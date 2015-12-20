@@ -54,19 +54,14 @@ func handleThankYou(w http.ResponseWriter, req *http.Request) {
 	emailAddress := req.FormValue("email")
 	name := req.FormValue("name")
 	terp := req.FormValue("terp")
-    if emailAddress == "" {
-        emailAddress = req.FormValue("email2")
-        name = req.FormValue("name2")
-        terp = req.FormValue("terp2")
-    }
 	aelog.Infof(c, "email: %s, name: %s, terp: %s ", emailAddress, name, terp)
 	if terp != "" {
 		return
 	}
-    if emailAddress == "" {
-        w.Write(thankyouPage)
-        return
-    }
+	if emailAddress == "" {
+		w.Write(thankyouPage)
+		return
+	}
 	key := datastore.NewKey(c, "ComingSoon", emailAddress, 0, nil)
 	entry := &ComingSoon{}
 	err := datastore.Get(c, key, entry)
@@ -81,6 +76,6 @@ func handleThankYou(w http.ResponseWriter, req *http.Request) {
 		w.Write(thankyouPage)
 		return
 	}
-	aelog.Errorf(c, "Error getting ComingSoonEmail: emailaddress - %s, err - %#v", emailAddress, err)
+	aelog.Errorf(c, "Error email already registered ComingSoonEmail: emailaddress - %s, err - %#v", emailAddress, err)
 	w.Write(thankyouPage)
 }

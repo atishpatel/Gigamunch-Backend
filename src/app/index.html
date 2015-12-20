@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE HTML>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -8,13 +8,14 @@
         <meta name="keywords" content="gigamunch, local, nashville, chef, cook, homemade, online, buy, foodie, meal, plan, eat, job, sell, food, home">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="apple-touch-icon" href="apple-touch-icon.png">
         <link rel="stylesheet" href="css/normalize.css">
-       <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.grey-red.min.css" />
+        <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.grey-red.min.css" />
         <link rel="stylesheet" href="css/main.css">
+        <!-- <script src="js/main.js"></script> -->
+        <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
     </head>
     <body>
-        <div class="container mdl-layout mdl-js-layout">
+        <div class="container mdl-js-layout">
             <header class="text-center bg-red">
                 <h1 class="logo font-bold">Gigamunch</h1>
                 <div class="mdl-grid--no-spacing">
@@ -43,14 +44,14 @@
                         Be the first to know!
                     </p>
                 </div>
-                <form action="/thankyou">
+                <form method="post" action="/thankyou">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                        <input class="mdl-textfield__input" type="text" id="name">
+                        <input class="mdl-textfield__input" type="text" name="name">
                         <label class="mdl-textfield__label" for="name">Name</label>
                     </div>
                     <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                        <input class="mdl-textfield__input" type="text" id="email">
+                        <input class="mdl-textfield__input" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
                         <label class="mdl-textfield__label" for="email">Email</label>
                     </div>
                     <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
@@ -129,15 +130,17 @@
                         We're coming to Nashville soon!
                     </p>
                 </div>
-                <form action="/thankyou">
+                <form method="post" action="/thankyou">
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                        <input class="mdl-textfield__input" type="text" id="name2">
+                        <input class="mdl-textfield__input" type="text" name="name">
                         <label class="mdl-textfield__label" for="name">Name</label>
                     </div>
+                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
                     <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                        <input class="mdl-textfield__input" type="text" id="email2">
+                        <input class="mdl-textfield__input" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
                         <label class="mdl-textfield__label" for="email">Email</label>
                     </div>
+                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
                     <input id="terp2" style="display:none">
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
                      Learn more!
@@ -145,8 +148,7 @@
                 </form>
             </div>
         </div>
-<!--        <script src="js/main.js"></script>-->
-        <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
+
         <!-- Google Analytics -->
         <script>
           (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

@@ -17,6 +17,10 @@ handlers:
   static_files: app/index.html
   upload: app/index.html
 
+# - url: /test.html
+#   static_files: app/test.html
+#   upload: app/test.html
+
 #change to be generic
 - url: /fonts
   static_dir: app/fonts
