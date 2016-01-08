@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Gigamunch</title>
+        <meta name="description" content="Gigamunch is a Nashville startup that connects foodies who love new eating experiences with people who love to cook. Sell food from your home. Buy food from your neighbors and local chefs.">
+        <meta name="keywords" content="gigamunch, local, nashville, chef, cook, homemade, online, buy, foodie, meal, plan, eat, job, sell, food, home">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.grey-red.min.css" />
+        <link rel="stylesheet" href="css/main.css">
+        <!-- <script src="js/main.js"></script> -->
+        <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
+    </head>
+    <body>
+        <div class="container mdl-js-layout">
+            <header class="text-center bg-red">
+                <h1 class="logo font-bold">Gigamunch</h1>
+                <div class="mdl-grid--no-spacing">
+                    <h4 class="sub-title font-light">
+                        We connect people who love to cook <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                        with people who love to eat.
+                    </h4>
+                </div>
+            </header>
+
+            <div class="text-center bg-gray step step-padding">
+                <div class="mdl-grid center">
+                    <p class="text-sell mdl-cell--3-col-phone font-bold">
+                        Sell cooked food <br class="mdl-cell--hide-desktop"/> from your kitchen!
+                    </p>
+                    <img src="img/gigachef.png" alt="A chef who loves to cook food." class="img-respnsive person-image mdl-cell--1-col-phone" />
+                </div>
+                <div class="mdl-grid center">
+                    <img src="img/gigamuncher.png" alt="A foodie who loves to eat new creative food." class="img-responsive person-image mdl-cell--1-col-phone" />
+                    <p class="text-buy mdl-cell--3-col-phone font-bold">
+                        Eat unique food <br class="mdl-cell--hide-desktop"/> cooked locally!
+                    </p>
+                </div>
+                <div class="mdl-grid center">
+                    <p class="step-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone font-light">
+                        Be the first to know!
+                    </p>
+                </div>
+                <form method="post" action="/thankyou">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
+                        <input class="mdl-textfield__input" type="text" name="name">
+                        <label class="mdl-textfield__label" for="name">Name</label>
+                    </div>
+                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
+                        <input class="mdl-textfield__input" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
+                        <label class="mdl-textfield__label" for="email">Email</label>
+                    </div>
+                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                    <input id="terp" style="display:none">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                     Learn more!
+                    </button>
+                </form>
+            </div>
+
+            <div class="text-center bg-yellow step step-padding">
+                <h2 class="how-it-works font-bold">How it Works</h2>
+                <div class="mdl-grid">
+                    <p class="step-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone">
+                        Verified chefs in the area post a <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                        meal they are interested in making
+                    </p>
+                </div>
+                <img src="img/gigasoon3.png" alt="A chef who loves to cook." class="img-responsive center-block small-image" />
+            </div>
+
+            <div class="text-center bg-orange step">
+                <div class="mdl-grid">
+                    <p class="step-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone">
+                        People looking for a meal browse <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                        the local selection and choose!
+                    </p>
+                </div>
+                    <img src="img/iphone_gigamunch.png" alt="Use our app to find and buy food to pick up later." class="img-responsive center-block small-image" />
+            </div>
+
+             <div class="text-center bg-yellow step step-padding">
+                <div class="mdl-grid">
+                    <p class="step-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone">
+                        The chef prepares the fresh meal
+                    </p>
+                </div>
+                    <img src="img/gigasoon5.png" alt="Use our app to find and buy food to pick up later." class="img-responsive center-block" />
+            </div>
+
+            <div class="text-center bg-gray step step-padding">
+                <div class="mdl-grid center">
+                    <p class="step-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone">
+                        Then the meal is either...
+                    </p>
+                </div>
+                <div class="mdl-grid center">
+                    <p class="text-delivered">
+                        Delivered
+                    </p>
+                    <img src="img/gigasoon6.png" alt="Chef driving to deliver food." class="img-responsive mdl-cell--2-col-phone options-image" />
+                </div>
+                <div class="mdl-grid center">
+                    <img src="img/gigasoon7.png" alt="Muncher picking up food from the chef's house." class="options-image img-responsive  mdl-cell--2-col-phone" />
+                    <p class="text-picked-up">
+                        Picked-up
+                    </p>
+                </div>
+                 <div class="mdl-grid text-center">
+                    <p class="step-text center-block">
+                        or something
+                    </p>
+                </div>
+                <div class="mdl-grid text-center center">
+                    <p class="text-in-between">
+                        In-between
+                    </p>
+                </div>
+
+                <img src="img/gigasoon8.png" alt="Chef driving to deliver food." class="img-responsive center-block" />
+            </div>
+
+            <div class="text-center bg-yellow step step-padding">
+                <div class="mdl-grid">
+                    <p class="step-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone">
+                        We're coming to Nashville soon!
+                    </p>
+                </div>
+                <form method="post" action="/thankyou">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
+                        <input class="mdl-textfield__input" type="text" name="name">
+                        <label class="mdl-textfield__label" for="name">Name</label>
+                    </div>
+                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
+                        <input class="mdl-textfield__input" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
+                        <label class="mdl-textfield__label" for="email">Email</label>
+                    </div>
+                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
+                    <input id="terp" style="display:none">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                     Learn more!
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Google Analytics -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-71567908-1', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </body>
+</html>
