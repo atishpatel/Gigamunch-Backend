@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	sessionName = "GMSID"
+	sessionName = "GIGASID"
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 // getUserFromSessionID returns a User object if user session is found
 // otherwise, it return nil
 func getUserFromSessionID(sessionID string) *types.User {
-	//TODO fix with redis stuff
+	//TODO fix with redis stuff, check if sessionID is valid
 	return nil
 }
 
@@ -59,6 +59,7 @@ func getUserFromGToken(ctx context.Context, tokenString string) (*types.User, st
 }
 
 func createSession() string {
+	//TODO: Probably takes in a user and returns a sessionID
 	return utils.GetUUID()
 }
 

@@ -85,15 +85,15 @@ textarea {
    ========================================================================== */
 
 html, body {
-  line-height: 1em;
+  line-height: 1;
 }
 
 @font-face {
-    font-family: NexaLight;
+    font-family: 'NexaLight';
     src: url("/fonts/nexa_light.otf") format("opentype");
 }
 @font-face {
-    font-family: NexaBold;
+    font-family: 'NexaBold';
     src: url("/fonts/nexa_bold.otf") format("opentype");
 }
 
@@ -124,7 +124,7 @@ p {
 }
 
 .bg-orange {
-    background: #FC913A;
+    background: #FF5722;
 }
 
 .bg-gray {
@@ -139,76 +139,95 @@ p {
 
 .logo {
     margin: 0;
-    padding: 24px 0 0 0 ;
+    padding: 10px 0 10px 0 ;
     color: #fff;
-    text-shadow: 3px 3px #000;
+    /*text-shadow: 3px 3px #000; */
     letter-spacing: 2px;
-    font-size: 62px;
+    font-size: 50px;
+}
+
+.promo-video {
+  width: 720px;
+  height: 405px;
+  margin:auto;
+}
+
+.white-transparent-bg {
+  background-color: rgba(255, 255, 255, 0.88);
+  padding-bottom: 30px;
+}
+
+.black-transparent-bg {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.video-center {
+  display:table-cell;
+  vertical-align:middle;
+}
+
+.video-block {
+  height: 450px;
+  width: 100%;
+  display: table;
+}
+
+.watch-now-button {
+  -webkit-border-radius: 2;
+  -moz-border-radius: 2;
+  border-radius: 2px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 20px;
+  padding: 15px 20px 15px 20px;
+  border: solid #ffffff 2px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+  letter-spacing: 2px;
+}
+
+.watch-now-button:hover {
+  background: #FF5722;
+  text-decoration: none;
+}
+
+.amazing-text {
+  color: white;
+  font-size: 60px;
+  line-height: 80px;
+  letter-spacing: 3px;
+  margin-left:auto;margin-right:auto;
 }
 
 .sub-title {
     margin: 0;
-    padding: 0 24px 24px 24px;
+    padding: 0 24px 10px 24px;
     color: #fff;
+    font-size: 15px;
+    line-height: 1em;
 }
 
 .get-hype {
     color: white;
-    text-shadow: 2px 2px #000;
 }
 
-.how-it-works {
+/*.how-it-works {
     margin: 0;
     padding: 24px 0px 0px 0px ;
     color: #FC913A;
-}
+}*/
 
 .font-bold {
     font-family: 'NexaBold', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: auto;
 }
 
 .font-light {
     font-family: 'NexaLight', sans-serif;
-}
-
-.step-text {
-    font-size: 24px;
-    font-weight: 100;
-    padding: 15px;
-    letter-spacing: 2px;
-}
-
-.step-padding {
-    padding: 20px;
-}
-
-.step .small-image {
-    width: 20%;
-}
-
-.text-delivered {
-    font-size: 80px;
-    color: #FF4E50;
-}
-
-.text-sell {
-    font-size: 40px;
-    color: #FF4E50;
-}
-
-.text-buy {
-    font-size: 40px;
-    color: #EDE574;
-}
-
-.text-picked-up {
-    font-size: 80px;
-    color: #FC913A;
-}
-
-.text-in-between {
-    font-size: 80px;
-    color: #EDE574;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: auto;
 }
 
 .center {
@@ -229,38 +248,189 @@ p {
     max-width: 400px;
 }
 
-@media (max-width: 839px) {
-    .sub-title {
-        font-size: 20px;
-        line-height: 1em;
+.signup-text {
+  font-size: 25px;
+  padding-top: 10px;
+}
+
+.section-content {
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-container {
+  min-height: 690px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-iphone {
+  background-image: url("/img/iphone_wireframe.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  height: 800px;
+  width: 500px;
+}
+
+.section-iphone-video {
+  height: auto;
+  width: 323px;
+  position: relative;
+  padding-top: 122px;
+  padding-left: 53px;
+}
+
+.section-text {
+  width: 420px;
+  text-align: center;
+  letter-spacing: 1px;
+  color: white;
+  font-size: 25px;
+  line-height: 30px;
+}
+
+.section-text-padding-left {
+  padding-left: 15px;
+}
+
+.section-text-padding-right {
+  padding-right: 15px;
+}
+
+/*.section-iphone-image {
+  max-width: 333px;
+}*/
+
+@media (max-height: 790px) {
+  .section-iphone-video {
+    height: 500.25px;
+    width: auto;
+    padding-top: 106px;
+    padding-left: 46px;
+  }
+
+  .section-iphone {
+    height: 695px;
+    width: 380px;
+  }
+}
+
+@media (min-width: 855px) {
+  .bg-wood {
+    background-image: url("/img/wood_small.jpg");
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .video-background {
+    background-image: url("/img/video_background.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #2F2420;
+  }
+}
+
+@media (max-width: 1050px) {
+  .section-text-padding-left {
+    padding-left: 10px;
+  }
+
+  .section-text-padding-right {
+    padding-right: 10px;
+  }
+
+}
+
+@media (max-width: 855px) {
+
+
+    .bg-wood {
+      background-image: url("/img/wood.jpg");
     }
 
-    .step-text {
+    .video-background {
+      background-image: url("/img/video_background_small.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-color: #2F2420;
+    }
+
+    .logo {
+      font-size: 40px;
+    }
+
+    .video-block {
+      height: 350px;
+    }
+
+    .promo-video {
+      width: 100%;
+      height: 350px;
+    }
+
+    .amazing-text {
+      font-size: 25px;
+      line-height: 32px;
+      padding: 15px;
+    }
+
+    .signup-text {
         font-size: 20px;
         padding: 5px;
     }
 
-    .text-delivered {
-        font-size: 40px;
+    .flex-column {
+      flex-direction: column;
     }
 
-    .text-sell {
-        font-size: 20px;
+    .flex-column-reverse {
+      flex-direction: column-reverse;
     }
 
-    .text-buy {
-        font-size: 20px;
+    .section-container {
+      min-height: auto;
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
 
-    .text-picked-up {
-        font-size: 35px;
+    .section-content {
+      min-height: auto;
     }
 
-    .text-in-between {
-        font-size: 40px;
+    .section-text {
+      width: 75%;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .section-iphone {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      height: auto;
+      max-width: 333px;
+      width: 60%;
+    }
+
+    .section-iphone-feed {
+      background-image: none;
+      width: 240px;
+      height: 442px;
+    }
+
+    .section-iphone-details {
+      background-image: none;
+      width: 240px;
+      height: 442px;
     }
 }
-
 
 /* ==========================================================================
    Helper classes

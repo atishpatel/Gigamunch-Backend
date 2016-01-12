@@ -59,6 +59,7 @@ func handleThankYou(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if emailAddress == "" {
+		aelog.Infof(c, "No email address. ")
 		w.Write(thankyouPage)
 		return
 	}
