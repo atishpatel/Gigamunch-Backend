@@ -61,11 +61,12 @@ func (db *Database) GetUserSession(ctx context.Context, UUID string) <-chan *typ
 	return userChannel
 }
 
-func createRedisDatabase(ip string, password string) *redis.Client {
+func createRedisDatabase(ip string, password string, poolSize int) *redis.Client {
 	RedisSessionClient := redis.NewClient(&redis.Options{
 		Addr:     ip,
 		Password: password,
 		DB:       0,
+		PoolSize: poolSize,
 	})
 
 	_, err := RedisSessionClient.Ping().Result()

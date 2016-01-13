@@ -108,7 +108,8 @@ func init() {
 
 	// databaseConfig := databases.Config{
 	// 	RedisSessionDBIP:       config.RedisSessionServerIP,
-	// 	RedisSessionDBPassword: config.RedisSessionServerPassword}
+	// 	RedisSessionDBPassword: config.RedisSessionServerPassword
+	//	RedisSessionDBPoolSize: 10}
 	// db := databases.CreateDatabase(databaseConfig)
 
 }

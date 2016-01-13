@@ -5,6 +5,7 @@ import "gopkg.in/redis.v3"
 type Config struct {
 	RedisSessionDBIP       string
 	RedisSessionDBPassword string
+	RedisSessionDBPoolSize int
 }
 
 type Database struct {
@@ -13,6 +14,6 @@ type Database struct {
 
 func CreateDatabase(config Config) *Database {
 	db := Database{}
-	db.redisSessionClient = createRedisDatabase(config.RedisSessionDBIP, config.RedisSessionDBPassword)
+	db.redisSessionClient = createRedisDatabase(config.RedisSessionDBIP, config.RedisSessionDBPassword, config.RedisSessionDBPoolSize)
 	return &db
 }

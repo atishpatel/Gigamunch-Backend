@@ -45,7 +45,7 @@ var thankyouPage []byte
 
 type ComingSoon struct {
 	Email string    `json:"email"`
-	Date  time.Time `json:"date" datastore:",noindex"`
+	Date  time.Time `json:"date"`
 	Name  string    `json:"name"`
 }
 

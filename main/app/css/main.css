@@ -294,11 +294,11 @@ p {
 }
 
 .section-text-padding-left {
-  padding-left: 15px;
+  padding-left: 13px;
 }
 
 .section-text-padding-right {
-  padding-right: 15px;
+  padding-right: 13px;
 }
 
 /*.section-iphone-image {
@@ -323,7 +323,6 @@ p {
   .bg-wood {
     background-image: url("/img/wood_small.jpg");
     padding-top: 20px;
-    padding-bottom: 20px;
   }
 
   .video-background {
@@ -333,17 +332,6 @@ p {
     background-size: cover;
     background-color: #2F2420;
   }
-}
-
-@media (max-width: 1050px) {
-  .section-text-padding-left {
-    padding-left: 10px;
-  }
-
-  .section-text-padding-right {
-    padding-right: 10px;
-  }
-
 }
 
 @media (max-width: 855px) {
