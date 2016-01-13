@@ -8,3 +8,11 @@ type User struct {
 	// bit1 isChef | bit2 isVerifiedChef |
 	Permissions uint32 `json:"permissions"`
 }
+
+func (user *User) isChef() bool {
+	return getKthBit(user.Permissions, 0)
+}
+
+func getKthBit(num uint32, k uint32) bool {
+	return (num>>k)&1 == 1
+}

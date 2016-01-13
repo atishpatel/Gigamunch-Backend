@@ -17,7 +17,6 @@ import (
 
 const (
 	loginURL     = "/login"
-	gitkitURL    = "/gitkit"
 	oobActionURL = "/sendEmail"
 	signOutURL   = "/signOut"
 
@@ -40,7 +39,6 @@ func init() {
  * ComingSoon stuff
  * TODO(Atish): remove after ComingSoon Phase
  */
-
 var thankyouPage []byte
 
 type ComingSoon struct {

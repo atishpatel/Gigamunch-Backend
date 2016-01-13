@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/appengine"
 
+	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
@@ -20,20 +21,23 @@ const (
 
 var (
 	gitkitClient *gitkit.Client
+	serverConfig *config.Config
 )
 
-// getUserFromSessionID returns a User object if user session is found
+type Auth struct{}
+
+// GetUserFromSessionID returns a User object if user session is found
 // otherwise, it return nil
-func getUserFromSessionID(sessionID string) *types.User {
+func (auth *Auth) GetUserFromSessionID(sessionID string) *types.User {
 	//TODO fix with redis stuff, check if sessionID is valid
 	return nil
 }
 
-func getUserFromGToken(ctx context.Context, tokenString string) (*types.User, string) {
+func (auth *Auth) GetUserFromGToken(ctx context.Context, tokenString string) (*types.User, string) {
 	if tokenString == "" {
 		return nil, ""
 	}
-	token, err := gitkitClient.ValidateToken(ctx, tokenString, []string{config.ClientID})
+	token, err := gitkitClient.ValidateToken(ctx, tokenString, []string{serverConfig.ClientID})
 	if err != nil {
 		utils.Errorf(ctx, "Invalid gitkit token %s: %+v", tokenString, err)
 		return nil, ""
@@ -53,12 +57,12 @@ func getUserFromGToken(ctx context.Context, tokenString string) (*types.User, st
 	// chefChan := getBasicChefInfo(u.Email)
 	// muncherChan := getBasicMuncherInfo(u.Email)
 
-	sessionID := createSession()
+	sessionID := auth.CreateSession(ctx)
 
 	return nil, sessionID
 }
 
-func createSession() string {
+func (auth *Auth) CreateSession(ctx context.Context) string {
 	//TODO: Probably takes in a user and returns a sessionID
 	return utils.GetUUID()
 }
@@ -90,15 +94,13 @@ func currentUser(req *http.Request, w http.ResponseWriter) *types.User {
 }
 
 func init() {
-	if config == nil {
-		loadConfig()
-	}
+	serverConfig = config.GetConfig()
 	// setup gitkit
 	c := &gitkit.Config{
-		WidgetURL: gitkitURL,
+		WidgetURL: types.GitkitURL,
 	}
 	if appengine.IsDevAppServer() {
-		c.GoogleAppCredentialsPath = config.GoogleAppCredentialsPath
+		c.GoogleAppCredentialsPath = serverConfig.GoogleAppCredentialsPath
 	}
 	var err error
 	gitkitClient, err = gitkit.New(context.Background(), c)
