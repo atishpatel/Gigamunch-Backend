@@ -1,8 +1,7 @@
-package databases
+package session
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 
 	"golang.org/x/net/context"
@@ -11,6 +10,8 @@ import (
 
 	"log"
 
+	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
@@ -23,16 +24,19 @@ const (
 )
 
 var (
-	// ErrInvalidUUID is returned when a UUID is invalid
-	ErrInvalidUUID = errors.New("Invalid UUID")
+	redisSessionClient *redis.Client
 )
 
 // SaveUserSession saves a types.User in the session db
-func (db *Database) SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan error {
+func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan error {
 	errChannel := make(chan error)
 	go func(ctx context.Context, UUID string, user *types.User) {
-		if utils.IsValidUUID(UUID) {
-			errChannel <- ErrInvalidUUID
+		if !utils.IsValidUUID(UUID) {
+			errChannel <- errors.ErrInvalidUUID
+			return
+		}
+		if user == nil {
+			errChannel <- errors.ErrNilParamenter
 			return
 		}
 		// log time for request
@@ -45,17 +49,17 @@ func (db *Database) SaveUserSession(ctx context.Context, UUID string, user *type
 			errChannel <- err
 		}
 		// TODO(Atish): save a list of sessionID queryable by email
-		err = db.redisSessionClient.Set(SessionNamespace+UUID, serialized, 0).Err()
+		err = redisSessionClient.Set(SessionNamespace+UUID, serialized, 0).Err()
 		errChannel <- err
 	}(ctx, UUID, user)
 	return errChannel
 }
 
 // GetUserSession gets a types.User from the session db
-func (db *Database) GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
+func GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
 	userChannel := make(chan *types.User)
 	go func(ctx context.Context, UUID string) {
-		if utils.IsValidUUID(UUID) {
+		if !utils.IsValidUUID(UUID) {
 			userChannel <- nil
 			return
 		}
@@ -64,7 +68,7 @@ func (db *Database) GetUserSession(ctx context.Context, UUID string) <-chan *typ
 		defer func() { utils.Latencyf(ctx, utils.REDISLATENCY, "GetUserSession %d", time.Since(startTime)) }()
 		defer close(userChannel)
 
-		serialized, err := db.redisSessionClient.Get(SessionNamespace + UUID).Result()
+		serialized, err := redisSessionClient.Get(SessionNamespace + UUID).Result()
 		if err != nil {
 			utils.Errorf(ctx, "Error getting user from session db: %+v", err)
 			userChannel <- nil
@@ -79,18 +83,20 @@ func (db *Database) GetUserSession(ctx context.Context, UUID string) <-chan *typ
 	return userChannel
 }
 
-func createRedisDatabase(ip string, password string, poolSize int) *redis.Client {
-	RedisSessionClient := redis.NewClient(&redis.Options{
-		Addr:     ip,
+func getRedisClient(address string, password string, db int64, poolsize int) *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     address,
 		Password: password,
-		DB:       0,
-		PoolSize: poolSize,
+		DB:       db,
+		PoolSize: poolsize,
 	})
+}
 
-	_, err := RedisSessionClient.Ping().Result()
+func init() {
+	config := config.GetConfig()
+	redisSessionClient = getRedisClient(config.RedisSessionServerIP, config.RedisSessionServerPassword, 0, 10)
+	_, err := redisSessionClient.Ping().Result()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return RedisSessionClient
 }

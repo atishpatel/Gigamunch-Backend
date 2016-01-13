@@ -40,7 +40,7 @@ func GetConfig() *Config {
 		return config
 	}
 	if appengine.IsDevAppServer() {
-		filedata, err := ioutil.ReadFile("private/dev_config.json")
+		filedata, err := ioutil.ReadFile("/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/config/private/dev_config.json")
 		if err != nil {
 			log.Println("Failed to open config file in private folder.")
 			log.Fatal(err)

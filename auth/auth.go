@@ -24,16 +24,14 @@ var (
 	serverConfig *config.Config
 )
 
-type Auth struct{}
-
 // GetUserFromSessionID returns a User object if user session is found
 // otherwise, it return nil
-func (auth *Auth) GetUserFromSessionID(sessionID string) *types.User {
+func GetUserFromSessionID(sessionID string) *types.User {
 	//TODO fix with redis stuff, check if sessionID is valid
 	return nil
 }
 
-func (auth *Auth) GetUserFromGToken(ctx context.Context, tokenString string) (*types.User, string) {
+func GetUserAndSessionFromGToken(ctx context.Context, tokenString string) (*types.User, string) {
 	if tokenString == "" {
 		return nil, ""
 	}
@@ -57,23 +55,23 @@ func (auth *Auth) GetUserFromGToken(ctx context.Context, tokenString string) (*t
 	// chefChan := getBasicChefInfo(u.Email)
 	// muncherChan := getBasicMuncherInfo(u.Email)
 
-	sessionID := auth.CreateSession(ctx)
+	sessionID := CreateSession(ctx)
 
 	return nil, sessionID
 }
 
-func (auth *Auth) CreateSession(ctx context.Context) string {
+func createSession(ctx context.Context) string {
 	//TODO: Probably takes in a user and returns a sessionID
 	return utils.GetUUID()
 }
 
-// currentUser extracts the user information stored in current session.
+// CurrentUser extracts the user information stored in current session.
 //
 // If there is no existing session, identity toolkit token is checked. If the
 // token is valid, a new session is created.
 //
 // If any error happens, nil is returned.
-func currentUser(req *http.Request, w http.ResponseWriter) *types.User {
+func CurrentUser(req *http.Request, w http.ResponseWriter) *types.User {
 	ctx := appengine.NewContext(req)
 	sessionCookie, err := req.Cookie(sessionName)
 	// doesn't have a session cookie
@@ -90,7 +88,7 @@ func currentUser(req *http.Request, w http.ResponseWriter) *types.User {
 		utils.Errorf(ctx, "Error getting user: %+v", err)
 	}
 	sessionID := sessionCookie.Value
-	return getUserFromSessionID(sessionID)
+	return GetUserFromSessionID(sessionID)
 }
 
 func init() {
