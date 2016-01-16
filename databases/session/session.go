@@ -28,9 +28,12 @@ var (
 )
 
 // SaveUserSession saves a types.User in the session db
+// if uuid is invalid, errors.ErrInvalidUUID is returned
+// if user is nil, errors.ErrNilParamenter is returned
 func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan error {
 	errChannel := make(chan error)
 	go func(ctx context.Context, UUID string, user *types.User) {
+		defer close(errChannel)
 		if !utils.IsValidUUID(UUID) {
 			errChannel <- errors.ErrInvalidUUID
 			return
@@ -42,11 +45,11 @@ func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan 
 		// log time for request
 		startTime := time.Now()
 		defer func() { utils.Latencyf(ctx, utils.REDISLATENCY, "SaveUserSession %d", time.Since(startTime)) }()
-		defer close(errChannel)
 		// serialize data
 		serialized, err := json.Marshal(&user)
 		if err != nil {
 			errChannel <- err
+			return
 		}
 		// TODO(Atish): save a list of sessionID queryable by email
 		err = redisSessionClient.Set(SessionNamespace+UUID, serialized, 0).Err()
@@ -56,9 +59,11 @@ func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan 
 }
 
 // GetUserSession gets a types.User from the session db
+// if uuid is invalid or user does not exist, nil is returned
 func GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
 	userChannel := make(chan *types.User)
 	go func(ctx context.Context, UUID string) {
+		defer close(userChannel)
 		if !utils.IsValidUUID(UUID) {
 			userChannel <- nil
 			return
@@ -66,19 +71,22 @@ func GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
 		// log time for request
 		startTime := time.Now()
 		defer func() { utils.Latencyf(ctx, utils.REDISLATENCY, "GetUserSession %d", time.Since(startTime)) }()
-		defer close(userChannel)
-
+		// get the serialized user
 		serialized, err := redisSessionClient.Get(SessionNamespace + UUID).Result()
 		if err != nil {
 			utils.Errorf(ctx, "Error getting user from session db: %+v", err)
 			userChannel <- nil
+			return
 		}
+		// deserialize user
 		user := &types.User{}
 		err = json.Unmarshal([]byte(serialized), user)
 		if err != nil {
 			utils.Errorf(ctx, "Error unmarshaling user: %+v", err)
 			userChannel <- nil
+			return
 		}
+		userChannel <- user
 	}(ctx, UUID)
 	return userChannel
 }
