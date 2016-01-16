@@ -7,7 +7,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine/aetest"
 )
@@ -125,10 +124,8 @@ func TestGetUserSession(t *testing.T) {
 			output:      expectedValidUser,
 		},
 	}
-	utils.Debugf(ctx, "done with setup")
 	// run test
 	for _, test := range testCases {
-		utils.Debugf(ctx, "starting test", test.description)
 		userChan := GetUserSession(ctx, test.uuid)
 		user := <-userChan
 		if user != nil && test.output != nil {
