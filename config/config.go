@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"google.golang.org/appengine"
 )
@@ -36,11 +37,20 @@ var (
 
 // GetConfig returns the configurations of the server
 func GetConfig() *Config {
-	if config != nil {
-		return config
+	if config == nil {
+		loadConfig()
 	}
+	return config
+
+}
+
+func loadConfig() {
 	if appengine.IsDevAppServer() {
-		filedata, err := ioutil.ReadFile("/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/config/private/dev_config.json")
+		privateDirPath := os.Getenv("GIGAMUNCH_PRIVATE_DIR")
+		if privateDirPath == "" {
+			log.Fatal("environment variable GIGAMUNCH_PRIVATE_DIR not set")
+		}
+		filedata, err := ioutil.ReadFile(privateDirPath + "/dev_config.json")
 		if err != nil {
 			log.Println("Failed to open config file in private folder.")
 			log.Fatal(err)
@@ -51,7 +61,10 @@ func GetConfig() *Config {
 			log.Fatal(err)
 		}
 	} else {
-		// TODO(Atish): load from datastore
+		// TODO(Atish): load from metadata on project
 	}
-	return config
+}
+
+func init() {
+	loadConfig()
 }
