@@ -9,8 +9,14 @@ type User struct {
 	Permissions uint32 `json:"permissions"`
 }
 
-func (user *User) isChef() bool {
+// IsChef returns true if a user is a chef
+func (user *User) IsChef() bool {
 	return getKthBit(user.Permissions, 0)
+}
+
+// IsVerifiedChef returns true if a user is a verified chef
+func (user *User) IsVerifiedChef() bool {
+	return getKthBit(user.Permissions, 1)
 }
 
 func getKthBit(num uint32, k uint32) bool {
