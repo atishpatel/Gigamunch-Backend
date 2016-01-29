@@ -1,0 +1,5 @@
+
+//TODO(Atish): look into compression before inputing into redis $$$
+//NOTE: check compression rate. Compressing user session is usesless
+//TODO(Atish): Use redis HashSets to save a bunch of memory
+//NOTE: the value limit by default is 64 bytes, the max size of set is 512

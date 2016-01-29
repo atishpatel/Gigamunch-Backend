@@ -11,14 +11,10 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
-	// dev
 	aelog "google.golang.org/appengine/log"
 )
 
 const (
-	loginURL     = "/login"
-	oobActionURL = "/sendEmail"
-	signOutURL   = "/signOut"
 
 	//TODO(Atish): Remove after ComingSoon Phase.
 	comingSoonURL = "/"
@@ -28,6 +24,7 @@ const (
 func init() {
 	// TODO(Atish): remove after ComingSoon Phase
 	http.HandleFunc(thankyouURL, handleThankYou)
+	// http.HandleFunc()
 	var err error
 	thankyouPage, err = ioutil.ReadFile("app/thankyou.html")
 	if err != nil {

@@ -35,7 +35,7 @@ func TestSaveUserSession(t *testing.T) {
 		{
 			description: "Invalid UUID",
 			uuid:        "klj",
-			user:        &types.User{},
+			user:        &types.User{}, // sets all variables to defaults
 			output:      errors.ErrInvalidUUID,
 		},
 		{
@@ -48,10 +48,7 @@ func TestSaveUserSession(t *testing.T) {
 			description: "Save a user",
 			uuid:        "b4e4f890-2210-4ff3-a67b-60be9989ce68",
 			user: &types.User{
-				Email:       "test@test.com",
-				Name:        "name",
-				PhotoURL:    "url",
-				Permissions: 0,
+				Email: "test@test.com",
 			},
 			output: nil,
 		},

@@ -16,10 +16,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
-const (
-	sessionName = "GIGASID"
-)
-
 var (
 	gitkitClient    *gitkit.Client
 	gitkitAudiences []string
@@ -70,7 +66,6 @@ func createSession(ctx context.Context, gitkitUser *gitkit.User) (string, *types
 	// muncherChan := getBasicMuncherInfo(u.Email)
 
 	// TODO(Atish): If first time logging in, download PhotoURL to server
-	//
 
 	sessionID := utils.GetUUID()
 	errChan := SaveUserSession(ctx, sessionID, user)
@@ -95,18 +90,21 @@ func SaveUserSession(ctx context.Context, sessionID string, user *types.User) <-
 // If any error happens, nil is returned.
 func CurrentUser(req *http.Request, w http.ResponseWriter) *types.User {
 	ctx := appengine.NewContext(req)
-	sessionCookie, err := req.Cookie(sessionName)
+	sessionCookie, err := req.Cookie(types.SessionCookieName)
 	// doesn't have a session cookie
 	if err == http.ErrNoCookie {
 		ts := gitkitClient.TokenFromRequest(req)
 		if ts == "" {
 			return nil
 		}
-		_, user := GetUserAndSessionFromGToken(ctx, ts)
-		// TODO Set session cookie and remove gtoken
+		sessionID, user := GetUserAndSessionFromGToken(ctx, ts)
+		if user != nil {
+			http.SetCookie(w, &http.Cookie{Name: types.SessionCookieName, Value: sessionID, MaxAge: 86400 * 100})
+			http.SetCookie(w, &http.Cookie{Name: types.GitkitCookieName, MaxAge: 1})
+		}
 		return user
 	} else if err != nil {
-		utils.Errorf(ctx, "Error getting user: %+v", err)
+		utils.Errorf(ctx, "Error getting session cookie: %+v", err)
 	}
 	sessionID := sessionCookie.Value
 	userChan := GetUserFromSessionID(ctx, sessionID)
@@ -114,18 +112,18 @@ func CurrentUser(req *http.Request, w http.ResponseWriter) *types.User {
 }
 
 func init() {
-	serverConfig := config.GetConfig()
+	config := config.GetGitkitConfig()
 	// setup gitkit
 	c := &gitkit.Config{
 		WidgetURL: types.GitkitURL,
 	}
 	if appengine.IsDevAppServer() {
-		c.GoogleAppCredentialsPath = serverConfig.GoogleAppCredentialsPath
+		c.GoogleAppCredentialsPath = config.GoogleAppCredentialsPath
 	}
 	var err error
 	gitkitClient, err = gitkit.New(context.Background(), c)
 	if err != nil {
 		log.Fatal(err)
 	}
-	gitkitAudiences = []string{serverConfig.ClientID}
+	gitkitAudiences = []string{config.ClientID}
 }

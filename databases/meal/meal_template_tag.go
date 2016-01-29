@@ -1,0 +1,5 @@
+package meal
+
+func GetMealTemplateTagList() {
+
+}

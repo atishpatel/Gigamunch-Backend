@@ -1,0 +1,9 @@
+application: gigamunch-omninexus-dev
+
+dispatch:
+  # TODO split endpoints into gigachef endpoint and gigamuncher endpoing
+  - url: "/_ah/*"
+    module: endpoints
+
+  - url: "/*"
+    moudle: default

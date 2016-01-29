@@ -1,0 +1,28 @@
+package endpoints
+
+import (
+	"log"
+
+	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
+	"github.com/atishpatel/Gigamunch-Backend/endpoints/gigachef"
+)
+
+func init() {
+	api, err := endpoints.RegisterService(&gigachef.Service{}, "gigachefservice", "v1", "An endpoint service for gigachefs.", true)
+	if err != nil {
+		log.Fatalf("Failed to register service: %#v", err)
+	}
+
+	register := func(orig, name, method, path, desc string) {
+		m := api.MethodByName(orig)
+		if m == nil {
+			log.Fatalf("Missing method %s", orig)
+		}
+		i := m.Info()
+		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
+	}
+	// Register course stuff
+	register("CreateMealTemplate", "createMealTemplate", "POST", "gigachefservice/createMealTemplate", "Creates a meal template")
+
+	endpoints.HandleHTTP()
+}

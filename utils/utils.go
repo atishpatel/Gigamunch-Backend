@@ -2,19 +2,19 @@ package utils
 
 import (
 	"bytes"
-
-	uuid "github.com/satori/go.uuid"
+	"strings"
 )
 
-// GetUUID gnerates a random string of given length
-func GetUUID() string {
-	return uuid.NewV4().String()
-}
+var (
+	banWords = []string{"anal", "anus", "ballsack", "blowjob", "dick", "dildo", "nigger", "penis", "vagina"}
+)
 
-// IsValidUUID checks if the passed in text is a valid UUID
-func IsValidUUID(text string) bool {
-	if len(text) < 32 {
-		return false
+// ContainsBanWord checks if a sentence contains a ban word
+func ContainsBanWord(sentence string) bool {
+	for index := range banWords {
+		if strings.Contains(sentence, banWords[index]) {
+			return false
+		}
 	}
 	return true
 }

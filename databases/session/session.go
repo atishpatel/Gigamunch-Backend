@@ -16,11 +16,13 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
+//TODO(Atish) save to datastore
+
 const (
 	// SessionNamespace is pre-fixed to a session
-	SessionNamespace = "session:"
+	SessionNamespace = "s:"
 	// UserSessionListNamespace is pre-fixed to a list of session based on email
-	UserSessionListNamespace = SessionNamespace + ":user:"
+	UserSessionListNamespace = "u:s:"
 )
 
 var (
@@ -39,7 +41,7 @@ func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan 
 			return
 		}
 		if user == nil {
-			errChannel <- errors.ErrNilParamenter
+			errChannel <- errors.ErrInvalidParameter.WithArgs("nil", "types.User")
 			return
 		}
 		// log time for request
@@ -91,6 +93,8 @@ func GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
 	return userChannel
 }
 
+// TODO add delete user session
+
 func getRedisClient(address string, password string, db int64, poolsize int) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     address,
@@ -101,7 +105,7 @@ func getRedisClient(address string, password string, db int64, poolsize int) *re
 }
 
 func init() {
-	config := config.GetConfig()
+	config := config.GetSessionConfig()
 	redisSessionClient = getRedisClient(config.RedisSessionServerIP, config.RedisSessionServerPassword, 0, 10)
 	_, err := redisSessionClient.Ping().Result()
 	if err != nil {
