@@ -7,6 +7,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/docker/distribution/registry/api/errcode"
 
 	"google.golang.org/appengine/aetest"
 )
@@ -20,7 +21,7 @@ func TestSaveUserSession(t *testing.T) {
 
 	// setup
 	var nilUser *types.User
-	config := config.GetConfig()
+	config := config.GetSessionConfig()
 	redisClient := getRedisClient(config.RedisSessionServerIP, config.RedisSessionServerPassword, 0, 1)
 	_, err = redisClient.Ping().Result()
 	if err != nil {
@@ -42,7 +43,7 @@ func TestSaveUserSession(t *testing.T) {
 			description: "nil for user",
 			uuid:        "b4e4f890-2210-4ff3-a67b-60be9989ce68",
 			user:        nilUser,
-			output:      errors.ErrNilParamenter,
+			output:      errors.ErrInvalidParameter,
 		},
 		{
 			description: "Save a user",
@@ -57,7 +58,8 @@ func TestSaveUserSession(t *testing.T) {
 	for _, test := range testCases {
 		errChan := SaveUserSession(ctx, test.uuid, test.user)
 		err = <-errChan
-		if err != test.output {
+		_, ok := err.(errcode.Error)
+		if ok && err.(errcode.Error).ErrorCode().Descriptor().Value != test.output.(errcode.ErrorCode).Descriptor().Value {
 			t.Errorf("Failed test %s | expected error: %+v | got error: %+v", test.description, test.output, err)
 		}
 		if err == nil {
@@ -85,7 +87,7 @@ func TestGetUserSession(t *testing.T) {
 	}
 	defer done()
 	// setup
-	config := config.GetConfig()
+	config := config.GetSessionConfig()
 	redisClient := getRedisClient(config.RedisSessionServerIP, config.RedisSessionServerPassword, 0, 1)
 	_, err = redisClient.Ping().Result()
 	if err != nil {
@@ -95,8 +97,6 @@ func TestGetUserSession(t *testing.T) {
 	validUUID := "b4e4f890-2210-4ff3-a67b-60be9989ce68"
 	expectedValidUser := &types.User{
 		Email:       "test@test.com",
-		Name:        "name",
-		PhotoURL:    "url",
 		Permissions: 0,
 	}
 	SaveUserSession(ctx, validUUID, expectedValidUser)

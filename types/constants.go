@@ -39,4 +39,12 @@ const (
 	GitkitCookieName = "gtoken"
 	// SessionCookieName is the name of the cookie for session id
 	SessionCookieName = "GIGASID"
+
+	/* ---------------------------------------------------------------------------
+	 * Other
+	 * ---------------------------------------------------------------------------
+	 */
+
+	// DefaultMaxDistanceInMiles is the default distance for live meals
+	DefaultMaxDistanceInMiles = 300
 )

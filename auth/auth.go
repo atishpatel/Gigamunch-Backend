@@ -115,7 +115,7 @@ func init() {
 	config := config.GetGitkitConfig()
 	// setup gitkit
 	c := &gitkit.Config{
-		WidgetURL: types.GitkitURL,
+		WidgetURL: types.LoginURL,
 	}
 	if appengine.IsDevAppServer() {
 		c.GoogleAppCredentialsPath = config.GoogleAppCredentialsPath

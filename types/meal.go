@@ -1,8 +1,10 @@
 package types
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
@@ -22,13 +24,36 @@ type BaseMeal struct {
 	PricePerServing          float64   `json:"price_per_serving" datastore:",noindex"`
 }
 
+// Validate validates the BaseMeal properties.
+// The form is valid if errors.Errors.HasErrors() == false.
+func (baseMeal *BaseMeal) Validate() errors.Errors {
+	var multipleErrors errors.Errors
+	if baseMeal.GigachefEmail == "" {
+		multipleErrors.AddError(fmt.Errorf("GigachefEmail is empty"))
+	}
+	if baseMeal.CreatedDateTime.Year() < 3 {
+		multipleErrors.AddError(fmt.Errorf("CreatedDateTime is not set"))
+	}
+	if len(baseMeal.Description) > 10 || utils.ContainsBanWord(baseMeal.Description) {
+		multipleErrors.AddError(fmt.Errorf("Description is too short"))
+	}
+	if len(baseMeal.Photos) == 0 {
+		multipleErrors.AddError(fmt.Errorf("Photos must be more than zero"))
+	}
+	if baseMeal.PricePerServing < 1 {
+		multipleErrors.AddError(fmt.Errorf("PricePerServing must be more than $1.00"))
+	}
+	// TODO(Atish): add stuff like perp time if it's required
+	return multipleErrors
+}
+
 // ValidateAndUpdate updates the BaseMeal based on the new meal template for the fields that pass validation
 func (oldBaseMeal *BaseMeal) ValidateAndUpdate(newBaseMeal *BaseMeal) *BaseMeal {
 	if oldBaseMeal.GigachefEmail == "" {
 		oldBaseMeal.GigachefEmail = newBaseMeal.GigachefEmail
 	}
 	if oldBaseMeal.CreatedDateTime.Year() < 3 {
-		oldBaseMeal.CreatedDateTime = time.Now()
+		oldBaseMeal.CreatedDateTime = time.Now().UTC()
 	}
 	if len(newBaseMeal.Description) > 10 && !utils.ContainsBanWord(newBaseMeal.Description) {
 		oldBaseMeal.Description = newBaseMeal.Description
@@ -67,7 +92,7 @@ func (oldMealTemplate *MealTemplate) ValidateAndUpdate(newMealTemplate *MealTemp
 	if len(newMealTemplate.Title) > 3 && !utils.ContainsBanWord(newMealTemplate.Title) {
 		oldMealTemplate.Title = newMealTemplate.Title
 	}
-	oldMealTemplate.LastUsedDataTime = time.Now()
+	oldMealTemplate.LastUsedDataTime = time.Now().UTC()
 	if newMealTemplate.NumMealsCreated > 0 {
 		oldMealTemplate.NumMealsCreated = newMealTemplate.NumMealsCreated
 	}
@@ -97,20 +122,32 @@ type MealTemplateTag struct {
 	MealTemplateReferences []MealTemplateReference `json:"meal_template_references" datastore:",noindex"`
 }
 
-// Use Sphinx and Redis for searching for live meals
-// // LiveMeal is the searchable live meal
-// type LiveMeal struct {
-// 	basicMealStuff // embedded
-// 	commonMeal     // embedded
-// 	// SearchableTags contains title, tags, chef name, and anything else that should be searchable
-// 	SearchableTags []string `json:"searchable_tags" datastore:",index"`
-// }
-
 // Meal is a meal that is no longer live
 type Meal struct {
-	BaseMeal          // embedded
-	Title     string  `json:"title" datastore:",noindex"`
-	IsLive    bool    `json:"islive" datastore:",index"`
-	Orders    []int64 `json:"orders" datastore:",noindex"`
-	NumOrders int64   `json:"num_orders" datastoer:",noindex"`
+	BaseMeal                  // embedded
+	MealTemplateID  int64     `json:"meal_template_id" datastore:",noindex"`
+	Title           string    `json:"title" datastore:",noindex"`
+	IsLive          bool      `json:"islive" datastore:",index"`
+	ClosingDateTime time.Time `json:"closing_datetime" datastore:",noindex"`
+	ReadyDateTime   time.Time `json:"ready_datetime" datastore:",index"`
+	ServingsOffered int       `json:"servings_offered" datastore:",noindex"`
+	TotalTips       float64   `json:"total_tips" datastore:",noindex"`
+	TotalRevenue    float64   `json:"total_revenue" datastore:",noindex"`
+	NumOrders       int64     `json:"num_orders" datastoer:",noindex"`
+	Orders          []int64   `json:"orders" datastore:",noindex"`
+}
+
+// Validate validates the BaseMeal properties.
+// The form is valid if errors.Errors.HasErrors() == false.
+func (meal *Meal) Validate() errors.Errors {
+	var multipleErrors errors.Errors
+	if meal.ClosingDateTime.After(meal.ReadyDateTime) {
+		multipleErrors.AddError(fmt.Errorf("ClosingDateTime cannot be after ReadyDateTime"))
+	}
+	if meal.ServingsOffered < 1 {
+		multipleErrors.AddError(fmt.Errorf("ServingsOffered need to be greater than 0"))
+	}
+
+	multipleErrors = append(multipleErrors, meal.BaseMeal.Validate())
+	return multipleErrors
 }

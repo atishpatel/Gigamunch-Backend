@@ -8,6 +8,7 @@ var (
                       HAVING distance < %d
                       ORDER BY distance
                       LIMIT %d , %d`
+	// TODO user prepare statements instead
 	searchAndSortByDistance = "SELECT MATCH (search_tags) AGAINST (%s IN NATURAL LANGUAGE MODE)"
 )
 

@@ -2,10 +2,19 @@
 
 
 # Setup
-In order to do local development, there are some config files you need to download from
-the project.
+The following programs need to be installed:
+  - golang app engine sdk
+  - mysql 5.6 (just use brew for OS X)
+  - redis 3.2+
 
-In your .bashprofile, export GIGAMUNCH_PRIVATE_DIR to point to the private directory
+In order to do local development, the following config files are needed:
+  - session_config.json
+
+Do the following in your .bashprofile file:
+  - export GIGAMUNCH_PRIVATE_DIR = point to the private directory with config files
+  - add /usr/local/mysql/support-files/ to PATH
+
+
 
 # App Engine Architecture
 There are currently two modules.

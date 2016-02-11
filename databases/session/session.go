@@ -34,14 +34,14 @@ var (
 // if user is nil, errors.ErrNilParamenter is returned
 func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan error {
 	errChannel := make(chan error)
-	go func(ctx context.Context, UUID string, user *types.User) {
+	go func(ctx context.Context, UUID string, user *types.User, errChannel chan<- error) {
 		defer close(errChannel)
 		if !utils.IsValidUUID(UUID) {
 			errChannel <- errors.ErrInvalidUUID
 			return
 		}
 		if user == nil {
-			errChannel <- errors.ErrInvalidParameter.WithArgs("nil", "types.User")
+			errChannel <- errors.ErrInvalidParameter.WithArgs("nil", "*types.User")
 			return
 		}
 		// log time for request
@@ -53,10 +53,11 @@ func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan 
 			errChannel <- err
 			return
 		}
+		// TODO(Atish): add datastore as persistent db layer
 		// TODO(Atish): save a list of sessionID queryable by email
 		err = redisSessionClient.Set(SessionNamespace+UUID, serialized, 0).Err()
 		errChannel <- err
-	}(ctx, UUID, user)
+	}(ctx, UUID, user, errChannel)
 	return errChannel
 }
 
@@ -64,7 +65,7 @@ func SaveUserSession(ctx context.Context, UUID string, user *types.User) <-chan 
 // if uuid is invalid or user does not exist, nil is returned
 func GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
 	userChannel := make(chan *types.User)
-	go func(ctx context.Context, UUID string) {
+	go func(ctx context.Context, UUID string, userChannel chan<- *types.User) {
 		defer close(userChannel)
 		if !utils.IsValidUUID(UUID) {
 			userChannel <- nil
@@ -89,11 +90,12 @@ func GetUserSession(ctx context.Context, UUID string) <-chan *types.User {
 			return
 		}
 		userChannel <- user
-	}(ctx, UUID)
+	}(ctx, UUID, userChannel)
 	return userChannel
 }
 
 // TODO add delete user session
+// TODO add update user permissions
 
 func getRedisClient(address string, password string, db int64, poolsize int) *redis.Client {
 	return redis.NewClient(&redis.Options{

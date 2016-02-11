@@ -11,7 +11,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
-// SaveMealTemplate saves the meal template if the user has permission
+// SaveMealTemplate creates/updates the meal template if the user has permission
 func SaveMealTemplate(ctx context.Context, sessionID string, mealTemplateID int64, mealTemplate *types.MealTemplate) (int64, *types.MealTemplate, error) {
 	var err error
 	var user *types.User
@@ -23,28 +23,29 @@ func SaveMealTemplate(ctx context.Context, sessionID string, mealTemplateID int6
 	if mealTemplateID != 0 {
 		// get old meal template
 		oldMealTemplate = &types.MealTemplate{}
-		err = getMealTemplate(ctx, mealTemplateID, oldMealTemplate)
+		errChan := getMealTemplate(ctx, mealTemplateID, oldMealTemplate)
 		user = <-userChannel
+		err = <-errChan
 		if user == nil {
 			err := errors.ErrSessionNotFound.WithArgs(sessionID)
 			utils.Errorf(ctx, "%+v", err)
 			return 0, nil, err
 		}
 		if err != nil {
-			err := errors.ErrDatastore.WithArgs("get", "old meal template", user.Email, err)
+			err = errors.ErrDatastore.WithArgs("get", "old meal template", user.Email, err)
 			utils.Errorf(ctx, "%+v", err)
 			return 0, nil, err
 		}
 		// check if user has right to access the meal template
 		if user.Email != oldMealTemplate.GigachefEmail {
-			err := errors.ErrUnauthorizedAccess.WithArgs(user.Email, "MealTemplate", mealTemplateID)
+			err = errors.ErrUnauthorizedAccess.WithArgs(user.Email, "MealTemplate", mealTemplateID)
 			utils.Errorf(ctx, "%+v", err)
 			return 0, nil, err
 		}
 	} else {
 		user = <-userChannel
 		if user == nil {
-			err := errors.ErrSessionNotFound.WithArgs(sessionID)
+			err = errors.ErrSessionNotFound.WithArgs(sessionID)
 			utils.Errorf(ctx, "%+v", err)
 			return 0, nil, err
 		}
@@ -62,7 +63,7 @@ func SaveMealTemplate(ctx context.Context, sessionID string, mealTemplateID int6
 	updatedMealTemplate := oldMealTemplate.ValidateAndUpdate(mealTemplate)
 	mealTemplateID, err = saveMealTemplate(ctx, mealTemplateID, updatedMealTemplate)
 	if err != nil {
-		err := errors.ErrDatastore.WithArgs("put", "updated meal template", user.Email, err)
+		err = errors.ErrDatastore.WithArgs("put", "updated meal template", user.Email, err)
 		utils.Errorf(ctx, "%+v", err)
 		return 0, nil, err
 	}
@@ -70,15 +71,24 @@ func SaveMealTemplate(ctx context.Context, sessionID string, mealTemplateID int6
 	return mealTemplateID, updatedMealTemplate, nil
 }
 
-func getMealTemplate(ctx context.Context, mealTemplateID int64, mealTemplate *types.MealTemplate) error {
-	// var err error
-	if mealTemplateID == 0 {
-		return datastore.ErrNoSuchEntity
-	}
-	mealTemplateKey := datastore.NewKey(ctx, types.KindMealTemplate, "", mealTemplateID, nil)
-	return datastore.Get(ctx, mealTemplateKey, mealTemplate)
+// TODO add redis cache layer
+// getMealTemplate is a helper function that manages getting from cache or database
+func getMealTemplate(ctx context.Context, mealTemplateID int64, mealTemplate *types.MealTemplate) <-chan error {
+	errChan := make(chan error)
+	go func(ctx context.Context, mealTemplateID int64, mealTemplate *types.MealTemplate, errChan chan<- error) {
+		defer close(errChan)
+		if mealTemplateID == 0 {
+			errChan <- datastore.ErrNoSuchEntity
+			return
+		}
+		mealTemplateKey := datastore.NewKey(ctx, types.KindMealTemplate, "", mealTemplateID, nil)
+		errChan <- datastore.Get(ctx, mealTemplateKey, mealTemplate)
+	}(ctx, mealTemplateID, mealTemplate, errChan)
+	return errChan
 }
 
+// TODO add redis cache layer
+// saveMealTemplate is a helper function that manages saving in cache and database
 func saveMealTemplate(ctx context.Context, mealTemplateID int64, mealTemplate *types.MealTemplate) (int64, error) {
 	var mealTemplateKey *datastore.Key
 	var err error
@@ -99,27 +109,30 @@ func updateOrginizationTags(ctx context.Context, oldOrginizationTags []string, n
 // GetMealTemplate gets a meal template
 // all errors from this function contain a HTTPStatusCode
 func GetMealTemplate(ctx context.Context, sessionID string, mealTemplateID int64) (*types.MealTemplate, error) {
+	var err error
+	var user *types.User
 	if mealTemplateID == 0 {
-		err := errors.ErrInvalidParameter.WithArgs(0, "mealTemplateID")
+		err = errors.ErrInvalidParameter.WithArgs(0, "mealTemplateID")
 		utils.Errorf(ctx, "%+v", err)
 		return nil, err
 	}
 	mealTemplate := &types.MealTemplate{}
 	userChannel := session.GetUserSession(ctx, sessionID)
-	err := getMealTemplate(ctx, mealTemplateID, mealTemplate)
-	user := <-userChannel
+	errChan := getMealTemplate(ctx, mealTemplateID, mealTemplate)
+	user = <-userChannel
+	err = <-errChan
 	if user == nil {
-		err := errors.ErrSessionNotFound.WithArgs(sessionID)
+		err = errors.ErrSessionNotFound.WithArgs(sessionID)
 		utils.Errorf(ctx, "%+v", err)
 		return nil, err
 	}
 	if err != nil {
-		err := errors.ErrDatastore.WithArgs("get", "old meal template", user.Email, err)
+		err = errors.ErrDatastore.WithArgs("get", "old meal template", user.Email, err)
 		utils.Errorf(ctx, "%+v", err)
 		return nil, err
 	}
 	if user.Email != mealTemplate.GigachefEmail {
-		err := errors.ErrUnauthorizedAccess.WithArgs(user.Email, "MealTemplate", mealTemplateID)
+		err = errors.ErrUnauthorizedAccess.WithArgs(user.Email, "MealTemplate", mealTemplateID)
 		utils.Errorf(ctx, "%+v", err)
 		return nil, err
 	}

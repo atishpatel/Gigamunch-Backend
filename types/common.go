@@ -20,3 +20,14 @@ type GeoPoint struct {
 func (g GeoPoint) Valid() bool {
 	return -90 <= g.Latitude && g.Latitude <= 90 && -180 <= g.Longitude && g.Longitude <= 180
 }
+
+// LimitRange is the a range limit for quries
+type LimitRange struct {
+	StartLimit int `json:"start_limit"`
+	EndLimit   int `json:"end_limit"`
+}
+
+// Valid returns whether a LimitRange's EndLimit > StartLimit
+func (l LimitRange) Valid() bool {
+	return l.EndLimit > l.StartLimit
+}

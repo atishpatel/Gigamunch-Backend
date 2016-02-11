@@ -2,9 +2,7 @@ package types
 
 // User information in a session.
 type User struct {
-	Email    string `json:"email"`
-	Name     string `json:"name"` // TODO(Atish): remove name?
-	PhotoURL string `json:"photo_url"`
+	Email string `json:"email"`
 	// bit1 isChef | bit2 isVerifiedChef |
 	Permissions uint32 `json:"permissions"`
 }

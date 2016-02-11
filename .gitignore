@@ -2,3 +2,5 @@
 appengine-generated/
 private/
 .tags*
+dump.rdb
+node_modules/
