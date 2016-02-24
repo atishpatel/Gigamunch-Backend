@@ -27,8 +27,8 @@ type Order struct {
 	CreatedDateTime          time.Time         `json:"created_datetime" datastore:",noindex"`
 	ExpectedExchangeDataTime time.Time         `json:"expected_exchange_datatime" datastore:",index"`
 	Delivered                bool              `json:"delivered" datastore:",index"`
-	GigachefEmail            string            `json:"gigachef_email" datastore:",index"`
-	GigamuncherEmail         string            `json:"gigamuncher_email" datastore:",index"`
+	GigachefID               string            `json:"gigachef_id" datastore:",index"`
+	GigamuncherID            string            `json:"gigamuncher_id" datastore:",index"`
 	PaymentInfo              PaymentInfo       `json:"payment_info" datastore:",noindex"`
 	ExchangeMethod           int64             `json:"exchange_method" datastore:",noindex"`
 	BasicExchangePlan        BasicExchangePlan `json:"basic_exchange_plan" datastore:",noindex"`

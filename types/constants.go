@@ -18,6 +18,8 @@ const (
 	KindMeal = "Meal"
 	// KindOrder is an order made by a Gigamuncher on a meal
 	KindOrder = "Order"
+	// KindGigachefApplication is an application for a chef to become verfified
+	KindGigachefApplication = "GigachefApplication"
 	/* ---------------------------------------------------------------------------
 	 * URLs
 	 * ---------------------------------------------------------------------------
@@ -37,8 +39,8 @@ const (
 
 	// GitkitCookieName is the name of the cookie for gitkit
 	GitkitCookieName = "gtoken"
-	// SessionCookieName is the name of the cookie for session id
-	SessionCookieName = "GIGASID"
+	// SessionTokenCookieName is the name of the cookie for the session token
+	SessionTokenCookieName = "GIGATKN"
 
 	/* ---------------------------------------------------------------------------
 	 * Other

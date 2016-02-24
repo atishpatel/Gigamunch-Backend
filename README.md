@@ -14,7 +14,12 @@ Do the following in your .bashprofile file:
   - export GIGAMUNCH_PRIVATE_DIR = point to the private directory with config files
   - add /usr/local/mysql/support-files/ to PATH
 
-
+Setting up for development:
+  - npm install
+  - Install the following packages for Atom:
+    - Go-plus
+    - linter-eslint
+    - laguage-babel
 
 # App Engine Architecture
 There are currently two modules.

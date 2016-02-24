@@ -7,13 +7,15 @@ import (
 )
 
 const (
-	errGroup                   = "gigamunch"
-	ErrInvalidUUIDValue        = "INVALID_UUID"
-	ErrSessionNotFoundValue    = "SESSION_NOT_FOUND"
-	ErrInvalidParameterValue   = "INVALID_PARAMETER"
-	ErrUnauthorizedAccessValue = "UNAUTHORIZED_ACCESS"
-	ErrDatastoreValue          = "DATASTORE_ERROR"
-	ErrUnknownValue            = "UNKNOWN_INTERNAL"
+	errGroup                       = "gigamunch"
+	ErrInvalidUUIDValue            = "INVALID_UUID"
+	ErrSessionNotFoundValue        = "SESSION_NOT_FOUND"
+	ErrExternalDependencyFailValue = "EXTERNAL_DEPENDENCY_FAIL"
+	ErrInvalidTokenValue           = "INVALID_TOKEN"
+	ErrInvalidParameterValue       = "INVALID_PARAMETER"
+	ErrUnauthorizedAccessValue     = "UNAUTHORIZED_ACCESS"
+	ErrDatastoreValue              = "DATASTORE_ERROR"
+	ErrUnknownValue                = "UNKNOWN_INTERNAL"
 )
 
 var (
@@ -33,6 +35,22 @@ var (
 		HTTPStatusCode: http.StatusBadRequest,
 	})
 
+	// ErrInvalidToken is returned when a token is invalid and the user should signout
+	ErrInvalidToken = errcode.Register(errGroup, errcode.ErrorDescriptor{
+		Value:          ErrInvalidTokenValue,
+		Message:        "The token is invalid. err: %+v",
+		Description:    "The login information is invalid. Signing out.",
+		HTTPStatusCode: 450,
+	})
+
+	// ErrExternalDependencyFail is returned when a token is invalid and the user should signout
+	ErrExternalDependencyFail = errcode.Register(errGroup, errcode.ErrorDescriptor{
+		Value:          ErrExternalDependencyFailValue,
+		Message:        "External dependency(%s) failed for reason(%s): %+v",
+		Description:    "An external dependency failed.",
+		HTTPStatusCode: 450,
+	})
+
 	// ErrInvalidParameter is returned when a parameter is invalid
 	ErrInvalidParameter = errcode.Register(errGroup, errcode.ErrorDescriptor{
 		Value:          ErrInvalidParameterValue,
@@ -50,7 +68,7 @@ var (
 	})
 
 	// ErrDatastore is returned when there is an error with Datastore
-	// Arguments: string(get,put, or delete) string(object name) string(user email) error(error)
+	// Arguments: string(get,put, or delete) string(object name) string(user id) error(error)
 	ErrDatastore = errcode.Register(errGroup, errcode.ErrorDescriptor{
 		Value:          ErrDatastoreValue,
 		Message:        "Failed to %s %s for %v: %+v",

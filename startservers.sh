@@ -18,7 +18,8 @@ mysql -uroot gigamunch < types/queries/create_live_meals_table.sql
 # goapp
 ################################################################################
 echo 'starting goapp'
-goapp serve main/app.yaml
+# goapp serve server/app.yaml endpoint-gigachef/app.yaml endpoint-gigamuncher/app.yaml
+goapp serve endpoint-gigamuncher/app.yaml
 ################################################################################
 # clean up
 ################################################################################

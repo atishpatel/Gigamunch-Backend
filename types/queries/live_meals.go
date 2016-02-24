@@ -3,7 +3,7 @@ package queries
 import "fmt"
 
 var (
-	sortByDistance = `SELECT id, ( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
+	sortByDistance = `SELECT meal_id, ( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
                       FROM live_meals
                       HAVING distance < %d
                       ORDER BY distance
@@ -13,6 +13,6 @@ var (
 )
 
 // GetSortByDistanceQuery returns the query string for getting id, distance from mysql
-func GetSortByDistanceQuery(latitude float64, longitude float64, distance int, startLimit int, endLimit int) string {
+func GetSortByDistanceQuery(latitude float32, longitude float32, distance int, startLimit int, endLimit int) string {
 	return fmt.Sprintf(sortByDistance, latitude, longitude, latitude, distance, startLimit, endLimit)
 }

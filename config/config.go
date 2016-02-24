@@ -12,10 +12,19 @@ import (
 	"log"
 	"os"
 
+	"golang.org/x/net/context"
+
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 )
+
+// Config is the configuration loaded from datastore
+type Config struct {
+	JWTSecret string `json:"jwt_secret"`
+	ClientID  string `json:"client_id"`
+}
 
 // GitkitConfig is used to load different configurations
 //between local, dev, and production environments
@@ -27,60 +36,20 @@ type GitkitConfig struct {
 	GoogleAppCredentialsPath string `json:"google_app_credentials_path"`
 }
 
-// SessionConfig has the configurations for storing user sessions
-type SessionConfig struct {
-	RedisSessionServerIP       string `json:"redis_session_server_ip"`
-	RedisSessionServerPassword string `json:"redis_session_server_password"`
-}
-
-// LiveMealConfig has the configurations for querying LiveMeals
-type LiveMealConfig struct {
-	MySQLServerIP     string `json:"mysql_server_ip"`
-	MySQLUser         string `json:"mysql_user"`
-	MySQLUserPassword string `json:"mysql_user_password"`
-}
-
 var (
 	gitkitConfig   *GitkitConfig
-	sessionConfig  *SessionConfig
-	liveMealConfig *LiveMealConfig
 	privateDirPath string
 )
 
-// GetSessionConfig returns the configurations for sessions on the server
-func GetSessionConfig() *SessionConfig {
-	if sessionConfig == nil {
-		loadSessionConfig()
-	}
-	return sessionConfig
-}
-
-func loadSessionConfig() {
-	if appengine.IsDevAppServer() {
-		filedata, err := ioutil.ReadFile(privateDirPath + "/session_config.json")
-		if err != nil {
-			log.Println("Failed to open config file in private folder.")
-			log.Fatal(err)
-		}
-		err = json.Unmarshal(filedata, &sessionConfig)
-		if err != nil {
-			log.Println("Failed to unmarshal session config file.")
-			log.Fatal(err)
-		}
-	} else {
-		// TODO(Atish): load from metadata on project
-	}
-}
-
 // GetGitkitConfig returns the configurations for gitkit on the server
-func GetGitkitConfig() *GitkitConfig {
+func GetGitkitConfig(ctx context.Context) *GitkitConfig {
 	if gitkitConfig == nil {
-		loadGitkitConfig()
+		loadGitkitConfig(ctx)
 	}
 	return gitkitConfig
 }
 
-func loadGitkitConfig() {
+func loadGitkitConfig(ctx context.Context) {
 	if appengine.IsDevAppServer() {
 		filedata, err := ioutil.ReadFile(privateDirPath + "/gitkit_config.json")
 		if err != nil {
@@ -93,37 +62,21 @@ func loadGitkitConfig() {
 			log.Fatal(err)
 		}
 	} else {
-		// TODO(Atish): load from metadata on project
+		key := datastore.NewKey(ctx, "Config", "", 100, nil)
+		config := &Config{}
+		err := datastore.Get(ctx, key, config)
+		if err != nil {
+			log.Fatalf("Error getting Config from datastore: %+v", err)
+		}
+		gitkitConfig = &GitkitConfig{
+			JWTSecret: config.JWTSecret,
+			ClientID:  config.ClientID,
+		}
 	}
 	var err error
 	gitkitConfig.JWTSecret, err = utils.Decrypt("KTd6M18avNkASNK149TDhyl3m45Mxqw2", gitkitConfig.JWTSecret)
 	if err != nil {
 		log.Fatalf("Error decoding jwt secret: %+v", err)
-	}
-}
-
-// GetLiveMealConfig returns the configurations for live meals on the server
-func GetLiveMealConfig() *LiveMealConfig {
-	if liveMealConfig == nil {
-		loadLiveMealConfig()
-	}
-	return liveMealConfig
-}
-
-func loadLiveMealConfig() {
-	if appengine.IsDevAppServer() {
-		filedata, err := ioutil.ReadFile(privateDirPath + "/live_meal_config.json")
-		if err != nil {
-			log.Println("Failed to open 'live_meal_config.json' config file in private folder.")
-			log.Fatal(err)
-		}
-		err = json.Unmarshal(filedata, &liveMealConfig)
-		if err != nil {
-			log.Println("Failed to unmarshal live meal config file.")
-			log.Fatal(err)
-		}
-	} else {
-		// TODO(Atish): load from metadata on project
 	}
 }
 
@@ -134,7 +87,4 @@ func init() {
 			log.Fatal("environment variable GIGAMUNCH_PRIVATE_DIR not set")
 		}
 	}
-	loadGitkitConfig()
-	loadSessionConfig()
-	loadLiveMealConfig()
 }

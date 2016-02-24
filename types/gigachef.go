@@ -2,7 +2,7 @@ package types
 
 import "time"
 
-type gigachefRating struct {
+type GigachefRating struct {
 	AverageRating       float64 `json:"average_rating" datastore:",index"`
 	NumRatings          int64   `json:"num_ratings" datastore:",index"`
 	NumOneStarRatings   int64   `json:"num_one_star_ratings" datastore:",noindex"`
@@ -17,17 +17,17 @@ type Gigachef struct {
 	IsVerified       bool     `json:"is_verified" datastore:",noindex"`
 	UserDetail                //embedded
 	Address          Address  `json:"address" datastore:",noindex"`
-	gigachefRating            // embedded
+	GigachefRating            // embedded
 	GeneralPhotoURLs []string `json:"general_photo_urls" datastore:",noindex"`
 	KitchenPhotoURLs []string `json:"kitchen_photo_urls" datastore:",noindex"`
 }
 
-type photo struct {
+type Photo struct {
 	CreatedDataTime time.Time `json:"created_datetime" datastore:",noindex"`
 	PhotoURL        string    `json:"photo_url" datastore:",noindex"`
 }
 
 // Gallery contains picture uploaded by a Gigachef
 type Gallery struct {
-	Photos []photo `json:"photos" datastore:",noindex"`
+	Photos []Photo `json:"photos" datastore:",noindex"`
 }

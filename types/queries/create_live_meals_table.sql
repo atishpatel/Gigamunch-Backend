@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS `live_meals` (
  `meal_id` BIGINT NOT NULL PRIMARY KEY,
- `close_datetime` DATETIME NOT NULL, -- only use for remove live meals
+ `close_datetime` DATETIME NOT NULL, -- user for cron job
+ `ready_datetime` DATETIME NOT NULL,
  `search_tags` VARCHAR( 500 ) NOT NULL,
  `is_experimental` BOOLEAN NOT NULL DEFAULT 0,
  `is_baked_good` BOOLEAN NOT NULL DEFAULT 0,

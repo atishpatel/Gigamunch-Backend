@@ -12,8 +12,8 @@ type Address struct {
 
 // GeoPoint represents a location as latitude/longitude in degrees.
 type GeoPoint struct {
-	Latitude  float64 `json:"latitude" datastore:",noindex"`
-	Longitude float64 `json:"longitude" datastore:",noindex"`
+	Latitude  float32 `json:"latitude" datastore:",noindex"`
+	Longitude float32 `json:"longitude" datastore:",noindex"`
 }
 
 // Valid returns whether a GeoPoint is within [-90, 90] latitude and [-180, 180] longitude.
@@ -29,5 +29,5 @@ type LimitRange struct {
 
 // Valid returns whether a LimitRange's EndLimit > StartLimit
 func (l LimitRange) Valid() bool {
-	return l.EndLimit > l.StartLimit
+	return l.StartLimit >= 0 && l.EndLimit > 0 && l.EndLimit > l.StartLimit
 }

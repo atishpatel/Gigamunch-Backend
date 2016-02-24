@@ -1,0 +1,47 @@
+application: gigamunch-omninexus-dev
+module: default
+version: 1
+runtime: go
+api_version: go1
+
+automatic_scaling:
+  min_pending_latency: 50ms
+  max_pending_latency: 100ms
+  max_concurrent_requests: 80
+
+env_variables:
+  GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private'
+
+handlers:
+- url: /favicon.ico
+  static_files: app/favicon.ico
+  upload: app/favicon.ico
+
+- url: /robots.txt
+  static_files: app/robots.txt
+  upload: app/robots.txt
+
+- url: /
+  static_files: app/index.html
+  upload: app/index.html
+
+- url: /gitkit
+  static_files: app/gitkit.html
+  upload: app/gitkit.html
+
+#change to be generic
+- url: /fonts
+  static_dir: app/fonts
+
+- url: /img
+  static_dir: app/img
+
+- url: /js
+  static_dir: app/js
+
+- url: /css
+  static_dir: app/css
+
+- url: /.*
+  script: _go_app
+  secure: always
