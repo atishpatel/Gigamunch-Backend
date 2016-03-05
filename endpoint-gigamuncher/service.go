@@ -24,7 +24,9 @@ func init() {
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
 	// Register course stuff
-	register("GetLiveMeals", "getLiveMeals", "POST", "gigamuncherservice/getLiveMeals", "Get live meals")
-
+	// register("GetLiveMeals", "getLiveMeals", "POST", "gigamuncherservice/getLiveMeals", "Get live meals")
+	register("SignIn", "signIn", "POST", "gigamuncherservice/signIn", "Sign in a user using a gtoken.")
+	register("SignOut", "signOut", "POST", "gigamuncherservice/signOut", "Sign out a user.")
+	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
 	endpoints.HandleHTTP()
 }
