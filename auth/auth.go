@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"net/http"
 	"time"
 
 	"google.golang.org/appengine"
@@ -15,10 +14,8 @@ import (
 	jwt "gopkg.in/dgrijalva/jwt-go.v2"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
-	"github.com/atishpatel/Gigamunch-Backend/core/account"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -27,95 +24,81 @@ var (
 	jwtKey          []byte
 )
 
-func GetUserFromGToken(ctx context.Context, gTokenString string, authToken *types.AuthToken) error {
+var (
+	errInvalidGToken = errors.ErrorWithCode{Code: errors.CodeSignOut, Message: "Invalid GITKIT token."}
+	errInvalidToken  = errors.ErrorWithCode{Code: errors.CodeSignOut, Message: "Invalid Gigatoken."}
+	errTokenExpired  = errors.ErrorWithCode{Code: errors.CodeSignOut, Message: "Invalid Gigatoken. Token is expired."}
+	errDatastore     = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+)
+
+// DeleteSessionToken removes the session token from valid tokens
+func DeleteSessionToken(ctx context.Context, JWTString string) error {
+	token, err := getAuthTokenFromString(ctx, JWTString)
+	if err != nil {
+		return err
+	}
+	userSessions := &UserSessions{}
+	err = getUserSessions(ctx, token.User.UserID, userSessions)
+	if err != nil {
+		return errDatastore.WithError(err)
+	}
+	for i := len(userSessions.TokenIDs) - 1; i >= 0; i-- {
+		if int32(userSessions.TokenIDs[i].JTI) == token.JTI {
+			// UserSession token should be removed
+			userSessions.TokenIDs = append(userSessions.TokenIDs[:i], userSessions.TokenIDs[i+1:]...)
+			break
+		}
+	}
+	err = putUserSessions(ctx, token.User.UserID, userSessions)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SaveUser saves user information such as permissions
+func SaveUser(ctx context.Context, user *types.User) error {
+	var err error
+	userSessions := &UserSessions{}
+	err = getUserSessions(ctx, user.UserID, userSessions)
+	if err != nil {
+		return errDatastore.WithError(err)
+	}
+	userSessions.User = *user
+	err = putUserSessions(ctx, user.UserID, userSessions)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetSessionWithGToken takes a GITKIT token string.
+// Returns: User, JWTString,error
+func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User, string, error) {
 	if gitkitClient == nil {
 		getConfig(ctx)
 	}
 	if gTokenString == "" {
-		return errors.ErrInvalidToken
+		return nil, "", errInvalidGToken
 	}
-	token, err := gitkitClient.ValidateToken(ctx, gTokenString, gitkitAudiences)
-	if err != nil {
-		return errors.ErrInvalidToken.WithArgs("Invalid gitkit token " + err.Error())
-	}
-	if time.Now().Sub(token.IssueAt) > 15*time.Minute {
-		return errors.ErrInvalidToken.WithArgs("token too old")
+	gtoken, err := gitkitClient.ValidateToken(ctx, gTokenString, gitkitAudiences)
+	if err != nil || time.Now().Sub(gtoken.IssueAt) > 15*time.Minute {
+		return nil, "", errInvalidGToken
 	}
 	// get user info from gitkit servers
-	gitkitUser, err := gitkitClient.UserByLocalID(ctx, token.LocalID)
+	gitkitUser, err := gitkitClient.UserByLocalID(ctx, gtoken.LocalID)
 	if err != nil {
-		return errors.ErrExternalDependencyFail.WithArgs("gitkit", "failed to fetch user from gitkit server", err)
+		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "failed to fetch user from gitkit server"}.WithError(err)
 	}
-	return createSessionToken(ctx, gitkitUser, authToken)
-}
-
-func GetUserFromToken(ctx context.Context, authToken *types.AuthToken) error {
-	if gitkitClient == nil {
-		getConfig(ctx)
-	}
-	token, err := jwt.Parse(authToken.JWTString, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-		return jwtKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		// Token is invalid
-		return errors.ErrInvalidToken.WithArgs(err)
-	}
-	// Token is good
-	err = updateAuthToken(ctx, authToken, token)
+	token, err := createSessionToken(ctx, gitkitUser)
+	jwtString, err := token.JWTString()
 	if err != nil {
-		return errors.ErrInvalidToken.WithArgs(err)
+		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Failed to encode user."}
 	}
-	return nil
+	return &token.User, jwtString, nil
 }
 
-func updateAuthToken(ctx context.Context, authToken *types.AuthToken, token *jwt.Token) error {
-	var err error
-	extractClaims(authToken, token)
-	// if issuedTime is > 60 minutes, token info gets refreshed
-	if time.Now().Sub(authToken.ITA) > 60*time.Minute {
-		err = updateToken(ctx, authToken)
-		if err != nil {
-			return err
-		}
-		err = insertClaims(authToken, token)
-		return err
-	}
-	// else data is new enough
-	return nil
-}
-
-func extractClaims(authToken *types.AuthToken, token *jwt.Token) {
-	authToken.User = types.User{
-		UserID:      token.Claims["user_id"].(string),
-		Name:        token.Claims["name"].(string),
-		PhotoURL:    token.Claims["photo_url"].(string),
-		Permissions: int32(token.Claims["perm"].(float64)),
-	}
-	authToken.JTI = int32(token.Claims["jti"].(float64))
-	authToken.ITA = time.Unix(int64(token.Claims["ita"].(float64)), 0)
-	authToken.Expire = time.Unix(int64(token.Claims["exp"].(float64)), 0)
-
-}
-
-func insertClaims(authToken *types.AuthToken, token *jwt.Token) error {
-	token.Claims["user_id"] = authToken.User.UserID
-	token.Claims["name"] = authToken.User.Name
-	token.Claims["photo_url"] = authToken.User.PhotoURL
-	token.Claims["perm"] = int32(authToken.User.Permissions)
-	token.Claims["jti"] = authToken.JTI
-	token.Claims["ita"] = int(authToken.ITA.Unix())
-	token.Claims["exp"] = int(authToken.Expire.Unix())
-	var err error
-	authToken.JWTString, err = token.SignedString(jwtKey)
-	return err
-}
-
-func createSessionToken(ctx context.Context, gitkitUser *gitkit.User, authToken *types.AuthToken) error {
+func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, error) {
 	var err error
 	userSessions := &UserSessions{}
 	err = getUserSessions(ctx, gitkitUser.LocalID, userSessions)
@@ -124,69 +107,146 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User, authToken 
 		if err == datastore.ErrNoSuchEntity {
 			firstTime = true
 		} else {
-			return errors.ErrDatastore.WithArgs("get", KindUserSessions, gitkitUser.LocalID, err)
+			return nil, errDatastore.WithError(err)
 		}
 	}
-
 	if firstTime {
-		// create gigamuncher kind
-		gigamuncher := &types.Gigamuncher{
-			UserDetail: types.UserDetail{
-				Name:       gitkitUser.DisplayName,
-				Email:      gitkitUser.Email,
-				PhotoURL:   gitkitUser.PhotoURL,
-				ProviderID: gitkitUser.ProviderID,
-			},
-		}
-		errChan := make(chan error, 1)
-		account.PutGigamuncher(ctx, gitkitUser.LocalID, gigamuncher, errChan)
-		err, ok := <-errChan
-		utils.Debugf(ctx, "got this err and ok", err, ok)
-		if !ok || err != nil {
-			return errors.ErrDatastore.WithArgs("put", types.KindGigamuncher, gitkitUser.LocalID, err)
-		}
-		utils.Debugf(ctx, "success putting gigamuncher")
-		// TODO remove. only tmp thing
-		gigachef := &types.Gigachef{
-			UserDetail: types.UserDetail{
-				Name:       gitkitUser.DisplayName,
-				Email:      gitkitUser.Email,
-				PhotoURL:   gitkitUser.PhotoURL,
-				ProviderID: gitkitUser.ProviderID,
-			},
-		}
-		errChan = make(chan error, 1)
-		account.PutGigachef(ctx, gitkitUser.LocalID, gigachef, errChan)
-		err, ok = <-errChan
-		if !ok || err != nil {
-			return errors.ErrDatastore.WithArgs("put", types.KindGigachef, gitkitUser.LocalID, err)
-		}
-		// TODO end
 		// create UserSessions kind
 		userSessions.User = types.User{
 			UserID:      gitkitUser.LocalID,
 			Name:        gitkitUser.DisplayName,
+			Email:       gitkitUser.Email,
+			ProviderID:  gitkitUser.ProviderID,
 			PhotoURL:    gitkitUser.PhotoURL,
 			Permissions: 0,
 		}
 	}
 	// create the token
-	authToken.User = userSessions.User
-	authToken.ITA = getITATime()
-	authToken.Expire = getExpTime()
-	authToken.JTI = getNewJTI()
-	err = addUserToken(ctx, authToken, userSessions)
-	if err != nil {
-		return errors.ErrDatastore.WithArgs("put", KindUserSessions, authToken.User.UserID, err)
+	token := &Token{
+		User:   userSessions.User,
+		ITA:    getITATime(),
+		JTI:    getNewJTI(),
+		Expire: getExpTime(),
 	}
-	token := jwt.New(jwt.SigningMethodHS256)
-	err = insertClaims(authToken, token)
-	utils.Debugf(ctx, "jwt string", authToken.JWTString)
-	return err
+	userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: token.JTI, Expire: token.Expire})
+	err = putUserSessions(ctx, token.User.UserID, userSessions)
+	if err != nil {
+		return nil, errors.ErrorWithCode{
+			Code:    errors.CodeInternalServerErr,
+			Message: fmt.Sprintf("error put UserSession(%s) err: %+v", gitkitUser.LocalID, err),
+		}
+	}
+	return token, nil
+}
+
+// GetUserFromToken validates a token and extracts the user from it.
+// Returns: User, error
+func GetUserFromToken(ctx context.Context, JWTString string) (*types.User, error) {
+	token, err := getAuthTokenFromString(ctx, JWTString)
+	if err != nil {
+		return nil, err
+	}
+	if token.IsExpired() {
+		return nil, errTokenExpired
+	}
+	// TODO if issue time is old, check in database
+	// log a "token miss"
+	if token.IsOld() {
+		userSessions := &UserSessions{}
+		err := getUserSessions(ctx, token.User.UserID, userSessions)
+		if err != nil {
+			// error doesn't matter. They should just call RefreshToken
+			return nil, errTokenExpired
+		}
+		return &userSessions.User, nil
+	}
+	return &token.User, nil
+}
+
+func getAuthTokenFromString(ctx context.Context, JWTString string) (*Token, error) {
+	if jwtKey == nil {
+		getConfig(ctx)
+	}
+	jwtToken, err := jwt.Parse(JWTString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtKey, nil
+	})
+	if err != nil || !jwtToken.Valid {
+		// Token is invalid
+		return nil, errInvalidToken
+	}
+	token, err := extractClaims(jwtToken)
+	if err != nil {
+		return nil, errInvalidToken
+	}
+	return token, nil
+}
+
+// RefreshToken takes a token string and returns a new token with updated claims
+// and expiration time. It also, invalidates the old token in an hour.
+func RefreshToken(ctx context.Context, JWTString string) (string, error) {
+	// TODO test
+	token, err := getAuthTokenFromString(ctx, JWTString)
+	if err != nil {
+		return "", err
+	}
+	userSessions := &UserSessions{}
+	err = getUserSessions(ctx, token.User.UserID, userSessions)
+	if err != nil {
+		return "", errDatastore.WithError(err)
+	}
+	found := false
+	needPut := false
+	for i := len(userSessions.TokenIDs) - 1; i >= 0; i-- {
+		if time.Now().After(userSessions.TokenIDs[i].Expire) {
+			// UserSession token should be removed
+			userSessions.TokenIDs = append(userSessions.TokenIDs[:i], userSessions.TokenIDs[i+1:]...)
+			needPut = true
+		}
+	}
+	for i := len(userSessions.TokenIDs) - 1; i >= 0; i-- {
+		if int32(userSessions.TokenIDs[i].JTI) == token.JTI {
+			found = true
+			if userSessions.TokenIDs[i].UpdatedToJTI != 0 {
+				token.JTI = userSessions.TokenIDs[i].UpdatedToJTI
+				token.Expire = userSessions.TokenIDs[i].UpdateToExpire
+			} else {
+				newJTI := getNewJTI()
+				token.JTI = newJTI
+				userSessions.TokenIDs[i].UpdatedToJTI = newJTI
+				expTime := getExpTime()
+				token.Expire = expTime
+				userSessions.TokenIDs[i].UpdateToExpire = expTime
+				userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: newJTI, Expire: expTime})
+				userSessions.TokenIDs[i].Expire = time.Now().UTC().Add(time.Hour * 1)
+				needPut = true
+			}
+			token.ITA = getITATime()
+			break
+		}
+	}
+	if needPut {
+		err = putUserSessions(ctx, token.User.UserID, userSessions)
+		if err != nil {
+			return "", errDatastore.WithError(err)
+		}
+	}
+	if !found {
+		return "", errInvalidToken
+	}
+	token.User = userSessions.User
+	jwtString, err := token.JWTString()
+	if err != nil {
+		return "", err
+	}
+	return jwtString, nil
 }
 
 func getExpTime() time.Time {
-	return time.Now().UTC().Add(time.Hour * 24 * 90)
+	return time.Now().UTC().Add(time.Hour * 24 * 60)
 }
 
 func getNewJTI() int32 {
@@ -197,53 +257,72 @@ func getITATime() time.Time {
 	return time.Now().UTC()
 }
 
-// CurrentUser extracts the user information stored in current session.
-//
-// If there is no existing session, identity toolkit token is checked. If the
-// token is valid, a new session is created.
-//
-// If any error happens, nil is returned.
-func CurrentUser(w http.ResponseWriter, req *http.Request) (*types.User, error) {
-	ctx := appengine.NewContext(req)
-	if gitkitClient == nil {
-		getConfig(ctx)
-	}
-	var err error
-	sessionTokenCookie, err := req.Cookie(types.SessionTokenCookieName)
-	// doesn't have a session cookie
-	if err == http.ErrNoCookie {
-		gTokenString := gitkitClient.TokenFromRequest(req)
-		if gTokenString == "" {
-			return nil, fmt.Errorf("No gtoken")
+func getJWTToken() *jwt.Token {
+	return jwt.New(jwt.SigningMethodHS256)
+}
+
+func extractClaims(jwtToken *jwt.Token) (*Token, error) {
+	getStringClaim := func(name string, ok bool) (string, bool) {
+		if ok {
+			tmp, ok := jwtToken.Claims[name].(string)
+			return tmp, ok
 		}
-		authToken := new(types.AuthToken)
-		err = GetUserFromGToken(ctx, gTokenString, authToken)
-		if err != nil {
-			return nil, err
+		return "", ok
+	}
+	getInt32Claim := func(name string, ok bool) (int32, bool) {
+		if ok {
+			tmp, ok := jwtToken.Claims[name].(float64)
+			if ok {
+				return int32(tmp), ok
+			}
 		}
-		http.SetCookie(w, &http.Cookie{Name: types.SessionTokenCookieName,
-			Value:  authToken.JWTString,
-			MaxAge: int(authToken.Expire.Sub(time.Now()).Seconds())})
-		http.SetCookie(w, &http.Cookie{Name: types.GitkitCookieName, MaxAge: -1})
-		return &authToken.User, nil
-	} else if err != nil {
-		utils.Errorf(ctx, "Error getting session cookie: %+v", err)
+		return 0, ok
 	}
-	authToken := &types.AuthToken{
-		JWTString: sessionTokenCookie.Value,
+	getTimeClaim := func(name string, ok bool) (time.Time, bool) {
+		if ok {
+			tmp, ok := jwtToken.Claims[name].(float64)
+			if ok {
+				return time.Unix(int64(tmp), 0), ok
+			}
+		}
+		return time.Now(), ok
 	}
-	err = GetUserFromToken(ctx, authToken)
-	if err != nil {
-		return nil, err
+	var userID, name, email, providerID, photoURL string
+	var permissions, jti int32
+	var ita, expire time.Time
+	ok := true
+	userID, ok = getStringClaim("user_id", ok)
+	name, ok = getStringClaim("name", ok)
+	email, ok = getStringClaim("email", ok)
+	providerID, ok = getStringClaim("provider_id", ok)
+	photoURL, ok = getStringClaim("photo_url", ok)
+	permissions, ok = getInt32Claim("perm", ok)
+	jti, ok = getInt32Claim("jti", ok)
+	ita, ok = getTimeClaim("ita", ok)
+	expire, ok = getTimeClaim("exp", ok)
+	if !ok {
+		return nil, errInvalidToken
 	}
-	return &authToken.User, nil
+	token := new(Token)
+	token.User = types.User{
+		UserID:      userID,
+		Name:        name,
+		Email:       email,
+		ProviderID:  providerID,
+		PhotoURL:    photoURL,
+		Permissions: permissions,
+	}
+	token.JTI = jti
+	token.ITA = ita
+	token.Expire = expire
+	return token, nil
 }
 
 func getConfig(ctx context.Context) {
 	config := config.GetGitkitConfig(ctx)
 	// setup gitkit
 	c := &gitkit.Config{
-		WidgetURL: types.LoginURL,
+		WidgetURL: loginURL,
 	}
 	if appengine.IsDevAppServer() {
 		c.GoogleAppCredentialsPath = config.GoogleAppCredentialsPath
@@ -255,5 +334,8 @@ func getConfig(ctx context.Context) {
 	}
 	gitkitAudiences = []string{config.ClientID}
 	jwtKey = []byte(config.JWTSecret)
+}
+
+func init() {
 	rand.Seed(time.Now().Unix())
 }
