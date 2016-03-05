@@ -2,10 +2,12 @@ package types
 
 // User information in a session.
 type User struct {
-	UserID   string `json:"user_id"`
-	Name     string `json:"name"`
-	PhotoURL string `json:"photo_url"`
-	// bit1 | bit2 | bit3 | ...
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	ProviderID string `json:"provider_id"`
+	PhotoURL   string `json:"photo_url"`
+	// bit32 | bit31 | bit30 | ...
 	// isChef | isVerifiedChef | isAdmin | HasAddress | HasCreditCardInfo
 	Permissions int32 `json:"permissions"`
 }
@@ -69,13 +71,4 @@ func setKthBit(num int32, k uint32, x bool) int32 {
 		return int32(uint32(num) ^ ((1<<k)^uint32(num))&(1<<k))
 	}
 	return int32(uint32(num) ^ ((0<<k)^uint32(num))&(1<<k))
-}
-
-// UserDetail is the structure that is stored in the database for a chef's
-// or muncher's details
-type UserDetail struct {
-	Name       string `json:"name" datastore:",noindex"`
-	Email      string `json:"email" datastore:",noindex"`
-	PhotoURL   string `json:"photo_url" datastore:",noindex"`
-	ProviderID string `json:"provider_id" datastore:",noindex"`
 }

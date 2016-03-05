@@ -50,7 +50,7 @@ func (token *Token) IsOld() bool {
 // JWTString returns a signed JSON Web Token string
 func (token *Token) JWTString() (string, error) {
 	jwtToken := getJWTToken()
-	jwtToken.Claims["user_id"] = token.User.UserID
+	jwtToken.Claims["id"] = token.User.ID
 	jwtToken.Claims["name"] = token.User.Name
 	jwtToken.Claims["email"] = token.User.Email
 	jwtToken.Claims["provider_id"] = token.User.ProviderID

@@ -38,7 +38,7 @@ func DeleteSessionToken(ctx context.Context, JWTString string) error {
 		return err
 	}
 	userSessions := &UserSessions{}
-	err = getUserSessions(ctx, token.User.UserID, userSessions)
+	err = getUserSessions(ctx, token.User.ID, userSessions)
 	if err != nil {
 		return errDatastore.WithError(err)
 	}
@@ -49,7 +49,7 @@ func DeleteSessionToken(ctx context.Context, JWTString string) error {
 			break
 		}
 	}
-	err = putUserSessions(ctx, token.User.UserID, userSessions)
+	err = putUserSessions(ctx, token.User.ID, userSessions)
 	if err != nil {
 		return err
 	}
@@ -60,12 +60,12 @@ func DeleteSessionToken(ctx context.Context, JWTString string) error {
 func SaveUser(ctx context.Context, user *types.User) error {
 	var err error
 	userSessions := &UserSessions{}
-	err = getUserSessions(ctx, user.UserID, userSessions)
+	err = getUserSessions(ctx, user.ID, userSessions)
 	if err != nil {
 		return errDatastore.WithError(err)
 	}
 	userSessions.User = *user
-	err = putUserSessions(ctx, user.UserID, userSessions)
+	err = putUserSessions(ctx, user.ID, userSessions)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 	if firstTime {
 		// create UserSessions kind
 		userSessions.User = types.User{
-			UserID:      gitkitUser.LocalID,
+			ID:          gitkitUser.LocalID,
 			Name:        gitkitUser.DisplayName,
 			Email:       gitkitUser.Email,
 			ProviderID:  gitkitUser.ProviderID,
@@ -129,7 +129,7 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 		Expire: getExpTime(),
 	}
 	userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: token.JTI, Expire: token.Expire})
-	err = putUserSessions(ctx, token.User.UserID, userSessions)
+	err = putUserSessions(ctx, token.User.ID, userSessions)
 	if err != nil {
 		return nil, errors.ErrorWithCode{
 			Code:    errors.CodeInternalServerErr,
@@ -153,7 +153,7 @@ func GetUserFromToken(ctx context.Context, JWTString string) (*types.User, error
 	// log a "token miss"
 	if token.IsOld() {
 		userSessions := &UserSessions{}
-		err := getUserSessions(ctx, token.User.UserID, userSessions)
+		err := getUserSessions(ctx, token.User.ID, userSessions)
 		if err != nil {
 			// error doesn't matter. They should just call RefreshToken
 			return nil, errTokenExpired
@@ -194,7 +194,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 		return "", err
 	}
 	userSessions := &UserSessions{}
-	err = getUserSessions(ctx, token.User.UserID, userSessions)
+	err = getUserSessions(ctx, token.User.ID, userSessions)
 	if err != nil {
 		return "", errDatastore.WithError(err)
 	}
@@ -229,7 +229,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 		}
 	}
 	if needPut {
-		err = putUserSessions(ctx, token.User.UserID, userSessions)
+		err = putUserSessions(ctx, token.User.ID, userSessions)
 		if err != nil {
 			return "", errDatastore.WithError(err)
 		}
@@ -291,7 +291,7 @@ func extractClaims(jwtToken *jwt.Token) (*Token, error) {
 	var permissions, jti int32
 	var ita, expire time.Time
 	ok := true
-	userID, ok = getStringClaim("user_id", ok)
+	userID, ok = getStringClaim("id", ok)
 	name, ok = getStringClaim("name", ok)
 	email, ok = getStringClaim("email", ok)
 	providerID, ok = getStringClaim("provider_id", ok)
@@ -305,7 +305,7 @@ func extractClaims(jwtToken *jwt.Token) (*Token, error) {
 	}
 	token := new(Token)
 	token.User = types.User{
-		UserID:      userID,
+		ID:          userID,
 		Name:        name,
 		Email:       email,
 		ProviderID:  providerID,
