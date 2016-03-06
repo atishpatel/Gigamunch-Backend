@@ -28,5 +28,7 @@ func init() {
 	register("SignIn", "signIn", "POST", "gigamuncherservice/signIn", "Sign in a user using a gtoken.")
 	register("SignOut", "signOut", "POST", "gigamuncherservice/signOut", "Sign out a user.")
 	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
+	register("PostReview", "postReview", "POST", "gigamuncherservice/postReview", "Post a review.")
+	register("GetReviews", "getReviews", "POST", "gigamuncherservice/getReviews", "Get reviews.")
 	endpoints.HandleHTTP()
 }
