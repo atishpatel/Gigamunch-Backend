@@ -22,8 +22,9 @@ import (
 
 // Config is the configuration loaded from datastore
 type Config struct {
-	JWTSecret string `json:"jwt_secret"`
-	ClientID  string `json:"client_id"`
+	JWTSecret string
+	ClientID  string
+	ServerKey string
 }
 
 // GitkitConfig is used to load different configurations
@@ -38,8 +39,19 @@ type GitkitConfig struct {
 
 var (
 	gitkitConfig   *GitkitConfig
+	config         *Config
 	privateDirPath string
 )
+
+func GetServerKey(ctx context.Context) string {
+	if gitkitConfig == nil {
+		loadGitkitConfig(ctx)
+	}
+	if appengine.IsDevAppServer() {
+		return gitkitConfig.ServerAPIKey
+	}
+	return config.ServerKey
+}
 
 // GetGitkitConfig returns the configurations for gitkit on the server
 func GetGitkitConfig(ctx context.Context) *GitkitConfig {
@@ -62,12 +74,7 @@ func loadGitkitConfig(ctx context.Context) {
 			log.Fatal(err)
 		}
 	} else {
-		key := datastore.NewKey(ctx, "Config", "", 100, nil)
-		config := &Config{}
-		err := datastore.Get(ctx, key, config)
-		if err != nil {
-			log.Fatalf("Error getting Config from datastore: %+v", err)
-		}
+		getDatastoreConfig(ctx)
 		gitkitConfig = &GitkitConfig{
 			JWTSecret: config.JWTSecret,
 			ClientID:  config.ClientID,
@@ -77,6 +84,14 @@ func loadGitkitConfig(ctx context.Context) {
 	gitkitConfig.JWTSecret, err = utils.Decrypt("KTd6M18avNkASNK149TDhyl3m45Mxqw2", gitkitConfig.JWTSecret)
 	if err != nil {
 		log.Fatalf("Error decoding jwt secret: %+v", err)
+	}
+}
+
+func getDatastoreConfig(ctx context.Context) {
+	key := datastore.NewKey(ctx, "Config", "", 100, nil)
+	err := datastore.Get(ctx, key, config)
+	if err != nil {
+		log.Fatalf("Error getting Config from datastore: %+v", err)
 	}
 }
 
