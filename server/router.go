@@ -3,26 +3,53 @@ package server
 import (
 	// golang
 
+	"io/ioutil"
 	"net/http"
 
-	"github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	// appengine
 	"google.golang.org/appengine"
+
+	"github.com/justinas/alice"
 )
 
 func init() {
-	http.HandleFunc(types.LoginURL, handleLogin)
+	http.HandleFunc(baseLoginURL, handleLogin)
+	http.HandleFunc(signOutURL, handleSignout)
+
+	// chef stuff
+	http.HandleFunc(chefApplicationURL, handleChefApplication)
+	// verfied chef stuff
+	verifiedChefChain := alice.New(middlewareVerifiedChef)
+	http.Handle(chefHomeURL, verifiedChefChain.ThenFunc(handleChefHome))
+	// admin stuff
+	adminChain := alice.New(middlewareAdmin)
+	http.Handle(adminHomeURL, adminChain.ThenFunc(handleAdminHome))
 }
 
 func handleLogin(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	user, err := auth.CurrentUser(w, req)
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	authToken := CurrentUser(w, req)
+	if authToken != nil {
+		utils.Debugf(appengine.NewContext(req), "User: %+v", authToken.User)
+		if authToken.User.IsVerifiedChef() {
+			http.Redirect(w, req, chefHomeURL, http.StatusTemporaryRedirect)
+		} else if authToken.User.IsAdmin() {
+			http.Redirect(w, req, adminHomeURL, http.StatusTemporaryRedirect)
+		} else {
+			http.Redirect(w, req, chefApplicationURL, http.StatusTemporaryRedirect)
+		}
 	}
-	utils.Infof(ctx, "Got the following user: %+v", user)
-	w.Write([]byte("Token generated"))
+	removeCookies(w)
+	page, err := ioutil.ReadFile("app/login.html")
+	if err != nil {
+		ctx := appengine.NewContext(req)
+		utils.Errorf(ctx, "Error reading login page: %+v", err)
+	}
+	w.Write(page)
+}
+
+func handleSignout(w http.ResponseWriter, req *http.Request) {
+	removeCookies(w)
+	http.Redirect(w, req, homeURL, http.StatusTemporaryRedirect)
 }

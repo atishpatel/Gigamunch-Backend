@@ -9,9 +9,6 @@ automatic_scaling:
   max_pending_latency: 100ms
   max_concurrent_requests: 80
 
-env_variables:
-  GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private'
-
 handlers:
 - url: /favicon.ico
   static_files: app/favicon.ico
@@ -45,3 +42,7 @@ handlers:
 - url: /.*
   script: _go_app
   secure: always
+
+env_variables:
+  GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private'
+  PROJECTID: 'gigamunch-omninexus-dev'
