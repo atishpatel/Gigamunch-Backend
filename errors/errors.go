@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// TODO test in playground
+
 // Errors is returned by operations when there are multiple possible errors for
 // the function.
 type Errors []error
