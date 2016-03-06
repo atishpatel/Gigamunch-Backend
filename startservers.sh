@@ -10,9 +10,9 @@ redis-server > /dev/null &
 ################################################################################
 /usr/local/opt/mysql56/bin/mysql.server start
 # create gigamunch database
-cat types/queries/create_gigamunch_datbase.sql | mysql -uroot
+cat misc/create_gigamunch_datbase.sql | mysql -uroot
 # create live_meals table
-mysql -uroot gigamunch < types/queries/create_live_meals_table.sql
+mysql -uroot gigamunch < misc/create_live_meals_table.sql
 # TODO create user for get and create mysql and one of cron delete
 ################################################################################
 # goapp
