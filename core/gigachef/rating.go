@@ -37,3 +37,17 @@ func UpdateAvgRating(ctx context.Context, userID string, oldRating int, newRatin
 	}
 	return nil
 }
+
+// GetRatings returns a list of GigachefRatings for the passed in array of ids
+func GetRatings(ctx context.Context, gigachefIDs []string) ([]float32, error) {
+	// TODO add not querying same ids
+	gigachefs, err := getMulti(ctx, gigachefIDs)
+	if err != nil {
+		return nil, errDatastore.WithError(err)
+	}
+	ratings := make([]float32, len(gigachefs))
+	for i := range gigachefs {
+		ratings[i] = gigachefs[i].AverageRating
+	}
+	return ratings, nil
+}

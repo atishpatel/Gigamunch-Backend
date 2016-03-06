@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS `live_posts` (
  `post_id` BIGINT NOT NULL PRIMARY KEY,
+ `gigachef_id` VARCHAR(15) NOT NULL,
  `close_datetime` DATETIME NOT NULL, -- used for cron job
  `ready_datetime` DATETIME NOT NULL,
  `search_tags` VARCHAR( 500 ) NOT NULL,

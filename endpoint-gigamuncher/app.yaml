@@ -15,3 +15,4 @@ handlers:
 
 env_variables:
   GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private'
+  PROJECTID: 'gigamunch-omninexus-dev'

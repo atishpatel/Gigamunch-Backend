@@ -30,5 +30,6 @@ func init() {
 	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
 	register("PostReview", "postReview", "POST", "gigamuncherservice/postReview", "Post a review.")
 	register("GetReviews", "getReviews", "POST", "gigamuncherservice/getReviews", "Get reviews.")
+	register("GetLivePosts", "getLivePosts", "POST", "gigamuncherservice/getLivePosts", "Get live posts.")
 	endpoints.HandleHTTP()
 }

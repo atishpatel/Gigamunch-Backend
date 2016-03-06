@@ -1,4 +1,4 @@
-package meal
+package post
 
 import (
 	"reflect"
@@ -22,25 +22,25 @@ func TestGetMultiMeal(t *testing.T) {
 	testCases := []struct {
 		description string
 		mealIDs     []int64
-		liveMeals   []*types.Meal
+		liveMeals   []*Post
 		output      error
 	}{
 		{
 			description: "Empty meal id input",
 			mealIDs:     make([]int64, 0),
-			liveMeals:   make([]*types.Meal, 0),
+			liveMeals:   make([]*Post, 0),
 			output:      nil,
 		},
 		{
 			description: "Entity does not exist in Datastore",
 			mealIDs:     []int64{1, 2},
-			liveMeals:   make([]*types.Meal, 2),
+			liveMeals:   make([]*Post, 2),
 			output:      appengine.MultiError{datastore.ErrNoSuchEntity, nil},
 		},
 		{
 			description: "Gets two valid Entities form Datastore",
 			mealIDs:     []int64{2, 3},
-			liveMeals:   make([]*types.Meal, 2),
+			liveMeals:   make([]*Post, 2),
 			output:      nil,
 		},
 	}
