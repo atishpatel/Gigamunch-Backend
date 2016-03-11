@@ -20,7 +20,7 @@ var (
 
 // PostPost posts a live post if the post is valid
 // returns postID, error
-func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) {
+func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) { // TODO: update to pass in itemid for stats stuff
 	var err error
 	if !user.IsVerifiedChef() {
 		return 0, errNotVerifiedChef
@@ -28,11 +28,22 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	post.GigachefID = user.ID
 	// get the gigachef address
 	var address *types.Address
-	address, err = gigachef.GetAddress(ctx, post.GigachefID)
+	var radius int
+	address, radius, err = gigachef.GetDeliveryInfo(ctx, user)
 	if err != nil {
 		return 0, err
 	}
 	post.Address = *address
+	post.GigachefDeliveryRadius = radius
+	// IncrementNumPost for gigachef
+	errChan := make(chan error, 1)
+	go func() {
+		err := gigachef.IncrementNumPost(ctx, user)
+		if err != nil {
+			utils.Errorf(ctx, "Num Post not incremented for user(%s)", user.ID)
+		}
+		errChan <- err
+	}()
 	// put in datastore
 	postID, err := putIncomplete(ctx, post)
 	// insert into sql table
@@ -42,7 +53,16 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 		utils.Criticalf(ctx, "failed to put %d in sql database: +%v", postID, err)
 		return 0, errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "mysql insert failed"}.WithError(err)
 	}
+	<-errChan
 	return postID, nil
+}
+
+func GetUserPosts(ctx context.Context, user types.User, limit *types.Limit) ([]int64, []Post, error) {
+	postIDs, posts, err := getUserPosts(ctx, user.ID, limit.Start, limit.End)
+	if err != nil {
+		return nil, nil, errDatastore.WithError(err)
+	}
+	return postIDs, posts, nil
 }
 
 // GetLivePostsIDs gets live posts sorted by ready date

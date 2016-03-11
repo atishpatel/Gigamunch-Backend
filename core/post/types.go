@@ -23,10 +23,9 @@ type Post struct {
 	types.BaseItem                                          // embedded
 	ItemID                   int64                          `json:"item_id" datastore:",noindex"`
 	Title                    string                         `json:"title" datastore:",noindex"`
-	IsLive                   bool                           `json:"is_live" datastore:",index"`
 	IsOrderNow               bool                           `json:"is_order_now" datastore:",noindex"`
 	GigachefCanceled         bool                           `json:"gigachef_canceled" datastore:",noindex"`
-	ClosingDateTime          time.Time                      `json:"closing_datetime" datastore:",noindex"`
+	ClosingDateTime          time.Time                      `json:"closing_datetime" datastore:",index"`
 	ReadyDateTime            time.Time                      `json:"ready_datetime" datastore:",index"`
 	ServingsOffered          int                            `json:"servings_offered" datastore:",noindex"`
 	PricePerServing          float32                        `json:"price_per_serving" datastore:",noindex"`

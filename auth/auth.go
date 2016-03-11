@@ -126,7 +126,7 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 		User:   userSessions.User,
 		ITA:    getITATime(),
 		JTI:    getNewJTI(),
-		Expire: getExpTime(),
+		Expire: GetExpTime(),
 	}
 	userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: token.JTI, Expire: token.Expire})
 	err = putUserSessions(ctx, token.User.ID, userSessions)
@@ -217,7 +217,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 				newJTI := getNewJTI()
 				token.JTI = newJTI
 				userSessions.TokenIDs[i].UpdatedToJTI = newJTI
-				expTime := getExpTime()
+				expTime := GetExpTime()
 				token.Expire = expTime
 				userSessions.TokenIDs[i].UpdateToExpire = expTime
 				userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: newJTI, Expire: expTime})
@@ -245,7 +245,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 	return jwtString, nil
 }
 
-func getExpTime() time.Time {
+func GetExpTime() time.Time {
 	return time.Now().UTC().Add(time.Hour * 24 * 60)
 }
 

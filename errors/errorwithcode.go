@@ -5,15 +5,15 @@ import "fmt"
 type ErrorWithCode struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-	Err     error  `json:"error"`
+	err     error  `json:"err"` // err is private because of endpoints
 }
 
 func (err ErrorWithCode) Error() string {
-	return fmt.Sprintf("Errorcode %d: %s: %+v", err.Code, err.Message, err.Err)
+	return fmt.Sprintf("Errorcode %d: %s: %+v", err.Code, err.Message, err.err)
 }
 
 func (err ErrorWithCode) WithError(attachedErr error) ErrorWithCode {
-	err.Err = attachedErr
+	err.err = attachedErr
 	return err
 }
 

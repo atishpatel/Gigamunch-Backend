@@ -35,3 +35,23 @@ func getMultiPost(ctx context.Context, postIDs []int64, dst []Post) error {
 	}
 	return nil
 }
+
+func getUserPosts(ctx context.Context, gigachefID string, startLimit int, endLimit int) ([]int64, []Post, error) {
+	offset := startLimit
+	limit := endLimit - startLimit
+	query := datastore.NewQuery(kindPost).
+		Filter("GigachefID =", gigachefID).
+		Order("ClosingDateTime").
+		Offset(offset).
+		Limit(limit)
+	var results []Post
+	keys, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, nil, err
+	}
+	ids := make([]int64, len(keys))
+	for i := range keys {
+		ids[i] = keys[i].IntID()
+	}
+	return ids, results, nil
+}

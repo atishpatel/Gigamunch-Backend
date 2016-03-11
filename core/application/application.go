@@ -26,50 +26,55 @@ func GetApplications(ctx context.Context, user *types.User) ([]*ChefApplication,
 		utils.Errorf(ctx, "user(%v) attemted to do an admin task.", *user)
 		return nil, errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 	}
-
 	chefApplications, err := getAll(ctx)
 	return chefApplications, err
 }
 
-func GetApplication(ctx context.Context, user *types.User) (*types.ChefApplication, error) {
+// GetApplication gets a chef application
+func GetApplication(ctx context.Context, user *types.User) (*ChefApplication, error) {
 	var err error
-	chefApplicationEntity := &ChefApplication{}
-	err = get(ctx, user.UserID, chefApplicationEntity)
+	chefApplication := &ChefApplication{}
+	err = get(ctx, user.ID, chefApplication)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			chefApplication := new(types.ChefApplication)
+			chefApplication := new(ChefApplication)
 			chefApplication.Name = user.Name
 			return chefApplication, nil
 		}
 		return nil, err
 	}
-	return &chefApplicationEntity.ChefApplication, nil
+	return chefApplication, nil
 }
 
 // SubmitApplication saves a ChefApplication.
 // A token should be refreshed if this function is called.
-func SubmitApplication(ctx context.Context, user *types.User, chefApplication *types.ChefApplication) (*types.ChefApplication, error) {
+func SubmitApplication(ctx context.Context, user *types.User, chefApplication *ChefApplication) (*ChefApplication, error) {
 	var err error
 	chefApplicationEntity := &ChefApplication{}
-	err = get(ctx, user.UserID, chefApplicationEntity)
-	if err != nil && err != datastore.ErrNoSuchEntity {
+	err = get(ctx, user.ID, chefApplicationEntity)
+	if err != nil && err.Error() != datastore.ErrNoSuchEntity.Error() {
 		return nil, err
 	}
-	if err == datastore.ErrNoSuchEntity || chefApplication.Address.String() != chefApplication.Address.String() {
-		err = getGeopointFromAddress(ctx, &chefApplication.Address)
-		if err != nil {
-			return nil, err
+
+	if err != nil && err.Error() == datastore.ErrNoSuchEntity.Error() {
+		chefApplication.ApplicationProgress = 1
+		if chefApplication.Address.String() != chefApplicationEntity.Address.String() {
+			err = getGeopointFromAddress(ctx, &chefApplication.Address)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			chefApplication.Address = chefApplicationEntity.Address
 		}
 	} else {
-		chefApplication.Address = chefApplicationEntity.Address
+		chefApplication.ApplicationProgress = chefApplicationEntity.ApplicationProgress
 	}
-	chefApplicationEntity.UserID = user.UserID
-	chefApplicationEntity.ChefApplication = *chefApplication
-	chefApplicationEntity.LastUpdatedDateTime = time.Now().UTC()
+	chefApplication.UserID = user.ID
+	chefApplication.LastUpdatedDateTime = time.Now().UTC()
 	if chefApplicationEntity.CreatedDateTime.IsZero() {
-		chefApplicationEntity.CreatedDateTime = time.Now().UTC()
+		chefApplication.CreatedDateTime = time.Now().UTC()
 	}
-	err = put(ctx, user.UserID, chefApplicationEntity)
+	err = put(ctx, user.ID, chefApplication)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +86,7 @@ func SubmitApplication(ctx context.Context, user *types.User, chefApplication *t
 	if err != nil {
 		return nil, err
 	}
-	return &chefApplicationEntity.ChefApplication, nil
+	return chefApplication, nil
 }
 
 func setAuthUserAndPerm(ctx context.Context, user *types.User, name string, email string) error {
@@ -129,7 +134,7 @@ func getGeopointFromAddress(ctx context.Context, address *types.Address) error {
 		}
 		return returnErr.WithError(err)
 	}
-	if mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) || mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated) {
+	if mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated) {
 		returnErr := errors.ErrorWithCode{
 			Code:    errors.CodeInvalidParameter,
 			Message: "Address is not valid.",

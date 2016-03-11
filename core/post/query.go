@@ -13,6 +13,7 @@ import (
 	"google.golang.org/appengine"
 
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -33,9 +34,9 @@ func insertLivePost(postID int64, post *Post) error {
 	_, err := mysqlDB.Exec(
 		`INSERT
 		INTO live_posts
-		(post_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_experimental, is_baked_good, latitude, longitude)
-		VALUES (?,?,?,?,?,?,?,?,?)`,
-		postID, post.GigachefID, post.ClosingDateTime.Format(time.RFC3339), post.ReadyDateTime.Format(time.RFC3339), post.Title, 0, 0, post.Latitude, post.Longitude)
+		(post_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_order_now, is_experimental, is_baked_good, latitude, longitude)
+		VALUES (?,?,?,?,?,?,?,?,?,?)`,
+		postID, post.GigachefID, post.ClosingDateTime.Format(time.RFC3339), post.ReadyDateTime.Format(time.RFC3339), post.Title, post.IsOrderNow, 0, 0, post.Latitude, post.Longitude)
 	return err
 }
 
@@ -43,7 +44,8 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	var err error
 	listLength := limit.End - limit.Start
 	livePostQuery := getSortByDateQuery(geopoint.Latitude, geopoint.Longitude, radius,
-		readyDatetime, descending, limit.Start, limit.End)
+		readyDatetime, descending, limit)
+	utils.Debugf(ctx, "query: ", livePostQuery)
 	rows, err := mysqlDB.Query(livePostQuery)
 	if err != nil {
 		return nil, nil, nil, err //TODO change to external dep err
@@ -80,16 +82,16 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	return postIDs, gigachefIDs, distances, nil
 }
 
-func getSortByDateQuery(latitude float32, longitude float32, radius int, readyTime time.Time, descending bool, startLimit int, endLimit int) string {
+func getSortByDateQuery(latitude float32, longitude float32, radius int, readyTime time.Time, descending bool, limit *types.Limit) string {
 	var readyDatetimeOrder, readyWhere string
 	if descending {
-		readyWhere = "'2014-04-01 00:00:00' AND " + readyTime.Format(time.RFC3339)
+		readyWhere = "'2014-04-01 00:00:00' AND '" + readyTime.Format(time.RFC3339) + "'"
 		readyDatetimeOrder = "DESC"
 	} else {
-		readyWhere = readyTime.Format(time.RFC3339) + " AND '4000-04-01 00:00:00'"
+		readyWhere = "'" + readyTime.Format(time.RFC3339) + "' AND '4000-04-01 00:00:00'"
 		readyDatetimeOrder = "ASC"
 	}
-	return fmt.Sprintf(sortByDate, latitude, longitude, latitude, readyWhere, radius, readyDatetimeOrder, startLimit, endLimit)
+	return fmt.Sprintf(sortByDate, latitude, longitude, latitude, readyWhere, radius, readyDatetimeOrder, limit.Start, limit.End)
 }
 
 func init() {

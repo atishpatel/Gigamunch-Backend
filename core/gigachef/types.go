@@ -24,6 +24,7 @@ type GigachefRating struct {
 func (r *GigachefRating) updateAvg() {
 	if r.NumRatings == 0 {
 		r.AverageRating = 0
+		return
 	}
 	totalStars := r.NumOneStarRatings + r.NumTwoStarRatings + r.NumThreeStarRatings + r.NumFourStarRatings + r.NumFiveStarRatings
 	r.AverageRating = float32(totalStars) / float32(r.NumRatings)

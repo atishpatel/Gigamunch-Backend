@@ -64,6 +64,7 @@ func PostReview(ctx context.Context, user *types.User, reviewID int64, rating in
 		// update chef avg rating
 		errChan <- gigachef.UpdateAvgRating(ctx, review.GigachefID, oldRating, rating)
 	}()
+	// TODO update avg item review
 	// update review
 	if isNewReview {
 		reviewID, err = putIncomplete(ctx, review)

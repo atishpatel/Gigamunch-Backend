@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	errInvalidArgument = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errDatastore       = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
 )
 
 // UpdateAvgRating updates the average rating of a Gigachef.
 // If rating is new, use 0 for oldRating.
 func UpdateAvgRating(ctx context.Context, userID string, oldRating int, newRating int) error {
 	if userID == "" || oldRating < 0 || oldRating > 5 || newRating < 1 || newRating > 5 {
-		return errInvalidArgument.WithError(fmt.Errorf("userID(%s) oldRating(%d) newRating(%d)", userID, oldRating, newRating))
+		return errInvalidParameter.WithError(fmt.Errorf("userID(%s) oldRating(%d) newRating(%d)", userID, oldRating, newRating))
 	}
 	if oldRating == newRating {
 		return nil
