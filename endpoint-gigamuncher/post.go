@@ -8,6 +8,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
@@ -64,8 +65,8 @@ func (req *GetLivePostsReq) Valid() error {
 	if req.StartLimit < 0 || req.EndLimit < 0 {
 		return fmt.Errorf("Limit is out of range.")
 	}
-	if req.StartLimit <= req.EndLimit {
-		return fmt.Errorf("StartLimit cannot be less than or equal to EndLimit.")
+	if req.EndLimit <= req.StartLimit {
+		return fmt.Errorf("EndLimit cannot be less than or equal to StartLimit.")
 	}
 	point := types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
 	if !point.Valid() {
@@ -78,15 +79,16 @@ func (req *GetLivePostsReq) Valid() error {
 //returns: posts, error
 type GetLivePostsResp struct {
 	Posts []Post               `json:"posts"`
-	Error errors.ErrorWithCode `json:"error"`
+	Err   errors.ErrorWithCode `json:"err"`
 }
 
 // GetLivePosts is an endpoint that returns a list of live posts
-func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) (resp *GetLivePostsResp, returnErr error) {
+func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) (*GetLivePostsResp, error) {
+	resp := new(GetLivePostsResp)
 	var err error
 	err = req.Valid()
 	if err != nil {
-		resp.Error = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 		return resp, nil
 	}
 	point := &types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
@@ -95,9 +97,10 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 	// get the live posts
 	postIDs, gigachefIDs, distances, err := post.GetLivePostsIDs(ctx, point, limit, req.Radius, readyDatetime, req.Decending)
 	if err != nil {
-		resp.Error = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+	utils.Debugf(ctx, "postids: ", postIDs)
 	// get posts
 	var posts []post.Post
 	postErrChan := make(chan error, 1)
@@ -116,17 +119,17 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 	}()
 	err = <-chefErrChan
 	if err != nil {
-		resp.Error = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
 	err = <-postErrChan
 	if err != nil {
-		resp.Error = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
 	// TODO: check if user is in delivery range
 	resp.Posts = make([]Post, len(postIDs))
-	for i := range postIDs {
+	for i := range postIDs { // TODO switch to post.Set(post.Post)
 		resp.Posts[i].ID = int(postIDs[i])
 		resp.Posts[i].Distance = distances[i]
 		resp.Posts[i].GigachefRating = ratings[i]

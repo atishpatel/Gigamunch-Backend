@@ -3,7 +3,6 @@ package gigamuncher
 import (
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -14,9 +13,14 @@ import (
 type PostReviewReq struct {
 	GigaToken  string `json:"giga_token"`
 	OrderID    int    `json:"order_id"`
+	ReviewID   int    `json:"review_id"`
 	Rating     int    `json:"rating"`
 	RatingText string `json:"rating_text"`
-	ReviewID   int    `json:"review_id"`
+}
+
+// Gigatoken returns the GigaToken string
+func (req *PostReviewReq) Gigatoken() string {
+	return req.GigaToken
 }
 
 // Valid validates a req
@@ -25,7 +29,7 @@ func (req *PostReviewReq) Valid() error {
 		return fmt.Errorf("Rating is out of range.")
 	}
 	if req.GigaToken == "" {
-		return fmt.Errorf("Gtoken is empty.")
+		return fmt.Errorf("GigaToken is empty.")
 	}
 	if req.OrderID == 0 {
 		return fmt.Errorf("OrderID is 0.")
@@ -37,24 +41,20 @@ func (req *PostReviewReq) Valid() error {
 // returns: review_id, gigatoken, error
 type PostReviewResp struct {
 	ReviewID int                  `json:"review_id"`
-	Error    errors.ErrorWithCode `json:"error"`
+	Err      errors.ErrorWithCode `json:"err"`
 }
 
 // PostReview is an endpoint that creates or updates a review
-func (service *Service) PostReview(ctx context.Context, req *PostReviewReq) (resp *PostReviewResp, respErr error) {
-	err := req.Valid()
+func (service *Service) PostReview(ctx context.Context, req *PostReviewReq) (*PostReviewResp, error) {
+	resp := new(PostReviewResp)
+	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
-		resp.Error = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
-		return resp, nil
-	}
-	user, err := auth.GetUserFromToken(ctx, req.GigaToken)
-	if err != nil {
-		resp.Error = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
 	reviewID, err := review.PostReview(ctx, user, int64(req.ReviewID), req.Rating, req.RatingText, int64(req.OrderID))
 	if err != nil {
-		resp.Error = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
 	resp.ReviewID = int(reviewID)
@@ -90,15 +90,16 @@ func (req *GetReviewsReq) Valid() error {
 // returns: []reviews, error
 type GetReviewsResp struct {
 	Reviews []Review             `json:"reviews"`
-	Error   errors.ErrorWithCode `json:"error"`
+	Err     errors.ErrorWithCode `json:"err"`
 }
 
 // GetReviews gets reviews for a Gigachef. If a ItemID is provided, the reviews
 // are resorted with a formula that weighs review post date and item relevence
-func (service *Service) GetReviews(ctx context.Context, req *GetReviewsReq) (resp *GetReviewsResp, respErr error) {
+func (service *Service) GetReviews(ctx context.Context, req *GetReviewsReq) (*GetReviewsResp, error) {
+	resp := new(GetReviewsResp)
 	err := req.Valid()
 	if err != nil {
-		resp.Error = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 		return resp, nil
 	}
 	limit := &types.Limit{
@@ -107,7 +108,7 @@ func (service *Service) GetReviews(ctx context.Context, req *GetReviewsReq) (res
 	}
 	reviewIDs, reviews, err := review.GetReviews(ctx, req.GigachefID, limit, int64(req.ItemID))
 	if err != nil {
-		resp.Error = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
 	for i := range reviewIDs {
