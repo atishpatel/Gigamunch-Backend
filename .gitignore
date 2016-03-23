@@ -3,4 +3,8 @@ appengine-generated/
 private/
 .tags*
 dump.rdb
-node_modules/
+node_modules
+dist
+bower_components
+.tmp
+.publish
