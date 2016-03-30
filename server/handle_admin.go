@@ -4,12 +4,12 @@ import "net/http"
 
 func middlewareAdmin(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		authToken := CurrentUser(w, req)
-		if authToken == nil {
+		user := CurrentUser(w, req)
+		if user == nil {
 			http.Redirect(w, req, loginURL, http.StatusTemporaryRedirect)
 			return
-		} else if !authToken.User.IsAdmin() {
-			http.Redirect(w, req, chefApplicationURL, http.StatusTemporaryRedirect)
+		} else if !user.IsAdmin() {
+			http.Redirect(w, req, baseGigachefURL, http.StatusTemporaryRedirect)
 			return
 		}
 		h.ServeHTTP(w, req)

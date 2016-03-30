@@ -1,0 +1,13 @@
+{
+  "babelMapsPath":                    "",
+  "babelMapsAddUrl":                  false,
+  "babelSourcePath":                  "server/app/es6",
+  "babelTranspilePath":               "server/app/scripts",
+  "createMap":                        false,
+  "createTargetDirectories":          false,
+  "createTranspiledCode":             true,
+  "disableWhenNoBabelrcFileInPath":   true,
+  "suppressSourcePathMessages":       false,
+  "suppressTranspileOnSaveMessages":  false,
+  "transpileOnSave":                  true
+}

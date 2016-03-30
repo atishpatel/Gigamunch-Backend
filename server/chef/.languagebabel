@@ -1,0 +1,13 @@
+{
+  "babelMapsPath":                    "",
+  "babelMapsAddUrl":                  false,
+  "babelSourcePath":                  "server/chef/app/es6",
+  "babelTranspilePath":               "server/chef/app/js",
+  "createMap":                        false,
+  "createTargetDirectories":          false,
+  "createTranspiledCode":             true,
+  "disableWhenNoBabelrcFileInPath":   true,
+  "suppressSourcePathMessages":       false,
+  "suppressTranspileOnSaveMessages":  false,
+  "transpileOnSave":                  true
+}

@@ -1,0 +1,88 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../../bower_components/google-apis/google-client-loader.html">
+
+<dom-module id="kitchen-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <google-client-loader id="client"
+                          name="gigachefservice"
+                          version="v1"
+                          api-root="[[getAPIRoot()]]"
+                          on-google-api-load="apiLoaded"
+                          on-google-api-error="apiError">
+    </google-client-loader>
+
+    <iron-pages attr-for-selected="data-route" selected="{{route}}">
+      <section data-route=""></section>
+      <section data-route="view"></section>
+      <section data-route="edit"></section>
+    </iron-pages>
+
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'kitchen-view',
+
+      properties: {
+        route: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+          value: ''
+        },
+        itemID: {
+          type: Number,
+          notify: true,
+          observer: 'updateItemID',
+          value: 0
+        }
+      },
+
+      updateItemID: function() {
+        // TODO set url to itemid
+      },
+
+      apiLoaded: function() {
+        console.log('in apiLoaded');
+      },
+
+      apiError: function(e) {
+        console.log('in apiError event:', e);
+      },
+
+      getAPIRoot: function() {
+        console.log('get api root function called');
+        if (window.location.host === 'localhost:8080') {
+          return 'http://localhost:8081/_ah/api';
+        } else if (window.location.host === 'gigamunch-omninexus-dev.appspot.com') {
+          return 'https://endpoint-gigamuncher-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
+        }
+        return 'https://endpoint-gigamuncher-dot-gigamunch-omninexus.appspot.com/_ah/api';
+      }
+
+    });
+
+  })();
+  </script>
+</dom-module>

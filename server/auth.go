@@ -21,13 +21,17 @@ func removeCookies(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{Name: gitkitCookieName, MaxAge: -1, Secure: true})
 }
 
-func saveAuthCookie(w http.ResponseWriter, authToken *types.AuthToken) {
-	http.SetCookie(w, &http.Cookie{
+func saveAuthCookie(w http.ResponseWriter, authToken string) {
+	cookie := &http.Cookie{
 		Name:   sessionTokenCookieName,
-		Value:  authToken.JWTString,
-		MaxAge: int(authToken.Expire.Sub(time.Now()).Seconds()),
+		Value:  authToken,
+		MaxAge: int(auth.GetExpTime().Sub(time.Now()).Seconds()),
 		Secure: true,
-	})
+	}
+	if appengine.IsDevAppServer() {
+		cookie.Secure = false
+	}
+	http.SetCookie(w, cookie)
 }
 
 // CurrentUser extracts the user information stored in current session.
@@ -37,17 +41,21 @@ func saveAuthCookie(w http.ResponseWriter, authToken *types.AuthToken) {
 //
 // If any error happens, nil is returned.
 // TODO: When to refresh?
-func CurrentUser(w http.ResponseWriter, req *http.Request) *types.AuthToken {
+func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 	ctx := appengine.NewContext(req)
 	var err error
 	sessionTokenCookie, err := req.Cookie(sessionTokenCookieName)
 	// doesn't have a session cookie
 	if err == http.ErrNoCookie {
-		gTokenCookie, err := req.Cookie(gitkitCookieName)
+		var gTokenCookie *http.Cookie
+		gTokenCookie, err = req.Cookie(gitkitCookieName)
+
 		if err != nil || gTokenCookie.Value == "" {
 			return nil
 		}
-		user, authToken, err := auth.GetSessionWithGToken(ctx, gTokenCookie.Value)
+		var user *types.User
+		var authToken string
+		user, authToken, err = auth.GetSessionWithGToken(ctx, gTokenCookie.Value)
 		if err != nil {
 			errWithCode := errors.GetErrorWithCode(err)
 			if errWithCode.Code == errors.CodeSignOut {
@@ -59,16 +67,13 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.AuthToken {
 		}
 		saveAuthCookie(w, authToken)
 		http.SetCookie(w, &http.Cookie{Name: gitkitCookieName, MaxAge: -1})
-		return authToken
+		return user
 	} else if err != nil {
 		utils.Errorf(ctx, "Error getting session cookie: %+v", err)
 		return nil
 	}
 	// has session cookie
-	authToken := &types.AuthToken{
-		JWTString: sessionTokenCookie.Value,
-	}
-	authToken, err = auth.GetUserFromToken(ctx, sessionTokenCookie.Value)
+	user, err := auth.GetUserFromToken(ctx, sessionTokenCookie.Value)
 	if err != nil {
 		errWithCode, ok := err.(errors.ErrorWithCode)
 		if ok && (errWithCode.Code == errors.CodeSignOut) {
@@ -78,6 +83,6 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.AuthToken {
 		}
 		return nil
 	}
-	saveAuthCookie(w, authToken)
-	return authToken
+	// saveAuthCookie(w, authToken)
+	return user
 }

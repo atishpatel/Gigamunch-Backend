@@ -1,8 +1,8 @@
 package server
 
 const (
-	baseChefURL  = "/chef"
-	baseAdminURL = "/admin"
+	baseGigachefURL = "/gigachef"
+	baseAdminURL    = "/admin"
 	/*****************************************************************************
 	*	URLs
 	*****************************************************************************/
@@ -17,11 +17,6 @@ const (
 	signOutURL = "/signout"
 
 	errorURL = "/error"
-
-	// chef stuff
-	chefHomeURL = baseChefURL
-
-	chefApplicationURL = "/chef/apply"
 
 	// admin stuff
 	adminHomeURL = baseAdminURL

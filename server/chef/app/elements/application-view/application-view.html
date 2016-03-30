@@ -1,0 +1,145 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+
+
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+
+<link rel="import" href="../../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import" href="../../bower_components/gold-phone-input/gold-phone-input.html">
+<link rel="import" href="../../bower_components/gold-zip-input/gold-zip-input.html">
+<dom-module id="application-view">
+  <template>
+    <style include="iron-flex iron-flex-alignment shared-styles">
+      :host {
+        display: block;
+      }
+
+      .dropdown-width {
+        width: 100px;
+      }
+
+      .dropdown-states  {
+        padding-right: 10px;
+      }
+    </style>
+
+    <!-- TODO: find and replace: name="\w+"  -->
+    <!-- <template is="dom-if" if="[[hasSubmited]]" restamp="true"></template> -->
+    <form is="iron-form" id="form" class="layout vertical" method="post" action="#">
+      <paper-input name="name" label="Name" value="{{application.name}}" required auto-validate></paper-input>
+      <gold-email-input name="email" label="Email" value="{{application.email}}" required auto-validate></gold-email-input>
+      <gold-phone-input name="phone" label="Phone Number" value="{{application.phone}}" required auto-validate></gold-phone-input>
+      <paper-input name="apt" label="Apt #" value="{{application.apt}}" auto-validate></paper-input>
+      <paper-input name="street" label="Street" value="{{application.street}}" required auto-validate></paper-input>
+      <paper-input name="city" label="City" value="{{application.city}}" required auto-validate></paper-input>
+      <div class="layout horizontal">
+        <paper-dropdown-menu class="dropdown-width dropdown-states" label="State">
+          <paper-listbox class="dropdown-content dropdown-width" attr-for-selected="value" selected="{{application.state}}">
+            <template is="dom-repeat" items="{{states}}" as="state">
+              <paper-item id="vendorName" value="[[state]]">[[state]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <gold-zip-input class="flex" name="zip" label="Zip" value="{{application.zip}}" required auto-validate></gold-zip-input>
+      </div>
+      <paper-checkbox name="read" required>I agree to the Terms &amp; Agreement and Privacy Policy</paper-checkbox>
+      <br>
+      <paper-button id="submitButton" class="" raised disabled>
+        <paper-spinner id="spinner" hidden></paper-spinner>Submit
+      </paper-button>
+    </form>
+
+    <button on-tap="print">Print</button>
+  </template>
+  <script>
+    (function() {
+      'use strict';
+      Polymer({
+        is: 'application-view',
+        properties: {
+          application: {
+            type: Object,
+            notify: true,
+            reflectToAttribute: true,
+            value: {
+              zip: ""
+            }
+          },
+          user: {
+            type: Object,
+            notify: true,
+            observer: 'userUpdated'
+          },
+          states: {
+            type: Array,
+            notify: true,
+            value: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI',
+              'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS',
+              'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR',
+              'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+            ]
+          }
+        },
+
+        listeners: {
+          'form.change': '_updateSubmitButtonState', // on form change
+          'form.iron-form-presubmit': 'endpointSubmit',
+          'submitButton.tap': '_submit',
+        },
+
+        endpointSubmit: function(event) {
+          console.log(event);
+          event.preventDefault();
+          // fire custom event to call endpoint?
+          this.fire('submitApplication', this.application);
+        },
+
+        _submit: function() {
+          this.$.form.submit();
+        },
+
+        _updateSubmitButtonState: function() {
+          var form = this.$.form;
+          var submitButton = this.$.submitButton;
+          // Validate the entire form to see if we should enable the `Submit` button.
+          submitButton.disabled = !form.validate();
+        },
+
+        userUpdated: function() {
+          // set default name for application
+          if (this.application === undefined) {
+            this.application = {
+              name: this.user.name
+            };
+          } else if (this.application.name === undefined) {
+            this.application.name = this.user.name;
+          }
+        },
+
+        print: function() {
+          console.log('user.name', this.user.name);
+          console.log('application', this.application);
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

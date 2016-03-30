@@ -1,44 +1,43 @@
 package server
 
 import (
-	// golang
-
 	"io/ioutil"
 	"net/http"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
-
-	// appengine
+	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/alice"
 	"google.golang.org/appengine"
 
-	"github.com/justinas/alice"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 func init() {
-	http.HandleFunc(baseLoginURL, handleLogin)
-	http.HandleFunc(signOutURL, handleSignout)
+	r := httprouter.New()
 
 	// chef stuff
-	http.HandleFunc(chefApplicationURL, handleChefApplication)
-	// verfied chef stuff
-	verifiedChefChain := alice.New(middlewareVerifiedChef)
-	http.Handle(chefHomeURL, verifiedChefChain.ThenFunc(handleChefHome))
-	// admin stuff
-	adminChain := alice.New(middlewareAdmin)
-	http.Handle(adminHomeURL, adminChain.ThenFunc(handleAdminHome))
+	loggedInChain := alice.New(middlewareLoggedIn)
+	r.Handler("GET", baseGigachefURL+"/*path", loggedInChain.ThenFunc(handleGigachefApp))
+
+	r.GET(baseLoginURL, handleLogin)
+	r.GET(signOutURL, handleSignout)
+
+	// // admin stuff
+	// adminChain := alice.New(middlewareAdmin)
+	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
+	r.NotFound = http.HandlerFunc(handle404)
+	http.Handle("/", r)
 }
 
-func handleLogin(w http.ResponseWriter, req *http.Request) {
-	authToken := CurrentUser(w, req)
-	if authToken != nil {
-		utils.Debugf(appengine.NewContext(req), "User: %+v", authToken.User)
-		if authToken.User.IsVerifiedChef() {
-			http.Redirect(w, req, chefHomeURL, http.StatusTemporaryRedirect)
-		} else if authToken.User.IsAdmin() {
-			http.Redirect(w, req, adminHomeURL, http.StatusTemporaryRedirect)
-		} else {
-			http.Redirect(w, req, chefApplicationURL, http.StatusTemporaryRedirect)
-		}
+func handle404(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("GIGA 404 page. :()"))
+}
+
+func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	utils.Debugf(ctx, "in login")
+	user := CurrentUser(w, req)
+	if user != nil {
+		http.Redirect(w, req, baseGigachefURL, http.StatusTemporaryRedirect)
 	}
 	removeCookies(w)
 	page, err := ioutil.ReadFile("app/login.html")
@@ -49,7 +48,7 @@ func handleLogin(w http.ResponseWriter, req *http.Request) {
 	w.Write(page)
 }
 
-func handleSignout(w http.ResponseWriter, req *http.Request) {
+func handleSignout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	removeCookies(w)
 	http.Redirect(w, req, homeURL, http.StatusTemporaryRedirect)
 }

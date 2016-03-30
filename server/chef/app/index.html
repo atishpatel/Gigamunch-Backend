@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <meta name="generator" content="Polymer Starter Kit"> -->
+    <title>Gigachef</title>
+
+    <!-- Chrome for Android theme color -->
+    <meta name="theme-color" content="#FF5722">
+
+    <!-- Web Application Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Tile color for Win8 -->
+    <meta name="msapplication-TileColor" content="#FF5722">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="GIGAMUNCH">
+    <!-- TODO figure out meta tags -->
+    <link rel="icon" sizes="192x192" href="/gigachef/images/touch/chrome-touch-icon-192x192.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Gigamunch">
+    <link rel="apple-touch-icon" href="/gigachef/images/touch/apple-touch-icon.png">
+
+    <!-- Tile icon for Win8 (144x144) -->
+    <meta name="msapplication-TileImage" content="/gigachef/images/touch/ms-touch-icon-144x144-precomposed.png">
+
+    <link rel="stylesheet" href="/common/common.css">
+    <link rel="stylesheet" href="/gigachef/styles/main.css">
+    <!-- build:css styles/main.css -->
+    <!-- endbuild-->
+
+    <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+    <script src="/gigachef/bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <!-- endbuild -->
+
+    <!-- Because this project uses vulcanize this should be your only html import
+         in this file. All other imports should go in elements.html -->
+    <link rel="import" href="/gigachef/elements/elements.html">
+
+    <!-- For shared styles, shared-styles.html import in elements.html -->
+    <style is="custom-style" include="shared-styles"></style>
+  </head>
+
+  <body unresolved>
+    <!-- build:remove -->
+    <span id="browser-sync-binding"></span>
+    <!-- endbuild -->
+
+    <template is="dom-bind" id="app">
+
+      <paper-drawer-panel id="paperDrawerPanel" responsive-width="840px">
+        <!-- Drawer Scroll Header Panel -->
+        <paper-scroll-header-panel drawer fixed>
+
+          <!-- Drawer Toolbar -->
+          <paper-toolbar id="drawerToolbar">
+            <span class="menu-name">{{user.name}}</span>
+          </paper-toolbar>
+
+          <!-- Drawer Content -->
+          <paper-menu class="app-menu" attr-for-selected="data-route" selected="[[route]]">
+            <a hidden=[[user.isVerifiedChef]] data-route="application" href="{{baseURL}}/application">
+              <iron-icon icon="home"></iron-icon>
+              <span>Application</span>
+            </a>
+
+            <a data-route="orders" href="{{baseURL}}/orders">
+              <iron-icon icon="home"></iron-icon>
+              <span>Orders</span>
+            </a>
+
+            <a data-route="kitchen" href="{{baseURL}}/kitchen">
+              <iron-icon icon="home"></iron-icon>
+              <span>Kitchen</span>
+            </a>
+
+            <!-- <a data-route="profile"
+                  href="{{baseURL}}/profile">
+              <iron-icon icon="home"></iron-icon>
+              <span>Profile/Reviews</span>
+            </a>
+
+            <a data-route="history"
+                  href="{{baseURL}}/orders/history">
+              <iron-icon icon="home"></iron-icon>
+              <span>Order History</span>
+            </a>
+
+            <a data-route="settings"
+                  href="{{baseURL}}/settings">
+              <iron-icon icon="home"></iron-icon>
+              <span>Settings</span>
+            </a>
+
+            <a data-route="feedback"
+                  href="{{baseURL}}/feedback">
+              <iron-icon icon="info"></iron-icon>
+              <span>Help &amp; Feedback</span>
+            </a>
+
+            <a data-route="about"
+                  href="{{baseURL}}/about">
+              <iron-icon icon="info"></iron-icon>
+              <span>About</span> -->
+            </a>
+          </paper-menu>
+        </paper-scroll-header-panel>
+
+        <!-- Main Area -->
+        <paper-scroll-header-panel main id="headerPanelMain" condenses keep-condensed-header>
+          <!-- Main Toolbar -->
+          <paper-toolbar id="mainToolbar" class="tall">
+            <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
+            <span class="space"></span>
+            <!-- Application name -->
+            <div class="middle middle-container">
+              <div class="app-name">{{title}}</div>
+            </div>
+            <div class="bottom bottom-container">
+              <div class="bottom-title">{{subtitle}}</div>
+            </div>
+          </paper-toolbar>
+
+          <!-- Main Content -->
+          <main class="content">
+            <iron-pages attr-for-selected="data-route" selected="{{route}}">
+              <!-- Application -->
+              <section data-route="application">
+                <application-view class="focus-target" user="[[user]]" application="{{application}}">
+                </application-view>
+              </section>
+              <!-- Orders -->
+              <section data-route="orders">
+                <span class="focus-target">tmp </span>
+                <orders-view class="focus-target"
+                  user="[[user]]">
+                </orders-view>
+              </section>
+
+              <!-- Kitchen -->
+              <section data-route="kitchen">
+                <kitchen-view class="focus-target"
+                  user="[[user]]">
+                </kitchen-view>
+              </section>
+
+              <section data-route="users">
+                <paper-material elevation="1">
+                  <h1 class="page-title focus-target" tabindex="-1">Users</h1>
+                  <p>This is the users section</p>
+                  <a href$="{{baseURL}}/users/Addy">Addy</a>
+                  <br>
+                  <a href$="{{baseURL}}/users/Rob">Rob</a>
+                  <br>
+                  <a href$="{{baseURL}}/users/Chuck">Chuck</a>
+                  <br>
+                  <a href$="{{baseURL}}/users/Sam">Sam</a>
+                </paper-material>
+              </section>
+
+              <section data-route="user-info">
+                <paper-material elevation="1">
+                  <h1 class="page-title focus-target" tabindex="-1">User: {{params.name}}</h1>
+                  <div>This is {{params.name}}'s section</div>
+                </paper-material>
+              </section>
+
+              <section data-route="about">
+                <paper-material elevation="1">
+                  <h1 class="page-title focus-target" tabindex="-1">About</h1>
+                  <p>Mission Statement</p>
+                </paper-material>
+              </section>
+            </iron-pages>
+          </main>
+          <!-- Footer -->
+          <footer>
+            <div class="container">
+              <div class="logo">
+                Gigamunch
+              </div>
+              <section>
+                <div class="title">Stuff</div>
+                <ul>
+                  <li><a href="/">Home</a></li>
+                  <li><a href="/gigachef">Gigachef</a></li>
+                </ul>
+              </section>
+              <section>
+                <div class="title">Legal</div>
+                <ul>
+                  <li><a href="/privacy">Privacy</a></li>
+                  <li><a href="/terms">Terms and Agreements</a></li>
+                </ul>
+              </section>
+            </div>
+          </footer>
+        </paper-scroll-header-panel>
+      </paper-drawer-panel>
+
+      <paper-toast id="toast" duration="8000">
+        <span class="toast-hide-button" role="button" tabindex="0" onclick="app.$.toast.hide()">OK</span>
+      </paper-toast>
+
+    </template>
+
+    <!-- <script src="/gigachef/js/endpoint.js"></script> -->
+    <!-- build:js js/app.js -->
+    <script src="/gigachef/js/user.js"></script>
+    <script src="/gigachef/js/app.js"></script>
+    <!-- endbuild-->
+    <!-- <script src="https://apis.google.com/js/client.js?onload=initEndpoints"></script> -->
+  </body>
+
+</html>
