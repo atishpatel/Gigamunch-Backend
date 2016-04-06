@@ -11,6 +11,7 @@ const (
 	kindChefApplication = "ChefApplication"
 )
 
+// ChefApplication is the chef application to become a verfified Gigachef
 type ChefApplication struct {
 	UserID                 string        `json:"user_id" datastore:",noindex"`
 	CreatedDateTime        time.Time     `json:"created_datetime" datastore:",noindex"`

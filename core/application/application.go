@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	mapsClient  *maps.Client
-	mapsCompMap map[maps.Component]string
+	mapsClient *maps.Client
 )
 
+// GetApplications gets all applications
 func GetApplications(ctx context.Context, user *types.User) ([]*ChefApplication, error) {
 	if !user.IsAdmin() {
 		utils.Errorf(ctx, "user(%v) attemted to do an admin task.", *user)
@@ -33,12 +33,12 @@ func GetApplications(ctx context.Context, user *types.User) ([]*ChefApplication,
 // GetApplication gets a chef application
 func GetApplication(ctx context.Context, user *types.User) (*ChefApplication, error) {
 	var err error
-	chefApplication := &ChefApplication{}
+	chefApplication := new(ChefApplication)
 	err = get(ctx, user.ID, chefApplication)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
-			chefApplication := new(ChefApplication)
 			chefApplication.Name = user.Name
+			chefApplication.Email = user.Email
 			return chefApplication, nil
 		}
 		return nil, err
@@ -52,11 +52,11 @@ func SubmitApplication(ctx context.Context, user *types.User, chefApplication *C
 	var err error
 	chefApplicationEntity := &ChefApplication{}
 	err = get(ctx, user.ID, chefApplicationEntity)
-	if err != nil && err.Error() != datastore.ErrNoSuchEntity.Error() {
+	if err != nil && err != datastore.ErrNoSuchEntity {
 		return nil, err
 	}
 
-	if err != nil && err.Error() == datastore.ErrNoSuchEntity.Error() {
+	if err != nil && err == datastore.ErrNoSuchEntity {
 		chefApplication.ApplicationProgress = 1
 		if chefApplication.Address.String() != chefApplicationEntity.Address.String() {
 			err = getGeopointFromAddress(ctx, &chefApplication.Address)
@@ -122,6 +122,8 @@ func getGeopointFromAddress(ctx context.Context, address *types.Address) error {
 		}
 		return returnErr
 	}
+	mapsCompMap := make(map[maps.Component]string, 1)
+	mapsCompMap[maps.ComponentCountry] = "US"
 	mapsReq := &maps.GeocodingRequest{
 		Address:    address.String(),
 		Components: mapsCompMap,
@@ -157,9 +159,4 @@ func getMapsClient(ctx context.Context) {
 			utils.Errorf(ctx, "failed to get maps client: %+v", err)
 		}
 	}
-}
-
-func init() {
-	mapsCompMap = make(map[maps.Component]string, 1)
-	mapsCompMap[maps.ComponentCountry] = "US"
 }
