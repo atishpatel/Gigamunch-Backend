@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// SubmitApplicationReq is the input request needed for GetItem.
+// SubmitApplicationReq is the input request needed for SubmitApplication.
 type SubmitApplicationReq struct {
 	GigaToken              string        `json:"gigatoken"`
 	Name                   string        `json:"name"`
@@ -41,7 +41,7 @@ func (req *SubmitApplicationReq) Valid() error {
 	return nil
 }
 
-// SubmitApplicationResp is the output response for GetItem.
+// SubmitApplicationResp is the output response for SubmitApplication.
 type SubmitApplicationResp struct {
 	ApplicationProgress int                  `json:"application_progress"`
 	Err                 errors.ErrorWithCode `json:"err"`
@@ -71,5 +71,47 @@ func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplic
 		return resp, nil
 	}
 	resp.ApplicationProgress = chefApplication.ApplicationProgress
+	return resp, nil
+}
+
+// GetApplicationReq is the input request needed for GetApplication.
+type GetApplicationReq struct {
+	GigaToken string `json:"gigatoken"`
+}
+
+// Gigatoken returns the GigaToken string
+func (req *GetApplicationReq) Gigatoken() string {
+	return req.GigaToken
+}
+
+// Valid validates a req
+func (req *GetApplicationReq) Valid() error {
+	if req.GigaToken == "" {
+		return fmt.Errorf("GigaToken is empty.")
+	}
+	return nil
+}
+
+// GetApplicationResp is the output response for GetApplication.
+type GetApplicationResp struct {
+	Application application.ChefApplication `json:"application"`
+	Err         errors.ErrorWithCode        `json:"err"`
+}
+
+// GetApplication is an endpoint that gets a chef application.
+func (service *Service) GetApplication(ctx context.Context, req *GetApplicationReq) (*GetApplicationResp, error) {
+	resp := new(GetApplicationResp)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	chefApplication, err := application.GetApplication(ctx, user)
+	if err != nil {
+		utils.Debugf(ctx, "err: %+v", err)
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	resp.Application = *chefApplication
 	return resp, nil
 }
