@@ -2,6 +2,7 @@
 appengine-generated/
 private/
 .tags*
+tags
 dump.rdb
 node_modules
 dist
