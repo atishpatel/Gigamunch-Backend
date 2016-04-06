@@ -20,9 +20,9 @@ type Post struct {
 	ServingsOffered int    `json:"servings_offered" endpoints:"req"`
 }
 
-// Set takes a item form the item package and converts it to a endpoint item
+// Set takes a post.Post and converts it to a endpoint post
 func (p *Post) Set(id int, post *post.Post) {
-	p.ID = int(id)
+	p.ID = id
 	p.ItemID = int(post.ItemID)
 	p.Title = post.Title
 	p.Subtitle = post.Subtitle
@@ -36,7 +36,7 @@ func (p *Post) Set(id int, post *post.Post) {
 	p.ServingsOffered = post.ServingsOffered
 }
 
-// Get creates a item.Item version of the endpoint item
+// Get creates a post.Post version of the endpoint post
 func (p *Post) Get() *post.Post {
 	post := new(post.Post)
 	post.ItemID = int64(p.ItemID)
