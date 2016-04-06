@@ -23,7 +23,7 @@ type Item struct {
 
 // Set takes a item form the item package and converts it to a endpoint item
 func (i *Item) Set(id int, item *item.Item) {
-	i.ID = int(id)
+	i.ID = id
 	i.Title = item.Title
 	i.Subtitle = item.Subtitle
 	i.Description = item.Description
