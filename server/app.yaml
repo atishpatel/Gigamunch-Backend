@@ -1,5 +1,6 @@
 application: gigamunch-omninexus-dev
-module: default
+# module: default
+module: server
 version: 1
 runtime: go
 api_version: go1
@@ -20,9 +21,9 @@ handlers:
   static_files: app/index.html
   upload: app/index.html
 
-- url: /gigachef/(.*).(html|js|json|css)
+- url: /gigachef/(.*).(html|js|json|css|map)
   static_files: chef/app/\1.\2
-  upload: (.*)\.(html|js|json|css)
+  upload: (.*)\.(html|js|json|css|map)
   secure: always
 
 # - url: /gigachef.*
