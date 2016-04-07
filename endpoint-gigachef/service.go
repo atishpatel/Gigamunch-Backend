@@ -43,6 +43,7 @@ func init() {
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
 	// Register course stuff
+	register("GetApplication", "getApplication", "POST", "gigachefservice/getApplication", "Get chef application.")
 	register("SubmitApplication", "submitApplication", "POST", "gigachefservice/submitApplication", "Apply to be a chef.")
 	register("SaveItem", "saveItem", "POST", "gigachefservice/saveItem", "Save a item.")
 	register("GetItem", "getItem", "POST", "gigachefservice/getItem", "Get a item.")
