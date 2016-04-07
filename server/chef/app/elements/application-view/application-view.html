@@ -1,11 +1,16 @@
 <!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+  `application-view` is the view chefs go to to submit and view their chef application.
+  ### Variables:
+    - user: The user variable is used for it's token property for every service call.
+    - service: The service variable is used to get and submit application.
+               The following functions are required for service.
+                  getApplication(callback)
+                  submitApplication(application, callback)
+  ### Events:
+    - redirect: redirect event is fired when the page needs to be redirected.
+  ### Public methods:
+    - select(): select should be called when the view comes into focus.
+      This functions does stuff like fetch the application.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -41,23 +46,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <!-- TODO: add progress bar -->
-    <!-- <template is="dom-if" if="[[hasSubmited]]" restamp="true"></template> -->
-    <form is="iron-form" id="form" class="layout vertical" method="post" action="#" on-change="_updateSubmitButtonState" on-iron-form-presubmit="submitApplication">
-      <paper-input label="Name" value="{{application.name}}" required auto-validate></paper-input>
-      <gold-email-input label="Email" value="{{application.email}}" required auto-validate></gold-email-input>
-      <gold-phone-input label="Phone Number" value="{{application.phone_number}}" required auto-validate></gold-phone-input>
-      <paper-input label="Apt #" value="{{application.address.apt}}" auto-validate></paper-input>
-      <paper-input label="Street" value="{{application.address.street}}" required auto-validate></paper-input>
-      <paper-input label="City" value="{{application.address.city}}" required auto-validate></paper-input>
+    <form is="iron-form" id="form" class="layout vertical" method="post" action="#" on-change="_updateSubmitButtonState" on-iron-form-presubmit="_submitApplication">
+      <paper-input label="Name" value="{{_application.name}}" required auto-validate></paper-input>
+      <gold-email-input label="Email" value="{{_application.email}}" required auto-validate></gold-email-input>
+      <gold-phone-input label="Phone Number" value="{{_application.phone_number}}" required auto-validate></gold-phone-input>
+      <paper-input label="Apt #" value="{{_application.address.apt}}" auto-validate></paper-input>
+      <paper-input label="Street" value="{{_application.address.street}}" required auto-validate></paper-input>
+      <paper-input label="City" value="{{_application.address.city}}" required auto-validate></paper-input>
+      <!-- group states and zip -->
       <div class="layout horizontal">
         <paper-dropdown-menu class="dropdown-width dropdown-states" label="State">
-          <paper-listbox class="dropdown-content dropdown-width" attr-for-selected="value" selected="{{application.address.state}}">
-            <template is="dom-repeat" items="{{states}}" as="state">
+          <paper-listbox class="dropdown-content dropdown-width" attr-for-selected="value" selected="{{_application.address.state}}">
+            <!-- for each state in states -->
+            <template is="dom-repeat" items="{{_states}}" as="state">
               <paper-item id="vendorName" value="[[state]]">[[state]]</paper-item>
             </template>
           </paper-listbox>
         </paper-dropdown-menu>
-        <gold-zip-input class="flex" label="Zip" value="{{application.address.zip}}" required auto-validate></gold-zip-input>
+        <gold-zip-input class="flex" label="Zip" value="{{_application.address.zip}}" required auto-validate></gold-zip-input>
       </div>
       <paper-checkbox required>I agree to the Terms &amp; Agreement and Privacy Policy</paper-checkbox>
       <br>
@@ -72,10 +78,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'application-view',
         properties: {
-          application: {
+          _application: {
             type: Object,
             notify: true,
-            reflectToAttribute: true,
             value: {
               address: {
                 zip: ""
@@ -84,14 +89,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           user: {
             type: Object,
-            notify: true,
-            observer: 'userUpdated'
+            notify: true
           },
           service: {
             type: Object,
             notify: true
           },
-          states: {
+          _states: {
             type: Array,
             notify: true,
             value: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI',
@@ -102,34 +106,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
         select: function() {
-          this.getApplication();
+          this._getApplication();
         },
-        getApplication: function() {
+        _getApplication: function() {
           if (this.service === undefined) {
-            this.async(this.getApplication, 200);
+            this.async(this._getApplication, 200);
             return;
           }
           this.service.getApplication( function(application, err) {
-              console.log('in application-view callback', application, err);
               // TODO: handle err
 
-              this.application = application;
+              this._application = application;
             }.bind(this)
           );
         },
-        submitApplication: function(event) {
+        _submitApplication: function(event) {
           if (event !== undefined || event !== null ){
             event.preventDefault();
           }
           if (this.service === undefined) {
-            this.async(this.submitApplication, 200);
+            this.async(this._submitApplication, 200);
             return;
           }
 
-
-          this.service.submitApplication(this.application, function(application, err) {
-              // TODO add function
-              this.application = application;
+          this.service.submitApplication(this._application, function(application, err) {
+              // TODO: handle err
+              this._application = application;
             }.bind(this)
           );
 
@@ -137,23 +139,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         _submit: function() {
           this.$.form.submit();
         },
-
         _updateSubmitButtonState: function() {
           var form = this.$.form;
           var submitButton = this.$.submitButton;
           // Validate the entire form to see if we should enable the `Submit` button.
           submitButton.disabled = !form.validate();
-        },
-
-        userUpdated: function() {
-          // set default name for application
-          if (this.application === undefined) {
-            this.application = {
-              name: this.user.name
-            };
-          } else if (this.application.name === undefined) {
-            this.application.name = this.user.name;
-          }
         }
       });
     })();
