@@ -1,0 +1,125 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/google-apis/google-client-loader.html">
+
+<dom-module id="gigachef-service">
+  <template>
+    <google-client-loader id="gigachefservice"
+                          name="gigachefservice"
+                          version="v1"
+                          api-root="[[_getAPIRoot()]]"
+                          on-google-api-load="_serviceLoaded"
+                          ></google-client-loader>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'gigachef-service',
+
+      properties: {
+        user: {
+          type: Object,
+          notify: true
+        },
+        loaded: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true,
+          value: false
+        },
+        callQueue: {
+          type: Array,
+          value: function() { return new Array() }
+        }
+      },
+      // getApplication gets the application for a user
+      // callback paramerter should be function(application, error)
+      getApplication: function(callback) {
+        // if api is not loaded, add to callQueue
+        if (!this.loaded) {
+          this.callQueue.push(function() {
+            this.getApplication(callback);
+          }.bind(this));
+          return;
+        }
+
+        var request = {
+          gigatoken: this._getGigatoken(),
+        };
+        this
+          .service
+          .getApplication(request)
+          .execute(
+            function(resp) {
+              console.log(resp);
+              callback(resp.application, resp.err);
+            }
+          );
+      },
+      submitApplication: function(application, callback) {
+        // if api is not loaded, add to callQueue
+        if (!this.loaded) {
+          this.callQueue.push(function() {
+            this.submitApplication(application, callback);
+          }.bind(this));
+          return;
+        }
+        application.toString = function() {
+          return JSON.stringify(this);
+        }
+
+        var request = {
+          gigatoken: this._getGigatoken(),
+          application: application,
+        };
+
+        this
+          .service
+          .submitApplication(request)
+          .execute(
+            function(resp) {
+              console.log(resp);
+              callback(resp.application, resp.err);
+            }
+          );
+      },
+      _getGigatoken: function() {
+        return this.user.token;
+      },
+      _serviceLoaded: function() {
+        this.service = this.$.gigachefservice.api;
+        this.loaded = true;
+        // remove functions from callQueue after calling them.
+        if (this.callQueue !== undefined || this.callQueue !== null) {
+          for (var i in this.callQueue) {
+            this.callQueue[i]();
+            delete(this.callQueue[i]);
+          }
+        }
+      },
+
+      _getAPIRoot: function() {
+        var domain = window.location.host;
+        if (domain.substring(0, 9) === 'localhost') {
+          return 'http://localhost:8080/_ah/api';
+        } else if (domain === 'gigamunch-omninexus-dev.appspot.com') {
+          return 'https://endpoint-gigachef-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
+        }
+        return 'https://endpoint-gigachef-dot-gigamunch-omninexus.appspot.com/_ah/api';
+      }
+
+    });
+  })();
+  </script>
+</dom-module>

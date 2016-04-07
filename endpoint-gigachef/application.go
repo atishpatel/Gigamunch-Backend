@@ -5,21 +5,14 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/application"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
 // SubmitApplicationReq is the input request needed for SubmitApplication.
 type SubmitApplicationReq struct {
-	GigaToken              string        `json:"gigatoken"`
-	Name                   string        `json:"name"`
-	Email                  string        `json:"email"`
-	PhoneNumber            string        `json:"phone_number"`
-	Address                types.Address `json:"address"`
-	AttendedCulinarySchool bool          `json:"attended_culinary_school"`
-	WorkedAtResturant      bool          `json:"worked_at_resturant"`
-	PostFrequency          int           `json:"post_frequency"`
+	GigaToken   string                      `json:"gigatoken"`
+	Application application.ChefApplication `json:"application"`
 }
 
 // Gigatoken returns the GigaToken string
@@ -32,19 +25,16 @@ func (req *SubmitApplicationReq) Valid() error {
 	if req.GigaToken == "" {
 		return fmt.Errorf("GigaToken is empty.")
 	}
-	if req.Email == "" {
-		return fmt.Errorf("Email is incorrect.")
-	}
-	if len(req.PhoneNumber) < 7 {
-		return fmt.Errorf("Phone number is invalid.")
+	if req.Application.Email == "" {
+		return fmt.Errorf("Application email is empty")
 	}
 	return nil
 }
 
 // SubmitApplicationResp is the output response for SubmitApplication.
 type SubmitApplicationResp struct {
-	ApplicationProgress int                  `json:"application_progress"`
-	Err                 errors.ErrorWithCode `json:"err"`
+	Application application.ChefApplication `json:"application"`
+	Err         errors.ErrorWithCode        `json:"err"`
 }
 
 // SubmitApplication is an endpoint that submits or updates a chef application.
@@ -55,22 +45,13 @@ func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplic
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	chefApplication := &application.ChefApplication{
-		Name:                   req.Name,
-		Email:                  req.Email,
-		PhoneNumber:            req.PhoneNumber,
-		AttendedCulinarySchool: req.AttendedCulinarySchool,
-		Address:                req.Address,
-		WorkedAtResturant:      req.WorkedAtResturant,
-		PostFrequency:          req.PostFrequency,
-	}
-	chefApplication, err = application.SubmitApplication(ctx, user, chefApplication)
+	chefApplication, err := application.SubmitApplication(ctx, user, &req.Application)
 	if err != nil {
 		utils.Debugf(ctx, "err: %+v", err)
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.ApplicationProgress = chefApplication.ApplicationProgress
+	resp.Application = *chefApplication
 	return resp, nil
 }
 

@@ -12,7 +12,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 
-<link rel="import" href="../../bower_components/google-apis/google-client-loader.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
 
 <dom-module id="kitchen-view">
   <template>
@@ -22,13 +24,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <google-client-loader id="client"
-                          name="gigachefservice"
-                          version="v1"
-                          api-root="[[getAPIRoot()]]"
-                          on-google-api-load="apiLoaded"
-                          on-google-api-error="apiError">
-    </google-client-loader>
+    <paper-card heading="Card Title">
+      <div class="card-content">Some content</div>
+      <div class="card-actions">
+        <paper-button>Some action</paper-button>
+        <paper-button>Some action2</paper-button>
+      </div>
+    </paper-card>
 
     <iron-pages attr-for-selected="data-route" selected="{{route}}">
       <section data-route=""></section>
@@ -61,24 +63,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       updateItemID: function() {
         // TODO set url to itemid
-      },
-
-      apiLoaded: function() {
-        console.log('in apiLoaded');
-      },
-
-      apiError: function(e) {
-        console.log('in apiError event:', e);
-      },
-
-      getAPIRoot: function() {
-        console.log('get api root function called');
-        if (window.location.host === 'localhost:8080') {
-          return 'http://localhost:8081/_ah/api';
-        } else if (window.location.host === 'gigamunch-omninexus-dev.appspot.com') {
-          return 'https://endpoint-gigamuncher-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
-        }
-        return 'https://endpoint-gigamuncher-dot-gigamunch-omninexus.appspot.com/_ah/api';
       }
 
     });

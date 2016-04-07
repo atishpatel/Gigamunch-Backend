@@ -11,11 +11,9 @@
   // Gets user
   app.user = new User();
   // Set up toolbar
-  app.toolbar = {};
-  //   title: 'Gigamunch',
-  //   subtitle: 'Light your inner cook!',
-  //   icon: 'menu',
-  // };
+  app.title = 'Gigamunch';
+  app.subtitle = 'Light your inner cook!';
+  app.icon = 'menu';
   // The subpath is for the view, edit, etc subpaths
   app.subpath = '';
 
@@ -39,8 +37,9 @@
     // console.log('Our app is ready to rock!');
   });
 
+  // imports are loaded and elements have been registered
   window.addEventListener('WebComponentsReady', () => {
-    // imports are loaded and elements have been registered
+    app.service = app.$.service;
   });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
@@ -86,10 +85,10 @@
       .closeDrawer();
   };
 
-  // app.openDrawer = function openDrawer() {
-  //   app
-  //     .$
-  //     .paperDrawerPanel
-  //     .openDrawer();
-  // };
+  app.openDrawer = function openDrawer() {
+    app
+      .$
+      .paperDrawerPanel
+      .openDrawer();
+  };
 })(document));

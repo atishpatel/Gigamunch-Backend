@@ -47,6 +47,8 @@
 
     <!-- For shared styles, shared-styles.html import in elements.html -->
     <style is="custom-style" include="shared-styles"></style>
+
+
   </head>
 
   <body unresolved>
@@ -55,7 +57,7 @@
     <!-- endbuild -->
 
     <template is="dom-bind" id="app">
-
+      <gigachef-service id="service" user={{user}}></gigachef-service>
       <paper-drawer-panel id="paperDrawerPanel" responsive-width="840px">
         <!-- Drawer Scroll Header Panel -->
         <paper-scroll-header-panel drawer fixed>
@@ -122,10 +124,10 @@
             <span class="space"></span>
             <!-- Application name -->
             <div class="middle middle-container">
-              <div class="app-name">{{title}}</div>
+              <div class="app-name">[[title]]</div>
             </div>
             <div class="bottom bottom-container">
-              <div class="bottom-title">{{subtitle}}</div>
+              <div class="bottom-title">[[subtitle]]</div>
             </div>
           </paper-toolbar>
 
@@ -133,24 +135,20 @@
           <main class="content">
             <iron-pages attr-for-selected="data-route" selected="{{route}}">
               <!-- Application -->
-              <section data-route="application">
-                <application-view class="focus-target" user="[[user]]" application="{{application}}">
-                </application-view>
-              </section>
+              <application-view data-route="application"
+                                id="applicationView"
+                                user="[[user]]"
+                                service="[[service]]">
+              </application-view>
               <!-- Orders -->
-              <section data-route="orders">
-                <span class="focus-target">tmp </span>
-                <orders-view class="focus-target"
-                  user="[[user]]">
-                </orders-view>
-              </section>
+              <orders-view data-route="orders"
+                user="[[user]]">
+              </orders-view>
 
               <!-- Kitchen -->
-              <section data-route="kitchen">
-                <kitchen-view class="focus-target"
-                  user="[[user]]">
-                </kitchen-view>
-              </section>
+              <kitchen-view data-route="kitchen"
+                user="[[user]]" items="[[items]]" item="[[item]]">
+              </kitchen-view>
 
               <section data-route="users">
                 <paper-material elevation="1">
@@ -188,7 +186,7 @@
                 Gigamunch
               </div>
               <section>
-                <div class="title">Stuff</div>
+                <div class="title">Navigation</div>
                 <ul>
                   <li><a href="/">Home</a></li>
                   <li><a href="/gigachef">Gigachef</a></li>
@@ -212,12 +210,10 @@
 
     </template>
 
-    <!-- <script src="/gigachef/js/endpoint.js"></script> -->
     <!-- build:js js/app.js -->
     <script src="/gigachef/js/user.js"></script>
     <script src="/gigachef/js/app.js"></script>
     <!-- endbuild-->
-    <!-- <script src="https://apis.google.com/js/client.js?onload=initEndpoints"></script> -->
   </body>
 
 </html>

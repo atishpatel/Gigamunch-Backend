@@ -1,11 +1,5 @@
 <!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+  routing.html is the router for the gigachef app.
 -->
 
 <script src="../bower_components/page/page.js"></script>
@@ -32,7 +26,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     function setFocus(selected) {
       Polymer.dom(document)
-        .querySelector('section[data-route="' + selected + '"] .focus-target')
+        .querySelectorAll('iron-pages > [data-route="' + selected + '"]')[0]
         .focus();
     }
 
@@ -49,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     const applicationURL = '/application';
     const ordersURL ='/orders';
 
-    // checkLoggedIn, 
+    // checkLoggedIn,
     page('*', scrollToTop, closeDrawer, function(ctx, next) {
       next();
     });
@@ -67,6 +61,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     page(applicationURL, function() {
       setPageConfig('Application', 'Apply to be a gigachef!', '', 'application');
+      app.$.applicationView.select();
       setFocus(app.route);
     });
 

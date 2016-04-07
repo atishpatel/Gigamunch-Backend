@@ -40,34 +40,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding-right: 10px;
       }
     </style>
-
-    <!-- TODO: find and replace: name="\w+"  -->
+    <!-- TODO: add progress bar -->
     <!-- <template is="dom-if" if="[[hasSubmited]]" restamp="true"></template> -->
-    <form is="iron-form" id="form" class="layout vertical" method="post" action="#">
-      <paper-input name="name" label="Name" value="{{application.name}}" required auto-validate></paper-input>
-      <gold-email-input name="email" label="Email" value="{{application.email}}" required auto-validate></gold-email-input>
-      <gold-phone-input name="phone" label="Phone Number" value="{{application.phone}}" required auto-validate></gold-phone-input>
-      <paper-input name="apt" label="Apt #" value="{{application.apt}}" auto-validate></paper-input>
-      <paper-input name="street" label="Street" value="{{application.street}}" required auto-validate></paper-input>
-      <paper-input name="city" label="City" value="{{application.city}}" required auto-validate></paper-input>
+    <form is="iron-form" id="form" class="layout vertical" method="post" action="#" on-change="_updateSubmitButtonState" on-iron-form-presubmit="submitApplication">
+      <paper-input label="Name" value="{{application.name}}" required auto-validate></paper-input>
+      <gold-email-input label="Email" value="{{application.email}}" required auto-validate></gold-email-input>
+      <gold-phone-input label="Phone Number" value="{{application.phone_number}}" required auto-validate></gold-phone-input>
+      <paper-input label="Apt #" value="{{application.address.apt}}" auto-validate></paper-input>
+      <paper-input label="Street" value="{{application.address.street}}" required auto-validate></paper-input>
+      <paper-input label="City" value="{{application.address.city}}" required auto-validate></paper-input>
       <div class="layout horizontal">
         <paper-dropdown-menu class="dropdown-width dropdown-states" label="State">
-          <paper-listbox class="dropdown-content dropdown-width" attr-for-selected="value" selected="{{application.state}}">
+          <paper-listbox class="dropdown-content dropdown-width" attr-for-selected="value" selected="{{application.address.state}}">
             <template is="dom-repeat" items="{{states}}" as="state">
               <paper-item id="vendorName" value="[[state]]">[[state]]</paper-item>
             </template>
           </paper-listbox>
         </paper-dropdown-menu>
-        <gold-zip-input class="flex" name="zip" label="Zip" value="{{application.zip}}" required auto-validate></gold-zip-input>
+        <gold-zip-input class="flex" label="Zip" value="{{application.address.zip}}" required auto-validate></gold-zip-input>
       </div>
-      <paper-checkbox name="read" required>I agree to the Terms &amp; Agreement and Privacy Policy</paper-checkbox>
+      <paper-checkbox required>I agree to the Terms &amp; Agreement and Privacy Policy</paper-checkbox>
       <br>
-      <paper-button id="submitButton" class="" raised disabled>
+      <paper-button id="submitButton" on-tap="_submit" class="" raised disabled>
         <paper-spinner id="spinner" hidden></paper-spinner>Submit
       </paper-button>
     </form>
-
-    <button on-tap="print">Print</button>
   </template>
   <script>
     (function() {
@@ -80,13 +77,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             notify: true,
             reflectToAttribute: true,
             value: {
-              zip: ""
+              address: {
+                zip: ""
+              }
             }
           },
           user: {
             type: Object,
             notify: true,
             observer: 'userUpdated'
+          },
+          service: {
+            type: Object,
+            notify: true
           },
           states: {
             type: Array,
@@ -98,20 +101,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             ]
           }
         },
-
-        listeners: {
-          'form.change': '_updateSubmitButtonState', // on form change
-          'form.iron-form-presubmit': 'endpointSubmit',
-          'submitButton.tap': '_submit',
+        select: function() {
+          this.getApplication();
         },
+        getApplication: function() {
+          if (this.service === undefined) {
+            this.async(this.getApplication, 200);
+            return;
+          }
+          this.service.getApplication( function(application, err) {
+              console.log('in application-view callback', application, err);
+              // TODO: handle err
 
-        endpointSubmit: function(event) {
-          console.log(event);
-          event.preventDefault();
-          // fire custom event to call endpoint?
-          this.fire('submitApplication', this.application);
+              this.application = application;
+            }.bind(this)
+          );
         },
+        submitApplication: function(event) {
+          if (event !== undefined || event !== null ){
+            event.preventDefault();
+          }
+          if (this.service === undefined) {
+            this.async(this.submitApplication, 200);
+            return;
+          }
 
+
+          this.service.submitApplication(this.application, function(application, err) {
+              // TODO add function
+              this.application = application;
+            }.bind(this)
+          );
+
+        },
         _submit: function() {
           this.$.form.submit();
         },
@@ -132,13 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           } else if (this.application.name === undefined) {
             this.application.name = this.user.name;
           }
-        },
-
-        print: function() {
-          console.log('user.name', this.user.name);
-          console.log('application', this.application);
         }
-
       });
     })();
   </script>
