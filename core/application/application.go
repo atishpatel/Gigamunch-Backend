@@ -11,7 +11,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/atishpatel/Gigamunch-Backend/utils/map"
+	"github.com/atishpatel/Gigamunch-Backend/utils/maps"
 )
 
 // GetApplications gets all applications
