@@ -45,6 +45,9 @@ func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplic
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+	if req.Application.Address.Country == "" {
+		req.Application.Address.Country = "USA"
+	}
 	chefApplication, err := application.SubmitApplication(ctx, user, &req.Application)
 	if err != nil {
 		utils.Debugf(ctx, "err: %+v", err)
