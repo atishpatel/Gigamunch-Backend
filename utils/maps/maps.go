@@ -1,6 +1,9 @@
 package maps
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -11,18 +14,46 @@ import (
 	"google.golang.org/appengine/urlfetch"
 )
 
-var (
-	mapsClient *maps.Client
+const (
+	metersInMile = 1609.344
 )
 
+var (
+	mapsClient     *maps.Client
+	mapsConnectErr = errors.ErrorWithCode{
+		Code:    errors.CodeInternalServerErr,
+		Message: "Could not connect to Google Maps.",
+	}
+	errMaps = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with Google Maps."}
+)
+
+// GetDistance returns the distance using roads between two points.
+// The points should return string "X,Y" where X and Y are floats.
+// returns miles, duration, err
+func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Duration, error) {
+	getMapsClient(ctx)
+	if mapsClient == nil {
+		return 0, nil, mapsConnectErr
+	}
+	mapsReq := &maps.DistanceMatrixRequest{
+		Origins:      []string{p1.String()},
+		Destinations: []string{p2.String()},
+		Units:        maps.UnitsImperial,
+	}
+	mapsResp, err := mapsClient.DistanceMatrix(ctx, mapsReq)
+	if err != nil {
+		return 0, nil, errMaps.WithError(err)
+	}
+	element := mapsResp.Rows[0].Elements[0]
+	miles := float32(element.Distance.Meters) / metersInMile // convert to miles
+	return miles, &element.Duration, nil
+}
+
+// GetGeopointFromAddress sets Latitude and Longitude to an address.
 func GetGeopointFromAddress(ctx context.Context, address *types.Address) error {
 	getMapsClient(ctx)
 	if mapsClient == nil {
-		returnErr := errors.ErrorWithCode{
-			Code:    errors.CodeInternalServerErr,
-			Message: "Could not connect to Google Maps.",
-		}
-		return returnErr
+		return mapsConnectErr
 	}
 	mapsCompMap := make(map[maps.Component]string, 1)
 	mapsCompMap[maps.ComponentCountry] = "US"

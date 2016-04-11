@@ -38,6 +38,11 @@ type GeoPoint struct {
 	Longitude float32 `json:"longitude" datastore:",noindex"`
 }
 
+// String returns Latitude,Longitude
+func (g GeoPoint) String() string {
+	return fmt.Sprintf("%g,%g", g.Latitude, g.Longitude)
+}
+
 // Valid returns whether a GeoPoint is within [-90, 90] latitude and [-180, 180] longitude.
 func (g GeoPoint) Valid() bool {
 	return -90 <= g.Latitude && g.Latitude <= 90 && -180 <= g.Longitude && g.Longitude <= 180

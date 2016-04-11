@@ -43,10 +43,11 @@ func init() {
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
 	// Register course stuff
-	// register("GetLiveMeals", "getLiveMeals", "POST", "gigamuncherservice/getLiveMeals", "Get live meals")
 	register("SignIn", "signIn", "POST", "gigamuncherservice/signIn", "Sign in a user using a gtoken.")
 	register("SignOut", "signOut", "POST", "gigamuncherservice/signOut", "Sign out a user.")
 	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
+
+	register("GetPost", "getPost", "POST", "gigamuncherservice/getPost", "Get post details.")
 	register("GetLivePosts", "getLivePosts", "POST", "gigamuncherservice/getLivePosts", "Get live posts.")
 
 	register("PostReview", "postReview", "POST", "gigamuncherservice/postReview", "Post a review.")

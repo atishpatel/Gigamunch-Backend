@@ -116,9 +116,3 @@ func (service *Service) GetReviews(ctx context.Context, req *GetReviewsReq) (*Ge
 	}
 	return resp, nil
 }
-
-// Review is a review
-type Review struct {
-	ID            int `json:"id"`
-	review.Review     // embedded
-}
