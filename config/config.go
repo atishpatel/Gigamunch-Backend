@@ -88,9 +88,11 @@ func loadGitkitConfig(ctx context.Context) {
 }
 
 func getDatastoreConfig(ctx context.Context) {
+	config = new(Config)
 	key := datastore.NewKey(ctx, "Config", "", 100, nil)
 	err := datastore.Get(ctx, key, config)
 	if err != nil {
+		utils.Errorf(ctx, "getDatastoreConfig error: %+v", err)
 		log.Fatalf("Error getting Config from datastore: %+v", err)
 	}
 }
