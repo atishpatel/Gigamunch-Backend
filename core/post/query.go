@@ -13,7 +13,6 @@ import (
 	"google.golang.org/appengine"
 
 	"github.com/atishpatel/Gigamunch-Backend/types"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -31,6 +30,9 @@ const (
 )
 
 func insertLivePost(postID int64, post *Post) error {
+	if mysqlDB == nil {
+		connectSQL()
+	}
 	_, err := mysqlDB.Exec(
 		`INSERT
 		INTO live_posts
@@ -41,11 +43,13 @@ func insertLivePost(postID int64, post *Post) error {
 }
 
 func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types.Limit, radius int, readyDatetime time.Time, descending bool) ([]int64, []string, []float32, error) {
+	if mysqlDB == nil {
+		connectSQL()
+	}
 	var err error
 	listLength := limit.End - limit.Start
 	livePostQuery := getSortByDateQuery(geopoint.Latitude, geopoint.Longitude, radius,
 		readyDatetime, descending, limit)
-	utils.Debugf(ctx, "query: ", livePostQuery)
 	rows, err := mysqlDB.Query(livePostQuery)
 	if err != nil {
 		return nil, nil, nil, err //TODO change to external dep err
@@ -94,17 +98,17 @@ func getSortByDateQuery(latitude float32, longitude float32, radius int, readyTi
 	return fmt.Sprintf(sortByDate, latitude, longitude, latitude, readyWhere, radius, readyDatetimeOrder, limit.Start, limit.End)
 }
 
-func init() {
+func connectSQL() {
 	var err error
 	var connectionString string
+	projectID := os.Getenv("PROJECTID")
+	if projectID == "" {
+		log.Fatal("PROJECTID env variable is not set.")
+	}
 	if appengine.IsDevAppServer() {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		projectID := os.Getenv("PROJECTID")
-		if projectID != "gigamunch-omninexus-dev" && projectID != "gigamunch-omninexus" {
-			log.Fatalln("PROJECTID env variable not set")
-		}
 		connectionString = fmt.Sprintf("root@cloudsql(" + projectID + ":gigasql)/gigamunch")
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
