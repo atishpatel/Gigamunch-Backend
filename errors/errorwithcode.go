@@ -5,7 +5,8 @@ import "fmt"
 type ErrorWithCode struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-	err     error  `json:"err"` // err is private because of endpoints
+	Details string `json:"details"`
+	err     error  // err is private because of endpoints
 }
 
 func (err ErrorWithCode) Error() string {
@@ -14,6 +15,7 @@ func (err ErrorWithCode) Error() string {
 
 func (err ErrorWithCode) WithError(attachedErr error) ErrorWithCode {
 	err.err = attachedErr
+	err.Details = err.Error()
 	return err
 }
 
