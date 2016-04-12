@@ -16,7 +16,7 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 	changed := false
 	gigamuncher := new(Gigamuncher)
 	err = get(ctx, user.ID, gigamuncher)
-	if err != nil && err.Error() != datastore.ErrNoSuchEntity.Error() {
+	if err != nil && err != datastore.ErrNoSuchEntity {
 		return err
 	}
 	if gigamuncher.Name != user.Name {
