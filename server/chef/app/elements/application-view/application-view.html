@@ -65,9 +65,9 @@
         </paper-dropdown-menu>
         <gold-zip-input class="flex" label="Zip" value="{{_application.address.zip}}" required auto-validate></gold-zip-input>
       </div>
-      <paper-checkbox required>I agree to the Terms &amp; Agreement and Privacy Policy</paper-checkbox>
+      <paper-checkbox id="agreeCheckbox" required>I agree to the Terms &amp; Agreement and Privacy Policy</paper-checkbox>
       <br>
-      <paper-button id="submitButton" on-tap="_submit" class="" raised disabled>
+      <paper-button id="submitButton" on-tap="_submit" raised disabled>
         <paper-spinner id="spinner" hidden></paper-spinner>Submit
       </paper-button>
     </form>
@@ -128,8 +128,13 @@
             this.async(this._submitApplication, 200);
             return;
           }
-
+          this.$.spinner.hidden = false;
+          this.$.spinner.active = true;
+          this.$.submitButton.disabled = true;
           this.service.submitApplication(this._application, function(application, err) {
+              this.$.spinner.hidden = true;
+              this.$.spinner.active = false;
+              this.$.agreeCheckbox.checked = false;
               // TODO: handle err
               this._application = application;
             }.bind(this)
