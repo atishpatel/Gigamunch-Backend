@@ -7,6 +7,12 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
+func get(ctx context.Context, postID int64, post *Post) error {
+	// TODO add cache stuff
+	key := datastore.NewKey(ctx, kindPost, "", postID, nil)
+	return datastore.Get(ctx, key, post)
+}
+
 func putIncomplete(ctx context.Context, post *Post) (int64, error) {
 	var err error
 	postKey := datastore.NewIncompleteKey(ctx, kindPost, nil)

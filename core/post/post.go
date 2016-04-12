@@ -57,6 +57,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	return postID, nil
 }
 
+// GetUserPosts gets post from a user sorted by closing time
 func GetUserPosts(ctx context.Context, user types.User, limit *types.Limit) ([]int64, []Post, error) {
 	postIDs, posts, err := getUserPosts(ctx, user.ID, limit.Start, limit.End)
 	if err != nil {
@@ -97,4 +98,14 @@ func GetPosts(ctx context.Context, postIDs []int64) ([]Post, error) {
 		return nil, errDatastore.WithError(err)
 	}
 	return posts, nil
+}
+
+// GetPost gets the post from a postID
+func GetPost(ctx context.Context, postID int64) (*Post, error) {
+	post := new(Post)
+	err := get(ctx, postID, post)
+	if err != nil {
+		return nil, errDatastore.WithError(err)
+	}
+	return post, nil
 }
