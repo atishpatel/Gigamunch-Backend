@@ -75,7 +75,7 @@
     });
 
     page(ordersURL+'/:subpath', function(ctx) {
-      setPageConfig('Orders', 'All the food people want from you.', ctx.params.name, 'orders');
+      setPageConfig('Orders', 'All the food people want from you.', ctx.params.subpath, 'orders');
       setFocus(app.route);
     });
 
@@ -86,7 +86,7 @@
     });
 
     page('/kitchen/:subpath', function(ctx) {
-      setPageConfig('Kitchen', 'All the items in your kitchen to post.', ctx.params.name, 'kitchen');
+      setPageConfig('Kitchen', 'All the items in your kitchen to post.', ctx.params.subpath, 'kitchen');
       app.$.kitchenView.select();
       setFocus(app.route);
     });
