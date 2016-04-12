@@ -6,6 +6,10 @@
 <script>
   window.addEventListener('WebComponentsReady', function() {
 
+    app.redirect = function(e) {
+      page.redirect(e.detail.URL);
+    }
+
     // Middleware
     function scrollToTop(ctx, next) {
       app.scrollPageToTop();
@@ -26,7 +30,7 @@
 
     function setFocus(selected) {
       Polymer.dom(document)
-        .querySelectorAll('iron-pages > [data-route="' + selected + '"]')[0]
+        .querySelector('section[data-route="' + selected + '"] .focus-target')
         .focus();
     }
 
@@ -70,31 +74,25 @@
       setFocus(app.route);
     });
 
-    // page(ordersURL+'/:subpath', function(ctx) {
-    //   setPageConfig('Orders', 'All the food people want from you.', ctx.params.name, 'orders');
-    //   setFocus(app.route);
-    // });
+    page(ordersURL+'/:subpath', function(ctx) {
+      setPageConfig('Orders', 'All the food people want from you.', ctx.params.name, 'orders');
+      setFocus(app.route);
+    });
 
     page('/kitchen', function() {
       setPageConfig('Kitchen', 'All the items in your kitchen to post.', '', 'kitchen');
+      app.$.kitchenView.select();
       setFocus(app.route);
     });
 
-    page('/users', function() {
-      app.route = 'users';
+    page('/kitchen/:subpath', function(ctx) {
+      setPageConfig('Kitchen', 'All the items in your kitchen to post.', ctx.params.name, 'kitchen');
+      app.$.kitchenView.select();
       setFocus(app.route);
     });
 
-    page('/users/:name', function(ctx) {
-      app.route = 'user-info';
-      app.params = ctx.params;
-      console.log(ctx);
-      console.log(ctx.params.name);
-      setFocus(app.route);
-    });
-
-    page('/contact', function() {
-      app.route = 'contact';
+    page('/about', function() {
+      setPageConfig('About', 'Why does Gigamunch exist?', '', 'about');
       setFocus(app.route);
     });
 
@@ -103,7 +101,7 @@
       console.log('404 err');
       app.$.toast.text = 'Can\'t find: ' + window.location.href  + '. Redirected you to Home Page';
       app.$.toast.show();
-      //redirectHome();
+      redirectHome();
     });
 
     // remove #! before urls
