@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 )
 
@@ -21,33 +22,35 @@ func UpdateAvgRating(ctx context.Context, userID string, oldRating int, newRatin
 	if oldRating == newRating {
 		return nil
 	}
-	gigachef := new(Gigachef)
+	chef := new(Gigachef)
 	// TODO should be transaction?
-	err := get(ctx, userID, gigachef)
+	err := get(ctx, userID, chef)
 	if err != nil {
 		return err
 	}
 	if oldRating != 0 {
-		gigachef.RemoveRating(oldRating)
+		chef.RemoveRating(oldRating)
 	}
-	gigachef.AddRating(newRating)
-	err = put(ctx, userID, gigachef)
+	chef.AddRating(newRating)
+	err = put(ctx, userID, chef)
 	if err != nil {
 		return errDatastore.WithError(err)
 	}
 	return nil
 }
 
-// GetRatings returns a list of GigachefRatings for the passed in array of ids
-func GetRatings(ctx context.Context, gigachefIDs []string) ([]float32, error) {
+// GetRatingsAndInfo returns a list of GigachefRatings for the passed in array of ids
+func GetRatingsAndInfo(ctx context.Context, chefIDs []string) ([]types.UserDetail, []GigachefRating, error) {
 	// TODO add not querying same ids
-	gigachefs, err := getMulti(ctx, gigachefIDs)
+	chefs, err := getMulti(ctx, chefIDs)
 	if err != nil {
-		return nil, errDatastore.WithError(err)
+		return nil, nil, errDatastore.WithError(err)
 	}
-	ratings := make([]float32, len(gigachefs))
-	for i := range gigachefs {
-		ratings[i] = gigachefs[i].AverageRating
+	chefUserDetails := make([]types.UserDetail, len(chefs))
+	ratings := make([]GigachefRating, len(chefs))
+	for i := range chefs {
+		ratings[i] = chefs[i].GigachefRating
+		chefUserDetails[i] = chefs[i].UserDetail
 	}
-	return ratings, nil
+	return chefUserDetails, ratings, nil
 }

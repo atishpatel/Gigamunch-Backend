@@ -30,3 +30,7 @@ gigachefendpoint:
   - In the 'endpoints/gigachef' folder.
 gigamuncherendpoint:
   - In the 'endpoint/gigamuncher' folder.
+
+# Styling notes
+  - gigachef and gigamuncher variables should be chef and muncher respectively to
+    confusion with the packages gigachef and gigamuncher
