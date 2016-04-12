@@ -32,10 +32,6 @@ func (i *Item) Set(id int, item *item.Item) {
 	i.DietaryNeedsTags = item.DietaryNeedsTags
 	i.Photos = item.Photos
 	i.LastUsedDateTime = int(item.LastUsedDateTime.Unix())
-	i.NumPostsCreated = item.NumPostsCreated
-	i.NumTotalOrders = item.NumTotalOrders
-	i.AverageItemRating = item.AverageItemRating
-	i.NumRatings = item.NumRatings
 }
 
 // Get creates a item.Item version of the endpoint item
