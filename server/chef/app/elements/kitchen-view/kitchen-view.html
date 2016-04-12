@@ -1,41 +1,58 @@
 <!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+  `kitchen-view` is the view chefs go to to create, view, and edit Items.
+  It uses the url to determine
+  ### Variables:
+    - route: route is used to navigate between the different subviews.
+        '' is the list subview
+        'view' is the detail view
+        'edit' is the edit view.
+  ### Events:
+    - redirect: redirect event is fired when the page needs to be redirected.
+                parameter: URL
+    - toast: toast is fired when a toast message needs to be displayed.
+             parameter: text
+    - update-toolbar: update-toolbar is fired when the toolbar needs to be updated.
+             parameter: title, subtitle, icon, iconCallback
+  ### Public methods:
+    - select(): select should be called when the view comes into focus.
+      This functions does stuff like fetch the Item from URL parameters.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 
+<link rel="import" href="../item-form/item-form.html">
 
 <dom-module id="kitchen-view">
   <template>
-    <style>
+    <style include="iron-flex iron-flex-alignment shared-styles">
       :host {
         display: block;
       }
     </style>
 
-    <paper-card heading="Card Title">
-      <div class="card-content">Some content</div>
-      <div class="card-actions">
-        <paper-button>Some action</paper-button>
-        <paper-button>Some action2</paper-button>
-      </div>
-    </paper-card>
-
     <iron-pages attr-for-selected="data-route" selected="{{route}}">
-      <section data-route=""></section>
+      <section data-route="">
+        <paper-card heading="Card Title">
+          <div class="card-content">Some content</div>
+          <div class="card-actions">
+            <paper-button>Some action</paper-button>
+            <paper-button>Some action2</paper-button>
+          </div>
+        </paper-card>
+
+        <paper-fab icon="add" on-tap="_addItem"></paper-fab>
+      </section>
       <section data-route="view"></section>
-      <section data-route="edit"></section>
+      <section data-route="edit">
+        <item-form on-save="_saveItem" item={{_item}}></item-form>
+      </section>
     </iron-pages>
 
   </template>
@@ -50,19 +67,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         route: {
           type: String,
           notify: true,
-          reflectToAttribute: true,
           value: ''
         },
-        itemID: {
-          type: Number,
-          notify: true,
-          observer: 'updateItemID',
-          value: 0
+        service: {
+          type: Object,
+          notify: true
+        },
+        _item: {
+          type: Object,
+          notify: true
         }
       },
 
-      updateItemID: function() {
-        // TODO set url to itemid
+      select: function() {
+
+      },
+      _addItem: function() {
+        this.fire('redirect', {URL: '/kitchen/edit'})
+      },
+
+      _saveItem: function() {
+        if (this.service === undefined) {
+          this.async(this._saveItem, 200);
+          return;
+        }
       }
 
     });
