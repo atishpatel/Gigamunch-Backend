@@ -1,6 +1,7 @@
 package gigamuncher
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -103,7 +104,7 @@ func (req *GetLivePostsReq) Valid() error {
 // GetLivePostsResp is the response for getting live posts
 //returns: posts, error
 type GetLivePostsResp struct {
-	Posts []Post               `json:"posts"`
+	Posts []Post               `json:"posts,omitempty"`
 	Err   errors.ErrorWithCode `json:"err"`
 }
 
@@ -172,11 +173,11 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 
 // GigachefDetailed is the detailed info for a Gigachef
 type GigachefDetailed struct {
-	ID                      string `json:"id"`
-	Name                    string `json:"name"`
-	PhotoURL                string `json:"photo_url"`
+	ID                      string `json:"id,omitempty"`
+	Name                    string `json:"name,omitempty"`
+	PhotoURL                string `json:"photo_url,omitempty"`
 	gigachef.GigachefRating        // embedded
-	NumOrders               int    `json:"num_orders"`
+	NumOrders               int    `json:"num_orders,omitempty"`
 }
 
 // Set takes chef info and saves it to an endpoint GigachefDetails
@@ -191,15 +192,15 @@ func (g *GigachefDetailed) Set(id, name, photoURL string, ratings gigachef.Gigac
 // PostDetailed has detailed information for a Post.
 type PostDetailed struct {
 	BasePost                  // embedded
-	Ingredients      []string `json:"ingredients"`
-	DietaryNeedsTags []string `json:"dietary_needs_tags"`
-	GeneralTags      []string `json:"general_tags"`
-	CuisineTags      []string `json:"cuisine_tags"`
+	Ingredients      []string `json:"ingredients,omitempty"`
+	DietaryNeedsTags []string `json:"dietary_needs_tags,omitempty"`
+	GeneralTags      []string `json:"general_tags,omitempty"`
+	CuisineTags      []string `json:"cuisine_tags,omitempty"`
 }
 
 // Set takes a post.Post package and converts it to an endpoint PostDetailed
-func (p *PostDetailed) Set(id int, distance float32, post *post.Post) {
-	p.BasePost.Set(id, distance, post)
+func (p *PostDetailed) Set(id int64, distance float32, post *post.Post) {
+	p.BasePost.Set(int(id), distance, post)
 	p.Ingredients = post.Ingredients
 	p.DietaryNeedsTags = post.DietaryNeedsTags
 	p.GeneralTags = post.GeneralTags
@@ -209,11 +210,11 @@ func (p *PostDetailed) Set(id int, distance float32, post *post.Post) {
 
 // GetPostReq is the input required to get a post
 type GetPostReq struct {
-	PostID    int     `json:"post_id,string"`
-	UserID    string  `json:"user_id"`
-	Latitude  float32 `json:"latitude"`
-	Longitude float32 `json:"longitude"`
-	Radius    int     `json:"radius"`
+	PostID    json.Number `json:"post_id"`
+	UserID    string      `json:"user_id"`
+	Latitude  float32     `json:"latitude"`
+	Longitude float32     `json:"longitude"`
+	Radius    int         `json:"radius"`
 }
 
 // Valid returns an error if input in invalid
@@ -224,9 +225,9 @@ func (req *GetPostReq) Valid() error {
 // GetPostResp is the response for getting a post
 //returns: post, error
 type GetPostResp struct {
-	Post     PostDetailed         `json:"post"`
-	Gigachef GigachefDetailed     `json:"gigachef"`
-	Reviews  []Review             `json:"reviews"`
+	Post     PostDetailed         `json:"post,omitempty"`
+	Gigachef GigachefDetailed     `json:"gigachef,omitempty"`
+	Reviews  []Review             `json:"reviews,omitempty"`
 	Err      errors.ErrorWithCode `json:"err"`
 }
 
@@ -238,7 +239,12 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 		return resp, nil
 	}
-	p, err := post.GetPost(ctx, int64(req.PostID))
+	postID, err := req.PostID.Int64()
+	if err != nil {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
+		return resp, nil
+	}
+	p, err := post.GetPost(ctx, postID)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
@@ -291,10 +297,13 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 		return resp, nil
 	}
 	// save reviews and gigachef details
+	// resp.Reviews = []Review{}
 	for i := range reviewIDs {
-		resp.Reviews = append(resp.Reviews, Review{ID: int(reviewIDs[i]), Review: reviews[i]})
+		r := Review{}
+		r.Set(int(reviewIDs[i]), &reviews[i])
+		resp.Reviews = append(resp.Reviews, r)
 	}
 	resp.Gigachef.Set(p.GigachefID, chef.Name, chef.PhotoURL, chef.GigachefRating, chef.NumOrders)
-	resp.Post.Set(req.PostID, distance, p)
+	resp.Post.Set(postID, distance, p)
 	return resp, nil
 }

@@ -89,7 +89,7 @@ func (req *GetReviewsReq) Valid() error {
 // GetReviewsResp is the response to getting a list of reviews
 // returns: []reviews, error
 type GetReviewsResp struct {
-	Reviews []Review             `json:"reviews"`
+	Reviews []Review             `json:"reviews,omitempty"`
 	Err     errors.ErrorWithCode `json:"err"`
 }
 
@@ -112,7 +112,9 @@ func (service *Service) GetReviews(ctx context.Context, req *GetReviewsReq) (*Ge
 		return resp, nil
 	}
 	for i := range reviewIDs {
-		resp.Reviews = append(resp.Reviews, Review{ID: int(reviewIDs[i]), Review: reviews[i]})
+		r := Review{}
+		r.Set(int(reviewIDs[i]), &reviews[i])
+		resp.Reviews = append(resp.Reviews, r)
 	}
 	return resp, nil
 }
