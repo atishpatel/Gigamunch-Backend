@@ -10,6 +10,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"github.com/atishpatel/Gigamunch-Backend/utils/maps"
 	"golang.org/x/net/context"
 )
@@ -37,6 +38,7 @@ type BasePost struct {
 func (p *BasePost) Set(id int, distance float32, post *post.Post) {
 	p.ID = id
 	p.Distance = distance
+	p.Title = post.Title
 	p.Description = post.Description
 	p.ItemID = int(post.ItemID)
 	p.ReadyDateTime = int(post.ReadyDateTime.Unix())
@@ -111,6 +113,11 @@ type GetLivePostsResp struct {
 // GetLivePosts is an endpoint that returns a list of live posts
 func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) (*GetLivePostsResp, error) {
 	resp := new(GetLivePostsResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "GetLivePost err: ", resp.Err)
+		}
+	}()
 	var err error
 	err = req.Valid()
 	if err != nil {
@@ -234,6 +241,11 @@ type GetPostResp struct {
 // GetPost gets the details for a post
 func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostResp, error) {
 	resp := new(GetPostResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "GetPost err: ", resp.Err)
+		}
+	}()
 	err := req.Valid()
 	if err != nil {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}

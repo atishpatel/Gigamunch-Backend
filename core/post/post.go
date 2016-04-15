@@ -25,6 +25,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	if !user.IsVerifiedChef() {
 		return 0, errNotVerifiedChef
 	}
+	post.CreatedDateTime = time.Now().UTC()
 	post.GigachefID = user.ID
 	// get the gigachef address
 	var address *types.Address
@@ -38,11 +39,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	// IncrementNumPost for gigachef
 	errChan := make(chan error, 1)
 	go func() {
-		err := gigachef.IncrementNumPost(ctx, user)
-		if err != nil {
-			utils.Errorf(ctx, "Num Post not incremented for user(%s)", user.ID)
-		}
-		errChan <- err
+		errChan <- gigachef.IncrementNumPost(ctx, user)
 	}()
 	// put in datastore
 	postID, err := putIncomplete(ctx, post)

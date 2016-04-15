@@ -6,18 +6,20 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
 // Post is a meal that is no longer live
 type Post struct {
-	BaseItem               // embedded
-	ID              int    `json:"id"`
-	ItemID          int    `json:"item_id"`
-	Title           string `json:"title"`
-	ClosingDateTime int    `json:"closing_datetime" endpoints:"req"`
-	ReadyDateTime   int    `json:"ready_datetime" endpoints:"req"`
-	ServingsOffered int    `json:"servings_offered" endpoints:"req"`
+	BaseItem                // embedded
+	ID              int     `json:"id"`
+	ItemID          int     `json:"item_id"`
+	Title           string  `json:"title"`
+	ClosingDateTime int     `json:"closing_datetime" endpoints:"req"`
+	ReadyDateTime   int     `json:"ready_datetime" endpoints:"req"`
+	ServingsOffered int     `json:"servings_offered" endpoints:"req"`
+	PricePerServing float32 `json:"price_per_serving"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
@@ -34,6 +36,7 @@ func (p *Post) Set(id int, post *post.Post) {
 	p.ClosingDateTime = int(post.ClosingDateTime.Unix())
 	p.ReadyDateTime = int(post.ReadyDateTime.Unix())
 	p.ServingsOffered = post.ServingsOffered
+	p.PricePerServing = post.PricePerServing
 }
 
 // Get creates a post.Post version of the endpoint post
@@ -50,6 +53,7 @@ func (p *Post) Get() *post.Post {
 	post.ClosingDateTime = time.Unix(int64(p.ClosingDateTime), 0)
 	post.ReadyDateTime = time.Unix(int64(p.ReadyDateTime), 0)
 	post.ServingsOffered = p.ServingsOffered
+	post.PricePerServing = p.PricePerServing
 	return post
 }
 
@@ -87,6 +91,11 @@ type PostPostResp struct {
 // PostPost is an endpoint that post a post form a Gigachef
 func (service *Service) PostPost(ctx context.Context, req *PostPostReq) (*PostPostResp, error) {
 	resp := new(PostPostResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "PostPost err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -94,6 +103,7 @@ func (service *Service) PostPost(ctx context.Context, req *PostPostReq) (*PostPo
 	}
 	postID, err := post.PostPost(ctx, user, req.Post.Get())
 	if err != nil {
+		utils.Errorf(ctx, "PostPost error: %+v", err)
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
