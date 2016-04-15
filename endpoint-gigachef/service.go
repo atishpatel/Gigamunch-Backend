@@ -42,12 +42,16 @@ func init() {
 		i := m.Info()
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
-	// Register course stuff
+	// refresh stuff
+	register("RefreshToken", "refreshToken", "POST", "gigachefservice/refreshToken", "Refresh a token.")
+	// application stuff
 	register("GetApplication", "getApplication", "POST", "gigachefservice/getApplication", "Get chef application.")
 	register("SubmitApplication", "submitApplication", "POST", "gigachefservice/submitApplication", "Apply to be a chef.")
+	// item stuff
 	register("SaveItem", "saveItem", "POST", "gigachefservice/saveItem", "Save a item.")
 	register("GetItem", "getItem", "POST", "gigachefservice/getItem", "Get a item.")
 	register("GetItems", "getItems", "POST", "gigachefservice/getItems", "Gets items sorted by last used.")
+	// post stuff
 	register("PostPost", "postPost", "POST", "gigachefservice/postPost", "Post a post.")
 	endpoints.HandleHTTP()
 }
