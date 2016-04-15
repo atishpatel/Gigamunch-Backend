@@ -5,7 +5,6 @@ private/
 tags
 dump.rdb
 node_modules
-dist
-bower_components
+**/app/bower_components
 .tmp
 .publish
