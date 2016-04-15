@@ -34,6 +34,21 @@ func saveAuthCookie(w http.ResponseWriter, authToken string) {
 	http.SetCookie(w, cookie)
 }
 
+func getUserFromCookie(req *http.Request) (*types.User, error) {
+	ctx := appengine.NewContext(req)
+	// get token from cookie
+	cookie, err := req.Cookie(sessionTokenCookieName)
+	if err != nil {
+		return nil, err
+	}
+	token := cookie.Value
+	if token == "" {
+		return nil, errInvalidParameter.WithMessage("Token is empty.")
+	}
+	// get user
+	return auth.GetUserFromToken(ctx, token)
+}
+
 // CurrentUser extracts the user information stored in current session.
 //
 // If there is no existing session, identity toolkit token is checked. If the

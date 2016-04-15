@@ -1,0 +1,114 @@
+<!--
+
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+
+<dom-module id="paper-file-input">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      img {
+        width: 100%;
+      }
+    </style>
+    <template is="dom-repeat" items="{{photos}}" as="photo">
+      <img src="{{photo}}"/>
+    </template>
+    <iron-icon icon="image:add-a-photo" on-tap="_selectFile"></iron-icon>
+    <form hidden action="{{action}}" method="{{method}}" enctype="multipart/form-data">
+      <input id="file" type="file" name="{{inputName}}" on-change="_uploadFile">
+    </form>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'paper-file-input',
+
+      properties: {
+        // photos is an array where the uploaded photos goes to
+        photos: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: new Array()
+        },
+        action: {
+          type: String,
+          notify: true
+        },
+        method: {
+          type: String,
+          notify: true,
+          value: "post"
+        },
+        inputName: {
+          type: String,
+          notify: true,
+          value: "file"
+        },
+        // _valid is false when a file is being uploaded
+        _valid: {
+          type: Boolean,
+          value: true
+        }
+      },
+      validate: function() {
+        return this._valid;
+      },
+      _selectFile: function() {
+        this.$.file.click();
+      },
+      _addPhoto: function(url) {
+        console.log("add photo url ", url, this.photos);
+        if(url !== undefined && url !== "") {
+          this.push('photos', url);
+        }
+      },
+      _updateProgress: function(e) {
+        console.log("in file on progress", e);
+        if (e.lengthComputable) {
+          var value = (e.loaded / e.total) * 100;
+          console.log("upload value", value);
+        }
+      },
+      _uploadFile: function(e) {
+        var path = e.target.value;
+        console.log("path", path);
+        if(path === '') {
+          return;
+        }
+        var formData = new FormData();
+        formData.append(this.inputName, e.target.files[0]);
+        console.log("file: ", e.target.files[0]);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', this.action, true);
+        var polymerElement = this;
+        xhr.onload = function() {
+          var resp = JSON.parse(this.response);
+          console.log("resp: ", resp);
+          if (resp.err.code === 300) {
+            alert(resp.err.message);
+            return;
+          } else if(resp.err.code !== 0) {
+            alert('There was an error upload your file.');
+            return;
+          }
+          polymerElement._addPhoto(resp.url);
+        };
+
+        xhr.upload.onprogress = this._updateProgress
+        xhr.send(formData);
+      }
+    });
+  })();
+  </script>
+</dom-module>

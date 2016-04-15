@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/justinas/alice"
 	"google.golang.org/appengine"
 
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -15,11 +14,12 @@ func init() {
 	r := httprouter.New()
 
 	// chef stuff
-	loggedInChain := alice.New(middlewareLoggedIn)
-	r.Handler("GET", baseGigachefURL+"/*path", loggedInChain.ThenFunc(handleGigachefApp))
+	// loggedInChain := alice.New(middlewareLoggedIn)
+	// r.Handler("GET", baseGigachefURL+"/*path", loggedInChain.ThenFunc(handleGigachefApp))
 
 	r.GET(baseLoginURL, handleLogin)
 	r.GET(signOutURL, handleSignout)
+	r.POST("/upload", handleUpload)
 
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
