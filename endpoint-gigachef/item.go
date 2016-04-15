@@ -7,6 +7,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/item"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
@@ -83,6 +84,11 @@ type GetItemResp struct {
 // GetItem is an endpoint that gets an item.
 func (service *Service) GetItem(ctx context.Context, req *GetItemReq) (*GetItemResp, error) {
 	resp := new(GetItemResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "GetItem err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -132,6 +138,11 @@ type GetItemsResp struct {
 // GetItems is an endpoint that gets a Gigachef's items.
 func (service *Service) GetItems(ctx context.Context, req *GetItemsReq) (*GetItemsResp, error) {
 	resp := new(GetItemsResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "GetItems err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -179,6 +190,11 @@ type SaveItemResp struct {
 // If item id is 0, a new item is created.
 func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*SaveItemResp, error) {
 	resp := new(SaveItemResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "SaveItem err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)

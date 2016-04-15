@@ -6,6 +6,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
@@ -47,6 +48,11 @@ type PostReviewResp struct {
 // PostReview is an endpoint that creates or updates a review
 func (service *Service) PostReview(ctx context.Context, req *PostReviewReq) (*PostReviewResp, error) {
 	resp := new(PostReviewResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "PostReview err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -97,6 +103,11 @@ type GetReviewsResp struct {
 // are resorted with a formula that weighs review post date and item relevence
 func (service *Service) GetReviews(ctx context.Context, req *GetReviewsReq) (*GetReviewsResp, error) {
 	resp := new(GetReviewsResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "GetReviews err: ", resp.Err)
+		}
+	}()
 	err := req.Valid()
 	if err != nil {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}

@@ -8,6 +8,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 // SignInReq is the input required to sign in
@@ -33,6 +34,11 @@ type SignInResp struct {
 // SignIn is an endpoint that signs in a user
 func (service *Service) SignIn(ctx context.Context, req *SignInReq) (*SignInResp, error) {
 	resp := new(SignInResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "SignIn err: ", resp.Err)
+		}
+	}()
 	var err error
 	err = req.Valid()
 	if err != nil {
@@ -65,6 +71,11 @@ type SignOutResp struct {
 // SignOut is an endpoint that signs out a user
 func (service *Service) SignOut(ctx context.Context, req *SignOutReq) (*SignOutResp, error) {
 	resp := new(SignOutResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "SignOut err: ", resp.Err)
+		}
+	}()
 	var err error
 	if req.GigaToken == "" {
 		return resp, nil
@@ -98,6 +109,11 @@ type RefreshTokenResp struct {
 // RefreshToken refreshs a token. A token should be refreshed at least ever hour.
 func (service *Service) RefreshToken(ctx context.Context, req *RefreshTokenReq) (*RefreshTokenResp, error) {
 	resp := new(RefreshTokenResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "RefreshToken err: ", resp.Err)
+		}
+	}()
 	var err error
 	err = req.Valid()
 	if err != nil {

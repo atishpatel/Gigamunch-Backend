@@ -40,6 +40,11 @@ type SubmitApplicationResp struct {
 // SubmitApplication is an endpoint that submits or updates a chef application.
 func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplicationReq) (*SubmitApplicationResp, error) {
 	resp := new(SubmitApplicationResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "SubmitApplication err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -85,6 +90,11 @@ type GetApplicationResp struct {
 // GetApplication is an endpoint that gets a chef application.
 func (service *Service) GetApplication(ctx context.Context, req *GetApplicationReq) (*GetApplicationResp, error) {
 	resp := new(GetApplicationResp)
+	defer func() {
+		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+			utils.Errorf(ctx, "GetApplication err: ", resp.Err)
+		}
+	}()
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
