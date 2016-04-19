@@ -55,8 +55,9 @@
           .getItem(request)
           .execute(
             function(resp) {
+              this._logError(resp.err);
               callback(resp.item, resp.err);
-            }
+            }.bind(this)
           );
       },
       getItems: function(startLimit, endLimit, callback) {
@@ -78,8 +79,9 @@
           .getItems(request)
           .execute(
             function(resp) {
+              this._logError(resp.err);
               callback(resp.items, resp.err);
-            }
+            }.bind(this)
           );
       },
       saveItem: function(item, callback) {
@@ -101,8 +103,9 @@
           .saveItem(request)
           .execute(
             function(resp) {
+              this._logError(resp.err);
               callback(resp.item, resp.err);
-            }
+            }.bind(this)
           );
       },
 
@@ -125,8 +128,9 @@
           .getApplication(request)
           .execute(
             function(resp) {
+              this._logError(resp.err);
               callback(resp.application, resp.err);
-            }
+            }.bind(this)
           );
       },
       submitApplication: function(application, callback) {
@@ -148,21 +152,22 @@
           .submitApplication(request)
           .execute(
             function(resp) {
+              this._logError(err);
               callback(resp.application, resp.err);
-            }
+            }.bind(this)
           );
       },
       _getGigatoken: function() {
         return this.user.token;
       },
-      // _logError: function(err) {
-      //   if(err !== undefined) {
-      //     if(err.code !== undefined || err.code !== 0) {
-      //       // TODO: add google analytics logging
-      //       console.log(err);
-      //     }
-      //   }
-      // },
+      _logError: function(err) {
+        if(err !== undefined) {
+          if(err.code !== undefined && err.code !== 0) {
+            // TODO: add google analytics logging
+            console.log(err);
+          }
+        }
+      },
       _serviceLoaded: function() {
         this.service = this.$.gigachefservice.api;
         this.loaded = true;
