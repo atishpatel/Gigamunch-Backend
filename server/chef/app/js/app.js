@@ -19,20 +19,6 @@
   // The subpath is for the view, edit, etc subpaths
   app.subpath = '';
 
-  // app.addEventListener('update-toolbar', (e) => {
-  //   if (e.detail.title !== undefined && e.detail.title === '') {
-  //     app.toolbar.title = e.detail.title;
-  //   }
-  //   if (e.detail.subtitle !== undefined && e.detail.subtitle === '') {
-  //     app.toolbar.subtitle = e.detail.subtitle;
-  //   }
-  //   if (e.detail.icon !== undefined && e.detail.icon !== '') {
-  //     app.toolbar.icon = e.detail.icon;
-  //   } else {
-  //     app.toolbar.icon = 'menu';
-  //   }
-  // });
-
   // Listen for template bound event to know when bindings
   // have resolved and content has been stamped to the page
   app.addEventListener('dom-change', function () {
@@ -41,6 +27,9 @@
 
   // imports are loaded and elements have been registered
   window.addEventListener('WebComponentsReady', function () {
+    if (app.user.token === undefined || app.user.token === '') {
+      window.location = '/login?mode=select';
+    }
     app.service = app.$.service;
   });
 
@@ -83,5 +72,25 @@
 
   app.openDrawer = function openDrawer() {
     app.$.paperDrawerPanel.openDrawer();
+  };
+
+  app.toast = function toast(text) {
+    app.$.toast.text = text;
+    app.$.toast.show();
+  };
+
+  app.updateToolbar = function updateToolbar(e) {
+    if (e.detail.title !== undefined && e.detail.title === '') {
+      app.title = e.detail.title;
+    }
+    if (e.detail.subtitle !== undefined && e.detail.subtitle === '') {
+      app.subtitle = e.detail.subtitle;
+    }
+    // TODO: add on click call iconCallback
+    if (e.detail.icon !== undefined && e.detail.icon !== '') {
+      app.icon = e.detail.icon;
+    } else {
+      app.icon = 'menu';
+    }
   };
 })(document);

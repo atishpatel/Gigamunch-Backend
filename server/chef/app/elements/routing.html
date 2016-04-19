@@ -7,7 +7,19 @@
   window.addEventListener('WebComponentsReady', function() {
 
     app.redirect = function(e) {
-      page.redirect(e.detail.URL);
+      var url;
+      switch (typeof e) {
+        case 'string':
+          url = e;
+          break;
+        case 'object':
+          url = e.detail.URL;
+          break;
+        default:
+          console.warn('redirect of unknown type was called', e);
+          return;
+      }
+      page.redirect(url);
     }
 
     // Middleware
@@ -20,13 +32,6 @@
       app.closeDrawer();
       next();
     }
-
-    // function checkLoggedIn(ctx, next) {
-    //   if(app.user.isLoggedIn === undefined || !app.user.isLoggedIn) {
-    //     window.location.replace('/login?mode=select');
-    //   }
-    //   next();
-    // }
 
     function setFocus(selected) {
       Polymer.dom(document)
