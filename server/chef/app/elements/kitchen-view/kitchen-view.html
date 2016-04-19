@@ -23,10 +23,9 @@
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
-<link rel="import" href="../../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 
+<link rel="import" href="../item-list/item-list.html">
 <link rel="import" href="../item-form/item-form.html">
 
 <dom-module id="kitchen-view">
@@ -39,19 +38,12 @@
 
     <iron-pages attr-for-selected="data-route" selected="{{route}}">
       <section data-route="">
-        <paper-card heading="Card Title">
-          <div class="card-content">Some content</div>
-          <div class="card-actions">
-            <paper-button>Some action</paper-button>
-            <paper-button>Some action2</paper-button>
-          </div>
-        </paper-card>
-
+        <item-list id="list" items=[[_items]]></item-list>
         <paper-fab icon="add" on-tap="_addItem"></paper-fab>
       </section>
       <section data-route="view"></section>
       <section data-route="edit">
-        <item-form on-save="_saveItem" item={{_item}}></item-form>
+        <item-form id="edit" on-save="_saveItem" item={{_item}}></item-form>
       </section>
     </iron-pages>
 
@@ -76,25 +68,70 @@
         _item: {
           type: Object,
           notify: true
+        },
+        _items: {
+          type: Array,
+          notify: true
         }
       },
 
       select: function() {
-
+        // get id from url
+        switch (this.route) {
+          case '':
+            this._getItems();
+            break;
+          case 'edit':
+            // TODO get item from id
+            break;
+          default:
+            // should never happen
+            break;
+        }
+      },
+      _getItems: function() {
+        if (this.service === undefined) {
+          this.async(this._getItems, 200);
+          return;
+        }
+        var startLimit = 0;
+        var endLimit = 100;
+        this.service.getItems(startLimit, endLimit, function(items, err) {
+            // TODO: handle err
+            console.log('items', items, 'err', err);
+            this._items = items;
+         }.bind(this)
+       );
       },
       _addItem: function() {
         this.fire('redirect', {URL: '/kitchen/edit'})
       },
-
       _saveItem: function() {
         if (this.service === undefined) {
           this.async(this._saveItem, 200);
           return;
         }
+
+        this.service.saveItem(this._item, function(item, err) {
+            // TODO: handle err
+            console.log('save item err',err);
+            this.$.edit.saved();
+            this._item = item;
+            var url = '/kitchen/view?id=' + item.id;
+            this.fire('redirect', {URL: url});
+         }.bind(this)
+       );
+      },
+      _getParameterByName: function(name) {
+        var url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
       }
-
     });
-
   })();
   </script>
 </dom-module>

@@ -1,11 +1,5 @@
 <!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+  gigachef-service is an element that connects to the Google Endpoint gigachefservice.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
@@ -38,17 +32,64 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           reflectToAttribute: true,
           value: false
         },
-        callQueue: {
+        _callQueue: {
           type: Array,
           value: function() { return new Array() }
         }
       },
+      getItems: function(startLimit, endLimit, callback) {
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+          this._callQueue.push(function() {
+            this.getItems(startLimit, endLimit, callback);
+          }.bind(this));
+          return;
+        }
+
+        var request = {
+          gigatoken: this._getGigatoken(),
+          start_limit: startLimit,
+          end_limit: endLimit,
+        };
+        this
+          .service
+          .getItems(request)
+          .execute(
+            function(resp) {
+              callback(resp.items, resp.err);
+            }
+          );
+      },
+      saveItem: function(item, callback) {
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+          this._callQueue.push(function() {
+            this.saveItem(item, callback);
+          }.bind(this));
+          return;
+        }
+
+        var request = {
+          gigatoken: this._getGigatoken(),
+          item: item,
+        };
+
+        this
+          .service
+          .saveItem(request)
+          .execute(
+            function(resp) {
+              callback(resp.item, resp.err);
+            }
+          );
+      },
+
       // getApplication gets the application for a user
       // callback paramerter should be function(application, error)
       getApplication: function(callback) {
-        // if api is not loaded, add to callQueue
+        // if api is not loaded, add to _callQueue
         if (!this.loaded) {
-          this.callQueue.push(function() {
+          this._callQueue.push(function() {
             this.getApplication(callback);
           }.bind(this));
           return;
@@ -62,21 +103,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .getApplication(request)
           .execute(
             function(resp) {
-              console.log(resp);
               callback(resp.application, resp.err);
             }
           );
       },
       submitApplication: function(application, callback) {
-        // if api is not loaded, add to callQueue
+        // if api is not loaded, add to _callQueue
         if (!this.loaded) {
-          this.callQueue.push(function() {
+          this._callQueue.push(function() {
             this.submitApplication(application, callback);
           }.bind(this));
           return;
-        }
-        application.toString = function() {
-          return JSON.stringify(this);
         }
 
         var request = {
@@ -89,7 +126,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           .submitApplication(request)
           .execute(
             function(resp) {
-              console.log(resp);
               callback(resp.application, resp.err);
             }
           );
@@ -97,14 +133,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _getGigatoken: function() {
         return this.user.token;
       },
+      // _logError: function(err) {
+      //   if(err !== undefined) {
+      //     if(err.code !== undefined || err.code !== 0) {
+      //       // TODO: add google analytics logging
+      //       console.log(err);
+      //     }
+      //   }
+      // },
       _serviceLoaded: function() {
         this.service = this.$.gigachefservice.api;
         this.loaded = true;
-        // remove functions from callQueue after calling them.
-        if (this.callQueue !== undefined || this.callQueue !== null) {
-          for (var i in this.callQueue) {
-            this.callQueue[i]();
-            delete(this.callQueue[i]);
+        // remove functions from _callQueue after calling them.
+        if (this._callQueue !== undefined || this._callQueue !== null) {
+          for (var i in this._callQueue) {
+            this._callQueue[i]();
+            delete(this._callQueue[i]);
           }
         }
       },
