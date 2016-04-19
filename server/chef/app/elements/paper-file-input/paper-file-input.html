@@ -68,8 +68,10 @@
         this.$.file.click();
       },
       _addPhoto: function(url) {
-        console.log("add photo url ", url, this.photos);
         if(url !== undefined && url !== "") {
+          if(this.photos === undefined) {
+            this.photos = new Array();
+          }
           this.push('photos', url);
         }
       },

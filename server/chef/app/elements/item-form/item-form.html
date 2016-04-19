@@ -30,7 +30,6 @@
           action="#"
           on-change="_updateSubmitButtonState"
           on-iron-form-presubmit="_saveItem">
-      <!-- TODO: create photos element -->
       <paper-file-input photos="{{item.photos}}"
                         action="/upload"
                         ></paper-file-input>
@@ -38,23 +37,23 @@
                    value="{{item.title}}"
                    required
                    auto-validate></paper-input>
-      <paper-input label="Discription"
-                   value="{{item.discription}}"
+      <paper-input label="Description"
+                   value="{{item.description}}"
                    required
                    auto-validate></paper-input>
       <paper-input label="Ingredients"
                    placeholder="tomatos,onions,..."
-                   value="{{item.ingredients}}"
+                   value="{{_ingredients}}"
                    required
                    auto-validate></paper-input>
       <paper-input label="General Tags"
-                   value="{{item.general_tags}}"
+                   value="{{_general_tags}}"
                    required
                    auto-validate></paper-input>
       <!-- TODO: switch to a checklist for dietary needs -->
       <paper-input label="Dietary Needs Tags"
                    placeholder="vegetarian,no-nuts,..."
-                   value="{{item.dietary_needs_tags}}"
+                   value="{{_dietary_needs_tags}}"
                    auto-validate></paper-input>
       <paper-button id="submitButton"
                    on-tap="_submit"
@@ -75,12 +74,29 @@
           item: {
             type: Object,
             notify: true,
-            reflectToAttribute: true
+            reflectToAttribute: true,
+            value: {}
           },
           _token: {
             type: String,
             notify:true
+          },
+          _ingredients: {
+            type: String,
+            observer: '_updateIngredients'
+          },
+          _general_tags: {
+            type: String,
+            observer: '_updateGeneralTags'
+          },
+          _dietary_needs_tags: {
+            type: String,
+            observer: '_updateDietaryNeedsTags'
           }
+        },
+        saved: function() {
+          this.$.spinner.hidden = true;
+          this.$.spinner.active = false;
         },
         _saveItem: function(event) {
           if (event !== undefined || event !== null) {
@@ -93,6 +109,15 @@
         },
         _submit: function() {
           this.$.form.submit();
+        },
+        _updateIngredients: function(ing) {
+          this.item.ingredients = ing.split(',');
+        },
+        _updateGeneralTags: function(gt) {
+          this.item.general_tags = gt.split(',');
+        },
+        _updateDietaryNeedsTags: function(dnt) {
+          this.item.dietary_needs_tags = dnt.split(',');
         },
         _updateSubmitButtonState: function() {
           var form = this.$.form;
