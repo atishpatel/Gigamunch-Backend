@@ -38,12 +38,13 @@
 
     <iron-pages attr-for-selected="data-route" selected="{{route}}">
       <section data-route="">
-        <item-list id="list" items=[[_items]]></item-list>
+        <item-list id="list"
+                   items="[[_items]]">
+        </item-list>
         <paper-fab icon="add" on-tap="_addItem"></paper-fab>
       </section>
-      <section data-route="view"></section>
       <section data-route="edit">
-        <item-form id="edit" on-save="_saveItem" item={{_item}}></item-form>
+        <item-form id="edit" on-save="_saveItem" item="{{_item}}"></item-form>
       </section>
     </iron-pages>
 
@@ -98,7 +99,6 @@
         var endLimit = 100;
         this.service.getItems(startLimit, endLimit, function(items, err) {
             // TODO: handle err
-            console.log('items', items, 'err', err);
             this._items = items;
          }.bind(this)
        );
