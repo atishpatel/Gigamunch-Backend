@@ -37,6 +37,28 @@
           value: function() { return new Array() }
         }
       },
+      getItem: function(id, callback) {
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+          this._callQueue.push(function() {
+            this.getItem(id, callback);
+          }.bind(this));
+          return;
+        }
+
+        var request = {
+          gigatoken: this._getGigatoken(),
+          id: id,
+        };
+        this
+          .service
+          .getItem(request)
+          .execute(
+            function(resp) {
+              callback(resp.item, resp.err);
+            }
+          );
+      },
       getItems: function(startLimit, endLimit, callback) {
         // if api is not loaded, add to _callQueue
         if (!this.loaded) {
