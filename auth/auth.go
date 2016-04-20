@@ -43,7 +43,7 @@ func DeleteSessionToken(ctx context.Context, JWTString string) error {
 		return errDatastore.WithError(err)
 	}
 	for i := len(userSessions.TokenIDs) - 1; i >= 0; i-- {
-		if int32(userSessions.TokenIDs[i].JTI) == token.JTI {
+		if userSessions.TokenIDs[i].JTI == token.JTI {
 			// UserSession token should be removed
 			userSessions.TokenIDs = append(userSessions.TokenIDs[:i], userSessions.TokenIDs[i+1:]...)
 			break
@@ -156,7 +156,7 @@ func GetUserFromToken(ctx context.Context, JWTString string) (*types.User, error
 		err := getUserSessions(ctx, token.User.ID, userSessions)
 		if err != nil {
 			// error doesn't matter. They should just call RefreshToken
-			return nil, errTokenExpired
+			return nil, errInvalidToken.WithMessage("Datastore error.").WithError(err)
 		}
 		return &userSessions.User, nil
 	}
@@ -208,7 +208,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 		}
 	}
 	for i := len(userSessions.TokenIDs) - 1; i >= 0; i-- {
-		if int32(userSessions.TokenIDs[i].JTI) == token.JTI {
+		if userSessions.TokenIDs[i].JTI == token.JTI {
 			found = true
 			if userSessions.TokenIDs[i].UpdatedToJTI != 0 {
 				token.JTI = userSessions.TokenIDs[i].UpdatedToJTI
@@ -245,6 +245,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 	return jwtString, nil
 }
 
+// GetExpTime returns the time a token should expire from now
 func GetExpTime() time.Time {
 	return time.Now().UTC().Add(time.Hour * 24 * 60)
 }
@@ -264,25 +265,25 @@ func getJWTToken() *jwt.Token {
 func extractClaims(jwtToken *jwt.Token) (*Token, error) {
 	getStringClaim := func(name string, ok bool) (string, bool) {
 		if ok {
-			tmp, ok := jwtToken.Claims[name].(string)
-			return tmp, ok
+			tmp, ok2 := jwtToken.Claims[name].(string)
+			return tmp, ok2
 		}
 		return "", ok
 	}
 	getInt32Claim := func(name string, ok bool) (int32, bool) {
 		if ok {
-			tmp, ok := jwtToken.Claims[name].(float64)
-			if ok {
-				return int32(tmp), ok
+			tmp, ok2 := jwtToken.Claims[name].(float64)
+			if ok2 {
+				return int32(tmp), ok2
 			}
 		}
 		return 0, ok
 	}
 	getTimeClaim := func(name string, ok bool) (time.Time, bool) {
 		if ok {
-			tmp, ok := jwtToken.Claims[name].(float64)
-			if ok {
-				return time.Unix(int64(tmp), 0), ok
+			tmp, ok2 := jwtToken.Claims[name].(float64)
+			if ok2 {
+				return time.Unix(int64(tmp), 0), ok2
 			}
 		}
 		return time.Now(), ok
