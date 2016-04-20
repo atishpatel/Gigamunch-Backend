@@ -55,7 +55,6 @@ func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplic
 	}
 	chefApplication, err := application.SubmitApplication(ctx, user, &req.Application)
 	if err != nil {
-		utils.Debugf(ctx, "err: %+v", err)
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
@@ -102,7 +101,6 @@ func (service *Service) GetApplication(ctx context.Context, req *GetApplicationR
 	}
 	chefApplication, err := application.GetApplication(ctx, user)
 	if err != nil {
-		utils.Debugf(ctx, "err: %+v", err)
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
