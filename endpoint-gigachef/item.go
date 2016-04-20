@@ -1,6 +1,7 @@
 package gigachef
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -55,8 +56,9 @@ func (i *Item) Get() *item.Item {
 
 // GetItemReq is the input request needed for GetItem.
 type GetItemReq struct {
-	GigaToken string `json:"gigatoken"`
-	ID        int    `json:"id"`
+	GigaToken string      `json:"gigatoken"`
+	ID        json.Number `json:"id"`
+	IDInt     int64       `json:"-"`
 }
 
 // Gigatoken returns the GigaToken string
@@ -69,8 +71,13 @@ func (req *GetItemReq) Valid() error {
 	if req.GigaToken == "" {
 		return fmt.Errorf("GigaToken is empty")
 	}
-	if req.ID == 0 {
+	if req.ID.String() == "0" {
 		return fmt.Errorf("ID is empty")
+	}
+	var err error
+	req.IDInt, err = req.ID.Int64()
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -94,12 +101,12 @@ func (service *Service) GetItem(ctx context.Context, req *GetItemReq) (*GetItemR
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	i, err := item.GetItem(ctx, user, int64(req.ID))
+	i, err := item.GetItem(ctx, user, req.IDInt)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.Item.Set(req.ID, i)
+	resp.Item.Set(int(req.IDInt), i)
 	return resp, nil
 }
 
