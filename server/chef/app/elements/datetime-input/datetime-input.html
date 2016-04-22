@@ -38,6 +38,7 @@
       label {
         font-size: 12px;
         color: #727272;
+        -webkit-font-smoothing: antialiased;
       }
       paper-input {
         margin-top: -20px;
@@ -69,7 +70,7 @@
     <paper-dialog id="timePickerDialog" modal
                   class="paper-time-picker-dialog"
                   on-iron-overlay-closed="_dismissTimeDialog">
-      <paper-time-picker id="timePicker" time="{{_time}}"></paper-time-picker>
+      <paper-time-picker id="timePicker" animated="false"></paper-time-picker>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button dialog-confirm>OK</paper-button>
@@ -110,24 +111,22 @@
         }
       },
       _updateEpoch: function(epochTime) {
-        console.log('epochTime', epochTime);
         var epochDate = new Date(epochTime);
         this.epoch = epochTime;
         this._date = epochDate.toLocaleDateString();
         this._d = epochDate;
-        this._time = epochDate.toLocaleTimeString().replace(/:[0-9][0-9]/,'');
-
+        this._time = epochDate.toLocaleTimeString().replace(/:[0-9][0-9] /,' ');
+        this.$.timePicker.time = this._time;
       },
       _dismissTimeDialog: function(e) {
         if (e.detail.confirmed) {
-          this._time = this.$.timePicker.time;
-          this.epoch = new Date(this._date + ' ' + this._time).getTime();
+          this.epoch = new Date(this._date + ' ' + this.$.timePicker.time).getTime();
         }
+        this.$.timePicker.view = 'hours';
       },
       _dismissDateDialog: function(e) {
         if (e.detail.confirmed) { // pressed ok
-          this._date = new Date(this._d).toLocaleDateString();
-          this.epoch = new Date(this._date + ' ' + this._time).getTime();
+          this.epoch = new Date(new Date(this._d).toLocaleDateString() + ' ' + this._time).getTime();
         } else { // pressed cancel
           this._d = new Date(this._date);
         }
