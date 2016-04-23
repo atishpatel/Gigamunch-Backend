@@ -84,8 +84,8 @@ func (req *PostPostReq) Valid() error {
 
 // PostPostResp is the output response for PostPost.
 type PostPostResp struct {
-	PostID int                  `json:"post_id"`
-	Err    errors.ErrorWithCode `json:"err"`
+	Post Post                 `json:"post"`
+	Err  errors.ErrorWithCode `json:"err"`
 }
 
 // PostPost is an endpoint that post a post form a Gigachef
@@ -101,12 +101,12 @@ func (service *Service) PostPost(ctx context.Context, req *PostPostReq) (*PostPo
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	postID, err := post.PostPost(ctx, user, req.Post.Get())
+	p := req.Post.Get()
+	postID, err := post.PostPost(ctx, user, p)
 	if err != nil {
-		utils.Errorf(ctx, "PostPost error: %+v", err)
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.PostID = int(postID)
+	resp.Post.Set(int(postID), p)
 	return resp, nil
 }
