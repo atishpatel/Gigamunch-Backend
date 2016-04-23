@@ -43,9 +43,9 @@
           <p>{{item.description}}</p>
         </div>
         <div class="card-actions">
-          <paper-button>Order Now Post</paper-button>
+          <paper-button on-tap="_orderNowPost">Order Now Post</paper-button>
           <span class="divider"></span>
-          <paper-button>Pre-order Post</paper-button>
+          <paper-button on-tap="_preorderPost">Pre-order Post</paper-button>
         </div>
       </paper-card>
     </template>
@@ -62,6 +62,14 @@
           type: Array,
           notify: true
         }
+      },
+      _orderNowPost: function(e) {
+        var url = '/orders/edit?id=' + e.model.item.id+ '&type=orderNow';
+        this.fire('redirect', {URL: url, item: e.model.item});
+      },
+      _preorderPost: function(e) {
+        var url = '/orders/edit?id=' + e.model.item.id + '&type=preorder';
+        this.fire('redirect', {URL: url, item: e.model.item});
       },
       _getPhoto: function(item) {
         if(item.photos === undefined || item.photos === null) {

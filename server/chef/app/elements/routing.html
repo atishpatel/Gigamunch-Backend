@@ -76,11 +76,13 @@
 
     page(ordersURL, function() {
       setPageConfig('Orders', 'All the food people want from you.', '', 'orders');
+      app.$.ordersView.select();
       setFocus(app.route);
     });
 
     page(ordersURL+'/:subpath', function(ctx) {
       setPageConfig('Orders', 'All the food people want from you.', ctx.params.subpath, 'orders');
+      app.$.ordersView.select();
       setFocus(app.route);
     });
 

@@ -37,6 +37,29 @@
           value: function() { return new Array() }
         }
       },
+      postPost: function(post, callback) {
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+          this._callQueue.push(function() {
+            this.postPost(post, callback);
+          }.bind(this));
+          return;
+        }
+
+        var request = {
+          gigatoken: this._getGigatoken(),
+          post: post,
+        };
+        this
+          .service
+          .postPost(request)
+          .execute(
+            function(resp) {
+              this._logError(resp.err);
+              callback(resp.post, resp.err);
+            }.bind(this)
+          );
+      },
       getItem: function(id, callback) {
         // if api is not loaded, add to _callQueue
         if (!this.loaded) {
@@ -108,7 +131,6 @@
             }.bind(this)
           );
       },
-
       // getApplication gets the application for a user
       // callback paramerter should be function(application, error)
       getApplication: function(callback) {
@@ -152,7 +174,7 @@
           .submitApplication(request)
           .execute(
             function(resp) {
-              this._logError(err);
+              this._logError(resp.err);
               callback(resp.application, resp.err);
             }.bind(this)
           );
@@ -161,6 +183,7 @@
         return this.user.token;
       },
       _logError: function(err) {
+        // TODO: Signout if code is signout
         if(err !== undefined) {
           if(err.code !== undefined && err.code !== 0) {
             // TODO: add google analytics logging

@@ -1,0 +1,202 @@
+<!--
+
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../paper-file-input/paper-file-input.html">
+<link rel="import" href="../datetime-input/datetime-input.html">
+
+<dom-module id="post-form">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #submitButton {
+        width: 100%;
+      }
+    </style>
+    <form is="iron-form"
+          id="form"
+          method="post"
+          action="#"
+          on-change="_updateSubmitButtonState"
+          on-iron-form-presubmit="_postPost">
+      <paper-file-input photos="{{post.photos}}"
+                        action="/upload">
+      </paper-file-input>
+      <paper-input label="Title"
+                   value="{{post.title}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input label="Description"
+                   value="{{post.description}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input label="Ingredients"
+                   placeholder="tomatos,onions,..."
+                   value="{{_ingredients}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input label="General Tags"
+                   value="{{_general_tags}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input label="Dietary Needs Tags"
+                   placeholder="vegetarian,no-nuts,..."
+                   value="{{_dietary_needs_tags}}"
+                   auto-validate>
+      </paper-input>
+      <paper-input label="Number of Servings Offered"
+                   value="{{_servings_offered}}"
+                   type="number"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input label="Price per serving"
+                   value="{{_price_per_serving}}"
+                   type="number"
+                   required
+                   auto-validate>
+        <div prefix>$&nbsp;</div>
+      </paper-input>
+      <datetime-input label="Post close time"
+                      epoch="{{post.closing_datetime}}">
+      </datetime-input>
+      <template is="dom-if" if="[[_isPreorder]]" restamp="true">
+        <datetime-input label="Meal ready time"
+                        epoch="{{post.ready_datetime}}">
+        </datetime-input>
+        <!-- <<paper-checkbox checked="{{post.d}}"></paper-checkbox> -->
+      </template>
+      <paper-button id="submitButton"
+                   on-tap="_submit"
+                   raised
+                   disabled>
+        <paper-spinner id="spinner" hidden></paper-spinner>Post
+      </paper-button>
+    </form>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'post-form',
+
+      properties: {
+        post: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          value: {}
+        },
+        item: {
+          type: Object,
+          notify: true,
+          observer: '_updateItem'
+        },
+        type: {
+          type: Number,
+          notify: true,
+          value: 0,
+          observer: '_updateType'
+        },
+        _price_per_serving: {
+          type: String,
+          observer: '_updatePricePerServing'
+        },
+        _servings_offered: {
+          type: String,
+          observer: '_updateServingsOffered'
+        },
+        _ingredients: {
+          type: String,
+          observer: '_updateIngredients'
+        },
+        _general_tags: {
+          type: String,
+          observer: '_updateGeneralTags'
+        },
+        _dietary_needs_tags: {
+          type: String,
+          observer: '_updateDietaryNeedsTags'
+        },
+        _isPreorder: {
+          type: Boolean,
+          value: true
+        }
+      },
+      saved: function() {
+        this.$.spinner.hidden = true;
+        this.$.spinner.active = false;
+      },
+      _postPost: function(event) {
+        if (event !== undefined || event !== null) {
+          event.preventDefault();
+        }
+        this.$.spinner.hidden = false;
+        this.$.spinner.active = true;
+        this.$.submitButton.disabled = true;
+        this.fire('post', {post: this.post});
+      },
+      _submit: function() {
+        this.$.form.submit();
+      },
+      _updatePricePerServing: function() {
+        this.post.price_per_serving = parseFloat(this._price_per_serving);
+      },
+      _updateServingsOffered: function() {
+        this.post.servings_offered = parseInt(this._servings_offered);
+      },
+      _updateType: function() {
+        this._isPreorder = (this.type === 0);
+      },
+      _updateItem: function(item) {
+        if(item !== undefined && item !== null) {
+          this.post.item_id = item.id;
+          this.set('post.photos',item.photos);
+          this.set('post.title',item.title);
+          this.set('post.description',item.description);
+          if(item.ingredients !== null) {
+            this._ingredients = item.ingredients.toString();
+          }
+          if(item.general_tags !== null) {
+            this._general_tags = item.general_tags.toString();
+          }
+          if(item.dietary_needs_tags !== null) {
+            this._dietary_needs_tags = item.dietary_needs_tags.toString();
+          }
+        }
+      },
+      _updateIngredients: function(ing) {
+        this.post.ingredients = ing.split(',');
+      },
+      _updateGeneralTags: function(gt) {
+        this.post.general_tags = gt.split(',');
+      },
+      _updateDietaryNeedsTags: function(dnt) {
+        this.post.dietary_needs_tags = dnt.split(',');
+      },
+      _updateSubmitButtonState: function() {
+        var form = this.$.form;
+        var submitButton = this.$.submitButton;
+        // Validate the entire form to see if we should enable the `Submit` button.
+        submitButton.disabled = !form.validate();
+      }
+    });
+  })();
+  </script>
+</dom-module>
