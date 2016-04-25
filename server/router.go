@@ -29,6 +29,7 @@ func init() {
 }
 
 func handle404(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("GIGA 404 page. :()"))
 }
 
