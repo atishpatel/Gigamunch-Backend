@@ -11,19 +11,20 @@ redis-server > /dev/null &
 /usr/local/opt/mysql56/bin/mysql.server start
 # create gigamunch database
 cat misc/create_gigamunch_datbase.sql | mysql -uroot
-# create live_meals table
-mysql -uroot gigamunch < misc/create_live_meals_table.sql
+# create live_posts table
+mysql -uroot gigamunch < misc/create_live_posts_table.sql
 # TODO create user for get and create mysql and one of cron delete
 ################################################################################
 # goapp
 ################################################################################
 echo 'starting goapp'
-# goapp serve server/app.yaml endpoint-gigachef/app.yaml endpoint-gigamuncher/app.yaml
-goapp serve endpoint-gigamuncher/app.yaml
+dev_appserver.py --datastore_path ./.datastore endpoint-gigachef/app.yaml server/app-dev.yaml # endpoint-gigamuncher/app.yaml
 ################################################################################
 # clean up
 ################################################################################
 echo 'stopping mysql'
 /usr/local/opt/mysql56/bin/mysql.server stop
-# kill all subprocesses
-trap 'kill $(jobs -p)' EXIT
+
+echo 'stopping redis server'
+redis-cli shutdown
+wait
