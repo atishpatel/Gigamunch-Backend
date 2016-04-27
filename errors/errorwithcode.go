@@ -9,7 +9,7 @@ type ErrorWithCode struct {
 }
 
 func (err ErrorWithCode) Error() string {
-	return fmt.Sprintf("Errorcode %d: %s: %+v", err.Code, err.Message, err.Details)
+	return fmt.Sprintf("Errorcode %d:\tMessage %s:\tDetails %s", err.Code, err.Message, err.Details)
 }
 
 // WithMessage sets Message. Makes chaining easier.
@@ -21,6 +21,13 @@ func (err ErrorWithCode) WithMessage(msg string) ErrorWithCode {
 // WithError sets Details to error.Error()
 func (err ErrorWithCode) WithError(e error) ErrorWithCode {
 	err.Details = e.Error()
+	return err
+}
+
+// Wrap adds details to the error by making error.Details = additionalDetail + oldDetails
+func Wrap(additionalDetail string, e error) ErrorWithCode {
+	err := GetErrorWithCode(e)
+	err.Details = additionalDetail + err.Details
 	return err
 }
 
