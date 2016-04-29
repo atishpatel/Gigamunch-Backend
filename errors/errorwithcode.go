@@ -2,14 +2,18 @@ package errors
 
 import "fmt"
 
+// ErrorWithCode is used to pass errors with a code, message, and details.
+// The code is used to identify the type of error.
+// The message is a human readable message.
+// The details is the error message itself.
 type ErrorWithCode struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-	Details string `json:"details"`
+	Detail  string `json:"detail"`
 }
 
 func (err ErrorWithCode) Error() string {
-	return fmt.Sprintf("Errorcode %d:\tMessage %s:\tDetails %s", err.Code, err.Message, err.Details)
+	return fmt.Sprintf("Errorcode: %d| Message: %s| Detail: %s", err.Code, err.Message, err.Detail)
 }
 
 // WithMessage sets Message. Makes chaining easier.
@@ -20,15 +24,27 @@ func (err ErrorWithCode) WithMessage(msg string) ErrorWithCode {
 
 // WithError sets Details to error.Error()
 func (err ErrorWithCode) WithError(e error) ErrorWithCode {
-	err.Details = e.Error()
+	err.Detail = e.Error()
 	return err
 }
 
-// Wrap adds details to the error by making error.Details = additionalDetail + oldDetails
-func Wrap(additionalDetail string, e error) ErrorWithCode {
-	err := GetErrorWithCode(e)
-	err.Details = additionalDetail + err.Details
+//Wrap annotates the error by prepending string to error's details
+func (err ErrorWithCode) Wrap(additionalDetail string) ErrorWithCode {
+	if err.Detail == "" {
+		err.Detail = additionalDetail
+	} else {
+		err.Detail = additionalDetail + ": " + err.Detail
+	}
 	return err
+}
+
+// Wrap annotates the error by prepending string to error's details
+func Wrap(additionalDetail string, e error) error {
+	if e == nil {
+		return nil
+	}
+	err := GetErrorWithCode(e)
+	return err.Wrap(additionalDetail)
 }
 
 // GetErrorWithCode casts error as ErrorWithCode or creates an ErrorWithCode
