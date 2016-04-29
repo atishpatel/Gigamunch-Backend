@@ -6,6 +6,6 @@ tags
 dump.rdb
 node_modules
 **/app/bower_components
-.tmp
+*.tmp
 .publish
 .datastore
