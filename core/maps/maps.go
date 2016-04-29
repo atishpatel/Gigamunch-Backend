@@ -19,11 +19,12 @@ const (
 
 var (
 	serverKey      string
-	mapsConnectErr = errors.ErrorWithCode{
+	errMapsConnect = errors.ErrorWithCode{
 		Code:    errors.CodeInternalServerErr,
 		Message: "Could not connect to Google Maps.",
 	}
-	errMaps = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with Google Maps."}
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errMaps             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with Google Maps."}
 )
 
 // GetDistance returns the distance using roads between two points.
@@ -41,7 +42,7 @@ func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Durat
 	}
 	mapsResp, err := mapsClient.DistanceMatrix(ctx, mapsReq)
 	if err != nil {
-		return 0, nil, errMaps.WithError(err)
+		return 0, nil, errMaps.WithError(err).Wrap("cannot get distance martrix")
 	}
 	element := mapsResp.Rows[0].Elements[0]
 	miles := float32(element.Distance.Meters) / metersInMile // convert to miles
@@ -62,18 +63,10 @@ func GetGeopointFromAddress(ctx context.Context, address *types.Address) error {
 	}
 	mapsGeocodeResults, err := mapsClient.Geocode(ctx, mapsReq)
 	if err != nil {
-		returnErr := errors.ErrorWithCode{
-			Code:    errors.CodeInternalServerErr,
-			Message: "Error getting geopoint from address.",
-		}
-		return returnErr.WithError(err)
+		return errMaps.WithError(err).Wrap("cannot get geopoint from address")
 	}
 	if mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated) {
-		returnErr := errors.ErrorWithCode{
-			Code:    errors.CodeInvalidParameter,
-			Message: "Address is not valid.",
-		}
-		return returnErr
+		return errInvalidParameter.WithMessage("Address is not valid.")
 	}
 	location := mapsGeocodeResults[0].Geometry.Location
 	address.GeoPoint = types.GeoPoint{
@@ -90,7 +83,7 @@ func getMapsClient(ctx context.Context) (*maps.Client, error) {
 	var err error
 	mapsClient, err := maps.NewClient(maps.WithAPIKey(serverKey), maps.WithHTTPClient(urlfetch.Client(ctx)))
 	if err != nil {
-		return nil, mapsConnectErr.WithError(err)
+		return nil, errMapsConnect.WithError(err).Wrap("cannot get new maps client")
 	}
 	return mapsClient, nil
 }
