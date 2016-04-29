@@ -8,10 +8,10 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/account"
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/atishpatel/Gigamunch-Backend/utils/maps"
 )
 
 // GetApplications gets all applications

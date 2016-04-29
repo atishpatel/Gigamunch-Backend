@@ -7,7 +7,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 	"googlemaps.github.io/maps"
 
@@ -19,7 +18,7 @@ const (
 )
 
 var (
-	mapsClient     *maps.Client
+	serverKey      string
 	mapsConnectErr = errors.ErrorWithCode{
 		Code:    errors.CodeInternalServerErr,
 		Message: "Could not connect to Google Maps.",
@@ -31,9 +30,9 @@ var (
 // The points should return string "X,Y" where X and Y are floats.
 // returns miles, duration, err
 func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Duration, error) {
-	getMapsClient(ctx)
-	if mapsClient == nil {
-		return 0, nil, mapsConnectErr
+	mapsClient, err := getMapsClient(ctx)
+	if err != nil {
+		return 0, nil, err
 	}
 	mapsReq := &maps.DistanceMatrixRequest{
 		Origins:      []string{p1.String()},
@@ -51,9 +50,9 @@ func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Durat
 
 // GetGeopointFromAddress sets Latitude and Longitude to an address.
 func GetGeopointFromAddress(ctx context.Context, address *types.Address) error {
-	getMapsClient(ctx)
-	if mapsClient == nil {
-		return mapsConnectErr
+	mapsClient, err := getMapsClient(ctx)
+	if err != nil {
+		return err
 	}
 	mapsCompMap := make(map[maps.Component]string, 1)
 	mapsCompMap[maps.ComponentCountry] = "US"
@@ -84,12 +83,14 @@ func GetGeopointFromAddress(ctx context.Context, address *types.Address) error {
 	return nil
 }
 
-func getMapsClient(ctx context.Context) {
-	if mapsClient == nil {
-		var err error
-		mapsClient, err = maps.NewClient(maps.WithAPIKey(config.GetServerKey(ctx)), maps.WithHTTPClient(urlfetch.Client(ctx)))
-		if err != nil {
-			utils.Errorf(ctx, "failed to get maps client: %+v", err)
-		}
+func getMapsClient(ctx context.Context) (*maps.Client, error) {
+	if serverKey == "" {
+		serverKey = config.GetServerKey(ctx)
 	}
+	var err error
+	mapsClient, err := maps.NewClient(maps.WithAPIKey(serverKey), maps.WithHTTPClient(urlfetch.Client(ctx)))
+	if err != nil {
+		return nil, mapsConnectErr.WithError(err)
+	}
+	return mapsClient, nil
 }

@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/atishpatel/Gigamunch-Backend/utils/maps"
 	"golang.org/x/net/context"
 )
 
@@ -185,6 +185,7 @@ type GigachefDetailed struct {
 	PhotoURL                string `json:"photo_url,omitempty"`
 	gigachef.GigachefRating        // embedded
 	NumOrders               int    `json:"num_orders,omitempty"`
+	// TODO add lad, long
 }
 
 // Set takes chef info and saves it to an endpoint GigachefDetails
@@ -232,10 +233,11 @@ func (req *GetPostReq) Valid() error {
 // GetPostResp is the response for getting a post
 //returns: post, error
 type GetPostResp struct {
-	Post     PostDetailed         `json:"post,omitempty"`
-	Gigachef GigachefDetailed     `json:"gigachef,omitempty"`
-	Reviews  []Review             `json:"reviews,omitempty"`
-	Err      errors.ErrorWithCode `json:"err"`
+	Post     PostDetailed     `json:"post,omitempty"`
+	Gigachef GigachefDetailed `json:"gigachef,omitempty"`
+	Reviews  []Review         `json:"reviews,omitempty"`
+	// TODO get payment info
+	Err errors.ErrorWithCode `json:"err"`
 }
 
 // GetPost gets the details for a post
