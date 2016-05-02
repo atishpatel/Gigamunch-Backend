@@ -12,6 +12,10 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
+const (
+	taxPercentage = 9.25
+)
+
 var (
 	// errNotVerifiedChef is an error for when unverfied chefs try and unauthorized action
 	errNotVerifiedChef = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not a verified chef."}
@@ -25,7 +29,9 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	if !user.IsVerifiedChef() {
 		return 0, errNotVerifiedChef
 	}
+	// TODO check if chef has sub merchant info stuff
 	post.CreatedDateTime = time.Now().UTC()
+	post.TaxPercentage = taxPercentage
 	post.GigachefID = user.ID
 	// get the gigachef address
 	var address *types.Address
@@ -34,7 +40,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	if err != nil {
 		return 0, err
 	}
-	post.Address = *address
+	post.GigachefAddress = *address
 	post.GigachefDeliveryRadius = radius
 	// IncrementNumPost for gigachef
 	errChan := make(chan error, 1)

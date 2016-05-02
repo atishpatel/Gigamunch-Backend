@@ -38,7 +38,17 @@ func insertLivePost(postID int64, post *Post) error {
 		INTO live_posts
 		(post_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_order_now, is_experimental, is_baked_good, latitude, longitude)
 		VALUES (?,?,?,?,?,?,?,?,?,?)`,
-		postID, post.GigachefID, post.ClosingDateTime.Format(time.RFC3339), post.ReadyDateTime.Format(time.RFC3339), post.Title, post.IsOrderNow, 0, 0, post.Latitude, post.Longitude)
+		postID,
+		post.GigachefID,
+		post.ClosingDateTime.Format(time.RFC3339),
+		post.ReadyDateTime.Format(time.RFC3339),
+		post.Title,
+		post.IsOrderNow,
+		0,
+		0,
+		post.GigachefAddress.Latitude,
+		post.GigachefAddress.Longitude,
+	)
 	return err
 }
 
