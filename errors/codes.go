@@ -1,11 +1,15 @@
 package errors
 
 const (
-	CodeInternalServerErr  = 500
-	CodeUnauthorizedAccess = 401
-	CodeForbidden          = 403
-	CodeSignOut            = 402
-	CodeInvalidToken       = 400
-	CodeInvalidParameter   = 300
-	CodeUnknownError       = 413
+	CodeInvalidParameter           = 400
+	CodeInvalidToken               = 400
+	CodeUnauthorizedAccess         = 401
+	CodeSignOut                    = 452
+	CodeForbidden                  = 403
+	CodeNotEnoughServingsLeft      = 453
+	CodeDeliveryMethodNotAvaliable = 454
+	CodeBTInvalidPaymentMethod     = 455
+	CodeBTFailedToProcess          = 456
+	CodeInternalServerErr          = 500
+	CodeUnknownError               = 666
 )
