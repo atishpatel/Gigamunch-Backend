@@ -13,6 +13,7 @@ import (
 	"google.golang.org/appengine"
 
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -64,7 +65,7 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	if err != nil {
 		return nil, nil, nil, err //TODO change to external dep err
 	}
-	defer rows.Close()
+	defer handleCloser(ctx, rows)
 	tmpPostIDs := make([]int64, listLength)
 	tmpDistances := make([]float32, listLength)
 	tmpGigachefIDs := make([]string, listLength)
@@ -124,5 +125,16 @@ func connectSQL() {
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal("Couldn't connect to mysql database")
+	}
+}
+
+type closer interface {
+	Close() error
+}
+
+func handleCloser(ctx context.Context, c closer) {
+	err := c.Close()
+	if err != nil {
+		utils.Errorf(ctx, "Error closing rows: %v", err)
 	}
 }

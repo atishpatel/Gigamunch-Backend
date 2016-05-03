@@ -13,40 +13,49 @@ import (
 )
 
 const (
-	taxPercentage = 9.25
+	taxPercentage = 7.25
 )
 
 var (
-	// errNotVerifiedChef is an error for when unverfied chefs try and unauthorized action
-	errNotVerifiedChef = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not a verified chef."}
-	errDatastore       = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errUnauthorized      = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
+	errNotVerifiedChef   = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not a verified chef."}
+	errNoSubMerchantID   = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have sub merchant id."}
+	errDatastore         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errMySQL             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was a database error with the server."}
+	errInvalidParameter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errNotEnoughServings = errors.ErrorWithCode{Code: errors.CodeNotEnoughServingsLeft, Message: "Not enough servings left."}
 )
 
 // PostPost posts a live post if the post is valid
 // returns postID, error
-func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) { // TODO: update to pass in itemid for stats stuff
+func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) {
 	var err error
 	if !user.IsVerifiedChef() {
 		return 0, errNotVerifiedChef
 	}
-	// TODO check if chef has sub merchant info stuff
+	if !user.HasSubMerchantID() {
+		return 0, errNoSubMerchantID
+	}
+	if !user.HasAddress() {
+		return 0, errUnauthorized.WithMessage("User does not have an address.")
+	}
 	post.CreatedDateTime = time.Now().UTC()
 	post.TaxPercentage = taxPercentage
 	post.GigachefID = user.ID
-	// get the gigachef address
-	var address *types.Address
-	var radius int
-	address, radius, err = gigachef.GetDeliveryInfo(ctx, user)
+	// get the gigachef post info
+	postInfo, err := gigachef.GetPostInfo(ctx, user)
 	if err != nil {
 		return 0, err
 	}
-	post.GigachefAddress = *address
-	post.GigachefDeliveryRadius = radius
+	post.GigachefAddress = postInfo.Address
+	post.GigachefDeliveryRadius = postInfo.DeliveryRange
+	post.BTSubMerchantID = postInfo.BTSubMerchantID
 	// IncrementNumPost for gigachef
-	errChan := make(chan error, 1)
+	postErrChan := make(chan error, 1)
 	go func() {
-		errChan <- gigachef.IncrementNumPost(ctx, user)
+		postErrChan <- gigachef.IncrementNumPost(ctx, user)
 	}()
+	// TODO add IncrementNumCreated post for Item
 	// put in datastore
 	postID, err := putIncomplete(ctx, post)
 	// insert into sql table
@@ -54,9 +63,9 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	if err != nil {
 		// TODO update to a transaction
 		utils.Criticalf(ctx, "failed to put %d in sql database: +%v", postID, err)
-		return 0, errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "mysql insert failed"}.WithError(err)
+		return 0, errMySQL.WithError(err).Wrap("mysql insert failed")
 	}
-	<-errChan
+	<-postErrChan
 	return postID, nil
 }
 

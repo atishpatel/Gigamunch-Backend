@@ -8,7 +8,7 @@ type User struct {
 	ProviderID string `json:"provider_id"`
 	PhotoURL   string `json:"photo_url"`
 	// bit32 | bit31 | bit30 | ...
-	// isChef | isVerifiedChef | isAdmin | HasAddress | HasCreditCardInfo
+	// isChef | isVerifiedChef | isAdmin | HasAddress | HasSubMerchantID
 	Permissions int32 `json:"permissions"`
 }
 
@@ -52,13 +52,13 @@ func (user *User) SetAddress(x bool) {
 	user.Permissions = setKthBit(user.Permissions, 4, x)
 }
 
-// HasCreditCardInfo returns true if a user has credit card info
-func (user *User) HasCreditCardInfo() bool {
+// HasSubMerchantID returns true if a user has a submerchant id
+func (user *User) HasSubMerchantID() bool {
 	return getKthBit(user.Permissions, 4)
 }
 
-// SetCreditCardInfo updates the permission of the user
-func (user *User) SetCreditCardInfo(x bool) {
+// SetSubMerchantID updates the permission of the user
+func (user *User) SetSubMerchantID(x bool) {
 	user.Permissions = setKthBit(user.Permissions, 4, x)
 }
 

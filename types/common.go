@@ -2,12 +2,6 @@ package types
 
 import "fmt"
 
-type AvaliableExchangeMethods int32
-
-func (aem AvaliableExchangeMethods) Pickup() bool {
-	return getKthBit(int32(aem), 1)
-}
-
 // UserDetail is the structure that is stored in the database for a chef's
 // or muncher's details
 type UserDetail struct {
