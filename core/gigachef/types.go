@@ -11,7 +11,8 @@ const (
 	kindGigachef = "Gigachef"
 )
 
-type GigachefRating struct {
+// Rating is all the rating info for a gigachef
+type Rating struct {
 	AverageRating       float32 `json:"average_rating" datastore:",index"`
 	NumRatings          int     `json:"num_ratings" datastore:",index"`
 	NumOneStarRatings   int     `json:"num_one_star_ratings" datastore:",noindex"`
@@ -21,7 +22,7 @@ type GigachefRating struct {
 	NumFiveStarRatings  int     `json:"num_five_star_ratings" datastore:",noindex"`
 }
 
-func (r *GigachefRating) updateAvg() {
+func (r *Rating) updateAvg() {
 	if r.NumRatings == 0 {
 		r.AverageRating = 0
 		return
@@ -30,39 +31,30 @@ func (r *GigachefRating) updateAvg() {
 	r.AverageRating = float32(totalStars) / float32(r.NumRatings)
 }
 
-// AddRating adds a rating and updates average rating
-func (r *GigachefRating) AddRating(rating int) {
-	switch rating {
-	case 1:
-		r.NumOneStarRatings++
-	case 2:
-		r.NumTwoStarRatings++
-	case 3:
-		r.NumThreeStarRatings++
-	case 4:
-		r.NumFourStarRatings++
-	case 5:
-		r.NumFiveStarRatings++
-	}
-	r.NumRatings++
-	r.updateAvg()
+// addRating adds a rating and updates average rating
+func (r *Rating) addRating(rating int) {
+	r.changeRating(rating, 1)
 }
 
-// RemoveRating removes a rating and updates average rating
-func (r *GigachefRating) RemoveRating(rating int) {
+// removeRating removes a rating and updates average rating
+func (r *Rating) removeRating(rating int) {
+	r.changeRating(rating, -1)
+}
+
+func (r *Rating) changeRating(rating, value int) {
 	switch rating {
 	case 1:
-		r.NumOneStarRatings--
+		r.NumOneStarRatings += value
 	case 2:
-		r.NumTwoStarRatings--
+		r.NumTwoStarRatings += value
 	case 3:
-		r.NumThreeStarRatings--
+		r.NumThreeStarRatings += value
 	case 4:
-		r.NumFourStarRatings--
+		r.NumFourStarRatings += value
 	case 5:
-		r.NumFiveStarRatings--
+		r.NumFiveStarRatings += value
 	}
-	r.NumRatings--
+	r.NumRatings += value
 	r.updateAvg()
 }
 
@@ -76,7 +68,7 @@ type Gigachef struct {
 	DeliveryRange     int32         `json:"delivery_range" datastore:",noindex"`
 	SendWeeklySummary bool          `json:"send_weekly_summary" datastore:",noindex"`
 	UseEmailOverSMS   bool          `json:"use_email_over_sms" datastore:",noindex"`
-	GigachefRating                  // embedded
+	Rating                          // embedded
 	NumPosts          int           `json:"num_posts" datastore:",noindex"`
 	NumOrders         int           `json:"num_orders" datastore:",noindex"`
 	NumFollowers      int           `json:"num_followers" datastore:",index"`

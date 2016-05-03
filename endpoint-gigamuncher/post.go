@@ -22,8 +22,8 @@ type BasePost struct {
 	Title             string   `json:"title"`
 	Description       string   `json:"description"`
 	PricePerServing   float32  `json:"price_per_serving"`
-	ServingsOffered   int      `json:"servings_offered"`
-	ServingsLeft      int      `json:"servings_left"`
+	ServingsOffered   int32    `json:"servings_offered"`
+	ServingsLeft      int32    `json:"servings_left"`
 	Photos            []string `json:"photos"`
 	PostedDateTime    int      `json:"posted_datetime"`
 	ClosingDateTime   int      `json:"closing_datetime"`
@@ -46,7 +46,7 @@ func (p *BasePost) Set(id int, distance float32, post *post.Post) {
 	p.PostedDateTime = int(post.CreatedDateTime.Unix())
 	p.Photos = post.Photos
 	p.ServingsOffered = post.ServingsOffered
-	p.ServingsLeft = post.ServingsOffered - post.NumOrders
+	p.ServingsLeft = post.ServingsOffered - post.NumServingsOrdered
 	p.PricePerServing = post.PricePerServing
 	p.PickupAvaliable = post.AvaliableExchangeMethods.Pickup()
 }
@@ -142,7 +142,7 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 		postErrChan <- postErr
 	}()
 	// get chef ratings
-	var ratings []gigachef.GigachefRating
+	var ratings []gigachef.Rating
 	var chefDetails []types.UserDetail
 	chefErrChan := make(chan error, 1)
 	go func() {
@@ -180,20 +180,20 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 
 // GigachefDetailed is the detailed info for a Gigachef
 type GigachefDetailed struct {
-	ID                      string `json:"id,omitempty"`
-	Name                    string `json:"name,omitempty"`
-	PhotoURL                string `json:"photo_url,omitempty"`
-	gigachef.GigachefRating        // embedded
-	NumOrders               int    `json:"num_orders,omitempty"`
+	ID              string `json:"id,omitempty"`
+	Name            string `json:"name,omitempty"`
+	PhotoURL        string `json:"photo_url,omitempty"`
+	gigachef.Rating        // embedded
+	NumOrders       int    `json:"num_orders,omitempty"`
 	// TODO add lad, long
 }
 
 // Set takes chef info and saves it to an endpoint GigachefDetails
-func (g *GigachefDetailed) Set(id, name, photoURL string, ratings gigachef.GigachefRating, numOrders int) {
+func (g *GigachefDetailed) Set(id, name, photoURL string, ratings gigachef.Rating, numOrders int) {
 	g.ID = id
 	g.Name = name
 	g.PhotoURL = photoURL
-	g.GigachefRating = ratings
+	g.Rating = ratings
 	g.NumOrders = numOrders
 }
 
@@ -288,7 +288,7 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 	var distance float32
 	distanceErrChan := make(chan error, 1)
 	go func() {
-		chefPoint := p.Address.GeoPoint
+		chefPoint := p.GigachefAddress.GeoPoint
 		muncherPoint := types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
 		var distanceErr error
 		distance, _, distanceErr = maps.GetDistance(ctx, chefPoint, muncherPoint)
@@ -317,7 +317,7 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 		r.Set(int(reviewIDs[i]), &reviews[i])
 		resp.Reviews = append(resp.Reviews, r)
 	}
-	resp.Gigachef.Set(p.GigachefID, chef.Name, chef.PhotoURL, chef.GigachefRating, chef.NumOrders)
+	resp.Gigachef.Set(p.GigachefID, chef.Name, chef.PhotoURL, chef.Rating, chef.NumOrders)
 	resp.Post.Set(postID, distance, p)
 	return resp, nil
 }
