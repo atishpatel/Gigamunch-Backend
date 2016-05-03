@@ -6,9 +6,9 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
-func get(ctx context.Context, userID string, chef *Gigachef) error {
+func get(ctx context.Context, id string, chef *Gigachef) error {
 	// TODO add cache stuff
-	key := datastore.NewKey(ctx, kindGigachef, userID, 0, nil)
+	key := datastore.NewKey(ctx, kindGigachef, id, 0, nil)
 	return datastore.Get(ctx, key, chef)
 }
 
@@ -25,10 +25,10 @@ func getMulti(ctx context.Context, ids []string) ([]Gigachef, error) {
 	return chefs, nil
 }
 
-func put(ctx context.Context, userID string, chef *Gigachef) error {
+func put(ctx context.Context, id string, chef *Gigachef) error {
 	var err error
 	// TODO add cache stuff
-	key := datastore.NewKey(ctx, kindGigachef, userID, 0, nil)
+	key := datastore.NewKey(ctx, kindGigachef, id, 0, nil)
 
 	_, err = datastore.Put(ctx, key, chef)
 	return err

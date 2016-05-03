@@ -69,17 +69,17 @@ func (r *GigachefRating) RemoveRating(rating int) {
 // Gigachef contains the basic Gigachef account info
 type Gigachef struct {
 	CreatedDatetime   time.Time     `json:"created_datetime" datastore:",noindex"`
-	IsVerified        bool          `json:"is_verified" datastore:",index"`
 	HasCarInsurance   bool          `json:"has_car_insurance" datastore:",noindex"`
 	types.UserDetail                //embedded
 	PhoneNumber       string        `json:"phone_number" datastore:",noindex"`
 	Address           types.Address `json:"address" datastore:",noindex"`
-	DeliveryRange     int           `json:"delivery_range" datastore:",noindex"`
+	DeliveryRange     int32         `json:"delivery_range" datastore:",noindex"`
 	SendWeeklySummary bool          `json:"send_weekly_summary" datastore:",noindex"`
 	UseEmailOverSMS   bool          `json:"use_email_over_sms" datastore:",noindex"`
 	GigachefRating                  // embedded
 	NumPosts          int           `json:"num_posts" datastore:",noindex"`
 	NumOrders         int           `json:"num_orders" datastore:",noindex"`
-	NumFollowers      int           `json:"num_followers" datastore:",noindex"`
+	NumFollowers      int           `json:"num_followers" datastore:",index"`
 	KitchenPhotoURLs  []string      `json:"kitchen_photo_urls" datastore:",noindex"`
+	BTSubMerchantID   string        `json:"-" datastore:",index"`
 }

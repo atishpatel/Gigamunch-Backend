@@ -14,7 +14,7 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address,
 	chef := new(Gigachef)
 	err = get(ctx, user.ID, chef)
 	if err != nil && err != datastore.ErrNoSuchEntity {
-		return err
+		return errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
 	chef.Name = user.Name
 	chef.PhotoURL = user.PhotoURL
@@ -28,35 +28,7 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address,
 	}
 	err = put(ctx, user.ID, chef)
 	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// GetDeliveryInfo gets info related to Gigachef's delivery
-// returns: address, gigachefDeliveryRange, error
-func GetDeliveryInfo(ctx context.Context, user *types.User) (*types.Address, int, error) {
-	var err error
-	chef := new(Gigachef)
-	err = get(ctx, user.ID, chef)
-	if err != nil {
-		return nil, 0, errDatastore.WithError(err)
-	}
-	return &chef.Address, chef.DeliveryRange, nil
-}
-
-// IncrementNumPost increases NumPosts for a Gigachef by 1
-func IncrementNumPost(ctx context.Context, user *types.User) error {
-	var err error
-	chef := new(Gigachef)
-	err = get(ctx, user.ID, chef)
-	if err != nil {
-		return errDatastore.WithError(err)
-	}
-	chef.NumPosts++
-	err = put(ctx, user.ID, chef)
-	if err != nil {
-		return errDatastore.WithError(err)
+		return errDatastore.WithError(err).Wrap("cannot put gigachef")
 	}
 	return nil
 }
@@ -67,7 +39,47 @@ func GetInfo(ctx context.Context, id string) (*Gigachef, error) {
 	chef := new(Gigachef)
 	err := get(ctx, id, chef)
 	if err != nil {
-		return nil, errDatastore.WithError(err)
+		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
 	return chef, nil
+}
+
+// PostInfoResp contains information related to a post
+type PostInfoResp struct {
+	Address         types.Address `json:"address"`
+	DeliveryRange   int32         `json:"delivery_range"`
+	BTSubMerchantID string        `json:"bt_sub_merchant_id"`
+}
+
+// GetPostInfo returns info related to a post
+// returns: *PostInfoResp, error
+func GetPostInfo(ctx context.Context, user *types.User) (*PostInfoResp, error) {
+	var err error
+	chef := new(Gigachef)
+	err = get(ctx, user.ID, chef)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
+	}
+	postInfo := &PostInfoResp{
+		Address:         chef.Address,
+		DeliveryRange:   chef.DeliveryRange,
+		BTSubMerchantID: chef.BTSubMerchantID,
+	}
+	return postInfo, nil
+}
+
+// IncrementNumPost increases NumPosts for a Gigachef by 1
+func IncrementNumPost(ctx context.Context, user *types.User) error {
+	var err error
+	chef := new(Gigachef)
+	err = get(ctx, user.ID, chef)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot get gigachef")
+	}
+	chef.NumPosts++
+	err = put(ctx, user.ID, chef)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot put gigachef")
+	}
+	return nil
 }
