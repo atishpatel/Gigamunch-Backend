@@ -41,7 +41,7 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 		changed = true
 	}
 	if address != nil {
-		addresses := []Addresses{Addresses{LastUsedDataTime: time.Now().UTC(), Address: *address}}
+		addresses := []Addresses{Addresses{AddedDataTime: time.Now().UTC(), Address: *address}}
 		muncher.Addresses = append(addresses, muncher.Addresses...)
 		changed = true
 	}
@@ -49,6 +49,33 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 		err = put(ctx, user.ID, muncher)
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("cannot save gigamuncher info because cannot put gigamuncher")
+		}
+	}
+	return nil
+}
+
+// GetBTCustomerID gets the Braintree customer id
+func GetBTCustomerID(ctx context.Context, muncherID string) (string, error) {
+	muncher := new(Gigamuncher)
+	err := get(ctx, muncherID, muncher)
+	if err != nil {
+		return "", errDatastore.WithError(err).Wrap("cannot get gigamuncher")
+	}
+	return muncher.BTCustomerID, nil
+}
+
+// SaveBTCustomerID saves the Braintree customer id
+func SaveBTCustomerID(ctx context.Context, muncherID, btCustomerID string) error {
+	muncher := new(Gigamuncher)
+	err := get(ctx, muncherID, muncher)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot get gigamuncher")
+	}
+	if muncher.BTCustomerID != btCustomerID {
+		muncher.BTCustomerID = btCustomerID
+		err := put(ctx, muncherID, muncher)
+		if err != nil {
+			return errDatastore.WithError(err).Wrap("cannot put gigamuncher")
 		}
 	}
 	return nil

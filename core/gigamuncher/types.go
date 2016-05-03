@@ -16,10 +16,11 @@ type Gigamuncher struct {
 	CreatedDatetime  time.Time   `json:"created_datetime" datastore:",noindex"`
 	types.UserDetail             //embedded
 	Addresses        []Addresses `json:"addresses" datastore:",noindex"`
+	BTCustomerID     string      `json:"bt_customer_id" datastore:",index"`
 }
 
 // Addresses contains the address and lasttime the address was used
 type Addresses struct {
-	types.Address              // embedded
-	LastUsedDataTime time.Time `json:"lastused_datatime" datastore:",noindex"`
+	types.Address           // embedded
+	AddedDataTime time.Time `json:"added_datatime" datastore:",noindex"`
 }
