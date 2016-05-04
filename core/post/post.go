@@ -48,8 +48,9 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 		return 0, err
 	}
 	post.GigachefAddress = postInfo.Address
-	post.GigachefDeliveryRadius = postInfo.DeliveryRange
+	post.GigachefDelivery.Radius = postInfo.DeliveryRange
 	post.BTSubMerchantID = postInfo.BTSubMerchantID
+	post.GigachefDelivery.MaxDuration = 45 * 60 // 45 minutes
 	// IncrementNumPost for gigachef
 	postErrChan := make(chan error, 1)
 	go func() {

@@ -21,9 +21,10 @@ type OrderInfoResp struct {
 	ChefPricePerServing      float32
 	PricePerServing          float32
 	TaxPercentage            float32
-	AvaliableExchangeMethods types.ExchangeMethods
+	AvailableExchangeMethods types.ExchangeMethods
 	ClosingDateTime          time.Time
-	TotalDeliveryTime        int64
+	GigachefDelivery         GigachefDelivery
+	GigachefDeliveryGeopoint types.GeoPoint
 }
 
 // GetOrderInfo returns information related to an order
@@ -40,10 +41,6 @@ func GetOrderInfo(ctx context.Context, postID int64) (*OrderInfoResp, error) {
 	if len(p.Photos) > 0 {
 		photoURL = p.Photos[0]
 	}
-	var totalDeliveryTime int64
-	for i := range p.Orders {
-		totalDeliveryTime += p.Orders[i].DeliveryTime
-	}
 	resp := &OrderInfoResp{
 		GigachefID:               p.GigachefID,
 		ItemID:                   p.ItemID,
@@ -55,21 +52,23 @@ func GetOrderInfo(ctx context.Context, postID int64) (*OrderInfoResp, error) {
 		ChefPricePerServing:      p.ChefPricePerServing,
 		PricePerServing:          p.PricePerServing,
 		TaxPercentage:            p.TaxPercentage,
-		AvaliableExchangeMethods: p.AvaliableExchangeMethods,
+		AvailableExchangeMethods: p.AvailableExchangeMethods,
 		ClosingDateTime:          p.ClosingDateTime,
-		TotalDeliveryTime:        totalDeliveryTime,
+		GigachefDelivery:         p.GigachefDelivery,
+		GigachefDeliveryGeopoint: p.GigachefAddress.GeoPoint,
 	}
 	return resp, nil
 }
 
 // AddOrderReq adds an order to a post
 type AddOrderReq struct {
-	PostID         int64
-	OrderID        int64
-	ExchangeMethod types.ExchangeMethods
-	DeliveryTime   int64
-	Servings       int32
-	GigamuncherID  string
+	PostID           int64
+	OrderID          int64
+	GigamuncherID    string
+	ExchangeMethod   types.ExchangeMethods
+	ExchangeDuration int64
+	ExchangeGeopoint types.GeoPoint
+	Servings         int32
 }
 
 func (req *AddOrderReq) valid() error {
@@ -84,6 +83,9 @@ func (req *AddOrderReq) valid() error {
 	}
 	if req.GigamuncherID == "" {
 		return errInvalidParameter.WithMessage("Invalid gigamuncher ID.")
+	}
+	if !req.ExchangeGeopoint.Valid() {
+		return errInvalidParameter.WithMessage("Invalid location.")
 	}
 	return nil
 }
@@ -104,11 +106,16 @@ func AddOrder(ctx context.Context, req *AddOrderReq) error {
 	}
 	p.NumServingsOrdered = p.NumServingsOrdered + req.Servings
 	pOrder := postOrder{
-		OrderID:        req.OrderID,
-		GigamuncherID:  req.GigamuncherID,
-		ExchangeMethod: req.ExchangeMethod,
-		DeliveryTime:   req.DeliveryTime,
-		Servings:       req.Servings,
+		OrderID:          req.OrderID,
+		GigamuncherID:    req.GigamuncherID,
+		ExchangeGeopoint: req.ExchangeGeopoint,
+		ExchangeMethod:   req.ExchangeMethod,
+		Servings:         req.Servings,
+	}
+	if req.ExchangeMethod.ChefDelivery() {
+
+		// TODO reculcate GigachefDelivery.TotalDuration
+		// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
 	}
 	p.Orders = append(p.Orders, pOrder)
 	err = put(ctx, req.PostID, p)

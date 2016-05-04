@@ -12,11 +12,19 @@ const (
 )
 
 type postOrder struct {
-	OrderID        int64                 `json:"order_id" datastore:",noindex"`
-	GigamuncherID  string                `json:"gigamuncher_id" datastore:",noindex"`
-	ExchangeMethod types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`
-	DeliveryTime   int64                 `json:"delievery_time" datastore:",noindex"`
-	Servings       int32                 `json:"servings" datastore:",noindex"`
+	OrderID          int64                 `json:"order_id" datastore:",noindex"`
+	GigamuncherID    string                `json:"gigamuncher_id" datastore:",noindex"`
+	ExchangeMethod   types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`
+	ExchangeGeopoint types.GeoPoint        `json:"exchange_geopoint" datastore:",noindex"`
+	Servings         int32                 `json:"servings" datastore:",noindex"`
+}
+
+// GigachefDelivery contains all the information related to gigachef doing delivery
+type GigachefDelivery struct {
+	Radius        int32   `json:"radius"`
+	MaxDuration   int64   `json:"max_duration"`
+	TotalDuration int64   `json:"total_duration"`
+	Price         float32 `json:"price"`
 }
 
 // Post is a public post created by the Gigachef
@@ -37,7 +45,7 @@ type Post struct {
 	TotalGigachefRevenue     float32               `json:"total_gigachef_revenue" datastore:",noindex"`
 	NumServingsOrdered       int32                 `json:"num_servings_ordered" datastore:",noindex"`
 	Orders                   []postOrder           `json:"orders" datastore:",noindex"`
-	AvaliableExchangeMethods types.ExchangeMethods `json:"avaliable_exchange_methods" datastore:",noindex"`
-	GigachefDeliveryRadius   int32                 `json:"gigachef_delivery_radius" datastore:",noindex"`
+	AvailableExchangeMethods types.ExchangeMethods `json:"available_exchange_methods" datastore:",noindex"`
+	GigachefDelivery         GigachefDelivery      `json:"gigachef_delivery"`
 	GigachefAddress          types.Address         `json:"gigachef_address" datastore:",noindex"`
 }
