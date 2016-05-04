@@ -48,7 +48,7 @@ func (p *BasePost) Set(id int, distance float32, post *post.Post) {
 	p.ServingsOffered = post.ServingsOffered
 	p.ServingsLeft = post.ServingsOffered - post.NumServingsOrdered
 	p.PricePerServing = post.PricePerServing
-	p.PickupAvaliable = post.AvaliableExchangeMethods.Pickup()
+	p.PickupAvaliable = post.AvailableExchangeMethods.Pickup()
 }
 
 // PostGigachef is the basic version of GigachefDetails for post in live feed
@@ -80,12 +80,12 @@ func (p *Post) Set(id int, distance float32, gigachefName string, gigachefPhotoU
 type GetLivePostsReq struct {
 	StartLimit    int     `json:"start_limit"`
 	EndLimit      int     `json:"end_limit"`
-	Latitude      float32 `json:"latitude"`
-	Longitude     float32 `json:"longitude"`
+	Latitude      float64 `json:"latitude"`
+	Longitude     float64 `json:"longitude"`
 	Radius        int     `json:"radius"`
 	ReadyDateTime int     `json:"ready_datetime"`
 	Decending     bool    `json:"decending"`
-	UserID        string  `json:"user_id"`
+	UserID        string  `json:"user_id"` // TODO switch to gigatoken
 }
 
 // Valid returns an error if input in invalid
@@ -219,9 +219,9 @@ func (p *PostDetailed) Set(id int64, distance float32, post *post.Post) {
 // GetPostReq is the input required to get a post
 type GetPostReq struct {
 	PostID    json.Number `json:"post_id"`
-	UserID    string      `json:"user_id"`
-	Latitude  float32     `json:"latitude"`
-	Longitude float32     `json:"longitude"`
+	UserID    string      `json:"user_id"` // TODO change gigatoken
+	Latitude  float64     `json:"latitude"`
+	Longitude float64     `json:"longitude"`
 	Radius    int         `json:"radius"`
 }
 

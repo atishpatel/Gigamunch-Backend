@@ -97,7 +97,7 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	return postIDs, gigachefIDs, distances, nil
 }
 
-func getSortByDateQuery(latitude float32, longitude float32, radius int, readyTime time.Time, descending bool, limit *types.Limit) string {
+func getSortByDateQuery(latitude float64, longitude float64, radius int, readyTime time.Time, descending bool, limit *types.Limit) string {
 	var readyDatetimeOrder, readyWhere string
 	if descending {
 		readyWhere = "'2014-04-01 00:00:00' AND '" + readyTime.Format(time.RFC3339) + "'"
