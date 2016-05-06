@@ -22,9 +22,31 @@ import (
 
 // Config is the configuration loaded from datastore
 type Config struct {
-	JWTSecret string
-	ClientID  string
-	ServerKey string
+	JWTSecret     string
+	ClientID      string
+	ServerKey     string
+	BTEnvironment string
+	BTMerchantID  string
+	BTPublicKey   string
+	BTPrivateKey  string
+}
+
+// BTEnvironment is the environment type for braintree
+type BTEnvironment string
+
+const (
+	// BTSandbox is the Braintree sandbox env
+	BTSandbox = "sandbox"
+	// BTProduction is the Braintree production env
+	BTProduction = "production"
+)
+
+// BTConfig has all the config needed for Braintree
+type BTConfig struct {
+	BTEnvironment string `json:"bt_environment"`
+	BTMerchantID  string `json:"bt_merchant_id"`
+	BTPublicKey   string `json:"bt_public_key"`
+	BTPrivateKey  string `json:"bt_private_key"`
 }
 
 // GitkitConfig is used to load different configurations
@@ -43,6 +65,27 @@ var (
 	privateDirPath string
 )
 
+// GetBTConfig returns the Braintree config
+func GetBTConfig(ctx context.Context) BTConfig {
+	var btConfig BTConfig
+	if appengine.IsDevAppServer() {
+		filedata := readFile("bt_config.json")
+		err := json.Unmarshal(filedata, &btConfig)
+		if err != nil {
+			log.Println("Failed to unmarshal bt_config file.")
+			log.Fatal(err)
+		}
+	} else {
+		getDatastoreConfig(ctx)
+		btConfig.BTEnvironment = config.BTEnvironment
+		btConfig.BTMerchantID = config.BTMerchantID
+		btConfig.BTPublicKey = config.BTPublicKey
+		btConfig.BTPrivateKey = config.BTPrivateKey
+	}
+	return btConfig
+}
+
+// GetServerKey returns the server key
 func GetServerKey(ctx context.Context) string {
 	if gitkitConfig == nil {
 		loadGitkitConfig(ctx)
@@ -62,12 +105,9 @@ func GetGitkitConfig(ctx context.Context) *GitkitConfig {
 }
 
 func loadGitkitConfig(ctx context.Context) {
+	var err error
 	if appengine.IsDevAppServer() {
-		filedata, err := ioutil.ReadFile(privateDirPath + "/gitkit_config.json")
-		if err != nil {
-			log.Println("Failed to open config file in private folder.")
-			log.Fatal(err)
-		}
+		filedata := readFile("gitkit_config.json")
 		err = json.Unmarshal(filedata, &gitkitConfig)
 		if err != nil {
 			log.Println("Failed to unmarshal gitkit config file.")
@@ -80,7 +120,7 @@ func loadGitkitConfig(ctx context.Context) {
 			ClientID:  config.ClientID,
 		}
 	}
-	var err error
+
 	gitkitConfig.JWTSecret, err = utils.Decrypt("KTd6M18avNkASNK149TDhyl3m45Mxqw2", gitkitConfig.JWTSecret)
 	if err != nil {
 		log.Fatalf("Error decoding jwt secret: %+v", err)
@@ -88,13 +128,24 @@ func loadGitkitConfig(ctx context.Context) {
 }
 
 func getDatastoreConfig(ctx context.Context) {
-	config = new(Config)
-	key := datastore.NewKey(ctx, "Config", "", 100, nil)
-	err := datastore.Get(ctx, key, config)
-	if err != nil {
-		utils.Errorf(ctx, "getDatastoreConfig error: %+v", err)
-		log.Fatalf("Error getting Config from datastore: %+v", err)
+	if config == nil {
+		config = new(Config)
+		key := datastore.NewKey(ctx, "Config", "", 100, nil)
+		err := datastore.Get(ctx, key, config)
+		if err != nil {
+			utils.Errorf(ctx, "getDatastoreConfig error: %+v", err)
+			log.Fatalf("Error getting Config from datastore: %+v", err)
+		}
 	}
+}
+
+func readFile(fileName string) []byte {
+	filedata, err := ioutil.ReadFile(privateDirPath + "/" + fileName)
+	if err != nil {
+		log.Printf("Failed to open %s file in private folder.", fileName)
+		log.Fatal(err)
+	}
+	return filedata
 }
 
 func init() {
