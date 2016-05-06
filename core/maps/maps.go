@@ -18,11 +18,8 @@ const (
 )
 
 var (
-	serverKey      string
-	errMapsConnect = errors.ErrorWithCode{
-		Code:    errors.CodeInternalServerErr,
-		Message: "Could not connect to Google Maps.",
-	}
+	serverKey           string
+	errMapsConnect      = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Could not connect to Google Maps."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 	errMaps             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with Google Maps."}
 )
@@ -70,8 +67,8 @@ func GetGeopointFromAddress(ctx context.Context, address *types.Address) error {
 	}
 	location := mapsGeocodeResults[0].Geometry.Location
 	address.GeoPoint = types.GeoPoint{
-		Latitude:  float32(location.Lat),
-		Longitude: float32(location.Lng),
+		Latitude:  location.Lat,
+		Longitude: location.Lng,
 	}
 	return nil
 }

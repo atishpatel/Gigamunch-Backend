@@ -46,7 +46,7 @@ func (g GeoPoint) Valid() bool {
 }
 
 // GreatCircleDistance calculates the Haversine distance between two points in miles
-func (g GeoPoint) GreatCircleDistance(p2 GeoPoint) float64 {
+func (g GeoPoint) GreatCircleDistance(p2 GeoPoint) float32 {
 	dLat := (p2.Latitude - g.Latitude) * (math.Pi / 180.0)
 	dLon := (p2.Longitude - g.Longitude) * (math.Pi / 180.0)
 
@@ -60,7 +60,7 @@ func (g GeoPoint) GreatCircleDistance(p2 GeoPoint) float64 {
 
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
-	return 3959 * c
+	return float32(3959.0 * c)
 }
 
 // EstimatedDuration calculates a guess of how long it will take to get from one
