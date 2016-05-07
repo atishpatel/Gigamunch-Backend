@@ -8,14 +8,19 @@ func (em ExchangeMethods) Pickup() bool {
 	return getKthBit(int32(em), 0)
 }
 
-// ChefDelivery returns ChefDelivery
-func (em ExchangeMethods) ChefDelivery() bool {
-	return getKthBit(int32(em), 1)
-}
-
 // SetPickup sets Pickup
 func (em ExchangeMethods) SetPickup(x bool) {
 	setKthBit(int32(em), 0, x)
+}
+
+// Delivery returns if any type of Delivery is true
+func (em ExchangeMethods) Delivery() bool {
+	return (int32(em) % 2) == 1
+}
+
+// ChefDelivery returns ChefDelivery
+func (em ExchangeMethods) ChefDelivery() bool {
+	return getKthBit(int32(em), 1)
 }
 
 // SetChefDelivery sets ChefDelivery
