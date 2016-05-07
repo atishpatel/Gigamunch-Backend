@@ -1,6 +1,7 @@
 package order
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -33,13 +34,13 @@ func getValidMakeOrderReq() MakeOrderReq {
 }
 
 type fakePostClient struct {
-	servingsOffered, numServingsOrdered int32
-	availableExchangeMethods            types.ExchangeMethods
-	closingDateTime                     time.Time
-	gigachefDelivery                    post.GigachefDelivery
-	AddOrderReq                         *post.AddOrderReq
-	getorderinfo, addorder              bool
-	GetOrderInfoCalled, AddOrderCalled  bool
+	servingsOffered, numServingsOrdered                   int32
+	availableExchangeMethods                              types.ExchangeMethods
+	closingDateTime                                       time.Time
+	gigachefDelivery                                      post.GigachefDelivery
+	AddOrderReq                                           *post.AddOrderReq
+	getorderinfo, addorder, removeOrder                   bool
+	GetOrderInfoCalled, AddOrderCalled, RemoveOrderCalled bool
 }
 
 func newPostClient() *fakePostClient {
@@ -48,6 +49,7 @@ func newPostClient() *fakePostClient {
 	return &fakePostClient{
 		getorderinfo:             true,
 		addorder:                 true,
+		removeOrder:              true,
 		servingsOffered:          10,
 		numServingsOrdered:       5,
 		closingDateTime:          time.Now().Add(time.Minute * 10),
@@ -59,6 +61,14 @@ func newPostClient() *fakePostClient {
 		},
 	}
 
+}
+
+func (f *fakePostClient) RemoveOrder(ctx context.Context, id int64) error {
+	f.RemoveOrderCalled = true
+	if f.removeOrder {
+		return nil
+	}
+	return errResp
 }
 
 func (f *fakePostClient) GetOrderInfo(id int64) (*post.OrderInfoResp, error) {
@@ -77,6 +87,7 @@ func (f *fakePostClient) GetOrderInfo(id int64) (*post.OrderInfoResp, error) {
 			TaxPercentage:            7.5,
 			AvailableExchangeMethods: f.availableExchangeMethods,
 			ClosingDateTime:          f.closingDateTime,
+			ReadyDateTime:            f.closingDateTime.Add(2 * time.Hour),
 			GigachefDelivery:         f.gigachefDelivery,
 			GigachefAddress:          testhelper.GetGigamuncherAddress(),
 		}, nil
@@ -132,7 +143,7 @@ func TestMakeOrder(t *testing.T) {
 	postC := newPostClient()
 	paymentC := newPaymentClient()
 	req := getValidMakeOrderReq()
-	_, err = makeOrder(ctx, &req, postC, paymentC)
+	resp, err := makeOrder(ctx, &req, postC, paymentC)
 	if err != nil {
 		t.Fatal("MakeOrder returned nil with error: ", err)
 	}
@@ -153,6 +164,33 @@ func TestMakeOrder(t *testing.T) {
 	if err != nil {
 		t.Fatal("Order was not created: ", err)
 	}
+	tmpResp := Resp{
+		ID:    postC.AddOrderReq.OrderID,
+		Order: *tmp,
+	}
+	// fix nanosecond off error
+	resp.CreatedDateTime = resp.CreatedDateTime.Truncate(time.Second)
+	tmpResp.CreatedDateTime = tmpResp.CreatedDateTime.Truncate(time.Second)
+	resp.ExpectedExchangeDataTime = resp.ExpectedExchangeDataTime.Truncate(time.Second)
+	tmpResp.ExpectedExchangeDataTime = tmpResp.ExpectedExchangeDataTime.Truncate(time.Second)
+	if !reflect.DeepEqual(tmpResp, *resp) {
+		t.Fatalf("Response order does not equal datastore order. \nResp: %#v \nActual: %#v", *resp, tmpResp)
+	}
+}
+
+func testmakeOrder(t *testing.T, ctx context.Context, req MakeOrderReq) int64 {
+	postC := newPostClient()
+	paymentC := newPaymentClient()
+	resp, err := makeOrder(ctx, &req, postC, paymentC)
+	if err != nil {
+		t.Fatal("MakeOrder returned nil with error: ", err)
+	}
+	tmp := new(Order)
+	err = get(ctx, resp.ID, tmp)
+	if err != nil {
+		t.Fatal("Order was not created: ", err)
+	}
+	return resp.ID
 }
 
 func TestMakeOrderThenRefund(t *testing.T) {
@@ -186,5 +224,44 @@ func TestMakeOrderThenRefund(t *testing.T) {
 	err = get(ctx, postC.AddOrderReq.OrderID, tmp)
 	if err != datastore.ErrNoSuchEntity {
 		t.Fatal("Order was not delete: ", err)
+	}
+}
+
+func TestCancelOrder(t *testing.T) {
+	ctx, done, err := aetest.NewContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer done()
+	req := getValidMakeOrderReq()
+	orderID := testmakeOrder(t, ctx, req)
+
+	postC := newPostClient()
+	paymentC := newPaymentClient()
+	resp, err := cancelOrder(ctx, req.GigamuncherID, orderID, postC, paymentC)
+	if err != nil {
+		t.Fatal("cancelOrder returned error: ", err)
+	}
+	if !paymentC.RefundSaleCalled {
+		t.Fatal("RefundSale wasn't called.")
+	}
+	if !postC.RemoveOrderCalled {
+		t.Fatal("RemoveOrder wasn't called.")
+	}
+	if resp.State != State.Refunded {
+		t.Fatal("Order state was not set to refunded.")
+	}
+
+	tmp := new(Order)
+	err = get(ctx, orderID, tmp)
+	if err != nil {
+		t.Fatal("Error getting order: ", err)
+	}
+	tmpResp := Resp{
+		ID:    orderID,
+		Order: *tmp,
+	}
+	if !reflect.DeepEqual(tmpResp, *resp) {
+		t.Fatalf("Response order does not equal datastore order. \nResp: %#v \nActual: %#v", *resp, tmpResp)
 	}
 }

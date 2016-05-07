@@ -23,6 +23,7 @@ type OrderInfoResp struct {
 	TaxPercentage            float32
 	AvailableExchangeMethods types.ExchangeMethods
 	ClosingDateTime          time.Time
+	ReadyDateTime            time.Time
 	GigachefDelivery         GigachefDelivery
 	GigachefAddress          types.Address
 }
@@ -54,6 +55,7 @@ func (c Client) GetOrderInfo(postID int64) (*OrderInfoResp, error) {
 		TaxPercentage:            p.TaxPercentage,
 		AvailableExchangeMethods: p.AvailableExchangeMethods,
 		ClosingDateTime:          p.ClosingDateTime,
+		ReadyDateTime:            p.ReadyDateTime,
 		GigachefDelivery:         p.GigachefDelivery,
 		GigachefAddress:          p.GigachefAddress,
 	}
@@ -105,6 +107,12 @@ func (c Client) AddOrder(ctx context.Context, req *AddOrderReq) error {
 		return errNotEnoughServings
 	}
 	p.NumServingsOrdered = p.NumServingsOrdered + req.Servings
+	if req.ExchangeMethod.ChefDelivery() {
+
+		p.GigachefDelivery.TotalDuration += req.ExchangeDuration
+		// TODO reculcate GigachefDelivery.TotalDuration
+		// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
+	}
 	pOrder := postOrder{
 		OrderID:             req.OrderID,
 		GigamuncherID:       req.GigamuncherID,
@@ -112,13 +120,44 @@ func (c Client) AddOrder(ctx context.Context, req *AddOrderReq) error {
 		ExchangeMethod:      req.ExchangeMethod,
 		Servings:            req.Servings,
 	}
-	if req.ExchangeMethod.ChefDelivery() {
-		p.GigachefDelivery.TotalDuration += req.ExchangeDuration
-		// TODO reculcate GigachefDelivery.TotalDuration
-		// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
-	}
 	p.Orders = append(p.Orders, pOrder)
 	err = put(c.ctx, req.PostID, p)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot put post")
+	}
+	return nil
+}
+
+// RemoveOrder removes an order from the post
+func (c Client) RemoveOrder(ctx context.Context, id int64) error {
+	p := new(Post)
+	err := get(ctx, id, p)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot get post")
+	}
+
+	var found bool
+	for i := range p.Orders {
+		if p.Orders[i].OrderID == id {
+			found = true
+			p.NumServingsOrdered += p.Orders[i].Servings
+			if p.Orders[i].ExchangeMethod.ChefDelivery() {
+				// remove chef delivery duration
+				// TODO reculcate GigachefDelivery.TotalDuration
+				// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
+			}
+			if i == 0 {
+				p.Orders = p.Orders[i+1:]
+			} else {
+				p.Orders = append(p.Orders[:i-1], p.Orders[i+1:]...)
+			}
+			break
+		}
+	}
+	if !found {
+		return errInvalidParameter.Wrap("order id not in post orders")
+	}
+	err = put(ctx, id, p)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put post")
 	}
