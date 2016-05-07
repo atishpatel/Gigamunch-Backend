@@ -45,6 +45,9 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 		muncher.Addresses = append(addresses, muncher.Addresses...)
 		changed = true
 	}
+	if muncher.BTCustomerID == "" {
+		muncher.BTCustomerID = user.ID[:36]
+	}
 	if changed {
 		err = put(ctx, user.ID, muncher)
 		if err != nil {

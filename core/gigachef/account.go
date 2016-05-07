@@ -26,6 +26,9 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address,
 	if phoneNumber != "" {
 		chef.PhoneNumber = phoneNumber
 	}
+	if chef.BTSubMerchantID == "" {
+		chef.BTSubMerchantID = user.ID[:32]
+	}
 	err = put(ctx, user.ID, chef)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put gigachef")
