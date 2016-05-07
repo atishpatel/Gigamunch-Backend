@@ -74,6 +74,7 @@ func TestMakeSaleThenRefund(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	createSubMerchantReq := &CreateSubMerchantReq{
+		ID:          "01234567890123456789012345678912",
 		FirstName:   "Kayle",
 		LastName:    "Gishen",
 		Email:       "kayle@test.com",
