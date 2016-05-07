@@ -24,8 +24,7 @@ func (err ErrorWithCode) WithMessage(msg string) ErrorWithCode {
 
 // WithError sets Details to error.Error()
 func (err ErrorWithCode) WithError(e error) ErrorWithCode {
-	err.Detail = e.Error()
-	return err
+	return err.Wrap(e.Error())
 }
 
 //Wrap annotates the error by prepending string to error's details
@@ -36,6 +35,17 @@ func (err ErrorWithCode) Wrap(additionalDetail string) ErrorWithCode {
 		err.Detail = additionalDetail + ": " + err.Detail
 	}
 	return err
+}
+
+// Equal returns if the two errors have the same Code
+func (err ErrorWithCode) Equal(e error) bool {
+	if e == nil {
+		return false
+	}
+	if err.Code != GetErrorWithCode(e).Code {
+		return false
+	}
+	return true
 }
 
 // Wrap annotates the error by prepending string to error's details
