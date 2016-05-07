@@ -12,11 +12,11 @@ const (
 )
 
 type postOrder struct {
-	OrderID          int64                 `json:"order_id" datastore:",noindex"`
-	GigamuncherID    string                `json:"gigamuncher_id" datastore:",noindex"`
-	ExchangeMethod   types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`
-	ExchangeGeopoint types.GeoPoint        `json:"exchange_geopoint" datastore:",noindex"`
-	Servings         int32                 `json:"servings" datastore:",noindex"`
+	OrderID             int64                 `json:"order_id" datastore:",noindex"`
+	GigamuncherID       string                `json:"gigamuncher_id" datastore:",noindex"`
+	ExchangeMethod      types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`
+	GigamuncherGeopoint types.GeoPoint        `json:"gigamuncher_geopoint" datastore:",noindex"`
+	Servings            int32                 `json:"servings" datastore:",noindex"`
 }
 
 // GigachefDelivery contains all the information related to gigachef doing delivery

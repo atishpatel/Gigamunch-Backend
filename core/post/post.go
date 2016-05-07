@@ -26,6 +26,17 @@ var (
 	errNotEnoughServings = errors.ErrorWithCode{Code: errors.CodeNotEnoughServingsLeft, Message: "Not enough servings left."}
 )
 
+type Client struct {
+	ctx context.Context
+}
+
+// New is used to create a new client for posts
+func New(ctx context.Context) Client {
+	return Client{
+		ctx: ctx,
+	}
+}
+
 // PostPost posts a live post if the post is valid
 // returns postID, error
 func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) {
@@ -36,9 +47,6 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	if !user.HasSubMerchantID() {
 		return 0, errNoSubMerchantID
 	}
-	if !user.HasAddress() {
-		return 0, errUnauthorized.WithMessage("User does not have an address.")
-	}
 	post.CreatedDateTime = time.Now().UTC()
 	post.TaxPercentage = taxPercentage
 	post.GigachefID = user.ID
@@ -46,6 +54,9 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	postInfo, err := gigachef.GetPostInfo(ctx, user)
 	if err != nil {
 		return 0, err
+	}
+	if !postInfo.Address.Valid() {
+		return 0, errUnauthorized.WithMessage("User does not have an address.")
 	}
 	post.GigachefAddress = postInfo.Address
 	post.GigachefDelivery.Radius = postInfo.DeliveryRange

@@ -24,16 +24,16 @@ type OrderInfoResp struct {
 	AvailableExchangeMethods types.ExchangeMethods
 	ClosingDateTime          time.Time
 	GigachefDelivery         GigachefDelivery
-	GigachefDeliveryGeopoint types.GeoPoint
+	GigachefAddress          types.Address
 }
 
 // GetOrderInfo returns information related to an order
-func GetOrderInfo(ctx context.Context, postID int64) (*OrderInfoResp, error) {
+func (c Client) GetOrderInfo(postID int64) (*OrderInfoResp, error) {
 	if postID == 0 {
 		return nil, errInvalidParameter.WithMessage("Invalid post id.")
 	}
 	p := new(Post)
-	err := get(ctx, postID, p)
+	err := get(c.ctx, postID, p)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("cannot get Post")
 	}
@@ -55,20 +55,20 @@ func GetOrderInfo(ctx context.Context, postID int64) (*OrderInfoResp, error) {
 		AvailableExchangeMethods: p.AvailableExchangeMethods,
 		ClosingDateTime:          p.ClosingDateTime,
 		GigachefDelivery:         p.GigachefDelivery,
-		GigachefDeliveryGeopoint: p.GigachefAddress.GeoPoint,
+		GigachefAddress:          p.GigachefAddress,
 	}
 	return resp, nil
 }
 
 // AddOrderReq adds an order to a post
 type AddOrderReq struct {
-	PostID           int64
-	OrderID          int64
-	GigamuncherID    string
-	ExchangeMethod   types.ExchangeMethods
-	ExchangeDuration int64
-	ExchangeGeopoint types.GeoPoint
-	Servings         int32
+	PostID              int64
+	OrderID             int64
+	GigamuncherID       string
+	ExchangeMethod      types.ExchangeMethods
+	ExchangeDuration    int64
+	GigamuncherGeopoint types.GeoPoint
+	Servings            int32
 }
 
 func (req *AddOrderReq) valid() error {
@@ -84,14 +84,14 @@ func (req *AddOrderReq) valid() error {
 	if req.GigamuncherID == "" {
 		return errInvalidParameter.WithMessage("Invalid gigamuncher ID.")
 	}
-	if !req.ExchangeGeopoint.Valid() {
+	if !req.GigamuncherGeopoint.Valid() {
 		return errInvalidParameter.WithMessage("Invalid location.")
 	}
 	return nil
 }
 
 // AddOrder adds an order to the list of order for a post
-func AddOrder(ctx context.Context, req *AddOrderReq) error {
+func (c Client) AddOrder(ctx context.Context, req *AddOrderReq) error {
 	err := req.valid()
 	if err != nil {
 		return errors.Wrap("order request is invalid", err)
@@ -106,19 +106,19 @@ func AddOrder(ctx context.Context, req *AddOrderReq) error {
 	}
 	p.NumServingsOrdered = p.NumServingsOrdered + req.Servings
 	pOrder := postOrder{
-		OrderID:          req.OrderID,
-		GigamuncherID:    req.GigamuncherID,
-		ExchangeGeopoint: req.ExchangeGeopoint,
-		ExchangeMethod:   req.ExchangeMethod,
-		Servings:         req.Servings,
+		OrderID:             req.OrderID,
+		GigamuncherID:       req.GigamuncherID,
+		GigamuncherGeopoint: req.GigamuncherGeopoint,
+		ExchangeMethod:      req.ExchangeMethod,
+		Servings:            req.Servings,
 	}
 	if req.ExchangeMethod.ChefDelivery() {
-
+		p.GigachefDelivery.TotalDuration += req.ExchangeDuration
 		// TODO reculcate GigachefDelivery.TotalDuration
 		// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
 	}
 	p.Orders = append(p.Orders, pOrder)
-	err = put(ctx, req.PostID, p)
+	err = put(c.ctx, req.PostID, p)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put post")
 	}
