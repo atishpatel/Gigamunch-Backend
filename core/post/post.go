@@ -17,15 +17,15 @@ const (
 )
 
 var (
-	errUnauthorized      = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
-	errNotVerifiedChef   = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not a verified chef."}
-	errNoSubMerchantID   = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have sub merchant id."}
-	errDatastore         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
-	errMySQL             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was a database error with the server."}
-	errInvalidParameter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errNotEnoughServings = errors.ErrorWithCode{Code: errors.CodeNotEnoughServingsLeft, Message: "Not enough servings left."}
+	errUnauthorized     = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
+	errNotVerifiedChef  = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not a verified chef."}
+	errNoSubMerchantID  = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have sub merchant id."}
+	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errMySQL            = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was a database error with the server."}
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 )
 
+// Client is a post client
 type Client struct {
 	ctx context.Context
 }

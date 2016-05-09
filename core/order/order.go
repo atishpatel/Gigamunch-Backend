@@ -4,26 +4,21 @@ import (
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/payment"
-	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
-
-	"google.golang.org/appengine/datastore"
 )
 
 var (
-	errDatastore         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
-	errNotEnoughServings = errors.ErrorWithCode{Code: errors.CodeNotEnoughServingsLeft, Message: "Not enough servings left."}
-	errOrderIsClosed     = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Order is already closed."}
-	errInvalidParameter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errUnauthorized      = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
+	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errUnauthorized     = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
 )
 
 // Client is a client for orders
 type Client struct {
-	ctx context.Context
+	ctx context.Context // TODO remove?
 }
 
 // New returns a new Client
@@ -37,97 +32,44 @@ type Resp struct {
 	Order // embedded
 }
 
-type postClient interface {
-	GetOrderInfo(int64) (*post.OrderInfoResp, error)
-	AddOrder(context.Context, *post.AddOrderReq) error
-	RemoveOrder(context.Context, int64) error
-}
-
 type paymentClient interface {
 	MakeSale(string, string, float32, float32) (string, error)
 	RefundSale(string) (string, error)
 }
 
-// CancelOrder cancels an order and refunds the money
-func (c Client) CancelOrder(userID string, orderID int64) (*Resp, error) {
-	if userID == "" {
-		return nil, errInvalidParameter.WithMessage("Invalid user id.")
-	}
-	if orderID == 0 {
-		return nil, errInvalidParameter.WithMessage("Invalid order id.")
-	}
-	postC := post.New(c.ctx)
-	paymentC := payment.New(c.ctx)
-	return cancelOrder(c.ctx, userID, orderID, postC, paymentC)
+// CreateReq is the request needed to create an order
+type CreateReq struct {
+	PostID                int64
+	NumServings           int32
+	PaymentNonce          string
+	GigamuncherAddress    types.Address
+	GigamuncherID         string
+	GigamuncherName       string
+	GigamuncherPhotoURL   string
+	GigachefID            string
+	GigachefSubMerchantID string
+	ItemID                int64
+	PostTitle             string
+	PostPhotoURL          string
+	ChefPricePerServing   float32
+	PricePerServing       float32
+	TaxPercentage         float32
+	ExchangeMethod        types.ExchangeMethods
+	ExchangePrice         float32
+	ExpectedExchangeTime  time.Time
+	GigachefAddress       types.Address
+	Distance              float32
+	Duration              int64
 }
 
-func cancelOrder(ctx context.Context, userID string, orderID int64, postC postClient, paymentC paymentClient) (*Resp, error) {
-	// get the order
-	order := new(Order)
-	err := get(ctx, orderID, order)
-	if err != nil {
-		return nil, errDatastore.WithError(err).WithMessage("cannot get order")
-	}
-	// check if user is chef or muncher
-	if order.GigamuncherID != userID && order.GigachefID != userID {
-		return nil, errUnauthorized.Wrap("user is not part of order")
-	}
-	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
-		// remove from post
-		err = postC.RemoveOrder(tc, orderID)
-		if err != nil {
-			return errors.Wrap("failed to remove order form post", err)
-		}
-		// refund payment
-		var transactionID string
-		transactionID, err = paymentC.RefundSale(order.PaymentInfo.BTTransactionID)
-		if err != nil {
-			return errors.Wrap("failed to refund sale", err)
-		}
-		// change order to cancel
-		order.State = State.Refunded
-		order.BTRefundTransactionID = transactionID
-		if userID == order.GigamuncherID {
-			order.GigamuncherCanceled = true
-		} else { // userID == order.GigachefID
-			order.GigachefCanceled = true
-		}
-		err = put(tc, orderID, order)
-		if err != nil {
-			return errDatastore.WithError(err).Wrap("cannot put order")
-		}
-		return nil
-	}, nil)
-	if err != nil {
-		return nil, errors.Wrap("cannot run in transaction", err)
-	}
-	resp := &Resp{
-		ID:    orderID,
-		Order: *order,
-	}
-	return resp, nil
-}
-
-// MakeOrderReq is the information needed to make an order
-type MakeOrderReq struct {
-	PostID              int64
-	NumServings         int32
-	BTNonce             string
-	ExchangeMethod      types.ExchangeMethods
-	GigamuncherAddress  types.Address
-	GigamuncherID       string
-	GigamuncherName     string
-	GigamuncherPhotoURL string
-}
-
-func (req *MakeOrderReq) valid() error {
+func (req *CreateReq) valid() error {
 	if req.PostID == 0 {
 		return errInvalidParameter.WithMessage("Invalid post id.")
 	}
 	if req.NumServings <= 0 {
 		return errInvalidParameter.WithMessage("Invalid number of servings.")
 	}
-	if req.BTNonce == "" {
+	if req.PaymentNonce == "" {
 		return errInvalidParameter.WithMessage("Invalid payment nonce.")
 	}
 	if req.ExchangeMethod.Pickup() && req.ExchangeMethod.Delivery() ||
@@ -135,110 +77,132 @@ func (req *MakeOrderReq) valid() error {
 		return errInvalidParameter.WithMessage("Invalid exchange method. Must pick either pickup or delivery.")
 	}
 	if !req.GigamuncherAddress.GeoPoint.Valid() {
-		return errInvalidParameter.WithMessage("Invalid location.")
+		return errInvalidParameter.WithMessage("Invalid muncher location.")
+	}
+	if !req.GigachefAddress.GeoPoint.Valid() {
+		return errInvalidParameter.WithMessage("Invalid chef location.")
+	}
+	if req.PricePerServing == 0 {
+		return errInvalidParameter.Wrap("price per serving cannot be 0.")
+	}
+	if req.ChefPricePerServing == 0 {
+		return errInvalidParameter.Wrap("chef price per serving cannot be 0.")
 	}
 	return nil
 }
 
-// MakeOrder makes an order for the user using the nonce as payment
-func (c Client) MakeOrder(req *MakeOrderReq) (*Resp, error) {
+// Create is used to save order information.
+func (c Client) Create(ctx context.Context, req *CreateReq) (*Resp, error) {
+	// make and order
 	err := req.valid()
 	if err != nil {
-		return nil, errors.Wrap("make order request is invalid", err)
+		return nil, errors.Wrap("create order request is invalid", err)
 	}
-	postC := post.New(c.ctx)
-	paymentC := payment.New(c.ctx)
-	return makeOrder(c.ctx, req, postC, paymentC)
+	paymentC := payment.New(ctx)
+	return create(ctx, req, paymentC)
 }
 
-func makeOrder(ctx context.Context, req *MakeOrderReq, postC postClient, paymentC paymentClient) (*Resp, error) {
-	// get post
-	orderInfo, err := postC.GetOrderInfo(req.PostID)
-	if err != nil {
-		return nil, errors.Wrap("cannot get order info", err)
-	}
-	// check if numServings exist
-	if req.NumServings > orderInfo.ServingsOffered-orderInfo.NumServingsOrdered {
-		return nil, errNotEnoughServings
-	}
-	// check if post is closed
-	if time.Now().UTC().After(orderInfo.ClosingDateTime) {
-		return nil, errOrderIsClosed
-	}
-	var exchangeMethod types.ExchangeMethods
-	var totalExchangePrice float32
-	var expectedExchangeTime time.Time
-	distance := req.GigamuncherAddress.GreatCircleDistance(orderInfo.GigachefAddress.GeoPoint)
-	duration := req.GigamuncherAddress.EstimatedDuration(orderInfo.GigachefAddress.GeoPoint)
-	if req.ExchangeMethod.Delivery() {
-		// TODO find cheapest delivery method
-		if req.ExchangeMethod.ChefDelivery() {
-			exchangeMethod.SetChefDelivery(true)
-			totalExchangePrice = orderInfo.GigachefDelivery.Price
-			expectedExchangeTime = orderInfo.ReadyDateTime
-		} else {
-			return nil, errInvalidParameter.WithMessage("Invalid delivery method.")
-		}
+func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp, error) {
 
-		// TODO schedule delivery stuff
-	} else { // pickup
-		totalExchangePrice = 0
-		exchangeMethod.SetPickup(true)
-		expectedExchangeTime = orderInfo.ReadyDateTime
-	}
-
-	totalPricePerServing := orderInfo.PricePerServing * float32(req.NumServings)
-	gigaFee := orderInfo.PricePerServing - orderInfo.ChefPricePerServing
+	totalPricePerServing := req.PricePerServing * float32(req.NumServings)
+	gigaFee := req.PricePerServing - req.ChefPricePerServing
 	totalGigaFee := gigaFee * float32(req.NumServings)
-	totalTax := (orderInfo.TaxPercentage / 100) * (totalGigaFee + totalPricePerServing + totalExchangePrice)
+	totalExchangePrice := req.ExchangePrice
+	totalTax := (req.TaxPercentage / 100) * (totalGigaFee + totalPricePerServing + totalExchangePrice)
 	totalFeeAndTax := totalGigaFee + totalTax
 	totalPrice := totalPricePerServing + totalFeeAndTax + totalExchangePrice
 
-	// submit braintree info
-	var transactionID string
-	transactionID, err = paymentC.MakeSale(orderInfo.BTSubMerchantID, req.BTNonce, totalPrice, totalFeeAndTax)
+	transactionID, err := paymentC.MakeSale(req.GigachefSubMerchantID, req.PaymentNonce, totalPrice, totalFeeAndTax)
 	if err != nil {
-		return nil, errors.Wrap("cannot make BT sale", err)
+		return nil, errors.Wrap("cannot make sale", err)
 	}
 	order := &Order{
 		CreatedDateTime:          time.Now(),
-		ExpectedExchangeDataTime: expectedExchangeTime,
+		ExpectedExchangeDataTime: req.ExpectedExchangeTime,
 		BasicOrderIDs: BasicOrderIDs{
-			GigachefID:    orderInfo.GigachefID,
+			GigachefID:    req.GigachefID,
 			GigamuncherID: req.GigamuncherID,
 			PostID:        req.PostID,
-			ItemID:        orderInfo.ItemID,
+			ItemID:        req.ItemID,
 		},
-		PostTitle:           orderInfo.PostTitle,
-		PostPhotoURL:        orderInfo.PostPhotoURL,
+		PostTitle:           req.PostTitle,
+		PostPhotoURL:        req.PostPhotoURL,
 		GigamuncherName:     req.GigamuncherName,
 		GigamuncherPhotoURL: req.GigamuncherPhotoURL,
-		ChefPricePerServing: orderInfo.ChefPricePerServing,
+		ChefPricePerServing: req.ChefPricePerServing,
 		Servings:            req.NumServings,
 		PaymentInfo: PaymentInfo{
 			BTTransactionID: transactionID,
-			Price:           totalPricePerServing,
-			ExchangePrice:   totalExchangePrice,
-			GigaFee:         totalGigaFee,
+			Price:           req.PricePerServing,
+			ExchangePrice:   req.ExchangePrice,
+			GigaFee:         gigaFee,
 			TaxPrice:        totalTax,
 			TotalPrice:      totalPrice,
 		},
-		ExchangeMethod: exchangeMethod,
+		ExchangeMethod: req.ExchangeMethod,
 		ExchangePlanInfo: exchangePlanInfo{
-			GigachefAddress:    orderInfo.GigachefAddress,
+			GigachefAddress:    req.GigachefAddress,
 			GigamuncherAddress: req.GigamuncherAddress,
-			Distance:           distance,
-			Duration:           duration,
+			Distance:           req.Distance,
+			Duration:           req.Duration,
 		},
 	}
-	// create the order
-	orderID, err := createOrder(ctx, order, postC)
+	id, err := putIncomplete(ctx, order)
 	if err != nil {
-		_, tErr := paymentC.RefundSale(transactionID)
-		if tErr != nil {
-			utils.Criticalf(ctx, "BT Transaction (%s) was not voided! Err: %+v", transactionID, tErr)
+		_, pErr := paymentC.RefundSale(transactionID)
+		if pErr != nil {
+			utils.Criticalf(ctx, "BT Transaction (%s) was not voided! Err: %+v", transactionID, pErr)
 		}
-		return nil, errors.Wrap("cannot run in transaction", err)
+		return nil, errDatastore.WithError(err).Wrap("cannot put incomplete order")
+	}
+	resp := &Resp{
+		ID:    id,
+		Order: *order,
+	}
+	return resp, nil
+}
+
+// Cancel changes the state of an order to canceled. The userID determinds if
+// the cancel is from the chef or muncher.
+func (c Client) Cancel(ctx context.Context, userID string, orderID int64) (*Resp, error) {
+	if userID == "" {
+		return nil, errInvalidParameter.WithMessage("Invalid user id.")
+	}
+	if orderID == 0 {
+		return nil, errInvalidParameter.WithMessage("Invalid order id.")
+	}
+	paymenyC := payment.New(ctx)
+	return cancel(ctx, userID, orderID, paymenyC)
+}
+
+func cancel(ctx context.Context, userID string, orderID int64, paymentC paymentClient) (*Resp, error) {
+	// get the order
+	order := new(Order)
+	err := get(ctx, orderID, order)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get order")
+	}
+	// check if user is chef or muncher
+	if order.GigamuncherID != userID && order.GigachefID != userID {
+		return nil, errUnauthorized.Wrap("user is not part of order")
+	}
+	// refund payment
+	var transactionID string
+	transactionID, err = paymentC.RefundSale(order.PaymentInfo.BTTransactionID)
+	if err != nil {
+		return nil, errors.Wrap("cannot refund sale", err)
+	}
+	// change order to cancel
+	order.State = State.Refunded
+	order.BTRefundTransactionID = transactionID
+	if userID == order.GigamuncherID {
+		order.GigamuncherCanceled = true
+	} else { // userID == order.GigachefID
+		order.GigachefCanceled = true
+	}
+	err = put(ctx, orderID, order)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot put order")
 	}
 	resp := &Resp{
 		ID:    orderID,
@@ -247,30 +211,12 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, postC postClient, payment
 	return resp, nil
 }
 
-func createOrder(ctx context.Context, order *Order, postC postClient) (int64, error) {
-	var orderID int64
-	var err error
-	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
-		// create order
-		orderID, err = putIncomplete(tc, order)
-		if err != nil {
-			return errDatastore.WithError(err).Wrap("cannot put incomplete order")
-		}
-		// add order to post
-		addOrderReq := &post.AddOrderReq{
-			PostID:              order.PostID,
-			OrderID:             orderID,
-			ExchangeMethod:      order.ExchangeMethod,
-			ExchangeDuration:    order.ExchangePlanInfo.Duration,
-			GigamuncherGeopoint: order.ExchangePlanInfo.GigamuncherAddress.GeoPoint,
-			Servings:            order.Servings,
-			GigamuncherID:       order.GigamuncherID,
-		}
-		err = postC.AddOrder(tc, addOrderReq)
-		if err != nil {
-			return errors.Wrap("cannot add order to post", err)
-		}
-		return nil // success
-	}, nil)
-	return orderID, err
+// GetPostID returns the post id for an order
+func (c Client) GetPostID(orderID int64) (int64, error) {
+	order := new(Order)
+	err := get(c.ctx, orderID, order)
+	if err != nil {
+		return 0, errDatastore.WithError(err).Wrap("cannot get order")
+	}
+	return order.PostID, nil
 }

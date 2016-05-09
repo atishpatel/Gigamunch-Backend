@@ -20,7 +20,7 @@ func put(ctx context.Context, orderID int64, order *Order) error {
 	return err
 }
 
-func putIncomplete(ctx context.Context, order *Order) (int64, error) {
+var putIncomplete = func(ctx context.Context, order *Order) (int64, error) {
 	var err error
 	key := datastore.NewIncompleteKey(ctx, kindOrder, nil)
 	key, err = datastore.Put(ctx, key, order)

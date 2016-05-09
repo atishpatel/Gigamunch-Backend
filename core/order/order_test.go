@@ -7,103 +7,12 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/misc/testhelper"
-	"github.com/atishpatel/Gigamunch-Backend/types"
 
 	"google.golang.org/appengine/aetest"
-	"google.golang.org/appengine/datastore"
 )
 
 var errResp = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "fake error"}
-
-func getValidMakeOrderReq() MakeOrderReq {
-	var exchangeMethod types.ExchangeMethods
-	exchangeMethod.SetPickup(true)
-	return MakeOrderReq{
-		PostID:              1,
-		NumServings:         1,
-		BTNonce:             "fake-valid-nonce",
-		ExchangeMethod:      exchangeMethod,
-		GigamuncherAddress:  testhelper.GetGigamuncherAddress(),
-		GigamuncherID:       "gigamuncher",
-		GigamuncherName:     "Muncher Name",
-		GigamuncherPhotoURL: testhelper.PersonPhotoURL,
-	}
-}
-
-type fakePostClient struct {
-	servingsOffered, numServingsOrdered                   int32
-	availableExchangeMethods                              types.ExchangeMethods
-	closingDateTime                                       time.Time
-	gigachefDelivery                                      post.GigachefDelivery
-	AddOrderReq                                           *post.AddOrderReq
-	getorderinfo, addorder, removeOrder                   bool
-	GetOrderInfoCalled, AddOrderCalled, RemoveOrderCalled bool
-}
-
-func newPostClient() *fakePostClient {
-	var exchangeMethod types.ExchangeMethods
-	exchangeMethod.SetPickup(true)
-	return &fakePostClient{
-		getorderinfo:             true,
-		addorder:                 true,
-		removeOrder:              true,
-		servingsOffered:          10,
-		numServingsOrdered:       5,
-		closingDateTime:          time.Now().Add(time.Minute * 10),
-		availableExchangeMethods: exchangeMethod,
-		gigachefDelivery: post.GigachefDelivery{
-			Price:         10.0,
-			Radius:        100,
-			TotalDuration: 3600,
-		},
-	}
-
-}
-
-func (f *fakePostClient) RemoveOrder(ctx context.Context, id int64) error {
-	f.RemoveOrderCalled = true
-	if f.removeOrder {
-		return nil
-	}
-	return errResp
-}
-
-func (f *fakePostClient) GetOrderInfo(id int64) (*post.OrderInfoResp, error) {
-	f.GetOrderInfoCalled = true
-	if f.getorderinfo {
-		return &post.OrderInfoResp{
-			GigachefID:               "chef",
-			ItemID:                   10,
-			PostTitle:                "title",
-			PostPhotoURL:             testhelper.FoodPhotoURL,
-			BTSubMerchantID:          "submerch",
-			ServingsOffered:          f.servingsOffered,
-			NumServingsOrdered:       f.numServingsOrdered,
-			ChefPricePerServing:      10,
-			PricePerServing:          10,
-			TaxPercentage:            7.5,
-			AvailableExchangeMethods: f.availableExchangeMethods,
-			ClosingDateTime:          f.closingDateTime,
-			ReadyDateTime:            f.closingDateTime.Add(2 * time.Hour),
-			GigachefDelivery:         f.gigachefDelivery,
-			GigachefAddress:          testhelper.GetGigamuncherAddress(),
-		}, nil
-	}
-	return nil, errResp
-}
-
-func (f *fakePostClient) AddOrder(ctx context.Context, p *post.AddOrderReq) error {
-	f.AddOrderCalled = true
-	f.AddOrderReq = p
-	if f.addorder {
-
-		return nil
-	}
-	return errResp
-}
 
 type fakePaymentClient struct {
 	makesale, refundsale             bool
@@ -133,19 +42,27 @@ func (f *fakePaymentClient) RefundSale(string) (string, error) {
 	return "", errResp
 }
 
-func TestMakeOrder(t *testing.T) {
+func getCreateReq() *CreateReq {
+	return &CreateReq{
+		NumServings:          1,
+		PricePerServing:      10,
+		ChefPricePerServing:  8,
+		ExpectedExchangeTime: time.Now(),
+	}
+}
+
+func TestCreate(t *testing.T) {
 	ctx, done, err := aetest.NewContext()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer done()
 	// setup
-	postC := newPostClient()
 	paymentC := newPaymentClient()
-	req := getValidMakeOrderReq()
-	resp, err := makeOrder(ctx, &req, postC, paymentC)
+	req := getCreateReq()
+	resp, err := create(ctx, req, paymentC)
 	if err != nil {
-		t.Fatal("MakeOrder returned nil with error: ", err)
+		t.Fatal("Create returned error: ", err)
 	}
 	if !paymentC.MakeSaleCalled {
 		t.Fatal("MakeSale wasn't called.")
@@ -153,19 +70,13 @@ func TestMakeOrder(t *testing.T) {
 	if paymentC.RefundSaleCalled {
 		t.Fatal("RefundSale was called.")
 	}
-	if !postC.GetOrderInfoCalled {
-		t.Fatal("GetOrderInfo wasn't called.")
-	}
-	if !postC.AddOrderCalled {
-		t.Fatal("AddOrder wasn't called.")
-	}
 	tmp := new(Order)
-	err = get(ctx, postC.AddOrderReq.OrderID, tmp)
+	err = get(ctx, resp.ID, tmp)
 	if err != nil {
 		t.Fatal("Order was not created: ", err)
 	}
 	tmpResp := Resp{
-		ID:    postC.AddOrderReq.OrderID,
+		ID:    resp.ID,
 		Order: *tmp,
 	}
 	// fix nanosecond off error
@@ -178,33 +89,21 @@ func TestMakeOrder(t *testing.T) {
 	}
 }
 
-func testmakeOrder(t *testing.T, ctx context.Context, req MakeOrderReq) int64 {
-	postC := newPostClient()
-	paymentC := newPaymentClient()
-	resp, err := makeOrder(ctx, &req, postC, paymentC)
-	if err != nil {
-		t.Fatal("MakeOrder returned nil with error: ", err)
-	}
-	tmp := new(Order)
-	err = get(ctx, resp.ID, tmp)
-	if err != nil {
-		t.Fatal("Order was not created: ", err)
-	}
-	return resp.ID
-}
-
-func TestMakeOrderThenRefund(t *testing.T) {
+func TestCreateAndRefund(t *testing.T) {
 	ctx, done, err := aetest.NewContext()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer done()
 
-	postC := newPostClient()
-	postC.addorder = false
 	paymentC := newPaymentClient()
-	req := getValidMakeOrderReq()
-	_, err = makeOrder(ctx, &req, postC, paymentC)
+	req := getCreateReq()
+	tmpPutIncomplete := putIncomplete
+	putIncomplete = func(ctx context.Context, order *Order) (int64, error) {
+		return 0, errResp
+	}
+	_, err = create(ctx, req, paymentC)
+	putIncomplete = tmpPutIncomplete
 	if !errResp.Equal(err) {
 		t.Fatal("makeOrder: wanted: InternalServerError. received: ", err)
 	}
@@ -214,42 +113,27 @@ func TestMakeOrderThenRefund(t *testing.T) {
 	if !paymentC.RefundSaleCalled {
 		t.Fatal("RefundSale wasn't called.")
 	}
-	if !postC.GetOrderInfoCalled {
-		t.Fatal("GetOrderInfo wasn't called.")
-	}
-	if !postC.AddOrderCalled {
-		t.Fatal("AddOrder wasn't called.")
-	}
-	tmp := new(Order)
-	err = get(ctx, postC.AddOrderReq.OrderID, tmp)
-	if err != datastore.ErrNoSuchEntity {
-		t.Fatal("Order was not delete: ", err)
-	}
 }
 
-func TestCancelOrder(t *testing.T) {
+func TestCancel(t *testing.T) {
 	ctx, done, err := aetest.NewContext()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer done()
-	req := getValidMakeOrderReq()
-	orderID := testmakeOrder(t, ctx, req)
-
-	postC := newPostClient()
+	o := new(Order)
+	o.GigamuncherID = "muncher"
+	orderID, err := putIncomplete(ctx, o)
+	if err != nil {
+		t.Fatal("failed to put incomplete")
+	}
 	paymentC := newPaymentClient()
-	resp, err := cancelOrder(ctx, req.GigamuncherID, orderID, postC, paymentC)
+	_, err = cancel(ctx, "muncher", orderID, paymentC)
 	if err != nil {
 		t.Fatal("cancelOrder returned error: ", err)
 	}
 	if !paymentC.RefundSaleCalled {
 		t.Fatal("RefundSale wasn't called.")
-	}
-	if !postC.RemoveOrderCalled {
-		t.Fatal("RemoveOrder wasn't called.")
-	}
-	if resp.State != State.Refunded {
-		t.Fatal("Order state was not set to refunded.")
 	}
 
 	tmp := new(Order)
@@ -257,11 +141,7 @@ func TestCancelOrder(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error getting order: ", err)
 	}
-	tmpResp := Resp{
-		ID:    orderID,
-		Order: *tmp,
-	}
-	if !reflect.DeepEqual(tmpResp, *resp) {
-		t.Fatalf("Response order does not equal datastore order. \nResp: %#v \nActual: %#v", *resp, tmpResp)
+	if tmp.State != State.Refunded {
+		t.Fatal("Order state was not 'refunded': ", tmp)
 	}
 }
