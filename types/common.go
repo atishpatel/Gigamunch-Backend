@@ -5,13 +5,15 @@ import (
 	"math"
 )
 
-// UserDetail is the structure that is stored in the database for a chef's
-// or muncher's details
-type UserDetail struct {
-	Name       string `json:"name" datastore:",noindex"`
-	Email      string `json:"email" datastore:",noindex"`
-	PhotoURL   string `json:"photo_url" datastore:",noindex"`
-	ProviderID string `json:"provider_id" datastore:",noindex"`
+func getKthBit(num int32, k uint32) bool {
+	return (uint32(num)>>k)&1 == 1
+}
+
+func setKthBit(num int32, k uint32, x bool) int32 {
+	if x {
+		return int32(uint32(num) ^ ((1<<k)^uint32(num))&(1<<k))
+	}
+	return int32(uint32(num) ^ ((0<<k)^uint32(num))&(1<<k))
 }
 
 // Address represents a location with GeoPoints and address
