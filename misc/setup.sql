@@ -1,3 +1,8 @@
+-- create database
+CREATE DATABASE IF NOT EXISTS gigamunch;
+-- use database
+USE gigamunch;
+-- create live_posts table
 CREATE TABLE IF NOT EXISTS `live_posts` (
  `post_id` BIGINT NOT NULL PRIMARY KEY,
  `gigachef_id` VARCHAR(45) NOT NULL,
@@ -14,3 +19,10 @@ CREATE TABLE IF NOT EXISTS `live_posts` (
   INDEX(`longitude`),
   INDEX(`ready_datetime`)
 ) ENGINE = MYISAM ;
+-- create like table
+CREATE TABLE IF NOT EXISTS `like` (
+  `user_id` VARCHAR(45) NOT NULL,
+  `item_id` BIGINT NOT NULL,
+  `created_datetime` DATETIME NOT NULL,
+  PRIMARY KEY (`item_id`, `user_id`)
+) ENGINE = InnoDB;
