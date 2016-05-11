@@ -31,12 +31,25 @@ func New(ctx context.Context) Client {
 // GenerateToken generates a token with a customerID
 // customerID must be 36 long.
 func (c Client) GenerateToken(customerID string) (string, error) {
-	clientToken := c.bt.Transaction().ClientToken()
 	if len(customerID) != 36 {
 		return "", errInvalidParameter.Wrap("customerID is invalid")
 	}
+	// check if customer exist
+	customerGateway := c.bt.Customer()
+	_, err := customerGateway.Find(customerID)
+	if err != nil {
+		// create customer
+		c := &braintree.Customer{
+			Id: customerID,
+		}
+		_, err = customerGateway.Create(c)
+		if err != nil {
+			return "", errBT.WithError(err).Wrap("cannot create a customer")
+		}
+	}
+	// generate token
+	clientToken := c.bt.Transaction().ClientToken()
 	token, err := clientToken.GenerateWithCustomer(customerID)
-
 	if err != nil {
 		return "", errBT.WithError(err).WithMessage("cannot generate token")
 	}
@@ -47,7 +60,7 @@ func (c Client) GenerateToken(customerID string) (string, error) {
 func (c Client) ReleaseSale(id string) (string, error) {
 	t, err := c.bt.Transaction().ReleaseFromEscrow(id)
 	if err != nil {
-		return "", errBT.WithError(err)
+		return "", errBT.WithError(err).Wrap("cannot release from escrow")
 	}
 	if t.EscrowStatus != braintree.EscrowStatus.ReleasePending && t.EscrowStatus != braintree.EscrowStatus.Released {
 		return "", errBT.Wrap("invalid escrow status on release: escrow status: " + t.EscrowStatus)
