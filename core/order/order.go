@@ -18,12 +18,12 @@ var (
 
 // Client is a client for orders
 type Client struct {
-	ctx context.Context // TODO remove?
+	ctx context.Context
 }
 
 // New returns a new Client
-func New(ctx context.Context) Client {
-	return Client{ctx: ctx}
+func New(ctx context.Context) *Client {
+	return &Client{ctx: ctx}
 }
 
 // Resp contains the order id and order itself
@@ -92,7 +92,7 @@ func (req *CreateReq) valid() error {
 }
 
 // Create is used to save order information.
-func (c Client) Create(ctx context.Context, req *CreateReq) (*Resp, error) {
+func (c *Client) Create(ctx context.Context, req *CreateReq) (*Resp, error) {
 	// make and order
 	err := req.valid()
 	if err != nil {
@@ -130,10 +130,11 @@ func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp,
 		GigamuncherName:     req.GigamuncherName,
 		GigamuncherPhotoURL: req.GigamuncherPhotoURL,
 		ChefPricePerServing: req.ChefPricePerServing,
+		PricePerServing:     req.PricePerServing,
 		Servings:            req.NumServings,
 		PaymentInfo: PaymentInfo{
 			BTTransactionID: transactionID,
-			Price:           req.PricePerServing,
+			Price:           totalPricePerServing,
 			ExchangePrice:   req.ExchangePrice,
 			GigaFee:         gigaFee,
 			TaxPrice:        totalTax,
@@ -164,7 +165,7 @@ func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp,
 
 // Cancel changes the state of an order to canceled. The userID determinds if
 // the cancel is from the chef or muncher.
-func (c Client) Cancel(ctx context.Context, userID string, orderID int64) (*Resp, error) {
+func (c *Client) Cancel(ctx context.Context, userID string, orderID int64) (*Resp, error) {
 	if userID == "" {
 		return nil, errInvalidParameter.WithMessage("Invalid user id.")
 	}
@@ -212,11 +213,46 @@ func cancel(ctx context.Context, userID string, orderID int64, paymentC paymentC
 }
 
 // GetPostID returns the post id for an order
-func (c Client) GetPostID(orderID int64) (int64, error) {
+func (c *Client) GetPostID(orderID int64) (int64, error) {
 	order := new(Order)
 	err := get(c.ctx, orderID, order)
 	if err != nil {
 		return 0, errDatastore.WithError(err).Wrap("cannot get order")
 	}
 	return order.PostID, nil
+}
+
+// GetOrder gets an order
+func (c *Client) GetOrder(userID string, orderID int64) (*Resp, error) {
+	resp := new(Resp)
+	if orderID == 0 {
+		return resp, nil
+	}
+	o := new(Order)
+	err := get(c.ctx, orderID, o)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get order")
+	}
+	if userID != o.GigamuncherID && userID != o.GigachefID {
+		return nil, errUnauthorized.Wrapf("user(%s) does not have access to order(%d)", userID, orderID)
+	}
+	resp.ID = orderID
+	resp.Order = *o
+	return resp, nil
+}
+
+// GetOrders gets the orders
+func (c *Client) GetOrders(muncherID string, limit *types.Limit) ([]Resp, error) {
+	ids, orders, err := getSortedOrders(c.ctx, muncherID, limit.Start, limit.End)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get sorted orders")
+	}
+
+	resps := make([]Resp, len(ids))
+	for i := range ids {
+		resps[i].ID = ids[i]
+		resps[i].Order = orders[i]
+	}
+
+	return resps, nil
 }

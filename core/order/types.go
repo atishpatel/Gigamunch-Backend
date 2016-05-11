@@ -61,7 +61,7 @@ type Order struct {
 	GigachefHasCompleted     bool                  `json:"gigachef_has_completed" datastore:",noindex"`
 	State                    int32                 `json:"state" datastore:",index"`
 	BTRefundTransactionID    string                `json:"bt_refund_transaction_id" datastore:",noindex"`
-	ZendeskIssueID           int                   `json:"zendesk_issue_id" datastore:",noindex"`
+	ZendeskIssueID           int64                 `json:"zendesk_issue_id" datastore:",noindex"`
 	GigachefCanceled         bool                  `json:"gigachef_canceled" datastore:",noindex"`
 	GigamuncherCanceled      bool                  `json:"gigamuncher_canceled" datastore:",noindex"`
 	BasicOrderIDs                                  // embedded
@@ -69,6 +69,7 @@ type Order struct {
 	PostPhotoURL             string                `json:"post_photo_url" datastore:",noindex"`
 	GigamuncherPhotoURL      string                `json:"gigamuncher_photo_url" datastore:",noindex"`
 	GigamuncherName          string                `json:"gigamuncher_name" datastore:",noindex"`
+	PricePerServing          float32               `json:"price_per_serving" datastore:",noindex"`
 	ChefPricePerServing      float32               `json:"chef_price_per_serving" datastore:",noindex"`
 	Servings                 int32                 `json:"servings" datastore:",noindex"`
 	PaymentInfo              PaymentInfo           `json:"payment_info" datastore:",noindex"`
