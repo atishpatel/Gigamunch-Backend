@@ -1,7 +1,10 @@
 package gigamuncher
 
 import (
+	"encoding/json"
 	"log"
+	"strconv"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -9,20 +12,40 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
+func ttoi(t time.Time) int {
+	return int(t.Unix())
+}
+
+func itojn(i int64) json.Number {
+	return json.Number(strconv.FormatInt(i, 10))
+}
+
 type validatableTokenReq interface {
-	Gigatoken() string
-	Valid() error
+	gigatoken() string
+	valid() error
 }
 
 func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*types.User, error) {
-	err := req.Valid()
+	err := req.valid()
 	if err != nil {
 		return nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 	}
-	user, err := auth.GetUserFromToken(ctx, req.Gigatoken())
+	user, err := auth.GetUserFromToken(ctx, req.gigatoken())
 	return user, err
+}
+
+type coder interface {
+	GetCode() int
+}
+
+func handleResp(ctx context.Context, fnName string, resp coder) {
+	code := resp.GetCode()
+	if code != 0 && code != errors.CodeInvalidParameter {
+		utils.Errorf(ctx, "%s err: ", fnName, resp)
+	}
 }
 
 // Service is the REST API Endpoint exposed to Gigamunchers
@@ -42,15 +65,23 @@ func init() {
 		i := m.Info()
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
-	// Register course stuff
+	// login
 	register("SignIn", "signIn", "POST", "gigamuncherservice/signIn", "Sign in a user using a gtoken.")
 	register("SignOut", "signOut", "POST", "gigamuncherservice/signOut", "Sign out a user.")
 	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
-
-	register("GetPost", "getPost", "POST", "gigamuncherservice/getPost", "Get post details.")
-	register("GetLivePosts", "getLivePosts", "POST", "gigamuncherservice/getLivePosts", "Get live posts.")
-
+	// post
+	register("GetPost", "getPost", "GET", "gigamuncherservice/getPost", "Get post details.")
+	register("GetLivePosts", "getLivePosts", "GET", "gigamuncherservice/getLivePosts", "Get live posts.")
+	// like
+	// register("LikeItem", "likeItem", "POST", "gigamuncherservice/likeItem", "Like an item.")
+	// register("UnlikeItem", "unlikeItem", "POST", "gigamuncherservice/unlikeItem", "Unlike an item.")
+	// // order
+	// register("GetBraintreeToken", "getBraintreeToken", "GET", "gigamuncherservice/getBraintreeToken", "Get a braintreeToken.")
+	// register("MakeOrder", "makeOrder", "POST", "gigamuncherservice/makeOrder", "Make an order.")
+	// register("GetOrders", "getOrders", "GET", "gigamuncherservice/getOrders", "Gets the orders for a muncher.")
+	// register("GetOrder", "getOrder", "GET", "gigamuncherservice/getOrder", "Get an order.")
+	// review
 	register("PostReview", "postReview", "POST", "gigamuncherservice/postReview", "Post a review.")
-	register("GetReviews", "getReviews", "POST", "gigamuncherservice/getReviews", "Get reviews.")
+	register("GetReviews", "getReviews", "GET", "gigamuncherservice/getReviews", "Get reviews.")
 	endpoints.HandleHTTP()
 }

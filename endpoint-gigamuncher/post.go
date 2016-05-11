@@ -5,50 +5,66 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
 // BasePost is the basic stuff for a post
 type BasePost struct {
-	ID                int      `json:"id"`
-	ItemID            int      `json:"item_id"`
-	Title             string   `json:"title"`
-	Description       string   `json:"description"`
-	PricePerServing   float32  `json:"price_per_serving"`
-	ServingsOffered   int32    `json:"servings_offered"`
-	ServingsLeft      int32    `json:"servings_left"`
-	Photos            []string `json:"photos"`
-	PostedDateTime    int      `json:"posted_datetime"`
-	ClosingDateTime   int      `json:"closing_datetime"`
-	ReadyDateTime     int      `json:"ready_datetime"`
-	Distance          float32  `json:"distance"`
-	DeliveryAvailable bool     `json:"delivery_avaliable"`
-	PickupAvaliable   bool     `json:"pickup_avaliable"`
-	HasBought         bool     `json:"has_bought"`
+	ID                json.Number `json:"id"`
+	ID64              int64       `json:"-"`
+	ItemID            json.Number `json:"item_id"`
+	ItemID64          int64       `json:"-"`
+	Title             string      `json:"title"`
+	Description       string      `json:"description"`
+	PricePerServing   float32     `json:"price_per_serving"`
+	ServingsOffered   int32       `json:"servings_offered"`
+	ServingsLeft      int32       `json:"servings_left"`
+	Photos            []string    `json:"photos,omitempty"`
+	PostedDateTime    int         `json:"posted_datetime"`
+	ClosingDateTime   int         `json:"closing_datetime"`
+	ReadyDateTime     int         `json:"ready_datetime"`
+	Distance          float32     `json:"distance"`
+	DeliveryAvailable bool        `json:"delivery_avaliable"`
+	PickupAvaliable   bool        `json:"pickup_avaliable"`
+	NumServingsBought int32       `json:"num_servings_bought"`
+	NumLikes          int         `json:"num_likes"`
+	HasLiked          bool        `json:"has_liked"`
 }
 
-// Set takes a post.Post package and converts it to a endpoint post
-func (p *BasePost) Set(id int, distance float32, post *post.Post) {
-	p.ID = id
-	p.Distance = distance
+// set takes a post.Post package and converts it to a endpoint post
+func (p *BasePost) set(userID string, id int64, numLikes int, hasLiked bool, distance float32, post *post.Post) {
+	p.ID64 = id
+	p.ID = itojn(id)
+	p.ItemID64 = post.ItemID
+	p.ItemID = itojn(post.ItemID)
 	p.Title = post.Title
 	p.Description = post.Description
-	p.ItemID = int(post.ItemID)
-	p.ReadyDateTime = int(post.ReadyDateTime.Unix())
-	p.ClosingDateTime = int(post.ClosingDateTime.Unix())
-	p.PostedDateTime = int(post.CreatedDateTime.Unix())
-	p.Photos = post.Photos
+	p.PricePerServing = post.PricePerServing
 	p.ServingsOffered = post.ServingsOffered
 	p.ServingsLeft = post.ServingsOffered - post.NumServingsOrdered
-	p.PricePerServing = post.PricePerServing
+	p.Photos = post.Photos
+	p.PostedDateTime = ttoi(post.CreatedDateTime)
+	p.ClosingDateTime = ttoi(post.ClosingDateTime)
+	p.ReadyDateTime = ttoi(post.ReadyDateTime)
+	p.Distance = distance
+	// DeliveryAvailable bool     `json:"delivery_avaliable"`
 	p.PickupAvaliable = post.AvailableExchangeMethods.Pickup()
+	if userID != "" {
+		for _, o := range post.Orders {
+			if o.GigamuncherID == userID {
+				p.NumServingsBought = o.Servings
+			}
+		}
+	}
+	p.NumLikes = numLikes
+	p.HasLiked = hasLiked
 }
 
 // PostGigachef is the basic version of GigachefDetails for post in live feed
@@ -65,9 +81,9 @@ type Post struct {
 	Gigachef PostGigachef `json:"gigachef"`
 }
 
-// Set takes a post.Post package and converts it to a endpoint post
-func (p *Post) Set(id int, distance float32, gigachefName string, gigachefPhotoURL string, avgRating float32, post *post.Post) {
-	p.BasePost.Set(id, distance, post)
+// set takes a post.Post package and converts it to a endpoint post
+func (p *Post) set(userID string, id int64, numLikes int, hasLiked bool, distance, avgRating float32, gigachefName string, gigachefPhotoURL string, post *post.Post) {
+	p.BasePost.set(userID, id, numLikes, hasLiked, distance, post)
 	p.Gigachef = PostGigachef{
 		ID:       post.GigachefID,
 		Name:     gigachefName,
@@ -85,11 +101,11 @@ type GetLivePostsReq struct {
 	Radius        int     `json:"radius"`
 	ReadyDateTime int     `json:"ready_datetime"`
 	Decending     bool    `json:"decending"`
-	UserID        string  `json:"user_id"` // TODO switch to gigatoken
+	Gigatoken     string  `json:"gigatoken"`
 }
 
-// Valid returns an error if input in invalid
-func (req *GetLivePostsReq) Valid() error {
+// valid returns an error if input in invalid
+func (req *GetLivePostsReq) valid() error {
 	if req.StartLimit < 0 || req.EndLimit < 0 {
 		return fmt.Errorf("Limit is out of range.")
 	}
@@ -104,7 +120,7 @@ func (req *GetLivePostsReq) Valid() error {
 }
 
 // GetLivePostsResp is the response for getting live posts
-//returns: posts, error
+// returns: posts, error
 type GetLivePostsResp struct {
 	Posts []Post               `json:"posts,omitempty"`
 	Err   errors.ErrorWithCode `json:"err"`
@@ -113,26 +129,28 @@ type GetLivePostsResp struct {
 // GetLivePosts is an endpoint that returns a list of live posts
 func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) (*GetLivePostsResp, error) {
 	resp := new(GetLivePostsResp)
-	defer func() {
-		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-			utils.Errorf(ctx, "GetLivePost err: ", resp.Err)
-		}
-	}()
+	defer handleResp(ctx, "GetLivePost", resp.Err)
 	var err error
-	err = req.Valid()
+	err = req.valid()
 	if err != nil {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 		return resp, nil
 	}
 	point := &types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
 	limit := &types.Limit{Start: req.StartLimit, End: req.EndLimit}
-	readyDatetime := time.Unix(int64(req.ReadyDateTime), 0)
+	var readyDatetime time.Time
+	if req.ReadyDateTime != 0 {
+		readyDatetime = time.Unix(int64(req.ReadyDateTime), 0)
+	} else {
+		readyDatetime = time.Now()
+	}
 	// get the live posts
 	postIDs, chefIDs, distances, err := post.GetLivePostsIDs(ctx, point, limit, req.Radius, readyDatetime, req.Decending)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+
 	// get posts
 	var posts []post.Post
 	postErrChan := make(chan error, 1)
@@ -150,51 +168,52 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 		chefDetails, ratings, chefErr = gigachef.GetRatingsAndInfo(ctx, chefIDs)
 		chefErrChan <- chefErr
 	}()
+	// handle errors
 	err = <-chefErrChan
+	if err == nil {
+		err = <-postErrChan
+	}
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	err = <-postErrChan
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
+	// get user
+	var userID string
+	if req.Gigatoken != "" {
+		user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
+		if user != nil {
+			userID = user.ID
+		}
 	}
 	// TODO: check if user is in delivery range
+	// TODO: get likes
 	resp.Posts = make([]Post, len(postIDs))
-	for i := range postIDs { // TODO switch to post.Set(post.Post)
-		resp.Posts[i].Set(int(postIDs[i]), distances[i], chefDetails[i].Name, chefDetails[i].PhotoURL, ratings[i].AverageRating, &posts[i])
-		if req.UserID != "" {
-			for j := range posts[i].Orders {
-				if posts[i].Orders[j].GigamuncherID == req.UserID {
-					resp.Posts[i].HasBought = true
-				}
-			}
-		}
-
-		// TODO check if user is in delivery range
-		// DeliveryAvailable bool     `json:"delivery_avaliable"`
+	for i := range postIDs {
+		resp.Posts[i].set(userID, postIDs[i], 0, false, distances[i], ratings[i].AverageRating, chefDetails[i].Name, chefDetails[i].PhotoURL, &posts[i])
 	}
 	return resp, nil
 }
 
 // GigachefDetailed is the detailed info for a Gigachef
 type GigachefDetailed struct {
-	ID              string `json:"id,omitempty"`
-	Name            string `json:"name,omitempty"`
-	PhotoURL        string `json:"photo_url,omitempty"`
-	gigachef.Rating        // embedded
-	NumOrders       int    `json:"num_orders,omitempty"`
-	// TODO add lad, long
+	ID              string  `json:"id,omitempty"`
+	Name            string  `json:"name,omitempty"`
+	PhotoURL        string  `json:"photo_url,omitempty"`
+	NumOrders       int     `json:"num_orders,omitempty"`
+	gigachef.Rating         // embedded
+	Latitude        float64 `json:"latitude"`
+	Longitude       float64 `json:"longitude"`
 }
 
-// Set takes chef info and saves it to an endpoint GigachefDetails
-func (g *GigachefDetailed) Set(id, name, photoURL string, ratings gigachef.Rating, numOrders int) {
+// set takes chef info and saves it to an endpoint GigachefDetails
+func (g *GigachefDetailed) set(id, name, photoURL string, ratings gigachef.Rating, numOrders int, latitude, longitude float64) {
 	g.ID = id
 	g.Name = name
 	g.PhotoURL = photoURL
 	g.Rating = ratings
 	g.NumOrders = numOrders
+	g.Latitude = latitude
+	g.Longitude = longitude
 }
 
 // PostDetailed has detailed information for a Post.
@@ -206,9 +225,9 @@ type PostDetailed struct {
 	CuisineTags      []string `json:"cuisine_tags,omitempty"`
 }
 
-// Set takes a post.Post package and converts it to an endpoint PostDetailed
-func (p *PostDetailed) Set(id int64, distance float32, post *post.Post) {
-	p.BasePost.Set(int(id), distance, post)
+// set takes a post.Post package and converts it to an endpoint PostDetailed
+func (p *PostDetailed) set(userID string, id int64, numLikes int, hasLiked bool, distance float32, post *post.Post) {
+	p.BasePost.set(userID, id, numLikes, hasLiked, distance, post)
 	p.Ingredients = post.Ingredients
 	p.DietaryNeedsTags = post.DietaryNeedsTags
 	p.GeneralTags = post.GeneralTags
@@ -216,49 +235,53 @@ func (p *PostDetailed) Set(id int64, distance float32, post *post.Post) {
 	// TODO add gigachef setting stuff
 }
 
+// PaymentInfo has the payment info
+type PaymentInfo struct {
+	ChefPricePerServing float32 `json:"chef_price_per_serving"`
+	GigaFee             float32 `json:"giga_fee"`
+	ExchangePrice       float32 `json:"exchange_price"`
+	TaxPercentage       float32 `json:"tax_percentage"`
+}
+
 // GetPostReq is the input required to get a post
 type GetPostReq struct {
 	PostID    json.Number `json:"post_id"`
-	UserID    string      `json:"user_id"` // TODO change gigatoken
+	PostID64  int64       `json:"-"`
+	Gigatoken string      `json:"gigatoken"`
 	Latitude  float64     `json:"latitude"`
 	Longitude float64     `json:"longitude"`
 	Radius    int         `json:"radius"`
 }
 
-// Valid returns an error if input in invalid
-func (req *GetPostReq) Valid() error {
+// valid returns an error if input in invalid
+func (req *GetPostReq) valid() error {
+	var err error
+	req.PostID64, err = req.PostID.Int64()
+	if err != nil {
+		return fmt.Errorf("error with PostID: %v", err)
+	}
 	return nil
 }
 
 // GetPostResp is the response for getting a post
-//returns: post, error
 type GetPostResp struct {
-	Post     PostDetailed     `json:"post,omitempty"`
-	Gigachef GigachefDetailed `json:"gigachef,omitempty"`
-	Reviews  []Review         `json:"reviews,omitempty"`
-	// TODO get payment info
-	Err errors.ErrorWithCode `json:"err"`
+	Post        PostDetailed         `json:"post,omitempty"`
+	Gigachef    GigachefDetailed     `json:"gigachef,omitempty"`
+	Reviews     []Review             `json:"reviews,omitempty"`
+	PaymentInfo PaymentInfo          `json:"payment_info"`
+	Err         errors.ErrorWithCode `json:"err"`
 }
 
 // GetPost gets the details for a post
 func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostResp, error) {
 	resp := new(GetPostResp)
-	defer func() {
-		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-			utils.Errorf(ctx, "GetPost err: ", resp.Err)
-		}
-	}()
-	err := req.Valid()
+	defer handleResp(ctx, "GetPost", resp.Err)
+	err := req.valid()
 	if err != nil {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 		return resp, nil
 	}
-	postID, err := req.PostID.Int64()
-	if err != nil {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
-		return resp, nil
-	}
-	p, err := post.GetPost(ctx, postID)
+	p, err := post.GetPost(ctx, req.PostID64)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
@@ -272,16 +295,16 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 		chefErrChan <- chefErr
 	}()
 	// Get reviews
-	var reviewIDs []int64
-	var reviews []review.Review
+	var reviews []review.Resp
 	reviewsErrChan := make(chan error, 1)
 	go func() {
 		limit := &types.Limit{
 			Start: 0,
 			End:   5,
 		}
+		reviewC := review.New(ctx)
 		var reviewErr error
-		reviewIDs, reviews, reviewErr = review.GetReviews(ctx, p.GigachefID, limit, p.ItemID)
+		reviews, reviewErr = reviewC.GetReviews(p.GigachefID, limit, p.ItemID)
 		reviewsErrChan <- reviewErr
 	}()
 	// Get distance
@@ -296,28 +319,34 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 	}()
 	// check for errors for get Gigachef details and get reviews
 	err = <-chefErrChan
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
+	if err == nil {
+		err = <-reviewsErrChan
 	}
-	err = <-reviewsErrChan
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
+	if err == nil {
+		err = <-distanceErrChan
 	}
-	err = <-distanceErrChan
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
 	// save reviews and gigachef details
-	// resp.Reviews = []Review{}
-	for i := range reviewIDs {
+	for i := range reviews {
 		r := Review{}
-		r.Set(int(reviewIDs[i]), &reviews[i])
+		r.set(&reviews[i])
 		resp.Reviews = append(resp.Reviews, r)
 	}
-	resp.Gigachef.Set(p.GigachefID, chef.Name, chef.PhotoURL, chef.Rating, chef.NumOrders)
-	resp.Post.Set(postID, distance, p)
+	// get user
+	var userID string
+	if req.Gigatoken != "" {
+		user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
+		if user != nil {
+			userID = user.ID
+		}
+	}
+	resp.Gigachef.set(p.GigachefID, chef.Name, chef.PhotoURL, chef.Rating, chef.NumOrders, chef.Address.Latitude, chef.Address.Longitude)
+	// TODO add num likes
+	numLikes := 0
+	hasLiked := false
+	resp.Post.set(userID, req.PostID64, numLikes, hasLiked, distance, p)
 	return resp, nil
 }
