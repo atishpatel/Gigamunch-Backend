@@ -12,6 +12,11 @@ type ErrorWithCode struct {
 	Detail  string `json:"detail"`
 }
 
+// GetCode return the code
+func (err ErrorWithCode) GetCode() int {
+	return err.Code
+}
+
 func (err ErrorWithCode) Error() string {
 	return fmt.Sprintf("Errorcode: %d| Message: %s| Detail: %s", err.Code, err.Message, err.Detail)
 }
@@ -37,6 +42,11 @@ func (err ErrorWithCode) Wrap(additionalDetail string) ErrorWithCode {
 	return err
 }
 
+//Wrapf annotates the error by fromating string and prepending it to error's details
+func (err ErrorWithCode) Wrapf(format string, args ...interface{}) ErrorWithCode {
+	return err.Wrap(fmt.Sprintf(format, args))
+}
+
 // Equal returns if the two errors have the same Code
 func (err ErrorWithCode) Equal(e error) bool {
 	if e == nil {
@@ -49,10 +59,7 @@ func (err ErrorWithCode) Equal(e error) bool {
 }
 
 // Wrap annotates the error by prepending string to error's details
-func Wrap(additionalDetail string, e error) error {
-	if e == nil {
-		return nil
-	}
+func Wrap(additionalDetail string, e error) ErrorWithCode {
 	err := GetErrorWithCode(e)
 	return err.Wrap(additionalDetail)
 }
