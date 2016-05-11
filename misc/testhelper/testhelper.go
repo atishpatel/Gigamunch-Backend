@@ -42,6 +42,7 @@ func getAddress() types.Address {
 	return types.Address{
 		Street:  "2500 West End Avenue",
 		City:    "Nashville",
+		Zip:     "37203",
 		State:   "TN",
 		Country: "USA",
 		GeoPoint: types.GeoPoint{
