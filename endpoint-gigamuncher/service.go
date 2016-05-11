@@ -73,8 +73,8 @@ func init() {
 	register("GetPost", "getPost", "GET", "gigamuncherservice/getPost", "Get post details.")
 	register("GetLivePosts", "getLivePosts", "GET", "gigamuncherservice/getLivePosts", "Get live posts.")
 	// like
-	// register("LikeItem", "likeItem", "POST", "gigamuncherservice/likeItem", "Like an item.")
-	// register("UnlikeItem", "unlikeItem", "POST", "gigamuncherservice/unlikeItem", "Unlike an item.")
+	register("LikeItem", "likeItem", "POST", "gigamuncherservice/likeItem", "Like an item.")
+	register("UnlikeItem", "unlikeItem", "POST", "gigamuncherservice/unlikeItem", "Unlike an item.")
 	// // order
 	// register("GetBraintreeToken", "getBraintreeToken", "GET", "gigamuncherservice/getBraintreeToken", "Get a braintreeToken.")
 	// register("MakeOrder", "makeOrder", "POST", "gigamuncherservice/makeOrder", "Make an order.")
