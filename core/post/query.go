@@ -21,7 +21,8 @@ var (
 )
 
 const (
-	sortByDate = `SELECT post_id, gigachef_id,( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
+	datetimeFormat = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
+	sortByDate     = `SELECT post_id, gigachef_id,( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
                       FROM live_posts
 											WHERE ready_datetime
 											BETWEEN %s
@@ -41,8 +42,8 @@ func insertLivePost(postID int64, post *Post) error {
 		VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		postID,
 		post.GigachefID,
-		post.ClosingDateTime.Format(time.RFC3339),
-		post.ReadyDateTime.Format(time.RFC3339),
+		post.ClosingDateTime.UTC().Format(datetimeFormat),
+		post.ReadyDateTime.UTC().Format(datetimeFormat),
 		post.Title,
 		post.IsOrderNow,
 		0,

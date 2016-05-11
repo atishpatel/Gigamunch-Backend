@@ -57,14 +57,14 @@ func (req *MakeOrderReq) valid() error {
 }
 
 // MakeOrder makes and order for the post
-func (c Client) MakeOrder(req MakeOrderReq) (*order.Resp, error) {
+func (c Client) MakeOrder(req *MakeOrderReq) (*order.Resp, error) {
 	err := req.valid()
 	if err != nil {
 		return nil, errors.Wrap("make order request is invalid", err)
 	}
 	orderC := order.New(c.ctx)
 
-	return makeOrder(c.ctx, &req, orderC)
+	return makeOrder(c.ctx, req, orderC)
 }
 
 func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*order.Resp, error) {
