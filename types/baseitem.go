@@ -12,13 +12,12 @@ import (
 type BaseItem struct {
 	GigachefID       string    `json:"gigachef_id"`
 	CreatedDateTime  time.Time `json:"created_datetime"`
-	Subtitle         string    `json:"subtitle"`
-	Description      string    `json:"description"`
-	GeneralTags      []string  `json:"general_tags"`
-	DietaryNeedsTags []string  `json:"dietary_needs_tags"`
-	CuisineTags      []string  `json:"cuisine_tags"`
-	Ingredients      []string  `json:"ingredients"`
-	Photos           []string  `json:"photos"`
+	Description      string    `json:"description" datastore:",noindex"`
+	GeneralTags      []string  `json:"general_tags" datastore:",noindex"`
+	DietaryNeedsTags []string  `json:"dietary_needs_tags" datastore:",noindex"`
+	CuisineTags      []string  `json:"cuisine_tags" datastore:",noindex"`
+	Ingredients      []string  `json:"ingredients" datastore:",noindex"`
+	Photos           []string  `json:"photos" datastore:",noindex"`
 }
 
 // Validate validates the BaseItem properties.
