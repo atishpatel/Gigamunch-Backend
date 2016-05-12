@@ -3,7 +3,6 @@ package gigachef
 // BaseItem is the basic stuff in an Item
 type BaseItem struct {
 	Title            string   `json:"title"`
-	Subtitle         string   `json:"subtitle"`
 	Description      string   `json:"description"`
 	Ingredients      []string `json:"ingredients"`
 	GeneralTags      []string `json:"general_tags"`

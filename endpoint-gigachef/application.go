@@ -5,25 +5,24 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/application"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
 // SubmitApplicationReq is the input request needed for SubmitApplication.
 type SubmitApplicationReq struct {
-	GigaToken   string                      `json:"gigatoken"`
+	Gigatoken   string                      `json:"gigatoken"`
 	Application application.ChefApplication `json:"application"`
 }
 
-// Gigatoken returns the GigaToken string
-func (req *SubmitApplicationReq) Gigatoken() string {
-	return req.GigaToken
+// gigatoken returns the Gigatoken string
+func (req *SubmitApplicationReq) gigatoken() string {
+	return req.Gigatoken
 }
 
-// Valid validates a req
-func (req *SubmitApplicationReq) Valid() error {
-	if req.GigaToken == "" {
-		return fmt.Errorf("GigaToken is empty.")
+// valid validates a req
+func (req *SubmitApplicationReq) valid() error {
+	if req.Gigatoken == "" {
+		return fmt.Errorf("Gigatoken is empty.")
 	}
 	if req.Application.Email == "" {
 		return fmt.Errorf("Application email is empty")
@@ -40,11 +39,7 @@ type SubmitApplicationResp struct {
 // SubmitApplication is an endpoint that submits or updates a chef application.
 func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplicationReq) (*SubmitApplicationResp, error) {
 	resp := new(SubmitApplicationResp)
-	defer func() {
-		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-			utils.Errorf(ctx, "SubmitApplication err: ", resp.Err)
-		}
-	}()
+	defer handleResp(ctx, "SubmitApplication", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -64,18 +59,18 @@ func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplic
 
 // GetApplicationReq is the input request needed for GetApplication.
 type GetApplicationReq struct {
-	GigaToken string `json:"gigatoken"`
+	Gigatoken string `json:"gigatoken"`
 }
 
-// Gigatoken returns the GigaToken string
-func (req *GetApplicationReq) Gigatoken() string {
-	return req.GigaToken
+// gigatoken returns the Gigatoken string
+func (req *GetApplicationReq) gigatoken() string {
+	return req.Gigatoken
 }
 
-// Valid validates a req
-func (req *GetApplicationReq) Valid() error {
-	if req.GigaToken == "" {
-		return fmt.Errorf("GigaToken is empty.")
+// valid validates a req
+func (req *GetApplicationReq) valid() error {
+	if req.Gigatoken == "" {
+		return fmt.Errorf("Gigatoken is empty.")
 	}
 	return nil
 }
@@ -89,11 +84,7 @@ type GetApplicationResp struct {
 // GetApplication is an endpoint that gets a chef application.
 func (service *Service) GetApplication(ctx context.Context, req *GetApplicationReq) (*GetApplicationResp, error) {
 	resp := new(GetApplicationResp)
-	defer func() {
-		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-			utils.Errorf(ctx, "GetApplication err: ", resp.Err)
-		}
-	}()
+	defer handleResp(ctx, "GetApplication", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)

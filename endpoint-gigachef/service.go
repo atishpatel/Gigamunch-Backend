@@ -1,7 +1,10 @@
 package gigachef
 
 import (
+	"encoding/json"
 	"log"
+	"strconv"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -9,19 +12,43 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
+func itot(i int) time.Time {
+	return time.Unix(int64(i), 0)
+}
+
+func ttoi(t time.Time) int {
+	return int(t.Unix())
+}
+
+func itojn(i int64) json.Number {
+	return json.Number(strconv.FormatInt(i, 10))
+}
+
+type coder interface {
+	GetCode() int
+}
+
+func handleResp(ctx context.Context, fnName string, resp coder) {
+	code := resp.GetCode()
+	if code != 0 && code != errors.CodeInvalidParameter {
+		utils.Errorf(ctx, "%s err: ", fnName, resp)
+	}
+}
+
 type validatableTokenReq interface {
-	Gigatoken() string
-	Valid() error
+	gigatoken() string
+	valid() error
 }
 
 func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*types.User, error) {
-	err := req.Valid()
+	err := req.valid()
 	if err != nil {
-		return nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
+		return nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}.Wrap("failed to validate request")
 	}
-	user, err := auth.GetUserFromToken(ctx, req.Gigatoken())
+	user, err := auth.GetUserFromToken(ctx, req.gigatoken())
 	return user, err
 }
 

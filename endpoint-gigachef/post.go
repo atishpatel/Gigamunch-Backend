@@ -1,59 +1,58 @@
 package gigachef
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
 // Post is a meal that is no longer live
 type Post struct {
-	BaseItem                // embedded
-	ID              int     `json:"id"`
-	ItemID          int     `json:"item_id"`
-	Title           string  `json:"title"`
-	ClosingDateTime int     `json:"closing_datetime" endpoints:"req"`
-	ReadyDateTime   int     `json:"ready_datetime" endpoints:"req"`
-	ServingsOffered int     `json:"servings_offered" endpoints:"req"`
-	PricePerServing float32 `json:"price_per_serving"`
+	BaseItem                        // embedded
+	ID                  json.Number `json:"id"`
+	ID64                int64       `json:"-"`
+	ItemID              json.Number `json:"item_id"`
+	ItemID64            int64       `json:"-"`
+	Title               string      `json:"title"`
+	ClosingDateTime     int         `json:"closing_datetime" endpoints:"req"`
+	ReadyDateTime       int         `json:"ready_datetime" endpoints:"req"`
+	ServingsOffered     int32       `json:"servings_offered" endpoints:"req"`
+	ChefPricePerServing float32     `json:"chef_price_per_serving"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
-func (p *Post) Set(id int, post *post.Post) {
-	p.ID = id
-	p.ItemID = int(post.ItemID)
+func (p *Post) Set(id int64, post *post.Post) {
+	p.ID = itojn(id)
+	p.ItemID = itojn(post.ItemID)
 	p.Title = post.Title
-	p.Subtitle = post.Subtitle
 	p.Description = post.Description
 	p.Ingredients = post.Ingredients
 	p.GeneralTags = post.GeneralTags
 	p.DietaryNeedsTags = post.DietaryNeedsTags
 	p.Photos = post.Photos
-	p.ClosingDateTime = int(post.ClosingDateTime.Unix())
-	p.ReadyDateTime = int(post.ReadyDateTime.Unix())
+	p.ClosingDateTime = ttoi(post.ClosingDateTime)
+	p.ReadyDateTime = ttoi(post.ReadyDateTime)
 	p.ServingsOffered = post.ServingsOffered
-	p.PricePerServing = post.PricePerServing
+	p.ChefPricePerServing = post.ChefPricePerServing
 }
 
 // Get creates a post.Post version of the endpoint post
 func (p *Post) Get() *post.Post {
 	post := new(post.Post)
-	post.ItemID = int64(p.ItemID)
+	post.ItemID = p.ItemID64
 	post.Title = p.Title
-	post.Subtitle = p.Subtitle
 	post.Description = p.Description
 	post.Ingredients = p.Ingredients
 	post.GeneralTags = p.GeneralTags
 	post.DietaryNeedsTags = p.DietaryNeedsTags
 	post.Photos = p.Photos
-	post.ClosingDateTime = time.Unix(int64(p.ClosingDateTime), 0)
-	post.ReadyDateTime = time.Unix(int64(p.ReadyDateTime), 0)
+	post.ClosingDateTime = itot(p.ClosingDateTime)
+	post.ReadyDateTime = itot(p.ReadyDateTime)
 	post.ServingsOffered = p.ServingsOffered
-	post.PricePerServing = p.PricePerServing
+	post.ChefPricePerServing = p.ChefPricePerServing
 	return post
 }
 
@@ -64,19 +63,24 @@ type PostWithOrders struct {
 
 // PostPostReq is the input request needed for PostPost.
 type PostPostReq struct {
-	GigaToken string `json:"gigatoken"`
-	Post      Post   `json:"post" endpoints:"req"`
+	Gigatoken string `json:"gigatoken"`
+	Post      Post   `json:"post"`
 }
 
-// Gigatoken returns the GigaToken string
-func (req *PostPostReq) Gigatoken() string {
-	return req.GigaToken
+// gigatoken returns the Gigatoken string
+func (req *PostPostReq) gigatoken() string {
+	return req.Gigatoken
 }
 
-// Valid validates a req
-func (req *PostPostReq) Valid() error {
-	if req.GigaToken == "" {
-		return fmt.Errorf("GigaToken is empty.")
+// valid validates a req
+func (req *PostPostReq) valid() error {
+	if req.Gigatoken == "" {
+		return fmt.Errorf("Gigatoken is empty.")
+	}
+	var err error
+	req.Post.ItemID64, err = req.Post.ItemID.Int64()
+	if err != nil {
+		return fmt.Errorf("Error with ItemID: %v", err)
 	}
 	// TODO: check post stuff
 	return nil
@@ -91,11 +95,7 @@ type PostPostResp struct {
 // PostPost is an endpoint that post a post form a Gigachef
 func (service *Service) PostPost(ctx context.Context, req *PostPostReq) (*PostPostResp, error) {
 	resp := new(PostPostResp)
-	defer func() {
-		if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-			utils.Errorf(ctx, "PostPost err: ", resp.Err)
-		}
-	}()
+	defer handleResp(ctx, "PostPost", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
@@ -107,6 +107,6 @@ func (service *Service) PostPost(ctx context.Context, req *PostPostReq) (*PostPo
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.Post.Set(int(postID), p)
+	resp.Post.Set(postID, p)
 	return resp, nil
 }
