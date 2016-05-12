@@ -68,7 +68,7 @@ type Order struct {
 	ID                       json.Number      `json:"id"`
 	CreatedDateTime          int              `json:"created_datetime"`
 	ExpectedExchangeDateTime int              `json:"expected_exchange_datetime"`
-	State                    int32            `json:"state"`
+	State                    string           `json:"state"`
 	ZendeskIssueID           json.Number      `json:"zendesk_issue_id"`
 	GigachefCanceled         bool             `json:"gigachef_canceled"`
 	GigamuncherCanceled      bool             `json:"gigamuncher_canceled"`

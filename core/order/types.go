@@ -12,12 +12,12 @@ const (
 )
 
 // State is the possible states the order can be in
-var State = struct{ Pending, Issues, Canceling, Refunded, Paid int32 }{
-	Refunded:  -10,
-	Canceling: -9,
-	Pending:   0,
-	Issues:    2,
-	Paid:      10,
+var State = struct{ Pending, Issues, Canceling, Refunded, Paid string }{
+	Refunded:  "Refunded",
+	Canceling: "Canceling",
+	Pending:   "Pending",
+	Issues:    "Issues",
+	Paid:      "Paid",
 }
 
 // PaymentInfo is the payment information related to an order
@@ -59,7 +59,7 @@ type Order struct {
 	CreatedDateTime          time.Time             `json:"created_datetime" datastore:",noindex"`
 	ExpectedExchangeDataTime time.Time             `json:"expected_exchange_datatime" datastore:",index"`
 	GigachefHasCompleted     bool                  `json:"gigachef_has_completed" datastore:",noindex"`
-	State                    int32                 `json:"state" datastore:",index"`
+	State                    string                `json:"state" datastore:",index"`
 	BTRefundTransactionID    string                `json:"bt_refund_transaction_id" datastore:",noindex"`
 	ZendeskIssueID           int64                 `json:"zendesk_issue_id" datastore:",noindex"`
 	GigachefCanceled         bool                  `json:"gigachef_canceled" datastore:",noindex"`
