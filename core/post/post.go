@@ -50,6 +50,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	post.CreatedDateTime = time.Now().UTC()
 	post.TaxPercentage = taxPercentage
 	post.GigachefID = user.ID
+	post.PricePerServing = post.ChefPricePerServing * 1.2
 	// get the gigachef post info
 	postInfo, err := gigachef.GetPostInfo(ctx, user)
 	if err != nil {
