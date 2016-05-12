@@ -171,7 +171,7 @@ func connectSQL() {
 		if projectID == "" {
 			log.Fatal("PROJECTID env variable is not set.")
 		}
-		connectionString = fmt.Sprintf("root@cloudsql(" + projectID + ":gigasql)/gigamunch")
+		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {

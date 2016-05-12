@@ -121,7 +121,8 @@ func connectSQL() {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		connectionString = fmt.Sprintf("root@cloudsql(" + projectID + ":gigasql)/gigamunch")
+		// MYSQL_CONNECTION: user:password@tcp([host]:3306)/dbname
+		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {
