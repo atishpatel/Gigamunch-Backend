@@ -100,7 +100,7 @@ type GetLivePostsReq struct {
 	Longitude     float64 `json:"longitude"`
 	Radius        int     `json:"radius"`
 	ReadyDateTime int     `json:"ready_datetime"`
-	Decending     bool    `json:"decending"`
+	Descending    bool    `json:"descending"`
 	Gigatoken     string  `json:"gigatoken"`
 }
 
@@ -145,7 +145,7 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 		readyDatetime = time.Now()
 	}
 	// get the live posts
-	postIDs, chefIDs, distances, err := post.GetLivePostsIDs(ctx, point, limit, req.Radius, readyDatetime, req.Decending)
+	postIDs, chefIDs, distances, err := post.GetLivePostsIDs(ctx, point, limit, req.Radius, readyDatetime, req.Descending)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
