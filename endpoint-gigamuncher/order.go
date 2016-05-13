@@ -6,6 +6,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
+	"github.com/atishpatel/Gigamunch-Backend/core/like"
 	"github.com/atishpatel/Gigamunch-Backend/core/order"
 	"github.com/atishpatel/Gigamunch-Backend/core/payment"
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
@@ -84,9 +85,11 @@ type Order struct {
 	PaymentInfo              OrderPaymentInfo `json:"payment_info"`
 	ExchangeMethod           int32            `json:"exchange_method"`
 	ExchangePlanInfo         ExchangePlanInfo `json:"exchange_plan_info"`
+	NumLikes                 int              `json:"num_likes"`
+	HasLiked                 bool             `json:"has_liked"`
 }
 
-func (o *Order) set(order *order.Resp) {
+func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool) {
 	o.ID = itojn(order.ID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
 	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDataTime)
@@ -95,7 +98,6 @@ func (o *Order) set(order *order.Resp) {
 	o.GigachefCanceled = order.GigachefCanceled
 	o.GigamuncherCanceled = order.GigamuncherCanceled
 	o.Gigachef.ID = order.GigachefID
-	// o.Gigachef.Name = order.
 	o.Gigamuncher.ID = order.GigamuncherID
 	o.Gigamuncher.Name = order.GigamuncherName
 	o.Gigamuncher.PhotoURL = order.GigamuncherPhotoURL
@@ -109,6 +111,8 @@ func (o *Order) set(order *order.Resp) {
 	o.PaymentInfo.set(&order.PaymentInfo)
 	o.ExchangeMethod = int32(order.ExchangeMethod)
 	o.ExchangePlanInfo.set(order)
+	o.NumLikes = numLikes
+	o.HasLiked = hasLikes
 }
 
 // MakeOrderReq is the request for MakeOrder
@@ -182,7 +186,15 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.Order.set(order)
+
+	itemIDs := []int64{order.ItemID}
+	likeC := like.New(ctx)
+	likes, numLikes, err := likeC.LikesItems(user.ID, itemIDs)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to get liked items", err)
+		return resp, nil
+	}
+	resp.Order.set(order, numLikes[0], likes[0])
 	return resp, nil
 }
 
@@ -232,7 +244,16 @@ func (service *Service) GetOrder(ctx context.Context, req *GetOrderReq) (*GetOrd
 		resp.Err = errors.Wrap("cannot get order", err)
 		return resp, nil
 	}
-	resp.Order.set(order)
+
+	itemIDs := []int64{order.ItemID}
+	likeC := like.New(ctx)
+	likes, numLikes, err := likeC.LikesItems(user.ID, itemIDs)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to get liked items", err)
+		return resp, nil
+	}
+
+	resp.Order.set(order, numLikes[0], likes[0])
 	// get review
 	reviewC := review.New(ctx)
 	review, err := reviewC.GetReview(req.OrderID64)
@@ -290,12 +311,21 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 		resp.Err = errors.Wrap("cannot get order", err)
 		return resp, nil
 	}
+	itemIDs := make([]int64, len(orders))
+	for i := range orders {
+		itemIDs[i] = orders[i].ItemID
+	}
+	likeC := like.New(ctx)
+	likes, numLikes, err := likeC.LikesItems(user.ID, itemIDs)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to get liked items", err)
+		return resp, nil
+	}
 	for i := range orders {
 		o := Order{}
-		o.set(&orders[i])
+		o.set(&orders[i], numLikes[i], likes[i])
 		resp.Orders = append(resp.Orders, o)
 	}
-
 	return resp, nil
 }
 

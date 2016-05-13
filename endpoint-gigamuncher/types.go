@@ -43,6 +43,7 @@ type Review struct {
 	EditedDateTime      int            `json:"edited_datetime"`
 	GigachefID          string         `json:"gigachef_id"`
 	GigamuncherID       string         `json:"gigamuncher_id"`
+	GigamuncherName     string         `json:"gigamuncher_name"`
 	GigamuncherPhotoURL string         `json:"gigamuncher_photo_url"`
 	ItemID              json.Number    `json:"item_id"`
 	ItemID64            int64          `json:"-"`
@@ -75,6 +76,7 @@ func (r *Review) set(review *review.Resp) {
 	r.EditedDateTime = ttoi(review.EditedDateTime)
 	r.GigachefID = review.GigachefID
 	r.GigamuncherID = review.GigamuncherID
+	r.GigamuncherName = review.GigamuncherName
 	r.GigamuncherPhotoURL = review.GigamuncherPhotoURL
 	r.ItemID = itojn(review.ItemID)
 	r.ItemID64 = review.ItemID

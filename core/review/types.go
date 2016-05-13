@@ -14,6 +14,7 @@ type Review struct {
 	EditedDateTime      time.Time      `json:"edited_datetime" datastore:",noindex"`
 	GigachefID          string         `json:"gigachef_id"`
 	GigamuncherID       string         `json:"gigamuncher_id"`
+	GigamuncherName     string         `json:"gigamuncher_name" datastore:",noindex"`
 	GigamuncherPhotoURL string         `json:"gigamuncher_photo_url" datastore:",noindex"`
 	ItemID              int64          `json:"item_id"`
 	OrderID             int64          `json:"order_id" datastore:",noindex"`
