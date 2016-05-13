@@ -132,12 +132,10 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 	// SELECT item_id, user_id, COUNT(item_id) FROM `like` WHERE item_id=0 OR item_id=1 GROUP BY item_id;
 	var err error
 	var buffer bytes.Buffer
-	for i := range items {
-		if i != 0 {
-			_, err = buffer.WriteString(fmt.Sprintf(" OR item_id=%d", items[i]))
-			if err != nil {
-				return "", errBuffer.WithError(err)
-			}
+	for i := range items[1:] {
+		_, err = buffer.WriteString(fmt.Sprintf(" OR item_id=%d", items[i+1]))
+		if err != nil {
+			return "", errBuffer.WithError(err)
 		}
 	}
 	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
