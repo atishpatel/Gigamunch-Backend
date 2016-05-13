@@ -111,6 +111,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 		expectedExchangeTime = p.ReadyDateTime
 	}
 	// run in transaction
+	opts := &datastore.TransactionOptions{XG: true, Attempts: 1}
 	var order *order.Resp
 	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
 		// make order
@@ -142,7 +143,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 			return errDatastore.WithError(err).Wrap("cannot put post")
 		}
 		return nil
-	}, nil)
+	}, opts)
 	if err != nil {
 		return nil, errors.Wrap("cannot run in transaction", err)
 	}
