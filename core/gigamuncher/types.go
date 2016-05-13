@@ -22,5 +22,5 @@ type Gigamuncher struct {
 // Addresses contains the address and lasttime the address was used
 type Addresses struct {
 	types.Address           // embedded
-	AddedDataTime time.Time `json:"added_datatime" datastore:",noindex"`
+	AddedDateTime time.Time `json:"added_datetime" datastore:",noindex"`
 }

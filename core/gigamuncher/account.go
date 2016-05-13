@@ -41,7 +41,7 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 		changed = true
 	}
 	if address != nil {
-		addresses := []Addresses{Addresses{AddedDataTime: time.Now().UTC(), Address: *address}}
+		addresses := []Addresses{Addresses{AddedDateTime: time.Now().UTC(), Address: *address}}
 		muncher.Addresses = append(addresses, muncher.Addresses...)
 		changed = true
 	}
