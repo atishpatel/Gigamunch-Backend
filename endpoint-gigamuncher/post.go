@@ -7,6 +7,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"github.com/atishpatel/Gigamunch-Backend/core/like"
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/core/post"
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
@@ -136,6 +137,15 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
 		return resp, nil
 	}
+	// get user
+	var userID string
+	if req.Gigatoken != "" {
+		user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
+		if user != nil {
+			userID = user.ID
+		}
+	}
+	// get the live posts
 	point := &types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
 	limit := &types.Limit{Start: req.StartLimit, End: req.EndLimit}
 	var readyDatetime time.Time
@@ -144,13 +154,11 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 	} else {
 		readyDatetime = time.Now()
 	}
-	// get the live posts
-	postIDs, chefIDs, distances, err := post.GetLivePostsIDs(ctx, point, limit, req.Radius, readyDatetime, req.Descending)
+	postIDs, itemIDs, chefIDs, distances, err := post.GetLivePostsIDs(ctx, point, limit, req.Radius, readyDatetime, req.Descending)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-
 	// get posts
 	var posts []post.Post
 	postErrChan := make(chan error, 1)
@@ -168,28 +176,33 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 		chefDetails, ratings, chefErr = gigachef.GetRatingsAndInfo(ctx, chefIDs)
 		chefErrChan <- chefErr
 	}()
+	// get likes
+	var likes []bool
+	var numLikes []int
+	likeErrChan := make(chan error, 1)
+	go func() {
+		var likeErr error
+		likeC := like.New(ctx)
+		likes, numLikes, likeErr = likeC.LikesItems(userID, itemIDs)
+		likeErrChan <- likeErr
+	}()
 	// handle errors
 	err = <-chefErrChan
 	if err == nil {
 		err = <-postErrChan
 	}
+	if err == nil {
+		err = <-likeErrChan
+	}
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	// get user
-	var userID string
-	if req.Gigatoken != "" {
-		user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
-		if user != nil {
-			userID = user.ID
-		}
-	}
+
 	// TODO: check if user is in delivery range
-	// TODO: get likes
 	resp.Posts = make([]Post, len(postIDs))
 	for i := range postIDs {
-		resp.Posts[i].set(userID, postIDs[i], 0, false, distances[i], ratings[i].AverageRating, chefDetails[i].Name, chefDetails[i].PhotoURL, &posts[i])
+		resp.Posts[i].set(userID, postIDs[i], numLikes[i], likes[i], distances[i], ratings[i].AverageRating, chefDetails[i].Name, chefDetails[i].PhotoURL, &posts[i])
 	}
 	return resp, nil
 }
@@ -265,8 +278,8 @@ func (req *GetPostReq) valid() error {
 
 // GetPostResp is the response for getting a post
 type GetPostResp struct {
-	Post        PostDetailed         `json:"post,omitempty"`
-	Gigachef    GigachefDetailed     `json:"gigachef,omitempty"`
+	Post        PostDetailed         `json:"post"`
+	Gigachef    GigachefDetailed     `json:"gigachef"`
 	Reviews     []Review             `json:"reviews,omitempty"`
 	PaymentInfo PaymentInfo          `json:"payment_info"`
 	Err         errors.ErrorWithCode `json:"err"`

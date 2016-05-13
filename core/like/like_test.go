@@ -92,22 +92,32 @@ func TestLikesItems(t *testing.T) {
 			t.Fatal("Error while liking item: ", err)
 		}
 	}
+	err = c.Like(randUserID(), items[0])
+	if err != nil {
+		t.Fatal("Error while liking item: ", err)
+	}
 	err = c.Unlike(userID, items[1])
 	if err != nil {
 		t.Fatal("Error while unliking item: ", err)
 	}
 	// test
-	wantResults := []bool{true, false, true}
-	actualResults, err := c.LikesItems(userID, items)
+	wantLikes := []bool{true, false, true}
+	wantNumLikes := []int{2, 0, 1}
+	likes, numLikes, err := c.LikesItems(userID, items)
 	if err != nil {
 		t.Fatal("Error while calling LikesItems: ", err)
 	}
-	if len(wantResults) != len(actualResults) {
+	if len(wantLikes) != len(likes) || len(wantNumLikes) != len(numLikes) {
 		t.Fatal("Array size of want and actual is different")
 	}
-	for i := range actualResults {
-		if actualResults[i] != wantResults[i] {
-			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", actualResults, wantResults)
+	for i := range likes {
+		if likes[i] != wantLikes[i] {
+			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", likes, wantLikes)
+		}
+	}
+	for i := range numLikes {
+		if numLikes[i] != wantNumLikes[i] {
+			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", wantNumLikes, numLikes)
 		}
 	}
 }

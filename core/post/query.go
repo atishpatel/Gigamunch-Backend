@@ -12,17 +12,19 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
-	mysqlDB *sql.DB
+	mysqlDB  *sql.DB
+	errSQLDB = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
 )
 
 const (
 	datetimeFormat = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
-	sortByDate     = `SELECT post_id, gigachef_id,( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
+	sortByDate     = `SELECT post_id, item_id, gigachef_id,( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
                       FROM live_posts
 											WHERE ready_datetime
 											BETWEEN %s
@@ -38,9 +40,10 @@ func insertLivePost(postID int64, post *Post) error {
 	_, err := mysqlDB.Exec(
 		`INSERT
 		INTO live_posts
-		(post_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_order_now, is_experimental, is_baked_good, latitude, longitude)
+		(post_id, item_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_order_now, is_experimental, is_baked_good, latitude, longitude)
 		VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		postID,
+		post.ItemID,
 		post.GigachefID,
 		post.ClosingDateTime.UTC().Format(datetimeFormat),
 		post.ReadyDateTime.UTC().Format(datetimeFormat),
@@ -54,7 +57,7 @@ func insertLivePost(postID int64, post *Post) error {
 	return err
 }
 
-func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types.Limit, radius int, readyDatetime time.Time, descending bool) ([]int64, []string, []float32, error) {
+func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types.Limit, radius int, readyDatetime time.Time, descending bool) ([]int64, []int64, []string, []float32, error) {
 	if mysqlDB == nil {
 		connectSQL()
 	}
@@ -64,38 +67,44 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 		readyDatetime, descending, limit)
 	rows, err := mysqlDB.Query(livePostQuery)
 	if err != nil {
-		return nil, nil, nil, err //TODO change to external dep err
+		return nil, nil, nil, nil, errSQLDB.WithError(err)
 	}
 	defer handleCloser(ctx, rows)
+
 	tmpPostIDs := make([]int64, listLength)
+	tmpItemIDs := make([]int64, listLength)
 	tmpDistances := make([]float32, listLength)
 	tmpGigachefIDs := make([]string, listLength)
 	actualReturnedRows := 0
 	for i := 0; rows.Next(); i++ {
-		rows.Scan(&tmpPostIDs[i], &tmpGigachefIDs[i], &tmpDistances[i])
+		rows.Scan(&tmpPostIDs[i], &tmpItemIDs[i], &tmpGigachefIDs[i], &tmpDistances[i])
 		actualReturnedRows++
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, nil, nil, err // TODO change to external dep err
+		return nil, nil, nil, nil, errSQLDB.WithError(err).Wrap("failed while iterating rows")
 	}
 	// resize to actual meal returned size
 	var postIDs []int64
+	var itemIDs []int64
 	var distances []float32
 	var gigachefIDs []string
 	if listLength != actualReturnedRows {
 		postIDs = make([]int64, actualReturnedRows)
+		itemIDs = make([]int64, actualReturnedRows)
 		distances = make([]float32, actualReturnedRows)
 		gigachefIDs = make([]string, actualReturnedRows)
 		copy(postIDs, tmpPostIDs)
+		copy(itemIDs, tmpItemIDs)
 		copy(distances, tmpDistances)
 		copy(gigachefIDs, tmpGigachefIDs)
 	} else {
 		postIDs = tmpPostIDs
+		itemIDs = tmpItemIDs
 		distances = tmpDistances
 		gigachefIDs = tmpGigachefIDs
 	}
-	return postIDs, gigachefIDs, distances, nil
+	return postIDs, itemIDs, gigachefIDs, distances, nil
 }
 
 func getSortByDateQuery(latitude float64, longitude float64, radius int, readyTime time.Time, descending bool, limit *types.Limit) string {

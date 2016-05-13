@@ -1,7 +1,6 @@
 package post
 
 import (
-	"fmt"
 	"time"
 
 	"golang.org/x/net/context"
@@ -93,26 +92,21 @@ func GetUserPosts(ctx context.Context, user types.User, limit *types.Limit) ([]i
 
 // GetLivePostsIDs gets live posts sorted by ready date
 // returns: []postIDs, []gigachefIDs, []distances, error
-func GetLivePostsIDs(ctx context.Context, geopoint *types.GeoPoint, limit *types.Limit, radius int, readyDatetime time.Time, descending bool) ([]int64, []string, []float32, error) {
+func GetLivePostsIDs(ctx context.Context, geopoint *types.GeoPoint, limit *types.Limit, radius int, readyDatetime time.Time, descending bool) ([]int64, []int64, []string, []float32, error) {
 	var err error
 	if !limit.Valid() {
-		err = fmt.Errorf("%d-%d is not a valid range limit", limit.Start, limit.End)
-		return nil, nil, nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Limit range is not valid."}.WithError(err)
+		return nil, nil, nil, nil, errInvalidParameter.WithMessage("Limit range is not valid.").Wrapf("%d-%d is not a valid range limit", limit.Start, limit.End)
 	}
 	if !geopoint.Valid() {
-		err = fmt.Errorf("%v is not a valid geopoint", geopoint)
-		return nil, nil, nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Geopoint is not valid."}.WithError(err)
+		return nil, nil, nil, nil, errInvalidParameter.WithMessage("Geopoint is not valid.").Wrapf("%v is not a valid geopoint", geopoint)
 	}
 	// get list of sorted livePostIDs
-	var postIDs []int64
-	var distances []float32
-	var gigachefIDs []string
-	postIDs, gigachefIDs, distances, err = selectLivePosts(ctx, geopoint, limit, radius, readyDatetime, descending)
+	postIDs, itemIDs, gigachefIDs, distances, err := selectLivePosts(ctx, geopoint, limit, radius, readyDatetime, descending)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to select live posts in sql database: +%v", err)
-		return nil, nil, nil, errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "mysql select failed"}.WithError(err)
+		return nil, nil, nil, nil, errors.Wrap("mysql select live post failed", err)
 	}
-	return postIDs, gigachefIDs, distances, nil
+	return postIDs, itemIDs, gigachefIDs, distances, nil
 }
 
 // GetPosts gets post form IDs

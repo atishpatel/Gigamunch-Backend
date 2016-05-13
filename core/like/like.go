@@ -80,63 +80,70 @@ func (c *Client) Unlike(userID string, itemID int64) error {
 }
 
 // LikesItems returns an array that states if the muncher likes the item or not
-func (c *Client) LikesItems(userID string, items []int64) ([]bool, error) {
+func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error) {
 	likesItem := make([]bool, len(items))
+	numLikes := make([]int, len(items))
 	if userID == "" {
-		return likesItem, nil
+		return likesItem, numLikes, nil
 	}
 	if len(items) == 0 {
-		return likesItem, nil
+		return likesItem, numLikes, nil
 	}
 	statement, err := buildLikesItemsStatement(userID, items)
 	if err != nil {
-		return likesItem, errors.Wrap("failed to build like item statment", err)
+		return likesItem, numLikes, errors.Wrap("failed to build like item statment", err)
 	}
 	rows, err := mysqlDB.Query(statement)
 	if err != nil {
-		return nil, errSQLDB.WithError(err).Wrap("cannot query following statement: " + statement)
+		return nil, nil, errSQLDB.WithError(err).Wrap("cannot query following statement: " + statement)
 	}
 	defer handleCloser(c.ctx, rows)
-	itemsSet := make(map[int64]bool, 0)
-	var itemID int64
+
+	var tmpItemID int64
+	var tmpUserID string
+	var tmpNumLike int
 	for rows.Next() {
-		err = rows.Scan(&itemID)
+		err = rows.Scan(&tmpItemID, &tmpUserID, &tmpNumLike)
 		if err != nil {
-			return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
+			return nil, nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
 		}
-		itemsSet[itemID] = true
-	}
-	for i, item := range items {
-		if _, ok := itemsSet[item]; ok {
-			likesItem[i] = true
+		for i := range items {
+			if items[i] == tmpItemID {
+				if tmpUserID == "" || tmpUserID == userID {
+					likesItem[i] = true
+				}
+				numLikes[i] = tmpNumLike
+			}
 		}
 	}
-	return likesItem, nil
+	return likesItem, numLikes, nil
 }
 
 func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 	if len(items) == 0 {
 		panic("items legth is 0")
 	}
+	// -- old
+	// SELECT item_id, user_id, count(item_id) AS cnt FROM (( SELECT item_id, user_id FROM `like` WHERE (item_id=0 OR item_id=1)
+	// ORDER BY user_id='user1' desc) AS s) group by item_id
+	// -- new
+	// SELECT item_id, '', COUNT(item_id) FROM `like` WHERE user_id='user1' and (item_id=0 OR item_id=1)
+	// UNION ALL
+	// SELECT item_id, user_id, COUNT(item_id) FROM `like` WHERE item_id=0 OR item_id=1 GROUP BY item_id;
+	var err error
 	var buffer bytes.Buffer
-	st := "SELECT item_id FROM `like` WHERE user_id='%s' AND (item_id=%d "
-	_, err := buffer.WriteString(fmt.Sprintf(st, userID, items[0]))
-	if err != nil {
-		return "", errBuffer.WithError(err)
-	}
 	for i := range items {
 		if i != 0 {
-			_, err = buffer.WriteString(fmt.Sprintf("OR item_id=%d ", items[i]))
+			_, err = buffer.WriteString(fmt.Sprintf(" OR item_id=%d", items[i]))
 			if err != nil {
 				return "", errBuffer.WithError(err)
 			}
 		}
 	}
-	_, err = buffer.WriteString(")")
-	if err != nil {
-		return "", errBuffer.WithError(err)
-	}
-	return buffer.String(), nil
+	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
+	st := fmt.Sprintf("SELECT item_id, '', COUNT(item_id) FROM `like` WHERE user_id='%s' and (%s) UNION ALL SELECT item_id, user_id, COUNT(item_id) FROM `like` WHERE %s GROUP BY item_id",
+		userID, itemIDStatement, itemIDStatement)
+	return st, nil
 }
 
 // GetUserLikes returns an array of item ids the user likes
