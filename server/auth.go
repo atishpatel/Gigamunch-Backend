@@ -81,7 +81,8 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 			return nil
 		}
 		saveAuthCookie(w, authToken)
-		http.SetCookie(w, &http.Cookie{Name: gitkitCookieName, MaxAge: -1})
+		gTokenCookie.MaxAge = 120
+		http.SetCookie(w, gTokenCookie)
 		return user
 	} else if err != nil {
 		utils.Errorf(ctx, "Error getting session cookie: %+v", err)
