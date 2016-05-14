@@ -1,6 +1,8 @@
 package gigachef
 
 import (
+	"fmt"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/datastore"
@@ -23,6 +25,20 @@ func getMulti(ctx context.Context, ids []string) ([]Gigachef, error) {
 		return nil, err
 	}
 	return chefs, nil
+}
+
+func getBySubmerchantID(ctx context.Context, submerchantID string) (string, *Gigachef, error) {
+	query := datastore.NewQuery(kindGigachef).
+		Filter("BTSubMerchantID =", submerchantID)
+	var results []Gigachef
+	keys, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return "", nil, err
+	}
+	if len(results) != 1 {
+		return "", nil, fmt.Errorf("failed to find 1 chef by submerchantID(%s): found: %v", submerchantID, results)
+	}
+	return keys[0].StringID(), &results[0], nil
 }
 
 func put(ctx context.Context, id string, chef *Gigachef) error {

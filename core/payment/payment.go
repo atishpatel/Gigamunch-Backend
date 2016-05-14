@@ -18,13 +18,15 @@ var (
 
 // Client is the payment client.  A new client should be created for each context.
 type Client struct {
-	bt *braintree.Braintree
+	ctx context.Context
+	bt  *braintree.Braintree
 }
 
 // New returns a new Client. A new client should be created for each context.
 func New(ctx context.Context) Client {
 	return Client{
-		bt: getBTClient(ctx),
+		ctx: ctx,
+		bt:  getBTClient(ctx),
 	}
 }
 
@@ -114,58 +116,6 @@ func (c Client) MakeSale(subMerchantID, nonce string, amount, serviceFee float32
 		return "", errBT.Wrap("invalid transaction escrow status: status: " + t.Status + " escrow status: " + t.EscrowStatus)
 	}
 	return t.Id, nil
-}
-
-// CreateSubMerchantReq is the request to CreateSubMerchant
-// ID must be len 32
-type CreateSubMerchantReq struct {
-	ID                  string
-	FirstName, LastName string
-	Email               string
-	DateOfBirth         string
-	AccountNumber       string
-	RoutingNumber       string
-	Address             types.Address
-}
-
-func (req *CreateSubMerchantReq) valid() error {
-	if len(req.ID) != 32 {
-		return errInvalidParameter.WithMessage("ID must be length 32.")
-	}
-	return nil
-}
-
-// CreateSubMerchant creates a sub-merchant
-// TODO change to update?
-func (c Client) CreateSubMerchant(req *CreateSubMerchantReq) (string, error) {
-	err := req.valid()
-	if err != nil {
-		return "", err
-	}
-	account, err := c.bt.MerchantAccount().Create(&braintree.MerchantAccount{
-		MasterMerchantAccountId: "Gigamunch_marketplace",
-		Id:          req.ID,
-		TOSAccepted: true,
-		Individual: &braintree.MerchantAccountPerson{
-			FirstName:   req.FirstName,
-			LastName:    req.LastName,
-			Email:       req.Email,
-			DateOfBirth: req.DateOfBirth,
-			Address:     getBTAddress(req.Address),
-		},
-		FundingOptions: &braintree.MerchantAccountFundingOptions{
-			Destination:   braintree.FUNDING_DEST_BANK,
-			AccountNumber: req.AccountNumber,
-			RoutingNumber: req.RoutingNumber,
-		},
-	})
-	if err != nil {
-		return "", errBT.WithError(err).Wrap("cannot create sub-merchant")
-	}
-	if account.Status != "pending" {
-		return "", errBT.WithMessage("Error creating sub-merchant account with status " + account.Status)
-	}
-	return account.Id, err
 }
 
 func getBTAddress(a types.Address) *braintree.Address {

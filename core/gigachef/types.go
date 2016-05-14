@@ -73,5 +73,6 @@ type Gigachef struct {
 	NumOrders         int           `json:"num_orders" datastore:",noindex"`
 	NumFollowers      int           `json:"num_followers" datastore:",index"`
 	KitchenPhotoURLs  []string      `json:"kitchen_photo_urls" datastore:",noindex"`
+	SubMerchantStatus string        `json:"sub_merchant_status" datastore:",noindex"`
 	BTSubMerchantID   string        `json:"-" datastore:",index"`
 }

@@ -1,11 +1,25 @@
 package gigachef
 
 import (
+	"fmt"
+
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/notification"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
+
+// Client is a client for gigachef
+type Client struct {
+	ctx context.Context
+}
+
+// New returns a client for gigchef
+func New(ctx context.Context) *Client {
+	return &Client{ctx: ctx}
+}
 
 // SaveUserInfo is to save a user's info. Only exposed for account package.
 // Please use the account package's func instead of this one.
@@ -83,6 +97,75 @@ func IncrementNumPost(ctx context.Context, user *types.User) error {
 	err = put(ctx, user.ID, chef)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put gigachef")
+	}
+	return nil
+}
+
+// Resp is a chef with id
+type Resp struct {
+	ID string
+	Gigachef
+}
+
+// FindBySubMerchantID finds a chef by submerchantID
+func (c *Client) FindBySubMerchantID(submerchantID string) (*Resp, error) {
+	if submerchantID == "" {
+		return nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
+	}
+	id, chef, err := getBySubmerchantID(c.ctx, submerchantID)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
+	}
+	resp := &Resp{
+		ID:       id,
+		Gigachef: *chef,
+	}
+	return resp, nil
+}
+
+// UpdateSubMerchantStatus updates the chef's SubMerchantStatus status
+func (c *Client) UpdateSubMerchantStatus(submerchantID, status string) (*Resp, error) {
+	if submerchantID == "" {
+		return nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
+	}
+	id, chef, err := getBySubmerchantID(c.ctx, submerchantID)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
+	}
+	chef.SubMerchantStatus = status
+	err = put(c.ctx, id, chef)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to put chef")
+	}
+	resp := &Resp{
+		ID:       id,
+		Gigachef: *chef,
+	}
+	return resp, nil
+}
+
+// Notify notifies chef with the message
+func (c *Client) Notify(id, subject, message string) error {
+	chef := new(Gigachef)
+	err := get(c.ctx, id, chef)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("failed to get by chef")
+	}
+	notifcationC := notification.New(c.ctx)
+	if !chef.UseEmailOverSMS {
+		err = notifcationC.SendSMS(chef.PhoneNumber, message)
+		if err == nil {
+			return nil
+		}
+		codeErr := errors.GetErrorWithCode(err)
+		if codeErr.Code != errors.CodeInvalidParameter {
+			return codeErr.Wrap("failed to send sms")
+		}
+		message += fmt.Sprintf("\nNote: There was an error while trying to send sms to notify you: %s", codeErr.Message)
+	}
+	err = notifcationC.SendEmail(chef.Email, subject, message)
+	if err != nil {
+		return errors.Wrap("failed to send email", err)
 	}
 	return nil
 }
