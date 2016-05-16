@@ -46,7 +46,11 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 		changed = true
 	}
 	if muncher.BTCustomerID == "" {
-		muncher.BTCustomerID = user.ID[:36]
+		tmpID := user.ID
+		for len(tmpID) <= 36 {
+			tmpID += tmpID
+		}
+		muncher.BTCustomerID = tmpID[:36]
 	}
 	if changed {
 		err = put(ctx, user.ID, muncher)

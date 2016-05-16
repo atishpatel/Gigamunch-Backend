@@ -41,7 +41,11 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address,
 		chef.PhoneNumber = phoneNumber
 	}
 	if chef.BTSubMerchantID == "" {
-		chef.BTSubMerchantID = user.ID[:32]
+		tmpID := user.ID
+		for len(tmpID) <= 32 {
+			tmpID += tmpID
+		}
+		chef.BTSubMerchantID = tmpID[:32]
 	}
 	err = put(ctx, user.ID, chef)
 	if err != nil {
