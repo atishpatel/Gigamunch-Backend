@@ -20,10 +20,12 @@ import (
 )
 
 const (
-	datetimeFormat  = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
-	insertStatement = "INSERT INTO `like` (created_datetime, user_id, item_id) VALUES (?,?,?)"
-	deleteStatement = "DELETE FROM `like` WHERE user_id=? AND item_id=?"
-	selectByUserID  = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
+	datetimeFormat   = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
+	insertStatement  = "INSERT INTO `like` (created_datetime, user_id, item_id) VALUES ('%s','%s',%d)"
+	insertNumLikes   = "INSERT INTO `num_likes` values (%d, 1) ON DUPLICATE KEY UPDATE num=num+1"
+	decreaseNumLikes = "UPDATE `num_likes` SET num=num-1 where item_id=%d"
+	deleteStatement  = "DELETE FROM `like` WHERE user_id=? AND item_id=?"
+	selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
 )
 
 var (
@@ -52,10 +54,14 @@ func (c *Client) Like(userID string, itemID int64) error {
 	if itemID == 0 {
 		return nil
 	}
-	_, err := mysqlDB.Exec(insertStatement,
+	_, err := mysqlDB.Exec(fmt.Sprintf(insertStatement,
 		time.Now().UTC().Format(datetimeFormat),
 		userID,
-		itemID)
+		itemID))
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("cannot execute insert statement")
+	}
+	_, err = mysqlDB.Exec(fmt.Sprintf(insertNumLikes, itemID))
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("cannot execute insert statement")
 	}
@@ -73,6 +79,10 @@ func (c *Client) Unlike(userID string, itemID int64) error {
 	_, err := mysqlDB.Exec(deleteStatement,
 		userID,
 		itemID)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("cannot execute delete statement")
+	}
+	_, err = mysqlDB.Exec(fmt.Sprintf(decreaseNumLikes, itemID))
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("cannot execute delete statement")
 	}
@@ -109,10 +119,11 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error)
 		}
 		for i := range items {
 			if items[i] == tmpItemID {
-				if tmpUserID == "" || tmpUserID == userID {
+				if tmpUserID == userID {
 					likesItem[i] = true
+				} else {
+					numLikes[i] = tmpNumLike
 				}
-				numLikes[i] = tmpNumLike
 			}
 		}
 	}
@@ -127,9 +138,8 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 	// SELECT item_id, user_id, count(item_id) AS cnt FROM (( SELECT item_id, user_id FROM `like` WHERE (item_id=0 OR item_id=1)
 	// ORDER BY user_id='user1' desc) AS s) group by item_id
 	// -- new
-	// SELECT item_id, '', COUNT(item_id) FROM `like` WHERE user_id='user1' and (item_id=0 OR item_id=1)
-	// UNION ALL
-	// SELECT item_id, user_id, COUNT(item_id) FROM `like` WHERE item_id=0 OR item_id=1 GROUP BY item_id;
+	// SELECT item_id, user_id, 0 FROM `like` WHERE user_id='%s' and (%s)
+	// UNION ALL SELECT item_id, '', num FROM `num_likes` WHERE (%s)
 	var err error
 	var buffer bytes.Buffer
 	for i := range items[1:] {
@@ -139,7 +149,7 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 		}
 	}
 	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
-	st := fmt.Sprintf("SELECT item_id, '', COUNT(item_id) FROM `like` WHERE user_id='%s' and (%s) UNION ALL SELECT item_id, user_id, COUNT(item_id) FROM `like` WHERE %s GROUP BY item_id",
+	st := fmt.Sprintf("SELECT item_id, user_id, 0 FROM `like` WHERE user_id='%s' and (%s) UNION ALL SELECT item_id, '', num FROM `num_likes` WHERE (%s)",
 		userID, itemIDStatement, itemIDStatement)
 	return st, nil
 }

@@ -27,3 +27,8 @@ CREATE TABLE IF NOT EXISTS `like` (
   `created_datetime` DATETIME NOT NULL,
   PRIMARY KEY (`item_id`, `user_id`)
 ) ENGINE = InnoDB;
+-- create num_likes table
+CREATE TABLE IF NOT EXISTS `num_likes` (
+  `item_id` BIGINT NOT NULL PRIMARY KEY,
+  `num` BIGINT NOT NULL
+) ENGINE = InnoDB;
