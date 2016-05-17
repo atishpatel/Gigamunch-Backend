@@ -54,7 +54,7 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 		review.Post.ID = postInfo.ID
 		review.Post.Title = postInfo.Title
 		review.Post.PhotoURL = postInfo.PhotoURL
-		review.CreatedDataTime = time.Now().UTC()
+		review.CreatedDateTime = time.Now().UTC()
 	} else { // update review
 		// check if the user has the right to update the review
 		err = get(c.ctx, reviewID, review)

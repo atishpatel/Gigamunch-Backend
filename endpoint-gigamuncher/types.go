@@ -38,7 +38,7 @@ type ErrorOnlyResp struct {
 type Review struct {
 	ID                  json.Number    `json:"id"`
 	ID64                int64          `json:"-"`
-	CreatedDataTime     int            `json:"created_datetime"`
+	CreatedDateTime     int            `json:"created_datetime"`
 	IsEdited            bool           `json:"is_edited"`
 	EditedDateTime      int            `json:"edited_datetime"`
 	GigachefID          string         `json:"gigachef_id"`
@@ -71,7 +71,7 @@ type reviewResponse struct {
 func (r *Review) set(review *review.Resp) {
 	r.ID = itojn(review.ID)
 	r.ID64 = review.ID
-	r.CreatedDataTime = ttoi(review.CreatedDataTime)
+	r.CreatedDateTime = ttoi(review.CreatedDateTime)
 	r.IsEdited = review.IsEdited
 	r.EditedDateTime = ttoi(review.EditedDateTime)
 	r.GigachefID = review.GigachefID

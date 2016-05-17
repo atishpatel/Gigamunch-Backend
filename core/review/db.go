@@ -12,12 +12,12 @@ func get(ctx context.Context, reviewID int64, review *Review) error {
 	return datastore.Get(ctx, key, review)
 }
 
-// getSortedReviews returns a list of reviews sorted by CreatedDataTime
+// getSortedReviews returns a list of reviews sorted by CreatedDateTime
 func getSortedReviews(ctx context.Context, gigachefID string, startLimit int, endLimit int) ([]int64, []Review, error) {
 	offset := startLimit
 	limit := endLimit - startLimit
 	query := datastore.NewQuery(kindReview).
-		Order("CreatedDataTime").
+		Order("CreatedDateTime").
 		Offset(offset).
 		Limit(limit)
 	var results []Review
