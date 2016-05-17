@@ -36,6 +36,12 @@ func New(ctx context.Context) Client {
 	}
 }
 
+// Resp is a post response
+type Resp struct {
+	ID int64
+	Post
+}
+
 // PostPost posts a live post if the post is valid
 // returns postID, error
 func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) {
@@ -114,7 +120,7 @@ func GetPosts(ctx context.Context, postIDs []int64) ([]Post, error) {
 	posts := make([]Post, len(postIDs))
 	err := getMultiPost(ctx, postIDs, posts)
 	if err != nil {
-		return nil, errDatastore.WithError(err)
+		return nil, errDatastore.WithError(err).Wrapf("cannot get multi posts(%v)", postIDs)
 	}
 	return posts, nil
 }
@@ -124,7 +130,30 @@ func GetPost(ctx context.Context, postID int64) (*Post, error) {
 	post := new(Post)
 	err := get(ctx, postID, post)
 	if err != nil {
-		return nil, errDatastore.WithError(err)
+		return nil, errDatastore.WithError(err).Wrapf("cannot get post(%d)", postID)
 	}
 	return post, nil
+}
+
+// GetClosedPosts returns posts that are closing in a minute or closed
+func (c *Client) GetClosedPosts() ([]int64, []string, error) {
+	return getClosedPosts(c.ctx)
+}
+
+// ClosePost removes the post from live posts
+func (c *Client) ClosePost(postID int64, chefID string) (*Resp, error) {
+	p := new(Post)
+	err := get(c.ctx, postID, p)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get post")
+	}
+	err = removeLivePost(postID)
+	if err != nil {
+		return nil, errors.Wrap("failed to remove live post", err)
+	}
+	resp := &Resp{
+		ID:   postID,
+		Post: *p,
+	}
+	return resp, nil
 }

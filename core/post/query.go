@@ -31,6 +31,8 @@ const (
 											HAVING distance < %d
                       ORDER BY ready_datetime %s, distance
                       LIMIT %d , %d`
+	selectClosedPosts = "SELECT post_id, gigachef_id FROM live_posts where close_datetime<'%s'"
+	deleteStatement   = "DELETE FROM live_posts WHERE post_id=%d"
 )
 
 func insertLivePost(postID int64, post *Post) error {
@@ -41,7 +43,7 @@ func insertLivePost(postID int64, post *Post) error {
 		`INSERT
 		INTO live_posts
 		(post_id, item_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_order_now, is_experimental, is_baked_good, latitude, longitude)
-		VALUES (?,?,?,?,?,?,?,?,?,?)`,
+		VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
 		postID,
 		post.ItemID,
 		post.GigachefID,
@@ -64,7 +66,7 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	var err error
 	listLength := limit.End - limit.Start
 	livePostQuery := getSortByDateQuery(geopoint.Latitude, geopoint.Longitude, radius,
-		readyDatetime, descending, limit)
+		readyDatetime.UTC(), descending, limit)
 	rows, err := mysqlDB.Query(livePostQuery)
 	if err != nil {
 		return nil, nil, nil, nil, errSQLDB.WithError(err)
@@ -77,7 +79,7 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	tmpGigachefIDs := make([]string, listLength)
 	actualReturnedRows := 0
 	for i := 0; rows.Next(); i++ {
-		rows.Scan(&tmpPostIDs[i], &tmpItemIDs[i], &tmpGigachefIDs[i], &tmpDistances[i])
+		_ = rows.Scan(&tmpPostIDs[i], &tmpItemIDs[i], &tmpGigachefIDs[i], &tmpDistances[i])
 		actualReturnedRows++
 	}
 	err = rows.Err()
@@ -107,6 +109,33 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 	return postIDs, itemIDs, gigachefIDs, distances, nil
 }
 
+func getClosedPosts(ctx context.Context) ([]int64, []string, error) {
+	if mysqlDB == nil {
+		connectSQL()
+	}
+	statement := fmt.Sprintf(selectClosedPosts, time.Now().UTC().Add(1*time.Minute).Format(datetimeFormat))
+	rows, err := mysqlDB.Query(statement)
+	if err != nil {
+		return nil, nil, errSQLDB.WithError(err).Wrapf("cannot query following statement: %s", statement)
+	}
+	defer handleCloser(ctx, rows)
+
+	var postIDs []int64
+	var chefIDs []string
+	var tmpPostID int64
+	var tmpChefID string
+	for rows.Next() {
+		_ = rows.Scan(&tmpPostID, &tmpChefID)
+		postIDs = append(postIDs, tmpPostID)
+		chefIDs = append(chefIDs, tmpChefID)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
+	}
+	return postIDs, chefIDs, nil
+}
+
 func getSortByDateQuery(latitude float64, longitude float64, radius int, readyTime time.Time, descending bool, limit *types.Limit) string {
 	var readyDatetimeOrder, readyWhere string
 	if descending {
@@ -119,17 +148,28 @@ func getSortByDateQuery(latitude float64, longitude float64, radius int, readyTi
 	return fmt.Sprintf(sortByDate, latitude, longitude, latitude, readyWhere, radius, readyDatetimeOrder, limit.Start, limit.End)
 }
 
+func removeLivePost(postID int64) error {
+	if mysqlDB == nil {
+		connectSQL()
+	}
+	_, err := mysqlDB.Exec(fmt.Sprintf(deleteStatement, postID))
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("cannot execute delete statement")
+	}
+	return nil
+}
+
 func connectSQL() {
 	var err error
 	var connectionString string
-	projectID := os.Getenv("PROJECTID")
-	if projectID == "" {
-		log.Fatal("PROJECTID env variable is not set.")
-	}
 	if appengine.IsDevAppServer() {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
+		projectID := os.Getenv("PROJECTID")
+		if projectID == "" {
+			log.Fatal("PROJECTID env variable is not set.")
+		}
 		// MYSQL_CONNECTION: user:password@tcp([host]:3306)/dbname
 		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
 	}

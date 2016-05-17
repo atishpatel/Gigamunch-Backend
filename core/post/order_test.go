@@ -119,12 +119,12 @@ func TestCancelOrder(t *testing.T) {
 	p := &Post{
 		ClosingDateTime: time.Now().Add(time.Hour),
 		ServingsOffered: 10,
-		Orders: []postOrder{
-			postOrder{
+		Orders: []OrderPost{
+			OrderPost{
 				OrderID:       10,
 				GigamuncherID: "muncher",
 			},
-			postOrder{
+			OrderPost{
 				OrderID: 20,
 			},
 		},
@@ -171,8 +171,8 @@ func TestCancelOrderErrors(t *testing.T) {
 	if err != nil {
 		t.Fatal("failed to put post")
 	}
-	p.Orders = []postOrder{
-		postOrder{
+	p.Orders = []OrderPost{
+		OrderPost{
 			OrderID:       10,
 			GigamuncherID: "muncher",
 		},

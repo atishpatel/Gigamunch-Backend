@@ -72,7 +72,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 	p := new(Post)
 	err := get(ctx, req.PostID, p)
 	if err != nil {
-		return nil, errDatastore.WithError(err).Wrap("cannot get post")
+		return nil, errDatastore.WithError(err).Wrapf("cannot get post(%d)", req.PostID)
 	}
 	// check if post stuff is avaliable
 	if req.NumServings > p.ServingsOffered-p.NumServingsOrdered {
@@ -125,7 +125,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 		if req.ExchangeMethod.ChefDelivery() {
 			p.GigachefDelivery.TotalDuration += duration
 		}
-		pOrder := postOrder{
+		pOrder := OrderPost{
 			OrderID:             order.ID,
 			GigamuncherID:       req.GigamuncherID,
 			GigamuncherGeopoint: req.GigamuncherAddress.GeoPoint,
@@ -174,6 +174,8 @@ func createOrderRequest(p *Post, req *MakeOrderReq, exchangeMethod types.Exchang
 		ExchangeMethod:        exchangeMethod,
 		ExchangePrice:         exchangeCost,
 		ExpectedExchangeTime:  expectedExchangeTime,
+		CloseDateTime:         p.ClosingDateTime,
+		ReadyDateTime:         p.ReadyDateTime,
 		GigachefAddress:       p.GigachefAddress,
 		Distance:              distance,
 		Duration:              duration,
