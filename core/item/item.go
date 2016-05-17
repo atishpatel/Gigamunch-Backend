@@ -68,7 +68,7 @@ func GetItem(ctx context.Context, user *types.User, itemID int64) (*Item, error)
 	return item, nil
 }
 
-// GetItems returns an array of items sorted by LastUsedDataTime
+// GetItems returns an array of items sorted by LastUsedDateTime
 // returns: []ids, []items, error
 func GetItems(ctx context.Context, user *types.User, limit *types.Limit) ([]int64, []Item, error) {
 	ids, items, err := getSortedItems(ctx, user.ID, limit.Start, limit.End)

@@ -12,7 +12,7 @@ func get(ctx context.Context, id int64, item *Item) error {
 	return datastore.Get(ctx, key, item)
 }
 
-// getSortedItems returns a list of reviews sorted by CreatedDataTime
+// getSortedItems returns a list of reviews sorted by CreatedDateTime
 func getSortedItems(ctx context.Context, gigachefID string, startLimit int, endLimit int) ([]int64, []Item, error) {
 	offset := startLimit
 	limit := endLimit - startLimit
