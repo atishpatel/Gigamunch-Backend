@@ -15,8 +15,8 @@ import (
 var errResp = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "fake error"}
 
 type fakePaymentClient struct {
-	makesale, refundsale             bool
-	MakeSaleCalled, RefundSaleCalled bool
+	makesale, refundsale, releasesale, cancelrelease                         bool
+	MakeSaleCalled, RefundSaleCalled, ReleaseSaleCalled, CancelReleaseCalled bool
 }
 
 func newPaymentClient() *fakePaymentClient {
@@ -24,6 +24,22 @@ func newPaymentClient() *fakePaymentClient {
 		makesale:   true,
 		refundsale: true,
 	}
+}
+
+func (f *fakePaymentClient) ReleaseSale(id string) (string, error) {
+	f.ReleaseSaleCalled = true
+	if f.releasesale {
+		return id, nil
+	}
+	return "", errResp
+}
+
+func (f *fakePaymentClient) CancelRelease(id string) (string, error) {
+	f.CancelReleaseCalled = true
+	if f.cancelrelease {
+		return id, nil
+	}
+	return "", errResp
 }
 
 func (f *fakePaymentClient) MakeSale(arg1, arg2 string, arg3, arg4 float32) (string, error) {
@@ -34,10 +50,10 @@ func (f *fakePaymentClient) MakeSale(arg1, arg2 string, arg3, arg4 float32) (str
 	return "", errResp
 }
 
-func (f *fakePaymentClient) RefundSale(string) (string, error) {
+func (f *fakePaymentClient) RefundSale(id string) (string, error) {
 	f.RefundSaleCalled = true
 	if f.refundsale {
-		return "success", nil
+		return id, nil
 	}
 	return "", errResp
 }
@@ -82,8 +98,8 @@ func TestCreate(t *testing.T) {
 	// fix nanosecond off error
 	resp.CreatedDateTime = resp.CreatedDateTime.Truncate(time.Second)
 	tmpResp.CreatedDateTime = tmpResp.CreatedDateTime.Truncate(time.Second)
-	resp.ExpectedExchangeDataTime = resp.ExpectedExchangeDataTime.Truncate(time.Second)
-	tmpResp.ExpectedExchangeDataTime = tmpResp.ExpectedExchangeDataTime.Truncate(time.Second)
+	resp.ExpectedExchangeDateTime = resp.ExpectedExchangeDateTime.Truncate(time.Second)
+	tmpResp.ExpectedExchangeDateTime = tmpResp.ExpectedExchangeDateTime.Truncate(time.Second)
 	if !reflect.DeepEqual(tmpResp, *resp) {
 		t.Fatalf("Response order does not equal datastore order. \nResp: %#v \nActual: %#v", *resp, tmpResp)
 	}

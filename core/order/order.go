@@ -35,6 +35,8 @@ type Resp struct {
 type paymentClient interface {
 	MakeSale(string, string, float32, float32) (string, error)
 	RefundSale(string) (string, error)
+	ReleaseSale(string) (string, error)
+	CancelRelease(string) (string, error)
 }
 
 // CreateReq is the request needed to create an order
@@ -57,6 +59,8 @@ type CreateReq struct {
 	ExchangeMethod        types.ExchangeMethods
 	ExchangePrice         float32
 	ExpectedExchangeTime  time.Time
+	CloseDateTime         time.Time
+	ReadyDateTime         time.Time
 	GigachefAddress       types.Address
 	Distance              float32
 	Duration              int64
@@ -103,7 +107,7 @@ func (c *Client) Create(ctx context.Context, req *CreateReq) (*Resp, error) {
 }
 
 func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp, error) {
-
+	// TODO make two transactions if delivery cost is not 0
 	totalPricePerServing := req.PricePerServing * float32(req.NumServings)
 	gigaFee := req.PricePerServing - req.ChefPricePerServing
 	totalGigaFee := gigaFee * float32(req.NumServings)
@@ -117,8 +121,11 @@ func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp,
 		return nil, errors.Wrap("cannot make sale", err)
 	}
 	order := &Order{
-		CreatedDateTime:          time.Now(),
-		ExpectedExchangeDataTime: req.ExpectedExchangeTime,
+		CreatedDateTime: time.Now(),
+		State:           State.Pending,
+		ExpectedExchangeDateTime: req.ExpectedExchangeTime,
+		PostCloseDateTime:        req.CloseDateTime,
+		PostReadyDateTime:        req.ReadyDateTime,
 		BasicOrderIDs: BasicOrderIDs{
 			GigachefID:    req.GigachefID,
 			GigamuncherID: req.GigamuncherID,
@@ -255,4 +262,66 @@ func (c *Client) GetOrders(muncherID string, limit *types.Limit) ([]Resp, error)
 	}
 
 	return resps, nil
+}
+
+// Process will process the order
+func (c *Client) Process(id int64) (*Resp, error) {
+	resp := &Resp{ID: id}
+	o := new(Order)
+	err := get(c.ctx, id, o)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("cannot get order(%d)", id)
+	}
+	switch o.State {
+	case State.Canceled:
+	case State.Refunded:
+	case State.Paid:
+	case State.Issues:
+		resp.Order = *o
+		return resp, nil
+	case State.Pending:
+		paymentC := payment.New(c.ctx)
+		return payOrder(c.ctx, id, o, paymentC)
+	}
+	// default
+	return nil, errInvalidParameter.WithMessage("order is in an unexpected state").Wrapf("order(%d) is unkown state(%s)", id, o.State)
+}
+
+func payOrder(ctx context.Context, id int64, o *Order, paymentC paymentClient) (*Resp, error) {
+	if o.State != State.Pending {
+		return nil, errInvalidParameter.WithMessage("order isn't in pending state").Wrapf("order(%d) isn't in pending state. state(%s)", id, o.State)
+	}
+	_, err := paymentC.ReleaseSale(o.PaymentInfo.BTTransactionID)
+	if err != nil {
+		return nil, errors.Wrap("failed to release sale", err)
+	}
+	o.State = State.Paid
+	err = put(ctx, id, o)
+	if err != nil {
+		_, btErr := paymentC.CancelRelease(o.PaymentInfo.BTTransactionID)
+		if btErr != nil {
+			utils.Criticalf(ctx, "failed to cancel release of transaction(%s): err: %#v", o.PaymentInfo.BTTransactionID, btErr)
+			return nil, errors.Wrap("failed to cancel release", btErr)
+		}
+		return nil, errDatastore.WithError(err).Wrapf("cannot put order(%d)", id)
+	}
+	resp := &Resp{
+		ID:    id,
+		Order: *o,
+	}
+	return resp, nil
+}
+
+// SetStateToPendingByTransactionID sets the state to pending
+func (c *Client) SetStateToPendingByTransactionID(transactionID string) (int64, error) {
+	id, o, err := getByTransactionID(c.ctx, transactionID)
+	if err != nil {
+		return 0, errDatastore.WithError(err).Wrapf("cannot getByTransactionID order(%d)", id)
+	}
+	o.State = State.Pending
+	err = put(c.ctx, id, o)
+	if err != nil {
+		return 0, errDatastore.WithError(err).Wrapf("cannot put order(%d)", id)
+	}
+	return id, nil
 }

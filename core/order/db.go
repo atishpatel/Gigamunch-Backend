@@ -1,17 +1,33 @@
 package order
 
 import (
+	"fmt"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/datastore"
 )
 
-// getSortedOrders returns a list of reviews sorted by CreatedDataTime
+func getByTransactionID(ctx context.Context, transactionID string) (int64, *Order, error) {
+	query := datastore.NewQuery(kindOrder).Filter("PaymentInfo.BTTransactionID =", transactionID)
+	var results []Order
+	keys, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return 0, nil, err
+	}
+	if len(keys) != 1 || len(results) != 1 {
+		return 0, nil, fmt.Errorf("transactionID(%s) has two orders", transactionID)
+	}
+	return keys[0].IntID(), &results[0], nil
+}
+
+// getSortedOrders returns a list of reviews sorted by CreatedDateTime
 func getSortedOrders(ctx context.Context, muncherID string, startLimit int, endLimit int) ([]int64, []Order, error) {
 	offset := startLimit
 	limit := endLimit - startLimit
 	query := datastore.NewQuery(kindOrder).
-		Order("CreatedDataTime").
+		Filter("GigamuncherID =", muncherID).
+		Order("-ExpectedExchangeDateTime").
 		Offset(offset).
 		Limit(limit)
 	var results []Order

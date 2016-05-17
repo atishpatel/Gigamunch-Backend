@@ -12,17 +12,17 @@ const (
 )
 
 // State is the possible states the order can be in
-var State = struct{ Pending, Issues, Canceling, Refunded, Paid string }{
-	Refunded:  "Refunded",
-	Canceling: "Canceling",
-	Pending:   "Pending",
-	Issues:    "Issues",
-	Paid:      "Paid",
+var State = struct{ Canceled, Pending, Issues, Refunded, Paid string }{
+	Canceled: "Canceled",
+	Refunded: "Refunded",
+	Pending:  "Pending",
+	Issues:   "Issues",
+	Paid:     "Paid",
 }
 
 // PaymentInfo is the payment information related to an order
 type PaymentInfo struct {
-	BTTransactionID string  `json:"bt_transaction_id" database:",noindex"`
+	BTTransactionID string  `json:"bt_transaction_id" database:",index"`
 	Price           float32 `json:"price" datastore:",noindex"`
 	ExchangePrice   float32 `json:"exchange_price" datastore:",noindex"`
 	GigaFee         float32 `json:"giga_fee" datastore:",noindex"`
@@ -56,8 +56,10 @@ type PostInfo struct {
 
 // Order is the order made by a gigamuncher for a post
 type Order struct {
-	CreatedDateTime          time.Time             `json:"created_datetime" datastore:",noindex"`
-	ExpectedExchangeDataTime time.Time             `json:"expected_exchange_datatime" datastore:",index"`
+	CreatedDateTime          time.Time             `json:"created_datetime"`
+	ExpectedExchangeDateTime time.Time             `json:"expected_exchange_datetime"`
+	PostCloseDateTime        time.Time             `json:"post_close_datetime"`
+	PostReadyDateTime        time.Time             `json:"post_ready_datetime"`
 	GigachefHasCompleted     bool                  `json:"gigachef_has_completed" datastore:",noindex"`
 	State                    string                `json:"state" datastore:",index"`
 	BTRefundTransactionID    string                `json:"bt_refund_transaction_id" datastore:",noindex"`
