@@ -44,7 +44,7 @@ func (err ErrorWithCode) Wrap(additionalDetail string) ErrorWithCode {
 
 //Wrapf annotates the error by fromating string and prepending it to error's details
 func (err ErrorWithCode) Wrapf(format string, args ...interface{}) ErrorWithCode {
-	return err.Wrap(fmt.Sprintf(format, args))
+	return err.Wrap(fmt.Sprintf(format, args...))
 }
 
 // Equal returns if the two errors have the same Code
