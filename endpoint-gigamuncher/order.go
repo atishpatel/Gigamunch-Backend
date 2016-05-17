@@ -3,6 +3,7 @@ package gigamuncher
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
@@ -66,18 +67,18 @@ type OrderGigachef struct {
 
 // Order is an order
 type Order struct {
-	ID                       json.Number      `json:"id"`
+	ID                       json.Number      `json:"id,omitempty"`
 	CreatedDateTime          int              `json:"created_datetime"`
 	ExpectedExchangeDateTime int              `json:"expected_exchange_datetime"`
 	State                    string           `json:"state"`
-	ZendeskIssueID           json.Number      `json:"zendesk_issue_id"`
+	ZendeskIssueID           json.Number      `json:"zendesk_issue_id,omitempty"`
 	GigachefCanceled         bool             `json:"gigachef_canceled"`
 	GigamuncherCanceled      bool             `json:"gigamuncher_canceled"`
 	Gigachef                 OrderGigachef    `json:"gigachef"`
 	Gigamuncher              OrderGigamuncher `json:"gigamuncher"`
-	ReviewID                 json.Number      `json:"review_id"`
-	PostID                   json.Number      `json:"post_id"`
-	ItemID                   json.Number      `json:"item_id"`
+	ReviewID                 json.Number      `json:"review_id,omitempty"`
+	PostID                   json.Number      `json:"post_id,omitempty"`
+	ItemID                   json.Number      `json:"item_id,omitempty"`
 	PostTitle                string           `json:"post_title"`
 	PostPhotoURL             string           `json:"post_photo_url"`
 	PricePerServing          float32          `json:"price_per_serving"`
@@ -87,12 +88,13 @@ type Order struct {
 	ExchangePlanInfo         ExchangePlanInfo `json:"exchange_plan_info"`
 	NumLikes                 int              `json:"num_likes"`
 	HasLiked                 bool             `json:"has_liked"`
+	Status                   string           `json:"status"`
 }
 
 func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool) {
 	o.ID = itojn(order.ID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
-	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDataTime)
+	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDateTime)
 	o.State = order.State
 	o.ZendeskIssueID = itojn(order.ZendeskIssueID)
 	o.GigachefCanceled = order.GigachefCanceled
@@ -113,11 +115,20 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool) {
 	o.ExchangePlanInfo.set(order)
 	o.NumLikes = numLikes
 	o.HasLiked = hasLikes
+	if order.ExpectedExchangeDateTime.After(time.Now().Add(1 * time.Hour)) {
+		o.Status = "Let me know if you liked the food!"
+	} else if order.ExpectedExchangeDateTime.After(time.Now()) {
+		o.Status = "Enjoy your food!"
+	} else if order.PostCloseDateTime.After(time.Now()) {
+		o.Status = "Starting to prepare your food!"
+	} else {
+		o.Status = "Looking forward to cooking for you!"
+	}
 }
 
 // MakeOrderReq is the request for MakeOrder
 type MakeOrderReq struct {
-	PostID          json.Number `json:"post_id"`
+	PostID          json.Number `json:"post_id,omitempty"`
 	PostID64        int64       `json:"-"`
 	BraintreeNonce  string      `json:"braintree_nonce"`
 	Servings        int32       `json:"servings"`
@@ -291,7 +302,7 @@ func (req *GetOrdersReq) valid() error {
 
 // GetOrdersResp is the response for GetOrders
 type GetOrdersResp struct {
-	Orders []Order              `json:"orders"`
+	Orders []Order              `json:"orders,omitempty"`
 	Err    errors.ErrorWithCode `json:"err"`
 }
 

@@ -18,9 +18,9 @@ import (
 
 // BasePost is the basic stuff for a post
 type BasePost struct {
-	ID                json.Number `json:"id"`
+	ID                json.Number `json:"id,omitempty"`
 	ID64              int64       `json:"-"`
-	ItemID            json.Number `json:"item_id"`
+	ItemID            json.Number `json:"item_id,omitempty"`
 	ItemID64          int64       `json:"-"`
 	Title             string      `json:"title"`
 	Description       string      `json:"description"`
@@ -66,6 +66,7 @@ func (p *BasePost) set(userID string, id int64, numLikes int, hasLiked bool, dis
 	}
 	p.NumLikes = numLikes
 	p.HasLiked = hasLiked
+
 }
 
 // PostGigachef is the basic version of GigachefDetails for post in live feed
@@ -256,6 +257,13 @@ type PaymentInfo struct {
 	TaxPercentage       float32 `json:"tax_percentage"`
 }
 
+func (p *PaymentInfo) set(post *post.Post) {
+	// TODO exchange price
+	p.ChefPricePerServing = post.ChefPricePerServing
+	p.GigaFee = post.PricePerServing - post.ChefPricePerServing
+	p.TaxPercentage = post.TaxPercentage
+}
+
 // GetPostReq is the input required to get a post
 type GetPostReq struct {
 	PostID    json.Number `json:"post_id"`
@@ -361,5 +369,6 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 	numLikes := 0
 	hasLiked := false
 	resp.Post.set(userID, req.PostID64, numLikes, hasLiked, distance, p)
+	resp.PaymentInfo.set(p)
 	return resp, nil
 }

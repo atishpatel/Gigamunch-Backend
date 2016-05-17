@@ -13,9 +13,9 @@ import (
 // PostReviewReq is the request for posting a review
 type PostReviewReq struct {
 	Gigatoken  string      `json:"gigatoken"`
-	OrderID    json.Number `json:"order_id"`
+	OrderID    json.Number `json:"order_id,omitempty"`
 	OrderID64  int64       `json:"-"`
-	ReviewID   json.Number `json:"review_id"`
+	ReviewID   json.Number `json:"review_id,omitempty"`
 	ReviewID64 int64       `json:"-"`
 	Rating     int         `json:"rating"`
 	RatingText string      `json:"rating_text"`
@@ -86,11 +86,8 @@ func (req *GetReviewsReq) valid() error {
 	if req.StartLimit < 0 || req.EndLimit < 0 {
 		return fmt.Errorf("Limit is out of range.")
 	}
-	if req.StartLimit <= req.EndLimit {
-		return fmt.Errorf("StartLimit cannot be less than or equal to EndLimit.")
-	}
-	if (req.EndLimit - req.StartLimit) > 40 {
-		return fmt.Errorf("StartLimit cannot be less than or equal to EndLimit.")
+	if req.StartLimit >= req.EndLimit {
+		return fmt.Errorf("StartLimit cannot be greater than or equal to EndLimit.")
 	}
 	if req.GigachefID == "" {
 		return fmt.Errorf("GigachefID cannot be empty")
