@@ -221,7 +221,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 				token.Expire = expTime
 				userSessions.TokenIDs[i].UpdateToExpire = expTime
 				userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: newJTI, Expire: expTime})
-				userSessions.TokenIDs[i].Expire = time.Now().UTC().Add(time.Hour * 1)
+				userSessions.TokenIDs[i].Expire = time.Now().UTC().Add(time.Minute * 1)
 				needPut = true
 			}
 			token.ITA = getITATime()
