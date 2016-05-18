@@ -51,6 +51,7 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 		review.GigamuncherID = user.ID
 		review.GigamuncherName = user.Name
 		review.OrderID = orderID
+		review.ItemID = orderIDs.ItemID
 		review.Post.ID = postInfo.ID
 		review.Post.Title = postInfo.Title
 		review.Post.PhotoURL = postInfo.PhotoURL

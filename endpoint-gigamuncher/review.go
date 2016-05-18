@@ -39,9 +39,13 @@ func (req *PostReviewReq) valid() error {
 	if err != nil {
 		return fmt.Errorf("error with OrderID: %v", err)
 	}
-	req.ReviewID64, err = req.ReviewID.Int64()
-	if err != nil {
-		return fmt.Errorf("error with ReviewID: %v", err)
+	if req.ReviewID.String() == "" {
+		req.ReviewID64 = 0
+	} else {
+		req.ReviewID64, err = req.ReviewID.Int64()
+		if err != nil {
+			return fmt.Errorf("error with ReviewID: %v", err)
+		}
 	}
 	return nil
 }

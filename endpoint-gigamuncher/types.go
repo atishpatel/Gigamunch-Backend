@@ -36,7 +36,7 @@ type ErrorOnlyResp struct {
 
 // Review is a review
 type Review struct {
-	ID                  json.Number    `json:"id"`
+	ID                  json.Number    `json:"id,omitempty"`
 	ID64                int64          `json:"-"`
 	CreatedDateTime     int            `json:"created_datetime"`
 	IsEdited            bool           `json:"is_edited"`
@@ -45,9 +45,9 @@ type Review struct {
 	GigamuncherID       string         `json:"gigamuncher_id"`
 	GigamuncherName     string         `json:"gigamuncher_name"`
 	GigamuncherPhotoURL string         `json:"gigamuncher_photo_url"`
-	ItemID              json.Number    `json:"item_id"`
+	ItemID              json.Number    `json:"item_id,omitempty"`
 	ItemID64            int64          `json:"-"`
-	OrderID             json.Number    `json:"order_id"`
+	OrderID             json.Number    `json:"order_id,omitempty"`
 	OrderID64           int64          `json:"-"`
 	Post                reviewPost     `json:"post"`
 	Rating              int            `json:"rating"`
