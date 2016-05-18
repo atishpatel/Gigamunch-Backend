@@ -63,10 +63,10 @@ func (user *User) SetAddress(x bool) {
 
 // HasSubMerchantID returns true if a user has a submerchant id
 func (user *User) HasSubMerchantID() bool {
-	return getKthBit(user.Permissions, 4)
+	return getKthBit(user.Permissions, 5)
 }
 
 // SetSubMerchantID updates the permission of the user
 func (user *User) SetSubMerchantID(x bool) {
-	user.Permissions = setKthBit(user.Permissions, 4, x)
+	user.Permissions = setKthBit(user.Permissions, 5, x)
 }

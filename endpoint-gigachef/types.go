@@ -1,5 +1,7 @@
 package gigachef
 
+import "github.com/atishpatel/Gigamunch-Backend/errors"
+
 // BaseItem is the basic stuff in an Item
 type BaseItem struct {
 	Title            string   `json:"title"`
@@ -9,4 +11,9 @@ type BaseItem struct {
 	CuisineTags      []string `json:"cuisine_tags"`
 	DietaryNeedsTags []string `json:"dietary_needs_tags"`
 	Photos           []string `json:"photos"`
+}
+
+// ErrorOnlyResp is a response with only an error with code
+type ErrorOnlyResp struct {
+	Err errors.ErrorWithCode `json:"err"`
 }

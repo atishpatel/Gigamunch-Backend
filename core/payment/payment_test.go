@@ -73,7 +73,7 @@ func TestMakeSaleThenRefund(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	createSubMerchantReq := &CreateSubMerchantReq{
+	updateSubMerchantReq := &UpdateSubMerchantReq{
 		ID:          "01234567890123456789012345678912",
 		FirstName:   "Kayle",
 		LastName:    "Gishen",
@@ -97,12 +97,11 @@ func TestMain(m *testing.M) {
 	defer done()
 
 	c := New(ctx)
-	subMerchantID, err = c.CreateSubMerchant(createSubMerchantReq)
+	subMerchantID, err = c.UpdateSubMerchant(updateSubMerchantReq)
 	if err != nil {
 		log.Fatalln("failed to create test sub merchant: %v", err)
 	}
 	log.Printf("using subMerchantID %s", subMerchantID)
 	code := m.Run()
-
 	os.Exit(code)
 }

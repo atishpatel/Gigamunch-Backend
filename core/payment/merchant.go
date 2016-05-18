@@ -5,15 +5,17 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/braintree-go"
 )
 
-// CreateSubMerchantReq is the request to CreateSubMerchant
+// UpdateSubMerchantReq is the request to UpdateSubMerchant
 // ID must be len 32
-type CreateSubMerchantReq struct {
+type UpdateSubMerchantReq struct {
+	User                types.User
 	ID                  string
 	FirstName, LastName string
 	Email               string
@@ -23,21 +25,21 @@ type CreateSubMerchantReq struct {
 	Address             types.Address
 }
 
-func (req *CreateSubMerchantReq) valid() error {
+func (req *UpdateSubMerchantReq) valid() error {
 	if len(req.ID) != 32 {
 		return errInvalidParameter.WithMessage("ID must be length 32.")
 	}
 	return nil
 }
 
-// CreateSubMerchant creates a sub-merchant
-// TODO change to update?
-func (c Client) CreateSubMerchant(req *CreateSubMerchantReq) (string, error) {
+// UpdateSubMerchant creates or updates sub-merchant info
+func (c Client) UpdateSubMerchant(req *UpdateSubMerchantReq) (string, error) {
 	err := req.valid()
 	if err != nil {
 		return "", err
 	}
-	account, err := c.bt.MerchantAccount().Create(&braintree.MerchantAccount{
+
+	ma := &braintree.MerchantAccount{
 		MasterMerchantAccountId: "Gigamunch_marketplace",
 		Id:          req.ID,
 		TOSAccepted: true,
@@ -53,14 +55,24 @@ func (c Client) CreateSubMerchant(req *CreateSubMerchantReq) (string, error) {
 			AccountNumber: req.AccountNumber,
 			RoutingNumber: req.RoutingNumber,
 		},
-	})
-	if err != nil {
-		return "", errBT.WithError(err).Wrap("cannot create sub-merchant")
 	}
-	if account.Status != "pending" {
-		return "", errBT.WithMessage("Error creating sub-merchant account with status " + account.Status)
+	if req.User.HasSubMerchantID() {
+		ma, err = c.bt.MerchantAccount().Update(ma)
+	} else {
+		ma, err = c.bt.MerchantAccount().Create(ma)
+		if err != nil {
+			return "", errBT.WithError(err).Wrap("cannot create sub-merchant")
+		}
+		req.User.SetSubMerchantID(true)
+		err = auth.SaveUser(c.ctx, &req.User)
+		if err != nil {
+			return "", errors.Wrap("failed update user to has sub-merchant account", err)
+		}
 	}
-	return account.Id, err
+	if ma.Status != "pending" {
+		return "", errBT.WithMessage("Error creating sub-merchant account with status " + ma.Status)
+	}
+	return ma.Id, err
 }
 
 type chefInterface interface {

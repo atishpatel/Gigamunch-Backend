@@ -21,6 +21,22 @@ func New(ctx context.Context) *Client {
 	return &Client{ctx: ctx}
 }
 
+// Resp is a chef with id
+type Resp struct {
+	ID string
+	Gigachef
+}
+
+// Get gets the chef
+func (c *Client) Get(id string) (*Resp, error) {
+	chef := new(Gigachef)
+	err := get(c.ctx, id, chef)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("failed to get chef(%s)", id)
+	}
+	return &Resp{ID: id, Gigachef: *chef}, nil
+}
+
 // SaveUserInfo is to save a user's info. Only exposed for account package.
 // Please use the account package's func instead of this one.
 func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address, phoneNumber string) error {
@@ -103,12 +119,6 @@ func IncrementNumPost(ctx context.Context, user *types.User) error {
 		return errDatastore.WithError(err).Wrap("cannot put gigachef")
 	}
 	return nil
-}
-
-// Resp is a chef with id
-type Resp struct {
-	ID string
-	Gigachef
 }
 
 // FindBySubMerchantID finds a chef by submerchantID
