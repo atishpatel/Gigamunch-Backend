@@ -123,9 +123,6 @@ func (c *Client) Unlike(userID string, itemID int64) error {
 func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error) {
 	likesItem := make([]bool, len(items))
 	numLikes := make([]int, len(items))
-	if userID == "" {
-		return likesItem, numLikes, nil
-	}
 	if len(items) == 0 {
 		return likesItem, numLikes, nil
 	}
@@ -149,7 +146,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error)
 		}
 		for i := range items {
 			if items[i] == tmpItemID {
-				if tmpUserID == userID {
+				if tmpUserID == "u" {
 					likesItem[i] = true
 				} else {
 					numLikes[i] = tmpNumLike
@@ -179,7 +176,7 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 		}
 	}
 	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
-	st := fmt.Sprintf("SELECT item_id, user_id, 0 FROM `like` WHERE user_id='%s' and (%s) UNION ALL SELECT item_id, '', num FROM `num_likes` WHERE (%s)",
+	st := fmt.Sprintf("SELECT item_id, 'u', 0 FROM `like` WHERE user_id='%s' and (%s) UNION ALL SELECT item_id, '', num FROM `num_likes` WHERE (%s)",
 		userID, itemIDStatement, itemIDStatement)
 	return st, nil
 }
