@@ -1,0 +1,4 @@
+cron:
+- description: "remove closed posts"
+  url: /remove-closed-posts
+  schedule: every 1 mins
