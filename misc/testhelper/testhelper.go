@@ -1,6 +1,10 @@
 package testhelper
 
 import (
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
@@ -10,6 +14,15 @@ const (
 	FoodPhotoURL   = "http://lorempixel.com/1920/1080/food"
 	PersonPhotoURL = "http://lorempixel.com/1920/1080/people"
 )
+
+func RandString() string {
+	return strconv.FormatInt(int64(time.Now().Nanosecond()), 36)
+}
+
+func RandInt() int64 {
+	rand.Seed(int64(time.Now().Nanosecond()))
+	return rand.Int63()
+}
 
 func GetGigamuncher(ctx context.Context) (string, gigamuncher.Gigamuncher) {
 	// TODO create datastore if not exist
