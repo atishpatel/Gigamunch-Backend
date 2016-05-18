@@ -141,6 +141,9 @@ func (service *Service) UpdateSubMerchant(ctx context.Context, req *UpdateSubMer
 		resp.Err = errors.GetErrorWithCode(err).Wrapf("cannot get chef(%d)", user.ID)
 		return resp, nil
 	}
+	if req.Address.Country == "" {
+		req.Address.Country = "USA"
+	}
 	updateMerchantReq := &payment.UpdateSubMerchantReq{
 		User:          *user,
 		ID:            chef.BTSubMerchantID,
