@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,10 +23,10 @@ import (
 const (
 	datetimeFormat   = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
 	insertStatement  = "INSERT INTO `like` (created_datetime, user_id, item_id) VALUES ('%s','%s',%d)"
-	insertNumLikes   = "INSERT INTO `num_likes` values (%d, 1) ON DUPLICATE KEY UPDATE num=num+1"
+	increaseNumLikes = "INSERT INTO `num_likes` values (%d, 1) ON DUPLICATE KEY UPDATE num=num+1"
 	decreaseNumLikes = "UPDATE `num_likes` SET num=num-1 where item_id=%d"
-	deleteStatement  = "DELETE FROM `like` WHERE user_id=? AND item_id=?"
-	selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
+	deleteStatement  = "DELETE FROM `like` WHERE user_id='%s' AND item_id=%d"
+	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
 )
 
 var (
@@ -54,16 +55,33 @@ func (c *Client) Like(userID string, itemID int64) error {
 	if itemID == 0 {
 		return nil
 	}
-	_, err := mysqlDB.Exec(fmt.Sprintf(insertStatement,
+	st := fmt.Sprintf(insertStatement,
 		time.Now().UTC().Format(datetimeFormat),
 		userID,
-		itemID))
+		itemID)
+	result, err := mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("cannot execute insert statement")
+		if strings.Contains(err.Error(), "Error 1062") {
+			return nil
+		}
+		return errSQLDB.WithError(err).Wrapf("cannot execute insert statement(%s)", st)
 	}
-	_, err = mysqlDB.Exec(fmt.Sprintf(insertNumLikes, itemID))
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("cannot execute insert statement")
+		return errSQLDB.WithError(err).Wrap("failed to get rows affected")
+	}
+	switch rowsAffected {
+	case 0:
+		return nil // nothing liked
+	case 1:
+		break
+	default:
+		return errSQLDB.Wrapf("num rows affected(%d) is not 0 or 1", rowsAffected)
+	}
+	st = fmt.Sprintf(increaseNumLikes, itemID)
+	_, err = mysqlDB.Exec(st)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrapf("cannot execute increaseNumLikes statement(%s)", st)
 	}
 	return nil
 }
@@ -76,15 +94,27 @@ func (c *Client) Unlike(userID string, itemID int64) error {
 	if itemID == 0 {
 		return nil
 	}
-	_, err := mysqlDB.Exec(deleteStatement,
-		userID,
-		itemID)
+	st := fmt.Sprintf(deleteStatement, userID, itemID)
+	result, err := mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("cannot execute delete statement")
+		return errSQLDB.WithError(err).Wrapf("cannot execute delete statement(%s)", st)
 	}
-	_, err = mysqlDB.Exec(fmt.Sprintf(decreaseNumLikes, itemID))
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("cannot execute delete statement")
+		return errSQLDB.WithError(err).Wrap("failed to get rows affected")
+	}
+	switch rowsAffected {
+	case 0:
+		return nil // nothing unliked
+	case 1:
+		break
+	default:
+		return errSQLDB.Wrapf("num rows affected(%d) is not 0 or 1", rowsAffected)
+	}
+	st = fmt.Sprintf(decreaseNumLikes, itemID)
+	_, err = mysqlDB.Exec(st)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrapf("cannot execute delete statement(%s)", st)
 	}
 	return nil
 }
@@ -155,23 +185,23 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 }
 
 // GetUserLikes returns an array of item ids the user likes
-func (c *Client) GetUserLikes(userID string) ([]int64, error) {
-	rows, err := mysqlDB.Query(selectByUserID, userID)
-	if err != nil {
-		return nil, errSQLDB.WithError(err).Wrap("cannot query by user id")
-	}
-	defer handleCloser(c.ctx, rows)
-	var id int64
-	var ids []int64
-	for rows.Next() {
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
-		}
-		ids = append(ids, id)
-	}
-	return ids, nil
-}
+// func (c *Client) GetUserLikes(userID string) ([]int64, error) {
+// 	rows, err := mysqlDB.Query(selectByUserID, userID)
+// 	if err != nil {
+// 		return nil, errSQLDB.WithError(err).Wrap("cannot query by user id")
+// 	}
+// 	defer handleCloser(c.ctx, rows)
+// 	var id int64
+// 	var ids []int64
+// 	for rows.Next() {
+// 		err = rows.Scan(&id)
+// 		if err != nil {
+// 			return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
+// 		}
+// 		ids = append(ids, id)
+// 	}
+// 	return ids, nil
+// }
 
 func connectSQL() {
 	var err error
