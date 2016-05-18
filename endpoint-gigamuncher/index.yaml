@@ -19,4 +19,3 @@ indexes:
   properties:
   - name: GigamuncherID
   - name: ExpectedExchangeDateTime
-    direction: desc

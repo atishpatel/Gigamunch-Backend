@@ -27,7 +27,7 @@ func getSortedOrders(ctx context.Context, muncherID string, startLimit int, endL
 	limit := endLimit - startLimit
 	query := datastore.NewQuery(kindOrder).
 		Filter("GigamuncherID =", muncherID).
-		Order("-ExpectedExchangeDateTime").
+		Order("ExpectedExchangeDateTime").
 		Offset(offset).
 		Limit(limit)
 	var results []Order
