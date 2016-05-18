@@ -17,6 +17,7 @@ func getSortedReviews(ctx context.Context, gigachefID string, startLimit int, en
 	offset := startLimit
 	limit := endLimit - startLimit
 	query := datastore.NewQuery(kindReview).
+		Filter("GigachefID =", gigachefID).
 		Order("CreatedDateTime").
 		Offset(offset).
 		Limit(limit)

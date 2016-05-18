@@ -19,3 +19,8 @@ indexes:
   properties:
   - name: GigamuncherID
   - name: ExpectedExchangeDateTime
+
+- kind: Review
+  properties:
+  - name: GigachefID
+  - name: CreatedDateTime

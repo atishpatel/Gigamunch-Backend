@@ -9,14 +9,14 @@ const (
 // Review is a review from a Gigamuncher about a post. It also contains a
 // response from the Gigachef
 type Review struct {
-	CreatedDateTime     time.Time      `json:"created_datetime"`
+	CreatedDateTime     time.Time      `json:"created_datetime" datastore:",noindex"`
 	IsEdited            bool           `json:"is_edited" datastore:",noindex"`
 	EditedDateTime      time.Time      `json:"edited_datetime" datastore:",noindex"`
 	GigachefID          string         `json:"gigachef_id"`
-	GigamuncherID       string         `json:"gigamuncher_id"`
+	GigamuncherID       string         `json:"gigamuncher_id" datastore:",noindex"`
 	GigamuncherName     string         `json:"gigamuncher_name" datastore:",noindex"`
 	GigamuncherPhotoURL string         `json:"gigamuncher_photo_url" datastore:",noindex"`
-	ItemID              int64          `json:"item_id"`
+	ItemID              int64          `json:"item_id" datastore:",noindex"`
 	OrderID             int64          `json:"order_id" datastore:",noindex"`
 	Post                reviewPost     `json:"post" datastore:",noindex"`
 	Rating              int            `json:"rating" datastore:",noindex"`
