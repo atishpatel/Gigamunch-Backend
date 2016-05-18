@@ -267,7 +267,7 @@ func (service *Service) GetOrder(ctx context.Context, req *GetOrderReq) (*GetOrd
 	resp.Order.set(order, numLikes[0], likes[0])
 	// get review
 	reviewC := review.New(ctx)
-	review, err := reviewC.GetReview(req.OrderID64)
+	review, err := reviewC.GetReview(order.ReviewID)
 	if err != nil {
 		resp.Err = errors.Wrap("cannot get review", err)
 		return resp, nil
