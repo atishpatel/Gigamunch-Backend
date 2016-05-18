@@ -110,7 +110,7 @@ func (c Client) RefundSale(id string) (string, error) {
 
 // MakeSale makes an escrow sale
 func (c Client) MakeSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {
-	t, err := c.bt.Transaction().Create(&braintree.Transaction{
+	t := &braintree.Transaction{
 		Type:               "sale",
 		MerchantAccountId:  subMerchantID,
 		PaymentMethodNonce: nonce,
@@ -120,9 +120,10 @@ func (c Client) MakeSale(subMerchantID, nonce string, amount, serviceFee float32
 			SubmitForSettlement: true,
 			HoldInEscrow:        true,
 		},
-	})
+	}
+	t, err := c.bt.Transaction().Create(t)
 	if err != nil {
-		return "", errBT.WithError(err).Wrap("cannot create transaction")
+		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
 	if t.EscrowStatus != braintree.EscrowStatus.HoldPending && t.EscrowStatus != braintree.EscrowStatus.Held {
 		return "", errBT.Wrap("invalid transaction escrow status: status: " + t.Status + " escrow status: " + t.EscrowStatus)
