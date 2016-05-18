@@ -70,7 +70,7 @@ func handleUpload(w http.ResponseWriter, req *http.Request, _ httprouter.Params)
 		}
 		err := json.NewEncoder(w).Encode(resp)
 		if err != nil {
-			utils.Errorf(ctx, "Error decoding json: %+v", err)
+			utils.Errorf(ctx, "Error encoding json: %+v", err)
 		}
 	}()
 	// get user
@@ -80,19 +80,17 @@ func handleUpload(w http.ResponseWriter, req *http.Request, _ httprouter.Params)
 		return
 	}
 	// get file
+	err = req.ParseMultipartForm(30 << 20)
+	if err != nil {
+		returnErr = errInvalidParameter.WithMessage("Error parsing multipart form.").WithError(err)
+		return
+	}
 	file, fileHeader, err := req.FormFile("file")
 	if err != nil {
 		returnErr = errInvalidParameter.WithMessage("File is invalid.").WithError(err)
 		return
 	}
-	defer func() {
-		if file != nil {
-			err = file.Close()
-			if err != nil {
-				utils.Errorf(ctx, "Error closing file: %+v", err)
-			}
-		}
-	}()
+	defer handleCloser(ctx, "file", file)
 	// make sure file is an image
 	if !strings.Contains(fileHeader.Header.Get("Content-Type"), "image") {
 		returnErr = errInvalidParameter.WithMessage("Invalid file format.")
@@ -104,20 +102,21 @@ func handleUpload(w http.ResponseWriter, req *http.Request, _ httprouter.Params)
 		returnErr = errInternal.WithError(err)
 		return
 	}
+	file = nil
 	// resize image
 	img = resizeAndConvert(img)
 	// generate obj name of UserID/rand
 	id := strconv.FormatInt(time.Now().UnixNano(), 36)
 	objName := user.ID + "/" + id
 	// save to bucket
-	err = uploadToBucket(ctx, bucketName, objName, img)
+	err = uploadToBucket(ctx, bucketName, objName, &img)
 	if err != nil {
 		returnErr = errors.GetErrorWithCode(err)
 	}
 	resp.URL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objName)
 }
 
-func uploadToBucket(ctx context.Context, bucketName, objName string, img image.Image) error {
+func uploadToBucket(ctx context.Context, bucketName, objName string, img *image.Image) error {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return errInternal.WithError(err)
@@ -125,14 +124,9 @@ func uploadToBucket(ctx context.Context, bucketName, objName string, img image.I
 	bucket := client.Bucket(bucketName)
 	obj := bucket.Object(objName)
 	wr := obj.NewWriter(ctx)
-	defer func() {
-		err = wr.Close()
-		if err != nil {
-			utils.Errorf(ctx, "Error closing file writer: %+v", err)
-		}
-	}()
+	defer handleCloser(ctx, "file writer", wr)
 	wr.CacheControl = "max-age=1209600" // cache for 14 days
-	err = jpeg.Encode(wr, img, &jpeg.Options{Quality: 75})
+	err = jpeg.Encode(wr, *img, &jpeg.Options{Quality: 75})
 	if err != nil {
 		return errInternal.WithError(err)
 	}
@@ -161,4 +155,17 @@ func init() {
 	// 	log.Fatal("chef/app/index.html not found")
 	// }
 	bucketName = "gigamunch-dev-images"
+}
+
+type closer interface {
+	Close() error
+}
+
+func handleCloser(ctx context.Context, detail string, c closer) {
+	if c != nil {
+		err := c.Close()
+		if err != nil {
+			utils.Errorf(ctx, "Error closing %s: %v", detail, err)
+		}
+	}
 }
