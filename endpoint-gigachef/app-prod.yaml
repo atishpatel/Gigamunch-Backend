@@ -5,6 +5,21 @@ runtime: go
 api_version: go1
 
 handlers:
+  - url: /remove-closed-posts
+    script: _go_app
+    login: admin
+
+  - url: /close-post
+    script: _go_app
+    login: admin
+
+  - url: /notify-muncher
+    script: _go_app
+    login: admin
+
+  - url: /process-order
+    script: _go_app
+    login: admin
 
   - url: /.*
     script: _go_app
@@ -14,6 +29,8 @@ handlers:
     script: _go_app
     secure: always
 
+beta_settings:
+      cloud_sql_instances: gigasqldb
+
 env_variables:
-  GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private'
   PROJECTID: 'gigamunch-omninexus-dev'
