@@ -116,13 +116,13 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool) {
 	o.NumLikes = numLikes
 	o.HasLiked = hasLikes
 	if order.ExpectedExchangeDateTime.After(time.Now().Add(1 * time.Hour)) {
-		o.Status = "Let me know if you liked the food!"
+		o.Status = "closed"
 	} else if order.ExpectedExchangeDateTime.After(time.Now()) {
-		o.Status = "Enjoy your food!"
+		o.Status = "open-received"
 	} else if order.PostCloseDateTime.After(time.Now()) {
-		o.Status = "Starting to prepare your food!"
+		o.Status = "open-preparing"
 	} else {
-		o.Status = "Looking forward to cooking for you!"
+		o.Status = "open-placed"
 	}
 }
 
