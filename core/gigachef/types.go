@@ -27,7 +27,7 @@ func (r *Rating) updateAvg() {
 		r.AverageRating = 0
 		return
 	}
-	totalStars := r.NumOneStarRatings + r.NumTwoStarRatings + r.NumThreeStarRatings + r.NumFourStarRatings + r.NumFiveStarRatings
+	totalStars := r.NumOneStarRatings + (r.NumTwoStarRatings * 2) + (r.NumThreeStarRatings * 3) + (r.NumFourStarRatings * 4) + (r.NumFiveStarRatings * 5)
 	r.AverageRating = float32(totalStars) / float32(r.NumRatings)
 }
 
