@@ -18,33 +18,33 @@ import (
 
 // BasePost is the basic stuff for a post
 type BasePost struct {
-	ID                json.Number `json:"id,omitempty"`
-	ID64              int64       `json:"-"`
-	ItemID            json.Number `json:"item_id,omitempty"`
-	ItemID64          int64       `json:"-"`
-	Title             string      `json:"title"`
-	Description       string      `json:"description"`
-	PricePerServing   float32     `json:"price_per_serving"`
-	ServingsOffered   int32       `json:"servings_offered"`
-	ServingsLeft      int32       `json:"servings_left"`
-	Photos            []string    `json:"photos,omitempty"`
-	PostedDateTime    int         `json:"posted_datetime"`
-	ClosingDateTime   int         `json:"closing_datetime"`
-	ReadyDateTime     int         `json:"ready_datetime"`
-	Distance          float32     `json:"distance"`
-	DeliveryAvailable bool        `json:"delivery_avaliable"`
-	PickupAvaliable   bool        `json:"pickup_avaliable"`
-	NumServingsBought int32       `json:"num_servings_bought"`
-	NumLikes          int         `json:"num_likes"`
-	HasLiked          bool        `json:"has_liked"`
+	ID                string   `json:"id,omitempty"`
+	ID64              int64    `json:"-"`
+	ItemID            string   `json:"item_id,omitempty"`
+	ItemID64          int64    `json:"-"`
+	Title             string   `json:"title"`
+	Description       string   `json:"description"`
+	PricePerServing   float32  `json:"price_per_serving"`
+	ServingsOffered   int32    `json:"servings_offered"`
+	ServingsLeft      int32    `json:"servings_left"`
+	Photos            []string `json:"photos,omitempty"`
+	PostedDateTime    int      `json:"posted_datetime"`
+	ClosingDateTime   int      `json:"closing_datetime"`
+	ReadyDateTime     int      `json:"ready_datetime"`
+	Distance          float32  `json:"distance"`
+	DeliveryAvailable bool     `json:"delivery_avaliable"`
+	PickupAvaliable   bool     `json:"pickup_avaliable"`
+	NumServingsBought int32    `json:"num_servings_bought"`
+	NumLikes          int      `json:"num_likes"`
+	HasLiked          bool     `json:"has_liked"`
 }
 
 // set takes a post.Post package and converts it to a endpoint post
 func (p *BasePost) set(userID string, id int64, numLikes int, hasLiked bool, distance float32, post *post.Post) {
 	p.ID64 = id
-	p.ID = itojn(id)
+	p.ID = itos(id)
 	p.ItemID64 = post.ItemID
-	p.ItemID = itojn(post.ItemID)
+	p.ItemID = itos(post.ItemID)
 	p.Title = post.Title
 	p.Description = post.Description
 	p.PricePerServing = post.PricePerServing

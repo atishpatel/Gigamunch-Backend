@@ -67,18 +67,18 @@ type OrderGigachef struct {
 
 // Order is an order
 type Order struct {
-	ID                       json.Number      `json:"id,omitempty"`
+	ID                       string           `json:"id,omitempty"`
 	CreatedDateTime          int              `json:"created_datetime"`
 	ExpectedExchangeDateTime int              `json:"expected_exchange_datetime"`
 	State                    string           `json:"state"`
-	ZendeskIssueID           json.Number      `json:"zendesk_issue_id,omitempty"`
+	ZendeskIssueID           string           `json:"zendesk_issue_id"`
 	GigachefCanceled         bool             `json:"gigachef_canceled"`
 	GigamuncherCanceled      bool             `json:"gigamuncher_canceled"`
 	Gigachef                 OrderGigachef    `json:"gigachef"`
 	Gigamuncher              OrderGigamuncher `json:"gigamuncher"`
-	ReviewID                 json.Number      `json:"review_id,omitempty"`
-	PostID                   json.Number      `json:"post_id,omitempty"`
-	ItemID                   json.Number      `json:"item_id,omitempty"`
+	ReviewID                 string           `json:"review_id,omitempty"`
+	PostID                   string           `json:"post_id,omitempty"`
+	ItemID                   string           `json:"item_id,omitempty"`
 	PostTitle                string           `json:"post_title"`
 	PostPhotoURL             string           `json:"post_photo_url"`
 	PricePerServing          float32          `json:"price_per_serving"`
@@ -91,21 +91,24 @@ type Order struct {
 	Status                   string           `json:"status"`
 }
 
-func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool) {
-	o.ID = itojn(order.ID)
+func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating) {
+	o.ID = itos(order.ID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
 	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDateTime)
 	o.State = order.State
-	o.ZendeskIssueID = itojn(order.ZendeskIssueID)
+	o.ZendeskIssueID = itos(order.ZendeskIssueID)
 	o.GigachefCanceled = order.GigachefCanceled
 	o.GigamuncherCanceled = order.GigamuncherCanceled
 	o.Gigachef.ID = order.GigachefID
+	o.Gigachef.Name = chefName
+	o.Gigachef.PhotoURL = chefPhotoURL
+	o.Gigachef.Rating = chefRatings
 	o.Gigamuncher.ID = order.GigamuncherID
 	o.Gigamuncher.Name = order.GigamuncherName
 	o.Gigamuncher.PhotoURL = order.GigamuncherPhotoURL
-	o.ReviewID = itojn(order.ReviewID)
-	o.PostID = itojn(order.PostID)
-	o.ItemID = itojn(order.ItemID)
+	o.ReviewID = itos(order.ReviewID)
+	o.PostID = itos(order.PostID)
+	o.ItemID = itos(order.ItemID)
 	o.PostTitle = order.PostTitle
 	o.PostPhotoURL = order.PostPhotoURL
 	o.PricePerServing = order.PricePerServing
@@ -115,11 +118,12 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool) {
 	o.ExchangePlanInfo.set(order)
 	o.NumLikes = numLikes
 	o.HasLiked = hasLikes
-	if order.ExpectedExchangeDateTime.After(time.Now().Add(1 * time.Hour)) {
+
+	if time.Now().After(order.ExpectedExchangeDateTime.Add(1 * time.Hour)) {
 		o.Status = "closed"
-	} else if order.ExpectedExchangeDateTime.After(time.Now()) {
+	} else if time.Now().After(order.ExpectedExchangeDateTime) {
 		o.Status = "open-received"
-	} else if order.PostCloseDateTime.After(time.Now()) {
+	} else if time.Now().After(order.PostCloseDateTime) {
 		o.Status = "open-preparing"
 	} else {
 		o.Status = "open-placed"
@@ -205,7 +209,14 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		resp.Err = errors.Wrap("failed to get liked items", err)
 		return resp, nil
 	}
-	resp.Order.set(order, numLikes[0], likes[0])
+
+	chef, err := gigachef.GetInfo(ctx, order.GigachefID)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("cannot chef.GetInfo")
+		return resp, nil
+	}
+
+	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating)
 	return resp, nil
 }
 
@@ -263,8 +274,13 @@ func (service *Service) GetOrder(ctx context.Context, req *GetOrderReq) (*GetOrd
 		resp.Err = errors.Wrap("failed to get liked items", err)
 		return resp, nil
 	}
+	chef, err := gigachef.GetInfo(ctx, order.GigachefID)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("cannot chef.GetInfo")
+		return resp, nil
+	}
 
-	resp.Order.set(order, numLikes[0], likes[0])
+	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating)
 	// get review
 	reviewC := review.New(ctx)
 	review, err := reviewC.GetReview(order.ReviewID)
@@ -323,8 +339,10 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 		return resp, nil
 	}
 	itemIDs := make([]int64, len(orders))
+	chefIDs := make([]string, len(orders))
 	for i := range orders {
 		itemIDs[i] = orders[i].ItemID
+		chefIDs[i] = orders[i].GigachefID
 	}
 	likeC := like.New(ctx)
 	likes, numLikes, err := likeC.LikesItems(user.ID, itemIDs)
@@ -332,9 +350,16 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 		resp.Err = errors.Wrap("failed to get liked items", err)
 		return resp, nil
 	}
+
+	chefDetails, ratings, err := gigachef.GetRatingsAndInfo(ctx, chefIDs)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to chef.GetRatingAndInfo", err)
+		return resp, nil
+	}
+
 	for i := range orders {
 		o := Order{}
-		o.set(&orders[i], numLikes[i], likes[i])
+		o.set(&orders[i], numLikes[i], likes[i], chefDetails[i].Name, chefDetails[i].PhotoURL, ratings[i])
 		resp.Orders = append(resp.Orders, o)
 	}
 	return resp, nil

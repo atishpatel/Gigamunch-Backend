@@ -23,6 +23,14 @@ func itojn(i int64) json.Number {
 	return json.Number(strconv.FormatInt(i, 10))
 }
 
+func itos(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
+
+func stoi(s string) (int64, error) {
+	return strconv.ParseInt(s, 10, 64)
+}
+
 type validatableTokenReq interface {
 	gigatoken() string
 	valid() error

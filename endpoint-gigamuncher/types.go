@@ -1,7 +1,6 @@
 package gigamuncher
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/review"
@@ -36,7 +35,7 @@ type ErrorOnlyResp struct {
 
 // Review is a review
 type Review struct {
-	ID                  json.Number    `json:"id,omitempty"`
+	ID                  string         `json:"id,omitempty"`
 	ID64                int64          `json:"-"`
 	CreatedDateTime     int            `json:"created_datetime"`
 	IsEdited            bool           `json:"is_edited"`
@@ -45,9 +44,9 @@ type Review struct {
 	GigamuncherID       string         `json:"gigamuncher_id"`
 	GigamuncherName     string         `json:"gigamuncher_name"`
 	GigamuncherPhotoURL string         `json:"gigamuncher_photo_url"`
-	ItemID              json.Number    `json:"item_id,omitempty"`
+	ItemID              string         `json:"item_id,omitempty"`
 	ItemID64            int64          `json:"-"`
-	OrderID             json.Number    `json:"order_id,omitempty"`
+	OrderID             string         `json:"order_id,omitempty"`
 	OrderID64           int64          `json:"-"`
 	Post                reviewPost     `json:"post"`
 	Rating              int            `json:"rating"`
@@ -57,10 +56,10 @@ type Review struct {
 }
 
 type reviewPost struct {
-	ID       json.Number `json:"id"`
-	ID64     int64       `json:"-"`
-	Title    string      `json:"title"`
-	PhotoURL string      `json:"photo_url"`
+	ID       string `json:"id,omitempty"`
+	ID64     int64  `json:"-"`
+	Title    string `json:"title"`
+	PhotoURL string `json:"photo_url"`
 }
 
 type reviewResponse struct {
@@ -69,7 +68,7 @@ type reviewResponse struct {
 }
 
 func (r *Review) set(review *review.Resp) {
-	r.ID = itojn(review.ID)
+	r.ID = itos(review.ID)
 	r.ID64 = review.ID
 	r.CreatedDateTime = ttoi(review.CreatedDateTime)
 	r.IsEdited = review.IsEdited
@@ -78,11 +77,11 @@ func (r *Review) set(review *review.Resp) {
 	r.GigamuncherID = review.GigamuncherID
 	r.GigamuncherName = review.GigamuncherName
 	r.GigamuncherPhotoURL = review.GigamuncherPhotoURL
-	r.ItemID = itojn(review.ItemID)
+	r.ItemID = itos(review.ItemID)
 	r.ItemID64 = review.ItemID
-	r.OrderID = itojn(review.OrderID)
+	r.OrderID = itos(review.OrderID)
 	r.OrderID64 = review.OrderID
-	r.Post.ID = itojn(review.Post.ID)
+	r.Post.ID = itos(review.Post.ID)
 	r.Post.ID64 = review.Post.ID
 	r.Post.Title = review.Post.Title
 	r.Post.PhotoURL = review.Post.PhotoURL
