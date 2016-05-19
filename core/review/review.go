@@ -38,24 +38,27 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 	review := new(Review)
 	var err error
 	isNewReview := reviewID == 0
+	var orderC *order.Client
 	if isNewReview { // new review
 		// check if user was the one who made the order
-		orderIDs, postInfo, err := order.GetOrderIDsAndPostInfo(c.ctx, orderID)
+		orderC = order.New(c.ctx)
+		var order *order.Resp
+		order, err = orderC.GetOrder(user.ID, orderID)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap("cannot get order", err)
 		}
-		if user.ID != orderIDs.GigamuncherID {
+		if user.ID != order.GigamuncherID {
 			return nil, errUnauthorizedAccess
 		}
-		review.GigachefID = orderIDs.GigachefID
+		review.GigachefID = order.GigachefID
 		review.GigamuncherID = user.ID
 		review.GigamuncherName = user.Name
 		review.GigamuncherPhotoURL = user.PhotoURL
 		review.OrderID = orderID
-		review.ItemID = orderIDs.ItemID
-		review.Post.ID = postInfo.ID
-		review.Post.Title = postInfo.Title
-		review.Post.PhotoURL = postInfo.PhotoURL
+		review.ItemID = order.ItemID
+		review.Post.ID = order.PostID
+		review.Post.Title = order.PostTitle
+		review.Post.PhotoURL = order.PostPhotoURL
 		review.CreatedDateTime = time.Now().UTC()
 	} else { // update review
 		// check if the user has the right to update the review
@@ -86,16 +89,24 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 	// update review
 	if isNewReview {
 		reviewID, err = putIncomplete(c.ctx, review)
+
 	} else {
 		err = put(c.ctx, reviewID, review)
 	}
 	if err != nil {
 		return nil, errDatastore.WithError(err)
 	}
+	if isNewReview {
+		_, err = orderC.UpdateReviewID(user.ID, orderID, reviewID)
+		if err != nil {
+			return nil, errors.Wrap("failed to update review id for order", err)
+		}
+	}
 	err = <-errChan
 	if err != nil {
 		return nil, err
 	}
+
 	resp := &Resp{
 		ID:     reviewID,
 		Review: *review,

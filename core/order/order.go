@@ -248,6 +248,30 @@ func (c *Client) GetOrder(userID string, orderID int64) (*Resp, error) {
 	return resp, nil
 }
 
+// UpdateReviewID updates the review id for an order
+func (c *Client) UpdateReviewID(userID string, orderID int64, reviewID int64) (*Resp, error) {
+	resp := new(Resp)
+	if orderID == 0 {
+		return resp, nil
+	}
+	o := new(Order)
+	err := get(c.ctx, orderID, o)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("cannot get order(%d)", orderID)
+	}
+	if userID != o.GigamuncherID && userID != o.GigachefID {
+		return nil, errUnauthorized.Wrapf("user(%s) does not have access to order(%d)", userID, orderID)
+	}
+	o.ReviewID = reviewID
+	err = put(c.ctx, orderID, o)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("cannot get order(%d)", orderID)
+	}
+	resp.ID = orderID
+	resp.Order = *o
+	return resp, nil
+}
+
 // GetOrders gets the orders
 func (c *Client) GetOrders(muncherID string, limit *types.Limit) ([]Resp, error) {
 	ids, orders, err := getSortedOrders(c.ctx, muncherID, limit.Start, limit.End)
