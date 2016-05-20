@@ -15,9 +15,6 @@ const (
 	sendEmailURL = "/sendemail"
 	// signOutURL is the url for signing out users
 	signOutURL = "/signout"
-
-	errorURL = "/error"
-
 	// admin stuff
 	adminHomeURL = baseAdminURL
 	/*****************************************************************************
