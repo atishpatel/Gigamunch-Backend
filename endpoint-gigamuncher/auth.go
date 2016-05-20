@@ -44,6 +44,7 @@ func (service *Service) SignIn(ctx context.Context, req *SignInReq) (*SignInResp
 	resp.Gigatoken = gigaToken
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
 	}
 	err = gigamuncher.SaveUserInfo(ctx, user, nil)
 	if err != nil {

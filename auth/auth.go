@@ -83,7 +83,7 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 	}
 	gtoken, err := gitkitClient.ValidateToken(ctx, gTokenString, gitkitAudiences)
 	if err != nil || time.Now().Sub(gtoken.IssueAt) > 15*time.Minute {
-		return nil, "", errInvalidGToken
+		return nil, "", errInvalidGToken.WithError(err)
 	}
 	// get user info from gitkit servers
 	gitkitUser, err := gitkitClient.UserByLocalID(ctx, gtoken.LocalID)
@@ -333,7 +333,7 @@ func getConfig(ctx context.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	gitkitAudiences = []string{config.ClientID}
+	gitkitAudiences = []string{config.ClientID, "gigamunch-omninexus-dev", "gigamunch-omninexus"}
 	jwtKey = []byte(config.JWTSecret)
 }
 
