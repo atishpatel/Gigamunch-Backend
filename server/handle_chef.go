@@ -15,8 +15,8 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/cloud/storage"
 
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 	"github.com/disintegration/imaging"
 	"github.com/julienschmidt/httprouter"
 )

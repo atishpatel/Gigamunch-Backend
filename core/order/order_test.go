@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 
 	"google.golang.org/appengine/aetest"
 )

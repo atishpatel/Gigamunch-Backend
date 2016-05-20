@@ -3,10 +3,10 @@ package review
 import (
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
-	"github.com/atishpatel/Gigamunch-Backend/core/order"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 
 	"appengine/datastore"

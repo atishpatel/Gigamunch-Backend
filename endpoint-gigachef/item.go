@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/item"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 )
 

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 
 	"google.golang.org/appengine/aetest"
 )

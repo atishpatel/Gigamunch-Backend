@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"

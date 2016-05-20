@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 // BaseItem is the basic stuff in a Item and Post

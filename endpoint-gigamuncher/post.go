@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
-	"github.com/atishpatel/Gigamunch-Backend/core/like"
-	"github.com/atishpatel/Gigamunch-Backend/core/maps"
-	"github.com/atishpatel/Gigamunch-Backend/core/post"
-	"github.com/atishpatel/Gigamunch-Backend/core/review"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/review"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 )
 

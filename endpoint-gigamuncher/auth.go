@@ -5,9 +5,9 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 )
 
 // SignInReq is the input required to sign in

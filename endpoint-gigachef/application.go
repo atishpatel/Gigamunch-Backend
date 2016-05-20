@@ -3,11 +3,11 @@ package gigachef
 import (
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/application"
-	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
-	"github.com/atishpatel/Gigamunch-Backend/core/payment"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/application"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/payment"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 )
 

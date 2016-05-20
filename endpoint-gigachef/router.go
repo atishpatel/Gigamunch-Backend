@@ -10,12 +10,12 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
-	"github.com/atishpatel/Gigamunch-Backend/core/order"
-	"github.com/atishpatel/Gigamunch-Backend/core/payment"
-	"github.com/atishpatel/Gigamunch-Backend/core/post"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/payment"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/taskqueue"

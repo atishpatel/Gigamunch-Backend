@@ -1,6 +1,6 @@
 package gigachef
 
-import "github.com/atishpatel/Gigamunch-Backend/errors"
+import "gitlab.com/atishpatel/Gigamunch-Backend/errors"
 
 // BaseItem is the basic stuff in an Item
 type BaseItem struct {

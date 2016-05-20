@@ -3,8 +3,8 @@ package gigachef
 import (
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
+	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"golang.org/x/net/context"
 )
 

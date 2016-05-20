@@ -31,4 +31,4 @@ handlers:
 
 env_variables:
   PROJECTID: 'gigamunch-omninexus-dev'
-  GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private'
+  GIGAMUNCH_PRIVATE_DIR: '/Users/atish/Development/go/src/gitlab.com/atishpatel/Gigamunch-Backend/private'

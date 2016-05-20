@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 )
 

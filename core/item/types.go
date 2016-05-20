@@ -3,7 +3,7 @@ package item
 import (
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 )
 
 const (

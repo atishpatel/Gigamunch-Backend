@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"google.golang.org/appengine"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 func init() {
