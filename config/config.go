@@ -22,13 +22,16 @@ import (
 
 // Config is the configuration loaded from datastore
 type Config struct {
-	JWTSecret     string
-	ClientID      string
-	ServerKey     string
-	BTEnvironment string
-	BTMerchantID  string
-	BTPublicKey   string
-	BTPrivateKey  string
+	JWTSecret        string   `json:"jwt_secret" datastore:",noindex"`
+	ClientID         string   `json:"client_id" datastore:",noindex"`
+	ServerKey        string   `json:"server_key" datastore:",noindex"`
+	BTEnvironment    string   `json:"bt_environment" datastore:",noindex"`
+	BTMerchantID     string   `json:"bt_merchant_id" datastore:",noindex"`
+	BTPublicKey      string   `json:"bt_public_key" datastore:",noindex"`
+	BTPrivateKey     string   `json:"bt_private_key" datastore:",noindex"`
+	TwilioAccountSID string   `json:"twilio_account_sid" datastore:",noindex"`
+	TwilioAuthToken  string   `json:"twilio_auth_token" datastore:",noindex"`
+	PhoneNumbers     []string `json:"phone_numbers" datastore:",noindex"`
 }
 
 // BTEnvironment is the environment type for braintree
@@ -50,7 +53,7 @@ type BTConfig struct {
 }
 
 // GitkitConfig is used to load different configurations
-//between local, dev, and production environments
+// between local, dev, and production environments
 type GitkitConfig struct {
 	JWTSecret                string `json:"jwt_secret"`
 	ClientID                 string `json:"client_id"`
@@ -59,11 +62,37 @@ type GitkitConfig struct {
 	GoogleAppCredentialsPath string `json:"google_app_credentials_path"`
 }
 
+// TwilioConfig is used to load twilio configurations
+type TwilioConfig struct {
+	AccountSID   string   `json:"account_sid"`
+	AuthToken    string   `json:"auth_token"`
+	PhoneNumbers []string `json:"phone_numbers"`
+}
+
 var (
 	gitkitConfig   *GitkitConfig
 	config         *Config
 	privateDirPath string
 )
+
+// GetTwilioConfig returns the twilio configs
+func GetTwilioConfig(ctx context.Context) TwilioConfig {
+	var twilioConfig TwilioConfig
+	if appengine.IsDevAppServer() {
+		filedata := readFile("twilio_config.json")
+		err := json.Unmarshal(filedata, &twilioConfig)
+		if err != nil {
+			log.Println("Failed to unmarshal twilio_config file.")
+			log.Fatal(err)
+		}
+	} else {
+		getDatastoreConfig(ctx)
+		twilioConfig.AccountSID = config.TwilioAccountSID
+		twilioConfig.AuthToken = config.TwilioAuthToken
+		twilioConfig.PhoneNumbers = config.PhoneNumbers
+	}
+	return twilioConfig
+}
 
 // GetBTConfig returns the Braintree config
 func GetBTConfig(ctx context.Context) BTConfig {
@@ -120,11 +149,6 @@ func loadGitkitConfig(ctx context.Context) {
 			ClientID:  config.ClientID,
 		}
 	}
-
-	gitkitConfig.JWTSecret, err = utils.Decrypt("KTd6M18avNkASNK149TDhyl3m45Mxqw2", gitkitConfig.JWTSecret)
-	if err != nil {
-		log.Fatalf("Error decoding jwt secret: %+v", err)
-	}
 }
 
 func getDatastoreConfig(ctx context.Context) {
@@ -133,8 +157,20 @@ func getDatastoreConfig(ctx context.Context) {
 		key := datastore.NewKey(ctx, "Config", "", 100, nil)
 		err := datastore.Get(ctx, key, config)
 		if err != nil {
-			utils.Errorf(ctx, "getDatastoreConfig error: %+v", err)
+			if err == datastore.ErrNoSuchEntity {
+				config.PhoneNumbers = []string{"14243484448"}
+				_, _ = datastore.Put(ctx, key, config)
+			}
+			utils.Errorf(ctx, "getDatastoreConfig get error: %+v", err)
 			log.Fatalf("Error getting Config from datastore: %+v", err)
+		}
+		if len(config.PhoneNumbers) == 0 {
+			config.PhoneNumbers = []string{"14243484448"}
+			_, err = datastore.Put(ctx, key, config)
+			if err != nil {
+				utils.Errorf(ctx, "getDatastoreConfig put error: %+v", err)
+				log.Fatalf("Error putting Config from datastore: %+v", err)
+			}
 		}
 	}
 }
