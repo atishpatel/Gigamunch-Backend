@@ -23,5 +23,5 @@ type ChefApplication struct {
 	AttendedCulinarySchool bool          `json:"attended_culinary_school" datastore:",noindex"`
 	WorkedAtResturant      bool          `json:"worked_at_resturant" datastore:",noindex"`
 	PostFrequency          int           `json:"post_frequency" datastore:",noindex"`
-	ApplicationProgress    int           `json:"application_progress" datastore:",noindex"`
+	ApplicationProgress    int           `json:"application_progress" datastore:",noindex"` // TODO remove
 }

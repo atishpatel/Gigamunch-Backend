@@ -21,6 +21,8 @@ type Post struct {
 	ReadyDateTime       int         `json:"ready_datetime" endpoints:"req"`
 	ServingsOffered     int32       `json:"servings_offered" endpoints:"req"`
 	ChefPricePerServing float32     `json:"chef_price_per_serving"`
+	Pickup              bool        `json:"pickup"`
+	GigachefDelivery    bool        `json:"gigachef_delivery"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
@@ -37,6 +39,8 @@ func (p *Post) Set(id int64, post *post.Post) {
 	p.ReadyDateTime = ttoi(post.ReadyDateTime)
 	p.ServingsOffered = post.ServingsOffered
 	p.ChefPricePerServing = post.ChefPricePerServing
+	p.Pickup = post.AvailableExchangeMethods.Pickup()
+	p.GigachefDelivery = post.AvailableExchangeMethods.ChefDelivery()
 }
 
 // Get creates a post.Post version of the endpoint post
@@ -53,12 +57,9 @@ func (p *Post) Get() *post.Post {
 	post.ReadyDateTime = itot(p.ReadyDateTime)
 	post.ServingsOffered = p.ServingsOffered
 	post.ChefPricePerServing = p.ChefPricePerServing
+	post.AvailableExchangeMethods.SetPickup(p.Pickup)
+	post.AvailableExchangeMethods.SetChefDelivery(p.GigachefDelivery)
 	return post
-}
-
-type PostWithOrders struct {
-	Post // embedded
-	// Orders []
 }
 
 // PostPostReq is the input request needed for PostPost.
