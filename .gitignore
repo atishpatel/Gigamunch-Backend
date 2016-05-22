@@ -5,7 +5,9 @@ private/
 tags
 dump.rdb
 node_modules
-**/app/bower_components
 *.tmp
 .publish
 .datastore
+bower_components
+dist
+build
