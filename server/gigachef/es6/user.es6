@@ -1,7 +1,10 @@
 /* exported user */
+/* global CHEF */
+window.CHEF = window.CHEF || {};
 
 class User {
   constructor() {
+    this.isLoggedIn = false;
     // get cookie
     const token = this._getTokenCookie();
     this.update(token, 0);
@@ -54,5 +57,9 @@ class User {
   }
 }
 
-window.CHEF = window.CHEF || {};
-window.CHEF.User = new User();
+CHEF.User = new User();
+
+// redirect if token is empty
+if (!CHEF.User.isLoggedIn) {
+  window.location = '/login?mode=select';
+}

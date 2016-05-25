@@ -1,0 +1,72 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="item-fields.html">
+
+<dom-module id="item-form">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #submitButton {
+        width: 100%;
+        margin: 20px 0px;
+      }
+    </style>
+
+    <form
+      is="iron-form"
+      id="form"
+      method="post"
+      action="#"
+      on-change="_updateSubmitButtonState"
+      on-iron-form-presubmit="_saveItem">
+      <item-fields
+        id="itemFields"
+        title="{{item.title}}"
+        description="{{item.description}}"
+        ingredients="{{item.ingredients}}"
+        general-tags="{{item.general_tags}}"
+        dietary-needs-tags="{{item.dietary_needs_tags}}">
+      </item-fields>
+      <paper-button
+        id="submitButton"
+        on-tap="_submit"
+        raised
+        disabled>
+        <paper-spinner id="spinner" hidden></paper-spinner>Save
+      </paper-button>
+    </form>
+
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'item-form',
+
+      properties: {
+        item: {
+          type: Object,
+          notify: true,
+          value: {}
+        }
+      },
+      update: function() {
+        this.$.itemFields.update();
+      },
+      _submit: function(){
+        this.fire('save', {item:this.item})
+      },
+      _updateSubmitButtonState: function() {
+        var form = this.$.form;
+        var submitButton = this.$.submitButton;
+        // Validate the entire form to see if we should enable the `Submit` button.
+        submitButton.disabled = !form.validate();
+      }
+    });
+  })();
+  </script>
+</dom-module>

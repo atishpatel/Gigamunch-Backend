@@ -1,7 +1,6 @@
 package gigachef
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
@@ -11,24 +10,24 @@ import (
 
 // Post is a meal that is no longer live
 type Post struct {
-	BaseItem                        // embedded
-	ID                  json.Number `json:"id"`
-	ID64                int64       `json:"-"`
-	ItemID              json.Number `json:"item_id"`
-	ItemID64            int64       `json:"-"`
-	Title               string      `json:"title"`
-	ClosingDateTime     int         `json:"closing_datetime" endpoints:"req"`
-	ReadyDateTime       int         `json:"ready_datetime" endpoints:"req"`
-	ServingsOffered     int32       `json:"servings_offered" endpoints:"req"`
-	ChefPricePerServing float32     `json:"chef_price_per_serving"`
-	Pickup              bool        `json:"pickup"`
-	GigachefDelivery    bool        `json:"gigachef_delivery"`
+	BaseItem                    // embedded
+	ID                  string  `json:"id"`
+	ID64                int64   `json:"-"`
+	ItemID              string  `json:"item_id"`
+	ItemID64            int64   `json:"-"`
+	Title               string  `json:"title"`
+	ClosingDateTime     int     `json:"closing_datetime" endpoints:"req"`
+	ReadyDateTime       int     `json:"ready_datetime" endpoints:"req"`
+	ServingsOffered     int32   `json:"servings_offered" endpoints:"req"`
+	ChefPricePerServing float32 `json:"chef_price_per_serving"`
+	Pickup              bool    `json:"pickup"`
+	GigachefDelivery    bool    `json:"gigachef_delivery"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
 func (p *Post) Set(id int64, post *post.Post) {
-	p.ID = itojn(id)
-	p.ItemID = itojn(post.ItemID)
+	p.ID = itos(id)
+	p.ItemID = itos(post.ItemID)
 	p.Title = post.Title
 	p.Description = post.Description
 	p.Ingredients = post.Ingredients
@@ -79,7 +78,7 @@ func (req *PostPostReq) valid() error {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
 	var err error
-	req.Post.ItemID64, err = req.Post.ItemID.Int64()
+	req.Post.ItemID64, err = stoi(req.Post.ItemID)
 	if err != nil {
 		return fmt.Errorf("Error with ItemID: %v", err)
 	}

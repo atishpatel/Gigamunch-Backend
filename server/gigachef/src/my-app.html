@@ -157,9 +157,7 @@
         <app-toolbar class="drawer-toolbar">
           <div class="bar top"><a class="logo" href="/">Gigamunch</a></div>
           <div class="bar bottom">
-            <!-- <div class="pic"> -->
-              <placeholder-img class="pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
-            <!-- </div> -->
+            <placeholder-img class="pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
             <div class="user-info">
               <div class="name"><strong>[[user.name]]</strong></div>
               <div class="email">[[user.email]]</div>
@@ -177,7 +175,7 @@
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
 
-        <app-header condenses reveals effects="waterfall">
+        <app-header condenses reveals shadow effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div title>[[title]]</div>
@@ -185,8 +183,8 @@
         </app-header>
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <dashboard-page name="dashboard" route=[[subroute]]></dashboard-page>
-          <items-page name="items"></items-page>
+          <dashboard-page id="dashboard" name="dashboard" route="{{subroute}}"></dashboard-page>
+          <items-page id="items" name="items" route="{{subroute}}" service="[[service]]"></items-page>
         </iron-pages>
 
       </app-header-layout>
@@ -226,10 +224,13 @@
 
       ready: function() {
         this.user = CHEF.User;
+        this.service = CHEF.Service;
       },
 
       _routePageChanged: function(page) {
-        this.page = page || 'dashboard';
+        if (this.page !== page){
+          this.page = page || 'dashboard';
+        }
       },
 
       _pageChanged: function(page) {

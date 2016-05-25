@@ -5,11 +5,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /* exported user */
+/* global CHEF */
+window.CHEF = window.CHEF || {};
 
 var User = function () {
   function User() {
     _classCallCheck(this, User);
 
+    this.isLoggedIn = false;
     // get cookie
     var token = this._getTokenCookie();
     this.update(token, 0);
@@ -73,5 +76,9 @@ var User = function () {
   return User;
 }();
 
-window.CHEF = window.CHEF || {};
-window.CHEF.User = new User();
+CHEF.User = new User();
+
+// redirect if token is empty
+if (!CHEF.User.isLoggedIn) {
+  window.location = '/login?mode=select';
+}

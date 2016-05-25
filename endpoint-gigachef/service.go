@@ -1,7 +1,6 @@
 package gigachef
 
 import (
-	"encoding/json"
 	"log"
 	"strconv"
 	"time"
@@ -23,8 +22,12 @@ func ttoi(t time.Time) int {
 	return int(t.Unix())
 }
 
-func itojn(i int64) json.Number {
-	return json.Number(strconv.FormatInt(i, 10))
+func itos(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
+
+func stoi(s string) (int64, error) {
+	return strconv.ParseInt(s, 10, 64)
 }
 
 type coder interface {

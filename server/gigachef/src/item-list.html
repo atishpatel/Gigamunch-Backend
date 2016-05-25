@@ -1,0 +1,101 @@
+<!--
+`item-list` displays a list of chef items.
+### Variables:
+  - items: An array of item each with a title, image, and description.
+### Events:
+  - edit: edit event is fired an item needs to be edited.
+          The item is past of the detail.
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+
+<dom-module id="item-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-card {
+        margin-bottom: 10px;
+        width: 100%;
+        --paper-card-actions: {
+          display: flex;
+          padding: 0px;
+        }
+      }
+      paper-button {
+        flex: 1;
+        margin: 0;
+      }
+      paper-menu-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      .divider {
+        flex: .01;
+        background-color: #E8E8E8;
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{items}}">
+      <paper-card image="{{_getPhoto(item)}}">
+        <div class="card-content">
+          <h1>{{item.title}}</h1>
+          <p>{{item.description}}</p>
+          <paper-menu-button>
+            <paper-icon-button icon="more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+              <paper-item on-tap="_editItem">Edit</paper-item>
+            </paper-menu>
+          </paper-menu-button>
+        </div>
+        <div class="card-actions">
+          <paper-button on-tap="_orderNowPost">Order Now Post</paper-button>
+          <span class="divider"></span>
+          <paper-button on-tap="_preorderPost">Pre-order Post</paper-button>
+        </div>
+      </paper-card>
+    </template>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'item-list',
+
+      properties: {
+        items: {
+          type: Array,
+          notify: true
+        }
+      },
+      _orderNowPost: function(e) {
+        this.fire('post', {item: e.model.item, orderNow: true});
+      },
+      _preorderPost: function(e) {
+        this.fire('post', {item: e.model.item, orderNow: false});
+      },
+      _getPhoto: function(item) {
+        if(item.photos === undefined || item.photos === null) {
+          return '';
+        }
+        if(item.photos[0] === '') {
+          return '';
+        }
+        return item.photos[0];
+      },
+      _editItem: function(e) {
+        this.fire('edit', {item: e.model.item})
+      }
+    });
+  })();
+  </script>
+</dom-module>

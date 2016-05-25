@@ -1,0 +1,114 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+
+<dom-module id="item-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+    <paper-input label="Title"
+                 value="{{title}}"
+                 required
+                 auto-validate></paper-input>
+    <paper-input label="Description"
+                 value="{{description}}"
+                 required
+                 auto-validate></paper-input>
+    <paper-input label="Ingredients"
+                 placeholder="tomatos,onions,..."
+                 value="{{_ingredients}}"
+                 required
+                 auto-validate></paper-input>
+    <paper-input label="General Tags"
+                 value="{{_general_tags}}"
+                 required
+                 auto-validate></paper-input>
+    <!-- TODO: switch to a checklist for dietary needs -->
+    <paper-input label="Dietary Needs Tags"
+                 placeholder="vegetarian,no-nuts,..."
+                 value="{{_dietary_needs_tags}}"
+                 auto-validate></paper-input>
+
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'item-fields',
+
+      properties: {
+        title: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+        description: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true
+        },
+        ingredients: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: []
+        },
+        generalTags: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: []
+        },
+        dietaryNeedsTags: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: []
+        },
+        _ingredients: {
+          type: String,
+          observer: '_updateIngredients'
+        },
+        _general_tags: {
+          type: String,
+          observer: '_updateGeneralTags'
+        },
+        _dietary_needs_tags: {
+          type: String,
+          observer: '_updateDietaryNeedsTags'
+        }
+      },
+      update: function() {
+        if (this.ingredients !== undefined) {
+          this.set('_ingredients', this.ingredients.toString().replace(',', ', '));
+        } else {
+          this.set('_ingredients', '');
+        }
+        if (this.generalTags !== undefined) {
+          this.set('_general_tags', this.generalTags.toString().replace(',', ', '));
+        } else {
+          this.set('_general_tags', '');
+        }
+        if (this.dietaryNeedsTags !== undefined) {
+          this.set('_dietary_needs_tags', this.dietaryNeedsTags.toString().replace(',', ', '));
+        } else {
+          this.set('_dietary_needs_tags', '');
+        }
+      },
+      _updateIngredients: function(ing) {
+        this.ingredients = ing.split(/\s*,\s*/);
+      },
+      _updateGeneralTags: function(gt) {
+        this.generalTags = gt.split(/\s*,\s*/);
+      },
+      _updateDietaryNeedsTags: function(dnt) {
+        this.dietaryNeedsTags = dnt.split(/\s*,\s*/);
+      }
+    });
+  })();
+  </script>
+</dom-module>

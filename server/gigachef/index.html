@@ -44,17 +44,20 @@
     CHEF.isDev = false;
     CHEF.isStage = false;
     CHEF.isProd = false;
+    CHEF.DEV = 'dev';
+    CHEF.STAGE = 'stage';
+    CHEF.PROD = 'prod';
     switch (location.hostname) {
       case 'localhost':
-        CHEF.Env = 'dev';
+        CHEF.Env = CHEF.DEV;
         CHEF.isDev = true;
         break;
       case 'gigamunch-omninexus-dev.appspot.com':
-        CHEF.Env = 'stage';
+        CHEF.Env = CHEF.STAGE;
         CHEF.isStage = true;
         break;
       default:
-        CHEF.Env = 'prod';
+        CHEF.Env = CHEF.PROD;
         CHEF.isProd = true;
     }
   </script>
@@ -144,8 +147,13 @@
 </head>
 <body>
   <script src="js/user.js"></script>
+  <script src="js/service.js"></script>
+  <script src="https://apis.google.com/js/client.js?onload=initService"></script>
 
-  <my-app id="app" base-url="/gigachef">My App</my-app>
+  <my-app id="app" base-url="/gigachef"></my-app>
 
+  <script>
+    var app = document.querySelector('#app');
+  </script>
 </body>
 </html>

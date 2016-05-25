@@ -1,7 +1,16 @@
-
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+
+<link rel="import" href="item-list.html">
+<link rel="import" href="item-form.html">
 
 <dom-module id="items-page">
 
@@ -12,47 +21,178 @@
         display: block;
         padding: 10px;
       }
-      .card {
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-        padding: 16px;
-        margin: 24px;
-        border-radius: 5px;
-        background-color: #fff;
-        color: #757575;
+
+      #dialog {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        padding: 0;
+        margin: 0;
+        height: 90%;
+        width: 100%;
+        max-height: 100%;
+        max-width: 100%;
+        z-index: 1;
+        box-shadow: none;
       }
-      .circle {
-        display: inline-block;
-        height: 64px;
-        width: 64px;
-        border-radius: 50%;
-        background: #ddd;
-        line-height: 64px;
-        font-size: 30px;
-        color: #555;
-        text-align: center;
+
+      #dialog #scrollable {
+        max-height: auto;
+        max-width: auto;
+        --paper-dialog-scrollable: {
+          height: 100%;
+        }
       }
-      h1 {
-        font-size: 22px;
-        margin: 16px 0;
-        color: #212121;
-      }
+
     </style>
+    <app-route
+      route="{{route}}"
+      pattern="/:page"
+      data="{{routeData}}">
+    </app-route>
 
-    <div class="card">
-      <div class="circle">1</div>
-      <h1>View One</h1>
-      <p>Ut labores minimum atomorum pro. Laudem tibique ut has.
-        <placeholder-img style="width:50px;" class="pic" icon="account-circle" alt="user profile picture" src="https://lh3.googleusercontent.com/-m3tJO-p5TcM/AAAAAAAAAAI/AAAAAAAAAAA/ADhl2ypIvnsOBFVQKBpolCpMgdc2Xgp7UQ/s64-c-mo/photo.jpg"></placeholder-img>
-      <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
-    </div>
+    <item-list
+      items=[[_items]]
+      on-edit="_editItem">
+    </item-list>
 
+    <paper-dialog
+      id="dialog"
+      on-iron-overlay-closed="_dismissDialog"
+      entry-animation="scale-up-animation"
+      exit-animation="fade-out-animation">
+      <paper-dialog-scrollable id="scrollable">
+        <paper-icon-button icon="close" dialog-dismiss></paper-icon-button>
+        <item-form id="itemForm" item="[[_item]]" on-save="_saveItem"></item-form>
+      </paper-dialog-scrollable>
+    </paper-dialog>
+
+    <paper-fab icon="add" on-tap="_fabTap"></paper-fab>
   </template>
-
   <script>
 
     Polymer({
 
-      is: 'items-page'
+      is: 'items-page',
+      properties: {
+        title: {
+          type: String
+        },
+        service: {
+          type: Object
+        },
+        _page: {
+          type: String,
+          reflectToAttribute: true
+        },
+        route: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          value: ''
+        },
+        user: {
+          type: Object
+        },
+        _items: {
+          type: Array,
+          value: []
+        },
+        _item: {
+          type: Object,
+          notify: true,
+          value: {}
+        }
+      },
+      observers: [
+        '_routePageChanged(routeData.page)'
+      ],
+      _routePageChanged: function(page) {
+        if (this._page !== page){
+          this._page = page || '/';
+          switch (this._page) {
+            case '/':
+              this._getItems();
+              break;
+            case 'edit':
+              this.$.dialog.open();
+              var itemID = this._getItemIDFromURL();
+              if (itemID !== "") {
+                this._getItem(itemID);
+              }
+              this.$.itemForm.update();
+              break;
+            default:
+          }
+        }
+
+      },
+      _getItems: function() {
+        this.service.getItems(0, 100, function (items, err) {
+            if (err.code !== 0) {
+              this.fire('error', {error: err, options:[{text: 'Try Again', func: this._getItems}]});
+            }
+            this.set('_items', items);
+        }.bind(this));
+      },
+      _getItem: function(id) {
+        if (id === undefined || id === "" || id === "0" ) {
+          return
+        }
+        if (this._item.id === id) {
+          return
+        }
+        for (const item of this._items) {
+          if (item.id === id) {
+            this.set('_item', item);
+            return
+          }
+        }
+        this.service.getItem(id, function (item, err) {
+          if (err.code !== 0) {
+            this.fire('error', {error: err, options:[{text: 'Try Again', func: this._getItems}]});
+          }
+          this.set('_item', item);
+          this.$.itemForm.update();
+        }.bind(this));
+      },
+      _editItem: function(e, details) {
+        this.set('_item', details.item);
+        this.set('route.path', 'edit/' + details.item.id);
+      },
+      _saveItem: function(e, details) {
+        this.service.saveItem(details.item, function(item, err){
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options:[
+                {text: 'Try Again',
+                 func: function() {
+                          this._saveItem(e, details);
+                       }.bind(this)
+                }]
+            };
+            this.fire('error', d);
+          }
+        }.bind(this));
+      },
+      _getItemIDFromURL: function() {
+        var pathComponents = this.route.path.substring(1).split('/');
+        if (pathComponents.length == 2) {
+            // has item id
+            return pathComponents[1];
+        }
+        return ""
+      },
+      _dismissDialog: function() {
+        this.set('_item', {})
+        this.set('route.path', '/');
+      },
+
+      _fabTap: function() {
+        this.set('route.path', 'edit');
+      }
 
     });
 
