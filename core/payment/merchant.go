@@ -56,8 +56,12 @@ func (c Client) UpdateSubMerchant(req *UpdateSubMerchantReq) (string, error) {
 			RoutingNumber: req.RoutingNumber,
 		},
 	}
+	// TODO switch to find?
 	if req.User.HasSubMerchantID() {
 		ma, err = c.bt.MerchantAccount().Update(ma)
+		if err != nil {
+			return "", errBT.WithError(err).Wrap("cannot bt.MerchantAccount().Update")
+		}
 	} else {
 		ma, err = c.bt.MerchantAccount().Create(ma)
 		if err != nil {
