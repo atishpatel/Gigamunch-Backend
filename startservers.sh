@@ -14,12 +14,14 @@ cat misc/setup.sql | mysql -uroot
 ################################################################################
 # goapp
 ################################################################################
-echo 'starting goapp'
-if [ $1 == "muncher" ]; then
-  echo "using muncher and server"
+if [[ $1 == "muncher" ]]; then
+  echo "starting muncher and server"
   dev_appserver.py --datastore_path ./.datastore endpoint-gigamuncher/app.yaml server/app-dev.yaml
+elif [[ $1 == "server" ]]; then
+  echo "starting server"
+  dev_appserver.py --datastore_path ./.datastore server/app-dev.yaml
 else
-  echo "using chef and server"
+  echo "starting chef and server"
   dev_appserver.py --datastore_path ./.datastore endpoint-gigachef/app.yaml server/app-dev.yaml
 fi
 ################################################################################
