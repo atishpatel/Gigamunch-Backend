@@ -1,6 +1,6 @@
 application: gigamunch-omninexus-dev
 module: server
-version: 1
+version: 2
 runtime: go
 api_version: go1
 
@@ -34,27 +34,28 @@ handlers:
   secure: always
 
 # Gigachef app
-- url: /gigachef/elements
-  static_dir: chef/app/elements
-  secure: always
-
 - url: /gigachef/bower_components
-  static_dir: chef/app/bower_components
+  static_dir: gigachef/bower_components
   secure: always
 
-- url: /gigachef/styles
-  static_dir: chef/app/styles
+- url: /gigachef/service-worker.js
+  static_files: gigachef/service-worker.js
+  upload: gigachef/service-worker.js
   secure: always
 
 - url: /gigachef/js
-  static_dir: chef/app/js
+  static_dir: gigachef/js
+  secure: always
+
+- url: /gigachef/src
+  static_dir: gigachef/src
   secure: always
 
 - url: /gigachef.*
-  static_files: chef/app/index.html
-  upload: chef/app/index.html
+  static_files: gigachef/index.html
+  upload: gigachef/index.html
   http_headers:
-    Link: '</gigachef/js/app.js>; rel=preload; as=script, </gigachef/elements/elements.html>; rel=preload; as=document, </gigachef/styles/main.css>; rel=preload; as=style'
+    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/my-app.html>; rel=preload; as=document, </common/common.css>; rel=preload; as=style'
   secure: always
 
 - url: /.*
