@@ -32,6 +32,7 @@ type Config struct {
 	TwilioAccountSID string   `json:"twilio_account_sid" datastore:",noindex"`
 	TwilioAuthToken  string   `json:"twilio_auth_token" datastore:",noindex"`
 	PhoneNumbers     []string `json:"phone_numbers" datastore:",noindex"`
+	BucketName       string   `json:"bucket_name" datastore:",noindex"`
 }
 
 // BTEnvironment is the environment type for braintree
@@ -112,6 +113,15 @@ func GetBTConfig(ctx context.Context) BTConfig {
 		btConfig.BTPrivateKey = config.BTPrivateKey
 	}
 	return btConfig
+}
+
+// GetBucketName returns the bucket for uploading images
+func GetBucketName(ctx context.Context) string {
+	if appengine.IsDevAppServer() {
+		return "gigamunch-dev-images"
+	}
+	getDatastoreConfig(ctx)
+	return config.BucketName
 }
 
 // GetServerKey returns the server key
