@@ -1,0 +1,155 @@
+<!--
+
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="paper-file-input">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      img {
+        width: 100%;
+      }
+
+      #remove {
+
+      }
+
+      .add-image {
+        text-align: center;
+        border-style: dashed;
+        border-color: black;
+        cursor: pointer;
+      }
+
+      .photo {
+        position: relative;
+      }
+
+      .photo paper-icon-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        --paper-icon-button: {
+          background-color: gray;
+          color: white;
+          border-radius: 50%;
+        }
+      }
+    </style>
+    <template id="photos" is="dom-repeat" items="{{photos}}" as="photo">
+      <div class="photo">
+        <paper-icon-button id="remove" icon="close" on-tap="_removePhoto"></paper-icon-button>
+        <img src="{{photo}}"/>
+      </div>
+    </template>
+    <div class="add-image" on-tap="_selectFile">
+      <paper-icon-button icon="add-a-photo" ></paper-icon-button>
+      Add Image
+    </div>
+    <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
+      <input id="file" type="file" name="file" on-change="_uploadFile">
+    </form>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'paper-file-input',
+
+      properties: {
+        // photos is an array where the uploaded photos goes to
+        photos: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: new Array()
+        },
+        action: {
+          type: String,
+          notify: true
+        },
+        // _valid is false when a file is being uploaded
+        _valid: {
+          type: Boolean,
+          value: true
+        }
+      },
+      ready: function() {
+        this._getActionURL();
+      },
+      _removePhoto: function(e) {
+        var index = this.photos.indexOf(e.model.photo);
+        console.log('photo', e.model.photo, 'index', index);
+        this.splice('photos', index, 1);
+      },
+      _getActionURL: function() {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+              var resp = JSON.parse(xmlHttp.response);
+              if(resp.err.code !== 0) {
+                alert('There was an error getting an upload url:', resp.err.message);
+                return;
+              }
+              this.set('action', resp.url);
+            }
+        }.bind(this)
+        xmlHttp.open("GET", '/get-upload-url', true); // true for asynchronous
+        xmlHttp.send(null);
+      },
+      validate: function() {
+        return this._valid;
+      },
+      _selectFile: function() {
+        this.$.file.click();
+      },
+      _addPhoto: function(url) {
+        if(url !== undefined && url !== "") {
+          if(this.photos === undefined) {
+            this.photos = new Array();
+          }
+          this.push('photos', url);
+        }
+      },
+      _updateProgress: function(e) {
+        console.log("in file on progress", e);
+        if (e.lengthComputable) {
+          var value = (e.loaded / e.total) * 100;
+          console.log("upload value", value);
+        }
+      },
+      _uploadFile: function(e) {
+        var path = e.target.value;
+        console.log("path", path);
+        if(path === '') {
+          return;
+        }
+        var formData = new FormData();
+        formData.append('file', e.target.files[0]);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', this.action, true);
+        var polymerElement = this;
+        xhr.onload = function() {
+          var resp = JSON.parse(this.response);
+          if(resp.err.code !== 0) {
+            alert('There was an error upload your file:', resp.err.message);
+            return;
+          }
+          polymerElement._addPhoto(resp.url);
+        };
+
+        xhr.upload.onprogress = this._updateProgress
+        xhr.send(formData);
+        this._getActionURL();
+      }
+    });
+  })();
+  </script>
+</dom-module>
