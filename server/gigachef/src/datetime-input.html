@@ -1,0 +1,147 @@
+<!--
+
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-time-picker/paper-time-picker.html">
+<link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
+<link rel="import" href="../bower_components/iron-icons/editor-icons.html">
+<link rel="import" href="../bower_components/iron-icons/device-icons.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+
+<link rel="import" href="d-calendar/d-calendar.html">
+
+<dom-module id="datetime-input">
+  <template>
+    <style include="iron-flex iron-flex-alignment paper-time-picker-dialog-style">
+      :host {
+        display: block;
+        padding-top: 10px;
+
+        --paper-button: {
+          background: white;
+          color: var(--primary-color);
+        }
+      }
+      .divider {
+        flex: .05;
+      }
+      d-calendar {
+        padding: 0px;
+      }
+      label {
+        font-size: 12px;
+        color: #727272;
+        -webkit-font-smoothing: antialiased;
+      }
+      paper-input {
+        margin-top: -20px;
+      }
+
+    </style>
+    <label>[[label]]</label>
+    <div class="layout horizontal">
+      <paper-input class="flex" id="dateInput" on-tap="_showDatePicker" value="{{_date}}">
+        <iron-icon icon="editor:insert-invitation" suffix></iron-icon>
+      </paper-input>
+      <span class="divider">
+      </span>
+      <paper-input id="timeInput" class="flex" on-tap="_showTimePicker" value="{{_time}}">
+        <iron-icon icon="device:access-time" suffix></iron-icon>
+      </paper-input>
+    </div>
+
+
+    <paper-dialog id="datePickerDialog"
+      on-iron-overlay-closed="_dismissDateDialog">
+      <paper-date-picker id="datePicker" date="[[_d]]"></paper-date-picker>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>OK</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="timePickerDialog"
+                  class="paper-time-picker-dialog"
+                  on-iron-overlay-closed="_dismissTimeDialog">
+      <paper-time-picker id="timePicker" time="[[_time]]" animated="false"></paper-time-picker>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>OK</paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'datetime-input',
+
+      properties: {
+        epoch: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
+          value: (new Date()).getTime()
+        },
+        label: {
+          type: String,
+          notify: true,
+          value: 'Pick a date'
+        },
+        _date: {
+          type: String,
+          notify: true
+        },
+        _d: {
+          type: String,
+          notify: true
+        },
+        _time: {
+          type: String,
+          notify: true
+        }
+      },
+      update: function() {
+        var date = new Date(this.epoch);
+        this._updateDate(date);
+        this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /,' '));
+      },
+      _dismissTimeDialog: function(e) {
+        if (e.detail.confirmed) {
+          var date = new Date(this._date + ' ' + this.$.timePicker.time);
+          this.set('epoch', date.getTime());
+          this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /,' '));
+        }
+        this.$.timePicker.view = 'hours';
+      },
+      _dismissDateDialog: function(e) {
+        if (e.detail.confirmed) { // pressed ok
+          var date = new Date(this.$.datePicker.date.toLocaleDateString() + ' ' + this._time);
+          this.set('epoch', date.getTime());
+          this._updateDate(date);
+        }
+      },
+      _updateDate: function(d) {
+        this.set('_d', d.toDateString());
+        this.set('_date', d.toLocaleDateString());
+      },
+      _showTimePicker: function() {
+        this.$.timePickerDialog.open();
+      },
+      _showDatePicker: function() {
+        this.$.datePickerDialog.open();
+      }
+    });
+  })();
+  </script>
+</dom-module>

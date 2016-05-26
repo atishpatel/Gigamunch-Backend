@@ -11,6 +11,8 @@
 
 <link rel="import" href="item-list.html">
 <link rel="import" href="item-form.html">
+<link rel="import" href="post-form.html">
+
 
 <dom-module id="items-page">
 
@@ -23,7 +25,7 @@
       }
 
       #dialog {
-        position: fixed;
+        position: absolute;
         top: 64px;
         left: 0;
         right: 0;
@@ -55,7 +57,8 @@
 
     <item-list
       items=[[_items]]
-      on-edit="_editItem">
+      on-edit="_editItem"
+      on-post="_postItem">
     </item-list>
 
     <paper-dialog
@@ -65,7 +68,10 @@
       exit-animation="fade-out-animation">
       <paper-dialog-scrollable id="scrollable">
         <paper-icon-button icon="close" dialog-dismiss></paper-icon-button>
-        <item-form id="itemForm" item="[[_item]]" on-save="_saveItem"></item-form>
+        <iron-pages role="main" selected="[[_page]]" attr-for-selected="name">
+          <post-form id="postForm" name="post" post="[[_post]]" on-post="_postPost"></post-form>
+          <item-form id="itemForm" name="edit" item="[[_item]]" on-save="_saveItem"></item-form>
+        </iron-pages>
       </paper-dialog-scrollable>
     </paper-dialog>
 
@@ -85,7 +91,7 @@
         },
         _page: {
           type: String,
-          reflectToAttribute: true
+          notify: true
         },
         route: {
           type: Object,
@@ -101,6 +107,11 @@
           value: []
         },
         _item: {
+          type: Object,
+          notify: true,
+          value: {}
+        },
+        _post: {
           type: Object,
           notify: true,
           value: {}
@@ -123,6 +134,10 @@
                 this._getItem(itemID);
               }
               this.$.itemForm.update();
+              break;
+            case 'post':
+              this.$.dialog.open();
+              this.$.postForm.update();
               break;
             default:
           }
@@ -161,6 +176,10 @@
       _editItem: function(e, details) {
         this.set('_item', details.item);
         this.set('route.path', 'edit/' + details.item.id);
+      },
+      _postItem: function(e, details) {
+        this.set('_post', details.post);
+        this.set('route.path', 'post');
       },
       _saveItem: function(e, details) {
         this.service.saveItem(details.item, function(item, err){

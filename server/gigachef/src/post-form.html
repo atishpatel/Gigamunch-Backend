@@ -1,10 +1,13 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="datetime-input.html">
 <link rel="import" href="item-fields.html">
 
-<dom-module id="item-form">
+<dom-module id="post-form">
   <template>
     <style>
       :host {
@@ -24,13 +27,36 @@
       on-change="_updateSubmitButtonState">
       <item-fields
         id="itemFields"
-        photos="{{item.photos}}"
-        title="{{item.title}}"
-        description="{{item.description}}"
-        ingredients="{{item.ingredients}}"
-        general-tags="{{item.general_tags}}"
-        dietary-needs-tags="{{item.dietary_needs_tags}}">
+        photos="{{post.photos}}"
+        title="{{post.title}}"
+        description="{{post.description}}"
+        ingredients="{{post.ingredients}}"
+        general-tags="{{post.general_tags}}"
+        dietary-needs-tags="{{post.dietary_needs_tags}}">
       </item-fields>
+      <paper-input
+        label="Number of Servings Offered"
+        value="{{_servings_offered}}"
+        type="number"
+        required
+        auto-validate>
+      </paper-input>
+      <paper-input
+        label="Price per serving"
+        value="{{_price_per_serving}}"
+        type="number"
+        required
+        auto-validate>
+        <div prefix>$&nbsp;</div>
+      </paper-input>
+      <datetime-input id="closeTime" label="Post close time"
+                      epoch="{{post.closing_datetime}}">
+      </datetime-input>
+      <template is="dom-if" if$="[[!post.is_order_now]]" restamp="true">
+        <datetime-input id="readyTime" label="Meal ready time"
+                        epoch="{{post.ready_datetime}}">
+        </datetime-input>
+      </template>
       <paper-button
         id="submitButton"
         on-tap="_submit"
@@ -46,10 +72,10 @@
     'use strict';
 
     Polymer({
-      is: 'item-form',
+      is: 'post-form',
 
       properties: {
-        item: {
+        post: {
           type: Object,
           notify: true,
           value: {}
@@ -64,7 +90,7 @@
         this.$.spinner.hidden = false;
         this.$.spinner.active = true;
         this.$.submitButton.disabled = true;
-        this.fire('save', {item:this.item})
+        this.fire('post', {post: this.item})
       },
       _updateSubmitButtonState: function() {
         var form = this.$.form;

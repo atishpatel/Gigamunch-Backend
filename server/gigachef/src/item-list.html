@@ -79,10 +79,14 @@
         }
       },
       _orderNowPost: function(e) {
-        this.fire('post', {item: e.model.item, orderNow: true});
+        var post = e.model.item;
+        post.is_order_now = true;
+        this.fire('post', {post: post});
       },
       _preorderPost: function(e) {
-        this.fire('post', {item: e.model.item, orderNow: false});
+        var post = e.model.item;
+        post.is_order_now = false;
+        this.fire('post', {post: post});
       },
       _getPhoto: function(item) {
         if(item.photos === undefined || item.photos === null) {
