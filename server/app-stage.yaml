@@ -61,9 +61,6 @@ handlers:
   script: _go_app
   secure: always
 
-env_variables:
-  PROJECTID: 'gigamunch-omninexus-dev'
-
 skip_files:
   - ^(.*/node_modules/.*)
   - ^(.*/node_modules/.*)

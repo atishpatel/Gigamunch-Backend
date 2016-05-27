@@ -33,6 +33,7 @@ type Config struct {
 	TwilioAuthToken  string   `json:"twilio_auth_token" datastore:",noindex"`
 	PhoneNumbers     []string `json:"phone_numbers" datastore:",noindex"`
 	BucketName       string   `json:"bucket_name" datastore:",noindex"`
+	ProjectID        string   `json:"project_id" datastore:",noindex"`
 }
 
 // BTEnvironment is the environment type for braintree
@@ -122,6 +123,15 @@ func GetBucketName(ctx context.Context) string {
 	}
 	getDatastoreConfig(ctx)
 	return config.BucketName
+}
+
+// GetProjectID returns the project id
+func GetProjectID(ctx context.Context) string {
+	if appengine.IsDevAppServer() {
+		return "gigamunch-omninexus-dev"
+	}
+	getDatastoreConfig(ctx)
+	return config.ProjectID
 }
 
 // GetServerKey returns the server key

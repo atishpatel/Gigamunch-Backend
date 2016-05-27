@@ -77,7 +77,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	// put in datastore
 	postID, err := putIncomplete(ctx, post)
 	// insert into sql table
-	err = insertLivePost(postID, post)
+	err = insertLivePost(ctx, postID, post)
 	if err != nil {
 		// TODO update to a transaction
 		utils.Criticalf(ctx, "failed to put %d in sql database: +%v", postID, err)
@@ -147,7 +147,7 @@ func (c *Client) ClosePost(postID int64, chefID string) (*Resp, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("cannot get post")
 	}
-	err = removeLivePost(postID)
+	err = removeLivePost(c.ctx, postID)
 	if err != nil {
 		return nil, errors.Wrap("failed to remove live post", err)
 	}

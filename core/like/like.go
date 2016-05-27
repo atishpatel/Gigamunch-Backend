@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -13,6 +12,7 @@ import (
 	// driver for mysql
 	_ "github.com/go-sql-driver/mysql"
 
+	"gitlab.com/atishpatel/Gigamunch-Backend/config"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
@@ -43,7 +43,9 @@ type Client struct {
 
 // New returns a new Client for user likes
 func New(ctx context.Context) *Client {
-	connectOnce.Do(connectSQL)
+	connectOnce.Do(func() {
+		connectSQL(ctx)
+	})
 	return &Client{ctx: ctx}
 }
 
@@ -200,19 +202,15 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 // 	return ids, nil
 // }
 
-func connectSQL() {
+func connectSQL(ctx context.Context) {
 	var err error
 	// TODO switch to config
 	var connectionString string
-
 	if appengine.IsDevAppServer() {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		projectID := os.Getenv("PROJECTID")
-		if projectID == "" {
-			log.Fatal("PROJECTID env variable is not set.")
-		}
+		projectID := config.GetProjectID(ctx)
 		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)

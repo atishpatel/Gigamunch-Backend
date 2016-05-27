@@ -31,6 +31,3 @@ handlers:
 
 beta_settings:
       cloud_sql_instances: gigasqldb
-
-env_variables:
-  PROJECTID: 'gigamunch-omninexus-dev'

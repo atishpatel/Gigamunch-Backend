@@ -16,13 +16,13 @@ func TestGetClosedPosts(t *testing.T) {
 	}
 	defer done()
 	// setup
-	connectSQL()
+	connectSQL(ctx)
 	postIDs := []int64{testhelper.RandInt(), testhelper.RandInt(), testhelper.RandInt()}
 	p := new(Post)
 	closeTime := time.Now()
 	for i, id := range postIDs {
 		p.ClosingDateTime = closeTime.Add(time.Duration(i) * time.Minute)
-		err = insertLivePost(id, p)
+		err = insertLivePost(ctx, id, p)
 		if err != nil {
 			t.Fatal("error inserting live post: ", err)
 		}
@@ -42,7 +42,7 @@ func TestGetClosedPosts(t *testing.T) {
 	}
 	// clean up
 	for _, id := range postIDs {
-		err = removeLivePost(id)
+		err = removeLivePost(ctx, id)
 		if err != nil {
 			t.Fatal("error deleteing posts ", err)
 		}
