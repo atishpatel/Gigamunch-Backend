@@ -232,6 +232,7 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 			// TODO reculcate GigachefDelivery.TotalDuration
 			// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
 		}
+		p.NumServingsOrdered -= p.Orders[orderIndex].Servings
 		if orderIndex == 0 {
 			p.Orders = p.Orders[orderIndex+1:]
 		} else {
