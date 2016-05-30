@@ -81,7 +81,6 @@
 
   </template>
   <script>
-  (function() {
     'use strict';
 
     Polymer({
@@ -92,32 +91,32 @@
           type: Number,
           notify: true,
           reflectToAttribute: true,
-          value: (new Date()).getTime()
+          value: (new Date()).getTime(),
         },
         label: {
           type: String,
           notify: true,
-          value: 'Pick a date'
+          value: 'Pick a date',
         },
         _date: {
           type: String,
-          notify: true
+          notify: true,
         },
         _d: {
           type: String,
-          notify: true
+          notify: true,
         },
         _time: {
           type: String,
-          notify: true
-        }
+          notify: true,
+        },
       },
-      update: function() {
+      update: function () {
         var date = new Date(this.epoch);
         this._updateDate(date);
-        this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /,' '));
+        this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /, ' '));
       },
-      _dismissTimeDialog: function(e) {
+      _dismissTimeDialog: function (e) {
         if (e.detail.confirmed) {
           var date = new Date(this._date + ' ' + this.$.timePicker.time);
           this.set('epoch', date.getTime());
@@ -125,24 +124,23 @@
         }
         this.$.timePicker.view = 'hours';
       },
-      _dismissDateDialog: function(e) {
+      _dismissDateDialog: function (e) {
         if (e.detail.confirmed) { // pressed ok
           var date = new Date(this.$.datePicker.date.toLocaleDateString() + ' ' + this._time);
           this.set('epoch', date.getTime());
           this._updateDate(date);
         }
       },
-      _updateDate: function(d) {
+      _updateDate: function (d) {
         this.set('_d', d.toDateString());
         this.set('_date', d.toLocaleDateString());
       },
-      _showTimePicker: function() {
+      _showTimePicker: function () {
         this.$.timePickerDialog.open();
       },
-      _showDatePicker: function() {
+      _showDatePicker: function () {
         this.$.datePickerDialog.open();
-      }
+      },
     });
-  })();
   </script>
 </dom-module>

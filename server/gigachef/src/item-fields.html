@@ -40,7 +40,6 @@
 
   </template>
   <script>
-  (function() {
     'use strict';
 
     Polymer({
@@ -51,48 +50,48 @@
           type: Array,
           notify: true,
           reflectToAttribute: true,
-          value: []
+          value: [],
         },
         title: {
           type: String,
           notify: true,
-          reflectToAttribute: true
+          reflectToAttribute: true,
         },
         description: {
           type: String,
           notify: true,
-          reflectToAttribute: true
+          reflectToAttribute: true,
         },
         ingredients: {
           type: Array,
           notify: true,
           reflectToAttribute: true,
-          value: []
+          value: [],
         },
         generalTags: {
           type: Array,
           notify: true,
           reflectToAttribute: true,
-          value: []
+          value: [],
         },
         dietaryNeedsTags: {
           type: Array,
           notify: true,
           reflectToAttribute: true,
-          value: []
+          value: [],
         },
         _ingredients: {
           type: String,
-          observer: '_updateIngredients'
+          observer: '_updateIngredients',
         },
         _general_tags: {
           type: String,
-          observer: '_updateGeneralTags'
+          observer: '_updateGeneralTags',
         },
         _dietary_needs_tags: {
           type: String,
-          observer: '_updateDietaryNeedsTags'
-        }
+          observer: '_updateDietaryNeedsTags',
+        },
       },
       update: function() {
         if (this.ingredients !== undefined) {
@@ -121,6 +120,5 @@
         this.dietaryNeedsTags = dnt.split(/\s*,\s*/);
       }
     });
-  })();
   </script>
 </dom-module>

@@ -71,7 +71,6 @@
     <paper-fab icon="add" on-tap="_fabTap"></paper-fab>
   </template>
   <script>
-  (function() {
     'use strict';
 
     Polymer({
@@ -82,10 +81,10 @@
           type: Array,
           notify: true,
           reflectToAttribute: true,
-          value: []
+          value: [],
         },
         service: {
-          type: Object
+          type: Object,
         },
       },
       selected: function() {
@@ -130,6 +129,5 @@
         this.fire('edit')
       }
     });
-  })();
   </script>
 </dom-module>
