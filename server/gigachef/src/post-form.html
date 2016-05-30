@@ -12,19 +12,41 @@
     <style>
       :host {
         display: block;
+        padding: 15px;
       }
       #submitButton {
         width: 100%;
         margin: 20px 0px;
       }
+
+      #dialog {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        padding: 0;
+        margin: 0;
+        height: 95%;
+        width: 100%;
+        max-height: 100%;
+        max-width: 100%;
+        z-index: 1;
+        box-shadow: none;
+      }
     </style>
+
+    <app-route
+      route="{{route}}"
+      pattern="/:itemid"
+      data="{{routeData}}">
+    </app-route>
 
     <form
       is="iron-form"
       id="form"
       method="post"
       action="#"
-      on-change="_updateSubmitButtonState">
+      on-change="updateSubmitButtonState">
       <item-fields
         id="itemFields"
         photos="{{post.photos}}"
@@ -36,30 +58,34 @@
       </item-fields>
       <paper-input
         label="Number of Servings Offered"
-        value="{{_servings_offered}}"
+        value="{{post.servings_offered}}"
         type="number"
         required
         auto-validate>
       </paper-input>
       <paper-input
         label="Price per serving"
-        value="{{_price_per_serving}}"
+        value="{{post.chef_price_per_serving}}"
         type="number"
         required
         auto-validate>
         <div prefix>$&nbsp;</div>
       </paper-input>
-      <datetime-input id="closeTime" label="Post close time"
-                      epoch="{{post.closing_datetime}}">
+      <datetime-input
+        id="closeTime"
+        label="Post close time"
+        epoch="{{post.closing_datetime}}">
       </datetime-input>
       <template is="dom-if" if$="[[!post.is_order_now]]" restamp="true">
-        <datetime-input id="readyTime" label="Meal ready time"
-                        epoch="{{post.ready_datetime}}">
+        <datetime-input
+          id="readyTime"
+          label="Meal ready time"
+          epoch="{{post.ready_datetime}}">
         </datetime-input>
       </template>
       <paper-button
         id="submitButton"
-        on-tap="_submit"
+        on-tap="submit"
         raised
         disabled>
         <paper-spinner id="spinner" hidden></paper-spinner>Save
@@ -68,7 +94,7 @@
 
   </template>
   <script>
-  (function() {
+  (function () {
     'use strict';
 
     Polymer({
@@ -78,26 +104,90 @@
         post: {
           type: Object,
           notify: true,
-          value: {}
-        }
+          value: {},
+        },
+        item: {
+          type: Object,
+        },
       },
-      update: function() {
+      selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
+        if (this.routeData.itemid === '') {
+          var d = {
+            error: 'There is a problem with your URL. :( Please try to post an item again.',
+            options: [{
+              text: 'Go to items',
+              func: function () {
+                this.fire('redirect', { url: 'items' });
+              }.bind(this)
+            }],
+          };
+          this.fire('error', d);
+          return;
+        }
+        if (this.item.id !== this.routeData.itemid) {
+          this.getItem(this.routeData.itemid);
+        } else {
+          this.setItem(this.item);
+        }
+      },
+      setItem: function (item) {
+        this.set('post', item);
+        this.post.item_id = item.id;
+        this.post.id = '';
         this.$.itemFields.update();
       },
-      _submit: function(){
+      getItem: function (id) {
+        if (id === undefined || id === '' || id === '0') {
+          return;
+        }
+        if (this.item.id === id) {
+          return;
+        }
+        this.service.getItem(id, function (item, err) {
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: this.getItems
+              }],
+            };
+            this.fire('error', d);
+            return;
+          }
+          this.setItem(item);
+        }.bind(this));
+      },
+      submit: function () {
         this.$.spinner.hidden = false;
         this.$.spinner.active = true;
         this.$.submitButton.disabled = true;
-        this.fire('post', {post: this.item})
+        this.post();
       },
-      _updateSubmitButtonState: function() {
+      post: function() {
+        this.service.postPost(this.post, function(post, err){
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: this.post
+              }],
+            };
+            this.fire('error', d);
+            return;
+          }
+          this.fire('posted', { post: post });
+        });
+      },
+      updateSubmitButtonState: function() {
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
         submitButton.disabled = !form.validate();
-      }
+      },
     });
   })();
   </script>

@@ -49,7 +49,7 @@
       </div>
     </template>
     <div class="add-image" on-tap="_selectFile">
-      <paper-icon-button icon="add-a-photo" ></paper-icon-button>
+      <paper-icon-button icon="add-a-photo"></paper-icon-button>
       Add Image
     </div>
     <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
@@ -86,7 +86,6 @@
       },
       _removePhoto: function(e) {
         var index = this.photos.indexOf(e.model.photo);
-        console.log('photo', e.model.photo, 'index', index);
         this.splice('photos', index, 1);
       },
       _getActionURL: function() {

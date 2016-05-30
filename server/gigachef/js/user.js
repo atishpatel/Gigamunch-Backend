@@ -14,7 +14,7 @@ var User = function () {
 
     this.isLoggedIn = false;
     // get cookie
-    var token = this._getTokenCookie();
+    var token = this.getTokenCookie();
     this.update(token, 0);
     if (this.token !== undefined && this.token !== '') {
       this.isLoggedIn = true;
@@ -38,16 +38,18 @@ var User = function () {
         }
       }
       // set permissions
-      this.isChef = this._getKthBit(jwt.perm, 0);
-      this.isVerifiedChef = this._getKthBit(jwt.perm, 1);
+      this.isChef = this.getKthBit(jwt.perm, 0);
+      this.isVerifiedChef = this.getKthBit(jwt.perm, 1);
+      this.hasAddress = this.getKthBit(jwt.perm, 4);
+      this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
       // update coookie to new token
       if (setCookie) {
-        this._setTokenCookie(token, jwt.exp);
+        this.setTokenCookie(token, jwt.exp);
       }
     }
   }, {
-    key: '_getTokenCookie',
-    value: function _getTokenCookie() {
+    key: 'getTokenCookie',
+    value: function getTokenCookie() {
       var name = 'GIGATKN=';
       var ca = document.cookie.split(';');
       for (var i = 0; i < ca.length; i++) {
@@ -59,16 +61,16 @@ var User = function () {
       return '';
     }
   }, {
-    key: '_setTokenCookie',
-    value: function _setTokenCookie(cvalue, exptime) {
+    key: 'setTokenCookie',
+    value: function setTokenCookie(cvalue, exptime) {
       var d = new Date();
       d.setTime(exptime);
       var expires = '\'expires=\'' + d.toUTCString();
       document.cookie = 'GIGATKN=' + cvalue + '; ' + expires;
     }
   }, {
-    key: '_getKthBit',
-    value: function _getKthBit(x, k) {
+    key: 'getKthBit',
+    value: function getKthBit(x, k) {
       return (x >> k & 1) === 1;
     }
   }]);

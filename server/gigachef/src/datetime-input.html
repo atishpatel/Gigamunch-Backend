@@ -16,11 +16,9 @@
 <link rel="import" href="../bower_components/iron-icons/device-icons.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 
-<link rel="import" href="d-calendar/d-calendar.html">
-
 <dom-module id="datetime-input">
   <template>
-    <style include="iron-flex iron-flex-alignment paper-time-picker-dialog-style">
+    <style include="iron-flex iron-flex-alignment paper-time-picker-dialog-style paper-date-picker-dialog-style">
       :host {
         display: block;
         padding-top: 10px;
@@ -33,9 +31,7 @@
       .divider {
         flex: .05;
       }
-      d-calendar {
-        padding: 0px;
-      }
+
       label {
         font-size: 12px;
         color: #727272;
@@ -59,7 +55,10 @@
     </div>
 
 
-    <paper-dialog id="datePickerDialog"
+    <paper-dialog
+      id="datePickerDialog"
+      class="paper-date-picker-dialog"
+      modal
       on-iron-overlay-closed="_dismissDateDialog">
       <paper-date-picker id="datePicker" date="[[_d]]"></paper-date-picker>
       <div class="buttons">
@@ -68,9 +67,11 @@
       </div>
     </paper-dialog>
 
-    <paper-dialog id="timePickerDialog"
-                  class="paper-time-picker-dialog"
-                  on-iron-overlay-closed="_dismissTimeDialog">
+    <paper-dialog
+      id="timePickerDialog"
+      modal
+      class="paper-time-picker-dialog"
+      on-iron-overlay-closed="_dismissTimeDialog">
       <paper-time-picker id="timePicker" time="[[_time]]" animated="false"></paper-time-picker>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>

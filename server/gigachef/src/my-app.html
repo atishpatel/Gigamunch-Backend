@@ -1,14 +1,17 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<!-- <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html"> -->
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="my-icons.html">
@@ -54,6 +57,10 @@
           bottom: 4vh;
           right: 4vh;
         }
+
+        --paper-tab: {
+          padding: 0;
+        }
       }
 
       app-header {
@@ -63,6 +70,24 @@
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
+      }
+
+      app-drawer {
+        z-index: 10;
+      }
+
+      app-toolbar {
+        z-index: 9;
+      }
+
+      app-header {
+        z-index: 8;
+      }
+
+      .nav-a {
+        text-decoration: none;
+        outline: 0;
+        color: #546E7A;
       }
 
       .drawer-toolbar {
@@ -97,19 +122,19 @@
         outline: 0;
       }
 
-      .drawer-toolbar .pic {
+      .user-pic {
         height: 35px;
         width: 35px;
         border-radius: 50%;
         background-color: white;
         color: var(--secondary-text-color);
-        margin-right: 20px;
       }
 
       .drawer-toolbar .user-info {
         color: var(--secondary-text-color);
         font-size: 12px;
         letter-spacing: .05em;
+        margin-left: 20px;
       }
 
       .drawer-toolbar .email {
@@ -123,16 +148,41 @@
 
       .drawer-list a {
         display: block;
-        outline: 0;
-        text-decoration: none;
         color: #546E7A;
       }
+
       .drawer-list a.iron-selected {
         background-color: #ECEFF1;
       }
       .drawer-list paper-item {
         font-size: inherit;
         font-weight: 500;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+
+      .toolbar-left {
+        margin-right: auto;
+      }
+
+      .nav-tabs {
+        height: 100%;
+        margin-right: 12px
+      }
+
+      .nav-tabs a {
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+      }
+
+      .hide {
+        display: none;
       }
 
       @media (max-width: 350px) /* Mobile */ {
@@ -149,97 +199,244 @@
         pattern="{{baseUrl}}/:page"
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
-
-    <app-drawer-layout fullbleed>
+    <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
       <!-- Drawer content -->
-      <app-drawer>
+      <app-drawer id="drawer" swipe-open="[[smallScreen]]">
         <app-toolbar class="drawer-toolbar">
-          <div class="bar top"><a class="logo" href="/">Gigamunch</a></div>
+          <div class="bar top">
+            <a class="logo" href="/">Gigamunch</a>
+          </div>
           <div class="bar bottom">
-            <placeholder-img class="pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+            <placeholder-img class="user-pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
             <div class="user-info">
               <div class="name"><strong>[[user.name]]</strong></div>
               <div class="email">[[user.email]]</div>
             </div>
           </div>
         </app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="dashboard" href$="{{baseUrl}}/"><paper-item>Dashboard</paper-item></a>
-          <a name="items" href$="{{baseUrl}}/items"><paper-item>Items</paper-item></a>
-          <a name="settings" href$="{{baseUrl}}/settings"><paper-item>Settings</paper-item></a>
-          <a name="signout" href="/signout"><paper-item>Log out</paper-item></a>
-        </iron-selector>
+          <iron-selector class="drawer-list" selected="[[page]]" attr-for-selected="name" role="navigation">
+            <a class="nav-a" name="dashboard" href$="{{baseUrl}}/"><paper-item>Dashboard</paper-item></a>
+            <a class="nav-a" name="items" href$="{{baseUrl}}/items"><paper-item>My Kitchen</paper-item></a>
+            <paper-item disabled>Messaging - Coming Soon!</paper-item>
+            <a class="nav-a" name="settings" href$="{{baseUrl}}/settings"><paper-item>Settings</paper-item></a>
+            <!-- TODO add help and feedback -->
+            <a class="nav-a" href="/signout"><paper-item>Log out</paper-item></a>
+          </iron-selector>
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+      <!-- <app-header-layout has-scrolling-region> -->
 
-        <app-header condenses reveals shadow effects="waterfall">
+        <app-header reveals shadow>
           <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div title>[[title]]</div>
+            <div class="toolbar toolbar-left">
+              <paper-icon-button
+                id="arrowBack"
+                class="hide"
+                icon="arrow-back"
+                on-tap="_backTaped">
+              </paper-icon-button>
+              <paper-icon-button
+                id="menuIcon"
+                class="hide"
+                icon="menu"
+                on-tap="_toggleDrawer">
+              </paper-icon-button>
+              <div title>[[title]]</div>
+            </div>
+            <div id="toolbarRight" class="toolbar hide" >
+              <paper-tabs
+                class="nav-tabs"
+                attr-for-selected="name"
+                selected="{{page}}" tabindex="-1">
+                <paper-tab name="dashboard" tabindex="-1">
+                  <a class="nav-a" href="{{baseUrl}}/"><span>Dashboard</span></a>
+                </paper-tab>
+                <paper-tab name="items" tabindex="-1">
+                  <a class="nav-a" href="{{baseUrl}}/items"><span>My Kitchen</span></a>
+                </paper-tab>
+              </paper-tabs>
+              <placeholder-img class="user-pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+              <paper-menu-button horizontal-align="right" vertical-offset="15" >
+                <paper-icon-button icon="more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                <paper-menu class="dropdown-content">
+                  <paper-item disabled>Messaging - Coming soon!</paper-item>
+                  <a class="nav-a" href="{{baseUrl}}/settings"><paper-item>Settings</paper-item></a>
+                  <a class="nav-a" href="/signout"><paper-item>Log out</paper-item></a>
+                </paper-menu>
+              </paper-menu-button>
+            </div>
           </app-toolbar>
+
         </app-header>
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <dashboard-page id="dashboard" name="dashboard" route="{{subroute}}"></dashboard-page>
-          <items-page id="items" name="items" route="{{subroute}}" service="[[service]]"></items-page>
+          <dashboard-page
+            id="dashboard"
+            name="dashboard"
+            route="{{subroute}}">
+          </dashboard-page>
+          <item-list
+            id="items"
+            name="items"
+            items="{{_items}}"
+            on-edit="_editItem"
+            on-post="_postItem"
+            on-error="_error"
+            service="[[service]]">
+          </item-list>
+          <item-form
+            id="edititem"
+            name="edititem"
+            item="{{_item}}"
+            on-saved="_savedItem"
+            on-error="_error"
+            route="{{subroute}}"
+            service="[[service]]">
+          </item-form>
+          <post-form
+            id="postitem"
+            name="postitem"
+            item="[[_item]]"
+            on-posted="_posted"
+            on-error="_error"
+            route="{{subroute}}"
+            service="[[service]]">
+          </post-form>
         </iron-pages>
 
-      </app-header-layout>
+      <!-- </app-header-layout> -->
 
-    </app-drawer-layout>
 
   </template>
 
   <script>
 
     Polymer({
-
       is: 'my-app',
 
       properties: {
         title: {
-          type: String
+          type: String,
         },
         page: {
           type: String,
           reflectToAttribute: true,
-          observer: '_pageChanged'
+          observer: '_pageChanged',
         },
-
         user: {
-          type: Object
+          type: Object,
         },
         baseUrl: {
           type: String,
-          notify: true
-        }
+          notify: true,
+        },
+        _item: {
+          type: Object,
+          value: {},
+        },
+        _items: {
+          type: Array,
+          value: [],
+        },
+        _host: {
+          type: String,
+          value: location.host,
+        },
       },
 
       observers: [
-        '_routePageChanged(routeData.page)'
+        '_routePageChanged(routeData.page)',
+        '_routePathChanged(route.path)',
+        '_pageOrScreenChanged(page, smallScreen)'
       ],
 
-      ready: function() {
-        this.user = CHEF.User;
-        this.service = CHEF.Service;
+      ready: function () {
+        this.set('user', CHEF.User);
+        this.set('service', CHEF.Service);
       },
-
-      _routePageChanged: function(page) {
+      _editItem: function (e, detail) {
+        if (detail.item !== undefined && detail.item.id !== undefined
+            && detail.item.id !== '' && detail.item.id !== '0') {
+          this.set('_item', detail.item);
+          this.setPath('edititem/' + detail.item.id);
+        } else {
+          this.set('_item', {});
+          this.setPath('edititem');
+        }
+      },
+      _postItem: function (e, detail) {
+        if (detail.item !== undefined && detail.item.id !== undefined) {
+          this.set('_item', detail.item);
+          this.setPath('postitem/' + detail.item.id);
+        }
+      },
+      _savedItem: function (e, detail) {
+        this.unshift('_items', detail.item);
+        this.setPath('items');
+      },
+      _routePageChanged: function (page) {
         if (this.page !== page){
           this.page = page || 'dashboard';
         }
       },
-
-      _pageChanged: function(page) {
-        this.title = page.charAt(0).toUpperCase() + page.slice(1);
+      _routePathChanged: function (path) {
+        if (!path.includes(this.baseUrl)) {
+          window.location = path;
+        }
+      },
+      _pageChanged: function (page) {
+        var pageURL = page + '-page.html';
+        var el;
+        var title = page.charAt(0).toUpperCase() + page.slice(1);
+        switch (page) {
+          case 'postitem':
+            el = this.$.postitem;
+            pageURL = 'post-form.html';
+            break;
+          case 'edititem':
+            el = this.$.edititem;
+            pageURL = 'item-form.html';
+            break;
+          case 'dashboard':
+            el = this.$.dashboard;
+            break;
+          case 'items':
+            el = this.$.items;
+            break;
+          default:
+        }
         // load page import on demand.
-        this.importHref(
-          this.resolveUrl(page + '-page.html'), null, null, true);
-      }
-
+        this.importHref(this.resolveUrl(pageURL), function () {
+          el.selected();
+        }, null, true);
+      },
+      _backTaped: function () {
+        switch (this.page) {
+          case 'edititem':
+          case 'postitem':
+            this.setPath('items');
+            break;
+          default:
+        }
+      },
+      _pageOrScreenChanged: function (page, smallScreen) {
+        var backPage = (page === 'edititem' || page === 'postitem');
+        this.$.arrowBack.toggleClass('hide', !backPage);
+        this.$.menuIcon.toggleClass('hide', (!smallScreen || backPage));
+        if (smallScreen || backPage) {
+          this.$.toolbarRight.className += ' hide';
+        } else {
+          this.$.toolbarRight.className = this.$.toolbarRight.className.replace(/hide/g, '');
+        }
+      },
+      _toggleDrawer: function () {
+        this.$.drawer.toggle();
+      },
+      setPath: function (path) {
+        this.set('route.path', this.baseUrl + '/' + path);
+      },
     });
 
   </script>

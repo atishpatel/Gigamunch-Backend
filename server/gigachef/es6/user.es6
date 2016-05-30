@@ -6,7 +6,7 @@ class User {
   constructor() {
     this.isLoggedIn = false;
     // get cookie
-    const token = this._getTokenCookie();
+    const token = this.getTokenCookie();
     this.update(token, 0);
     if (this.token !== undefined && this.token !== '') {
       this.isLoggedIn = true;
@@ -26,15 +26,17 @@ class User {
       }
     }
     // set permissions
-    this.isChef = this._getKthBit(jwt.perm, 0);
-    this.isVerifiedChef = this._getKthBit(jwt.perm, 1);
+    this.isChef = this.getKthBit(jwt.perm, 0);
+    this.isVerifiedChef = this.getKthBit(jwt.perm, 1);
+    this.hasAddress = this.getKthBit(jwt.perm, 4);
+    this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
     // update coookie to new token
     if (setCookie) {
-      this._setTokenCookie(token, jwt.exp);
+      this.setTokenCookie(token, jwt.exp);
     }
   }
 
-  _getTokenCookie() {
+  getTokenCookie() {
     const name = 'GIGATKN=';
     const ca = document.cookie.split(';');
     for (let i = 0; i < ca.length; i++) {
@@ -45,14 +47,14 @@ class User {
     return '';
   }
 
-  _setTokenCookie(cvalue, exptime) {
+  setTokenCookie(cvalue, exptime) {
     const d = new Date();
     d.setTime(exptime);
     const expires = `'expires='${d.toUTCString()}`;
     document.cookie = `GIGATKN=${cvalue}; ${expires}`;
   }
 
-  _getKthBit(x, k) {
+  getKthBit(x, k) {
     return (((x >> k) & 1) === 1);
   }
 }
