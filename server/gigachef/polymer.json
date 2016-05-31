@@ -5,6 +5,8 @@
     "src/dashboard-page.html",
     "src/item-list.html",
     "src/item-form.html",
-    "src/post-form.html"
+    "src/post-form.html",
+    "src/profile-form.html",
+    "src/payout-form.html"
   ]
 }

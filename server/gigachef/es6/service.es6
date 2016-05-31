@@ -66,7 +66,52 @@ class Service {
         }
       );
   }
+  /*
+   * Payout Method
+   */
+  getSubMerchant(callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getSubMerchant(callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+    };
+    this
+      .service
+      .getSubMerchant(request)
+      .execute(
+        (resp) => {
+          this.logError('getSubMerchant', resp.err);
+          callback(resp.sub_merchant, resp.err);
+        }
+      );
+  }
 
+  updateSubMerchant(submerchant, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.updateSubMerchant(submerchant, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      sub_merchant: submerchant,
+    };
+    this
+      .service
+      .updateSubMerchant(request)
+      .execute(
+        (resp) => {
+          this.logError('updateSubMerchant', resp.err);
+          callback(resp.gigachef, resp.err);
+          setTimeout(() => { this.refreshToken(); }, 1);
+        }
+      );
+  }
   /*
    * Item
    */

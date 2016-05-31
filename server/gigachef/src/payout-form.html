@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
@@ -10,15 +11,15 @@
 <link rel="import" href="../bower_components/gold-email-input/gold-email-input.html">
 <link rel="import" href="../bower_components/gold-phone-input/gold-phone-input.html">
 <link rel="import" href="../bower_components/gold-zip-input/gold-zip-input.html">
+<link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
 
 <link rel="import" href="select-with-options.html">
 <link rel="import" href="paper-select.html">
-<link rel="import" href="file-input.html">
-<link rel="import" href="placeholder-img.html">
+<link rel="import" href="my-icons.html">
 
-<dom-module id="profile-form">
+<dom-module id="payout-form">
   <template>
-    <style include="paper-select">
+    <style include="paper-select paper-date-picker-dialog-style">
       :host {
         display: block;
         padding: 15px;
@@ -30,6 +31,7 @@
         width: 100%;
         margin: 20px 0px;
       }
+
       .row {
         display: flex;
         flex-direction: row;
@@ -38,6 +40,11 @@
       .row > *:not(:first-child) {
         margin-left: 8px;
       }
+
+      .row > * {
+        flex: 1;
+      }
+
       .select-input {
         display: flex;
         flex-direction: column;
@@ -51,19 +58,10 @@
         line-height: 20px;
       }
 
-      .profile-pic, placeholder-img {
-        height: 200px;
-        width: 200px;
-        border-radius: 50%;
+      img {
+        display: block;
+        max-width: 100%;
         margin: auto;
-        cursor: pointer;
-      }
-
-      .profile-top {
-        position: relative;
-        bottom: 125px;
-        color: white;
-        text-align: center;
       }
     </style>
 
@@ -73,35 +71,24 @@
       method="post"
       action="#"
       on-change="updateSubmitButtonState">
-      <file-input
-        photos="{{photos}}"
-        url-postfix="=s720-c">
-        <div class="profile-pic">
-          <placeholder-img
-            icon="account-circle"
-            alt="user profile picture"
-            src="[[gigachef.photo_url]]">
-          </placeholder-img>
-          <div class="profile-top">
-            <iron-icon icon="add-a-photo">
-            </iron-icon>
-            <br>
-            <span>Change profile photo</span>
-          </div>
-        </div>
-      </file-input>
-      <paper-input label="Name" value="{{gigachef.name}}" required auto-validate></paper-input>
-      <gold-email-input label="Email" value="{{gigachef.email}}" required auto-validate></gold-email-input>
-      <gold-phone-input label="Phone Number" value="{{gigachef.phone_number}}" required auto-validate></gold-phone-input>
-      <paper-input label="Apt #" value="{{gigachef.address.apt}}" auto-validate></paper-input>
-      <paper-input label="Street" value="{{gigachef.address.street}}" required auto-validate></paper-input>
-      <paper-input label="City" value="{{gigachef.address.city}}" required auto-validate></paper-input>
+
+      <div class="row">
+        <paper-input label="Legal First Name" value="{{submerchant.first_name}}" required auto-validate></paper-input>
+        <paper-input label="Legal Last Name" value="{{submerchant.last_name}}" required auto-validate></paper-input>
+      </div>
+      <div class="row">
+        <gold-email-input label="Email" value="{{submerchant.email}}" required auto-validate></gold-email-input>
+        <paper-input label="Date of Birth" type="date" value="{{dob}}" required auto-validate></paper-input>
+      </div>
+      <paper-input label="Apt # (optional)" value="{{submerchant.address.apt}}" auto-validate></paper-input>
+      <paper-input label="Street" value="{{submerchant.address.street}}" required auto-validate></paper-input>
+      <paper-input label="City" value="{{submerchant.address.city}}" required auto-validate></paper-input>
       <!-- group states and zip -->
       <div class="row">
         <div class="select-input flex-1">
         <label>State</label>
         <paper-select>
-          <select is="select-with-options" option-value="value" value="{{gigachef.address.state::change}}" required>
+          <select is="select-with-options" option-value="value" value="{{submerchant.address.state::change}}" required>
             <option value="AL">AL</option>
             <option value="AK">AK</option>
             <option value="AZ">AZ</option>
@@ -159,10 +146,18 @@
           </paper-md-decorator>
         </paper-select>
         </div>
-        <gold-zip-input class="flex-1" label="Zip" value="{{gigachef.address.zip}}" required auto-validate></gold-zip-input>
+        <gold-zip-input class="flex-1" label="Zip" value="{{submerchant.address.zip}}" required auto-validate></gold-zip-input>
       </div>
 
-      <paper-checkbox id="agreeCheckbox" required>I agree to the <a href="/terms">Terms &amp; Conditions</a> and <a href="privacy">Privacy Policy</a></paper-checkbox>
+      <div>
+        <img alt="A check with routing and account number." src="http://banks-america.com/info/wp-content/uploads/2014/08/routing-number-check.jpg"></img>
+      </div>
+      <div class="row">
+        <paper-input label="Routing Number" value="{{submerchant.routing_number}}" required auto-validate></paper-input>
+        <paper-input label="Account Number" value="{{submerchant.account_number}}" required auto-validate></paper-input>
+      </div>
+
+      <paper-checkbox id="agreeCheckbox" required>I agree to <a href="/terms">Terms &amp; Agreement</a> and <a href="privacy">Privacy Policy</a> as a sub-merchant.</paper-checkbox>
 
       <paper-button
         id="submitButton"
@@ -178,10 +173,10 @@
     'use strict';
 
     Polymer({
-      is: 'profile-form',
+      is: 'payout-form',
 
       properties: {
-        gigachef: {
+        submerchant: {
           type: Object,
           notify: true,
           reflectToAttribute: true,
@@ -191,60 +186,59 @@
             },
           },
         },
+        dob: {
+          type: String,
+          observer: 'dobUpdated',
+        },
         service: {
           type: Object,
         },
         user: {
           type: Object,
         },
-        photos: {
-          type: Array,
-          observer: 'photosChanged',
-        },
       },
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
-        this.getGigachef();
+        this.getSubMerchant();
       },
-      getGigachef: function () {
-        this.service.getGigachef(function (chef, err) {
+      getSubMerchant: function () {
+        this.service.getSubMerchant(function (submerchant, err) {
           if (err.code !== 0) {
             var d = {
               error: err,
               options: [{
                 text: 'Try Again',
                 func: function () {
-                  this.getGigachef();
-                }.bind(this),
+                  this.getSubMerchant();
+                }.bind(this)
               }],
             };
             this.fire('error', d);
           }
-          this.set('gigachef', chef);
+          this.set('submerchant', submerchant);
         }.bind(this));
       },
       submit: function (){
         this.$.spinner.hidden = false;
         this.$.spinner.active = true;
         this.$.submitButton.disabled = true;
-        this.updateProfile(this.gigachef);
+        this.updateSubMerchant(this.submerchant);
       },
-      updateProfile: function (gigachef) {
-        this.service.updateProfile(gigachef, function(chef, err){
+      updateSubMerchant: function (submerchant) {
+        this.service.updateSubMerchant(submerchant, function(chef, err){
           if (err.code !== 0) {
             var d = {
               error: err,
               options: [{
                 text: 'Try Again',
                 func: function() {
-                        this.updateProfile(gigachef);
+                        this.updateSubMerchant(submerchant);
                       }.bind(this)
                 }],
             };
             this.fire('error', d);
           } else {
-            this.set('gigachef', chef);
             this.fire('updated', { gigachef: chef });
           }
         }.bind(this));
@@ -255,10 +249,11 @@
         // Validate the entire form to see if we should enable the `Submit` button.
         submitButton.disabled = !form.validate();
       },
-      photosChanged: function(photos) {
-        if (photos.length > 0) {
-          this.set('gigachef.photo_url', photos[0]);
-          this.set(photos, []);
+      dobUpdated: function (dob) {
+        if (dob !== undefined || dob !== '') {
+          var ymd = dob.split('-');
+          var m = parseInt(ymd[1], 10) - 1;
+          this.submerchant.date_of_birth = new Date(ymd[0], m, ymd[2]).getTime();
         }
       },
     });

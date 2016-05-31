@@ -1,8 +1,8 @@
 module.exports = {
   staticFileGlobs: [
-    '/index.html',
-    '/manifest.json',
-    '/bower_components/webcomponentsjs/webcomponents-lite.min.js'
+    '/gigachef/index.html',
+    '/gigachef/manifest.json',
+    '/gigachef/bower_components/webcomponentsjs/webcomponents-lite.min.js'
   ],
-  navigateFallback: '/index.html'
+  navigateFallback: '/gigachef/index.html'
 };

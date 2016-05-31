@@ -40,7 +40,7 @@
     <template id="photos" is="dom-repeat" items="{{photos}}" as="photo">
       <div class="photo">
         <paper-icon-button icon="close" on-tap="removePhoto"></paper-icon-button>
-        <img src="{{photo}}"/>
+        <img src="{{photo}}" alt="food photo"/>
       </div>
     </template>
     <file-input
