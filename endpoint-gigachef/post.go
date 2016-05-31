@@ -22,6 +22,7 @@ type Post struct {
 	ChefPricePerServing float32 `json:"chef_price_per_serving"`
 	Pickup              bool    `json:"pickup"`
 	GigachefDelivery    bool    `json:"gigachef_delivery"`
+	IsOrderNow          bool    `json:"is_order_now"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
@@ -40,6 +41,7 @@ func (p *Post) Set(id int64, post *post.Post) {
 	p.ChefPricePerServing = post.ChefPricePerServing
 	p.Pickup = post.AvailableExchangeMethods.Pickup()
 	p.GigachefDelivery = post.AvailableExchangeMethods.ChefDelivery()
+	p.IsOrderNow = post.IsOrderNow
 }
 
 // Get creates a post.Post version of the endpoint post
@@ -58,6 +60,7 @@ func (p *Post) Get() *post.Post {
 	post.ChefPricePerServing = p.ChefPricePerServing
 	post.AvailableExchangeMethods.SetPickup(p.Pickup)
 	post.AvailableExchangeMethods.SetChefDelivery(p.GigachefDelivery)
+	post.IsOrderNow = p.IsOrderNow
 	return post
 }
 
