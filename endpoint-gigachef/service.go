@@ -72,11 +72,12 @@ func init() {
 		i := m.Info()
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
+	// TODO update to GET
 	// refresh stuff
 	register("RefreshToken", "refreshToken", "POST", "gigachefservice/refreshToken", "Refresh a token.")
 	// application stuff
-	register("GetApplication", "getApplication", "POST", "gigachefservice/getApplication", "Get chef application.")
-	register("SubmitApplication", "submitApplication", "POST", "gigachefservice/submitApplication", "Apply to be a chef.")
+	register("GetGigachef", "getGigachef", "GET", "gigachefservice/getGigachef", "Get the chef info.")
+	register("UpdateProfile", "updateProfile", "POST", "gigachefservice/updateProfile", "Update chef profile.")
 	register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
 	// item stuff
 	register("SaveItem", "saveItem", "POST", "gigachefservice/saveItem", "Save a item.")

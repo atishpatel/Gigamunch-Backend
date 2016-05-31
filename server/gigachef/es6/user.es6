@@ -34,6 +34,7 @@ class User {
     if (setCookie) {
       this.setTokenCookie(token, jwt.exp);
     }
+    document.dispatchEvent(new Event('userUpdated', { bubbles: true }));
   }
 
   getTokenCookie() {

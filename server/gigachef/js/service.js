@@ -53,17 +53,64 @@ var Service = function () {
       }
     }
     /*
+     * Chef
+     */
+
+  }, {
+    key: 'getGigachef',
+    value: function getGigachef(callback) {
+      var _this = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this.getGigachef(callback);
+        });
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken()
+      };
+      this.service.getGigachef(request).execute(function (resp) {
+        _this.logError('getGigachef', resp.err);
+        callback(resp.gigachef, resp.err);
+      });
+    }
+  }, {
+    key: 'updateProfile',
+    value: function updateProfile(chef, callback) {
+      var _this2 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this2.updateProfile(chef, callback);
+        });
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken(),
+        gigachef: chef
+      };
+      this.service.updateProfile(request).execute(function (resp) {
+        _this2.logError('updateProfile', resp.err);
+        callback(resp.gigachef, resp.err);
+        setTimeout(function () {
+          _this2.refreshToken();
+        }, 1);
+      });
+    }
+
+    /*
      * Item
      */
 
   }, {
     key: 'getItems',
     value: function getItems(startLimit, endLimit, callback) {
-      var _this = this;
+      var _this3 = this;
 
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this.getItems(startLimit, endLimit, callback);
+          _this3.getItems(startLimit, endLimit, callback);
         });
         return;
       }
@@ -74,19 +121,19 @@ var Service = function () {
         end_limit: endLimit
       };
       this.service.getItems(request).execute(function (resp) {
-        _this.logError('getItems', resp.err);
+        _this3.logError('getItems', resp.err);
         callback(resp.items, resp.err);
       });
     }
   }, {
     key: 'getItem',
     value: function getItem(id, callback) {
-      var _this2 = this;
+      var _this4 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this2.getItem(id, callback);
+          _this4.getItem(id, callback);
         });
         return;
       }
@@ -96,19 +143,19 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.getItem(request).execute(function (resp) {
-        _this2.logError(resp.err);
+        _this4.logError(resp.err);
         callback(resp.item, resp.err);
       });
     }
   }, {
     key: 'saveItem',
     value: function saveItem(item, callback) {
-      var _this3 = this;
+      var _this5 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this3.saveItem(item, callback);
+          _this5.saveItem(item, callback);
         });
         return;
       }
@@ -119,7 +166,7 @@ var Service = function () {
       };
 
       this.service.saveItem(request).execute(function (resp) {
-        _this3.logError(resp.err);
+        _this5.logError(resp.err);
         callback(resp.item, resp.err);
       });
     }
@@ -130,12 +177,12 @@ var Service = function () {
   }, {
     key: 'postPost',
     value: function postPost(post, callback) {
-      var _this4 = this;
+      var _this6 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this4.postPost(post, callback);
+          _this6.postPost(post, callback);
         });
         return;
       }
@@ -145,8 +192,27 @@ var Service = function () {
         post: post
       };
       this.service.postPost(request).execute(function (resp) {
-        _this4.logError(resp.err);
+        _this6.logError(resp.err);
         callback(resp.post, resp.err);
+      });
+    }
+  }, {
+    key: 'refreshToken',
+    value: function refreshToken() {
+      var _this7 = this;
+
+      // if api is not loaded, add to _callQueue
+      if (!this.loaded) {
+        this.callQueue.push(this.refreshToken);
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken()
+      };
+      this.service.refreshToken(request).execute(function (resp) {
+        if (!_this7.logError(resp.err)) {
+          CHEF.User.update(resp.gigatoken);
+        }
       });
     }
     /*
@@ -168,7 +234,9 @@ var Service = function () {
           exDescription: desc,
           exFatal: false
         });
+        return true;
       }
+      return false;
     }
   }]);
 

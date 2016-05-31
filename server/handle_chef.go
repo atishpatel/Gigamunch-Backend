@@ -57,7 +57,7 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 		resp.Err = errInternal.WithError(err).Wrap("failed to get image.ServingURL")
 		return
 	}
-	resp.URL = url.String() + "=s1080"
+	resp.URL = url.String()
 }
 
 func hangleGetUploadURL(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {

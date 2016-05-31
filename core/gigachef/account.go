@@ -37,6 +37,47 @@ func (c *Client) Get(id string) (*Resp, error) {
 	return &Resp{ID: id, Gigachef: *chef}, nil
 }
 
+func (c *Client) UpdateProfile(user *types.User, address *types.Address, phoneNumber, bio string, deliveryRange int32) (*Resp, error) {
+	var err error
+	chef := new(Gigachef)
+	err = get(c.ctx, user.ID, chef)
+	if err != nil && err != datastore.ErrNoSuchEntity {
+		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
+	}
+	chef.Name = user.Name
+	chef.PhotoURL = user.PhotoURL
+	chef.Email = user.Email
+	chef.ProviderID = user.ProviderID
+	chef.DeliveryRange = deliveryRange
+	chef.Bio = bio
+	chef.Application = true
+	if chef.DeliveryRange == 0 {
+		chef.DeliveryRange = 1
+	}
+	if address != nil {
+		chef.Address = *address
+	}
+	if phoneNumber != "" {
+		chef.PhoneNumber = phoneNumber
+	}
+	if chef.BTSubMerchantID == "" {
+		tmpID := user.ID
+		for len(tmpID) <= 32 {
+			tmpID += tmpID
+		}
+		chef.BTSubMerchantID = tmpID[:32]
+	}
+	err = put(c.ctx, user.ID, chef)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot put gigachef")
+	}
+	resp := &Resp{
+		ID:       user.ID,
+		Gigachef: *chef,
+	}
+	return resp, nil
+}
+
 // SaveUserInfo is to save a user's info. Only exposed for account package.
 // Please use the account package's func instead of this one.
 func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address, phoneNumber string) error {
@@ -50,6 +91,9 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address,
 	chef.PhotoURL = user.PhotoURL
 	chef.Email = user.Email
 	chef.ProviderID = user.ProviderID
+	if chef.DeliveryRange == 0 {
+		chef.DeliveryRange = 5
+	}
 	if address != nil {
 		chef.Address = *address
 	}

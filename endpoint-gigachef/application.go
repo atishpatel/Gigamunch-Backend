@@ -3,7 +3,7 @@ package gigachef
 import (
 	"fmt"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/application"
+	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/payment"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
@@ -11,94 +11,143 @@ import (
 	"golang.org/x/net/context"
 )
 
-// SubmitApplicationReq is the input request needed for SubmitApplication.
-type SubmitApplicationReq struct {
-	Gigatoken   string                      `json:"gigatoken"`
-	Application application.ChefApplication `json:"application"`
+type Gigachef struct {
+	CreatedDatetime   int           `json:"created_datetime"`
+	HasCarInsurance   bool          `json:"has_car_insurance"`
+	types.UserDetail                //embedded
+	Bio               string        `json:"bio"`
+	PhoneNumber       string        `json:"phone_number"`
+	Address           types.Address `json:"address"`
+	DeliveryRange     int32         `json:"delivery_range"`
+	SendWeeklySummary bool          `json:"send_weekly_summary"`
+	UseEmailOverSMS   bool          `json:"use_email_over_sms"`
+	gigachef.Rating                 // embedded
+	NumPosts          int           `json:"num_posts"`
+	NumOrders         int           `json:"num_orders"`
+	NumFollowers      int           `json:"num_followers"`
+	KitchenPhotoURLs  []string      `json:"kitchen_photo_urls"`
+	SubMerchantStatus string        `json:"sub_merchant_status"`
+	Application       bool          `json:"application"`
+	KitchenInspection bool          `json:"kitchen_inspection"`
+	BackgroundCheck   bool          `json:"background_check"`
+	FoodHandlerCard   bool          `json:"food_handler_card"`
+	PayoutMethod      bool          `json:"payout_method"`
+	Verified          bool          `json:"verified"`
+}
+
+func (c *Gigachef) set(chef *gigachef.Resp) {
+	c.CreatedDatetime = ttoi(chef.CreatedDatetime)
+	c.HasCarInsurance = chef.HasCarInsurance
+	c.UserDetail = chef.UserDetail
+	c.Bio = chef.Bio
+	c.PhoneNumber = chef.PhoneNumber
+	c.Address = chef.Address
+	c.DeliveryRange = chef.DeliveryRange
+	c.SendWeeklySummary = chef.SendWeeklySummary
+	c.UseEmailOverSMS = chef.UseEmailOverSMS
+	c.Rating = chef.Rating
+	c.NumPosts = chef.NumPosts
+	c.NumOrders = chef.NumOrders
+	c.NumFollowers = chef.NumFollowers
+	c.KitchenPhotoURLs = chef.KitchenPhotoURLs
+	c.SubMerchantStatus = chef.SubMerchantStatus
+	c.Application = chef.Application
+	c.KitchenInspection = chef.KitchenInspection
+	c.BackgroundCheck = chef.BackgroundCheck
+	c.FoodHandlerCard = chef.FoodHandlerCard
+	c.PayoutMethod = chef.PayoutMethod
+	c.Verified = chef.Verified
+}
+
+// UpdateProfile is the input request needed for SubmitApplication.
+type UpdateProfileReq struct {
+	Gigatoken string   `json:"gigatoken"`
+	Gigachef  Gigachef `json:"gigachef"`
 }
 
 // gigatoken returns the Gigatoken string
-func (req *SubmitApplicationReq) gigatoken() string {
+func (req *UpdateProfileReq) gigatoken() string {
 	return req.Gigatoken
 }
 
 // valid validates a req
-func (req *SubmitApplicationReq) valid() error {
+func (req *UpdateProfileReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
-	if req.Application.Email == "" {
-		return fmt.Errorf("Application email is empty")
+	if req.Gigachef.Email == "" {
+		return fmt.Errorf("Email is empty.")
 	}
 	return nil
 }
 
-// SubmitApplicationResp is the output response for SubmitApplication.
-type SubmitApplicationResp struct {
-	Application application.ChefApplication `json:"application"`
-	Err         errors.ErrorWithCode        `json:"err"`
+// UpdateProfileResp is the output response for UpdateProfile.
+type UpdateProfileResp struct {
+	Gigachef Gigachef             `json:"gigachef"`
+	Err      errors.ErrorWithCode `json:"err"`
 }
 
-// SubmitApplication is an endpoint that submits or updates a chef application.
-func (service *Service) SubmitApplication(ctx context.Context, req *SubmitApplicationReq) (*SubmitApplicationResp, error) {
-	resp := new(SubmitApplicationResp)
-	defer handleResp(ctx, "SubmitApplication", resp.Err)
+// UpdateProfile is an endpoint that submits or updates a chef application.
+func (service *Service) UpdateProfile(ctx context.Context, req *UpdateProfileReq) (*UpdateProfileResp, error) {
+	resp := new(UpdateProfileResp)
+	defer handleResp(ctx, "UpdateProfile", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if req.Application.Address.Country == "" {
-		req.Application.Address.Country = "USA"
+	if req.Gigachef.Address.Country == "" {
+		req.Gigachef.Address.Country = "USA"
 	}
-	chefApplication, err := application.SubmitApplication(ctx, user, &req.Application)
+	if req.Gigachef.Email != "" {
+		user.Email = req.Gigachef.Email
+	}
+	if req.Gigachef.Name != "" {
+		user.Name = req.Gigachef.Name
+	}
+	if req.Gigachef.PhotoURL != "" {
+		user.PhotoURL = req.Gigachef.PhotoURL
+	}
+	chefC := gigachef.New(ctx)
+	chef, err := chefC.UpdateProfile(user, &req.Gigachef.Address, req.Gigachef.PhoneNumber, req.Gigachef.Bio, req.Gigachef.DeliveryRange)
 	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to update chef profile")
 		return resp, nil
 	}
-	resp.Application = *chefApplication
+	if !user.IsChef() {
+		user.SetChef(true)
+	}
+	err = auth.SaveUser(ctx, user)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to auth.SaveUser")
+		return resp, nil
+	}
+	resp.Gigachef.set(chef)
 	return resp, nil
 }
 
-// GetApplicationReq is the input request needed for GetApplication.
-type GetApplicationReq struct {
-	Gigatoken string `json:"gigatoken"`
+// GetGigachefResp is the output response for GetGigachef.
+type GetGigachefResp struct {
+	Gigachef Gigachef             `json:"gigachef"`
+	Err      errors.ErrorWithCode `json:"err"`
 }
 
-// gigatoken returns the Gigatoken string
-func (req *GetApplicationReq) gigatoken() string {
-	return req.Gigatoken
-}
-
-// valid validates a req
-func (req *GetApplicationReq) valid() error {
-	if req.Gigatoken == "" {
-		return fmt.Errorf("Gigatoken is empty.")
-	}
-	return nil
-}
-
-// GetApplicationResp is the output response for GetApplication.
-type GetApplicationResp struct {
-	Application application.ChefApplication `json:"application"`
-	Err         errors.ErrorWithCode        `json:"err"`
-}
-
-// GetApplication is an endpoint that gets a chef application.
-func (service *Service) GetApplication(ctx context.Context, req *GetApplicationReq) (*GetApplicationResp, error) {
-	resp := new(GetApplicationResp)
-	defer handleResp(ctx, "GetApplication", resp.Err)
+// GetGigachef is an endpoint that get the chef info.
+func (service *Service) GetGigachef(ctx context.Context, req *GigatokenOnlyReq) (*GetGigachefResp, error) {
+	resp := new(GetGigachefResp)
+	defer handleResp(ctx, "GetGigachef", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	chefApplication, err := application.GetApplication(ctx, user)
+	chefC := gigachef.New(ctx)
+	chef, err := chefC.Get(user.ID)
 	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to get chef")
 		return resp, nil
 	}
-	resp.Application = *chefApplication
+	resp.Gigachef.set(chef)
 	return resp, nil
 }
 

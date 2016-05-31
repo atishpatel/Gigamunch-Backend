@@ -63,6 +63,7 @@ type Gigachef struct {
 	CreatedDatetime   time.Time     `json:"created_datetime" datastore:",noindex"`
 	HasCarInsurance   bool          `json:"has_car_insurance" datastore:",noindex"`
 	types.UserDetail                //embedded
+	Bio               string        `json:"bio" datastore:",noindex"`
 	PhoneNumber       string        `json:"phone_number" datastore:",noindex"`
 	Address           types.Address `json:"address" datastore:",noindex"`
 	DeliveryRange     int32         `json:"delivery_range" datastore:",noindex"`
@@ -75,4 +76,10 @@ type Gigachef struct {
 	KitchenPhotoURLs  []string      `json:"kitchen_photo_urls" datastore:",noindex"`
 	SubMerchantStatus string        `json:"sub_merchant_status" datastore:",noindex"`
 	BTSubMerchantID   string        `json:"-" datastore:",index"`
+	Application       bool          `json:"application" datastore:",noindex"`
+	KitchenInspection bool          `json:"kitchen_inspection" datastore:",noindex"`
+	BackgroundCheck   bool          `json:"background_check" datastore:",noindex"`
+	FoodHandlerCard   bool          `json:"food_handler_card" datastore:",noindex"`
+	PayoutMethod      bool          `json:"payout_method" datastore:",noindex"`
+	Verified          bool          `json:"verified" datastore:",noindex"`
 }

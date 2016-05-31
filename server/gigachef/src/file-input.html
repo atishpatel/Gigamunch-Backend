@@ -1,0 +1,119 @@
+<!--
+
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="file-input">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <content on-tap="selectFile"></content>
+    <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
+      <input id="file" type="file" name="file" on-change="_uploadFile">
+    </form>
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'file-input',
+
+      properties: {
+        // photos is an array where the uploaded photos goes to
+        photos: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        action: {
+          type: String,
+          notify: true,
+        },
+        progress: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
+          value: 0,
+        },
+        // valid is false when a file is being uploaded
+        valid: {
+          type: Boolean,
+          value: true,
+        },
+        urlPostfix: {
+          type: String,
+          value: '',
+        },
+      },
+      ready: function() {
+        this.getActionURL();
+      },
+      getActionURL: function() {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            var resp = JSON.parse(xmlHttp.response);
+            if (resp.err.code !== 0) {
+              alert('There was an error getting an upload url:', resp.err.message);
+              return;
+            }
+            this.set('action', resp.url);
+            this.set('valid', true);
+          }
+        }.bind(this)
+        xmlHttp.open("GET", '/get-upload-url', true);
+        xmlHttp.send(null);
+      },
+      validate: function() {
+        return this.valid;
+      },
+      selectFile: function() {
+        this.$.file.click();
+      },
+      addPhoto: function(url) {
+        if (url !== undefined && url !== '') {
+          if (this.photos === undefined) {
+            this.photos = [];
+          }
+          this.push('photos', url + this.urlPostfix);
+        }
+      },
+      updateProgress: function(e) {
+        if (e.lengthComputable) {
+          var value = (e.loaded / e.total) * 100;
+          this.set('progress', value);
+        }
+      },
+      _uploadFile: function(e) {
+        this.set('progress', 0);
+        var path = e.target.value;
+        if (path === '') {
+          return;
+        }
+        var formData = new FormData();
+        formData.append('file', e.target.files[0]);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', this.action, true);
+        var polymerElement = this;
+        xhr.onload = function() {
+          var resp = JSON.parse(this.response);
+          if(resp.err.code !== 0) {
+            alert('There was an error upload your file:', resp.err.message);
+            return;
+          }
+          polymerElement.addPhoto(resp.url);
+        };
+        xhr.upload.onprogress = this.updateProgress.bind(this);
+        this.set('valid', false);
+        xhr.send(formData);
+        this.getActionURL();
+      },
+    });
+  </script>
+</dom-module>

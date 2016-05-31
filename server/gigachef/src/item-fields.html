@@ -1,6 +1,8 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="paper-file-input.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="file-input.html">
 
 <dom-module id="item-fields">
   <template>
@@ -8,12 +10,48 @@
       :host {
         display: block;
       }
-    </style>
 
-    <paper-file-input
+      .add-image {
+        text-align: center;
+        border-style: dashed;
+        border-color: black;
+        cursor: pointer;
+      }
+
+      .photo {
+        position: relative;
+      }
+
+      .photo img {
+          width: 100%;
+      }
+
+      .photo paper-icon-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        --paper-icon-button: {
+          background-color: gray;
+          color: white;
+          border-radius: 50%;
+        }
+      }
+    </style>
+    <template id="photos" is="dom-repeat" items="{{photos}}" as="photo">
+      <div class="photo">
+        <paper-icon-button icon="close" on-tap="removePhoto"></paper-icon-button>
+        <img src="{{photo}}"/>
+      </div>
+    </template>
+    <file-input
       photos="{{photos}}"
+      url-postfix="=s1080"
       auto-validate>
-    </paper-file-input>
+      <div class="add-image">
+        <paper-icon-button icon="add-a-photo"></paper-icon-button>
+        Add Image
+      </div>
+    </file-input>
 
     <paper-input label="Title"
                  value="{{title}}"
@@ -118,7 +156,11 @@
       },
       _updateDietaryNeedsTags: function(dnt) {
         this.dietaryNeedsTags = dnt.split(/\s*,\s*/);
-      }
+      },
+      removePhoto: function(e) {
+        var index = this.photos.indexOf(e.model.photo);
+        this.splice('photos', index, 1);
+      },
     });
   </script>
 </dom-module>

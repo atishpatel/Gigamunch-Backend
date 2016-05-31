@@ -46,6 +46,7 @@ var User = function () {
       if (setCookie) {
         this.setTokenCookie(token, jwt.exp);
       }
+      document.dispatchEvent(new Event('userUpdated', { bubbles: true }));
     }
   }, {
     key: 'getTokenCookie',

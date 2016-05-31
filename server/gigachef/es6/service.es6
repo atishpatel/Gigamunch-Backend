@@ -21,6 +21,53 @@ class Service {
     }
   }
   /*
+   * Chef
+   */
+  getGigachef(callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getGigachef(callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+    };
+    this
+      .service
+      .getGigachef(request)
+      .execute(
+        (resp) => {
+          this.logError('getGigachef', resp.err);
+          callback(resp.gigachef, resp.err);
+        }
+      );
+  }
+
+  updateProfile(chef, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.updateProfile(chef, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      gigachef: chef,
+    };
+    this
+      .service
+      .updateProfile(request)
+      .execute(
+        (resp) => {
+          this.logError('updateProfile', resp.err);
+          callback(resp.gigachef, resp.err);
+          setTimeout(() => { this.refreshToken(); }, 1);
+        }
+      );
+  }
+
+  /*
    * Item
    */
   getItems(startLimit, endLimit, callback) {
@@ -39,10 +86,11 @@ class Service {
     this
       .service
       .getItems(request)
-      .execute((resp) => {
-        this.logError('getItems', resp.err);
-        callback(resp.items, resp.err);
-      }
+      .execute(
+        (resp) => {
+          this.logError('getItems', resp.err);
+          callback(resp.items, resp.err);
+        }
       );
   }
 
@@ -120,6 +168,27 @@ class Service {
         }
       );
   }
+
+  refreshToken() {
+    // if api is not loaded, add to _callQueue
+    if (!this.loaded) {
+      this.callQueue.push(this.refreshToken);
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+    };
+    this
+      .service
+      .refreshToken(request)
+      .execute(
+        (resp) => {
+          if (!this.logError(resp.err)) {
+            CHEF.User.update(resp.gigatoken);
+          }
+        }
+      );
+  }
   /*
    * utils
    */
@@ -135,7 +204,9 @@ class Service {
         exDescription: desc,
         exFatal: false,
       });
+      return true;
     }
+    return false;
   }
 }
 

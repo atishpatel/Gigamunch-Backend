@@ -1,24 +1,165 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
 <dom-module id="dashboard-page">
 
   <template>
-
     <style>
       :host {
         display: block;
         padding: 15px;
       }
-    </style>
 
+      paper-dialog paper-button {
+        background: white;
+        color: var(--primary-color);
+      }
+
+      paper-material {
+        background-color: white;
+        padding: 10px;
+      }
+
+      .setup-list {
+        padding: 15px;
+      }
+
+      .setup-item paper-icon-button {
+        color: var(--secondary-text-color)
+      }
+    </style>
+    <paper-dialog
+      id="infoDialog"
+      modal>
+      <div id="infoDialogText">info</div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+    <template is="dom-if" if="[[showSetupCard]]" restamp="true">
+    <paper-material class="setup-card" elevation="1">
+      Hey {{user.name}}! Before you get started posting your delicious dishes, there a few
+      tasks we need to take care of.
+      <br>
+      Please, do the following things:
+      <br>
+      <div class="setup-list">
+        <div class="setup-item">
+          <paper-checkbox checked$="[[gigachef.application]]" disabled></paper-checkbox>
+          <a href="../updateprofile">Application/Profile</a>
+          <paper-icon-button data-type="application" icon="info" on-tap="infoDialog"></paper-icon-button>
+        </div>
+        <div class="setup-item">
+          <paper-checkbox checked$="[[gigachef.kitchen_inspection]]" disabled></paper-checkbox>
+          Kitchen Inspection
+          <paper-icon-button data-type="kitchen_inspection" icon="info" on-tap="infoDialog"></paper-icon-button>
+        </div>
+        <div class="setup-item">
+          <paper-checkbox checked$="[[gigachef.background_check]]" disabled></paper-checkbox>
+          Background Check
+          <paper-icon-button data-type="background_check" icon="info" on-tap="infoDialog"></paper-icon-button>
+        </div>
+        <div class="setup-item">
+          <paper-checkbox checked$="[[gigachef.payout_method]]" disabled></paper-checkbox>
+          <a href="../updatepayout">Payout Method</a>
+          <paper-icon-button data-type="payout_method" icon="info" on-tap="infoDialog"></paper-icon-button>
+        </div>
+        <div class="setup-item">
+          <paper-checkbox checked$="[[hasFirstPost]]" disabled></paper-checkbox>
+          First post!
+        </div>
+      </div>
+    </paper-material>
+    </template>
   </template>
 
   <script>
     Polymer({
+      is: 'dashboard-page',
+      properties: {
+        user: {
+          type: Object,
+          notify: true,
+        },
+        gigachef: {
+          type: Object,
+          value: {},
+        },
+        service: {
+          type: Object,
+        },
+        showSetupCard: {
+          type: Boolean,
+          notify: true,
+          value: false,
+        },
+      },
+      observers: [
+        'userUpdated(user)',
+      ],
+      selected: function() {
+        this.getGigachef();
+        // fetch data?
+      },
+      userUpdated: function (user) {
+        if (user !== undefined) {
+          if (!user.isVerifiedChef) { // TODO and first post?
+            this.set('showSetupCard', true);
+            // show card
+          }
+        }
+      },
+      getGigachef: function () {
+        this.service.getGigachef(function (chef, err) {
+          // TODO check error
+          if (err.code !== 0) {
+            var d = {
 
-      is: 'dashboard-page'
+            }
+            this.fire('error', d);
+          }
 
+          this.set('gigachef', chef);
+        }.bind(this));
+      },
+      infoDialog: function (e) {
+        var type = e.target.getAttribute('data-type');
+        var text;
+        switch (type) {
+          case 'application':
+            text = 'The application brings you to our attention so we can get you started. ' +
+            'It also fills out your profile.';
+            break;
+          case 'kitchen_inspection':
+            text = 'At the kitchen inspection, we\'ll come to your house and ' +
+            'make sure your kitchen is decently clean. ' +
+            'This means we\'ll check for stuff like wiped tables, animal hair on ' +
+            'kitchen tables, etc... <br>' +
+            'If you have any questions regarding this, please shoot us an email. :)';
+            break;
+          case 'background_check':
+            text = 'Our background checks are to make sure we don\'t have ' +
+            'people with ill intent cooking for our eaters. We don\'t really care ' +
+            'about silly things you did in college.';
+            break;
+          case 'payout_method':
+            text = 'People are going to love your food, ' +
+            'and we want to make sure you get paid directly to your bank.';
+            break;
+          default:
+            return;
+        }
+        this.$.infoDialogText.innerHTML = text;
+        this.$.infoDialog.open();
+      },
+      hasFirstPost: function() {
+        return (this.gigachef.num_posts !== undefined && this.gigachef.num_posts !== 0);
+      },
     });
   </script>
-
 </dom-module>

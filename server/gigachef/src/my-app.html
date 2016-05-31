@@ -51,17 +51,22 @@
         --paper-button: {
           background: var(--primary-color);
           color: var(--text-primary-color);
-        }
+          min-width: 5em;
+        };
         --paper-fab: {
           position: fixed;
           bottom: 4vh;
           right: 4vh;
-        }
+        };
 
         --paper-tab: {
           padding: 0;
-        }
+        };
+
+        color: var(--primary-text-color);
       }
+
+
 
       app-header {
         background-color: var(--primary-color);
@@ -227,7 +232,6 @@
 
       <!-- Main content -->
       <!-- <app-header-layout has-scrolling-region> -->
-
         <app-header reveals shadow>
           <app-toolbar>
             <div class="toolbar toolbar-left">
@@ -275,6 +279,9 @@
           <dashboard-page
             id="dashboard"
             name="dashboard"
+            user="[[user]]"
+            gigachef="{{gigachef}}"
+            service="[[service]]"
             route="{{subroute}}">
           </dashboard-page>
           <item-list
@@ -304,6 +311,14 @@
             route="{{subroute}}"
             service="[[service]]">
           </post-form>
+          <profile-form
+            id="updateprofile"
+            name="updateprofile"
+            gigachef="[[_gigachef]]"
+            user="[[user]]"
+            on-updated="gigachefUpdated"
+            service="[[service]]">
+          </profile-form>
         </iron-pages>
 
       <!-- </app-header-layout> -->
@@ -331,6 +346,10 @@
           type: String,
           notify: true,
         },
+        gigachef: {
+          type: Object,
+          value: {},
+        },
         _item: {
           type: Object,
           value: {},
@@ -354,6 +373,9 @@
       ready: function () {
         this.set('user', CHEF.User);
         this.set('service', CHEF.Service);
+        this.addEventListener('userUpdated', function() {
+          this.set('user', CHEF.User);
+        }.bind(this));
       },
       _editItem: function (e, detail) {
         if (detail.item !== undefined && detail.item.id !== undefined
@@ -375,6 +397,10 @@
         this.unshift('_items', detail.item);
         this.setPath('items');
       },
+      gigachefUpdated: function (e, detail) {
+        this.set('gigachef', detail.gigachef);
+        this.setPath();
+      },
       _routePageChanged: function (page) {
         if (this.page !== page){
           this.page = page || 'dashboard';
@@ -393,16 +419,31 @@
           case 'postitem':
             el = this.$.postitem;
             pageURL = 'post-form.html';
+            title = 'Post Item';
             break;
           case 'edititem':
             el = this.$.edititem;
             pageURL = 'item-form.html';
+            title = 'Edit Item';
+            break;
+          case 'updateprofile':
+            el = this.$.updateprofile;
+            pageURL = 'profile-form.html';
+            title = 'Update Profile';
+            break;
+          case 'updatepayout':
+            el = this.$.updatepayout;
+            pageURL = 'payout-form.html';
+            title = 'Update Payout Method';
             break;
           case 'dashboard':
             el = this.$.dashboard;
+            title = 'Dashboard';
             break;
           case 'items':
             el = this.$.items;
+            pageURL = 'item-list.html';
+            title = 'My Kitchen';
             break;
           default:
         }
@@ -410,6 +451,7 @@
         this.importHref(this.resolveUrl(pageURL), function () {
           el.selected();
         }, null, true);
+        this.set('title', title);
       },
       _backTaped: function () {
         switch (this.page) {
@@ -417,11 +459,16 @@
           case 'postitem':
             this.setPath('items');
             break;
+          case 'updateprofile':
+          case 'updatepayout':
+            this.setPath('dashboard');
+            break;
           default:
         }
       },
       _pageOrScreenChanged: function (page, smallScreen) {
-        var backPage = (page === 'edititem' || page === 'postitem');
+        var backPage = (page === 'edititem' || page === 'postitem'
+          || page === 'updateprofile' || page === 'updatepayout');
         this.$.arrowBack.toggleClass('hide', !backPage);
         this.$.menuIcon.toggleClass('hide', (!smallScreen || backPage));
         if (smallScreen || backPage) {
@@ -434,7 +481,11 @@
         this.$.drawer.toggle();
       },
       setPath: function (path) {
-        this.set('route.path', this.baseUrl + '/' + path);
+        var route = '/';
+        if (path !== undefined) {
+          route += path;
+        }
+        this.set('route.path', this.baseUrl + route);
       },
     });
   </script>
