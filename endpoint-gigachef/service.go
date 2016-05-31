@@ -22,6 +22,10 @@ func ttoi(t time.Time) int {
 	return int(t.Unix())
 }
 
+func ttos(t time.Time) string {
+	return strconv.FormatInt(t.Unix(), 10)
+}
+
 func itos(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
@@ -79,6 +83,7 @@ func init() {
 	register("GetGigachef", "getGigachef", "GET", "gigachefservice/getGigachef", "Get the chef info.")
 	register("UpdateProfile", "updateProfile", "POST", "gigachefservice/updateProfile", "Update chef profile.")
 	register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
+	register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
 	// item stuff
 	register("SaveItem", "saveItem", "POST", "gigachefservice/saveItem", "Save a item.")
 	register("GetItem", "getItem", "POST", "gigachefservice/getItem", "Get a item.")

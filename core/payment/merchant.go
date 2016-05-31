@@ -2,6 +2,7 @@ package payment
 
 import (
 	"fmt"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -12,20 +13,49 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 )
 
-// UpdateSubMerchantReq is the request to UpdateSubMerchant
+const (
+	dateOfBirthFormat = "2006-01-02"
+)
+
+// GetSubMerchant returns a SubMerchant
+func (c Client) GetSubMerchant(subMerchantID string) (*SubMerchantInfo, error) {
+	if len(subMerchantID) != 32 {
+		return nil, errInvalidParameter.WithMessage("ID must be length 32.")
+	}
+	ma, err := c.bt.MerchantAccount().Find(subMerchantID)
+	if err != nil {
+		return nil, errBT.WithError(err).Wrapf("cannot bt.MerchantAccount().Find sub-merchant(%s)", subMerchantID)
+	}
+	dob, err := time.Parse(dateOfBirthFormat, ma.Individual.DateOfBirth)
+	if err != nil {
+		return nil, errInternal.WithError(err).Wrapf("failed to parse time from string(%s)", ma.Individual.DateOfBirth)
+	}
+	sm := &SubMerchantInfo{
+		ID:            ma.Id,
+		FirstName:     ma.Individual.FirstName,
+		LastName:      ma.Individual.LastName,
+		Email:         ma.Individual.Email,
+		DateOfBirth:   dob,
+		AccountNumber: ma.FundingOptions.AccountNumber,
+		RoutingNumber: ma.FundingOptions.RoutingNumber,
+		Address:       *getAddress(ma.Individual.Address),
+	}
+	return sm, nil
+}
+
+// SubMerchantInfo is the request to UpdateSubMerchant
 // ID must be len 32
-type UpdateSubMerchantReq struct {
-	User                types.User
+type SubMerchantInfo struct {
 	ID                  string
 	FirstName, LastName string
 	Email               string
-	DateOfBirth         string
+	DateOfBirth         time.Time
 	AccountNumber       string
 	RoutingNumber       string
 	Address             types.Address
 }
 
-func (req *UpdateSubMerchantReq) valid() error {
+func (req *SubMerchantInfo) valid() error {
 	if len(req.ID) != 32 {
 		return errInvalidParameter.WithMessage("ID must be length 32.")
 	}
@@ -33,12 +63,16 @@ func (req *UpdateSubMerchantReq) valid() error {
 }
 
 // UpdateSubMerchant creates or updates sub-merchant info
-func (c Client) UpdateSubMerchant(req *UpdateSubMerchantReq) (string, error) {
+func (c Client) UpdateSubMerchant(user *types.User, req *SubMerchantInfo) (string, error) {
 	err := req.valid()
 	if err != nil {
 		return "", err
 	}
+	chefC := gigachef.New(c.ctx)
+	return updateSubMerchant(c.ctx, c.bt, chefC, user, req)
+}
 
+func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, chefC chefInterface, user *types.User, req *SubMerchantInfo) (string, error) {
 	ma := &braintree.MerchantAccount{
 		MasterMerchantAccountId: "Gigamunch_marketplace",
 		Id:          req.ID,
@@ -47,7 +81,7 @@ func (c Client) UpdateSubMerchant(req *UpdateSubMerchantReq) (string, error) {
 			FirstName:   req.FirstName,
 			LastName:    req.LastName,
 			Email:       req.Email,
-			DateOfBirth: req.DateOfBirth,
+			DateOfBirth: req.DateOfBirth.Format(dateOfBirthFormat),
 			Address:     getBTAddress(req.Address),
 		},
 		FundingOptions: &braintree.MerchantAccountFundingOptions{
@@ -56,25 +90,29 @@ func (c Client) UpdateSubMerchant(req *UpdateSubMerchantReq) (string, error) {
 			RoutingNumber: req.RoutingNumber,
 		},
 	}
-	// TODO switch to find?
-	if req.User.HasSubMerchantID() {
-		ma, err = c.bt.MerchantAccount().Update(ma)
+	_, err := bt.MerchantAccount().Find(req.ID)
+	if err == nil {
+		ma, err = bt.MerchantAccount().Update(ma)
 		if err != nil {
-			return "", errBT.WithError(err).Wrap("cannot bt.MerchantAccount().Update")
+			return "", errBT.WithError(err).Wrapf("cannot bt.MerchantAccount().Update sub-merchant(%s)", req.ID)
 		}
 	} else {
-		ma, err = c.bt.MerchantAccount().Create(ma)
+		ma, err = bt.MerchantAccount().Create(ma)
 		if err != nil {
-			return "", errBT.WithError(err).Wrap("cannot create sub-merchant")
+			return "", errBT.WithError(err).Wrapf("cannot create sub-merchant(%s)", req.ID)
 		}
-		req.User.SetSubMerchantID(true)
-		err = auth.SaveUser(c.ctx, &req.User)
+		user.SetSubMerchantID(true)
+		err = auth.SaveUser(ctx, user)
 		if err != nil {
 			return "", errors.Wrap("failed update user to has sub-merchant account", err)
 		}
 	}
-	if ma.Status != "pending" {
+	if ma.Status != "pending" && ma.Status != "active" {
 		return "", errBT.WithMessage("Error creating sub-merchant account with status " + ma.Status)
+	}
+	_, err = chefC.UpdateSubMerchantStatus(ma.Id, ma.Status)
+	if err != nil {
+		return "", errors.Wrap("failed to chefC.UpdateSubMerchantStatus", err)
 	}
 	return ma.Id, err
 }
