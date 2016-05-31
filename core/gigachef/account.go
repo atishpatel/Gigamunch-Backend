@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/notification"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
@@ -55,6 +56,10 @@ func (c *Client) UpdateProfile(user *types.User, address *types.Address, phoneNu
 		chef.DeliveryRange = 1
 	}
 	if address != nil {
+		err = maps.GetGeopointFromAddress(c.ctx, address)
+		if err != nil {
+			return nil, errors.Wrap("failed to GetGeopointFromAddress", err)
+		}
 		chef.Address = *address
 	}
 	if phoneNumber != "" {
@@ -190,6 +195,7 @@ func (c *Client) UpdateSubMerchantStatus(submerchantID, status string) (*Resp, e
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
 	}
+	chef.PayoutMethod = true
 	chef.SubMerchantStatus = status
 	err = put(c.ctx, id, chef)
 	if err != nil {
