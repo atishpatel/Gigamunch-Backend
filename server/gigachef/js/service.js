@@ -220,14 +220,36 @@ var Service = function () {
      */
 
   }, {
+    key: 'getPosts',
+    value: function getPosts(startLimit, endLimit, callback) {
+      var _this8 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this8.getPosts(startLimit, endLimit, callback);
+        });
+        return;
+      }
+
+      var request = {
+        gigatoken: this.getToken(),
+        start_limit: startLimit,
+        end_limit: endLimit
+      };
+      this.service.getPosts(request).execute(function (resp) {
+        _this8.logError('getPosts', resp.err);
+        callback(resp.posts, resp.err);
+      });
+    }
+  }, {
     key: 'postPost',
     value: function postPost(post, callback) {
-      var _this8 = this;
+      var _this9 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this8.postPost(post, callback);
+          _this9.postPost(post, callback);
         });
         return;
       }
@@ -237,14 +259,14 @@ var Service = function () {
         post: post
       };
       this.service.postPost(request).execute(function (resp) {
-        _this8.logError(resp.err);
+        _this9.logError(resp.err);
         callback(resp.post, resp.err);
       });
     }
   }, {
     key: 'refreshToken',
     value: function refreshToken() {
-      var _this9 = this;
+      var _this10 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
@@ -255,7 +277,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this9.logError(resp.err)) {
+        if (!_this10.logError(resp.err)) {
           CHEF.User.update(resp.gigatoken);
         }
       });

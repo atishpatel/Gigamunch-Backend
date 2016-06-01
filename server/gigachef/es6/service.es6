@@ -190,6 +190,30 @@ class Service {
   /*
    * Post
    */
+  getPosts(startLimit, endLimit, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getPosts(startLimit, endLimit, callback);
+      });
+      return;
+    }
+
+    const request = {
+      gigatoken: this.getToken(),
+      start_limit: startLimit,
+      end_limit: endLimit,
+    };
+    this
+     .service
+     .getPosts(request)
+     .execute(
+       (resp) => {
+         this.logError('getPosts', resp.err);
+         callback(resp.posts, resp.err);
+       }
+     );
+  }
+
   postPost(post, callback) {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
