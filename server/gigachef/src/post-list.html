@@ -1,0 +1,100 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+
+<link rel="import" href="my-icons.html">
+
+<dom-module id="post-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 15px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+      paper-card {
+        margin-bottom: 15px;
+        width: 100%;
+        --paper-card-actions: {
+          display: flex;
+          padding: 0px;
+        }
+      }
+      paper-button {
+        flex: 1;
+        margin: 0;
+      }
+
+
+      @media (min-width: 767px) {
+        paper-card {
+          flex-basis: 45%;
+          max-width: 50%;
+          margin: 15px;
+        }
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{posts}}" as="post">
+      <paper-card>
+        <placeholder-img src="[[getPhoto(post)]]"></placeholder-img>
+        <div class="card-content">
+          <h1>{{item.title}}</h1>
+          <p>{{item.description}}</p>
+        </div>
+      </paper-card>
+    </template>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'post-list',
+
+      properties: {
+        posts: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        service: {
+          type: Object,
+        },
+      },
+      selected: function() {
+        this.getPosts();
+      },
+      getPosts: function() {
+        this.service.getPosts(0, 200, function (posts, err) {
+          if (err.code !== 0) {
+            this.fire('error', {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: this.getItems.bind(this),
+              }],
+            });
+          }
+          this.set('posts', posts);
+        }.bind(this));
+      },
+      getPhoto: function(post) {
+        if(post.photos === undefined || post.photos === null) {
+          return '';
+        }
+        if(post.photos[0] === '') {
+          return '';
+        }
+        return post.photos[0];
+      },
+    });
+  </script>
+</dom-module>

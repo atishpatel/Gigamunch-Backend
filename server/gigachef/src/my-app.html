@@ -2,9 +2,7 @@
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
-<!-- <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html"> -->
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<!-- <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html"> -->
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -63,8 +61,6 @@
 
         color: var(--primary-text-color);
       }
-
-
 
       app-header {
         background-color: var(--primary-color);
@@ -157,6 +153,7 @@
       .drawer-list a.iron-selected {
         background-color: #ECEFF1;
       }
+
       .drawer-list paper-item {
         font-size: inherit;
         font-weight: 500;
@@ -188,7 +185,8 @@
         display: none;
       }
 
-      @media (min-width: 767px) /* not smallScreen */ {
+      /* not smallScreen */
+      @media (min-width: 767px) {
         .toolbar-title {
           margin-left: 30px;
         }
@@ -221,7 +219,8 @@
           <iron-selector class="drawer-list" selected="[[page]]" attr-for-selected="name" role="navigation">
             <a class="nav-a" name="dashboard" href$="[[baseUrl]]/"><paper-item>Dashboard</paper-item></a>
             <a class="nav-a" name="items" href$="[[baseUrl]]/items"><paper-item>My Kitchen</paper-item></a>
-            <paper-item disabled>Messaging - Coming Soon!</paper-item>
+            <!-- <a class="nav-a" name="posts" href$="[[baseUrl]]/posts"><paper-item>My Orders</paper-item></a> -->
+            <paper-item disabled>Messages - Coming Soon!</paper-item>
             <!-- <a class="nav-a" name="settings" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
             <!-- TODO add help and feedback -->
             <a class="nav-a" href="/signout"><paper-item>Log out</paper-item></a>
@@ -258,12 +257,15 @@
                 <paper-tab name="items" tabindex="-1">
                   <a class="nav-a" href$="[[baseUrl]]/items"><span>My Kitchen</span></a>
                 </paper-tab>
+                <!-- <paper-tab name="orders" tabindex="-1">
+                  <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
+                </paper-tab> -->
               </paper-tabs>
               <placeholder-img class="user-pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
               <paper-menu-button horizontal-align="right" vertical-offset="15" >
                 <paper-icon-button icon="more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
                 <paper-menu class="dropdown-content">
-                  <paper-item disabled>Messaging - Coming soon!</paper-item>
+                  <paper-item disabled>Messages - Coming soon!</paper-item>
                   <!-- <a class="nav-a" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
                   <a class="nav-a" href="/signout"><paper-item>Log out</paper-item></a>
                 </paper-menu>
@@ -300,6 +302,12 @@
             route="{{subroute}}"
             service="[[service]]">
           </item-form>
+          <post-list
+            id="posts"
+            name="posts"
+            posts="{{posts}}"
+            service="[[service]]">
+          </post-list>
           <post-form
             id="postitem"
             name="postitem"
@@ -364,7 +372,15 @@
         },
         gigachef: {
           type: Object,
-          value: {},
+          value: {
+            address: {
+              zip: '',
+            },
+          },
+        },
+        posts: {
+          type: Array,
+          value: [],
         },
         _item: {
           type: Object,
@@ -435,15 +451,29 @@
         var el;
         var title = page.charAt(0).toUpperCase() + page.slice(1);
         switch (page) {
-          case 'postitem':
-            el = this.$.postitem;
-            pageURL = 'post-form.html';
-            title = 'Post Item';
+          case 'dashboard':
+            el = this.$.dashboard;
+            title = 'Dashboard';
+            break;
+          case 'items':
+            el = this.$.items;
+            pageURL = 'item-list.html';
+            title = 'My Kitchen';
             break;
           case 'edititem':
             el = this.$.edititem;
             pageURL = 'item-form.html';
             title = 'Edit Item';
+            break;
+          case 'posts':
+            el = this.$.posts;
+            pageURL = 'post-list.html';
+            title = 'My Orders';
+            break;
+          case 'postitem':
+            el = this.$.postitem;
+            pageURL = 'post-form.html';
+            title = 'Post Item';
             break;
           case 'updateprofile':
             el = this.$.updateprofile;
@@ -454,15 +484,6 @@
             el = this.$.updatepayout;
             pageURL = 'payout-form.html';
             title = 'Update Payout Method';
-            break;
-          case 'dashboard':
-            el = this.$.dashboard;
-            title = 'Dashboard';
-            break;
-          case 'items':
-            el = this.$.items;
-            pageURL = 'item-list.html';
-            title = 'My Kitchen';
             break;
           default:
         }
