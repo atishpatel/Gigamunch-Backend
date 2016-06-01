@@ -68,6 +68,12 @@
           type: Object,
         },
       },
+      observers: [
+        'itemPhotoChanged(item.photos)',
+      ],
+      itemPhotoChanged: function (p) {
+        this.updateSubmitButtonState();
+      },
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
@@ -133,8 +139,9 @@
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
-        submitButton.disabled = !form.validate();
-      }
+        var hasPhoto = this.item.photos !== undefined && this.item.photos !== null && this.item.photos.length > 0;
+        submitButton.disabled = !form.validate() || !hasPhoto;
+      },
     });
   </script>
 </dom-module>

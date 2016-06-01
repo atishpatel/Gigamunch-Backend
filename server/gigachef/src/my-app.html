@@ -4,6 +4,8 @@
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -60,6 +62,11 @@
         };
 
         color: var(--primary-text-color);
+      }
+
+      iron-pages {
+        max-width: 1000px;
+        margin: auto;
       }
 
       app-header {
@@ -202,6 +209,18 @@
         tail="{{subroute}}"></app-route>
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
+    <paper-dialog
+      id="errorDialog"
+      modal>
+      <h2>Oh no! Something went wrong!</h2>
+      <div id="errorDialogText">error :(</div>
+      <div>We're sorry for the inconvenience. :(
+        <br>Our developer, Atish, will be working on fixing this issue asap.</div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+
       <!-- Drawer content -->
       <app-drawer id="drawer" opened="{{drawerOpened}}" swipe-open="[[smallScreen]]">
         <app-toolbar class="drawer-toolbar">
@@ -209,7 +228,7 @@
             <a class="logo" href="/">Gigamunch</a>
           </div>
           <div class="bar bottom">
-            <placeholder-img class="user-pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+            <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
             <div class="user-info">
               <div class="name"><strong>[[user.name]]</strong></div>
               <div class="email">[[user.email]]</div>
@@ -235,13 +254,13 @@
               <paper-icon-button
                 id="arrowBack"
                 class="hide"
-                icon="arrow-back"
+                icon="gigaicons:arrow-back"
                 on-tap="_backTaped">
               </paper-icon-button>
               <paper-icon-button
                 id="menuIcon"
                 class="hide"
-                icon="menu"
+                icon="gigaicons:menu"
                 on-tap="_toggleDrawer">
               </paper-icon-button>
               <div class="toolbar-title" title>[[title]]</div>
@@ -261,9 +280,9 @@
                   <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
                 </paper-tab> -->
               </paper-tabs>
-              <placeholder-img class="user-pic" icon="account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+              <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
               <paper-menu-button horizontal-align="right" vertical-offset="15" >
-                <paper-icon-button icon="more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                <paper-icon-button icon="gigaicons:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
                 <paper-menu class="dropdown-content">
                   <paper-item disabled>Messages - Coming soon!</paper-item>
                   <!-- <a class="nav-a" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
@@ -429,6 +448,9 @@
         }
       },
       _savedItem: function (e, detail) {
+        if (this._items === undefined) {
+          this._items = [];
+        }
         this.unshift('_items', detail.item);
         this.setPath('items');
       },

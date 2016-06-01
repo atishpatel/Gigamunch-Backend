@@ -62,6 +62,7 @@
         label="Number of Servings Offered"
         value="{{post.servings_offered}}"
         type="number"
+        min=0
         required
         auto-validate>
       </paper-input>
@@ -69,6 +70,8 @@
         label="Price per serving"
         value="{{post.chef_price_per_serving}}"
         type="number"
+        step="0.01"
+        min=0
         required
         auto-validate>
         <div prefix>$&nbsp;</div>
@@ -78,13 +81,12 @@
         label="Post close time"
         epoch="{{post.closing_datetime}}">
       </datetime-input>
-      <template is="dom-if" if$="[[!post.is_order_now]]" restamp="true">
-        <datetime-input
-          id="readyTime"
-          label="Meal ready time"
-          epoch="{{post.ready_datetime}}">
-        </datetime-input>
-      </template>
+      <datetime-input
+        hidden$="[[post.is_order_now]]"
+        id="readyTime"
+        label="Meal ready time"
+        epoch="{{post.ready_datetime}}">
+      </datetime-input>
       <paper-button
         id="submitButton"
         on-tap="submit"
@@ -110,6 +112,12 @@
         item: {
           type: Object,
         },
+      },
+      observers: [
+        'postPhotoChanged(post.photos)'
+      ],
+      postPhotoChanged: function (p) {
+        this.updateSubmitButtonState();
       },
       selected: function () {
         this.$.spinner.hidden = true;
@@ -138,6 +146,8 @@
         this.post.item_id = item.id;
         this.post.id = '';
         this.$.itemFields.update();
+        this.$.closeTime.update();
+        this.$.readyTime.update();
       },
       getItem: function (id) {
         if (id === undefined || id === '' || id === '0') {
@@ -187,7 +197,8 @@
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
-        submitButton.disabled = !form.validate();
+        var hasPhoto = this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0;
+        submitButton.disabled = !form.validate() || !hasPhoto;
       },
     });
   </script>

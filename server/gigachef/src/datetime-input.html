@@ -4,18 +4,19 @@
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-time-picker/paper-time-picker.html">
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
-<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import" href="my-icons.html">
+
 
 <dom-module id="datetime-input">
   <template>
-    <style include="iron-flex iron-flex-alignment paper-time-picker-dialog-style paper-date-picker-dialog-style">
+    <style include="paper-date-picker-dialog-style">
       :host {
         display: block;
         padding-top: 10px;
@@ -25,6 +26,7 @@
           color: var(--primary-color);
         }
       }
+
       .divider {
         flex: .05;
       }
@@ -41,13 +43,13 @@
     </style>
     <label>[[label]]</label>
     <div class="layout horizontal">
-      <paper-input class="flex" id="dateInput" on-tap="_showDatePicker" value="{{_date}}">
-        <iron-icon icon="insert-invitation" suffix></iron-icon>
+      <paper-input class="flex" id="dateInput" on-tap="_showDatePicker" value="{{_date}}" placeholder="mm/dd/yyyy">
+        <iron-icon icon="gigaicons:insert-invitation" suffix></iron-icon>
       </paper-input>
       <span class="divider">
       </span>
-      <paper-input id="timeInput" class="flex" on-tap="_showTimePicker" value="{{_time}}">
-        <iron-icon icon="access-time" suffix></iron-icon>
+      <paper-input id="timeInput" class="flex" on-tap="_showTimePicker" value="{{_time}}" placeholder="hh:mm am/pm">
+        <iron-icon icon="gigaicons:access-time" suffix></iron-icon>
       </paper-input>
     </div>
 
@@ -100,15 +102,19 @@
           notify: true,
         },
         _d: {
-          type: String,
+          type: Date,
           notify: true,
         },
         _time: {
           type: String,
           notify: true,
+          value: '7:00 PM',
         },
       },
       update: function () {
+        if (this.epoch === undefined || this.epoch === null || this.epoch === 0) {
+          this.epoch = new Date().getTime();
+        }
         var date = new Date(this.epoch);
         this._updateDate(date);
         this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /, ' '));
@@ -129,7 +135,7 @@
         }
       },
       _updateDate: function (d) {
-        this.set('_d', d.toDateString());
+        this.set('_d', d);
         this.set('_date', d.toLocaleDateString());
       },
       _showTimePicker: function () {
