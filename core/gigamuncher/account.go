@@ -24,6 +24,10 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		return errDatastore.WithError(err).Wrap("cannot save gigamuncher info because cannot get gigamuncher")
 	}
+	if muncher.CreatedDatetime.IsZero() {
+		muncher.CreatedDatetime = time.Now()
+		changed = true
+	}
 	if muncher.Name != user.Name {
 		muncher.Name = user.Name
 		changed = true
