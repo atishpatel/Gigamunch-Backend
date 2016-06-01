@@ -49,10 +49,9 @@ class User {
   }
 
   setTokenCookie(cvalue, exptime) {
-    const d = new Date();
-    d.setTime(exptime);
-    const expires = `'expires='${d.toUTCString()}`;
-    document.cookie = `GIGATKN=${cvalue}; ${expires}`;
+    const d = new Date(0);
+    d.setUTCSeconds(exptime);
+    document.cookie = `GIGATKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
   }
 
   getKthBit(x, k) {

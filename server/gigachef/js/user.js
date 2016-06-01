@@ -64,10 +64,9 @@ var User = function () {
   }, {
     key: 'setTokenCookie',
     value: function setTokenCookie(cvalue, exptime) {
-      var d = new Date();
-      d.setTime(exptime);
-      var expires = '\'expires=\'' + d.toUTCString();
-      document.cookie = 'GIGATKN=' + cvalue + '; ' + expires;
+      var d = new Date(0);
+      d.setUTCSeconds(exptime);
+      document.cookie = 'GIGATKN=' + cvalue + '; expires=' + d.toUTCString() + '; path=/';
     }
   }, {
     key: 'getKthBit',
