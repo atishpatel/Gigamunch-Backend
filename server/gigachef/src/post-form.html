@@ -1,10 +1,10 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/polymer/polymer.html">
 
-<link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/iron-form/iron-form.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="/bower_components/app-route/app-route.html">
+<link rel="import" href="/bower_components/iron-form/iron-form.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="datetime-input.html">
 <link rel="import" href="item-fields.html">
@@ -40,9 +40,7 @@
     </style>
 
     <app-route
-      route="{{route}}"
-      pattern="/:itemid"
-      data="{{routeData}}">
+      route="{{route}}">
     </app-route>
 
     <form
@@ -116,7 +114,7 @@
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
-        if (this.routeData.itemid === '') {
+        if (this.route.path.substring(1) === '') {
           var d = {
             error: 'There is a problem with your URL. :( Please try to post an item again.',
             options: [{
@@ -129,8 +127,8 @@
           this.fire('error', d);
           return;
         }
-        if (this.item.id !== this.routeData.itemid) {
-          this.getItem(this.routeData.itemid);
+        if (this.item.id !== this.route.path.substring(1)) {
+          this.getItem(this.route.path.substring(1));
         } else {
           this.setItem(this.item);
         }
