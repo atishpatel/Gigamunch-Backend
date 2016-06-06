@@ -19,6 +19,7 @@ class Service {
       }
       this.callQueue = [];
     }
+    this.refreshToken();
   }
   /*
    * Chef

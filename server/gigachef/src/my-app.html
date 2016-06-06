@@ -238,7 +238,7 @@
           <iron-selector class="drawer-list" selected="[[page]]" attr-for-selected="name" role="navigation">
             <a class="nav-a" name="dashboard" href$="[[baseUrl]]/"><paper-item>Dashboard</paper-item></a>
             <a class="nav-a" name="items" href$="[[baseUrl]]/items"><paper-item>My Kitchen</paper-item></a>
-            <!-- <a class="nav-a" name="posts" href$="[[baseUrl]]/posts"><paper-item>My Orders</paper-item></a> -->
+            <a class="nav-a" name="posts" href$="[[baseUrl]]/posts"><paper-item>My Orders</paper-item></a>
             <paper-item disabled>Messages - Coming Soon!</paper-item>
             <!-- <a class="nav-a" name="settings" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
             <!-- TODO add help and feedback -->
@@ -276,9 +276,9 @@
                 <paper-tab name="items" tabindex="-1">
                   <a class="nav-a" href$="[[baseUrl]]/items"><span>My Kitchen</span></a>
                 </paper-tab>
-                <!-- <paper-tab name="orders" tabindex="-1">
+                <paper-tab name="posts" tabindex="-1">
                   <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
-                </paper-tab> -->
+                </paper-tab>
               </paper-tabs>
               <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
               <paper-menu-button horizontal-align="right" vertical-offset="15" >
@@ -301,6 +301,7 @@
             user="[[user]]"
             gigachef="{{gigachef}}"
             service="[[service]]"
+            on-error="showError"
             route="{{subroute}}">
           </dashboard-page>
           <item-list
@@ -309,7 +310,7 @@
             items="{{_items}}"
             on-edit="_editItem"
             on-post="_postItem"
-            on-error="_error"
+            on-error="showError"
             service="[[service]]">
           </item-list>
           <item-form
@@ -317,7 +318,7 @@
             name="edititem"
             item="{{_item}}"
             on-saved="_savedItem"
-            on-error="_error"
+            on-error="showError"
             route="{{subroute}}"
             service="[[service]]">
           </item-form>
@@ -325,14 +326,16 @@
             id="posts"
             name="posts"
             posts="{{posts}}"
+            on-error="showError"
             service="[[service]]">
           </post-list>
           <post-form
             id="postitem"
             name="postitem"
+            user="[[user]]"
             item="[[_item]]"
-            on-posted="_posted"
-            on-error="_error"
+            on-posted="postPosted"
+            on-error="showError"
             route="{{subroute}}"
             service="[[service]]">
           </post-form>
@@ -341,6 +344,7 @@
             name="updateprofile"
             gigachef="[[gigachef]]"
             user="[[user]]"
+            on-error="showError"
             on-updated="gigachefUpdated"
             service="[[service]]">
           </profile-form>
@@ -348,6 +352,7 @@
             id="updatepayout"
             name="updatepayout"
             user="[[user]]"
+            on-error="showError"
             on-updated="gigachefUpdated"
             service="[[service]]">
           </payout-form>
@@ -454,6 +459,9 @@
         this.unshift('_items', detail.item);
         this.setPath('items');
       },
+      postPosted: function(e, detail) {
+        this.setPath('posts');
+      },
       gigachefUpdated: function (e, detail) {
         this.set('gigachef', detail.gigachef);
         this.setPath();
@@ -552,6 +560,22 @@
           route += path;
         }
         this.set('route.path', this.baseUrl + route);
+      },
+      showError: function (e, detail) {
+        var text;
+        switch (typeof(detail.error)) {
+          case 'object':
+            if (typeof(detail.error.error) === 'string') {
+              text = detail.error.error;
+            } else {
+              text = detail.error.error.message + '<br>detail:'  + detail.error.error.detail;
+            }
+            break;
+          default:
+            text = detail.error.toString();
+        }
+        this.$.errorDialogText.innerHTML = text;
+        this.$.errorDialog.open();
       },
     });
   </script>

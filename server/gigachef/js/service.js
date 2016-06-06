@@ -51,6 +51,7 @@ var Service = function () {
 
         this.callQueue = [];
       }
+      this.refreshToken();
     }
     /*
      * Chef

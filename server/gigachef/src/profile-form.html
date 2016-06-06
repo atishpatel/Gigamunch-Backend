@@ -251,6 +251,8 @@
             this.set('gigachef', chef);
             this.fire('updated', { gigachef: chef });
           }
+          this.$.spinner.hidden = true;
+          this.$.spinner.active = false;
         }.bind(this));
       },
       updateSubmitButtonState: function () {

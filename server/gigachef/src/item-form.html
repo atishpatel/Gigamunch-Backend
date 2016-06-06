@@ -133,6 +133,8 @@
             this.set('item', i);
             this.fire('saved', { item: i });
           }
+          this.$.spinner.hidden = true;
+          this.$.spinner.active = false;
         }.bind(this));
       },
       updateSubmitButtonState: function () {

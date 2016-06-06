@@ -16,7 +16,7 @@
 
 <dom-module id="datetime-input">
   <template>
-    <style include="paper-date-picker-dialog-style">
+    <style include="paper-time-picker-dialog-style">
       :host {
         display: block;
         padding-top: 10px;
@@ -38,6 +38,43 @@
       }
       paper-input {
         margin-top: -20px;
+      }
+
+    .paper-date-picker-dialog {
+      margin: 0;
+      max-height: 520px !important;
+      overflow: hidden;
+     }
+     .paper-date-picker-dialog > paper-date-picker {
+       --paper-calendar: {
+         padding-bottom: 0;
+       };
+       margin-top: 0 !important;
+       padding: 0;
+     }
+
+     .paper-date-picker-dialog > paper-date-picker:not([narrow]) {
+       --paper-date-picker-heading: {
+         margin-bottom: -62px;
+       };
+     }
+
+     .paper-time-picker-dialog {
+        margin: 0;
+        max-height: 520px !important;
+      }
+      .paper-time-picker-dialog > paper-time-picker {
+        --paper-calendar: {
+          padding-bottom: 0;
+        };
+        margin-top: 0 !important;
+        padding: 0;
+      }
+
+      .paper-time-picker-dialog > paper-time-picker:not([narrow]) {
+        --paper-time-picker-heading: {
+          margin-bottom: -56px;
+        };
       }
 
     </style>
@@ -90,7 +127,6 @@
           type: Number,
           notify: true,
           reflectToAttribute: true,
-          value: (new Date()).getTime(),
         },
         label: {
           type: String,
@@ -113,16 +149,19 @@
       },
       update: function () {
         if (this.epoch === undefined || this.epoch === null || this.epoch === 0) {
-          this.epoch = new Date().getTime();
+          this.setEpoch(new Date());
         }
-        var date = new Date(this.epoch);
+        var date = new Date(this.epoch * 100);
         this._updateDate(date);
         this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /, ' '));
+      },
+      setEpoch: function(d) {
+        this.set('epoch', Math.round(d.getTime() / 100))
       },
       _dismissTimeDialog: function (e) {
         if (e.detail.confirmed) {
           var date = new Date(this._date + ' ' + this.$.timePicker.time);
-          this.set('epoch', date.getTime());
+          this.setEpoch(date);
           this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /,' '));
         }
         this.$.timePicker.view = 'hours';
@@ -130,7 +169,7 @@
       _dismissDateDialog: function (e) {
         if (e.detail.confirmed) { // pressed ok
           var date = new Date(this.$.datePicker.date.toLocaleDateString() + ' ' + this._time);
-          this.set('epoch', date.getTime());
+          this.setEpoch(date);
           this._updateDate(date);
         }
       },
