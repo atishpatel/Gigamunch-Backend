@@ -31,9 +31,7 @@ handlers:
   secure: always
 
 # Gigachef app
-
-# Gigachef app
-- url: /gigachef/bower_components
+- url: /.*bower_components
   static_dir: gigachef/build/unbundled/bower_components
   secure: always
 
@@ -46,7 +44,7 @@ handlers:
   static_dir: gigachef/build/unbundled/js
   secure: always
 
-- url: /gigachef/src
+- url: /.*src
   static_dir: gigachef/build/unbundled/src
   secure: always
 
@@ -54,7 +52,7 @@ handlers:
   static_files: gigachef/build/unbundled/index.html
   upload: gigachef/build/unbundled/index.html
   http_headers:
-    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/my-app.html>; rel=preload; as=document, </common/common.css>; rel=preload; as=style'
+    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/src/my-app.html>; rel=preload; as=document, </common/common.css>; rel=preload; as=style'
   secure: always
 
 - url: /.*
@@ -71,4 +69,7 @@ skip_files:
   - ^(.*/)?.*\.yml$
   - ^(.*/)?.*\.gitignore$
   - ^(.*/)?.*/LICENSE$
-  - ^(chef/app/.*)
+  - ^(gigachef/build/bundled/.*)
+  - ^(gigachef/bower_components/.*)
+  - ^(gigachef/src/.*)
+  - ^(gigachef/js/.*)

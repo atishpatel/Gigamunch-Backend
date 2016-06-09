@@ -21,10 +21,6 @@ handlers:
   static_files: app/index.html
   upload: app/index.html
 
-- url: /bower_components
-  static_dir: app/bower_components
-  secure: always
-
 - url: /styles
   static_dir: app/styles
   secure: always
@@ -34,7 +30,8 @@ handlers:
   secure: always
 
 # Gigachef app
-- url: /gigachef/bower_components
+
+- url: /.*bower_components
   static_dir: gigachef/bower_components
   secure: always
 
@@ -55,7 +52,7 @@ handlers:
   static_files: gigachef/index.html
   upload: gigachef/index.html
   http_headers:
-    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/my-app.html>; rel=preload; as=document, </common/common.css>; rel=preload; as=style'
+    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/src/my-app.html>; rel=preload; as=document, </common/common.css>; rel=preload; as=style'
   secure: always
 
 - url: /.*
