@@ -12,9 +12,9 @@
         display: block;
       }
     </style>
-    <content on-tap="selectFile"></content>
+      <content on-tap="selectFile"></content>
     <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
-      <input id="file" type="file" name="file" on-change="_uploadFile">
+      <input id="file" type="file" name="file" accept="image/*;capture=camera" on-change="_uploadFile">
     </form>
   </template>
   <script>
@@ -78,10 +78,11 @@
       },
       addPhoto: function(url) {
         if (url !== undefined && url !== '') {
-          if (this.photos === undefined) {
+          if (this.photos === undefined || this.photos === null) {
             this.photos = [];
           }
           this.push('photos', url + this.urlPostfix);
+          this.fire('photosChanged');
         }
       },
       updateProgress: function(e) {

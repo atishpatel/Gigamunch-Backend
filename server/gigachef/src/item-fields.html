@@ -65,8 +65,10 @@
     </template>
     <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required</div>
     <file-input
+      id="fileInput"
       photos="{{photos}}"
       url-postfix="=s1080"
+      on-photos-changed="photosChanged"
       auto-validate>
       <div class="add-image">
         <paper-icon-button icon="gigaicons:add-a-photo"></paper-icon-button>
@@ -163,30 +165,36 @@
         },
       },
       update: function() {
-        if (this.ingredients !== undefined) {
+        if (this.ingredients !== undefined && this.ingredients !== null) {
           this.set('_ingredients', this.ingredients.toString().replace(',', ', '));
         } else {
           this.set('_ingredients', '');
         }
-        if (this.generalTags !== undefined) {
+        if (this.generalTags !== undefined && this.generalTags !== null) {
           this.set('_general_tags', this.generalTags.toString().replace(',', ', '));
         } else {
           this.set('_general_tags', '');
         }
-        if (this.dietaryNeedsTags !== undefined) {
+        if (this.dietaryNeedsTags !== undefined && this.dietaryNeedsTags !== null) {
           this.set('_dietary_needs_tags', this.dietaryNeedsTags.toString().replace(',', ', '));
         } else {
           this.set('_dietary_needs_tags', '');
         }
       },
       _updateIngredients: function(ing) {
-        this.ingredients = ing.split(/\s*,\s*/);
+        if (ing !== undefined && ing !== null) {
+          this.ingredients = ing.split(/\s*,\s*/);
+        }
       },
       _updateGeneralTags: function(gt) {
-        this.generalTags = gt.split(/\s*,\s*/);
+        if (gt !== undefined && gt !== null) {
+          this.generalTags = gt.split(/\s*,\s*/);
+        }
       },
       _updateDietaryNeedsTags: function(dnt) {
-        this.dietaryNeedsTags = dnt.split(/\s*,\s*/);
+        if (dnt !== undefined && dnt !== null) {
+          this.dietaryNeedsTags = dnt.split(/\s*,\s*/);
+        }
       },
       removePhoto: function(e) {
         var index = this.photos.indexOf(e.model.photo);
@@ -199,6 +207,10 @@
         } else {
           this.set('showPhotoRequired', false);
         }
+      },
+      photosChanged: function() {
+        // this.notifyPath('photos', this.photos);
+        this.photosUpdated(this.photos);
       },
     });
   </script>
