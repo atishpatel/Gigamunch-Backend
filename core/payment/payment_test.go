@@ -74,9 +74,12 @@ func TestMakeSaleThenRefund(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	t, _ := time.Parse(dateOfBirthFormat, "1-1-1989")
+	t, err := time.Parse(dateOfBirthFormat, "01-01-1989")
+	if err != nil {
+		log.Fatalf("failed to get dob time: %v", err)
+	}
 	updateSubMerchantReq := &SubMerchantInfo{
-		ID:          "01234567890123456789012345678912",
+		ID:          "01234567890123456789532345678912",
 		FirstName:   "Kayle",
 		LastName:    "Gishen",
 		Email:       "kayle@test.com",

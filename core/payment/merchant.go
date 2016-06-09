@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/atishpatel/braintree-go"
+
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/braintree-go"
 	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 const (
-	dateOfBirthFormat = "2006-01-02"
+	dateOfBirthFormat = "02-01-2006"
 )
 
 // GetSubMerchant returns a SubMerchant
@@ -90,6 +92,7 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, chefC chefI
 			RoutingNumber: req.RoutingNumber,
 		},
 	}
+	utils.Errorf(ctx, "ma: %#v i: %#v ia: %#v f:", ma, ma.Individual, ma.Individual.Address, ma.FundingOptions)
 	_, err := bt.MerchantAccount().Find(req.ID)
 	if err == nil {
 		ma, err = bt.MerchantAccount().Update(ma)

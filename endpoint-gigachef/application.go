@@ -14,13 +14,13 @@ import (
 )
 
 type Gigachef struct {
-	CreatedDatetime   int           `json:"created_datetime"`
+	CreatedDatetime   string        `json:"created_datetime"`
 	HasCarInsurance   bool          `json:"has_car_insurance"`
 	types.UserDetail                //embedded
 	Bio               string        `json:"bio"`
 	PhoneNumber       string        `json:"phone_number"`
 	Address           types.Address `json:"address"`
-	DeliveryRange     int32         `json:"delivery_range"`
+	DeliveryRange     int           `json:"delivery_range"`
 	SendWeeklySummary bool          `json:"send_weekly_summary"`
 	UseEmailOverSMS   bool          `json:"use_email_over_sms"`
 	gigachef.Rating                 // embedded
@@ -38,13 +38,13 @@ type Gigachef struct {
 }
 
 func (c *Gigachef) set(chef *gigachef.Resp) {
-	c.CreatedDatetime = ttoi(chef.CreatedDatetime)
+	c.CreatedDatetime = ttos(chef.CreatedDatetime)
 	c.HasCarInsurance = chef.HasCarInsurance
 	c.UserDetail = chef.UserDetail
 	c.Bio = chef.Bio
 	c.PhoneNumber = chef.PhoneNumber
 	c.Address = chef.Address
-	c.DeliveryRange = chef.DeliveryRange
+	c.DeliveryRange = int(chef.DeliveryRange)
 	c.SendWeeklySummary = chef.SendWeeklySummary
 	c.UseEmailOverSMS = chef.UseEmailOverSMS
 	c.Rating = chef.Rating
@@ -61,7 +61,7 @@ func (c *Gigachef) set(chef *gigachef.Resp) {
 	c.Verified = chef.Verified
 }
 
-// UpdateProfile is the input request needed for SubmitApplication.
+// UpdateProfileReq is the input request needed for SubmitApplication.
 type UpdateProfileReq struct {
 	Gigatoken string   `json:"gigatoken"`
 	Gigachef  Gigachef `json:"gigachef"`
@@ -111,7 +111,7 @@ func (service *Service) UpdateProfile(ctx context.Context, req *UpdateProfileReq
 		user.PhotoURL = req.Gigachef.PhotoURL
 	}
 	chefC := gigachef.New(ctx)
-	chef, err := chefC.UpdateProfile(user, &req.Gigachef.Address, req.Gigachef.PhoneNumber, req.Gigachef.Bio, req.Gigachef.DeliveryRange)
+	chef, err := chefC.UpdateProfile(user, &req.Gigachef.Address, req.Gigachef.PhoneNumber, req.Gigachef.Bio, int32(req.Gigachef.DeliveryRange))
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to update chef profile")
 		return resp, nil
@@ -152,7 +152,7 @@ type SubMerchantApplication struct {
 	FirstName       string        `json:"first_name"`
 	LastName        string        `json:"last_name"`
 	Email           string        `json:"email"`
-	DateOfBirth     string        `json:"date_of_birth"`
+	DateOfBirth     int           `json:"date_of_birth"`
 	DateOfBirthTime time.Time     `json:"-"`
 	AccountNumber   string        `json:"account_number"`
 	RoutingNumber   string        `json:"routing_number"`
@@ -176,7 +176,7 @@ func (sm *SubMerchantApplication) set(r *payment.SubMerchantInfo) {
 	sm.FirstName = r.FirstName
 	sm.LastName = r.LastName
 	sm.Email = r.Email
-	sm.DateOfBirth = ttos(r.DateOfBirth)
+	sm.DateOfBirth = ttoi(r.DateOfBirth)
 	sm.AccountNumber = r.AccountNumber
 	sm.RoutingNumber = r.RoutingNumber
 	sm.Address = r.Address
@@ -201,6 +201,7 @@ func (req *UpdateSubMerchantReq) valid() error {
 	if req.SubMerchant.Address.Country == "" {
 		req.SubMerchant.Address.Country = "USA"
 	}
+	req.SubMerchant.DateOfBirthTime = itot(req.SubMerchant.DateOfBirth)
 	return nil
 }
 
