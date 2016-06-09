@@ -39,7 +39,8 @@
         description="{{item.description}}"
         ingredients="{{item.ingredients}}"
         general-tags="{{item.general_tags}}"
-        dietary-needs-tags="{{item.dietary_needs_tags}}">
+        dietary-needs-tags="{{item.dietary_needs_tags}}"
+        on-photos-changed="itemPhotoChanged">
       </item-fields>
       <paper-button
         id="submitButton"
@@ -130,6 +131,11 @@
             };
             this.fire('error', d);
           } else {
+            if (this.item.id !== 0) {
+              ga('send', 'event', 'item', 'updated');
+            } else {
+              ga('send', 'event', 'item', 'created');
+            }
             this.set('item', i);
             this.fire('saved', { item: i });
           }
