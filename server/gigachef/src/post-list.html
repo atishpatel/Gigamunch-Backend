@@ -194,7 +194,7 @@
       },
       getAmountEarned: function(post) {
         var e = 0.0;
-        if (post.orders !== undefined || post.orders !== null) {
+        if (post.orders !== undefined && post.orders !== null) {
           post.orders.forEach(
             function(order) {
               e += order.servings * post.chef_price_per_serving;
@@ -205,7 +205,7 @@
       },
       getNumOrders: function(post) {
         var e = 0;
-        if (post.orders !== undefined || post.orders !== null) {
+        if (post.orders !== undefined && post.orders !== null) {
           post.orders.forEach(
             function(order) {
               e += order.servings;
@@ -215,10 +215,10 @@
         return e;
       },
       getMakeBy: function(post) {
-        return (new Date(post.ready_datetime * 100)).toLocaleString().replace(/:[0-9][0-9] /, ' ');
+        return (new Date(post.ready_datetime * 1000)).toLocaleString().replace(/:[0-9][0-9] /, ' ');
       },
       getExchangeTime: function(order) {
-        return (new Date(order.exchange_time * 100)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+        return (new Date(order.exchange_time * 1000)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
       },
       getExchangeText: function(order) {
         if (order.exchange_method == 1) {

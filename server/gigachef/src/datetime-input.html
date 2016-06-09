@@ -151,12 +151,13 @@
         if (this.epoch === undefined || this.epoch === null || this.epoch === 0) {
           this.setEpoch(new Date());
         }
-        var date = new Date(this.epoch * 100);
+        var date = new Date(this.epoch * 1000);
         this._updateDate(date);
         this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /, ' '));
       },
       setEpoch: function(d) {
-        this.set('epoch', Math.round(d.getTime() / 100))
+        this.set('epoch', Math.round(d.getTime() / 1000))
+        this.fire('changed');
       },
       _dismissTimeDialog: function (e) {
         if (e.detail.confirmed) {
