@@ -2,7 +2,6 @@ package errors
 
 const (
 	CodeInvalidParameter           = 400
-	CodeInvalidToken               = 400
 	CodeUnauthorizedAccess         = 401
 	CodeSignOut                    = 452
 	CodeForbidden                  = 403
