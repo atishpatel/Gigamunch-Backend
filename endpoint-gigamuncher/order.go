@@ -91,7 +91,7 @@ type Order struct {
 	Status                   string           `json:"status"`
 }
 
-func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating) {
+func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating) {
 	o.ID = itos(order.ID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
 	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDateTime)
@@ -117,9 +117,11 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLikes bool, chefName, ch
 	o.ExchangeMethod = int32(order.ExchangeMethod)
 	o.ExchangePlanInfo.set(order)
 	o.NumLikes = numLikes
-	o.HasLiked = hasLikes
+	o.HasLiked = hasLiked
 
-	if time.Now().After(order.ExpectedExchangeDateTime.Add(1 * time.Hour)) {
+	if o.GigachefCanceled || o.GigamuncherCanceled {
+		o.Status = "canceled"
+	} else if time.Now().After(order.ExpectedExchangeDateTime.Add(1 * time.Hour)) {
 		o.Status = "closed"
 	} else if time.Now().After(order.ExpectedExchangeDateTime) {
 		o.Status = "open-received"
@@ -222,9 +224,9 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 
 // GetOrderReq is the request for GetOrder
 type GetOrderReq struct {
-	OrderID   json.Number `json:"order_id"`
-	OrderID64 int64       `json:"-"`
-	Gigatoken string      `json:"gigatoken"`
+	OrderID   string `json:"order_id"`
+	OrderID64 int64  `json:"-"`
+	Gigatoken string `json:"gigatoken"`
 }
 
 func (req *GetOrderReq) gigatoken() string {
@@ -236,7 +238,7 @@ func (req *GetOrderReq) valid() error {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
 	var err error
-	req.OrderID64, err = req.OrderID.Int64()
+	req.OrderID64, err = stoi(req.OrderID)
 	if err != nil {
 		return fmt.Errorf("error with OrderID: %v", err)
 	}
@@ -392,5 +394,75 @@ func (service *Service) GetBraintreeToken(ctx context.Context, req *GigatokenOnl
 		return resp, nil
 	}
 	resp.BraintreeToken = token
+	return resp, nil
+}
+
+// CancelOrderReq is the request for CancelOrder
+type CancelOrderReq struct {
+	OrderID   string `json:"order_id"`
+	OrderID64 int64  `json:"-"`
+	Gigatoken string `json:"gigatoken"`
+}
+
+func (req *CancelOrderReq) gigatoken() string {
+	return req.Gigatoken
+}
+
+func (req *CancelOrderReq) valid() error {
+	if req.Gigatoken == "" {
+		return fmt.Errorf("Gigatoken is empty.")
+	}
+	var err error
+	req.OrderID64, err = stoi(req.OrderID)
+	if err != nil {
+		return fmt.Errorf("error with OrderID: %v", err)
+	}
+	return nil
+}
+
+// CancelOrderResp is the response for CancelOrder
+type CancelOrderResp struct {
+	Order  Order                `json:"order"`
+	Review Review               `json:"review"`
+	Err    errors.ErrorWithCode `json:"err"`
+}
+
+// CancelOrder cancels an order
+func (service *Service) CancelOrder(ctx context.Context, req *CancelOrderReq) (*CancelOrderResp, error) {
+	resp := new(CancelOrderResp)
+	defer handleResp(ctx, "CancelOrder", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}
+		return resp, nil
+	}
+	postC := post.New(ctx)
+	order, err := postC.CancelOrder(user.ID, req.OrderID64)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to cancel order")
+		return resp, nil
+	}
+	// get items
+	itemIDs := []int64{order.ItemID}
+	likeC := like.New(ctx)
+	likes, numLikes, err := likeC.LikesItems(user.ID, itemIDs)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to get liked items", err)
+		return resp, nil
+	}
+	chef, err := gigachef.GetInfo(ctx, order.GigachefID)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("cannot chef.GetInfo")
+		return resp, nil
+	}
+	// get review
+	reviewC := review.New(ctx)
+	review, err := reviewC.GetReview(order.ReviewID)
+	if err != nil {
+		resp.Err = errors.Wrap("cannot get review", err)
+		return resp, nil
+	}
+	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating)
+	resp.Review.set(review)
 	return resp, nil
 }
