@@ -21,6 +21,12 @@ indexes:
   - name: GigamuncherID
   - name: ExpectedExchangeDateTime
 
+- kind: Post
+  properties:
+  - name: GigachefID
+  - name: ReadyDateTime
+    direction: desc
+
 - kind: Review
   properties:
   - name: GigachefID
