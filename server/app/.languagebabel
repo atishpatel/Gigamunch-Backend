@@ -2,7 +2,7 @@
   "babelMapsPath":                    "",
   "babelMapsAddUrl":                  false,
   "babelSourcePath":                  "server/app/es6",
-  "babelTranspilePath":               "server/app/scripts",
+  "babelTranspilePath":               "server/app/js",
   "createMap":                        false,
   "createTargetDirectories":          false,
   "createTranspiledCode":             true,
