@@ -17,7 +17,7 @@ type User struct {
 	ProviderID string `json:"provider_id"`
 	PhotoURL   string `json:"photo_url"`
 	// bit32 | bit31 | bit30 | ...
-	// isChef | isVerifiedChef | isAdmin | HasAddress | HasSubMerchantID
+	// isChef | isVerifiedChef | isAdmin |  | HasAddress | HasSubMerchantID
 	Permissions int32 `json:"permissions"`
 }
 
