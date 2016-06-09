@@ -15,6 +15,9 @@ const (
 type OrderPost struct {
 	OrderID             int64                 `json:"order_id" datastore:",noindex"`
 	GigamuncherID       string                `json:"gigamuncher_id" datastore:",noindex"`
+	GigamuncherName     string                `json:"gigamuncher_name" datastore:",noindex"`
+	GigamuncherPhotoURL string                `json:"gigamuncher_photo_url" datastore:",noindex"`
+	ExchangeTime        time.Time             `json:"exchange_time" datastore:",noindex"`
 	ExchangeMethod      types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`
 	GigamuncherGeopoint types.GeoPoint        `json:"gigamuncher_geopoint" datastore:",noindex"`
 	Servings            int32                 `json:"servings" datastore:",noindex"`

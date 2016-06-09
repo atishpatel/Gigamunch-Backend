@@ -108,7 +108,11 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 		}
 		exchangeCost = 0
 		exchangeMethod.SetPickup(true)
-		expectedExchangeTime = p.ReadyDateTime
+		if p.IsOrderNow {
+			expectedExchangeTime = time.Now().Add(time.Duration(p.EstimatedPreperationTime) * time.Second)
+		} else {
+			expectedExchangeTime = p.ReadyDateTime
+		}
 	}
 	// run in transaction
 	opts := &datastore.TransactionOptions{XG: true, Attempts: 1}
@@ -128,7 +132,10 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 		pOrder := OrderPost{
 			OrderID:             order.ID,
 			GigamuncherID:       req.GigamuncherID,
+			GigamuncherName:     req.GigamuncherName,
+			GigamuncherPhotoURL: req.GigamuncherPhotoURL,
 			GigamuncherGeopoint: req.GigamuncherAddress.GeoPoint,
+			ExchangeTime:        order.ExpectedExchangeDateTime,
 			ExchangeMethod:      exchangeMethod,
 			Servings:            req.NumServings,
 		}

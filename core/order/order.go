@@ -298,8 +298,11 @@ func (c *Client) Process(id int64) (*Resp, error) {
 	}
 	switch o.State {
 	case State.Canceled:
+		fallthrough
 	case State.Refunded:
+		fallthrough
 	case State.Paid:
+		fallthrough
 	case State.Issues:
 		resp.Order = *o
 		return resp, nil
