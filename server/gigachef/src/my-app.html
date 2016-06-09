@@ -212,10 +212,18 @@
     <paper-dialog
       id="errorDialog"
       modal>
-      <h2>Oh no! Something went wrong!</h2>
+      <h3>Oh no! Something went wrong!</h3>
       <div id="errorDialogText">error :(</div>
       <div>We're sorry for the inconvenience. :(
         <br>Our developer, Atish, will be working on fixing this issue asap.</div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog
+      id="notificationDialog"
+      modal>
+      <div id="notificationDialogText"></div>
       <div class="buttons">
         <paper-button dialog-dismiss>OK</paper-button>
       </div>
@@ -483,6 +491,7 @@
         switch (page) {
           case 'dashboard':
             el = this.$.dashboard;
+            pageURL = 'dashboard-page.html';
             title = 'Dashboard';
             break;
           case 'items':
@@ -565,17 +574,24 @@
         var text;
         switch (typeof(detail.error)) {
           case 'object':
-            if (typeof(detail.error.error) === 'string') {
-              text = detail.error.error;
+            if (typeof(detail.error) === 'string') {
+              text = detail.error;
             } else {
-              text = detail.error.error.message + '<br>detail:'  + detail.error.error.detail;
+              text = detail.error.message +
+                '<br>detailed gibberish:' +
+                detail.error.detail;
             }
             break;
           default:
             text = detail.error.toString();
         }
-        this.$.errorDialogText.innerHTML = text;
-        this.$.errorDialog.open();
+        if (detail.notification === true) {
+          this.$.notificationDialogText.innerHTML = text;
+          this.$.notificationDialog.open();
+        } else {
+          this.$.errorDialogText.innerHTML = text;
+          this.$.errorDialog.open();
+        }
       },
     });
   </script>
