@@ -58,7 +58,9 @@ func (c *Client) SendSMS(to, message string) error {
 		if twilioErr, ok := err.(*twilio.TwilioError); ok {
 			switch twilioErr.Code {
 			case 21211:
+				fallthrough
 			case 21612:
+				fallthrough
 			case 21614:
 				return errFakeInput.WithMessage(fmt.Sprintf("Failed to send sms because %s", twilioErr.Message))
 			}
