@@ -18,6 +18,7 @@
         background-color: white;
         min-height: 86vh;
       }
+
       #submitButton {
         width: 100%;
         margin: 20px 0px;
@@ -56,7 +57,8 @@
         description="{{post.description}}"
         ingredients="{{post.ingredients}}"
         general-tags="{{post.general_tags}}"
-        dietary-needs-tags="{{post.dietary_needs_tags}}">
+        dietary-needs-tags="{{post.dietary_needs_tags}}"
+        on-photos-changed="postPhotosChanged">
       </item-fields>
       <paper-input
         label="Number of Servings Offered*"
@@ -79,13 +81,15 @@
       <datetime-input
         id="closeTime"
         label="Post close time*"
-        epoch="{{post.closing_datetime}}">
+        epoch="{{post.closing_datetime}}"
+        on-changed="updateSubmitButtonState">
       </datetime-input>
       <datetime-input
         hidden$="[[post.is_order_now]]"
         id="readyTime"
         label="Meal ready time*"
-        epoch="{{post.ready_datetime}}">
+        epoch="{{post.ready_datetime}}"
+        on-changed="updateSubmitButtonState">
       </datetime-input>
       <template is="dom-if" if$="[[post.is_order_now]]" restamp="true">
         <paper-input
@@ -132,9 +136,9 @@
         }
       },
       observers: [
-        'postPhotoChanged(post.photos)'
+        'postPhotosChanged(post.photos)'
       ],
-      postPhotoChanged: function (p) {
+      postPhotosChanged: function (p) {
         this.updateSubmitButtonState();
       },
       eptChanged: function (ept) {
@@ -202,23 +206,37 @@
       postPost: function() {
         if (!this.user.isVerifiedChef) {
           // TODO change to not error
-          this.fire('error', { bug: false, error: 'Sorry, but you aren\'t verified chef yet.' });
+          this.fire('error', {
+            notification: true,
+            error: 'Sorry. You aren\'t a verified chef yet.',
+          });
+          this.$.spinner.hidden = true;
+          this.$.spinner.active = false;
           return;
         }
         this.service.postPost(this.post, function(post, err) {
           this.$.spinner.hidden = true;
           this.$.spinner.active = false;
           if (err.code !== 0) {
-            var d = {
-              error: err,
-              options: [{
-                text: 'Try Again',
-                func: this.postPost.bind(this),
-              }],
-            };
+            var d;
+            if (err.code === 400) {
+              d = {
+                notification: true,
+                error: err.message,
+              };
+            } else {
+              d = {
+                error: err,
+                options: [{
+                  text: 'Try Again',
+                  func: this.postPost.bind(this),
+                }],
+              };
+            }
             this.fire('error', d);
             return;
           }
+          ga('send', 'event', 'post', 'created');
           this.fire('posted', { post: post });
         }.bind(this));
       },
