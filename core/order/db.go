@@ -8,6 +8,24 @@ import (
 	"google.golang.org/appengine/datastore"
 )
 
+func getMultiOrders(ctx context.Context, ids []int64) ([]Order, error) {
+	if ids == nil || len(ids) == 0 {
+		return nil, fmt.Errorf("ids is invalid")
+	}
+	var err error
+	// TODO add cache stuff
+	keys := make([]*datastore.Key, len(ids))
+	for i := range ids {
+		keys[i] = datastore.NewKey(ctx, kindOrder, "", ids[i], nil)
+	}
+	dst := make([]Order, len(ids))
+	err = datastore.GetMulti(ctx, keys, dst)
+	if err != nil && err.Error() != "(0 errors)" { // GetMulti always returns appengine.MultiError which is stupid
+		return nil, err
+	}
+	return dst, nil
+}
+
 func getByTransactionID(ctx context.Context, transactionID string) (int64, *Order, error) {
 	query := datastore.NewQuery(kindOrder).Filter("PaymentInfo.BTTransactionID =", transactionID)
 	var results []Order
