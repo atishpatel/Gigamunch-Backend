@@ -53,7 +53,11 @@ func (p *BasePost) set(userID string, id int64, numLikes int, hasLiked bool, dis
 	p.Photos = post.Photos
 	p.PostedDateTime = ttoi(post.CreatedDateTime)
 	p.ClosingDateTime = ttoi(post.ClosingDateTime)
-	p.ReadyDateTime = ttoi(post.ReadyDateTime)
+	if post.IsOrderNow {
+		p.ReadyDateTime = ttoi(time.Now().Add(time.Duration(post.EstimatedPreperationTime) * time.Second))
+	} else {
+		p.ReadyDateTime = ttoi(post.ReadyDateTime)
+	}
 	p.Distance = distance
 	// DeliveryAvailable bool     `json:"delivery_avaliable"`
 	p.PickupAvaliable = post.AvailableExchangeMethods.Pickup()
