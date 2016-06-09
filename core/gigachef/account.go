@@ -2,8 +2,12 @@ package gigachef
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"golang.org/x/net/context"
+	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
@@ -51,7 +55,17 @@ func (c *Client) UpdateProfile(user *types.User, address *types.Address, phoneNu
 	chef.ProviderID = user.ProviderID
 	chef.DeliveryRange = deliveryRange
 	chef.Bio = bio
-	chef.Application = true
+	if !chef.Application {
+		chef.Application = true
+		if !appengine.IsDevAppServer() {
+			// notify enis
+			nC := notification.New(c.ctx)
+			err = nC.SendSMS("6153975516", fmt.Sprintf("%s just submit an application. get on that booty. userID: %s", user.Name, user.ID))
+			if err != nil {
+				utils.Errorf(c.ctx, "failed to notify enis about chef(%s) submitting application", user.ID)
+			}
+		}
+	}
 	if chef.DeliveryRange == 0 {
 		chef.DeliveryRange = 1
 	}
@@ -71,6 +85,9 @@ func (c *Client) UpdateProfile(user *types.User, address *types.Address, phoneNu
 			tmpID += tmpID
 		}
 		chef.BTSubMerchantID = tmpID[:32]
+	}
+	if chef.CreatedDatetime.IsZero() {
+		chef.CreatedDatetime = time.Now()
 	}
 	err = put(c.ctx, user.ID, chef)
 	if err != nil {
@@ -112,6 +129,9 @@ func SaveUserInfo(ctx context.Context, user *types.User, address *types.Address,
 		}
 		chef.BTSubMerchantID = tmpID[:32]
 	}
+	if chef.CreatedDatetime.IsZero() {
+		chef.CreatedDatetime = time.Now()
+	}
 	err = put(ctx, user.ID, chef)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put gigachef")
@@ -132,9 +152,10 @@ func GetInfo(ctx context.Context, id string) (*Gigachef, error) {
 
 // PostInfoResp contains information related to a post
 type PostInfoResp struct {
-	Address         types.Address `json:"address"`
-	DeliveryRange   int32         `json:"delivery_range"`
-	BTSubMerchantID string        `json:"bt_sub_merchant_id"`
+	Address             types.Address `json:"address"`
+	DeliveryRange       int32         `json:"delivery_range"`
+	BTSubMerchantID     string        `json:"bt_sub_merchant_id"`
+	BTSubMerchantStatus string        `json:"bt_sub_merchant_status"`
 }
 
 // GetPostInfo returns info related to a post
@@ -147,9 +168,10 @@ func GetPostInfo(ctx context.Context, user *types.User) (*PostInfoResp, error) {
 		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
 	postInfo := &PostInfoResp{
-		Address:         chef.Address,
-		DeliveryRange:   chef.DeliveryRange,
-		BTSubMerchantID: chef.BTSubMerchantID,
+		Address:             chef.Address,
+		DeliveryRange:       chef.DeliveryRange,
+		BTSubMerchantID:     chef.BTSubMerchantID,
+		BTSubMerchantStatus: chef.SubMerchantStatus,
 	}
 	return postInfo, nil
 }
