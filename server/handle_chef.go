@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-	"time"
 
 	"google.golang.org/appengine/blobstore"
 	"google.golang.org/appengine/image"
@@ -73,9 +71,8 @@ func hangleGetUploadURL(w http.ResponseWriter, req *http.Request, _ httprouter.P
 		resp.Err = errors.GetErrorWithCode(err)
 		return
 	}
-	name := strconv.FormatInt(time.Now().UnixNano(), 36)
 	opts := &blobstore.UploadURLOptions{
-		StorageBucket: fmt.Sprintf("%s/%s/%s", bucketName, user.ID, name),
+		StorageBucket: fmt.Sprintf("%s/%s", bucketName, user.ID),
 	}
 	uploadURL, err := blobstore.UploadURL(ctx, "/upload", opts)
 	if err != nil {
