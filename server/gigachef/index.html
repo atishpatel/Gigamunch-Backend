@@ -12,6 +12,7 @@
   <meta name="theme-color" content="#FF7043">
   <link rel="manifest" href="manifest.json">
 
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
   <script>
 
     // setup Polymer options
@@ -59,25 +60,11 @@
         CHEF.Env = CHEF.PROD;
         CHEF.isProd = true;
     }
-  </script>
-  <link rel="import" href="src/my-app.html">
 
-  <style>
-
-    body {
-      margin: 0;
-      font-family: 'Roboto', 'Noto', sans-serif;
-      line-height: 1.5;
-      min-height: 100vh;
-      background-color: #eee;
-    }
-
-  </style>
-  <!-- Google Analytics -->
-  <script async src="https://www.google-analytics.com/analytics.js"></script>
-  <script>
+    // Google Analytics
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-    ga('create', 'UA-71567908-1', 'auto');
+    var ua = CHEF.isProd ? 'UA-71567908-1' : 'UA-71567908-4';
+    ga('create', ua, 'auto');
     ga('send', 'pageview');
     // Setup error tracking before anything else runs.
     window.onerror = function(message, file, lineNumber, columnNumber, error) {
@@ -142,7 +129,19 @@
       setTimeout(redirectToUpgradePage, 5000);
     }
   </script>
-  <!-- End upgrade browser -->
+  <link rel="import" href="src/my-app.html">
+
+  <style>
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Noto', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      background-color: #eee;
+    }
+
+  </style>
 </head>
 <body>
   <script src="js/user.js"></script>
