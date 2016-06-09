@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	// driver for mysql
@@ -12,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 
+	"gitlab.com/atishpatel/Gigamunch-Backend/config"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
@@ -35,9 +35,9 @@ const (
 	deleteStatement   = "DELETE FROM live_posts WHERE post_id=%d"
 )
 
-func insertLivePost(postID int64, post *Post) error {
+func insertLivePost(ctx context.Context, postID int64, post *Post) error {
 	if mysqlDB == nil {
-		connectSQL()
+		connectSQL(ctx)
 	}
 	_, err := mysqlDB.Exec(
 		`INSERT
@@ -61,7 +61,7 @@ func insertLivePost(postID int64, post *Post) error {
 
 func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types.Limit, radius int, readyDatetime time.Time, descending bool) ([]int64, []int64, []string, []float32, error) {
 	if mysqlDB == nil {
-		connectSQL()
+		connectSQL(ctx)
 	}
 	var err error
 	listLength := limit.End - limit.Start
@@ -111,7 +111,7 @@ func selectLivePosts(ctx context.Context, geopoint *types.GeoPoint, limit *types
 
 func getClosedPosts(ctx context.Context) ([]int64, []string, error) {
 	if mysqlDB == nil {
-		connectSQL()
+		connectSQL(ctx)
 	}
 	statement := fmt.Sprintf(selectClosedPosts, time.Now().UTC().Add(1*time.Minute).Format(datetimeFormat))
 	rows, err := mysqlDB.Query(statement)
@@ -148,9 +148,9 @@ func getSortByDateQuery(latitude float64, longitude float64, radius int, readyTi
 	return fmt.Sprintf(sortByDate, latitude, longitude, latitude, readyWhere, radius, readyDatetimeOrder, limit.Start, limit.End)
 }
 
-func removeLivePost(postID int64) error {
+func removeLivePost(ctx context.Context, postID int64) error {
 	if mysqlDB == nil {
-		connectSQL()
+		connectSQL(ctx)
 	}
 	_, err := mysqlDB.Exec(fmt.Sprintf(deleteStatement, postID))
 	if err != nil {
@@ -159,17 +159,14 @@ func removeLivePost(postID int64) error {
 	return nil
 }
 
-func connectSQL() {
+func connectSQL(ctx context.Context) {
 	var err error
 	var connectionString string
 	if appengine.IsDevAppServer() {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		projectID := os.Getenv("PROJECTID")
-		if projectID == "" {
-			log.Fatal("PROJECTID env variable is not set.")
-		}
+		projectID := config.GetProjectID(ctx)
 		// MYSQL_CONNECTION: user:password@tcp([host]:3306)/dbname
 		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
 	}

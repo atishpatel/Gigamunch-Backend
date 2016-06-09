@@ -1,7 +1,6 @@
 package gigachef
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
@@ -12,19 +11,19 @@ import (
 
 // Item is an item created by the chef that holds the basic info for a post
 type Item struct {
-	BaseItem                      // embedded
-	ID                json.Number `json:"id"`
-	ID64              int64       `json:"-"`
-	LastUsedDateTime  int         `json:"last_used_datetime"`
-	NumPostsCreated   int         `json:"num_posts_created"`
-	NumTotalOrders    int         `json:"num_total_orders"`
-	AverageItemRating float32     `json:"average_item_rating"`
-	NumRatings        int         `json:"num_ratings"`
+	BaseItem                  // embedded
+	ID                string  `json:"id"`
+	ID64              int64   `json:"-"`
+	LastUsedDateTime  int     `json:"last_used_datetime"`
+	NumPostsCreated   int     `json:"num_posts_created"`
+	NumTotalOrders    int     `json:"num_total_orders"`
+	AverageItemRating float32 `json:"average_item_rating"`
+	NumRatings        int     `json:"num_ratings"`
 }
 
 // Set takes a item form the item package and converts it to a endpoint item
 func (i *Item) Set(id int64, item *item.Item) {
-	i.ID = itojn(id)
+	i.ID = itos(id)
 	i.ID64 = id
 	i.Title = item.Title
 	i.Description = item.Description
@@ -54,9 +53,9 @@ func (i *Item) Get() *item.Item {
 
 // GetItemReq is the input request needed for GetItem.
 type GetItemReq struct {
-	Gigatoken string      `json:"gigatoken"`
-	ID        json.Number `json:"id"`
-	ID64      int64       `json:"-"`
+	Gigatoken string `json:"gigatoken"`
+	ID        string `json:"id"`
+	ID64      int64  `json:"-"`
 }
 
 // gigatoken returns the Gigatoken string
@@ -69,11 +68,11 @@ func (req *GetItemReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty")
 	}
-	if req.ID.String() == "0" {
+	if req.ID == "" || req.ID == "0" {
 		return fmt.Errorf("ID is empty")
 	}
 	var err error
-	req.ID64, err = req.ID.Int64()
+	req.ID64, err = stoi(req.ID)
 	if err != nil {
 		return fmt.Errorf("Error with ID: %v", err)
 	}
@@ -176,7 +175,7 @@ func (req *SaveItemReq) valid() error {
 	}
 	if req.Item.ID != "" {
 		var err error
-		req.Item.ID64, err = req.Item.ID.Int64()
+		req.Item.ID64, err = stoi(req.Item.ID)
 		if err != nil {
 			return fmt.Errorf("Error with ID: %v", err)
 		}
@@ -206,6 +205,6 @@ func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*SaveIt
 		return resp, nil
 	}
 	resp.Item = req.Item
-	resp.Item.ID = itojn(itemID)
+	resp.Item.ID = itos(itemID)
 	return resp, nil
 }

@@ -49,17 +49,17 @@ type BasicOrderIDs struct {
 
 // PostInfo contains info related to a post
 type PostInfo struct {
-	ID       int64  `json:"id"`
-	Title    string `json:"title"`
-	PhotoURL string `json:"photo_url"`
+	ID       int64  `json:"id" datastore:",noindex"`
+	Title    string `json:"title" datastore:",noindex"`
+	PhotoURL string `json:"photo_url" datastore:",noindex"`
 }
 
 // Order is the order made by a gigamuncher for a post
 type Order struct {
 	CreatedDateTime          time.Time             `json:"created_datetime"`
 	ExpectedExchangeDateTime time.Time             `json:"expected_exchange_datetime"`
-	PostCloseDateTime        time.Time             `json:"post_close_datetime"`
-	PostReadyDateTime        time.Time             `json:"post_ready_datetime"`
+	PostCloseDateTime        time.Time             `json:"post_close_datetime" datastore:",noindex"`
+	PostReadyDateTime        time.Time             `json:"post_ready_datetime" datastore:",noindex"`
 	GigachefHasCompleted     bool                  `json:"gigachef_has_completed" datastore:",noindex"`
 	State                    string                `json:"state" datastore:",index"`
 	BTRefundTransactionID    string                `json:"bt_refund_transaction_id" datastore:",noindex"`

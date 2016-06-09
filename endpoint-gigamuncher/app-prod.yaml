@@ -12,6 +12,3 @@ handlers:
   - url: /_ah/spi/.*
     script: _go_app
     secure: always
-
-env_variables:
-  PROJECTID: 'gigamunch-omninexus-dev'

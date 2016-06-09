@@ -21,7 +21,7 @@ var (
 	serverKey           string
 	errMapsConnect      = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Could not connect to Google Maps."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errMaps             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with Google Maps."}
+	errMaps             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with address."}
 )
 
 // GetDistance returns the distance using roads between two points.

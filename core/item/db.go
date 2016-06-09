@@ -18,7 +18,7 @@ func getSortedItems(ctx context.Context, gigachefID string, startLimit int, endL
 	limit := endLimit - startLimit
 	query := datastore.NewQuery(kindItem).
 		Filter("GigachefID =", gigachefID).
-		Order("LastUsedDateTime").
+		Order("-LastUsedDateTime").
 		Offset(offset).
 		Limit(limit)
 	var results []Item

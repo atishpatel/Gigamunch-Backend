@@ -1,0 +1,263 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import" href="../bower_components/gold-phone-input/gold-phone-input.html">
+<link rel="import" href="../bower_components/gold-zip-input/gold-zip-input.html">
+<link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
+
+<link rel="import" href="select-with-options.html">
+<link rel="import" href="paper-select.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="payout-form">
+  <template>
+    <style include="paper-select paper-date-picker-dialog-style">
+      :host {
+        display: block;
+        padding: 15px;
+        background-color: white;
+        min-height: 86vh;
+      }
+
+      #submitButton {
+        width: 100%;
+        margin: 20px 0px;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+      }
+      .row > *:not(:first-child) {
+        margin-left: 8px;
+      }
+
+      .row > * {
+        flex: 1;
+      }
+
+      .select-input {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .flex-1 {
+        flex: 1;
+      }
+
+      label {
+        line-height: 20px;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+        margin: auto;
+      }
+    </style>
+
+    <form
+      is="iron-form"
+      id="form"
+      method="post"
+      action="#"
+      on-change="updateSubmitButtonState">
+
+      <div class="row">
+        <paper-input label="Legal First Name" value="{{submerchant.first_name}}" required auto-validate></paper-input>
+        <paper-input label="Legal Last Name" value="{{submerchant.last_name}}" required auto-validate></paper-input>
+      </div>
+      <div class="row">
+        <gold-email-input label="Email" value="{{submerchant.email}}" required auto-validate></gold-email-input>
+        <paper-input label="Date of Birth" type="date" value="{{dob}}" placeholder="mm/dd/yyyy" required auto-validate></paper-input>
+      </div>
+      <paper-input label="Apt # (optional)" value="{{submerchant.address.apt}}" auto-validate></paper-input>
+      <paper-input label="Street" value="{{submerchant.address.street}}" required auto-validate></paper-input>
+      <paper-input label="City" value="{{submerchant.address.city}}" required auto-validate></paper-input>
+      <!-- group states and zip -->
+      <div class="row">
+        <div class="select-input flex-1">
+        <label>State</label>
+        <paper-select>
+          <select is="select-with-options" option-value="value" value="{{submerchant.address.state::change}}" required>
+            <option value="AL">AL</option>
+            <option value="AK">AK</option>
+            <option value="AZ">AZ</option>
+            <option value="AR">AR</option>
+            <option value="CA">CA</option>
+            <option value="CO">CO</option>
+            <option value="CT">CT</option>
+            <option value="DE">DE</option>
+            <option value="DC">DC</option>
+            <option value="FL">FL</option>
+            <option value="GA">GA</option>
+            <option value="HI">HI</option>
+            <option value="ID">ID</option>
+            <option value="IL">IL</option>
+            <option value="IN">IN</option>
+            <option value="IA">IA</option>
+            <option value="KS">KS</option>
+            <option value="KY">KY</option>
+            <option value="LA">LA</option>
+            <option value="ME">ME</option>
+            <option value="MD">MD</option>
+            <option value="MA">MA</option>
+            <option value="MI">MI</option>
+            <option value="MN">MN</option>
+            <option value="MS">MS</option>
+            <option value="MO">MO</option>
+            <option value="MT">MT</option>
+            <option value="NE">NE</option>
+            <option value="NV">NV</option>
+            <option value="NH">NH</option>
+            <option value="NJ">NJ</option>
+            <option value="NM">NM</option>
+            <option value="NY">NY</option>
+            <option value="NC">NC</option>
+            <option value="ND">ND</option>
+            <option value="OH">OH</option>
+            <option value="OK">OK</option>
+            <option value="OR">OR</option>
+            <option value="PA">PA</option>
+            <option value="RI">RI</option>
+            <option value="SC">SC</option>
+            <option value="SD">SD</option>
+            <option value="TN">TN</option>
+            <option value="TX">TX</option>
+            <option value="UT">UT</option>
+            <option value="VT">VT</option>
+            <option value="VA">VA</option>
+            <option value="WA">WA</option>
+            <option value="WV">WV</option>
+            <option value="WI">WI</option>
+            <option value="WY">WY</option>
+          </select>
+          <paper-md-decorator>
+            <paper-underline></paper-underline>
+          </paper-md-decorator>
+        </paper-select>
+        </div>
+        <gold-zip-input class="flex-1" label="Zip" value="{{submerchant.address.zip}}" required auto-validate></gold-zip-input>
+      </div>
+
+      <div>
+        <img alt="A check with routing and account number." src="http://banks-america.com/info/wp-content/uploads/2014/08/routing-number-check.jpg"></img>
+      </div>
+      <div class="row">
+        <paper-input label="Routing Number" value="{{submerchant.routing_number}}" required auto-validate></paper-input>
+        <paper-input label="Account Number" value="{{submerchant.account_number}}" required auto-validate></paper-input>
+      </div>
+
+      <paper-checkbox id="agreeCheckbox" required>I agree to <a href="/terms">Terms &amp; Agreement</a> and <a href="privacy">Privacy Policy</a> as a sub-merchant.</paper-checkbox>
+
+      <paper-button
+        id="submitButton"
+        on-tap="submit"
+        raised
+        disabled>
+        <paper-spinner id="spinner" hidden></paper-spinner>Update
+      </paper-button>
+    </form>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'payout-form',
+
+      properties: {
+        submerchant: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          value: {
+            address: {
+              zip: '',
+            },
+          },
+        },
+        dob: {
+          type: String,
+          observer: 'dobUpdated',
+        },
+        service: {
+          type: Object,
+        },
+        user: {
+          type: Object,
+        },
+      },
+      selected: function () {
+        this.$.spinner.hidden = true;
+        this.$.spinner.active = false;
+        this.getSubMerchant();
+      },
+      getSubMerchant: function () {
+        this.service.getSubMerchant(function (submerchant, err) {
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: function () {
+                  this.getSubMerchant();
+                }.bind(this)
+              }],
+            };
+            this.fire('error', d);
+          }
+          this.set('submerchant', submerchant);
+        }.bind(this));
+      },
+      submit: function (){
+        this.$.spinner.hidden = false;
+        this.$.spinner.active = true;
+        this.$.submitButton.disabled = true;
+        this.updateSubMerchant(this.submerchant);
+      },
+      updateSubMerchant: function (submerchant) {
+        this.service.updateSubMerchant(submerchant, function(chef, err){
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: function() {
+                        this.updateSubMerchant(submerchant);
+                      }.bind(this)
+                }],
+            };
+            this.fire('error', d);
+            this.$.spinner.hidden = true;
+            this.$.spinner.active = false;
+          } else {
+            this.fire('updated', { gigachef: chef });
+          }
+        }.bind(this));
+      },
+      updateSubmitButtonState: function () {
+        var form = this.$.form;
+        var submitButton = this.$.submitButton;
+        // Validate the entire form to see if we should enable the `Submit` button.
+        submitButton.disabled = !form.validate();
+      },
+      dobUpdated: function (dob) {
+        if (dob !== undefined || dob !== '') {
+          var ymd = dob.split('-');
+          var m = parseInt(ymd[1], 10) - 1;
+          this.submerchant.date_of_birth = Math.round(new Date(ymd[0], m, ymd[2]).getTime() / 100);
+        }
+      },
+    });
+  </script>
+</dom-module>

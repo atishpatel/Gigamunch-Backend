@@ -13,18 +13,17 @@ import (
 func init() {
 	r := httprouter.New()
 
-	// chef stuff
-	// loggedInChain := alice.New(middlewareLoggedIn)
-	// r.Handler("GET", baseGigachefURL+"/*path", loggedInChain.ThenFunc(handleGigachefApp))
-
 	r.GET(baseLoginURL, handleLogin)
 	r.GET(signOutURL, handleSignout)
-	r.POST("/upload", handleUpload)
+
+	// r.POST("/upload", handleUpload)
+	r.GET("/get-upload-url", hangleGetUploadURL)
 
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
 	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
 	r.NotFound = http.HandlerFunc(handle404)
+	http.HandleFunc("/upload", handleUpload)
 	http.Handle("/", r)
 }
 

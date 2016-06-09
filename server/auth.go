@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/account"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
@@ -34,17 +35,24 @@ func saveAuthCookie(w http.ResponseWriter, authToken string) {
 	http.SetCookie(w, cookie)
 }
 
-func getUserFromCookie(req *http.Request) (*types.User, error) {
-	ctx := appengine.NewContext(req)
-	// get token from cookie
+func getTokenFromReq(req *http.Request) (string, error) {
 	cookie, err := req.Cookie(sessionTokenCookieName)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	token := cookie.Value
 	if token == "" {
-		return nil, errInvalidParameter.WithMessage("Token is empty.")
+		return "", errInvalidParameter.WithMessage("Token is empty.")
 	}
+	return token, nil
+}
+
+func getUserFromCookie(req *http.Request) (*types.User, error) {
+	token, err := getTokenFromReq(req)
+	if err != nil {
+		return nil, err
+	}
+	ctx := appengine.NewContext(req)
 	// get user
 	return auth.GetUserFromToken(ctx, token)
 }
@@ -79,6 +87,25 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 				utils.Errorf(ctx, "Error getting user form gtoken: %+v", err)
 			}
 			return nil
+		}
+		// if user isn't a chef make them a chef
+		if !user.IsChef() {
+			user.SetChef(true)
+			err = auth.SaveUser(ctx, user)
+			if err != nil {
+				utils.Errorf(ctx, "Error auth.SaveUser", err)
+				// TODO redirect?
+			}
+			err = account.SaveUserInfo(ctx, user, nil, "")
+			if err != nil {
+				utils.Errorf(ctx, "Error account.SavingUserInfo", err)
+				return nil
+			}
+			authToken, err = auth.RefreshToken(ctx, authToken)
+			if err != nil {
+				utils.Errorf(ctx, "failed to refresh token ", err)
+				return nil
+			}
 		}
 		saveAuthCookie(w, authToken)
 		gTokenCookie.MaxAge = 120

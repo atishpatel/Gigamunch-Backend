@@ -1,0 +1,171 @@
+<!--
+`item-list` displays a list of chef items.
+### Variables:
+  - items: An array of item each with a title, image, and description.
+### Events:
+  - edit: edit event is fired an item needs to be edited.
+          The item is past of the detail.
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+
+<link rel="import" href="my-icons.html">
+
+<dom-module id="item-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 15px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+
+      .photo {
+        display: block;
+        width: 100%;
+      	position: relative;
+      	height: 0;
+      	padding: 56.25% 0 0 0;
+        overflow: hidden;
+      }
+
+      .photo img {
+      	position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+
+      paper-card {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+        width: 100%;
+        --paper-card-actions: {
+          display: flex;
+          padding: 0px;
+          margin-top: auto;
+        }
+      }
+
+      paper-button {
+        flex: 1;
+        margin: 0;
+      }
+
+      .editItem {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: white;
+        color: #727272;
+        border-radius: 50%;
+        margin: 10px;
+      }
+
+      .divider {
+        flex: .01;
+        background-color: #E8E8E8;
+      }
+
+      @media (min-width: 767px) {
+        paper-card {
+          flex-basis: 45%;
+          max-width: 50%;
+          margin: 15px;
+        }
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{items}}">
+      <paper-card>
+        <div class="photo" >
+          <img src='{{_getPhoto(item)}}'></img>
+        </div>
+        <div class="card-content">
+          <h1>{{item.title}}</h1>
+          <p>{{item.description}}</p>
+          <paper-icon-button class="editItem" on-tap="_editItem" icon="gigaicons:edit"></paper-icon-button>
+        </div>
+        <div class="card-actions">
+          <paper-button on-tap="_orderNowPost">Order Now Post</paper-button>
+          <span class="divider"></span>
+          <paper-button on-tap="_preorderPost">Pre-order Post</paper-button>
+        </div>
+      </paper-card>
+    </template>
+
+    <paper-fab icon="gigaicons:add" on-tap="_fabTap"></paper-fab>
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'item-list',
+
+      properties: {
+        items: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        service: {
+          type: Object,
+        },
+      },
+      selected: function() {
+        this.getItems();
+      },
+      getItems: function() {
+        this.service.getItems(0, 100, function (items, err) {
+          if (err.code !== 0) {
+            this.fire('error', {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: this.getItems.bind(this),
+              }],
+            });
+          }
+          this.set('items', items);
+        }.bind(this));
+      },
+      _orderNowPost: function(e) {
+        var item = e.model.item;
+        item.is_order_now = true;
+        this.fire('post', {item: item});
+      },
+      _preorderPost: function(e) {
+        var item = e.model.item;
+        item.is_order_now = false;
+        this.fire('post', {item: item});
+      },
+      _getPhoto: function(item) {
+        if(item.photos === undefined || item.photos === null || item.photos[0] === '') {
+          return 'data:image/svg+xml;utf8,<svg viewBox="0 0 304 171" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#929292" x="0" y="0" width="304" height="171"></rect><path d="M186.346124,89 L201.42488,89 C195.493404,110.894487 175.483744,127 151.71244,127 C127.941136,127 107.931477,110.894487 102,89 L179.7366,89 L204.639617,50.6527161 L207.155629,52.2866332 L185.411644,85.769434 L215.323046,57.8766002 L217.369041,60.0706613 L186.346124,89 Z" fill="#FFFFFF"></path></g></svg>';
+        }
+        return item.photos[0];
+      },
+      _editItem: function(e) {
+        this.fire('edit', { item: e.model.item });
+      },
+      _fabTap: function() {
+        this.fire('edit');
+      },
+    });
+  </script>
+</dom-module>

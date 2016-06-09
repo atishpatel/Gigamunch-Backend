@@ -13,6 +13,7 @@ import (
 var (
 	errBT               = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with payment processing."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was something went wrong."}
 	btConfig            config.BTConfig
 )
 
@@ -138,6 +139,16 @@ func getBTAddress(a types.Address) *braintree.Address {
 		Locality:        a.City,
 		Region:          a.State,
 		PostalCode:      a.Zip,
+	}
+}
+
+func getAddress(btA *braintree.Address) *types.Address {
+	return &types.Address{
+		Street: btA.StreetAddress,
+		APT:    btA.ExtendedAddress,
+		City:   btA.Locality,
+		State:  btA.Region,
+		Zip:    btA.PostalCode,
 	}
 }
 

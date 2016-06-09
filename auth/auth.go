@@ -88,7 +88,7 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 	// get user info from gitkit servers
 	gitkitUser, err := gitkitClient.UserByLocalID(ctx, gtoken.LocalID)
 	if err != nil {
-		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "failed to fetch user from gitkit server"}.WithError(err)
+		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error while signing in."}.WithError(err).Wrap("failed to fetch user from gitkit server")
 	}
 	token, err := createSessionToken(ctx, gitkitUser)
 	jwtString, err := token.JWTString()

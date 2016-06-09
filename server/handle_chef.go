@@ -3,22 +3,19 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"image"
-	"image/jpeg"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
+
+	"google.golang.org/appengine/blobstore"
+	"google.golang.org/appengine/image"
 
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
-	"google.golang.org/cloud/storage"
 
+	"github.com/julienschmidt/httprouter"
+	"gitlab.com/atishpatel/Gigamunch-Backend/config"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/disintegration/imaging"
-	"github.com/julienschmidt/httprouter"
 )
 
 var (
@@ -27,145 +24,72 @@ var (
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
 )
 
-// func handleGigachefApp(w http.ResponseWriter, req *http.Request) {
-// 	var err error
-// 	var page []byte
-// 	if appengine.IsDevAppServer() {
-// 		page, err = ioutil.ReadFile("chef/app/index.html")
-// 	} else {
-// 		page = chefIndexPage
-// 	}
-//
-// 	if err != nil {
-// 		ctx := appengine.NewContext(req)
-// 		utils.Errorf(ctx, "Error reading login page: %+v", err)
-// 	}
-// 	w.Write(page)
-// }
+type urlResp struct {
+	URL string               `json:"url"`
+	Err errors.ErrorWithCode `json:"err"`
+}
 
-// func middlewareLoggedIn(h http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-// 		user := CurrentUser(w, req)
-// 		if user == nil {
-// 			http.Redirect(w, req, loginURL, http.StatusTemporaryRedirect)
-// 			return
-// 		}
-// 		h.ServeHTTP(w, req)
-// 	})
-// }
-
-func handleUpload(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	var returnErr errors.ErrorWithCode
-	var resp struct {
-		URL string               `json:"url"`
-		Err errors.ErrorWithCode `json:"err"`
-	}
+func handleUpload(w http.ResponseWriter, req *http.Request) {
+	resp := new(urlResp)
 	ctx := appengine.NewContext(req)
 
-	defer func() {
-		// encode json resp and log errors
-		resp.Err = returnErr
-		if returnErr.Code != 0 && returnErr.Code != errors.CodeInvalidParameter {
-			utils.Errorf(ctx, "Error uploading file: %+v", returnErr)
-		}
-		err := json.NewEncoder(w).Encode(resp)
-		if err != nil {
-			utils.Errorf(ctx, "Error encoding json: %+v", err)
-		}
-	}()
+	defer handleURLResp(ctx, w, resp)
+
+	// get file
+	blobs, _, err := blobstore.ParseUpload(req)
+	if err != nil {
+		resp.Err = errInvalidParameter.WithMessage("Error parsing multipart form.").WithError(err)
+		return
+	}
+	file := blobs["file"]
+	if len(file) == 0 {
+		resp.Err = errInvalidParameter.WithMessage("No file was uploaded.")
+		return
+	}
+	opts := &image.ServingURLOptions{
+		Secure: true,
+		Crop:   true,
+	}
+	url, err := image.ServingURL(ctx, file[0].BlobKey, opts)
+	if err != nil {
+		resp.Err = errInternal.WithError(err).Wrap("failed to get image.ServingURL")
+		return
+	}
+	resp.URL = url.String()
+}
+
+func hangleGetUploadURL(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	resp := new(urlResp)
+	ctx := appengine.NewContext(req)
+	defer handleURLResp(ctx, w, resp)
+	if bucketName == "" {
+		bucketName = config.GetBucketName(ctx)
+	}
 	// get user
 	user, err := getUserFromCookie(req)
 	if err != nil {
-		returnErr = errors.GetErrorWithCode(err)
+		resp.Err = errors.GetErrorWithCode(err)
 		return
 	}
-	// get file
-	err = req.ParseMultipartForm(30 << 20)
+	opts := &blobstore.UploadURLOptions{
+		StorageBucket: fmt.Sprintf("%s/%s", bucketName, user.ID),
+	}
+	uploadURL, err := blobstore.UploadURL(ctx, "/upload", opts)
 	if err != nil {
-		returnErr = errInvalidParameter.WithMessage("Error parsing multipart form.").WithError(err)
+		resp.Err = errInternal.WithError(err).Wrap("error getting blobstore.UploadURL")
 		return
 	}
-	file, fileHeader, err := req.FormFile("file")
-	if err != nil {
-		returnErr = errInvalidParameter.WithMessage("File is invalid.").WithError(err)
-		return
-	}
-	defer handleCloser(ctx, "file", file)
-	// make sure file is an image
-	if !strings.Contains(fileHeader.Header.Get("Content-Type"), "image") {
-		returnErr = errInvalidParameter.WithMessage("Invalid file format.")
-		return
-	}
-	// decode image
-	img, err := imaging.Decode(file)
-	if err != nil {
-		returnErr = errInternal.WithError(err)
-		return
-	}
-	file = nil
-	// resize image
-	img = resizeAndConvert(img)
-	// generate obj name of UserID/rand
-	id := strconv.FormatInt(time.Now().UnixNano(), 36)
-	objName := user.ID + "/" + id
-	// save to bucket
-	err = uploadToBucket(ctx, bucketName, objName, &img)
-	if err != nil {
-		returnErr = errors.GetErrorWithCode(err)
-	}
-	resp.URL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objName)
+	resp.URL = uploadURL.String()
 }
 
-func uploadToBucket(ctx context.Context, bucketName, objName string, img *image.Image) error {
-	client, err := storage.NewClient(ctx)
+func handleURLResp(ctx context.Context, w http.ResponseWriter, resp *urlResp) {
+	// encode json resp and log errors
+	if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
+		utils.Errorf(ctx, "Error uploading file: %+v", resp.Err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
-		return errInternal.WithError(err)
-	}
-	bucket := client.Bucket(bucketName)
-	obj := bucket.Object(objName)
-	wr := obj.NewWriter(ctx)
-	defer handleCloser(ctx, "file writer", wr)
-	wr.CacheControl = "max-age=1209600" // cache for 14 days
-	err = jpeg.Encode(wr, *img, &jpeg.Options{Quality: 75})
-	if err != nil {
-		return errInternal.WithError(err)
-	}
-	return nil
-}
-
-func resizeAndConvert(img image.Image) image.Image {
-	// rotate images that are portrait
-	if img.Bounds().Dx() < img.Bounds().Dy() {
-		img = imaging.Rotate90(img)
-	}
-	ratio := 9.0 / 16.0
-	width := img.Bounds().Dx()
-	// crop
-	img = imaging.CropCenter(img, width, int(float64(width)*ratio))
-	// resize
-	img = imaging.Resize(img, 1920, 1080, imaging.Lanczos)
-	return img
-}
-
-func init() {
-	// var err error
-	// TODO switch to template with footer and stuff in different page
-	// chefIndexPage, err = ioutil.ReadFile("chef/app/index.html")
-	// if err != nil {
-	// 	log.Fatal("chef/app/index.html not found")
-	// }
-	bucketName = "gigamunch-dev-images"
-}
-
-type closer interface {
-	Close() error
-}
-
-func handleCloser(ctx context.Context, detail string, c closer) {
-	if c != nil {
-		err := c.Close()
-		if err != nil {
-			utils.Errorf(ctx, "Error closing %s: %v", detail, err)
-		}
+		utils.Errorf(ctx, "Error encoding json: %+v", err)
 	}
 }

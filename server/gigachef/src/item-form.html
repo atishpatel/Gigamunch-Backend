@@ -1,0 +1,155 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="item-fields.html">
+
+<dom-module id="item-form">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 15px;
+        background-color: white;
+        min-height: 86vh;
+      }
+      #submitButton {
+        width: 100%;
+        margin: 20px 0px;
+      }
+    </style>
+
+    <app-route
+      route="{{route}}"
+      pattern="/:id">
+    </app-route>
+
+    <form
+      is="iron-form"
+      id="form"
+      method="post"
+      action="#"
+      on-change="updateSubmitButtonState">
+      <item-fields
+        id="itemFields"
+        photos="{{item.photos}}"
+        title="{{item.title}}"
+        description="{{item.description}}"
+        ingredients="{{item.ingredients}}"
+        general-tags="{{item.general_tags}}"
+        dietary-needs-tags="{{item.dietary_needs_tags}}"
+        on-photos-changed="itemPhotoChanged">
+      </item-fields>
+      <paper-button
+        id="submitButton"
+        on-tap="submit"
+        raised
+        disabled>
+        <paper-spinner id="spinner" hidden></paper-spinner>Save
+      </paper-button>
+    </form>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'item-form',
+
+      properties: {
+        item: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          value: {},
+        },
+        service: {
+          type: Object,
+        },
+      },
+      observers: [
+        'itemPhotoChanged(item.photos)',
+      ],
+      itemPhotoChanged: function (p) {
+        this.updateSubmitButtonState();
+      },
+      selected: function () {
+        this.$.spinner.hidden = true;
+        this.$.spinner.active = false;
+        if (this.route.path === '' || this.route.path === '/') {
+          this.set('item', {});
+        } else if (this.item.id !== this.route.path.substring(1)) {
+          this.getItem(this.route.path.substring(1));
+        } else {
+          this.$.itemFields.update();
+        }
+      },
+      getItem: function (id) {
+        if (id === undefined || id === '' || id === '0') {
+          return;
+        }
+        if (this.item.id === id) {
+          this.$.itemFields.update();
+          return;
+        }
+        this.service.getItem(id, function (item, err) {
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: function () {
+                  this.getItems(id);
+                }.bind(this)
+              }],
+            };
+            this.fire('error', d);
+          }
+          this.set('item', item);
+          this.$.itemFields.update();
+        }.bind(this));
+      },
+      submit: function (){
+        this.$.spinner.hidden = false;
+        this.$.spinner.active = true;
+        this.$.submitButton.disabled = true;
+        this.saveItem(this.item);
+      },
+      saveItem: function (item) {
+        this.service.saveItem(item, function(i, err){
+          if (err.code !== 0) {
+            var d = {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: function() {
+                        this.saveItem(item);
+                      }.bind(this)
+                }],
+            };
+            this.fire('error', d);
+          } else {
+            if (this.item.id !== 0) {
+              ga('send', 'event', 'item', 'updated');
+            } else {
+              ga('send', 'event', 'item', 'created');
+            }
+            this.set('item', i);
+            this.fire('saved', { item: i });
+          }
+          this.$.spinner.hidden = true;
+          this.$.spinner.active = false;
+        }.bind(this));
+      },
+      updateSubmitButtonState: function () {
+        var form = this.$.form;
+        var submitButton = this.$.submitButton;
+        // Validate the entire form to see if we should enable the `Submit` button.
+        var hasPhoto = this.item.photos !== undefined && this.item.photos !== null && this.item.photos.length > 0;
+        submitButton.disabled = !form.validate() || !hasPhoto;
+      },
+    });
+  </script>
+</dom-module>

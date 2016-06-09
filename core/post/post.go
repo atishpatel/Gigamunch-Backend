@@ -49,13 +49,13 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	if !user.IsVerifiedChef() {
 		return 0, errNotVerifiedChef
 	}
-	if !user.HasSubMerchantID() {
-		return 0, errNoSubMerchantID
-	}
 	post.CreatedDateTime = time.Now().UTC()
 	post.TaxPercentage = taxPercentage
 	post.GigachefID = user.ID
 	post.PricePerServing = post.ChefPricePerServing * 1.2
+	if post.IsOrderNow {
+		post.ReadyDateTime = post.ClosingDateTime
+	}
 	// get the gigachef post info
 	postInfo, err := gigachef.GetPostInfo(ctx, user)
 	if err != nil {
@@ -63,6 +63,9 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	}
 	if !postInfo.Address.Valid() {
 		return 0, errUnauthorized.WithMessage("User does not have an address.")
+	}
+	if postInfo.BTSubMerchantStatus == "" {
+		return 0, errNoSubMerchantID
 	}
 	post.GigachefAddress = postInfo.Address
 	post.GigachefDelivery.Radius = postInfo.DeliveryRange
@@ -77,7 +80,7 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	// put in datastore
 	postID, err := putIncomplete(ctx, post)
 	// insert into sql table
-	err = insertLivePost(postID, post)
+	err = insertLivePost(ctx, postID, post)
 	if err != nil {
 		// TODO update to a transaction
 		utils.Criticalf(ctx, "failed to put %d in sql database: +%v", postID, err)
@@ -87,11 +90,11 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 	return postID, nil
 }
 
-// GetUserPosts gets post from a user sorted by closing time
-func GetUserPosts(ctx context.Context, user types.User, limit *types.Limit) ([]int64, []Post, error) {
-	postIDs, posts, err := getUserPosts(ctx, user.ID, limit.Start, limit.End)
+// GetUserPosts gets post from a user sorted by ready time
+func (c *Client) GetUserPosts(chefID string, start, end int) ([]int64, []Post, error) {
+	postIDs, posts, err := getUserPosts(c.ctx, chefID, start, end)
 	if err != nil {
-		return nil, nil, errDatastore.WithError(err)
+		return nil, nil, errDatastore.WithError(err).Wrapf("failed to getUserPosts for chef(%s)", chefID)
 	}
 	return postIDs, posts, nil
 }
@@ -147,7 +150,7 @@ func (c *Client) ClosePost(postID int64, chefID string) (*Resp, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("cannot get post")
 	}
-	err = removeLivePost(postID)
+	err = removeLivePost(c.ctx, postID)
 	if err != nil {
 		return nil, errors.Wrap("failed to remove live post", err)
 	}

@@ -8,21 +8,20 @@
 <link type="text/css" rel="stylesheet" href="//www.gstatic.com/authtoolkit/css/gitkit.css">
 </head>
 <body class="container">
-  <header class="header-basic-light">
-    <div class="header-limiter">
-      <h1><a href="#">Gigamunch</a></h1>
-      <h2><a href="#">{ Beta }</a></h2>
-    </div>
-  </header>
   <div class="panel panel-default">
     <div id="gitkitWidget"></div>
   </div>
 <script type="text/javascript">
-  // TODO: switch to template to set apiKey
+  var apiKey;
+  if (location.hostname.includes('gigamunch-omninexus-dev.appspot.com') || location.hostname === 'localhost') {
+    apiKey = 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g';
+  } else {
+    apiKey = 'AIzaSyCB8i30D0GkFPW6_mKf9ph8voFFMQoarO0';
+  }
   google.identitytoolkit.start(
     '#gitkitWidget',
     {
-      apiKey: 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g',
+      apiKey: apiKey,
       signInSuccessUrl: '/login',
       oobActionUrl: '/sendemail',
       displayMode: 'providerFirst',

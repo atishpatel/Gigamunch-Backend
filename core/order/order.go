@@ -109,12 +109,12 @@ func (c *Client) Create(ctx context.Context, req *CreateReq) (*Resp, error) {
 func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp, error) {
 	// TODO make two transactions if delivery cost is not 0
 	totalPricePerServing := req.PricePerServing * float32(req.NumServings)
-	gigaFee := req.PricePerServing - req.ChefPricePerServing
-	totalGigaFee := gigaFee * float32(req.NumServings)
 	totalExchangePrice := req.ExchangePrice
-	totalTax := (req.TaxPercentage / 100) * (totalGigaFee + totalPricePerServing + totalExchangePrice)
+	totalTax := (req.TaxPercentage / 100) * (totalPricePerServing + totalExchangePrice)
+	totalPrice := totalPricePerServing + totalTax + totalExchangePrice
+
+	totalGigaFee := totalPricePerServing - (req.ChefPricePerServing * float32(req.NumServings))
 	totalFeeAndTax := totalGigaFee + totalTax
-	totalPrice := totalPricePerServing + totalFeeAndTax + totalExchangePrice
 
 	transactionID, err := paymentC.MakeSale(req.GigachefSubMerchantID, req.PaymentNonce, totalPrice, totalFeeAndTax)
 	if err != nil {
@@ -298,8 +298,11 @@ func (c *Client) Process(id int64) (*Resp, error) {
 	}
 	switch o.State {
 	case State.Canceled:
+		fallthrough
 	case State.Refunded:
+		fallthrough
 	case State.Paid:
+		fallthrough
 	case State.Issues:
 		resp.Order = *o
 		return resp, nil

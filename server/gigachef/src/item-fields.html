@@ -1,0 +1,217 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="file-input.html">
+<link rel="import" href="my-icons.html">
+
+<dom-module id="item-fields">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .add-image {
+        text-align: center;
+        border-style: dashed;
+        border-color: black;
+        cursor: pointer;
+      }
+
+      .photo {
+        display: block;
+        width: 100%;
+      	position: relative;
+      	height: 0;
+      	padding: 56.25% 0 0 0;
+        overflow: hidden;
+        margin: 15px 0px;
+      }
+
+      .photo img {
+        z-index: 0;
+      	position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+
+      .photo paper-icon-button {
+        z-index: 1;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        --paper-icon-button: {
+          background-color: gray;
+          color: white;
+          border-radius: 50%;
+        }
+      }
+
+      .photoRequired {
+        color: #dd2c00;
+      }
+    </style>
+    <template id="photos" is="dom-repeat" items="{{photos}}" as="photo">
+      <div class="photo">
+        <paper-icon-button icon="gigaicons:close" on-tap="removePhoto"></paper-icon-button>
+        <img src="{{photo}}" alt="food photo"/>
+      </div>
+    </template>
+    <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required</div>
+    <file-input
+      id="fileInput"
+      photos="{{photos}}"
+      url-postfix="=s1080"
+      on-photos-changed="photosChanged"
+      auto-validate>
+      <div class="add-image">
+        <paper-icon-button icon="gigaicons:add-a-photo"></paper-icon-button>
+        Add Image
+      </div>
+    </file-input>
+
+    <paper-input label="Title*"
+                 value="{{title}}"
+                 placeholder="Pasta with sweet potato and goat cheese"
+                 errorMessage="A title is required"
+                 required
+                 auto-validate></paper-input>
+    <paper-input label="Description*"
+                 value="{{description}}"
+                 placeholder="Fresh Pasta with sweet potato, goat cheese, roasted vegetables, and nutty almonds transform plain fettuccine noodles into a dinner worth craving!"
+                 errorMessage="A description is required"
+                 required
+                 auto-validate></paper-input>
+    <paper-input label="Ingredients*"
+                 placeholder="sweet potato, mushrooms, fettuccine noodles, almonds, goat cheese, salt, black pepper"
+                 errorMessage="Ingredients are required"
+                 value="{{_ingredients}}"
+                 required
+                 auto-validate></paper-input>
+    <paper-input label="General Tags"
+                 placeholder="pasta, vegeterian, vegetables, cheese"
+                 value="{{_general_tags}}"
+                 auto-validate></paper-input>
+    <!-- TODO: switch to a checklist for dietary needs -->
+    <paper-input label="Dietary Concerns Tags"
+                 placeholder="cheese, almonds"
+                 value="{{_dietary_needs_tags}}"
+                 auto-validate></paper-input>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'item-fields',
+
+      properties: {
+        photos: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          observer: 'photosUpdated',
+          value: [],
+        },
+        title: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        description: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        ingredients: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        generalTags: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        dietaryNeedsTags: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        _ingredients: {
+          type: String,
+          observer: '_updateIngredients',
+        },
+        _general_tags: {
+          type: String,
+          observer: '_updateGeneralTags',
+        },
+        _dietary_needs_tags: {
+          type: String,
+          observer: '_updateDietaryNeedsTags',
+        },
+        showPhotoRequired: {
+          type: Boolean,
+          value: true,
+        },
+      },
+      update: function() {
+        if (this.ingredients !== undefined && this.ingredients !== null) {
+          this.set('_ingredients', this.ingredients.toString().replace(',', ', '));
+        } else {
+          this.set('_ingredients', '');
+        }
+        if (this.generalTags !== undefined && this.generalTags !== null) {
+          this.set('_general_tags', this.generalTags.toString().replace(',', ', '));
+        } else {
+          this.set('_general_tags', '');
+        }
+        if (this.dietaryNeedsTags !== undefined && this.dietaryNeedsTags !== null) {
+          this.set('_dietary_needs_tags', this.dietaryNeedsTags.toString().replace(',', ', '));
+        } else {
+          this.set('_dietary_needs_tags', '');
+        }
+      },
+      _updateIngredients: function(ing) {
+        if (ing !== undefined && ing !== null) {
+          this.ingredients = ing.split(/\s*,\s*/);
+        }
+      },
+      _updateGeneralTags: function(gt) {
+        if (gt !== undefined && gt !== null) {
+          this.generalTags = gt.split(/\s*,\s*/);
+        }
+      },
+      _updateDietaryNeedsTags: function(dnt) {
+        if (dnt !== undefined && dnt !== null) {
+          this.dietaryNeedsTags = dnt.split(/\s*,\s*/);
+        }
+      },
+      removePhoto: function(e) {
+        var index = this.photos.indexOf(e.model.photo);
+        this.splice('photos', index, 1);
+        this.photosUpdated(this.photos);
+      },
+      photosUpdated: function(photos) {
+        if (photos === undefined || photos === null || photos.length === 0) {
+          this.set('showPhotoRequired', true);
+        } else {
+          this.set('showPhotoRequired', false);
+        }
+      },
+      photosChanged: function() {
+        // this.notifyPath('photos', this.photos);
+        this.photosUpdated(this.photos);
+      },
+    });
+  </script>
+</dom-module>

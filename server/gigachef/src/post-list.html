@@ -1,0 +1,232 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+
+<link rel="import" href="my-icons.html">
+
+<dom-module id="post-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 15px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+
+      .post-card {
+        background: white;
+        padding:10px;
+        margin-bottom: 15px;
+        width: 100%;
+        font-weight: 300;
+      }
+
+      .post-card h2 {
+        font-size: 1.25em;
+        font-weight: 500;
+        margin: 0px;
+      }
+
+      .post-card h3 {
+        font-size: 1em;
+        font-weight: 400;
+        margin-bottom: 5px;
+      }
+
+      .post-card .order {
+        padding: 5px 0px;
+        width: 100%;
+        border-top: 1px solid #e8e8e8;
+        font-size: .9em;
+        letter-spacing: .05em;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .flex-2 {
+        flex: 2;
+      }
+
+      .center-text {
+        justify-content: center;
+      }
+
+      .photo {
+        display: block;
+        width: 100%;
+      	position: relative;
+      	height: 0;
+      	padding: 56.25% 0 0 0;
+        overflow: hidden;
+      }
+
+      .photo img {
+      	position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+
+      .user-pic {
+        height: 35px;
+        width: 35px;
+        border-radius: 50%;
+        background-color: white;
+        color: var(--secondary-text-color);
+      }
+
+      .user-name {
+        margin-left: 20px;
+      }
+
+      @media (min-width: 767px) {
+        .post-card {
+          flex-basis: 45%;
+          max-width: 44%;
+          margin: 1%;
+        }
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{posts}}" as="post">
+      <paper-material elevation="1" class="post-card">
+        <div class="row">
+          <div class="column center-text">
+            <h2>[[post.title]]</h2>
+          </div>
+          <div class="column">
+            <div class="photo">
+              <img src="[[getPhoto(post)]]"></img>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="column">
+            <h3>Earned:</h3>
+            <span>$[[getAmountEarned(post)]]</span>
+          </div>
+          <div class="column">
+            <h3>Servings:</h3>
+            <span>[[getNumOrders(post)]]</span>
+          </div>
+          <div class="column flex-2">
+            <h3>Make by:</h3>
+            <span>[[getMakeBy(post)]]</span>
+          </div>
+        </div>
+        <template is="dom-repeat" items="[[post.orders]]" as="order">
+          <div class="order">
+            <div class="row">
+              <div class="column">
+                <div class="row">
+                  <placeholder-img class="user-pic" icon="gigaicons:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
+                  <span class="column center-text user-name">[[order.gigamuncher_name]]</span>
+                </div>
+              </div>
+              <div class="column center-text">
+                <span>
+                  [[getExchangeText(order)]] [[order.servings]] servings by [[getExchangeTime(order)]]
+                </span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </paper-material>
+    </template>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'post-list',
+
+      properties: {
+        posts: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        service: {
+          type: Object,
+        },
+      },
+      selected: function() {
+        this.getPosts();
+      },
+      getPosts: function() {
+        this.service.getPosts(0, 200, function (posts, err) {
+          if (err.code !== 0) {
+            this.fire('error', {
+              error: err,
+              options: [{
+                text: 'Try Again',
+                func: this.getItems.bind(this),
+              }],
+            });
+          }
+          this.set('posts', posts);
+        }.bind(this));
+      },
+      getPhoto: function(post) {
+        if(post.photos === undefined || post.photos === null || post.photos[0] === '') {
+          return '';
+        }
+        return post.photos[0];
+      },
+      getAmountEarned: function(post) {
+        var e = 0.0;
+        if (post.orders !== undefined && post.orders !== null) {
+          post.orders.forEach(
+            function(order) {
+              e += order.servings * post.chef_price_per_serving;
+            }
+          );
+        }
+        return e;
+      },
+      getNumOrders: function(post) {
+        var e = 0;
+        if (post.orders !== undefined && post.orders !== null) {
+          post.orders.forEach(
+            function(order) {
+              e += order.servings;
+            }
+          );
+        }
+        return e;
+      },
+      getMakeBy: function(post) {
+        return (new Date(post.ready_datetime * 1000)).toLocaleString().replace(/:[0-9][0-9] /, ' ');
+      },
+      getExchangeTime: function(order) {
+        return (new Date(order.exchange_time * 1000)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+      },
+      getExchangeText: function(order) {
+        if (order.exchange_method == 1) {
+          return 'Pickup';
+        } else {
+          return 'Delivery';
+        }
+      },
+    });
+  </script>
+</dom-module>

@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 
@@ -73,12 +74,16 @@ func TestMakeSaleThenRefund(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	updateSubMerchantReq := &UpdateSubMerchantReq{
-		ID:          "01234567890123456789012345678912",
+	t, err := time.Parse(dateOfBirthFormat, "01-01-1989")
+	if err != nil {
+		log.Fatalf("failed to get dob time: %v", err)
+	}
+	updateSubMerchantReq := &SubMerchantInfo{
+		ID:          "01234567890123456789532345678912",
 		FirstName:   "Kayle",
 		LastName:    "Gishen",
 		Email:       "kayle@test.com",
-		DateOfBirth: "1-1-1989",
+		DateOfBirth: t,
 		Address: types.Address{
 			APT:     "Suite 404",
 			Street:  "1 E Main St",
@@ -97,7 +102,8 @@ func TestMain(m *testing.M) {
 	defer done()
 
 	c := New(ctx)
-	subMerchantID, err = c.UpdateSubMerchant(updateSubMerchantReq)
+	user := new(types.User)
+	subMerchantID, err = c.UpdateSubMerchant(user, updateSubMerchantReq)
 	if err != nil {
 		log.Fatalln("failed to create test sub merchant: %v", err)
 	}
