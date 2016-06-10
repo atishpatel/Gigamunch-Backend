@@ -1,189 +1,54 @@
-<!DOCTYPE HTML>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title>Gigamunch</title>
-        <meta name="description" content="Gigamunch is a Nashville startup that connects foodies who love new eating experiences with people who love to cook. Sell food from your home. Buy food from your neighbors and local chefs.">
-        <meta name="keywords" content="gigamunch, local, nashville, chef, cook, homemade, online, buy, foodie, meal, plan, eat, job, sell, food, home">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="msvalidate.01" content="3BEBA3446CD201D8846F3AE2E5E4F290" />
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
-        <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.deep_orange-red.min.css" />
-        <link rel="stylesheet" href="css/main.css">
-        <!-- <script src="js/main.js"></script> -->
-        <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
-    </head>
-    <body>
-        <div class="container mdl-js-layout">
-            <header class="text-center bg-orange">
-                <h1 class="logo font-bold">Gigamunch</h1>
-            </header>
-            <div class="text-center bg-gray step video-background">
-                <div class="black-transparent-bg video-block">
-                  <div class="video-center">
-                    <div id="video-holder-spot">
-                      <div class="amazing-text font-light">
-                        Something Amazing <br/>
-                        is Coming to Nashville
-                      </div>
-                      <div class="watch-now-button font-light" onclick="document.getElementById('video').innerHTML='<iframe class=&quot;promo-video&quot; src=&quot;https://www.youtube.com/embed/Jv3LDsXat_g?rrel=0&amp;showinfo=0&amp;autoplay=1&quot; frameborder=&quot;0&quot; allowfullscreen></iframe>'; document.getElementById('video-holder-spot').style.display='none'; ">
-                        Watch Video
-                      </div>
-                    </div>
-                    <div id="video" class="center-block">
-                    </div>
-                  </div>
-                </div>
-                <div class="white-transparent-bg">
-                  <div class="mdl-grid center">
-                      <p class="signup-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone font-light">
-                          Be the first to know!
-                      </p>
-                  </div>
-                  <form method="post" action="/thankyou">
-                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                          <input class="mdl-textfield__input" type="text" name="name">
-                          <label class="mdl-textfield__label" for="name">Name</label>
-                      </div>
-                      <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
-                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                          <input class="mdl-textfield__input" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
-                          <label class="mdl-textfield__label" for="email">Email</label>
-                      </div>
-                      <br class="mdl-cell--hide-desktop"/>
-                      <input id="terp" style="display:none">
-                      <button style="background-color:#FF5722;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                       Learn more!
-                      </button>
-                  </form>
-                </div>
-            </div>
-            <div class="bg-wood">
-              <div class="section-container">
-                <div class="section-content flex-column">
-                  <div id="feed-video-container" class="section-iphone section-iphone-feed">
-                    <img class="section-iphone-image img-responsive" src="/img/feed_screen.png" alt="Gigamunch app feed view. Selecting the Kickin Quesadilla."></img>
-                  </div>
-                  <div class="section-text section-text-padding-left font-light">
-                      Express your inner creative chef, <br class="mdl-cell--hide-phone mdl-cell--hide-tablet"/>
-                       and <span class="font-bold">share</span> your creations <br class="mdl-cell--hide-phone mdl-cell--hide-tablet"/>
-                       with the world.
-                  </div>
-                </div>
-              </div>
-              <div class="section-container">
-                <div class="section-content flex-column-reverse">
-                  <div class="section-text section-text-padding-right font-light" style="min-width:300px">
-                    Discover <span class="font-bold">unique</span>,  <br class="mdl-cell--hide-desktop"/>
-                    local foods, <br class="mdl-cell--hide-phone mdl-cell--hide-tablet"/>and get <br class="mdl-cell--hide-desktop"/>
-                    excited for delicious <br/>
-                    adventures.
-                  </div>
-                  <div id="details-video-container" class="section-iphone section-iphone-details">
-                    <img class="section-iphone-image img-responsive" src="/img/details_screen.png" alt="Gigamunch app details view. Options of delievery, pick up, and in between."></img>
-                  </div>
-                </div>
-              </div>
-              <div class="white-transparent-bg text-center">
-                <div class="mdl-grid center">
-                    <p class="signup-text center-block mdl-cell mdl-cell--8-col mdl-cell--7-col-tablet mdl-cell--4-col-phone font-light">
-                        Get ready Nashville!
-                    </p>
-                </div>
-                <form method="post" action="/thankyou">
-                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                        <input class="mdl-textfield__input" type="text" name="name">
-                        <label class="mdl-textfield__label" for="name">Name</label>
-                    </div>
-                    <br class="mdl-cell--hide-desktop mdl-cell--hide-phone"/>
-                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label comingsoon-input">
-                        <input class="mdl-textfield__input" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
-                        <label class="mdl-textfield__label" for="email">Email</label>
-                    </div>
-                    <br class="mdl-cell--hide-desktop"/>
-                    <input id="terp" style="display:none">
-                    <button style="background-color:#FF5722;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                     Learn more!
-                    </button>
-                </form>
-              </div>
-            </div>
-        </div>
+  <title>Gigamunch</title>
 
-        <!-- Google Analytics -->
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-          ga('create', 'UA-71567908-1', 'auto');
-          ga('send', 'pageview');
-        </script>
-        <script>
-        var videos = document.getElementsByTagName("video"),
-        fraction = 0.85;
-        function checkScrollForVideo() {
-          for(var i = 0; i < videos.length; i++) {
-              var video = videos[i];
-              if(!video.ended){
-                var x = video.offsetLeft,
-                    y = video.offsetTop,
-                    w = video.offsetWidth,
-                    h = video.offsetHeight,
-                    r = x + w, //right
-                    b = y + h, //bottom
-                    visibleX, visibleY, visible;
+  <meta name="theme-color" content="#546E7A">
 
-                visibleX = Math.max(0, Math.min(w, window.pageXOffset + window.innerWidth - x, r - window.pageXOffset));
-                visibleY = Math.max(0, Math.min(h, window.pageYOffset + window.innerHeight - y, b - window.pageYOffset));
+  <script>
 
-                visible = visibleX * visibleY / (w * h);
+    // setup Polymer options
+    window.Polymer = {lazyRegister: true, dom: 'shadow'};
 
-                if (visible > fraction) {
-                    video.play();
-                } else {
-                    video.pause();
-                }
-              }
-          }
-        }
+    // load webcomponents polyfills
+    (function() {
+      if ('registerElement' in document
+          && 'import' in document.createElement('link')
+          && 'content' in document.createElement('template')) {
+        // browser has web components
+      } else {
+        // polyfill web components
+        var e = document.createElement('script');
+        e.src = '/bower_components/webcomponentsjs/webcomponents-lite.min.js';
+        document.head.appendChild(e);
+      }
+    })();
 
+  </script>
 
-        var feedVideo = document.getElementById("feed-video-container");
-        var detailsVideo = document.getElementById("details-video-container");
-        var isMobile = window.matchMedia("(max-width: 855px)").matches;
-        var videoDisplayMode = false;
-        function checkSizeForVideoToImage() {
-          isMobile = window.matchMedia("(max-width: 855px)").matches;
-          if(!isMobile) {
-            if(!videoDisplayMode){
-              feedVideo.innerHTML = '<video class="section-iphone-video" >\
-                    <source src="/video/feed_screen.mp4" type="video/mp4"/>\
-                  </video>';
-              detailsVideo.innerHTML = '<video class="section-iphone-video" >\
-                    <source src="/video/details_screen.mp4" type="video/mp4"/>\
-                  </video>'
-              videoDisplayMode = true;
-            }
-          } else {
-            if(videoDisplayMode){
-              feedVideo.innerHTML = '<img class="section-iphone-image img-responsive" src="/img/feed_screen.png" \
-                alt="Gigamunch app feed view. Selecting the Kickin Quesadilla."></img>';
-              detailsVideo.innerHTML = '<img class="section-iphone-image img-responsive" src="/img/details_screen.png" \
-                alt="Gigamunch app details view. Options of delievery, pick up, and in between."></img>';
-              videoDisplayMode = false;
-            }
-          }
-        }
-        checkSizeForVideoToImage();
-        window.addEventListener('resize', checkSizeForVideoToImage, false);
+  <link rel="import" href="/source/app-shell.html">
+  <!-- <link rel="import" href="/common/common.css"> -->
+  <style>
 
-        if(!isMobile){
-          window.addEventListener('scroll', checkScrollForVideo, false);
-        }
-        window.addEventListener('resize', checkScrollForVideo, false);
- </script>
-    </body>
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Noto', sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      background-color: #eee;
+    }
+
+  </style>
+
+</head>
+<body>
+
+  <app-shell id="app"></app-shell>
+  <script>
+    var app = document.querySelector('#app');
+  </script>
+</body>
 </html>

@@ -1,0 +1,230 @@
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="app-icons.html">
+<link rel="import" href="home-page.html">
+
+<dom-module id="app-shell">
+
+  <template>
+
+    <style>
+
+      :host {
+        display: block;
+        --app-primary-color: #FF7043;
+        --app-secondary-color: black;
+        --primary-text-color: var(--paper-grey-900);
+        --secondary-text-color: #727272;
+        color: var(--primary-text-color);
+      }
+
+      app-drawer {
+        z-index: 10;
+      }
+
+      app-toolbar {
+        z-index: 9;
+      }
+
+      app-header, app-header-layout {
+        z-index: 8;
+      }
+
+      app-header-layout {
+        position: inherit;
+      }
+
+      app-header {
+        background-color: white;
+        color: var(--app-primary-color);
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: black;
+      }
+
+      .nav-a {
+        text-decoration: none;
+        outline: 0;
+        color: #546E7A;
+      }
+
+      .drawer-toolbar {
+        height: 64px;
+        background-color: var(--app-primary-color);
+        font-size: 14px;
+      }
+
+      .drawer-toolbar .logo {
+        font-size: 20px;
+        color: white;
+        text-decoration: none;
+        outline: 0;
+      }
+
+      .drawer-list {
+        padding-top: 8px;
+        font-size: 14px;
+      }
+
+      .drawer-list a {
+        display: block;
+        color: #546E7A;
+      }
+
+      .drawer-list a.iron-selected {
+        background-color: #ECEFF1;
+      }
+
+      .drawer-list paper-item {
+        font-size: inherit;
+        font-weight: 500;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+
+      .toolbar-left {
+        margin-right: auto;
+      }
+
+      .nav-tabs {
+        height: 100%;
+        margin-right: 12px
+      }
+
+      .nav-tabs a {
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+      }
+
+      .hide {
+        display: none;
+      }
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
+
+      <!-- Drawer content -->
+      <app-drawer id="drawer" opened="{{drawerOpened}}" swipe-open="[[smallScreen]]">
+        <app-toolbar  class="drawer-toolbar"><div class="logo">Gigamunch</div></app-toolbar>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a class="nav-a" name="home" href="/"><paper-item>Home</paper-item></a>
+          <a class="nav-a" name="becomechef" href="/becomechef"><paper-item>Become a chef</paper-item></a>
+          <a class="nav-a" name="faq" href="/faq"><paper-item>FAQ</paper-item></a>
+        </iron-selector>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+        <app-header condenses reveals effects="waterfall">
+          <app-toolbar>
+            <div class="toolbar toolbar-left">
+              <paper-icon-button
+                id="menuIcon"
+                class="hide"
+                icon="app:menu"
+                on-tap="toggleDrawer">
+              </paper-icon-button>
+              <div class="toolbar-title" title>Gigamunch</div>
+            </div>
+            <div id="toolbarRight" class="toolbar hide">
+              <paper-tabs
+                class="nav-tabs"
+                attr-for-selected="name"
+                selected="{{page}}" tabindex="-1">
+                <paper-tab name="home" tabindex="-1">
+                  <a class="nav-a" href="/"><span>Home</span></a>
+                </paper-tab>
+                <paper-tab name="becomechef" tabindex="-1">
+                  <a class="nav-a" href="/becomechef"><span>Become a chef</span></a>
+                </paper-tab>
+                <paper-tab name="faq" tabindex="-1">
+                  <a class="nav-a" href="/faq"><span>FAQ</span></a>
+                </paper-tab>
+              </paper-tabs>
+            </div>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
+          <home-page name="home"></home-page>
+          <becomechef-page name="becomechef"></becomechef-page>
+          <faq-page name="faq"></faq-page>
+          <terms-page name="terms"></terms-page>
+          <privacy-page name="privacy"></privacy-page>
+          <upgrade-page name="upgrade"></upgrade-page>
+        </iron-pages>
+
+      </app-header-layout>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'app-shell',
+
+      properties: {
+
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: 'pageChanged',
+        },
+
+      },
+      observers: [
+        'routePageChanged(routeData.page)',
+        'screenChanged(smallScreen)',
+      ],
+      routePageChanged: function(page) {
+        this.page = page || 'home';
+      },
+
+      pageChanged: function(page) {
+        // load page import on demand.
+        this.importHref(
+          this.resolveUrl(page + '-page' + '.html'), null, null, true);
+      },
+      screenChanged: function (smallScreen) {
+        this.$.menuIcon.toggleClass('hide', !smallScreen);
+        if (smallScreen) {
+          this.$.toolbarRight.className += ' hide';
+        } else {
+          this.$.toolbarRight.className = this.$.toolbarRight.className.replace(/hide/g, '');
+        }
+      },
+      toggleDrawer: function () {
+        this.drawerOpened = !this.drawerOpened;
+      },
+    });
+
+  </script>
+
+</dom-module>
