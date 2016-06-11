@@ -7,7 +7,7 @@
   <title>Gigamunch</title>
 
   <meta name="theme-color" content="#546E7A">
-
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
   <script>
 
     // setup Polymer options
@@ -27,10 +27,42 @@
       }
     })();
 
+    var isDev = false;
+    var isStage = false;
+    var isProd = false;
+    switch (location.hostname) {
+      case 'localhost':
+        isDev = true;
+        break;
+      case 'gigamunch-omninexus-dev.appspot.com':
+        isStage = true;
+        break;
+      default:
+        isProd = true;
+    }
+
+    // Google Analytics
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    var ua = isProd ? 'UA-71567908-1' : 'UA-71567908-4';
+    ga('create', ua, 'auto');
+    ga('send', 'pageview');
+    // Setup error tracking before anything else runs.
+    window.onerror = function(message, file, lineNumber, columnNumber, error) {
+      // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
+      try {
+        // Some browsers don't support error param yet.
+        if (error !== undefined) {
+          message = error.stack;
+        }
+        ga('send', 'event', 'error', file + ':' + lineNumber, message);
+      } catch (e) {
+        // no-op
+      }
+    };
+    // End Google Analytics
   </script>
 
   <link rel="import" href="/source/app-shell.html">
-  <!-- <link rel="import" href="/common/common.css"> -->
   <style>
 
     body {
