@@ -5,17 +5,48 @@
   <template>
 
     <style>
-      :host {
-        display: block;
-      }
-    </style>
+    :host {
+      display: block;
+      padding: 10px;
+      color: var(--primary-text-color);
+    }
 
-    <div class="card">
-      <div class="circle">1</div>
-      <h1>View One</h1>
-      <p>Ut labores minimum atomorum pro. Laudem tibique ut has.
-      <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
+    h1, h2, p {
+      font-size: 1em;
+    }
+
+    h2 {
+      font-weight: 500;
+    }
+
+    p {
+      font-weight: 300;
+    }
+
+    paper-material {
+      padding: 10px;
+      height: 50vh
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .bg-white {
+      background-color: white;
+    }
+  </style>
+
+  <paper-material elevation="1" class="bg-white">
+    <div class="center">
+      <h1>Oh no! It looks like your browser is old and tired.</h1>
+      <p>
+        For the best experience on our website, please upgrade your browser to
+        <a href="https://www.google.com/chrome/browser/">Google Chrome</a> and try again.
+      </p>
     </div>
+
+  </paper-material>
 
   </template>
 
