@@ -150,6 +150,16 @@ func GetInfo(ctx context.Context, id string) (*Gigachef, error) {
 	return chef, nil
 }
 
+// GetMultiInfo returns Gigachef info
+func GetMultiInfo(ctx context.Context, ids []string) ([]Gigachef, error) {
+	// TODO add not querying same ids
+	chefs, err := getMulti(ctx, ids)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get multi gigachefs")
+	}
+	return chefs, nil
+}
+
 // PostInfoResp contains information related to a post
 type PostInfoResp struct {
 	Address             types.Address `json:"address"`

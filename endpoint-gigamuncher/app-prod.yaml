@@ -12,3 +12,6 @@ handlers:
   - url: /_ah/spi/.*
     script: _go_app
     secure: always
+
+beta_settings:
+      cloud_sql_instances: gigasqldb

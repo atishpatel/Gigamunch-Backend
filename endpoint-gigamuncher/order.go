@@ -60,6 +60,7 @@ type OrderGigamuncher struct {
 type OrderGigachef struct {
 	ID              string `json:"id"`
 	Name            string `json:"name"`
+	PhoneNumber     string `json:"phone_number"`
 	PhotoURL        string `json:"photo_url"`
 	NumOrders       int    `json:"num_orders"`
 	gigachef.Rating        // embedded
@@ -91,7 +92,7 @@ type Order struct {
 	Status                   string           `json:"status"`
 }
 
-func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating) {
+func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating, chefPhoneNumber string) {
 	o.ID = itos(order.ID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
 	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDateTime)
@@ -102,6 +103,7 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, ch
 	o.Gigachef.ID = order.GigachefID
 	o.Gigachef.Name = chefName
 	o.Gigachef.PhotoURL = chefPhotoURL
+	o.Gigachef.PhoneNumber = chefPhoneNumber
 	o.Gigachef.Rating = chefRatings
 	o.Gigamuncher.ID = order.GigamuncherID
 	o.Gigamuncher.Name = order.GigamuncherName
@@ -218,7 +220,7 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		return resp, nil
 	}
 
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating)
+	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	return resp, nil
 }
 
@@ -282,7 +284,7 @@ func (service *Service) GetOrder(ctx context.Context, req *GetOrderReq) (*GetOrd
 		return resp, nil
 	}
 
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating)
+	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	// get review
 	reviewC := review.New(ctx)
 	review, err := reviewC.GetReview(order.ReviewID)
@@ -352,8 +354,7 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 		resp.Err = errors.Wrap("failed to get liked items", err)
 		return resp, nil
 	}
-
-	chefDetails, ratings, err := gigachef.GetRatingsAndInfo(ctx, chefIDs)
+	chefs, err := gigachef.GetMultiInfo(ctx, chefIDs)
 	if err != nil {
 		resp.Err = errors.Wrap("failed to chef.GetRatingAndInfo", err)
 		return resp, nil
@@ -361,7 +362,7 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 
 	for i := range orders {
 		o := Order{}
-		o.set(&orders[i], numLikes[i], likes[i], chefDetails[i].Name, chefDetails[i].PhotoURL, ratings[i])
+		o.set(&orders[i], numLikes[i], likes[i], chefs[i].Name, chefs[i].PhotoURL, chefs[i].Rating, chefs[i].PhoneNumber)
 		resp.Orders = append(resp.Orders, o)
 	}
 	return resp, nil
@@ -462,7 +463,7 @@ func (service *Service) CancelOrder(ctx context.Context, req *CancelOrderReq) (*
 		resp.Err = errors.Wrap("cannot get review", err)
 		return resp, nil
 	}
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating)
+	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	resp.Review.set(review)
 	return resp, nil
 }
