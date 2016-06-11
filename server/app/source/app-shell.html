@@ -17,6 +17,7 @@
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="app-icons.html">
 <link rel="import" href="home-page.html">
+<link rel="import" href="app-footer.html">
 
 <dom-module id="app-shell">
 
@@ -136,101 +137,6 @@
       .hide {
         display: none;
       }
-
-      /*******************************************************************************
-      * footer
-      ******************************************************************************/
-
-      footer {
-        background-color: #797c82;
-        color: #fff;
-        padding: 20px 0 40px;
-        position: relative;
-        font-size: 14px;
-      }
-
-      footer .container {
-        margin: 0 auto;
-        padding: 0 32px;
-      }
-
-      footer .logo {
-        font-size: 1.5em;
-        color: white;
-        margin: 25px 0;
-      }
-
-      footer .love .logo {
-        font-size: 1em;
-      }
-
-      footer .nav {
-        display: flex;
-        flex-direction: column;
-      }
-
-      footer section {
-        padding: 10px 0;
-      }
-
-      footer .nav section:last-child {
-        margin-right: auto;
-      }
-
-      footer .title {
-        color: #fff;
-        font-weight: bold;
-        margin: 5px 0;
-      }
-
-      footer ul {
-        list-style: none;
-        margin: 0;
-        padding: 0
-      }
-
-      footer ul li {
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 26px
-      }
-
-      footer a {
-        color: #c6c7ca;
-        text-decoration: none
-      }
-
-      footer a:hover {
-        color: #fff;
-        text-decoration: none
-      }
-
-      @media (min-width: 767px) {
-        footer {
-          padding: 40px 0 60px;
-        }
-
-        footer .logo {
-          margin: 20px 0 40px;
-        }
-
-        footer .content {
-          padding: 0 20px;
-        }
-
-        footer .nav {
-          flex-direction: row;
-          justify-content: space-around;
-        }
-
-        footer section {
-          padding-right: 40px;
-        }
-
-        footer .love {
-          text-align: center;
-        }
-      }
     </style>
 
     <app-location route="{{route}}"></app-location>
@@ -294,35 +200,7 @@
         </iron-pages>
 
         <!-- Footer -->
-        <footer>
-          <div class="container">
-            <div class="logo">
-              Gigamunch
-            </div>
-            <div class="nav">
-              <section>
-                <div class="title">Navigation</div>
-                <ul>
-                  <li><a href="/">Home</a></li>
-                  <li><a href="/becomechef">Become a chef</a></li>
-                  <li><a href="/faq">FAQ</a></li>
-                  <li><a href="https://geo.itunes.apple.com/us/app/gigamunch/id1114611940?mt=8">Gigamunch app</a></li>
-                  <li><a href="/gigachef">Gigachef app</a></li>
-                </ul>
-              </section>
-              <section>
-                <div class="title">Legal</div>
-                <ul>
-                  <li><a href="/terms">Terms and Agreements</a></li>
-                  <li><a href="/privacy">Privacy Policy</a></li>
-                </ul>
-              </section>
-            </div>
-            <div class="love">
-              Made with <iron-icon style="color:#FF7043" icon="app:favorite"></iron-icon> by <span class="logo">Gigamunch</span> | <iron-icon style="width:14px" icon="app:copyright"></iron-icon> 2016
-            </div>
-          </div>
-        </footer>
+        <app-footer></app-footer>
       </app-header-layout>
 
   </template>
@@ -357,6 +235,13 @@
         this.importHref(
           this.resolveUrl(page + '-page' + '.html'), null, null, true);
         this.drawerOpened = false;
+        var title;
+        if (page === 'home') {
+          title = 'Gigamunch | Buy homemade food from local cooks';
+        } else {
+          title = page.charAt(0).toUpperCase() + page.slice(1);
+        }
+        document.title = title + ' | Gigamunch';
       },
       screenChanged: function (smallScreen) {
         this.$.menuIcon.toggleClass('hide', !smallScreen);
