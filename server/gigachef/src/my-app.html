@@ -14,7 +14,8 @@
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-footer.html">
+<link rel="import" href="app-icons.html">
 <link rel="import" href="placeholder-img.html">
 
 <dom-module id="my-app">
@@ -65,6 +66,7 @@
       }
 
       iron-pages {
+        min-height: 80vh;
         max-width: 1000px;
         margin: auto;
       }
@@ -88,6 +90,17 @@
 
       app-header {
         z-index: 8;
+      }
+
+      @font-face {
+        font-family: 'NexaBold';
+        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+      }
+
+      .logo {
+        font-family: 'NexaBold', sans-serif;
+        letter-spacing: .05em;
+        text-decoration: none;
       }
 
       .nav-a {
@@ -198,7 +211,6 @@
           margin-left: 30px;
         }
       }
-
     </style>
 
     <app-location route="{{route}}"></app-location>
@@ -236,7 +248,7 @@
             <a class="logo" href="/">Gigamunch</a>
           </div>
           <div class="bar bottom">
-            <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+            <placeholder-img class="user-pic" icon="app:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
             <div class="user-info">
               <div class="name"><strong>[[user.name]]</strong></div>
               <div class="email">[[user.email]]</div>
@@ -262,13 +274,13 @@
               <paper-icon-button
                 id="arrowBack"
                 class="hide"
-                icon="gigaicons:arrow-back"
+                icon="app:arrow-back"
                 on-tap="_backTaped">
               </paper-icon-button>
               <paper-icon-button
                 id="menuIcon"
                 class="hide"
-                icon="gigaicons:menu"
+                icon="app:menu"
                 on-tap="_toggleDrawer">
               </paper-icon-button>
               <div class="toolbar-title" title>[[title]]</div>
@@ -288,9 +300,9 @@
                   <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
                 </paper-tab>
               </paper-tabs>
-              <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+              <placeholder-img class="user-pic" icon="app:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
               <paper-menu-button horizontal-align="right" vertical-offset="15" >
-                <paper-icon-button icon="gigaicons:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                <paper-icon-button icon="app:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
                 <paper-menu class="dropdown-content">
                   <paper-item disabled>Messages - Coming soon!</paper-item>
                   <!-- <a class="nav-a" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
@@ -367,7 +379,7 @@
         </iron-pages>
 
       <!-- </app-header-layout> -->
-
+      <app-footer></app-footer>
 
   </template>
 
