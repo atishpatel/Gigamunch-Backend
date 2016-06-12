@@ -83,12 +83,12 @@
         url-postfix="=s720-c">
         <div class="profile-pic">
           <placeholder-img
-            icon="gigaicons:account-circle"
+            icon="app:account-circle"
             alt="user profile picture"
             src="[[gigachef.photo_url]]">
           </placeholder-img>
           <div class="profile-top">
-            <iron-icon icon="gigaicons:add-a-photo">
+            <iron-icon icon="app:add-a-photo">
             </iron-icon>
             <br>
             <span>Change profile photo</span>
@@ -167,7 +167,7 @@
         <gold-zip-input class="flex-1" label="Zip" value="{{gigachef.address.zip}}" required auto-validate></gold-zip-input>
       </div>
 
-      <paper-checkbox id="agreeCheckbox" required>I agree to the <a href="/terms">Terms &amp; Conditions</a> and <a href="privacy">Privacy Policy</a></paper-checkbox>
+      <paper-checkbox id="agreeCheckbox" required>I agree to the <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a></paper-checkbox>
 
       <paper-button
         id="submitButton"

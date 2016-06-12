@@ -3,7 +3,7 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="file-input.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-icons.html">
 
 <dom-module id="item-fields">
   <template>
@@ -59,7 +59,7 @@
     </style>
     <template id="photos" is="dom-repeat" items="{{photos}}" as="photo">
       <div class="photo">
-        <paper-icon-button icon="gigaicons:close" on-tap="removePhoto"></paper-icon-button>
+        <paper-icon-button icon="app:close" on-tap="removePhoto"></paper-icon-button>
         <img src="{{photo}}" alt="food photo"/>
       </div>
     </template>
@@ -71,7 +71,7 @@
       on-photos-changed="photosChanged"
       auto-validate>
       <div class="add-image">
-        <paper-icon-button icon="gigaicons:add-a-photo"></paper-icon-button>
+        <paper-icon-button icon="app:add-a-photo"></paper-icon-button>
         Add Image
       </div>
     </file-input>

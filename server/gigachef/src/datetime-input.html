@@ -11,7 +11,7 @@
 <link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-icons.html">
 
 
 <dom-module id="datetime-input">
@@ -81,12 +81,12 @@
     <label>[[label]]</label>
     <div class="layout horizontal">
       <paper-input class="flex" id="dateInput" on-tap="_showDatePicker" value="{{_date}}" placeholder="mm/dd/yyyy">
-        <iron-icon icon="gigaicons:insert-invitation" suffix></iron-icon>
+        <iron-icon icon="app:insert-invitation" suffix></iron-icon>
       </paper-input>
       <span class="divider">
       </span>
       <paper-input id="timeInput" class="flex" on-tap="_showTimePicker" value="{{_time}}" placeholder="hh:mm am/pm">
-        <iron-icon icon="gigaicons:access-time" suffix></iron-icon>
+        <iron-icon icon="app:access-time" suffix></iron-icon>
       </paper-input>
     </div>
 

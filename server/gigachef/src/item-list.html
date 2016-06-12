@@ -15,7 +15,7 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-icons.html">
 
 <dom-module id="item-list">
   <template>
@@ -98,7 +98,7 @@
         <div class="card-content">
           <h1>{{item.title}}</h1>
           <p>{{item.description}}</p>
-          <paper-icon-button class="editItem" on-tap="_editItem" icon="gigaicons:edit"></paper-icon-button>
+          <paper-icon-button class="editItem" on-tap="_editItem" icon="app:edit"></paper-icon-button>
         </div>
         <div class="card-actions">
           <paper-button on-tap="_orderNowPost">Order Now Post</paper-button>
@@ -108,7 +108,7 @@
       </paper-card>
     </template>
 
-    <paper-fab icon="gigaicons:add" on-tap="_fabTap"></paper-fab>
+    <paper-fab icon="app:add" on-tap="_fabTap"></paper-fab>
   </template>
   <script>
     'use strict';
