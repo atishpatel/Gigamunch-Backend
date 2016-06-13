@@ -267,13 +267,16 @@ class Service {
   }
 
   logError(fnName, err) {
-    if (err !== undefined && err.code !== 0) {
+    if (err !== undefined && (err.code === undefined || err.code !== 0)) {
       const desc = `Function: ${fnName} | Message: ${err.message} | Details: ${err.detail}`;
       console.error(desc);
       ga('send', 'exception', {
         exDescription: desc,
         exFatal: false,
       });
+      if (err.code !== undefined && err.code === 452) { // code signout
+        window.location = '/signout';
+      }
       return true;
     }
     return false;
