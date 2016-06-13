@@ -3,6 +3,19 @@
 <dom-module id="feature-style">
   <template>
     <style>
+    .bg-white {
+      background-color: white;
+    }
+
+    .bg-primary-color {
+      background-color: var(--app-primary-color);
+    }
+
+    .content {
+        max-width: 1000px;
+        margin: auto;
+      }
+    
     .feature {
       display: flex;
       align-items: center;
@@ -12,6 +25,7 @@
     .feature .text {
       flex: 2;
       font-weight: 400;
+      margin: 0 16px;
     }
 
     .feature .text > * {
@@ -28,8 +42,12 @@
     }
 
     .feature img {
-      width: 100%;
+      width: 200px;
       border-radius: 50%;
+    }
+
+    .last-element {
+      padding-bottom: 100px;
     }
 
     @media (max-width: 767px) {
@@ -38,9 +56,9 @@
         text-align: center;
       }
 
-      .feature .image {
-        width: 150px;
-        height: 150px;
+      .feature img {
+        width: 175px;
+        height: 175px;
       }
 
       .flex-column {
