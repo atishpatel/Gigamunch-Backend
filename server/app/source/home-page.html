@@ -70,6 +70,10 @@
         z-index: 18;
       }
 
+      .center-text {
+        text-align: center;
+      }
+
       @media (max-width: 767px) {
 
         .gigamunch-desc {
@@ -104,11 +108,17 @@
     <div class="active">
       <div class="content">
         <paper-material class="bg-white becomechef-card" elevation="1">
-            <h2>Become a gigachef</h2>
+          <div id="becomeGigachef">
+            <h2>Become a Gigachef</h2>
             <p>Earn money and recognition by sharing your food with the community.</p>
             <div class="action">
               <a href="/becomechef"><paper-button raised>See What You Can Earn</paper-button></a>
             </div>
+          </div>
+          <div class="center-text" id="goToDashboard" hidden>
+            <h2>Hey [[user.name]]! Welcome back!</h2>
+            <a class="nav-a" href="/gigachef/"><paper-button raised>My Dashboard</paper-button></a>
+          </div>
         </paper-material>
       </div>
 
@@ -186,8 +196,20 @@
 
     Polymer({
 
-      is: 'home-page'
-
+      is: 'home-page',
+      properties: {
+        user: {
+          type: Object,
+          notify: true,
+          observer: 'userUpdated',
+        },
+      },
+      userUpdated: function(u) {
+        if (u !== undefined && u !== null && u.id !== undefined) {
+          this.$.becomeGigachef.hidden = true;
+          this.$.goToDashboard.hidden = false;
+        }
+      },
     });
 
   </script>

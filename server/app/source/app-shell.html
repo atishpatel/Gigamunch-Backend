@@ -34,6 +34,13 @@
         color: var(--primary-text-color);
         --paper-tabs-selection-bar-color: var(--light-accent-color);
         --paper-tab-ink: var(--light-accent-color);
+        /* paper-button */
+        --paper-button: {
+          background: var(--dark-accent-color);
+          color: white;
+          min-width: 5em;
+          text-transform: none;
+        };
       }
 
       app-drawer {
@@ -205,21 +212,18 @@
                 </div>
               </a>
               </paper-tabs>
-              <!--<a class="nav-a" href="[[loginBtnUrl]]">
-                <paper-button raised>[[loginBtnText]]</paper-button>
-              </a>-->
             </div>
           </app-toolbar>
         </app-header>
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <home-page name="home"></home-page>
-          <becomechef-page name="becomechef"></becomechef-page>
-          <faq-page name="faq"></faq-page>
-          <terms-page name="terms"></terms-page>
-          <privacy-page name="privacy"></privacy-page>
+          <home-page id="home" user="[[user]]" name="home"></home-page>
+          <becomechef-page id="becomechef" user="[[user]]" name="becomechef"></becomechef-page>
+          <faq-page id="faq" name="faq"></faq-page>
+          <terms-page id="terms" name="terms"></terms-page>
+          <privacy-page id="privacy" name="privacy"></privacy-page>
           <upgrade-page name="upgrade"></upgrade-page>
-          <about-page name="about"></about-page>
+          <about-page id="about" name="about"></about-page>
         </iron-pages>
 
         <!-- Footer -->
@@ -249,6 +253,10 @@
         loginBtnText: {
           type: String,
         },
+        user: {
+          type: Object,
+          notify: true,
+        }
       },
       observers: [
         'routePageChanged(routeData.page)',
@@ -256,20 +264,27 @@
         'screenChanged(smallScreen)',
       ],
       ready: function() {
-        if (this.isUserLoggedIn()) {
-          this.loginBtnUrl = '/gigachef/';
-          this.loginBtnText= 'My Dashboard';
-        } else {
-          this.loginBtnUrl = '/becomechef';
-          this.loginBtnText= 'Sign up/Log in';
-        }
+        this.updateIsUserLoggedIn();
       },
-      isUserLoggedIn: function() {
+      updateIsUserLoggedIn: function() {
         var token = this.getTokenCookie();
         if (token !== undefined && token !== '') {
-          return true;
+          this.loginBtnUrl = '/gigachef/';
+          this.loginBtnText= 'My Dashboard';
+          this.user = {};
+          var userString = token.split('.')[1];
+          var jwt = JSON.parse(window.atob(userString));
+          for (var k in jwt) {
+            if (k !== '__proto__') {
+              this.user[k] = jwt[k];
+            }
+          }
+          return;
         }
-        return false;
+        this.loginBtnUrl = '/becomechef';
+        this.loginBtnText= 'Sign up/Log in';
+        this.user = null;
+        return;
       },
       routePageChanged: function(page) {
         this.page = page || 'home';

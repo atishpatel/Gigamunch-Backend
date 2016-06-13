@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
-
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="feature-style.html">
 <dom-module id="becomechef-page">
 
@@ -53,6 +53,9 @@
         line-height: 30px;
         margin: auto;
         z-index: 21;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
       .sign-up-card > * {
@@ -60,6 +63,15 @@
       }
 
       .sign-up-card h2 {
+        text-align: center;
+      }
+
+      .nav-a {
+        text-decoration: none;
+        outline: 0;
+      }
+
+      .center-text {
         text-align: center;
       }
 
@@ -103,9 +115,15 @@
 
     <div class="active">
       <paper-material elevation="1" class="content sign-up-card bg-white">
-            <h2>Sign up/Log in</h2>
-            <div id="gitkitWidget">
-            </div>
+        <div id="signUp">
+          <h2>Sign up/Log in</h2>
+          <div id="gitkitWidget">
+          </div>
+        </div>
+        <div class="center-text" id="goToDashboard" hidden>
+          <h2>Hey [[user.name]]! Welcome back!</h2>
+          <a class="nav-a" href="/gigachef/"><paper-button raised>My Dashboard</paper-button></a>
+        </div>
       </paper-material>
 
         <paper-material elevation="0" class="bg-white">
@@ -168,6 +186,13 @@
     Polymer({
 
       is: 'becomechef-page',
+      properties: {
+        user: {
+          type: Object,
+          notify: true,
+          observer: 'userUpdated',
+        },
+      },
       ready: function() {
         var apiKey;
         if (location.hostname.includes('gigamunch-omninexus-dev.appspot.com') || location.hostname === 'localhost') {
@@ -188,6 +213,12 @@
             accountChooserEnabled: false,
           },
           '');
+      },
+      userUpdated: function(u) {
+        if (u !== undefined && u !== null && u.id !== undefined) {
+          this.$.signUp.hidden = true;
+          this.$.goToDashboard.hidden = false;
+        }
       },
     });
 
