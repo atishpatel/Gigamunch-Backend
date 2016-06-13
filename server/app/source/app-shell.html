@@ -26,11 +26,14 @@
       :host {
         display: block;
         --app-primary-color: #FF7043;
-        --accent-color: var(--paper-amber-a400);
+        --accent-color: var(--paper-light-blue-a200);
+        --light-accent-color: var(--paper-light-blue-a100);
+        --dark-accent-color: var(--paper-light-blue-a400);
         --primary-text-color: var(--paper-grey-900);
         --secondary-text-color: #727272;
         color: var(--primary-text-color);
-        --paper-tabs-selection-bar-color: var(--accent-color);
+        --paper-tabs-selection-bar-color: var(--light-accent-color);
+        --paper-tab-ink: var(--light-accent-color);
       }
 
       app-drawer {
@@ -127,6 +130,12 @@
         margin-right: 12px
       }
 
+      .nav-tabs .fake-paper-tab {
+        display: inline-flex;
+        opacity: .8;
+        -webkit-font-smoothing: antialiased;
+      }
+
       .nav-tabs a {
         display: flex;
         align-items: center;
@@ -151,9 +160,11 @@
       <app-drawer id="drawer" opened="{{drawerOpened}}" swipe-open="[[smallScreen]]">
         <app-toolbar  class="drawer-toolbar"><a class="nav-a" href="/"><div class="logo">Gigamunch</div></a></app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a class="nav-a" href="[[loginBtnUrl]]"><paper-item>[[loginBtnText]]</paper-item></a>
           <a class="nav-a" name="home" href="/"><paper-item>Home</paper-item></a>
           <a class="nav-a" name="becomechef" href="/becomechef"><paper-item>Become a chef</paper-item></a>
           <a class="nav-a" name="faq" href="/faq"><paper-item>FAQ</paper-item></a>
+          <a class="nav-a" name="about" href="/about"><paper-item>About</paper-item></a>
         </iron-selector>
       </app-drawer>
 
@@ -184,7 +195,19 @@
                 <paper-tab name="faq" tabindex="-1">
                   <a class="nav-a" href="/faq"><span>FAQ</span></a>
                 </paper-tab>
+                <paper-tab name="about" tabindex="-1">
+                  <a class="nav-a" href="/about"><span>About</span></a>
+                </paper-tab>
+                <div class="fake-paper-tab">
+                  <a class="nav-a" href="[[loginBtnUrl]]">
+                    <span>[[loginBtnText]]</span>
+                  </a>
+                </div>
+              </a>
               </paper-tabs>
+              <!--<a class="nav-a" href="[[loginBtnUrl]]">
+                <paper-button raised>[[loginBtnText]]</paper-button>
+              </a>-->
             </div>
           </app-toolbar>
         </app-header>
@@ -212,7 +235,6 @@
       is: 'app-shell',
 
       properties: {
-
         page: {
           type: String,
           reflectToAttribute: true,
@@ -221,12 +243,34 @@
         drawerOpened: {
           type: Boolean,
         },
+        loginBtnUrl: {
+          type: String,
+        },
+        loginBtnText: {
+          type: String,
+        },
       },
       observers: [
         'routePageChanged(routeData.page)',
         'routePathChanged(route.path)',
         'screenChanged(smallScreen)',
       ],
+      ready: function() {
+        if (this.isUserLoggedIn()) {
+          this.loginBtnUrl = '/gigachef/';
+          this.loginBtnText= 'My Dashboard';
+        } else {
+          this.loginBtnUrl = '/becomechef';
+          this.loginBtnText= 'Sign up/Log in';
+        }
+      },
+      isUserLoggedIn: function() {
+        var token = this.getTokenCookie();
+        if (token !== undefined && token !== '') {
+          return true;
+        }
+        return false;
+      },
       routePageChanged: function(page) {
         this.page = page || 'home';
       },
@@ -267,6 +311,16 @@
       },
       toggleDrawer: function () {
         this.drawerOpened = !this.drawerOpened;
+      },
+      getTokenCookie: function() {
+        var name = 'GIGATKN=';
+        var ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) === ' ')c = c.substring(1);
+          if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+        }
+        return '';
       },
     });
 
