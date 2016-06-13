@@ -158,7 +158,7 @@ class Service {
       .getItem(request)
       .execute(
         (resp) => {
-          this.logError(resp.err);
+          this.logError('getItem', resp.err);
           callback(resp.item, resp.err);
         }
       );
@@ -183,7 +183,7 @@ class Service {
       .saveItem(request)
       .execute(
         (resp) => {
-          this.logError(resp.err);
+          this.logError('saveItem', resp.err);
           callback(resp.item, resp.err);
         }
       );
@@ -233,7 +233,7 @@ class Service {
       .postPost(request)
       .execute(
         (resp) => {
-          this.logError(resp.err);
+          this.logError('postPost', resp.err);
           callback(resp.post, resp.err);
         }
       );
@@ -253,7 +253,7 @@ class Service {
       .refreshToken(request)
       .execute(
         (resp) => {
-          if (!this.logError(resp.err)) {
+          if (!this.logError('refreshToken', resp.err)) {
             CHEF.User.update(resp.gigatoken);
           }
         }

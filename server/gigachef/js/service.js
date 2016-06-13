@@ -189,7 +189,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.getItem(request).execute(function (resp) {
-        _this6.logError(resp.err);
+        _this6.logError('getItem', resp.err);
         callback(resp.item, resp.err);
       });
     }
@@ -212,7 +212,7 @@ var Service = function () {
       };
 
       this.service.saveItem(request).execute(function (resp) {
-        _this7.logError(resp.err);
+        _this7.logError('saveItem', resp.err);
         callback(resp.item, resp.err);
       });
     }
@@ -260,7 +260,7 @@ var Service = function () {
         post: post
       };
       this.service.postPost(request).execute(function (resp) {
-        _this9.logError(resp.err);
+        _this9.logError('postPost', resp.err);
         callback(resp.post, resp.err);
       });
     }
@@ -278,7 +278,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this10.logError(resp.err)) {
+        if (!_this10.logError('refreshToken', resp.err)) {
           CHEF.User.update(resp.gigatoken);
         }
       });
