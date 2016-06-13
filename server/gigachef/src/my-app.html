@@ -29,9 +29,9 @@
         --primary-color: #FF7043;
         --light-primary-color: var(--paper-deep-orange-100);
         --dark-primary-color: var(--paper-deep-orange-700);
-        --accent-color: var(--paper-amber-a400);
-        --light-accent-color: var(-—paper-amber-a100);
-        --dark-accent-color: var(-—paper-amber-a700);
+        --accent-color: var(--paper-light-blue-a200);
+        --light-accent-color: var(--paper-light-blue-a100);
+        --dark-accent-color: var(--paper-light-blue-a400);
 
         --primary-text-color: var(--paper-grey-900);
         --secondary-text-color: #727272;
@@ -58,13 +58,16 @@
           right: 4vh;
         };
 
-        --paper-tabs-selection-bar-color: var(--accent-color);
+        --paper-tabs-selection-bar-color: var(--light-accent-color);
         --paper-tab: {
           padding: 0;
         };
+        --paper-tab-ink: var(--light-accent-color);
 
         color: var(--primary-text-color);
       }
+
+      
 
       iron-pages {
         min-height: 80vh;
@@ -590,9 +593,10 @@
             if (typeof(detail.error) === 'string') {
               text = detail.error;
             } else {
-              text = detail.error.message +
-                '<br>detailed gibberish:' +
-                detail.error.detail;
+              text = detail.error.message;
+              if (detail.error.detail !== undefined && detail.error.detail !== '') {
+                text += '<br>detailed gibberish:' + detail.error.detail;
+              }
             }
             break;
           default:
