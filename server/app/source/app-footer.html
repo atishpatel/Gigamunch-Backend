@@ -11,6 +11,17 @@
         display: block;
       }
 
+      @font-face {
+        font-family: 'NexaBold';
+        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+      }
+
+      .logo {
+        font-family: 'NexaBold', sans-serif;
+        letter-spacing: .05em;
+        text-decoration: none;
+      }
+
       footer {
         background-color: #797c82;
         color: #fff;
@@ -20,6 +31,7 @@
       }
 
       footer .container {
+        max-width: 1000px;
         margin: 0 auto;
         padding: 0 32px;
       }
@@ -43,7 +55,7 @@
 
       footer .join-us-links a {
         display: inline-block;
-        padding: 3px 10px;
+        padding: 3px 7px;
         font-size: 13px;
         font-weight: 500;
         text-shadow: none;
@@ -172,6 +184,16 @@
               <li><a href="/gigachef">Gigachef app</a></li>
             </ul>
           </section>
+          <section>
+              <div class="title">Gigachef App</div>
+              <ul>
+                <li><a href="/gigachef/">Dashboard</a></li>
+                <li><a href="/gigachef/items">My Items</a></li>
+                <li><a href="/gigachef/posts">My Orders</a></li>
+                <li><a href="/gigachef/updateprofile">Update Profile</a></li>
+                <li><a href="/gigachef/updatepayout">Update Payout Method</a></li>
+              </ul>
+            </section>
           <section>
             <div class="title">Legal</div>
             <ul>
