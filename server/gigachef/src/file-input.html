@@ -104,15 +104,18 @@
         var polymerElement = this;
         xhr.onload = function() {
           var resp = JSON.parse(this.response);
-          if(resp.err.code !== 0) {
-            alert('There was an error upload your file:', resp.err.message);
+          if(resp.err === undefined || resp.err.code !== 0) {
+            alert('There was an error upload your file:', resp.err);
             return;
           }
           polymerElement.addPhoto(resp.url);
+          this.fire('progressEnd');
+          this.set('progress', 0);
         };
         xhr.upload.onprogress = this.updateProgress.bind(this);
         this.set('valid', false);
         xhr.send(formData);
+        this.fire('progressStart');
         this.getActionURL();
       },
     });

@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="file-input.html">
@@ -53,6 +54,11 @@
         }
       }
 
+      paper-progress {
+        width: 100%;
+        padding: 10px 0;
+      }
+
       .photoRequired {
         color: #dd2c00;
       }
@@ -63,12 +69,16 @@
         <img src="{{photo}}" alt="food photo"/>
       </div>
     </template>
-    <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required</div>
+    <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required. Note: all photos will be cropped to a 16 x 9 ratio from the center so please use your camera in landscape orientation.</div>
+    <div hidden$="[[!showProgress]]"><paper-progress value="[[progress]]"></paper-progress></div>
     <file-input
       id="fileInput"
       photos="{{photos}}"
       url-postfix="=s1080"
       on-photos-changed="photosChanged"
+      on-progress-start="progressStart"
+      on-progress-end="progressEnd"
+      progress="{{progress}}"
       auto-validate>
       <div class="add-image">
         <paper-icon-button icon="app:add-a-photo"></paper-icon-button>
@@ -163,6 +173,10 @@
           type: Boolean,
           value: true,
         },
+        showProgress: {
+          type: Boolean,
+          value: false,
+        },
       },
       update: function() {
         if (this.ingredients !== undefined && this.ingredients !== null) {
@@ -211,6 +225,12 @@
       photosChanged: function() {
         // this.notifyPath('photos', this.photos);
         this.photosUpdated(this.photos);
+      },
+      progressStart: function() {
+        this.set('showProgress', true);
+      },
+      progressEnd: function() {
+        this.set('showProgress', false);
       },
     });
   </script>
