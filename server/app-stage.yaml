@@ -35,7 +35,7 @@ handlers:
   static_files: gigachef/build/bundled/index.html
   upload: gigachef/build/bundled/index.html
   http_headers:
-    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/js/service.js>; rel=preload; as=script, </gigachef/src/my-app.html>; rel=preload; as=document'
+    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/js/service.js>; rel=preload; as=script, </gigachef/src/app-shell.html>; rel=preload; as=document'
   secure: always
 
 # Website app
