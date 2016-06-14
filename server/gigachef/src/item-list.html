@@ -29,6 +29,11 @@
         justify-content: space-around;
       }
 
+      h1 {
+        font-size: 1.2em;
+        margin-right: 25px;
+      }
+
       .photo {
         display: block;
         width: 100%;
@@ -70,7 +75,6 @@
         position: absolute;
         top: 0;
         right: 0;
-        background-color: white;
         color: #727272;
         border-radius: 50%;
         margin: 10px;
@@ -97,7 +101,7 @@
         </div>
         <div class="card-content">
           <h1>{{item.title}}</h1>
-          <p>{{item.description}}</p>
+          <p>[[getItemDesc(item)]]</p>
           <paper-icon-button class="editItem" on-tap="_editItem" icon="app:edit"></paper-icon-button>
         </div>
         <div class="card-actions">
@@ -159,6 +163,12 @@
           return 'data:image/svg+xml;utf8,<svg viewBox="0 0 304 171" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#929292" x="0" y="0" width="304" height="171"></rect><path d="M186.346124,89 L201.42488,89 C195.493404,110.894487 175.483744,127 151.71244,127 C127.941136,127 107.931477,110.894487 102,89 L179.7366,89 L204.639617,50.6527161 L207.155629,52.2866332 L185.411644,85.769434 L215.323046,57.8766002 L217.369041,60.0706613 L186.346124,89 Z" fill="#FFFFFF"></path></g></svg>';
         }
         return item.photos[0];
+      },
+      getItemDesc: function(item) {
+        if (item.description.length < 200) {
+          return item.description;
+        }
+        return item.description.substring(0, 197) + '...';
       },
       _editItem: function(e) {
         this.fire('edit', { item: e.model.item });
