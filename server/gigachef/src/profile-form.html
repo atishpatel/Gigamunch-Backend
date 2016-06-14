@@ -64,11 +64,12 @@
         transform: scale(1.1);
       }
 
-      .profile-top {
+      .change-profile-photo {
         position: relative;
         bottom: 125px;
         color: white;
         text-align: center;
+        pointer-events: none;
       }
     </style>
 
@@ -87,7 +88,7 @@
             alt="user profile picture"
             src="[[gigachef.photo_url]]">
           </placeholder-img>
-          <div class="profile-top">
+          <div class="change-profile-photo">
             <iron-icon icon="app:add-a-photo">
             </iron-icon>
             <br>
@@ -95,16 +96,16 @@
           </div>
         </div>
       </file-input>
-      <paper-input label="Name" value="{{gigachef.name}}" required auto-validate></paper-input>
-      <gold-email-input label="Email" value="{{gigachef.email}}" required auto-validate></gold-email-input>
-      <gold-phone-input label="Phone Number" value="{{gigachef.phone_number}}" required auto-validate></gold-phone-input>
+      <paper-input label="Name*" value="{{gigachef.name}}" required auto-validate></paper-input>
+      <gold-email-input label="Email*" value="{{gigachef.email}}" required auto-validate></gold-email-input>
+      <gold-phone-input label="Phone Number*" value="{{gigachef.phone_number}}" required auto-validate></gold-phone-input>
       <paper-input label="Apt #" value="{{gigachef.address.apt}}" auto-validate></paper-input>
-      <paper-input label="Street" value="{{gigachef.address.street}}" required auto-validate></paper-input>
-      <paper-input label="City" value="{{gigachef.address.city}}" required auto-validate></paper-input>
+      <paper-input label="Street*" value="{{gigachef.address.street}}" required auto-validate></paper-input>
+      <paper-input label="City*" value="{{gigachef.address.city}}" required auto-validate></paper-input>
       <!-- group states and zip -->
       <div class="row">
         <div class="select-input flex-1">
-        <label>State</label>
+        <label>State*</label>
         <paper-select>
           <select is="select-with-options" option-value="value" value="{{gigachef.address.state::change}}" required>
             <option value="AL">AL</option>
@@ -164,7 +165,7 @@
           </paper-md-decorator>
         </paper-select>
         </div>
-        <gold-zip-input class="flex-1" label="Zip" value="{{gigachef.address.zip}}" required auto-validate></gold-zip-input>
+        <gold-zip-input class="flex-1" label="Zip*" value="{{gigachef.address.zip}}" required auto-validate></gold-zip-input>
       </div>
 
       <paper-checkbox id="agreeCheckbox" required>I agree to the <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a></paper-checkbox>
@@ -207,6 +208,10 @@
           observer: 'photosChanged',
         },
       },
+      observers: [
+        'updateSubmitButtonState(gigachef.phone_number)',
+        'updateSubmitButtonState(gigachef.address.zip)',
+      ],
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
@@ -260,7 +265,9 @@
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
-        submitButton.disabled = !form.validate();
+        var valid = !form.validate();
+        submitButton.disabled = valid;
+        return valid;
       },
       photosChanged: function(photos) {
         if (photos.length > 0) {

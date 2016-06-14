@@ -77,8 +77,26 @@ func (req *UpdateProfileReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
+	if req.Gigachef.Name == "" {
+		return fmt.Errorf("Name cannot be empty.")
+	}
 	if req.Gigachef.Email == "" {
-		return fmt.Errorf("Email is empty.")
+		return fmt.Errorf("Email cannot be empty.")
+	}
+	if req.Gigachef.PhoneNumber == "" {
+		return fmt.Errorf("PhoneNumber cannot be empty.")
+	}
+	if req.Gigachef.Address.Street == "" {
+		return fmt.Errorf("Street cannot be empty.")
+	}
+	if req.Gigachef.Address.City == "" {
+		return fmt.Errorf("City cannot be empty.")
+	}
+	if req.Gigachef.Address.State == "" {
+		return fmt.Errorf("State cannot be empty.")
+	}
+	if req.Gigachef.Address.Zip == "" {
+		return fmt.Errorf("Zip cannot be empty.")
 	}
 	return nil
 }
@@ -100,12 +118,6 @@ func (service *Service) UpdateProfile(ctx context.Context, req *UpdateProfileReq
 	}
 	if req.Gigachef.Address.Country == "" {
 		req.Gigachef.Address.Country = "USA"
-	}
-	if req.Gigachef.Email != "" {
-		user.Email = req.Gigachef.Email
-	}
-	if req.Gigachef.Name != "" {
-		user.Name = req.Gigachef.Name
 	}
 	if req.Gigachef.PhotoURL != "" {
 		user.PhotoURL = req.Gigachef.PhotoURL
