@@ -16,6 +16,7 @@
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="app-icons.html">
 <link rel="import" href="app-footer.html">
+<link rel="import" href="home-page.html">
 
 <dom-module id="app-shell">
 
@@ -330,7 +331,7 @@
       getTokenCookie: function() {
         var name = 'GIGATKN=';
         var ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
+        for (var i = 0; i < ca.length; i++) {
           var c = ca[i];
           while (c.charAt(0) === ' ')c = c.substring(1);
           if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
