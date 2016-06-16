@@ -14,27 +14,28 @@ import (
 )
 
 type Gigachef struct {
-	CreatedDatetime   string        `json:"created_datetime"`
-	HasCarInsurance   bool          `json:"has_car_insurance"`
-	types.UserDetail                //embedded
-	Bio               string        `json:"bio"`
-	PhoneNumber       string        `json:"phone_number"`
-	Address           types.Address `json:"address"`
-	DeliveryRange     int           `json:"delivery_range"`
-	SendWeeklySummary bool          `json:"send_weekly_summary"`
-	UseEmailOverSMS   bool          `json:"use_email_over_sms"`
-	gigachef.Rating                 // embedded
-	NumPosts          int           `json:"num_posts"`
-	NumOrders         int           `json:"num_orders"`
-	NumFollowers      int           `json:"num_followers"`
-	KitchenPhotoURLs  []string      `json:"kitchen_photo_urls"`
-	SubMerchantStatus string        `json:"sub_merchant_status"`
-	Application       bool          `json:"application"`
-	KitchenInspection bool          `json:"kitchen_inspection"`
-	BackgroundCheck   bool          `json:"background_check"`
-	FoodHandlerCard   bool          `json:"food_handler_card"`
-	PayoutMethod      bool          `json:"payout_method"`
-	Verified          bool          `json:"verified"`
+	CreatedDatetime   string         `json:"created_datetime"`
+	HasCarInsurance   bool           `json:"has_car_insurance"`
+	types.UserDetail                 //embedded
+	Bio               string         `json:"bio"`
+	PhoneNumber       string         `json:"phone_number"`
+	Address           Address        `json:"address"`
+	AddressTypes      *types.Address `json:"-"`
+	DeliveryRange     int            `json:"delivery_range"`
+	SendWeeklySummary bool           `json:"send_weekly_summary"`
+	UseEmailOverSMS   bool           `json:"use_email_over_sms"`
+	gigachef.Rating                  // embedded
+	NumPosts          int            `json:"num_posts"`
+	NumOrders         int            `json:"num_orders"`
+	NumFollowers      int            `json:"num_followers"`
+	KitchenPhotoURLs  []string       `json:"kitchen_photo_urls"`
+	SubMerchantStatus string         `json:"sub_merchant_status"`
+	Application       bool           `json:"application"`
+	KitchenInspection bool           `json:"kitchen_inspection"`
+	BackgroundCheck   bool           `json:"background_check"`
+	FoodHandlerCard   bool           `json:"food_handler_card"`
+	PayoutMethod      bool           `json:"payout_method"`
+	Verified          bool           `json:"verified"`
 }
 
 func (c *Gigachef) set(chef *gigachef.Resp) {
@@ -43,7 +44,7 @@ func (c *Gigachef) set(chef *gigachef.Resp) {
 	c.UserDetail = chef.UserDetail
 	c.Bio = chef.Bio
 	c.PhoneNumber = chef.PhoneNumber
-	c.Address = chef.Address
+	c.Address.set(&chef.Address)
 	c.DeliveryRange = int(chef.DeliveryRange)
 	c.SendWeeklySummary = chef.SendWeeklySummary
 	c.UseEmailOverSMS = chef.UseEmailOverSMS
@@ -59,6 +60,33 @@ func (c *Gigachef) set(chef *gigachef.Resp) {
 	c.FoodHandlerCard = chef.FoodHandlerCard
 	c.PayoutMethod = chef.PayoutMethod
 	c.Verified = chef.Verified
+}
+
+func (c *Gigachef) valid() error {
+	if c.Name == "" {
+		return fmt.Errorf("Name cannot be empty.")
+	}
+	if c.Email == "" {
+		return fmt.Errorf("Email cannot be empty.")
+	}
+	if c.PhoneNumber == "" {
+		return fmt.Errorf("PhoneNumber cannot be empty.")
+	}
+	if c.Address.Street == "" {
+		return fmt.Errorf("Street cannot be empty.")
+	}
+	if c.Address.City == "" {
+		return fmt.Errorf("City cannot be empty.")
+	}
+	if c.Address.State == "" {
+		return fmt.Errorf("State cannot be empty.")
+	}
+	if c.Address.Zip == "" {
+		return fmt.Errorf("Zip cannot be empty.")
+	}
+	var err error
+	c.AddressTypes, err = c.Address.get()
+	return err
 }
 
 // UpdateProfileReq is the input request needed for SubmitApplication.
@@ -77,26 +105,9 @@ func (req *UpdateProfileReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
-	if req.Gigachef.Name == "" {
-		return fmt.Errorf("Name cannot be empty.")
-	}
-	if req.Gigachef.Email == "" {
-		return fmt.Errorf("Email cannot be empty.")
-	}
-	if req.Gigachef.PhoneNumber == "" {
-		return fmt.Errorf("PhoneNumber cannot be empty.")
-	}
-	if req.Gigachef.Address.Street == "" {
-		return fmt.Errorf("Street cannot be empty.")
-	}
-	if req.Gigachef.Address.City == "" {
-		return fmt.Errorf("City cannot be empty.")
-	}
-	if req.Gigachef.Address.State == "" {
-		return fmt.Errorf("State cannot be empty.")
-	}
-	if req.Gigachef.Address.Zip == "" {
-		return fmt.Errorf("Zip cannot be empty.")
+	err := req.Gigachef.valid()
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -123,7 +134,7 @@ func (service *Service) UpdateProfile(ctx context.Context, req *UpdateProfileReq
 		user.PhotoURL = req.Gigachef.PhotoURL
 	}
 	chefC := gigachef.New(ctx)
-	chef, err := chefC.UpdateProfile(user, &req.Gigachef.Address, req.Gigachef.PhoneNumber, req.Gigachef.Bio, int32(req.Gigachef.DeliveryRange))
+	chef, err := chefC.UpdateProfile(user, req.Gigachef.AddressTypes, req.Gigachef.PhoneNumber, req.Gigachef.Bio, int32(req.Gigachef.DeliveryRange))
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to update chef profile")
 		return resp, nil
@@ -161,14 +172,15 @@ func (service *Service) GetGigachef(ctx context.Context, req *GigatokenOnlyReq) 
 
 // SubMerchantApplication is the submerchant payout info
 type SubMerchantApplication struct {
-	FirstName       string        `json:"first_name"`
-	LastName        string        `json:"last_name"`
-	Email           string        `json:"email"`
-	DateOfBirth     int           `json:"date_of_birth"`
-	DateOfBirthTime time.Time     `json:"-"`
-	AccountNumber   string        `json:"account_number"`
-	RoutingNumber   string        `json:"routing_number"`
-	Address         types.Address `json:"address"`
+	FirstName       string         `json:"first_name"`
+	LastName        string         `json:"last_name"`
+	Email           string         `json:"email"`
+	DateOfBirth     int            `json:"date_of_birth"`
+	DateOfBirthTime time.Time      `json:"-"`
+	AccountNumber   string         `json:"account_number"`
+	RoutingNumber   string         `json:"routing_number"`
+	Address         Address        `json:"address"`
+	AddressTypes    *types.Address `json:"-"`
 }
 
 func (sm *SubMerchantApplication) get(smID string) *payment.SubMerchantInfo {
@@ -180,7 +192,7 @@ func (sm *SubMerchantApplication) get(smID string) *payment.SubMerchantInfo {
 		DateOfBirth:   sm.DateOfBirthTime,
 		AccountNumber: sm.AccountNumber,
 		RoutingNumber: sm.RoutingNumber,
-		Address:       sm.Address,
+		Address:       *sm.AddressTypes,
 	}
 }
 
@@ -191,7 +203,16 @@ func (sm *SubMerchantApplication) set(r *payment.SubMerchantInfo) {
 	sm.DateOfBirth = ttoi(r.DateOfBirth)
 	sm.AccountNumber = r.AccountNumber
 	sm.RoutingNumber = r.RoutingNumber
-	sm.Address = r.Address
+	sm.Address.set(&r.Address)
+}
+
+func (sm *SubMerchantApplication) valid() error {
+	if sm.Address.Country == "" {
+		sm.Address.Country = "USA"
+	}
+	var err error
+	sm.AddressTypes, err = sm.Address.get()
+	return err
 }
 
 // UpdateSubMerchantReq updates sub-merchant payment info
@@ -210,10 +231,11 @@ func (req *UpdateSubMerchantReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
-	if req.SubMerchant.Address.Country == "" {
-		req.SubMerchant.Address.Country = "USA"
-	}
 	req.SubMerchant.DateOfBirthTime = itot(req.SubMerchant.DateOfBirth)
+	err := req.SubMerchant.valid()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -233,6 +255,9 @@ func (service *Service) UpdateSubMerchant(ctx context.Context, req *UpdateSubMer
 		return resp, nil
 	}
 	paymentC := payment.New(ctx)
+	utils.Debugf(ctx, "submerch: %#v", req.SubMerchant)
+	t, err := req.SubMerchant.Address.get()
+	utils.Debugf(ctx, "address type: %#v, err: %s", t, err)
 	_, err = paymentC.UpdateSubMerchant(user, req.SubMerchant.get(chef.BTSubMerchantID))
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrapf("cannot update sub-merchant(%d)", chef.BTSubMerchantID)
@@ -267,7 +292,7 @@ func (service *Service) GetSubMerchant(ctx context.Context, req *GigatokenOnlyRe
 	paymentC := payment.New(ctx)
 	sm, err := paymentC.GetSubMerchant(chef.BTSubMerchantID)
 	if err != nil {
-		resp.SubMerchant.Address = chef.Address
+		resp.SubMerchant.Address.set(&chef.Address)
 		resp.SubMerchant.Email = chef.Email
 		utils.Infof(ctx, "cannot update sub-merchant(%s): err: %v", chef.BTSubMerchantID, err)
 		return resp, nil
