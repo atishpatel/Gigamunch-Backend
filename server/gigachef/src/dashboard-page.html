@@ -74,7 +74,7 @@
         </div>
         <div class="setup-item">
           <paper-checkbox checked$="[[hasFirstPost]]" disabled></paper-checkbox>
-          First post!
+          <a href="../items">Create first post!</a>
         </div>
       </div>
     </paper-material>
@@ -111,10 +111,10 @@
       },
       userUpdated: function (user) {
         if (user !== undefined) {
-          if (!user.isVerifiedChef) { // TODO and first post?
+          // if (!user.isVerifiedChef) { // TODO and first post?
             this.set('showSetupCard', true);
             // show card
-          }
+          // }
         }
       },
       getGigachef: function () {
@@ -162,7 +162,7 @@
         this.$.infoDialog.open();
       },
       hasFirstPost: function() {
-        return (this.gigachef.num_posts !== undefined && this.gigachef.num_posts !== 0);
+        return (this.gigachef.num_posts !== undefined && this.gigachef.num_posts > 0);
       },
     });
   </script>
