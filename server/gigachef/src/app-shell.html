@@ -602,7 +602,7 @@
           default:
             text = detail.error.toString();
         }
-        if (detail.notification === true) {
+        if (detail.notification === true || (detail.error !== undefined && detail.error.code !== undefined && detail.error.code === 400)) {
           this.$.notificationDialogText.innerHTML = text;
           this.$.notificationDialog.open();
         } else {
