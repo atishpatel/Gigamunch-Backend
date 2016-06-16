@@ -161,7 +161,6 @@
         pattern="/:page"
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
-
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
       <!-- Drawer content -->
@@ -177,7 +176,7 @@
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+      <app-header-layout id="headerLayout" has-scrolling-region>
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <div class="toolbar toolbar-left">
@@ -316,6 +315,7 @@
           title = page.charAt(0).toUpperCase() + page.slice(1);
         }
         document.title = title + ' | Gigamunch';
+        app.$.headerLayout.$.contentContainer.scrollTop = 0;
       },
       screenChanged: function (smallScreen) {
         this.$.menuIcon.toggleClass('hide', !smallScreen);
