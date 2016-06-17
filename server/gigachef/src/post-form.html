@@ -2,11 +2,14 @@
 
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="datetime-input.html">
+<link rel="import" href="app-icons.html">
 <link rel="import" href="item-fields.html">
 
 <dom-module id="post-form">
@@ -38,78 +41,194 @@
         z-index: 1;
         box-shadow: none;
       }
+
+      .photo {
+        display: block;
+        width: 100%;
+      	position: relative;
+      	height: 0;
+      	padding: 56.25% 0 0 0;
+        overflow: hidden;
+      }
+
+      .photo img {
+      	position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+
+      .preview {
+        display: none;
+      }
+
+      .preview hr {
+        margin: 0;
+        color: #727272;
+      }
+
+      .preview .header {
+        height: 64px;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: flex-end;
+        font-size: 10px;
+      }
+
+      .preview .likeBar {
+        height: 32px;
+        color: #727272;
+        display: flex;
+        padding: 0 10px;
+        align-items: center;
+      }
+
+      .preview .container {
+        padding: 0 8px;
+      }
+
+      .preview .title {
+        font-size: 16px;
+        font-weight: 500;
+        padding-top: 5px;
+      }
+
+      .preview .desc {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--secondary-text-color);
+        padding: 10px 0;
+      }
+
+      .flex-container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      @media (min-width: 767px) {
+        .preview {
+          display: flex;
+          padding: 15px;
+        }
+
+        .preview .screen {
+          width: 300px;
+        }
+
+        .form {
+          flex: 1;
+        }
+
+        .flex-container {
+          flex-direction: row-reverse;
+        }
+      }
     </style>
 
     <app-route
       route="{{route}}">
     </app-route>
 
-    <form
-      is="iron-form"
-      id="form"
-      method="post"
-      action="#"
-      on-change="updateSubmitButtonState">
-      <item-fields
-        id="itemFields"
-        photos="{{post.photos}}"
-        title="{{post.title}}"
-        description="{{post.description}}"
-        ingredients="{{post.ingredients}}"
-        general-tags="{{post.general_tags}}"
-        dietary-needs-tags="{{post.dietary_needs_tags}}"
-        on-photos-changed="postPhotosChanged">
-      </item-fields>
-      <paper-input
-        label="Number of Servings Offered*"
-        value="{{post.servings_offered}}"
-        type="number"
-        min="1"
-        required
-        auto-validate>
-      </paper-input>
-      <paper-input
-        label="Price per serving*"
-        value="{{post.chef_price_per_serving}}"
-        type="number"
-        step="0.01"
-        min="0.50"
-        required
-        auto-validate>
-        <div prefix>$&nbsp;</div>
-      </paper-input>
-      <datetime-input
-        id="closeTime"
-        label="Post close time*"
-        epoch="{{post.closing_datetime}}"
-        on-changed="updateSubmitButtonState">
-      </datetime-input>
-      <datetime-input
-        hidden$="[[post.is_order_now]]"
-        id="readyTime"
-        label="Meal ready time*"
-        epoch="{{post.ready_datetime}}"
-        on-changed="updateSubmitButtonState">
-      </datetime-input>
-      <template is="dom-if" if$="[[post.is_order_now]]" restamp="true">
+    <div class="flex-container">
+      <!--<div class="preview">
+      <paper-card class="screen">
+        <div class="header">
+          <h1>Preview</h1>
+        </div>
+        <div class="photo" >
+          <img src='{{photo}}'></img>
+        </div>
+        <div class="likeBar">
+          <iron-icon icon="favorite"></iron-icon>
+        </div>
+        <hr>
+        <div class="container">
+          <div class="title">
+            [[post.title]]
+          </div>
+          <div class="desc">
+            [[post.description]]
+          </div>
+        </div>
+        <hr>
+        </paper-card>
+      </div>-->
+      <form
+        is="iron-form"
+        id="form"
+        class="form"
+        method="post"
+        action="#"
+        on-change="updateSubmitButtonState">
+        <item-fields
+          id="itemFields"
+          photos="{{post.photos}}"
+          title="{{post.title}}"
+          description="{{post.description}}"
+          ingredients="{{post.ingredients}}"
+          general-tags="{{post.general_tags}}"
+          dietary-needs-tags="{{post.dietary_needs_tags}}"
+          on-photos-changed="postPhotosChanged"
+          on-change="updateSubmitButtonState">
+        </item-fields>
         <paper-input
-          label="Estimated Preperation Time for One Order*"
-          value="{{ept}}"
+          label="Number of Servings Offered*"
+          value="{{post.servings_offered}}"
           type="number"
           min="1"
           required
           auto-validate>
-          <div suffix>minutes</div>
         </paper-input>
-      </template>
-      <paper-button
-        id="submitButton"
-        on-tap="submit"
-        raised
-        disabled>
-        <paper-spinner id="spinner" hidden></paper-spinner>Save
-      </paper-button>
-    </form>
+        <paper-input
+          label="Price per serving*"
+          value="{{post.chef_price_per_serving}}"
+          type="number"
+          step="0.01"
+          min="0.50"
+          required
+          auto-validate>
+          <div prefix>$&nbsp;</div>
+        </paper-input>
+        <datetime-input
+          id="closeTime"
+          label="Post close time*"
+          epoch="{{post.closing_datetime}}"
+          on-changed="updateSubmitButtonState">
+        </datetime-input>
+        <datetime-input
+          hidden$="[[post.is_order_now]]"
+          id="readyTime"
+          label="Order pick-up time*"
+          epoch="{{post.ready_datetime}}"
+          on-changed="updateSubmitButtonState">
+        </datetime-input>
+        <template is="dom-if" if$="[[post.is_order_now]]" restamp="true">
+          <paper-input
+            label="Estimated Preperation Time for One Order*"
+            value="{{ept}}"
+            type="number"
+            min="1"
+            required
+            auto-validate>
+            <div suffix>minutes</div>
+          </paper-input>
+        </template>
+        <paper-button
+          id="submitButton"
+          on-tap="submit"
+          raised
+          disabled>
+          <paper-spinner id="spinner" hidden></paper-spinner>Publish Post
+        </paper-button>
+      </form>
+    </div>
 
   </template>
   <script>
@@ -132,14 +251,20 @@
         },
         ept: {
           type: Number,
-          observer: 'eptChanged'
-        }
+          observer: 'eptChanged',
+        },
+        photo: {
+          type: String,
+        },
       },
       observers: [
         'postPhotosChanged(post.photos)'
       ],
       postPhotosChanged: function (p) {
         this.updateSubmitButtonState();
+        if (this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0) {
+          this.set('photo', this.post.photos[0]);
+        }
       },
       eptChanged: function (ept) {
         this.post.estimated_preperation_time = this.ept * 60;

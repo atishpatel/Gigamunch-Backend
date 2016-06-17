@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
@@ -69,15 +70,15 @@
         <img src="{{photo}}" alt="food photo"/>
       </div>
     </template>
-    <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required. Note: all photos will be cropped to a 16 x 9 ratio from the center so please use your camera in landscape orientation.</div>
-    <div hidden$="[[!showProgress]]"><paper-progress value="[[progress]]"></paper-progress></div>
+    <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required. Note: Please, use your camera in <strong>landscape</strong> orientation because all photos will be cropped to a 16 x 9 ratio from the center.</div>
+    <div id="progressBar" hidden><paper-progress value="[[progress]]"></paper-progress></div>
     <file-input
       id="fileInput"
       photos="{{photos}}"
       url-postfix="=s1080"
       on-photos-changed="photosChanged"
-      on-progress-start="progressStart"
-      on-progress-end="progressEnd"
+      on-progressstart="progressStart"
+      on-progressend="progressEnd"
       progress="{{progress}}"
       auto-validate>
       <div class="add-image">
@@ -92,25 +93,25 @@
                  errorMessage="A title is required"
                  required
                  auto-validate></paper-input>
-    <paper-input label="Description*"
+    <paper-textarea label="Description*"
                  value="{{description}}"
                  placeholder="Fresh Pasta with sweet potato, goat cheese, roasted vegetables, and nutty almonds transform plain fettuccine noodles into a dinner worth craving!"
                  errorMessage="A description is required"
                  required
-                 auto-validate></paper-input>
-    <paper-input label="Ingredients*"
+                 auto-validate></paper-textarea>
+    <paper-textarea label="Ingredients*"
                  placeholder="sweet potato, mushrooms, fettuccine noodles, almonds, goat cheese, salt, black pepper"
                  errorMessage="Ingredients are required"
                  value="{{_ingredients}}"
                  required
-                 auto-validate></paper-input>
-    <paper-input label="General Tags"
+                 auto-validate></paper-textarea>
+    <paper-textarea label="General Tags"
                  placeholder="pasta, vegeterian, vegetables, cheese"
                  value="{{_general_tags}}"
-                 auto-validate></paper-input>
+                 auto-validate></paper-textarea>
     <!-- TODO: switch to a checklist for dietary needs -->
     <paper-input label="Dietary Concerns Tags"
-                 placeholder="cheese, almonds"
+                 placeholder="dairy, nuts, meat"
                  value="{{_dietary_needs_tags}}"
                  auto-validate></paper-input>
 
@@ -138,6 +139,7 @@
           type: String,
           notify: true,
           reflectToAttribute: true,
+          observer: 'changed',
         },
         ingredients: {
           type: Array,
@@ -173,10 +175,6 @@
           type: Boolean,
           value: true,
         },
-        showProgress: {
-          type: Boolean,
-          value: false,
-        },
       },
       update: function() {
         if (this.ingredients !== undefined && this.ingredients !== null) {
@@ -199,11 +197,13 @@
         if (ing !== undefined && ing !== null) {
           this.ingredients = ing.split(/\s*,\s*/);
         }
+        this.fire('change');
       },
       _updateGeneralTags: function(gt) {
         if (gt !== undefined && gt !== null) {
           this.generalTags = gt.split(/\s*,\s*/);
         }
+        this.fire('change');
       },
       _updateDietaryNeedsTags: function(dnt) {
         if (dnt !== undefined && dnt !== null) {
@@ -223,14 +223,16 @@
         }
       },
       photosChanged: function() {
-        // this.notifyPath('photos', this.photos);
         this.photosUpdated(this.photos);
       },
       progressStart: function() {
-        this.set('showProgress', true);
+        this.$.progressBar.hidden = false; 
       },
       progressEnd: function() {
-        this.set('showProgress', false);
+        this.$.progressBar.hidden = true; 
+      },
+      changed: function(e) {
+        this.fire('change');
       },
     });
   </script>
