@@ -12,7 +12,9 @@
         display: block;
       }
     </style>
-      <content on-tap="selectFile"></content>
+    <div on-tap="selectFile">
+      <content></content>
+    </div>
     <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
       <input id="file" type="file" name="file" accept="image/*;capture=camera" on-change="_uploadFile">
     </form>
@@ -74,6 +76,7 @@
         return this.valid;
       },
       selectFile: function() {
+        console.log('selecte file clicked');
         this.$.file.click();
       },
       addPhoto: function(url) {
