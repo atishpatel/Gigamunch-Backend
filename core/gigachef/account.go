@@ -60,7 +60,7 @@ func (c *Client) UpdateProfile(user *types.User, address *types.Address, phoneNu
 		if !appengine.IsDevAppServer() {
 			// notify enis
 			nC := notification.New(c.ctx)
-			err = nC.SendSMS("6153975516", fmt.Sprintf("%s just submit an application. get on that booty. userID: %s", user.Name, user.ID))
+			err = nC.SendSMS("6153975516", fmt.Sprintf("%s just submit an application. get on that booty. email: %s", user.Name, user.Email))
 			if err != nil {
 				utils.Errorf(c.ctx, "failed to notify enis about chef(%s) submitting application", user.ID)
 			}
@@ -148,6 +148,16 @@ func GetInfo(ctx context.Context, id string) (*Gigachef, error) {
 		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
 	return chef, nil
+}
+
+// GetMultiInfo returns Gigachef info
+func GetMultiInfo(ctx context.Context, ids []string) ([]Gigachef, error) {
+	// TODO add not querying same ids
+	chefs, err := getMulti(ctx, ids)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("cannot get multi gigachefs")
+	}
+	return chefs, nil
 }
 
 // PostInfoResp contains information related to a post

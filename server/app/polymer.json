@@ -1,0 +1,13 @@
+{
+  "entrypoint": "index.html",
+  "shell": "source/app-shell.html",
+  "fragments": [
+    "source/home-page.html",
+    "source/becomechef-page.html",
+    "source/faq-page.html",
+    "source/about-page.html",
+    "source/terms-page.html",
+    "source/privacy-page.html",
+    "source/upgrade-page.html"
+  ]
+}

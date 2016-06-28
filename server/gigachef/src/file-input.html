@@ -12,7 +12,9 @@
         display: block;
       }
     </style>
-      <content on-tap="selectFile"></content>
+    <div on-tap="selectFile">
+      <content></content>
+    </div>
     <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
       <input id="file" type="file" name="file" accept="image/*;capture=camera" on-change="_uploadFile">
     </form>
@@ -74,6 +76,7 @@
         return this.valid;
       },
       selectFile: function() {
+        console.log('selecte file clicked');
         this.$.file.click();
       },
       addPhoto: function(url) {
@@ -104,14 +107,17 @@
         var polymerElement = this;
         xhr.onload = function() {
           var resp = JSON.parse(this.response);
-          if(resp.err.code !== 0) {
-            alert('There was an error upload your file:', resp.err.message);
+          if(resp.err === undefined || resp.err.code === undefined || resp.err.code !== 0) {
+            alert('There was an error upload your file:', resp.err);
             return;
           }
           polymerElement.addPhoto(resp.url);
+          polymerElement.fire('progressend');
+          polymerElement.set('progress', 0);
         };
         xhr.upload.onprogress = this.updateProgress.bind(this);
         this.set('valid', false);
+        this.fire('progressstart');
         xhr.send(formData);
         this.getActionURL();
       },

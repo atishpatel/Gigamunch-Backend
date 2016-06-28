@@ -2,6 +2,7 @@ package payment
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/atishpatel/braintree-go"
@@ -97,11 +98,17 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, chefC chefI
 	if err == nil {
 		ma, err = bt.MerchantAccount().Update(ma)
 		if err != nil {
+			if strings.Contains(err.Error(), "number is invalid") {
+				return "", errInvalidParameter.WithMessage(err.Error())
+			}
 			return "", errBT.WithError(err).Wrapf("cannot bt.MerchantAccount().Update sub-merchant(%s)", req.ID)
 		}
 	} else {
 		ma, err = bt.MerchantAccount().Create(ma)
 		if err != nil {
+			if strings.Contains(err.Error(), "number is invalid") {
+				return "", errInvalidParameter.WithMessage(err.Error())
+			}
 			return "", errBT.WithError(err).Wrapf("cannot create sub-merchant(%s)", req.ID)
 		}
 		user.SetSubMerchantID(true)

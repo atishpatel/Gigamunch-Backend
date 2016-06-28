@@ -82,5 +82,5 @@ CHEF.User = new User();
 
 // redirect if token is empty
 if (!CHEF.User.isLoggedIn) {
-  window.location = '/login?mode=select';
+  window.location = '/becomechef?mode=select';
 }

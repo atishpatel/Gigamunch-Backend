@@ -2,7 +2,7 @@
 
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-icons.html">
 
 <dom-module id="post-list">
   <template>
@@ -13,7 +13,17 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: space-around;
+        justify-content: space-between;
+      }
+
+      paper-material {
+        background: white;
+        padding: 10px;
+      }
+
+      paper-material h1 {
+        font-size: 1.25em;
+        font-weight: 500;
       }
 
       .post-card {
@@ -97,7 +107,7 @@
       }
 
       @media (min-width: 767px) {
-        .post-card {
+        paper-material {
           flex-basis: 45%;
           max-width: 44%;
           margin: 1%;
@@ -136,7 +146,7 @@
             <div class="row">
               <div class="column">
                 <div class="row">
-                  <placeholder-img class="user-pic" icon="gigaicons:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
+                  <placeholder-img class="user-pic" icon="app:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
                   <span class="column center-text user-name">[[order.gigamuncher_name]]</span>
                 </div>
               </div>
@@ -149,6 +159,17 @@
           </div>
         </template>
       </paper-material>
+    </template>
+
+    <template is="dom-if" if="[[showTutorialCard]]">
+      <paper-material>
+        <h1>Tutorial Card</h1>
+        <p>
+          My Orders is where you can see the all your post and the number of servings each person ordered. 
+          <br><br>
+          Post a dish from <a href="/items">My Kitchen</a> to start building your brand and earn money cooking! :)
+        </p>
+      </paper-card>
     </template>
 
   </template>
@@ -168,6 +189,10 @@
         service: {
           type: Object,
         },
+        showTutorialCard: {
+          type: Boolean,
+          value: false,
+        },
       },
       selected: function() {
         this.getPosts();
@@ -182,6 +207,11 @@
                 func: this.getItems.bind(this),
               }],
             });
+          }
+          if (posts.length < 2) {
+            this.set('showTutorialCard', true);
+          } else {
+            this.set('showTutorialCard', false);
           }
           this.set('posts', posts);
         }.bind(this));

@@ -1,0 +1,73 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="feature-style">
+  <template>
+    <style>
+    .bg-white {
+      background-color: white;
+    }
+
+    .bg-primary-color {
+      background-color: var(--app-primary-color);
+    }
+
+    .content {
+        max-width: 1000px;
+        margin: auto;
+      }
+    
+    .feature {
+      display: flex;
+      align-items: center;
+      padding: 0px 70px;
+    }
+
+    .feature .text {
+      flex: 2;
+      font-weight: 400;
+      margin: 0 16px;
+    }
+
+    .feature .text h1 {
+      font-size: 1.1em;
+    }
+
+    .feature p {
+      font-weight: 300;
+    }
+
+    .feature .image {
+      padding: 0 16px;
+    }
+
+    .feature img {
+      width: 200px;
+      border-radius: 50%;
+    }
+
+    .last-element {
+      padding-bottom: 64px;
+    }
+
+    @media (max-width: 767px) {
+      .feature {
+        padding: 0px 10px;
+        text-align: center;
+      }
+
+      .feature img {
+        width: 175px;
+        height: 175px;
+      }
+
+      .flex-column {
+        flex-direction: column;
+      }
+
+      .flex-column-rev {
+        flex-direction: column-reverse;
+      }
+    }
+    </style>
+  </template>
+</dom-module>

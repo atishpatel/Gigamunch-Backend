@@ -40,7 +40,8 @@
         ingredients="{{item.ingredients}}"
         general-tags="{{item.general_tags}}"
         dietary-needs-tags="{{item.dietary_needs_tags}}"
-        on-photos-changed="itemPhotoChanged">
+        on-photos-changed="itemPhotoChanged"
+        on-change="updateSubmitButtonState">
       </item-fields>
       <paper-button
         id="submitButton"

@@ -1,0 +1,89 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+
+<dom-module id="faq-page">
+
+  <template>
+
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+        color: var(--primary-text-color)
+      }
+
+      h1, h2, p {
+        font-size: 1em;
+      }
+
+      h2 {
+        font-weight: 500;
+      }
+
+      p {
+        font-weight: 300;
+      }
+
+      paper-material {
+        padding: 10px;
+        margin: auto;
+        max-width: 1000px;
+      }
+
+      .center {
+        text-align: center;
+      }
+
+      .bg-white {
+        background-color: white;
+      }
+    </style>
+
+    <paper-material elevation="1" class="bg-white">
+      <div class="center">
+        <h1>FAQ</h1>
+      </div>
+      <p>
+        <h2>Can anyone cook on Gigamunch?</h2>
+        Anyone who wants to use Gigamunch to sell food must go through an approval process.
+        The approval process includes an interview to learn about the potential cooks food experience and motivations for sharing their food.
+        The process also includes a local, state, and federal background check to ensure the safety of customers. Lastly, the Gigamunch team will make kitchen visits to further develop a trusting relationship with the cooks.
+      </p>
+      <p>
+        <h2>How does a cook sell their food exactly?</h2>
+        Once cooks are approved they will be able to create posts on the Gigamunch app.
+        The cooks will set the price, description, and other relevant information.
+        Using the app, you will be able to see and buy their posted foods.
+      </p>
+      <p>
+        <h2>Where does my money go?</h2>
+        When you purchase a meal 80% of your money will go to the cook.
+        The other 20% will go to Gigamunch to help us maintain operations.
+      </p>
+      <p>
+        <h2>How do you get the food?</h2>
+        There are three main ways to get your food.
+        <ol>
+          <li>Pick up the food from the cook's home.</li>
+          <li>Get the food delivered to you by a delivery service, or by the cooks themselves.</li>
+          <li>Pick up the food at an agreed upon location.</li>
+        </ol>
+      </p>
+      <p>
+        For further information contact us at <a href="mailto:enis@gigamunchapp.com">enis@gigamunchapp.com</a>
+      </p>
+    </paper-material>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'faq-page'
+
+    });
+
+  </script>
+
+</dom-module>

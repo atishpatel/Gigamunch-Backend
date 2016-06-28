@@ -6,53 +6,48 @@ api_version: go1
 
 handlers:
 - url: /favicon.ico
-  static_files: common/favicon.ico
-  upload: common/favicon.ico
+  static_files: favicon.ico
+  upload: favicon.ico
 
 - url: /robots.txt
-  static_files: common/robots.txt
-  upload: common/robots.txt
-
-- url: /common
-  static_dir: common
-
-# Website app
-- url: /
-  static_files: app/index.html
-  upload: app/index.html
-  secure: always
-
-- url: /styles
-  static_dir: app/styles
-  secure: always
-
-- url: /js
-  static_dir: app/js
-  secure: always
+  static_files: robots.txt
+  upload: robots.txt
 
 # Gigachef app
 - url: /.*bower_components
-  static_dir: gigachef/build/unbundled/bower_components
+  static_dir: gigachef/build/bundled/bower_components
   secure: always
 
 - url: /gigachef/service-worker.js
-  static_files: gigachef/build/unbundled/service-worker.js
-  upload: gigachef/build/unbundled/service-worker.js
+  static_files: gigachef/build/bundled/service-worker.js
+  upload: gigachef/build/bundled/service-worker.js
   secure: always
 
 - url: /gigachef/js
-  static_dir: gigachef/build/unbundled/js
+  static_dir: gigachef/build/bundled/js
   secure: always
 
 - url: /.*src
-  static_dir: gigachef/build/unbundled/src
+  static_dir: gigachef/build/bundled/src
   secure: always
 
 - url: /gigachef.*
-  static_files: gigachef/build/unbundled/index.html
-  upload: gigachef/build/unbundled/index.html
+  static_files: gigachef/build/bundled/index.html
+  upload: gigachef/build/bundled/index.html
   http_headers:
-    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/src/my-app.html>; rel=preload; as=document, </common/common.css>; rel=preload; as=style'
+    Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/js/service.js>; rel=preload; as=script, </gigachef/src/app-shell.html>; rel=preload; as=document'
+  secure: always
+
+# Website app
+- url: /source
+  static_dir: app/build/bundled/source
+  secure: always
+
+- url: /(|home|becomechef|faq|terms|privacy|upgrade|about)$
+  static_files: app/build/bundled/index.html
+  upload: app/build/bundled/index.html
+  http_headers:
+    Link: '</source/app-shell.html>; rel=preload; as=document, </source/home-page.html>; rel=preload; as=document'
   secure: always
 
 - url: /.*
@@ -69,7 +64,10 @@ skip_files:
   - ^(.*/)?.*\.yml$
   - ^(.*/)?.*\.gitignore$
   - ^(.*/)?.*/LICENSE$
-  - ^(gigachef/build/bundled/.*)
+  - ^(gigachef/build/unbundled/.*)
   - ^(gigachef/bower_components/.*)
   - ^(gigachef/src/.*)
   - ^(gigachef/js/.*)
+  - ^(app/build/unbundled/.*)
+  - ^(app/bower_components/.*)
+  - ^(app/source/.*)

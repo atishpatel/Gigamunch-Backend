@@ -42,6 +42,10 @@ func ftos(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 32)
 }
 
+func ftos64(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
 func stoi(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
@@ -60,6 +64,10 @@ func stof(s string) (float32, error) {
 		return 0, err
 	}
 	return float32(f), nil
+}
+
+func stof64(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
 }
 
 type coder interface {

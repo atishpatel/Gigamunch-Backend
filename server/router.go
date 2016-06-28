@@ -1,13 +1,9 @@
 package server
 
 import (
-	"io/ioutil"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"google.golang.org/appengine"
-
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 func init() {
@@ -33,17 +29,12 @@ func handle404(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	ctx := appengine.NewContext(req)
 	user := CurrentUser(w, req)
 	if user != nil {
 		http.Redirect(w, req, baseGigachefURL, http.StatusTemporaryRedirect)
 	}
 	removeCookies(w)
-	page, err := ioutil.ReadFile("app/login.html")
-	if err != nil {
-		utils.Errorf(ctx, "Error reading login page: %+v", err)
-	}
-	w.Write(page)
+	http.Redirect(w, req, "/becomechef", http.StatusTemporaryRedirect)
 }
 
 func handleSignout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {

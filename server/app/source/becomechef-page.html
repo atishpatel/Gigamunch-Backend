@@ -1,0 +1,229 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="feature-style.html">
+<dom-module id="becomechef-page">
+
+  <template>
+
+    <style include="feature-style">
+      :host {
+        display: block;
+      }
+
+      #gitkitWidget ::content .gitkit-container,#gitkitWidget ::content .gitkit-container-outer{background-color:#fff;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;color:#111;font:14px "Helvetica Neue",helvetica,arial,sans-serif;overflow:hidden;position:relative}#gitkitWidget ::content .gitkit-container{direction:ltr;margin:0 auto;padding:10px;width:300px}#gitkitWidget ::content .gitkit-container-outer{box-shadow:0 0 0.6em #ccc;-webkit-box-shadow:0 0 0.6em #ccc;-moz-box-shadow:0 0 0.6em #ccc;padding:35px 50px}#gitkitWidget ::content .gitkit-container-outer #gitkitWidget ::content .gitkit-container{min-width:300px;width:inherit}#gitkitWidget ::content .gitkit-title{direction:ltr;font-size:20px;font-weight:normal;line-height:1.2;margin-bottom:18px;margin-top:12px;padding-bottom:7px;text-align:left}#gitkitWidget ::content .gitkit-text{direction:ltr;margin:14px 0;text-align:left}#gitkitWidget ::content .gitkit-error{color:#e54b31;direction:ltr;line-height:18px;margin:-16px 0 16px;text-align:left}#gitkitWidget ::content .gitkit-list-item{direction:ltr;margin:0;padding:0;text-align:left}#gitkitWidget ::content .gitkit-hidden{display:none}#gitkitWidget ::content .gitkit-relative-wrapper{position:relative}#gitkitWidget ::content .gitkit-label{direction:ltr;display:block;font-weight:bold;line-height:1.2;margin-bottom:7px;text-align:left}#gitkitWidget ::content .gitkit-checkbox-label{direction:ltr;display:inline-block;font-weight:normal;text-align:left}#gitkitWidget ::content .gitkit-input,#gitkitWidget ::content .gitkit-input-invalid{border:1px solid #ddd;border-top:1px solid #ccc;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;direction:ltr;display:inline-block;font-size:15px;height:32px;margin:0 0 24px;max-width:300px;padding-left:8px;width:100%}#gitkitWidget ::content .gitkit-input-invalid{border:1px solid #e54b31}#gitkitWidget ::content .gitkit-recaptcha{margin-bottom:24px;text-align:center}#gitkitWidget ::content .gitkit-button{background-color:#f5f5f5;background-image:linear-gradient(top,#f5f5f5,#f1f1f1);background-image:-moz-linear-gradient(top,#f5f5f5,#f1f1f1);background-image:-ms-linear-gradient(top,#f5f5f5,#f1f1f1);background-image:-o-linear-gradient(top,#f5f5f5,#f1f1f1);background-image:-webkit-linear-gradient(top,#f5f5f5,#f1f1f1);border:1px solid #dcdcdc;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;color:#444;cursor:default;display:inline-block;font:13px "Helvetica Neue",helvetica,arial,sans-serif;font-weight:bold;height:32px;line-height:32px;margin:0;min-width:54px;padding:0 12px;text-align:center;text-decoration:none;-moz-user-select:none;-ms-user-select:none;-webkit-user-select:none}#gitkitWidget ::content .gitkit-button:hover{background-color:#eeeeee;background-image:linear-gradient(top,#ededed,#e0e0e0);background-image:-moz-linear-gradient(top,#ededed,#e0e0e0);background-image:-ms-linear-gradient(top,#ededed,#e0e0e0);background-image:-o-linear-gradient(top,#ededed,#e0e0e0);background-image:-webkit-linear-gradient(top,#ededed,#e0e0e0);border:1px solid #c6c6c6;box-shadow:0 1px 2px rgba(0,0,0,0.1);-webkit-box-shadow:0 1px 2px rgba(0,0,0,0.1);-moz-box-shadow:0 1px 2px rgba(0,0,0,0.1);color:#111;transition:all 0.0s;-moz-transition:all 0.0s;-ms-transition:all 0.0s;-o-transition:all 0.0s;-webkit-transition:all 0.0s}#gitkitWidget ::content .gitkit-button:active{background-color:#f6f6f6;background-image:linear-gradient(top,#ededed,#e0e0e0);background-image:-moz-linear-gradient(top,#ededed,#e0e0e0);background-image:-ms-linear-gradient(top,#ededed,#e0e0e0);background-image:-o-linear-gradient(top,#ededed,#e0e0e0);background-image:-webkit-linear-gradient(top,#ededed,#e0e0e0);box-shadow:inset 0 1px 2px rgba(0,0,0,0.1);-moz-box-shadow:inset 0 1px 2px rgba(0,0,0,0.1);-webkit-box-shadow:inset 0 1px 2px rgba(0,0,0,0.1)}#gitkitWidget ::content .gitkit-link{color:#018ed7;font-variant:normal;font-weight:normal;text-decoration:none}#gitkitWidget ::content .gitkit-link:hover{text-decoration:underline}#gitkitWidget ::content .gitkit-form-actions{direction:ltr;margin-bottom:14px;text-align:left}#gitkitWidget ::content .gitkit-edit-action{background:url(https://www.gstatic.com/authtoolkit/image/edit.png) top left no-repeat;display:inline-block;line-height:25px;padding-left:30px}#gitkitWidget ::content .gitkit-remove-action{background:url(https://www.gstatic.com/authtoolkit/image/trash.png) top left no-repeat;display:inline-block;height:24px;margin-left:22px;width:24px}#gitkitWidget ::content .gitkit-indent{margin-left:1em}#gitkitWidget ::content .gitkit-sign-in-options{direction:ltr;margin:-16px 0 24px;position:relative;text-align:left}#gitkitWidget ::content .gitkit-tos{direction:ltr;margin-bottom:24px;text-align:left}#gitkitWidget ::content .gitkit-arrow-indicator,#gitkitWidget ::content .gitkit-arrow-indicator-active{border:none;bottom:24px;height:32px;padding:0;position:absolute;right:0px;width:32px}#gitkitWidget ::content .gitkit-arrow-indicator{background:url(https://www.gstatic.com/authtoolkit/image/indicator-left.png) no-repeat center}#gitkitWidget ::content .gitkit-arrow-indicator-active{background:url(https://www.gstatic.com/authtoolkit/image/indicator-active-left.png) no-repeat center}#gitkitWidget ::content .gitkit-recommend-option{margin-bottom:24px;margin-top:-24px}#gitkitWidget ::content .gitkit-idp-list{list-style:none;margin:1em 0;padding:0}#gitkitWidget ::content .gitkit-idp-button{direction:ltr;display:inline-block;height:48px;text-align:left;vertical-align:middle;width:100%}#gitkitWidget ::content .gitkit-idp-list> .gitkit-list-item{margin-bottom:15px}#gitkitWidget ::content .gitkit-idp-icon{border:none;display:inline-block;height:48px;vertical-align:middle;width:48px}#gitkitWidget ::content .gitkit-idp-favicon{border:none;display:inline-block;height:14px;margin-right:5px;vertical-align:middle;width:14px}#gitkitWidget ::content .gitkit-idp-text{color:#fff;display:inline-block;font-size:18px;font-weight:bold;text-align:center;vertical-align:middle;width:252px}#gitkitWidget ::content .gitkit-idp-password{background-color:#7f7f7f}#gitkitWidget ::content .gitkit-idp-google{background-color:#4285f4}#gitkitWidget ::content .gitkit-idp-googleplus{background-color:#db4437}#gitkitWidget ::content .gitkit-idp-microsoft{background-color:#004185}#gitkitWidget ::content .gitkit-idp-yahoo{background-color:#4002af}#gitkitWidget ::content .gitkit-idp-aol{background-color:#2ea0df}#gitkitWidget ::content .gitkit-idp-facebook{background-color:#3b5998}#gitkitWidget ::content .gitkit-idp-paypal{background-color:#008de0}#gitkitWidget ::content .gitkit-idp-twitter{background-color:#55acee}#gitkitWidget ::content .gitkit-account-photo{display:inline-block;height:48px;margin-left:15px;vertical-align:middle;width:48px}#gitkitWidget ::content .gitkit-avatar-with-idp{direction:ltr;margin:10px 16px;text-align:left}#gitkitWidget ::content .gitkit-info-bar{background-color:#f9edbe;border:1px solid #f0c36d;box-shadow:0 2px 4px rgba(0,0,0,0.2);-webkit-box-shadow:0 2px 4px rgba(0,0,0,0.2);-moz-box-shadow:0 2px 4px rgba(0,0,0,0.2);left:10%;padding:8px 16px;position:absolute;right:10%;text-align:center;top:0}#gitkitWidget ::content .gitkit-info-bar-message{font-size:12px;margin:0}#gitkitWidget ::content .gitkit-busy-indicator{background:url(https://www.gstatic.com/authtoolkit/image/loading.gif) no-repeat center center;height:100%;left:0;position:absolute;top:0;width:100%}#gitkitWidget ::content .gitkit-callback-indicator-container{height:120px}#gitkitWidget ::content .gitkit-account-chip{background:#fff;border:1px solid #dcdcdc;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;display:inline-block;height:62px;padding:8px;position:relative;-moz-user-select:none;-ms-user-select:none;-webkit-user-select:none;width:254px}#gitkitWidget ::content .gitkit-account-chip-photo{border:1px solid rgba(0,0,0,0.1);height:42px;left:8px;position:absolute;top:8px;width:42px}#gitkitWidget ::content .gitkit-account-chip-name,#gitkitWidget ::content .gitkit-account-chip-email,#gitkitWidget ::content .gitkit-account-chip-email-only{direction:ltr;display:block;line-height:18px;margin-left:52px;overflow:hidden;text-align:left;text-overflow:ellipsis}#gitkitWidget ::content .gitkit-account-chip-name{font-weight:bold;margin-top:2px;white-space:nowrap}#gitkitWidget ::content .gitkit-account-chip-email{color:#666}#gitkitWidget ::content .gitkit-account-chip-email-only{color:#111;font-weight:bold;margin-top:12px}#gitkitWidget ::content .gitkit-account-chip-email-label{display:inline-block;overflow:hidden;text-overflow:ellipsis;vertical-align:text-bottom;width:165px}#gitkitWidget ::content .gitkit-sign-in-button{display:inline-block}#gitkitWidget ::content .gitkit-user-card{color:#111;font:14px "Helvetica Neue",helvetica,arial,sans-serif;position:relative;width:254px}#gitkitWidget ::content .gitkit-user-card-chip{cursor:pointer;outline:none}#gitkitWidget ::content .gitkit-user-card-arrow{background:url("https://www.gstatic.com/authtoolkit/image/down-arrow.png") no-repeat right center;height:4px;position:absolute;top:31px;width:97%}#gitkitWidget ::content .gitkit-user-card-menu{border:1px solid #dcdcdc;border-width:0 1px 1px 1px;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;direction:ltr;list-style:none;margin:0;padding:0;position:absolute;width:inherit}#gitkitWidget ::content .gitkit-user-card-menuitem{background:#fff;color:#018ed7;display:block;margin:0;outline:none;overflow:hidden;padding:15px 8px;text-overflow:ellipsis;white-space:nowrap}#gitkitWidget ::content .gitkit-user-card-menuitem:hover,#gitkitWidget ::content .gitkit-user-card-menuitem:focus{background:#f4f4f4;cursor:pointer}#gitkitWidget ::content .gitkit-manage-account-list{border:1px solid #e4e0e0;list-style:none;padding:0}#gitkitWidget ::content .gitkit-manage-account-list> .gitkit-list-item{border-bottom:1px solid #e4e0e0;padding:10px}#gitkitWidget ::content .gitkit-manage-account-list> .gitkit-list-item:last-of-type{border-bottom:none}#gitkitWidget ::content .gitkit-account-chip-list{list-style:none;margin:1em 0;padding:0}#gitkitWidget ::content .gitkit-account-chip-list> .gitkit-list-item{margin-bottom:24px}@media (max-width:500px){#gitkitWidget ::content .gitkit-container-outer{box-shadow:none;-webkit-box-shadow:none;-moz-box-shadow:none;padding:10px 0}#gitkitWidget ::content .gitkit-container-outer #gitkitWidget ::content .gitkit-container{padding:0px}#gitkitWidget ::content .gitkit-manage-account-list{border-left:none;border-right:none}}
+
+      /* Custom gitkit widget */
+      #gitkitWidget ::content .gitkit-title,#gitkitWidget ::content .gitkit-info-bar  {
+        display: none;
+      }
+
+      #gitkitWidget ::content .gitkit-list-item {
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .top-desc {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+        padding: 20px;
+        margin-bottom: -100px;
+        z-index: 20;
+      }
+
+      .top-desc h1 {
+        text-align: center;
+        font-size: 20px;
+        line-height: 30px;
+        font-weight: 500;
+        color: white;
+        max-width: 700px;
+      }
+
+      .sign-up-card {
+        min-height: 250px;
+        position: relative;
+        max-width: 700px;
+        width: 70%;
+        padding: 30px;
+        line-height: 30px;
+        margin: auto;
+        z-index: 21;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .sign-up-card > * {
+        font-size: 1em;
+      }
+
+      .sign-up-card h2 {
+        text-align: center;
+      }
+
+      .nav-a {
+        text-decoration: none;
+        outline: 0;
+      }
+
+      .center-text {
+        text-align: center;
+      }
+
+      .active paper-material:nth-child(2) {
+        margin-top: -300px;
+        padding-top: 330px;
+        z-index: 18;
+      }
+
+      .padding-bottom {
+        padding-bottom: 100px;
+      }
+
+      @media (max-width: 767px) {
+
+        .top-desc {
+          justify-content: center;
+          height: 300px;
+          margin-bottom: 0px;
+        }
+
+        .top-desc h1 {
+          font-size: 16px;
+          margin-bottom: auto;
+          text-align: center;
+        }
+
+        .sign-up-card {
+          margin: 0;
+          text-align: center;
+          width: inherit;
+          z-index: 19;
+        }
+      }
+
+    </style>
+
+    <paper-material elevation="2" class="top-desc bg-primary-color">
+      <h1 class="content">Earn money and recognition by sharing your food with the community.</h1>
+    </paper-material>
+
+    <div class="active">
+      <paper-material elevation="1" class="content sign-up-card bg-white">
+        <div id="signUp">
+          <h2>Sign up/Log in</h2>
+          <div id="gitkitWidget">
+          </div>
+        </div>
+        <div class="center-text" id="goToDashboard" hidden>
+          <h2>Hey <span>[[user.name]]</span>! Welcome back!</h2>
+          <a class="nav-a" href="/gigachef/"><paper-button raised>My Dashboard</paper-button></a>
+        </div>
+      </paper-material>
+
+        <paper-material elevation="0" class="bg-white">
+          <div class="content">
+            <section class="feature flex-column-rev">
+              <div class="text">
+                <h1>Create a name for yourself</h1>
+                <p>
+                  Gigamunch is the perfect platform to build a following. 
+                  Your customers will be able to review and rate your creations, as well as get notifications when you post new meals.
+                </p>
+              </div>
+              <div class="image">
+                <img alt="a person kneading dough" src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/create-brand-350.jpg"/>
+              </div>
+            </section>
+          </div>
+        </paper-material>
+      
+
+        <paper-material elevation="0" class="bg-white">
+          <div class="content">
+            <section class="feature flex-column">
+              <div class="image">
+                <img alt="a person writing down notes for work" src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/own-schedule-350.jpg"/>
+              </div>
+              <div class="text">
+                <h1>Earn money on a flexible schedule</h1>
+                <p>
+                  Gigamunch gives you freedom to cook whenever you want. 
+                  Choose your own schedule and be your own boss.
+                </p>
+              </div>
+            </section>
+          </div>
+        </paper-material>
+        <paper-material elevation="0" class="bg-white">
+          <div class="content last-element">
+            <section class="feature flex-column-rev">
+              <div class="text">
+                <h1>The easiest way to share your food</h1>
+                <p>
+                  Gigamunch will help manage orders, payments, and logistics of selling your food. 
+                  Let us take care of the boring stuff so you can spend more time actually cooking.
+                </p>
+              </div>
+              <div class="image">
+                <img alt="a table with food worth sharing" src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/share-food-350.jpg"/>
+              </div>
+            </section>
+          </div>
+        </paper-material>
+        
+      </div>
+  </template>
+
+  <script>
+    
+
+    Polymer({
+
+      is: 'becomechef-page',
+      properties: {
+        user: {
+          type: Object,
+          notify: true,
+          observer: 'userUpdated',
+        },
+      },
+      ready: function() {
+        if (this.user === undefined || this.user === null || this.user.id === undefined) {        
+          var apiKey;
+          if (location.hostname.includes('gigamunch-omninexus-dev.appspot.com') || location.hostname === 'localhost') {
+            apiKey = 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g';
+          } else {
+            apiKey = 'AIzaSyCB8i30D0GkFPW6_mKf9ph8voFFMQoarO0';
+          }
+          google.identitytoolkit.start(
+            '#gitkitWidget',
+            {
+              apiKey: apiKey,
+              signInSuccessUrl: '/login',
+              popupMode: true,
+              oobActionUrl: '/sendemail',
+              displayMode: 'providerFirst',
+              signInOptions: ["google", "facebook", "password"],
+              siteName: 'Gigamunch',
+              accountChooserEnabled: false,
+            },
+            '');
+          }
+      },
+      userUpdated: function(u) {
+        if (u !== undefined && u !== null && u.id !== undefined) {
+          this.$.signUp.hidden = true;
+          this.$.goToDashboard.hidden = false;
+        }
+      },
+    });
+
+  </script>
+
+</dom-module>

@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scrollpos-control/app-scrollpos-control.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
@@ -14,10 +15,11 @@
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-footer.html">
+<link rel="import" href="app-icons.html">
 <link rel="import" href="placeholder-img.html">
 
-<dom-module id="my-app">
+<dom-module id="app-shell">
 
   <template>
 
@@ -28,9 +30,9 @@
         --primary-color: #FF7043;
         --light-primary-color: var(--paper-deep-orange-100);
         --dark-primary-color: var(--paper-deep-orange-700);
-        --accent-color: var(--paper-amber-a400);
-        --light-accent-color: var(-—paper-amber-a100);
-        --dark-accent-color: var(-—paper-amber-a700);
+        --accent-color: var(--paper-light-blue-a200);
+        --light-accent-color: var(--paper-light-blue-a100);
+        --dark-accent-color: var(--paper-light-blue-a400);
 
         --primary-text-color: var(--paper-grey-900);
         --secondary-text-color: #727272;
@@ -51,20 +53,25 @@
           color: var(--text-primary-color);
           min-width: 5em;
         };
+        /* paper-fab */
         --paper-fab: {
           position: fixed;
           bottom: 4vh;
           right: 4vh;
         };
-
+        /* paper-tabs */
+        --paper-tabs-selection-bar-color: var(--light-accent-color);
         --paper-tab: {
           padding: 0;
         };
-
+        --paper-tab-ink: var(--light-accent-color);
+        /* paper-progress */
+        --paper-progress-active-color: var(--accent-color);
         color: var(--primary-text-color);
       }
 
       iron-pages {
+        min-height: 96vh;
         max-width: 1000px;
         margin: auto;
       }
@@ -88,6 +95,21 @@
 
       app-header {
         z-index: 8;
+      }
+
+      #errorDialogDetails {
+        color: var(--secondary-text-color);
+      }
+
+      @font-face {
+        font-family: 'NexaBold';
+        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+      }
+
+      .logo {
+        font-family: 'NexaBold', sans-serif;
+        letter-spacing: .05em;
+        text-decoration: none;
       }
 
       .nav-a {
@@ -198,7 +220,6 @@
           margin-left: 30px;
         }
       }
-
     </style>
 
     <app-location route="{{route}}"></app-location>
@@ -214,6 +235,7 @@
       modal>
       <h3>Oh no! Something went wrong!</h3>
       <div id="errorDialogText">error :(</div>
+      <div id="errorDialogDetails"></div>
       <div>We're sorry for the inconvenience. :(
         <br>Our developer, Atish, will be working on fixing this issue asap.</div>
       <div class="buttons">
@@ -229,6 +251,7 @@
       </div>
     </paper-dialog>
 
+    <app-scrollpos-control selected="{{page}}"></app-scrollpos-control>
       <!-- Drawer content -->
       <app-drawer id="drawer" opened="{{drawerOpened}}" swipe-open="[[smallScreen]]">
         <app-toolbar class="drawer-toolbar">
@@ -236,7 +259,7 @@
             <a class="logo" href="/">Gigamunch</a>
           </div>
           <div class="bar bottom">
-            <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+            <placeholder-img class="user-pic" icon="app:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
             <div class="user-info">
               <div class="name"><strong>[[user.name]]</strong></div>
               <div class="email">[[user.email]]</div>
@@ -262,13 +285,13 @@
               <paper-icon-button
                 id="arrowBack"
                 class="hide"
-                icon="gigaicons:arrow-back"
+                icon="app:arrow-back"
                 on-tap="_backTaped">
               </paper-icon-button>
               <paper-icon-button
                 id="menuIcon"
                 class="hide"
-                icon="gigaicons:menu"
+                icon="app:menu"
                 on-tap="_toggleDrawer">
               </paper-icon-button>
               <div class="toolbar-title" title>[[title]]</div>
@@ -288,9 +311,9 @@
                   <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
                 </paper-tab>
               </paper-tabs>
-              <placeholder-img class="user-pic" icon="gigaicons:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
+              <placeholder-img class="user-pic" icon="app:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
               <paper-menu-button horizontal-align="right" vertical-offset="15" >
-                <paper-icon-button icon="gigaicons:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                <paper-icon-button icon="app:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
                 <paper-menu class="dropdown-content">
                   <paper-item disabled>Messages - Coming soon!</paper-item>
                   <!-- <a class="nav-a" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
@@ -367,13 +390,13 @@
         </iron-pages>
 
       <!-- </app-header-layout> -->
-
+      <app-footer></app-footer>
 
   </template>
 
   <script>
     Polymer({
-      is: 'my-app',
+      is: 'app-shell',
 
       properties: {
         title: {
@@ -572,23 +595,28 @@
       },
       showError: function (e, detail) {
         var text;
+        var details;
         switch (typeof(detail.error)) {
           case 'object':
             if (typeof(detail.error) === 'string') {
               text = detail.error;
             } else {
-              text = detail.error.message +
-                '<br>detailed gibberish:' +
-                detail.error.detail;
+              text = detail.error.message;
+              if (detail.error.detail !== undefined && detail.error.detail !== '') {
+                details += detail.error.detail;
+              }
             }
             break;
           default:
             text = detail.error.toString();
         }
-        if (detail.notification === true) {
+        if (detail.notification === true || (detail.error !== undefined && detail.error.code !== undefined && detail.error.code === 400)) {
           this.$.notificationDialogText.innerHTML = text;
           this.$.notificationDialog.open();
         } else {
+          if (details !== '') {
+            this.$.errorDialogDetails.innerHTML = 'Detailed gibberish:' + details;
+          }
           this.$.errorDialogText.innerHTML = text;
           this.$.errorDialog.open();
         }

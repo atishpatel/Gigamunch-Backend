@@ -15,7 +15,7 @@
 
 <link rel="import" href="select-with-options.html">
 <link rel="import" href="paper-select.html">
-<link rel="import" href="my-icons.html">
+<link rel="import" href="app-icons.html">
 
 <dom-module id="payout-form">
   <template>
@@ -77,16 +77,16 @@
         <paper-input label="Legal Last Name" value="{{submerchant.last_name}}" required auto-validate></paper-input>
       </div>
       <div class="row">
-        <gold-email-input label="Email" value="{{submerchant.email}}" required auto-validate></gold-email-input>
-        <paper-input label="Date of Birth" type="date" value="{{dob}}" placeholder="mm/dd/yyyy" required auto-validate></paper-input>
+        <gold-email-input label="Email*" value="{{submerchant.email}}" required auto-validate></gold-email-input>
+        <paper-input label="Date of Birth*" type="date" value="{{dob}}" placeholder="mm/dd/yyyy" required auto-validate></paper-input>
       </div>
-      <paper-input label="Apt # (optional)" value="{{submerchant.address.apt}}" auto-validate></paper-input>
-      <paper-input label="Street" value="{{submerchant.address.street}}" required auto-validate></paper-input>
-      <paper-input label="City" value="{{submerchant.address.city}}" required auto-validate></paper-input>
+      <paper-input label="Billing Address Apt # (optional)" value="{{submerchant.address.apt}}" auto-validate></paper-input>
+      <paper-input label="Billing Address Street*" value="{{submerchant.address.street}}" required auto-validate></paper-input>
+      <paper-input label="Billing Address City*" value="{{submerchant.address.city}}" required auto-validate></paper-input>
       <!-- group states and zip -->
       <div class="row">
         <div class="select-input flex-1">
-        <label>State</label>
+        <label>Billing Address State*</label>
         <paper-select>
           <select is="select-with-options" option-value="value" value="{{submerchant.address.state::change}}" required>
             <option value="AL">AL</option>
@@ -146,19 +146,16 @@
           </paper-md-decorator>
         </paper-select>
         </div>
-        <gold-zip-input class="flex-1" label="Zip" value="{{submerchant.address.zip}}" required auto-validate></gold-zip-input>
+        <gold-zip-input class="flex-1" label="Billing Address Zip*" value="{{submerchant.address.zip}}" required auto-validate></gold-zip-input>
       </div>
-
       <div>
         <img alt="A check with routing and account number." src="http://banks-america.com/info/wp-content/uploads/2014/08/routing-number-check.jpg"></img>
       </div>
       <div class="row">
-        <paper-input label="Routing Number" value="{{submerchant.routing_number}}" required auto-validate></paper-input>
-        <paper-input label="Account Number" value="{{submerchant.account_number}}" required auto-validate></paper-input>
+        <paper-input label="Routing Number*" value="{{submerchant.routing_number}}" required auto-validate></paper-input>
+        <paper-input label="Account Number*" value="{{submerchant.account_number}}" required auto-validate></paper-input>
       </div>
-
-      <paper-checkbox id="agreeCheckbox" required>I agree to <a href="/terms">Terms &amp; Agreement</a> and <a href="privacy">Privacy Policy</a> as a sub-merchant.</paper-checkbox>
-
+      <paper-checkbox id="agreeCheckbox" required>I agree to <a href="/terms" target="_blank">Terms &amp; Agreement</a> and <a href="/privacy" target="_blank">Privacy Policy</a> as a sub-merchant.</paper-checkbox>
       <paper-button
         id="submitButton"
         on-tap="submit"
@@ -197,6 +194,9 @@
           type: Object,
         },
       },
+      observers: [
+        'updateSubmitButtonState(submerchant.address.zip)',
+      ],
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
@@ -255,7 +255,7 @@
         if (dob !== undefined || dob !== '') {
           var ymd = dob.split('-');
           var m = parseInt(ymd[1], 10) - 1;
-          this.submerchant.date_of_birth = Math.round(new Date(ymd[0], m, ymd[2]).getTime() / 100);
+          this.submerchant.date_of_birth = Math.round(new Date(ymd[0], m, ymd[2]).getTime() / 1000);
         }
       },
     });
