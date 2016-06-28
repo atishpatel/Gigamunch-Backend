@@ -21,7 +21,7 @@ type Client struct {
 	ctx context.Context
 }
 
-// New returns a client for gigchef
+// New returns a client for gigachef
 func New(ctx context.Context) *Client {
 	return &Client{ctx: ctx}
 }
