@@ -62,7 +62,7 @@ func (c *Client) UpdateProfile(user *types.User, address *types.Address, phoneNu
 			nC := notification.New(c.ctx)
 			err = nC.SendSMS("6153975516", fmt.Sprintf("%s just submit an application. get on that booty. email: %s", user.Name, user.Email))
 			if err != nil {
-				utils.Errorf(c.ctx, "failed to notify enis about chef(%s) submitting application", user.ID)
+				utils.Criticalf(c.ctx, "failed to notify enis about chef(%s) submitting application", user.ID)
 			}
 		}
 	}
