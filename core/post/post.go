@@ -1,7 +1,12 @@
 package post
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/core/notification"
+
+	"appengine"
 
 	"golang.org/x/net/context"
 
@@ -87,6 +92,18 @@ func PostPost(ctx context.Context, user *types.User, post *Post) (int64, error) 
 		return 0, errMySQL.WithError(err).Wrap("mysql insert failed")
 	}
 	<-postErrChan
+	if !appengine.IsDevAppServer() {
+		// notify enis
+		nC := notification.New(ctx)
+		var photo string
+		if len(post.Photos) != 0 {
+			photo = post.Photos[0]
+		}
+		err = nC.SendSMS("6153975516", fmt.Sprintf("A new post was made by %s. \n Title: %s \n Desc: %s \n Image: %s", user.Name, post.Title, post.Description, photo))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to notify enis about chef(%s) making a post(%s)", user.ID, postID)
+		}
+	}
 	return postID, nil
 }
 
