@@ -255,7 +255,7 @@
         if (dob !== undefined || dob !== '') {
           var ymd = dob.split('-');
           var m = parseInt(ymd[1], 10) - 1;
-          this.submerchant.date_of_birth = Math.round(new Date(ymd[0], m, ymd[2]).getTime() / 100);
+          this.submerchant.date_of_birth = Math.round(new Date(ymd[0], m, ymd[2]).getTime() / 1000);
         }
       },
     });
