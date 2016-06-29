@@ -23,4 +23,5 @@ type Gigamuncher struct {
 type Addresses struct {
 	types.Address           // embedded
 	AddedDateTime time.Time `json:"added_datetime" datastore:",noindex"`
+	Selected      bool      `json:"selected" datastore:",noindex"`
 }

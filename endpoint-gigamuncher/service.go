@@ -77,6 +77,9 @@ func init() {
 	register("SignIn", "signIn", "POST", "gigamuncherservice/signIn", "Sign in a user using a gtoken.")
 	register("SignOut", "signOut", "POST", "gigamuncherservice/signOut", "Sign out a user.")
 	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
+	// address
+	register("GetAddresses", "getAddresses", "GET", "gigamuncherservice/getAddresses", "Get the muncher's addresses.")
+	register("SelectAddress", "selectAddress", "POST", "gigamuncherservice/selectAddress", "Select an Address.")
 	// post
 	register("GetPost", "getPost", "GET", "gigamuncherservice/getPost", "Get post details.")
 	register("GetLivePosts", "getLivePosts", "GET", "gigamuncherservice/getLivePosts", "Get live posts.")
