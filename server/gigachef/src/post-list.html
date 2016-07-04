@@ -208,7 +208,7 @@
               }],
             });
           }
-          if (posts.length < 2) {
+          if (posts === undefined || posts === null || posts.length < 2) {
             this.set('showTutorialCard', true);
           } else {
             this.set('showTutorialCard', false);
