@@ -160,7 +160,7 @@
               }],
             });
           }
-          if (items.length < 2) {
+          if (items === undefined || items === null || items.length < 2) {
             this.set('showTutorialCard', true);
           } else {
             this.set('showTutorialCard', false);

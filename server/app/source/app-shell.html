@@ -304,9 +304,11 @@
         }
       },
       pageChanged: function(page) {
-        // load page import on demand.
-        this.importHref(
-          this.resolveUrl(page + '-page' + '.html'), null, null, true);
+        if (page !== 'home') { // since home is included in this page
+          // load page import on demand.
+          this.importHref(
+            this.resolveUrl(page + '-page' + '.html'), null, null, true);
+        }
         this.drawerOpened = false;
         var title;
         if (page === 'home') {
@@ -316,6 +318,7 @@
         }
         document.title = title + ' | Gigamunch';
         app.$.headerLayout.$.contentContainer.scrollTop = 0;
+        
       },
       screenChanged: function (smallScreen) {
         this.$.menuIcon.toggleClass('hide', !smallScreen);
