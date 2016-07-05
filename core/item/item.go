@@ -16,6 +16,18 @@ var (
 	errUnauthorizedAccess = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have permission to item."}
 )
 
+// Client is a post client
+type Client struct {
+	ctx context.Context
+}
+
+// New is used to create a new client for posts
+func New(ctx context.Context) Client {
+	return Client{
+		ctx: ctx,
+	}
+}
+
 // SaveItem saves a item. If ItemID is 0, a new item is created.
 // returns ItemID, error
 func SaveItem(ctx context.Context, user *types.User, itemID int64, item *Item) (int64, error) {
@@ -76,4 +88,19 @@ func GetItems(ctx context.Context, user *types.User, limit *types.Limit) ([]int6
 		return nil, nil, errDatastore.WithError(err).Wrap("cannot get items")
 	}
 	return ids, items, nil
+}
+
+// IncrementNumPostsCreated increases the num posts created by one
+func (c *Client) IncrementNumPostsCreated(itemID int64) error {
+	item := new(Item)
+	err := get(c.ctx, itemID, item)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot get item")
+	}
+	item.NumPostsCreated++
+	err = put(c.ctx, itemID, item)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot put item")
+	}
+	return nil
 }
