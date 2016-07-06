@@ -27,3 +27,8 @@ func (em *ExchangeMethods) ChefDelivery() bool {
 func (em *ExchangeMethods) SetChefDelivery(x bool) {
 	*em = ExchangeMethods(setKthBit(int32(*em), 1, x))
 }
+
+// Equal compares two exchangemethods
+func (em ExchangeMethods) Equal(em2 ExchangeMethods) bool {
+	return int32(em) == int32(em2)
+}
