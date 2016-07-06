@@ -499,7 +499,10 @@
       },
       _routePageChanged: function (page) {
         if (this.page !== page) {
-          this.page = page || 'dashboard';
+          if (page === undefined || page === null || page === '') {
+            page = 'dashboard';
+          }
+          this.set('page', page);
         }
       },
       _routePathChanged: function (path) {
