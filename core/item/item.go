@@ -22,8 +22,8 @@ type Client struct {
 }
 
 // New is used to create a new client for posts
-func New(ctx context.Context) Client {
-	return Client{
+func New(ctx context.Context) *Client {
+	return &Client{
 		ctx: ctx,
 	}
 }
@@ -98,6 +98,21 @@ func (c *Client) IncrementNumPostsCreated(itemID int64) error {
 		return errDatastore.WithError(err).Wrap("cannot get item")
 	}
 	item.NumPostsCreated++
+	err = put(c.ctx, itemID, item)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot put item")
+	}
+	return nil
+}
+
+// AddNumTotalOrders increases the num posts created by one
+func (c *Client) AddNumTotalOrders(itemID int64, amount int32) error {
+	item := new(Item)
+	err := get(c.ctx, itemID, item)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot get item")
+	}
+	item.NumTotalOrders += int(amount)
 	err = put(c.ctx, itemID, item)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put item")
