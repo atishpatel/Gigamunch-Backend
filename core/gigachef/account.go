@@ -19,6 +19,7 @@ import (
 // Client is a client for gigachef
 type Client struct {
 	ctx context.Context
+	// TODO add ID and Chef to cache
 }
 
 // New returns a client for gigachef
@@ -170,10 +171,10 @@ type PostInfoResp struct {
 
 // GetPostInfo returns info related to a post
 // returns: *PostInfoResp, error
-func GetPostInfo(ctx context.Context, user *types.User) (*PostInfoResp, error) {
+func (c *Client) GetPostInfo(id string) (*PostInfoResp, error) {
 	var err error
 	chef := new(Gigachef)
-	err = get(ctx, user.ID, chef)
+	err = get(c.ctx, id, chef)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
@@ -187,15 +188,15 @@ func GetPostInfo(ctx context.Context, user *types.User) (*PostInfoResp, error) {
 }
 
 // IncrementNumPost increases NumPosts for a Gigachef by 1
-func IncrementNumPost(ctx context.Context, user *types.User) error {
+func (c *Client) IncrementNumPost(id string) error {
 	var err error
 	chef := new(Gigachef)
-	err = get(ctx, user.ID, chef)
+	err = get(c.ctx, id, chef)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
 	chef.NumPosts++
-	err = put(ctx, user.ID, chef)
+	err = put(c.ctx, id, chef)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("cannot put gigachef")
 	}
