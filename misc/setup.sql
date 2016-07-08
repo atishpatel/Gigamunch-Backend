@@ -8,17 +8,17 @@ CREATE TABLE IF NOT EXISTS `live_posts` (
  `item_id` BIGINT NOT NULL,
  `gigachef_id` VARCHAR(45) NOT NULL,
  `close_datetime` DATETIME NOT NULL, -- used for cron job
- `ready_datetime` DATETIME NOT NULL,
+ `first_exchange_datetime` DATETIME NOT NULL,
+ `last_exchange_datetime` DATETIME NOT NULL,
  `search_tags` VARCHAR( 500 ) NOT NULL,
- `is_order_now` BOOLEAN NOT NULL DEFAULT 0,
- `is_experimental` BOOLEAN NOT NULL DEFAULT 0,
  `is_baked_good` BOOLEAN NOT NULL DEFAULT 0,
  `latitude` FLOAT( 10, 6 ) NOT NULL,
  `longitude` FLOAT( 10, 6 ) NOT NULL,
   FULLTEXT(`search_tags`),
   INDEX(`latitude`),
   INDEX(`longitude`),
-  INDEX(`ready_datetime`)
+  INDEX(`first_exchange_datetime`),
+  INDEX(`last_exchange_datetime`),
 ) ENGINE = MYISAM ;
 -- create like table
 CREATE TABLE IF NOT EXISTS `like` (
