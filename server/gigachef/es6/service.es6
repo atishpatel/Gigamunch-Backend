@@ -20,6 +20,12 @@ class Service {
       this.callQueue = [];
     }
     this.refreshToken();
+    ga('send', {
+      hitType: 'timing',
+      timingCategory: 'Endpoint',
+      timingVar: 'load',
+      timingValue: window.performance.now(),
+    });
   }
   /*
    * Chef
@@ -298,4 +304,10 @@ function initService() {
       apiRoot = 'https://endpoint-gigachef-dot-gigamunch-omninexus.appspot.com/_ah/api';
   }
   gapi.client.load('gigachefservice', 'v1', () => { CHEF.Service.endpointLoaded(); }, apiRoot);
+  ga('send', {
+    hitType: 'timing',
+    timingCategory: 'Endpoint',
+    timingVar: 'init',
+    timingValue: window.performance.now(),
+  });
 }

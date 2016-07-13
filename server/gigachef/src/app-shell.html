@@ -466,6 +466,12 @@
         this.addEventListener('userUpdated', function() {
           this.set('user', CHEF.User);
         }.bind(this));
+        ga('send', {
+          hitType: 'timing',
+          timingCategory: 'shell',
+          timingVar: 'ready',
+          timingValue: window.performance.now(),
+        });
       },
       _editItem: function (e, detail) {
         if (detail.item !== undefined && detail.item.id !== undefined

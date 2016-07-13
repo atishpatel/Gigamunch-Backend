@@ -52,6 +52,12 @@ var Service = function () {
         this.callQueue = [];
       }
       this.refreshToken();
+      ga('send', {
+        hitType: 'timing',
+        timingCategory: 'Endpoint',
+        timingVar: 'load',
+        timingValue: window.performance.now()
+      });
     }
     /*
      * Chef
@@ -332,4 +338,10 @@ function initService() {
   gapi.client.load('gigachefservice', 'v1', function () {
     CHEF.Service.endpointLoaded();
   }, apiRoot);
+  ga('send', {
+    hitType: 'timing',
+    timingCategory: 'Endpoint',
+    timingVar: 'init',
+    timingValue: window.performance.now()
+  });
 }

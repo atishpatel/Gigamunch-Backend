@@ -79,6 +79,12 @@
         // no-op
       }
     };
+    ga('send', {
+      hitType: 'timing',
+      timingCategory: 'index',
+      timingVar: 'load',
+      timingValue: window.performance.now(),
+    });
     // End Google Analytics
 
     // Upgrade browser
