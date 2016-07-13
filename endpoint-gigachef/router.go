@@ -48,6 +48,8 @@ func init() {
 
 func handleNotifyMuncher(w http.ResponseWriter, req *http.Request) {
 	// TODO notify muncher
+	// check if order isn't canceled
+	// send notification
 
 }
 
@@ -113,10 +115,9 @@ func handleClosePost(w http.ResponseWriter, req *http.Request) {
 	if len(p.Orders) > 0 {
 		// notify chef
 		chefC := gigachef.New(ctx)
-		message := fmt.Sprintf("Hey! %d gigamunchers are starving for your %s! We just wanted to remind you to have it ready for them by %s.",
+		message := fmt.Sprintf("Hey! %d gigamunchers are starving for your %s! Checkout who they are http://www.gigamunchapp.com/posts. :)",
 			len(p.Orders),
 			p.Title,
-			p.ReadyDateTime.Format("Mon Jan 2 at 03:04 PM"),
 		)
 		err = chefC.Notify(chefID, "Your customers are starving - Gigamunch", message)
 		if err != nil {
@@ -124,21 +125,14 @@ func handleClosePost(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		// get notify-muncher and process-order queue tasks
+		// get process-order queue tasks
 		orderIDs := make([]int64, len(p.Orders))
 		muncherIDs := make([]string, len(p.Orders))
 		for i := range p.Orders {
 			orderIDs[i] = p.Orders[i].OrderID
 			muncherIDs[i] = p.Orders[i].GigamuncherID
 		}
-		orderTasks, muncherTasks := createMuncherAndOrderTasks(postID, p.ReadyDateTime, orderIDs, muncherIDs)
-		// notify muncher
-		_, err = taskqueue.AddMulti(ctx, muncherTasks, notifyMuncherQueue)
-		if err != nil {
-			utils.Errorf(ctx, "Error adding tasks to notify-muncher queue: %s", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		orderTasks := createOrderTasks(postID, p.Orders)
 		// add order queue
 		_, err = taskqueue.AddMulti(ctx, orderTasks, processOrderQueue)
 		if err != nil {
@@ -167,35 +161,22 @@ func parsePostIDAndChefID(req *http.Request) (int64, string, error) {
 	return postID, chefID, nil
 }
 
-func createMuncherAndOrderTasks(postID int64, readyTime time.Time, orders []int64, muncherIDs []string) ([]*taskqueue.Task, []*taskqueue.Task) {
+func createOrderTasks(postID int64, orders []post.OrderPost) []*taskqueue.Task {
 	h := make(http.Header)
 	h.Set("Content-Type", "application/x-www-form-urlencoded")
 	orderTasks := make([]*taskqueue.Task, len(orders))
 	for i, order := range orders {
 		v := url.Values{}
-		v.Set("order_id", strconv.FormatInt(order, 10))
+		v.Set("order_id", strconv.FormatInt(order.OrderID, 10))
 		orderTasks[i] = &taskqueue.Task{
 			Path:    processOrderURL,
 			Payload: []byte(v.Encode()),
 			Header:  h,
 			Method:  "POST",
-			ETA:     readyTime.Add(48 * time.Hour),
+			ETA:     order.ExchangeTime.Add(48 * time.Hour),
 		}
 	}
-	muncherTasks := make([]*taskqueue.Task, len(muncherIDs))
-	for i, muncherID := range muncherIDs {
-		v := url.Values{}
-		v.Set("post_id", strconv.FormatInt(postID, 10))
-		v.Set("muncher_id", muncherID)
-		muncherTasks[i] = &taskqueue.Task{
-			Path:    notifyMuncherURL,
-			Payload: []byte(v.Encode()),
-			Header:  h,
-			Method:  "POST",
-			ETA:     readyTime.Add(1 * time.Hour),
-		}
-	}
-	return orderTasks, muncherTasks
+	return orderTasks
 }
 
 func handleRemovePosts(w http.ResponseWriter, req *http.Request) {
