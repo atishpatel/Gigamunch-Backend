@@ -6,6 +6,7 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/gold-email-input/gold-email-input.html">
 <link rel="import" href="../bower_components/gold-phone-input/gold-phone-input.html">
@@ -71,6 +72,11 @@
         text-align: center;
         pointer-events: none;
       }
+
+      paper-progress {
+        width: 100%;
+        padding-top: 20px;
+      }
     </style>
 
     <form
@@ -80,8 +86,13 @@
       action="#"
       on-change="updateSubmitButtonState">
       <file-input
+        id="fileInput"
         photos="{{photos}}"
-        url-postfix="=s720-c">
+        url-postfix="=s720-c"
+        on-photoschanged="photosChanged"
+        on-progressstart="progressStart"
+        on-progressend="progressEnd"
+        progress="{{progress}}">
         <div class="profile-pic">
           <placeholder-img
             icon="app:account-circle"
@@ -96,6 +107,7 @@
           </div>
         </div>
       </file-input>
+      <div id="progressBar" hidden><paper-progress value="[[progress]]"></paper-progress></div>
       <paper-input label="Name*" value="{{gigachef.name}}" required auto-validate></paper-input>
       <gold-email-input label="Email*" value="{{gigachef.email}}" required auto-validate></gold-email-input>
       <gold-phone-input label="Phone Number*" value="{{gigachef.phone_number}}" required auto-validate></gold-phone-input>
@@ -205,7 +217,8 @@
         },
         photos: {
           type: Array,
-          observer: 'photosChanged',
+          notify: true,
+          reflectToAttribute: true,
         },
       },
       observers: [
@@ -269,11 +282,17 @@
         submitButton.disabled = valid;
         return valid;
       },
-      photosChanged: function(photos) {
-        if (photos.length > 0) {
-          this.set('gigachef.photo_url', photos[0]);
-          this.set(photos, []);
+      photosChanged: function(e) {
+        if (this.photos.length > 0) {
+          this.set('gigachef.photo_url', this.photos[0]);
+          this.set('photos', []);
         }
+      },
+      progressStart: function() {
+        this.$.progressBar.hidden = false; 
+      },
+      progressEnd: function() {
+        this.$.progressBar.hidden = true; 
       },
     });
   </script>
