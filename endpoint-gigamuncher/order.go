@@ -121,13 +121,18 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, ch
 	o.NumLikes = numLikes
 	o.HasLiked = hasLiked
 
+	preparingStartTime := order.ExpectedExchangeDateTime.Add(-30 * time.Minute)
+	if preparingStartTime.After(order.PostCloseDateTime) {
+		preparingStartTime = order.PostCloseDateTime.Add(-30 * time.Minute)
+	}
+
 	if o.GigachefCanceled || o.GigamuncherCanceled {
 		o.Status = "canceled"
 	} else if time.Now().After(order.ExpectedExchangeDateTime.Add(1 * time.Hour)) {
 		o.Status = "closed"
 	} else if time.Now().After(order.ExpectedExchangeDateTime) {
 		o.Status = "open-received"
-	} else if time.Now().After(order.PostCloseDateTime) {
+	} else if preparingStartTime.After(order.PostCloseDateTime) {
 		o.Status = "open-preparing"
 	} else {
 		o.Status = "open-placed"
@@ -136,15 +141,17 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, ch
 
 // MakeOrderReq is the request for MakeOrder
 type MakeOrderReq struct {
-	PostID          json.Number `json:"post_id,omitempty"`
-	PostID64        int64       `json:"-"`
-	BraintreeNonce  string      `json:"braintree_nonce"`
-	Servings        int32       `json:"servings"`
-	ExchangeMethods int32       `json:"exchange_methods"`
-	Latitude        float64     `json:"latitude"`
-	Longitude       float64     `json:"longitude"`
-	TotalPrice      float32     `json:"total_price"`
-	Gigatoken       string      `json:"gigatoken"`
+	Gigatoken           string        `json:"gigatoken"`
+	PostID              json.Number   `json:"post_id,omitempty"`
+	PostID64            int64         `json:"-"`
+	BraintreeNonce      string        `json:"braintree_nonce"`
+	Servings            int32         `json:"servings"`
+	ExchangeWindowIndex int32         `json:"exchange_window_index"`
+	ExchangeMethods     int32         `json:"exchange_methods"`
+	Latitude            float64       `json:"latitude"`  // REMOVE
+	Longitude           float64       `json:"longitude"` // REMOVE
+	Address             types.Address `json:"address"`
+	TotalPrice          float32       `json:"total_price"`
 }
 
 func (req *MakeOrderReq) gigatoken() string {
@@ -162,6 +169,10 @@ func (req *MakeOrderReq) valid() error {
 	req.PostID64, err = req.PostID.Int64()
 	if err != nil {
 		return fmt.Errorf("error with PostID: %v", err)
+	}
+	if req.Address.Longitude == 0 { // REMOVE
+		req.Address.Longitude = req.Longitude
+		req.Address.Latitude = req.Latitude
 	}
 	return nil
 }
@@ -181,20 +192,15 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-
 	exchangeMethods := types.ExchangeMethods(req.ExchangeMethods)
 	postC := post.New(ctx)
 	postReq := &post.MakeOrderReq{
-		PostID:         req.PostID64,
-		NumServings:    req.Servings,
-		PaymentNonce:   req.BraintreeNonce,
-		ExchangeMethod: exchangeMethods,
-		GigamuncherAddress: types.Address{
-			GeoPoint: types.GeoPoint{
-				Latitude:  req.Latitude,
-				Longitude: req.Longitude,
-			},
-		},
+		PostID:              req.PostID64,
+		NumServings:         req.Servings,
+		PaymentNonce:        req.BraintreeNonce,
+		ExchangeMethod:      exchangeMethods,
+		ExchangeWindowIndex: req.ExchangeWindowIndex,
+		GigamuncherAddress:  req.Address,
 		GigamuncherID:       user.ID,
 		GigamuncherName:     user.Name,
 		GigamuncherPhotoURL: user.PhotoURL,
