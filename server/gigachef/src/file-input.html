@@ -76,7 +76,6 @@
         return this.valid;
       },
       selectFile: function() {
-        console.log('selecte file clicked');
         this.$.file.click();
       },
       addPhoto: function(url) {
@@ -85,7 +84,7 @@
             this.photos = [];
           }
           this.push('photos', url + this.urlPostfix);
-          this.fire('photosChanged');
+          this.fire('photoschanged');
         }
       },
       updateProgress: function(e) {
