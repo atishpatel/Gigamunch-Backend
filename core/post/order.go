@@ -88,11 +88,11 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	if req.NumServings > p.ServingsOffered-p.NumServingsOrdered {
 		return nil, errNotEnoughServings
 	}
-	if time.Now().After(p.ClosingDateTime) {
-		return nil, errPostIsClosed
-	}
 	if int(req.ExchangeWindowIndex) >= len(p.ExchangeTimes) {
 		return nil, errInvalidParameter.WithMessage("Pickup or Delivery window is out of range.")
+	}
+	if time.Now().After(p.ClosingDateTime) || time.Now().After(p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime) {
+		return nil, errPostIsClosed
 	}
 	// calculate delivery info
 	var exchangeMethod types.ExchangeMethods
@@ -104,7 +104,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 		if req.ExchangeMethod.ChefDelivery() {
 			exchangeMethod.SetChefDelivery(true)
 			if !p.ExchangeTimes[req.ExchangeWindowIndex].AvailableExchangeMethods.ChefDelivery() {
-				return nil, errDelivery.Wrap("chef delivery is not an avaliable option")
+				return nil, errDelivery.Wrap("Chef delivery is not an avaliable option")
 			}
 			chefDeliveryPoints := []types.GeoPoint{req.GigamuncherAddress.GeoPoint}
 			// find all the waypoints for the time window with the same exchange method
@@ -254,14 +254,15 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("cannot get post")
 	}
-	// check if order is cancelable
-	if time.Now().After(p.ClosingDateTime) {
-		return nil, errPostIsClosed
-	}
+
 	var orderIndex int
 	orderIndex, err = findOrderIndex(orderID, p)
 	if err != nil {
 		return nil, err
+	}
+	// check if it's too late to cancel the order
+	if time.Now().After(p.ClosingDateTime) || time.Now().After(p.ExchangeTimes[p.Orders[orderIndex].ExchangeWindowIndex].StartDateTime) {
+		return nil, errPostIsClosed
 	}
 	if p.GigachefID != userID && p.Orders[orderIndex].GigamuncherID != userID {
 		return nil, errUnauthorized.Wrap("user is not part of order or post.")
