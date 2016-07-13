@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/utils"
+
 	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
@@ -30,10 +32,14 @@ type BasePost struct {
 	Photos            []string `json:"photos,omitempty"`
 	PostedDateTime    int      `json:"posted_datetime"`
 	ClosingDateTime   int      `json:"closing_datetime"`
-	ReadyDateTime     int      `json:"ready_datetime"`
-	Distance          float32  `json:"distance"`
-	DeliveryAvailable bool     `json:"delivery_avaliable"`
+	ReadyDateTime     int      `json:"ready_datetime"` // TODO: REMOVE
 	PickupAvaliable   bool     `json:"pickup_avaliable"`
+	PickupStartTime   int      `json:"pickup_start_time"`
+	PickupEndTime     int      `json:"pickup_end_time"`
+	DeliveryAvailable bool     `json:"delivery_avaliable"`
+	DeliveryStartTime int      `json:"delivery_start_time"`
+	DeliveryEndTime   int      `json:"delivery_end_time"`
+	Distance          float32  `json:"distance"`
 	NumServingsBought int32    `json:"num_servings_bought"`
 	NumLikes          int      `json:"num_likes"`
 	HasLiked          bool     `json:"has_liked"`
@@ -53,14 +59,33 @@ func (p *BasePost) set(userID string, id int64, numLikes int, hasLiked bool, dis
 	p.Photos = post.Photos
 	p.PostedDateTime = ttoi(post.CreatedDateTime)
 	p.ClosingDateTime = ttoi(post.ClosingDateTime)
-	if post.IsOrderNow {
-		p.ReadyDateTime = ttoi(time.Now().Add(time.Duration(post.EstimatedPreperationTime) * time.Second))
-	} else {
-		p.ReadyDateTime = ttoi(post.ReadyDateTime)
+	var pickupStartTime, pickupEndTime, deliveryStartTime, deliveryEndTime time.Time
+	for _, exchange := range post.ExchangeTimes {
+		if exchange.AvailableExchangeMethods.Pickup() {
+			p.PickupAvaliable = true
+			if pickupStartTime.IsZero() || exchange.StartDateTime.Before(pickupStartTime) {
+				pickupStartTime = exchange.StartDateTime
+			}
+			if pickupEndTime.IsZero() || exchange.EndDateTime.After(pickupEndTime) {
+				pickupEndTime = exchange.EndDateTime
+			}
+		}
+		if exchange.AvailableExchangeMethods.Delivery() {
+			p.DeliveryAvailable = true
+			if deliveryStartTime.IsZero() || exchange.StartDateTime.Before(deliveryStartTime) {
+				deliveryStartTime = exchange.StartDateTime
+			}
+			if deliveryEndTime.IsZero() || exchange.EndDateTime.After(deliveryEndTime) {
+				deliveryEndTime = exchange.EndDateTime
+			}
+		}
 	}
+	p.ReadyDateTime = ttoi(pickupStartTime)
+	p.PickupStartTime = ttoi(pickupStartTime)
+	p.PickupEndTime = ttoi(pickupEndTime)
+	p.DeliveryStartTime = ttoi(deliveryStartTime)
+	p.DeliveryEndTime = ttoi(deliveryEndTime)
 	p.Distance = distance
-	// DeliveryAvailable bool     `json:"delivery_avaliable"`
-	p.PickupAvaliable = post.AvailableExchangeMethods.Pickup()
 	if userID != "" {
 		for _, o := range post.Orders {
 			if o.GigamuncherID == userID {
@@ -70,15 +95,15 @@ func (p *BasePost) set(userID string, id int64, numLikes int, hasLiked bool, dis
 	}
 	p.NumLikes = numLikes
 	p.HasLiked = hasLiked
-
 }
 
 // PostGigachef is the basic version of GigachefDetails for post in live feed
 type PostGigachef struct {
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
-	PhotoURL string  `json:"photo_url"`
-	Rating   float32 `json:"rating"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	PhotoURL   string  `json:"photo_url"`
+	Rating     float32 `json:"rating"`
+	NumRatings int     `json:"num_ratings"`
 }
 
 // Post is a meal that is no longer live
@@ -88,13 +113,14 @@ type Post struct {
 }
 
 // set takes a post.Post package and converts it to a endpoint post
-func (p *Post) set(userID string, id int64, numLikes int, hasLiked bool, distance, avgRating float32, gigachefName string, gigachefPhotoURL string, post *post.Post) {
+func (p *Post) set(userID string, id int64, numLikes int, hasLiked bool, distance float32, rating *gigachef.Rating, gigachefName, gigachefPhotoURL string, post *post.Post) {
 	p.BasePost.set(userID, id, numLikes, hasLiked, distance, post)
 	p.Gigachef = PostGigachef{
-		ID:       post.GigachefID,
-		Name:     gigachefName,
-		PhotoURL: gigachefPhotoURL,
-		Rating:   avgRating,
+		ID:         post.GigachefID,
+		Name:       gigachefName,
+		PhotoURL:   gigachefPhotoURL,
+		Rating:     rating.AverageRating,
+		NumRatings: rating.NumRatings,
 	}
 }
 
@@ -207,7 +233,7 @@ func (service *Service) GetLivePosts(ctx context.Context, req *GetLivePostsReq) 
 	// TODO: check if user is in delivery range
 	resp.Posts = make([]Post, len(postIDs))
 	for i := range postIDs {
-		resp.Posts[i].set(userID, postIDs[i], numLikes[i], likes[i], distances[i], ratings[i].AverageRating, chefDetails[i].Name, chefDetails[i].PhotoURL, &posts[i])
+		resp.Posts[i].set(userID, postIDs[i], numLikes[i], likes[i], distances[i], &ratings[i], chefDetails[i].Name, chefDetails[i].PhotoURL, &posts[i])
 	}
 	return resp, nil
 }
@@ -234,13 +260,23 @@ func (g *GigachefDetailed) set(id, name, photoURL string, ratings gigachef.Ratin
 	g.Longitude = longitude
 }
 
+// ExchangeTimeSegment is the time range where the exchange can be made
+type ExchangeTimeSegment struct {
+	StartDateTime            int     `json:"start_datetime"`
+	EndDateTime              int     `json:"end_datetime"`
+	AvailableExchangeMethods int32   `json:"available_exchange_methods"`
+	Price                    float32 `json:"price"`
+	Index                    int     `json:"index"`
+}
+
 // PostDetailed has detailed information for a Post.
 type PostDetailed struct {
-	BasePost                  // embedded
-	Ingredients      []string `json:"ingredients,omitempty"`
-	DietaryNeedsTags []string `json:"dietary_needs_tags,omitempty"`
-	GeneralTags      []string `json:"general_tags,omitempty"`
-	CuisineTags      []string `json:"cuisine_tags,omitempty"`
+	BasePost                               // embedded
+	ExchangeTimes    []ExchangeTimeSegment `json:"exchange_times"`
+	Ingredients      []string              `json:"ingredients,omitempty"`
+	DietaryNeedsTags []string              `json:"dietary_needs_tags,omitempty"`
+	GeneralTags      []string              `json:"general_tags,omitempty"`
+	CuisineTags      []string              `json:"cuisine_tags,omitempty"`
 }
 
 // set takes a post.Post package and converts it to an endpoint PostDetailed
@@ -250,19 +286,52 @@ func (p *PostDetailed) set(userID string, id int64, numLikes int, hasLiked bool,
 	p.DietaryNeedsTags = post.DietaryNeedsTags
 	p.GeneralTags = post.GeneralTags
 	p.CuisineTags = post.CuisineTags
-	// TODO add gigachef setting stuff
+	for i, exchangeTime := range post.ExchangeTimes {
+		if !exchangeTime.AvailableExchangeMethods.IsZero() {
+			// add pickup option
+			if exchangeTime.AvailableExchangeMethods.Pickup() {
+				ets := ExchangeTimeSegment{
+					StartDateTime:            ttoi(exchangeTime.StartDateTime),
+					EndDateTime:              ttoi(exchangeTime.EndDateTime),
+					AvailableExchangeMethods: int32(types.PickupOnlyExchangeMethod),
+					Index: i,
+				}
+				// add exchange option
+				p.ExchangeTimes = append(p.ExchangeTimes, ets)
+			}
+			// set chef delivery to false if out of delivery radius
+			if distance > float32(post.GigachefDelivery.Radius) {
+				exchangeTime.AvailableExchangeMethods.SetChefDelivery(false)
+			}
+			// add delivery option
+			if exchangeTime.AvailableExchangeMethods.Delivery() {
+				var price float32
+				if exchangeTime.AvailableExchangeMethods.ChefDelivery() {
+					price = post.GigachefDelivery.BasePrice
+				} // else calculate price
+				exchangeTime.AvailableExchangeMethods.SetPickup(false)
+				ets := ExchangeTimeSegment{
+					StartDateTime:            ttoi(exchangeTime.StartDateTime),
+					EndDateTime:              ttoi(exchangeTime.EndDateTime),
+					AvailableExchangeMethods: int32(exchangeTime.AvailableExchangeMethods),
+					Index: i,
+					Price: price,
+				}
+				// add exchange option
+				p.ExchangeTimes = append(p.ExchangeTimes, ets)
+			}
+		}
+	}
 }
 
 // PaymentInfo has the payment info
 type PaymentInfo struct {
 	ChefPricePerServing float32 `json:"chef_price_per_serving"`
 	GigaFee             float32 `json:"giga_fee"`
-	ExchangePrice       float32 `json:"exchange_price"`
 	TaxPercentage       float32 `json:"tax_percentage"`
 }
 
 func (p *PaymentInfo) set(post *post.Post) {
-	// TODO exchange price
 	p.ChefPricePerServing = post.ChefPricePerServing
 	p.GigaFee = post.PricePerServing - post.ChefPricePerServing
 	p.TaxPercentage = post.TaxPercentage
@@ -270,9 +339,9 @@ func (p *PaymentInfo) set(post *post.Post) {
 
 // GetPostReq is the input required to get a post
 type GetPostReq struct {
+	Gigatoken string      `json:"gigatoken"`
 	PostID    json.Number `json:"post_id"`
 	PostID64  int64       `json:"-"`
-	Gigatoken string      `json:"gigatoken"`
 	Latitude  float64     `json:"latitude"`
 	Longitude float64     `json:"longitude"`
 	Radius    int         `json:"radius"`
@@ -369,9 +438,17 @@ func (service *Service) GetPost(ctx context.Context, req *GetPostReq) (*GetPostR
 		}
 	}
 	resp.Gigachef.set(p.GigachefID, chef.Name, chef.PhotoURL, chef.Rating, chef.NumOrders, chef.Address.Latitude, chef.Address.Longitude)
-	// TODO add num likes
+
 	numLikes := 0
 	hasLiked := false
+	likeC := like.New(ctx)
+	hasLikedList, numLikesList, err := likeC.LikesItems(userID, []int64{p.ItemID})
+	if err != nil {
+		utils.Errorf(ctx, "failed to get like.LikesItem: %v", err)
+	} else {
+		hasLiked = hasLikedList[0]
+		numLikes = numLikesList[0]
+	}
 	resp.Post.set(userID, req.PostID64, numLikes, hasLiked, distance, p)
 	resp.PaymentInfo.set(p)
 	return resp, nil
