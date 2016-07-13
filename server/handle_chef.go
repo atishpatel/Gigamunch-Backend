@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"google.golang.org/appengine/blobstore"
 	"google.golang.org/appengine/image"
@@ -50,9 +51,11 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 		Secure: true,
 		Crop:   true,
 	}
+	ctx, _ = context.WithDeadline(ctx, time.Now().Add(60*time.Second))
 	url, err := image.ServingURL(ctx, file[0].BlobKey, opts)
 	if err != nil {
-		resp.Err = errInternal.WithError(err).Wrap("failed to get image.ServingURL")
+		deadline, _ := ctx.Deadline()
+		resp.Err = errInternal.WithError(err).Wrapf("failed to get image.ServingURL (blobkey: %v) (now:%v context.Deadline:%v)", file[0].BlobKey, time.Now(), deadline)
 		return
 	}
 	resp.URL = url.String()

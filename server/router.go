@@ -32,6 +32,7 @@ func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) 
 	user := CurrentUser(w, req)
 	if user != nil {
 		http.Redirect(w, req, baseGigachefURL, http.StatusTemporaryRedirect)
+		return
 	}
 	removeCookies(w)
 	http.Redirect(w, req, "/becomechef", http.StatusTemporaryRedirect)
