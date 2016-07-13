@@ -117,24 +117,17 @@ func (po *PostOrder) set(postOrder *post.OrderPost) {
 }
 
 // Post is a meal that is no longer live
-type Post struct { // TODO add num likes and stuff
-	BaseItem                             // embedded
-	ID                       string      `json:"id"`
-	ID64                     int64       `json:"-"`
-	ItemID                   string      `json:"item_id"`
-	ItemID64                 int64       `json:"-"`
-	Title                    string      `json:"title"`
-	ClosingDateTime          int         `json:"closing_datetime"`
-	ReadyDateTime            int         `json:"ready_datetime"`
-	ServingsOffered          string      `json:"servings_offered"`
-	ServingsOffered32        int32       `json:"-"`
-	ChefPricePerServing      string      `json:"chef_price_per_serving"`
-	ChefPricePerServing32    float32     `json:"-"`
-	EstimatedPreperationTime int         `json:"estimated_preperation_time"`
-	Pickup                   bool        `json:"pickup"`
-	GigachefDelivery         bool        `json:"gigachef_delivery"`
-	IsOrderNow               bool        `json:"is_order_now"`
-	Orders                   []PostOrder `json:"orders"`
+type Post struct {
+	ID                  string      `json:"id"`
+	BaseItem                        // embedded
+	ItemID              string      `json:"item_id"`
+	Title               string      `json:"title"`
+	GigachefCanceled    bool        `json:"gigachef_canceled"`
+	ClosingDateTime     int         `json:"closing_datetime"`
+	ServingsOffered     string      `json:"servings_offered"`
+	ChefPricePerServing string      `json:"chef_price_per_serving"`
+	PricePerServing     string      `json:"price_per_serving"`
+	Orders              []PostOrder `json:"orders"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
@@ -148,100 +141,118 @@ func (p *Post) set(id int64, post *post.Post) {
 	p.DietaryNeedsTags = post.DietaryNeedsTags
 	p.Photos = post.Photos
 	p.ClosingDateTime = ttoi(post.ClosingDateTime)
-	p.ReadyDateTime = ttoi(post.ReadyDateTime)
 	p.ServingsOffered = itos(int64(post.ServingsOffered))
 	p.ChefPricePerServing = ftos(float64(post.ChefPricePerServing))
-	p.EstimatedPreperationTime = int(post.EstimatedPreperationTime)
-	p.Pickup = post.AvailableExchangeMethods.Pickup()
-	p.GigachefDelivery = post.AvailableExchangeMethods.ChefDelivery()
-	p.IsOrderNow = post.IsOrderNow
+	p.PricePerServing = ftos(float64(post.PricePerServing))
 	p.Orders = make([]PostOrder, len(post.Orders))
 	for i := range post.Orders {
 		p.Orders[i].set(&post.Orders[i])
 	}
 }
 
-// Get creates a post.Post version of the endpoint post
-func (p *Post) get() *post.Post {
-	post := new(post.Post)
-	post.ItemID = p.ItemID64
-	post.Title = p.Title
-	post.Description = p.Description
-	post.Ingredients = p.Ingredients
-	post.GeneralTags = p.GeneralTags
-	post.DietaryNeedsTags = p.DietaryNeedsTags
-	post.Photos = p.Photos
-	post.ClosingDateTime = itot(p.ClosingDateTime)
-	post.ReadyDateTime = itot(p.ReadyDateTime)
-	post.ServingsOffered = p.ServingsOffered32
-	post.ChefPricePerServing = p.ChefPricePerServing32
-	post.EstimatedPreperationTime = int64(p.EstimatedPreperationTime)
-	post.AvailableExchangeMethods.SetPickup(p.Pickup)
-	post.AvailableExchangeMethods.SetChefDelivery(p.GigachefDelivery)
-	post.IsOrderNow = p.IsOrderNow
-	return post
+// PublishPostReq is the input request needed for PublishPost.
+type PublishPostReq struct {
+	Gigatoken                 string  `json:"gigatoken"`
+	BaseItem                          // embedded
+	ItemID                    string  `json:"item_id"`
+	ItemID64                  int64   `json:"-"`
+	Title                     string  `json:"title"`
+	ClosingDateTime           int     `json:"closing_datetime"`
+	StartPickupDateTime       int     `json:"start_pickup_datetime"`
+	EndPickupDateTime         int     `json:"end_pickup_datetime"`
+	ChefDelivery              bool    `json:"chef_delivery"`
+	StartChefDeliveryDateTime int     `json:"start_chef_delivery_datetime"`
+	EndChefDeliveryDateTime   int     `json:"end_chef_delivery_datetime"`
+	ChefDeliveryRadius        int32   `json:"chef_delivery_radius"`
+	ChefDeliveryBasePrice     string  `json:"chef_delivery_base_price"`
+	ChefDeliveryBasePrice32   float32 `json:"-"`
+	ServingsOffered           string  `json:"servings_offered"`
+	ServingsOffered32         int32   `json:"-"`
+	ChefPricePerServing       string  `json:"chef_price_per_serving"`
+	ChefPricePerServing32     float32 `json:"-"`
 }
 
-func (p *Post) valid() error {
-	var err error
-	p.ItemID64, err = stoi(p.ItemID)
-	if err != nil {
-		return fmt.Errorf("Error with item_id: %v", err)
+// Get creates a post.PublishPostReq
+func (req *PublishPostReq) getPublishPostReq(user *types.User) *post.PublishPostReq {
+	return &post.PublishPostReq{
+		User: user,
+		BaseItem: types.BaseItem{
+			GigachefID:       user.ID,
+			CreatedDateTime:  time.Now(),
+			Description:      req.BaseItem.Description,
+			GeneralTags:      req.BaseItem.GeneralTags,
+			DietaryNeedsTags: req.BaseItem.DietaryNeedsTags,
+			CuisineTags:      req.BaseItem.CuisineTags,
+			Ingredients:      req.BaseItem.Ingredients,
+			Photos:           req.BaseItem.Photos,
+		},
+		ItemID:                    req.ItemID64,
+		Title:                     req.Title,
+		ClosingDateTime:           itot(req.ClosingDateTime),
+		StartPickupDateTime:       itot(req.StartPickupDateTime),
+		EndPickupDateTime:         itot(req.EndPickupDateTime),
+		ChefDelivery:              req.ChefDelivery,
+		ChefDeliveryRadius:        int32(req.ChefDeliveryRadius),
+		ChefDeliveryBasePrice:     req.ChefDeliveryBasePrice32,
+		StartChefDeliveryDateTime: itot(req.StartChefDeliveryDateTime),
+		EndChefDeliveryDateTime:   itot(req.EndChefDeliveryDateTime),
+		ServingsOffered:           req.ServingsOffered32,
+		ChefPricePerServing:       req.ChefPricePerServing32,
 	}
-	p.ServingsOffered32, err = stoi32(p.ServingsOffered)
-	if err != nil {
-		return fmt.Errorf("Error with servings_offered: %v", err)
-	}
-	p.ChefPricePerServing32, err = stof(p.ChefPricePerServing)
-	if err != nil {
-		return fmt.Errorf("Error with chef_price_per_serving: %v", err)
-	}
-	return nil
-}
-
-// PostPostReq is the input request needed for PostPost.
-type PostPostReq struct {
-	Gigatoken string `json:"gigatoken"`
-	Post      Post   `json:"post"`
 }
 
 // gigatoken returns the Gigatoken string
-func (req *PostPostReq) gigatoken() string {
+func (req *PublishPostReq) gigatoken() string {
 	return req.Gigatoken
 }
 
 // valid validates a req
-func (req *PostPostReq) valid() error {
+func (req *PublishPostReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
 	now := int(time.Now().Unix())
-	if req.Post.ClosingDateTime < now {
+	if req.ClosingDateTime < now {
 		return fmt.Errorf("Closing DateTime cannot be before now.")
 	}
-	if !req.Post.IsOrderNow && req.Post.ReadyDateTime < now {
-		return fmt.Errorf("Ready DateTime cannot be before now.")
+	var err error
+	req.ItemID64, err = stoi(req.ItemID)
+	if err != nil {
+		return fmt.Errorf("Error with item_id: %v", err)
 	}
-	return req.Post.valid()
+	req.ServingsOffered32, err = stoi32(req.ServingsOffered)
+	if err != nil {
+		return fmt.Errorf("Error with servings_offered: %v", err)
+	}
+	req.ChefPricePerServing32, err = stof(req.ChefPricePerServing)
+	if err != nil {
+		return fmt.Errorf("Error with chef_price_per_serving: %v", err)
+	}
+	req.ChefDeliveryBasePrice32, err = stof(req.ChefDeliveryBasePrice)
+	if err != nil {
+		return fmt.Errorf("Error with chef delivery base price: %v", err)
+	}
+	return nil
 }
 
-// PostPostResp is the output response for PostPost.
-type PostPostResp struct {
+// PublishPostResp is the output response for PublishPost.
+type PublishPostResp struct {
 	Post Post                 `json:"post"`
 	Err  errors.ErrorWithCode `json:"err"`
 }
 
-// PostPost is an endpoint that post a post form a Gigachef
-func (service *Service) PostPost(ctx context.Context, req *PostPostReq) (*PostPostResp, error) {
-	resp := new(PostPostResp)
-	defer handleResp(ctx, "PostPost", resp.Err)
+// PublishPost is an endpoint that post a post form a Gigachef
+func (service *Service) PublishPost(ctx context.Context, req *PublishPostReq) (*PublishPostResp, error) {
+	resp := new(PublishPostResp)
+	defer handleResp(ctx, "PublishPost", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	p := req.Post.get()
-	postID, err := post.PostPost(ctx, user, p)
+	postC := post.New(ctx)
+	publishPostReq := req.getPublishPostReq(user)
+	postID, p, err := postC.PublishPost(publishPostReq)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
