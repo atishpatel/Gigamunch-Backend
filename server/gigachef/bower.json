@@ -27,8 +27,6 @@
     "neon-animation": "polymerelements/neon-animation#^1.2.3",
     "paper-menu-button": "polymerelements/paper-menu-button#^1.1.0",
     "paper-menu": "polymerelements/paper-menu#^1.2.2",
-    "paper-time-picker": "^1.1.2",
-    "paper-date-picker": "polymer-paper-date-picker#^1.1.4",
     "paper-tabs": "PolymerElements/paper-tabs#^1.5.0",
     "paper-material": "PolymerElements/paper-material#^1.0.6",
     "paper-checkbox": "PolymerElements/paper-checkbox#^1.2.0",
@@ -36,7 +34,9 @@
     "gold-phone-input": "PolymerElements/gold-phone-input#^1.0.9",
     "gold-zip-input": "PolymerElements/gold-zip-input#^1.0.5",
     "paper-spinner": "PolymerElements/paper-spinner#^1.2.0",
-    "paper-progress": "PolymerElements/paper-progress#^1.0.9"
+    "paper-progress": "PolymerElements/paper-progress#^1.0.9",
+    "paper-slider": "PolymerElements/paper-slider#^1.0.11",
+    "paper-collapse-item": "^1.1.0"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
