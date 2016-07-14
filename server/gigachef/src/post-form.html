@@ -4,9 +4,12 @@
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/paper-collapse-item/paper-collapse-item.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
 
 <link rel="import" href="datetime-input.html">
 <link rel="import" href="app-icons.html">
@@ -112,6 +115,19 @@
         flex-direction: column;
       }
 
+      .row-fields {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .row-fields > * {
+        flex: 1;
+      }
+
+      .range-divider {
+        flex: .05;
+      }
+
       @media (min-width: 767px) {
         .preview {
           display: flex;
@@ -137,7 +153,7 @@
     </app-route>
 
     <div class="flex-container">
-      <!--<div class="preview">
+      <div class="preview">
         <paper-card class="screen">
         <div class="header">
           <h1>Preview</h1>
@@ -159,7 +175,7 @@
         </div>
         <hr>
         </paper-card>
-      </div>-->
+      </div>
       <form
         is="iron-form"
         id="form"
@@ -167,6 +183,7 @@
         method="post"
         action="#"
         on-change="updateSubmitButtonState">
+        <paper-collapse-item header="Item details">
         <item-fields
           id="itemFields"
           photos="{{post.photos}}"
@@ -178,6 +195,7 @@
           on-photos-changed="postPhotosChanged"
           on-change="updateSubmitButtonState">
         </item-fields>
+        </paper-collapse-item>
         <paper-input
           label="Number of Servings Offered*"
           value="{{post.servings_offered}}"
@@ -202,23 +220,48 @@
           epoch="{{post.closing_datetime}}"
           on-changed="updateSubmitButtonState">
         </datetime-input>
-        <datetime-input
-          hidden$="[[post.is_order_now]]"
-          id="readyTime"
-          label="Order pick-up time*"
-          epoch="{{post.ready_datetime}}"
-          on-changed="updateSubmitButtonState">
-        </datetime-input>
-        <template is="dom-if" if$="[[post.is_order_now]]" restamp="true">
+        <div class="row-fields">
+          <datetime-input
+            id="startPickupTime"
+            label="Start pick-up time*"
+            epoch="{{post.start_pickup_datetime}}"
+            on-changed="updateSubmitButtonState">
+          </datetime-input>
+          <span class="range-divider"></span>
+          <datetime-input
+            id="endPickupTime"
+            label="End pick-up time*"
+            epoch="{{post.end_pickup_datetime}}"
+            on-changed="updateSubmitButtonState">
+          </datetime-input>
+        </div>
+        <paper-checkbox active="{{post.chef_delivery}}">I'll do order delivery for my customers.</paper-checkbox>
+        <template is="dom-if" if$="[[post.chef_delivery]]" restamp="true">
+          <div class="row-fields">
+            <datetime-input
+              id="startChefDeliveryTime"
+              label="Start self delivery time*"
+              epoch="{{post.start_chef_delivery_datetime}}"
+              on-changed="updateSubmitButtonState">
+            </datetime-input>
+            <span class="range-divider"></span>
+            <datetime-input
+              id="endChefDeliveryTime"
+              label="End self delivery time*"
+              epoch="{{post.end_chef_delivery_datetime}}"
+              on-changed="updateSubmitButtonState">
+            </datetime-input>
+          </div>
+          <paper-slider id="deliveryRange" pin snaps max="15" max-markers="15" step="1" value="3"></paper-slider>
           <paper-input
-            label="Estimated Preperation Time for One Order*"
-            value="{{ept}}"
+            label="Price for self delivery*"
+            value="{{post.chef_delivery_base_price}}"
             type="number"
-            min="1"
-            required
+            step="0.50"
+            min="0.00"
             auto-validate>
-            <div suffix>minutes</div>
-          </paper-input>
+          <div prefix>$&nbsp;</div>
+        </paper-input>
         </template>
         <paper-button
           id="submitButton"
@@ -249,25 +292,21 @@
         user: {
           type: Object,
         },
-        ept: {
-          type: Number,
-          observer: 'eptChanged',
-        },
         photo: {
           type: String,
         },
       },
       observers: [
-        'postPhotosChanged(post.photos)'
+        'postPhotosChanged(post.photos)',
+        'postStartPickupTimeChanged(post.start_pickup_datetime)',
       ],
       postPhotosChanged: function (p) {
         this.updateSubmitButtonState();
         if (this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0) {
           this.set('photo', this.post.photos[0]);
+        } else {
+          // make placeholder image
         }
-      },
-      eptChanged: function (ept) {
-        this.post.estimated_preperation_time = this.ept * 60;
       },
       selected: function () {
         this.$.spinner.hidden = true;
@@ -298,7 +337,7 @@
         this.post.pickup = true; // TODO make radio button
         this.$.itemFields.update();
         this.$.closeTime.update();
-        this.$.readyTime.update();
+
       },
       getItem: function (id) {
         if (id === undefined || id === '' || id === '0') {
@@ -369,7 +408,7 @@
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
-        var hasPhoto = this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0;
+        var hasPhoto = this.post !== undefined && this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0;
         submitButton.disabled = !form.validate() || !hasPhoto;
       },
     });
