@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `live_posts` (
   INDEX(`latitude`),
   INDEX(`longitude`),
   INDEX(`first_exchange_datetime`),
-  INDEX(`last_exchange_datetime`),
+  INDEX(`last_exchange_datetime`)
 ) ENGINE = MYISAM ;
 -- create like table
 CREATE TABLE IF NOT EXISTS `like` (
