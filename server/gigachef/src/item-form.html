@@ -148,7 +148,7 @@
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
-        var hasPhoto = this.item.photos !== undefined && this.item.photos !== null && this.item.photos.length > 0;
+        var hasPhoto = this.item !== undefined && this.item.photos !== undefined && this.item.photos !== null && this.item.photos.length > 0;
         submitButton.disabled = !form.validate() || !hasPhoto;
       },
     });
