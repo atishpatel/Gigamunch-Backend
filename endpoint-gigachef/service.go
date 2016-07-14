@@ -124,7 +124,7 @@ func init() {
 	register("GetItem", "getItem", "GET", "gigachefservice/getItem", "Get a item.")
 	register("GetItems", "getItems", "GET", "gigachefservice/getItems", "Gets items sorted by last used.")
 	// post stuff
-	register("PostPost", "postPost", "POST", "gigachefservice/postPost", "Post a post.")
+	register("PublishPost", "publishPost", "POST", "gigachefservice/publishPost", "Publish a post.")
 	register("GetPosts", "getPosts", "GET", "gigachefservice/getPosts", "Get a chef's posts.")
 
 	endpoints.HandleHTTP()
