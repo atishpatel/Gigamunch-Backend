@@ -284,7 +284,7 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 		if orderIndex == 0 {
 			p.Orders = p.Orders[orderIndex+1:]
 		} else {
-			p.Orders = append(p.Orders[:orderIndex-1], p.Orders[orderIndex+1:]...)
+			p.Orders = append(p.Orders[:orderIndex], p.Orders[orderIndex+1:]...)
 		}
 		// save post
 		err = put(ctx, postID, p)
