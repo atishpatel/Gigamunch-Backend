@@ -74,7 +74,7 @@
         color: #727272;
       }
 
-      .preview .header {
+      .preview-header {
         height: 64px;
         background-color: var(--primary-color);
         color: white;
@@ -85,7 +85,7 @@
         font-size: 10px;
       }
 
-      .preview .likeBar {
+      .preview-likeBar {
         height: 32px;
         color: #727272;
         display: flex;
@@ -93,17 +93,17 @@
         align-items: center;
       }
 
-      .preview .container {
+      .preview-container {
         padding: 0 8px;
       }
 
-      .preview .title {
+      .preview-title {
         font-size: 16px;
         font-weight: 500;
         padding-top: 5px;
       }
 
-      .preview .desc {
+      .preview-desc {
         font-size: 12px;
         font-weight: 400;
         color: var(--secondary-text-color);
@@ -128,13 +128,23 @@
         flex: .05;
       }
 
+      .header {
+        font-size: 16px;
+        padding: 35px 0 5px 0;
+        font-weight: 500;
+      }
+
+      paper-checkbox {
+        padding: 12px 0 5px 0;
+      }
+
       @media (min-width: 767px) {
         .preview {
           display: flex;
           padding: 15px;
         }
 
-        .preview .screen {
+        .preview-screen {
           width: 300px;
         }
 
@@ -154,22 +164,22 @@
 
     <div class="flex-container">
       <div class="preview">
-        <paper-card class="screen">
-        <div class="header">
+        <paper-card class="preview-screen">
+        <div class="preview-header">
           <h1>Preview</h1>
         </div>
         <div class="photo" >
           <img src='{{photo}}'></img>
         </div>
-        <div class="likeBar">
+        <div class="preview-likeBar">
           <iron-icon icon="favorite"></iron-icon>
         </div>
         <hr>
-        <div class="container">
-          <div class="title">
+        <div class="preview-container">
+          <div class="preview-title">
             [[post.title]]
           </div>
-          <div class="desc">
+          <div class="preview-desc">
             [[post.description]]
           </div>
         </div>
@@ -183,43 +193,45 @@
         method="post"
         action="#"
         on-change="updateSubmitButtonState">
-        <paper-collapse-item header="Item details">
-        <item-fields
-          id="itemFields"
-          photos="{{post.photos}}"
-          title="{{post.title}}"
-          description="{{post.description}}"
-          ingredients="{{post.ingredients}}"
-          general-tags="{{post.general_tags}}"
-          dietary-needs-tags="{{post.dietary_needs_tags}}"
-          on-photos-changed="postPhotosChanged"
-          on-change="updateSubmitButtonState">
-        </item-fields>
+        <paper-collapse-item header="Item Details">
+          <item-fields
+            id="itemFields"
+            photos="{{post.photos}}"
+            title="{{post.title}}"
+            description="{{post.description}}"
+            ingredients="{{post.ingredients}}"
+            general-tags="{{post.general_tags}}"
+            dietary-needs-tags="{{post.dietary_needs_tags}}"
+            on-photos-changed="postPhotosChanged"
+            on-change="updateSubmitButtonState">
+          </item-fields>
         </paper-collapse-item>
-        <paper-input
-          label="Number of Servings to Offer*"
-          value="{{post.servings_offered}}"
-          type="number"
-          min="1"
-          required
-          auto-validate>
-        </paper-input>
-        <paper-input
-          label="Price per serving* (how much you'll make per serving')"
-          value="{{post.chef_price_per_serving}}"
-          type="number"
-          step="0.01"
-          min="0.50"
-          required
-          auto-validate>
-          <div prefix>$&nbsp;</div>
-        </paper-input>
+        <paper-collapse-item header="Post Details" opened>        
+          <paper-input
+            label="Price per serving* (how much you'll make per serving')"
+            value="{{post.servings_offered}}"
+            type="number"
+            min="1"
+            required
+            auto-validate>
+          </paper-input>
+          <paper-input
+            label="Price per serving*"
+            value="{{post.chef_price_per_serving}}"
+            type="number"
+            step="0.01"
+            min="0.50"
+            required
+            auto-validate>
+            <div prefix>$&nbsp;</div>
+          </paper-input>
         <datetime-input
           id="closeTime"
           label="Post close time*"
           epoch="{{post.closing_datetime}}"
           on-changed="updateSubmitButtonState">
         </datetime-input>
+        <div class="header">Pickup Time Logistics</div>
         <div class="row-fields">
           <datetime-input
             id="startPickupTime"
@@ -235,8 +247,9 @@
             on-changed="updateSubmitButtonState">
           </datetime-input>
         </div>
+        <div class="header">Self Delivery Time Logistics</div>
         <paper-checkbox active="{{post.chef_delivery}}">I'll do order delivery for my customers.</paper-checkbox>
-        <template is="dom-if" if$="[[post.chef_delivery]]" restamp="true">
+        <template is="dom-if" if$="[[post.chef_delivery]]">
           <div class="row-fields">
             <datetime-input
               id="startChefDeliveryTime"
@@ -259,10 +272,14 @@
             type="number"
             step="0.50"
             min="0.00"
+            max="50"
             auto-validate>
-          <div prefix>$&nbsp;</div>
-        </paper-input>
+            <div prefix>$&nbsp;</div>
+          </paper-input>
         </template>
+        </paper-collapse-item>
+        <!--<paper-collapse-item header="Post summary">
+        </paper-collapse-item>-->
         <paper-button
           id="submitButton"
           on-tap="submit"
