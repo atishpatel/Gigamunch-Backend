@@ -249,24 +249,21 @@ var Service = function () {
       });
     }
   }, {
-    key: 'postPost',
-    value: function postPost(post, callback) {
+    key: 'publishPost',
+    value: function publishPost(postReq, callback) {
       var _this9 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this9.postPost(post, callback);
+          _this9.postPost(postReq, callback);
         });
         return;
       }
 
-      var request = {
-        gigatoken: this.getToken(),
-        post: post
-      };
-      this.service.postPost(request).execute(function (resp) {
-        _this9.logError('postPost', resp.err);
+      postReq.gigatoken = this.getToken();
+      this.service.publishPost(postReq).execute(function (resp) {
+        _this9.logError('publishPost', resp.err);
         callback(resp.post, resp.err);
       });
     }

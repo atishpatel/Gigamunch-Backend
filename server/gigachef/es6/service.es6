@@ -221,25 +221,22 @@ class Service {
      );
   }
 
-  postPost(post, callback) {
+  publishPost(postReq, callback) {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
-        this.postPost(post, callback);
+        this.postPost(postReq, callback);
       });
       return;
     }
 
-    const request = {
-      gigatoken: this.getToken(),
-      post,
-    };
+    postReq.gigatoken = this.getToken();
     this
       .service
-      .postPost(request)
+      .publishPost(postReq)
       .execute(
         (resp) => {
-          this.logError('postPost', resp.err);
+          this.logError('publishPost', resp.err);
           callback(resp.post, resp.err);
         }
       );
