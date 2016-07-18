@@ -39,7 +39,11 @@ func insertLivePost(ctx context.Context, postID int64, post *Post) error {
 	if mysqlDB == nil {
 		connectSQL(ctx)
 	}
-	var firstExchange, lastExchange time.Time
+	if len(post.ExchangeTimes) == 0 {
+		errInvalidParameter.Wrap("length of post.ExchangeTimes is 0")
+	}
+	firstExchange := post.ExchangeTimes[0].StartDateTime
+	lastExchange := post.ExchangeTimes[0].EndDateTime
 	for i := range post.ExchangeTimes {
 		if post.ExchangeTimes[i].StartDateTime.Before(firstExchange) {
 			firstExchange = post.ExchangeTimes[i].StartDateTime
@@ -51,7 +55,7 @@ func insertLivePost(ctx context.Context, postID int64, post *Post) error {
 		`INSERT
 		INTO live_posts
 		(post_id, item_id, gigachef_id, close_datetime, first_exchange_datetime, last_exchange_datetime, search_tags, is_baked_good, latitude, longitude)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+		VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		postID,
 		post.ItemID,
 		post.GigachefID,
@@ -180,6 +184,10 @@ func connectSQL(ctx context.Context) {
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal("Couldn't connect to mysql database")
+	}
+	err = mysqlDB.Ping()
+	if err != nil {
+		log.Fatal("failed to ping mysql database", err)
 	}
 }
 
