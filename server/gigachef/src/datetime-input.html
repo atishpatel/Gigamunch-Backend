@@ -53,6 +53,18 @@
       <span class="divider"></span>
       <paper-select class="flex">
         <select id="times" is="select-with-options" option-value="value" value="{{time::change}}" required>
+          <option value="06:00">06:00 AM</option>
+          <option value="06:30">06:30 AM</option>
+          <option value="07:00">07:00 AM</option>
+          <option value="07:30">07:30 AM</option>
+          <option value="08:00">08:00 AM</option>
+          <option value="08:30">08:30 AM</option>
+          <option value="09:00">09:00 AM</option>
+          <option value="09:30">09:30 AM</option>
+          <option value="10:00">10:00 AM</option>
+          <option value="10:30">10:30 AM</option>
+          <option value="11:00">11:00 AM</option>
+          <option value="11:30">11:30 AM</option>
           <option value="12:00">12:00 PM (noon)</option>
           <option value="12:30">12:30 PM</option>
           <option value="13:00">01:00 PM</option>
@@ -89,18 +101,6 @@
           <option value="04:30">04:30 AM</option>
           <option value="05:00">05:00 AM</option>
           <option value="05:30">05:30 AM</option>
-          <option value="06:00">06:00 AM</option>
-          <option value="06:30">06:30 AM</option>
-          <option value="07:00">07:00 AM</option>
-          <option value="07:30">07:30 AM</option>
-          <option value="08:00">08:00 AM</option>
-          <option value="08:30">08:30 AM</option>
-          <option value="09:00">09:00 AM</option>
-          <option value="09:30">09:30 AM</option>
-          <option value="10:00">10:00 AM</option>
-          <option value="10:30">10:30 AM</option>
-          <option value="11:00">11:00 AM</option>
-          <option value="11:30">11:30 AM</option>
         </select>
         <paper-md-decorator>
           <paper-underline></paper-underline>
@@ -145,7 +145,7 @@
         var month = today.getMonth();
         var date = today.getDate();
         for(var i=0; i<30; i++){
-          var day = new Date(year, month - 1, date + i);
+          var day = new Date(year, month, date + i);
           var opt = document.createElement("option");
           opt.innerHTML = day.toLocaleDateString();
           opt.value = day.toDateString();
