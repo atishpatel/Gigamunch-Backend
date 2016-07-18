@@ -54,7 +54,7 @@ func getUserPosts(ctx context.Context, gigachefID string, startLimit int, endLim
 	limit := endLimit - startLimit
 	query := datastore.NewQuery(kindPost).
 		Filter("GigachefID =", gigachefID).
-		Order("-ReadyDateTime").
+		Order("-ClosingDateTime").
 		Offset(offset).
 		Limit(limit)
 	var results []Post
