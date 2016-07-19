@@ -213,7 +213,13 @@ func (req *PublishPostReq) valid() error {
 	}
 	now := int(time.Now().Unix())
 	if req.ClosingDateTime < now {
-		return fmt.Errorf("Closing DateTime cannot be before now.")
+		return fmt.Errorf("Closing time cannot be before now.")
+	}
+	if req.StartPickupDateTime < now {
+		return fmt.Errorf("Start Pickup time cannot be before now.")
+	}
+	if req.EndPickupDateTime < req.StartPickupDateTime {
+		return fmt.Errorf("Start Pickup time cannot be before End Pickup time.")
 	}
 	var err error
 	req.ItemID64, err = stoi(req.ItemID)
@@ -228,9 +234,20 @@ func (req *PublishPostReq) valid() error {
 	if err != nil {
 		return fmt.Errorf("Error with chef_price_per_serving: %v", err)
 	}
-	req.ChefDeliveryBasePrice32, err = stof(req.ChefDeliveryBasePrice)
-	if err != nil {
-		return fmt.Errorf("Error with chef delivery base price: %v", err)
+	if req.ChefDelivery {
+		if req.ChefDeliveryBasePrice == "" {
+			return fmt.Errorf("Self Delivery Base Price must be between $0 - $50.")
+		}
+		req.ChefDeliveryBasePrice32, err = stof(req.ChefDeliveryBasePrice)
+		if err != nil {
+			return fmt.Errorf("Error with chef delivery base price: %v", err)
+		}
+		if req.StartChefDeliveryDateTime < now {
+			return fmt.Errorf("Start Delivery time cannot be before now.")
+		}
+		if req.EndChefDeliveryDateTime < req.StartChefDeliveryDateTime {
+			return fmt.Errorf("Start Delivery time cannot be before End Delivery time.")
+		}
 	}
 	return nil
 }
