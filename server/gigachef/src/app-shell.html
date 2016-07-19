@@ -38,6 +38,8 @@
         --secondary-text-color: #727272;
         --disabled-text-color: #9B9B9B;
         --divider-color: #B6B6B6;
+        color: var(--primary-text-color);
+
         /* Components */
 
         /* paper-drawer-panel */
@@ -53,21 +55,28 @@
           color: var(--text-primary-color);
           min-width: 5em;
         };
+        
         /* paper-fab */
         --paper-fab: {
           position: fixed;
           bottom: 4vh;
           right: 4vh;
         };
+        
         /* paper-tabs */
         --paper-tabs-selection-bar-color: var(--light-accent-color);
         --paper-tab: {
           padding: 0;
         };
         --paper-tab-ink: var(--light-accent-color);
+        
         /* paper-progress */
         --paper-progress-active-color: var(--accent-color);
-        color: var(--primary-text-color);
+
+        /* paper-slider */
+        --paper-slider-active-color: var(--dark-primary-color);
+        --paper-slider-knob-color: var(--dark-primary-color);
+        --paper-slider-pin-color: var(--dark-primary-color);
       }
 
       iron-pages {
