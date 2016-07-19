@@ -25,7 +25,7 @@ var (
 )
 
 type orderClient interface {
-	Create(context.Context, *order.CreateReq) (*order.Resp, error)
+	Create(context.Context, *order.CreateReq) (int64, *order.Order, error)
 	Cancel(context.Context, string, int64) (*order.Resp, error)
 	GetPostID(int64) (int64, error)
 }
@@ -135,7 +135,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 			}
 
 			deliveryTimeBuffer := time.Duration(chefExchangeMinutes*precedingWaypoints) * time.Minute // chef exchanging the food with person
-			expectedExchangeTime = arrivalTimes[currentOrderRouteIndex].Add(deliveryTimeBuffer)
+			expectedExchangeTime = arrivalTimes[currentOrderRouteIndex].Add(deliveryTimeBuffer)       // TODO update all expectedExchangeTimes
 			exchangeCost = p.GigachefDelivery.BasePrice
 		} else {
 			// we don't support yet
@@ -155,7 +155,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
 		// make order
 		createOrderReq := createOrderRequest(p, req, exchangeMethod, exchangeCost, expectedExchangeTime, distance, duration)
-		order, err = orderC.Create(tc, createOrderReq)
+		orderID, _, err := orderC.Create(tc, createOrderReq)
 		if err != nil {
 			return errors.Wrap("cannot create order", err)
 		}
@@ -165,13 +165,13 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 			// TODO
 		}
 		pOrder := OrderPost{
-			OrderID:             order.ID,
+			OrderID:             orderID,
 			GigamuncherID:       req.GigamuncherID,
 			GigamuncherName:     req.GigamuncherName,
 			GigamuncherPhotoURL: req.GigamuncherPhotoURL,
 			GigamuncherGeopoint: req.GigamuncherAddress.GeoPoint,
 			ExchangeWindowIndex: req.ExchangeWindowIndex,
-			ExchangeTime:        order.ExpectedExchangeDateTime,
+			ExchangeTime:        createOrderReq.ExpectedExchangeTime,
 			ExchangeMethod:      exchangeMethod,
 			Servings:            req.NumServings,
 		}
