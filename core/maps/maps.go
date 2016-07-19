@@ -1,7 +1,6 @@
 package maps
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -68,7 +67,7 @@ func GetDirections(ctx context.Context, depratureTime time.Time, origin types.Ge
 // GetDistance returns the distance using roads between two points.
 // The points should return string "X,Y" where X and Y are floats.
 // returns miles, duration, err
-func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Duration, error) {
+func GetDistance(ctx context.Context, p1, p2 types.GeoPoint) (float32, *time.Duration, error) {
 	mapsClient, err := getMapsClient(ctx)
 	if err != nil {
 		return 0, nil, err
@@ -84,6 +83,9 @@ func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Durat
 	}
 	element := mapsResp.Rows[0].Elements[0]
 	miles := float32(element.Distance.Meters) / metersInMile // convert to miles
+	if miles < .01 {
+		miles = p1.GreatCircleDistance(p2)
+	}
 	return miles, &element.Duration, nil
 }
 
