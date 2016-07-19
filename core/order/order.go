@@ -96,17 +96,17 @@ func (req *CreateReq) valid() error {
 }
 
 // Create is used to save order information.
-func (c *Client) Create(ctx context.Context, req *CreateReq) (*Resp, error) {
+func (c *Client) Create(ctx context.Context, req *CreateReq) (int64, *Order, error) {
 	// make and order
 	err := req.valid()
 	if err != nil {
-		return nil, errors.Wrap("create order request is invalid", err)
+		return 0, nil, errors.Wrap("create order request is invalid", err)
 	}
 	paymentC := payment.New(ctx)
 	return create(ctx, req, paymentC)
 }
 
-func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp, error) {
+func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (int64, *Order, error) {
 	// TODO make two transactions if delivery cost is not 0
 	totalPricePerServing := req.PricePerServing * float32(req.NumServings)
 	totalExchangePrice := req.ExchangePrice
@@ -118,7 +118,7 @@ func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp,
 
 	transactionID, err := paymentC.MakeSale(req.GigachefSubMerchantID, req.PaymentNonce, totalPrice, totalFeeAndTax)
 	if err != nil {
-		return nil, errors.Wrap("cannot make sale", err)
+		return 0, nil, errors.Wrap("cannot make sale", err)
 	}
 	order := &Order{
 		CreatedDateTime: time.Now(),
@@ -161,13 +161,9 @@ func create(ctx context.Context, req *CreateReq, paymentC paymentClient) (*Resp,
 		if pErr != nil {
 			utils.Criticalf(ctx, "BT Transaction (%s) was not voided! Err: %+v", transactionID, pErr)
 		}
-		return nil, errDatastore.WithError(err).Wrap("cannot put incomplete order")
+		return 0, nil, errDatastore.WithError(err).Wrap("cannot put incomplete order")
 	}
-	resp := &Resp{
-		ID:    id,
-		Order: *order,
-	}
-	return resp, nil
+	return id, order, nil
 }
 
 // Cancel changes the state of an order to canceled. The userID determinds if
