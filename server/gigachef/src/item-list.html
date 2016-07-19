@@ -3,8 +3,10 @@
 ### Variables:
   - items: An array of item each with a title, image, and description.
 ### Events:
-  - edit: edit event is fired an item needs to be edited.
-          The item is past of the detail.
+  - edit: edit event is fired when an item needs to be edited.
+          The item is part of the detail.
+  - post: post event is fired when an item needs to be posted.
+          The item is part of the detail.
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
@@ -97,7 +99,7 @@
     <template is="dom-repeat" items="{{items}}">
       <paper-card>
         <div class="photo" >
-          <img src='{{_getPhoto(item)}}'></img>
+          <img src='{{getPhoto(item)}}'></img>
         </div>
         <div class="card-content">
           <h1>{{item.title}}</h1>
@@ -105,7 +107,7 @@
           <paper-icon-button class="editItem" on-tap="_editItem" icon="app:edit"></paper-icon-button>
         </div>
         <div class="card-actions">
-          <paper-button on-tap="_preorderPost">Post</paper-button>
+          <paper-button on-tap="makePost">Post</paper-button>
         </div>
       </paper-card>
     </template>
@@ -149,15 +151,12 @@
       selected: function() {
         this.getItems();
       },
+      // getItems fetches the items for a cook from the endpoint
       getItems: function() {
         this.service.getItems(0, 100, function (items, err) {
           if (err.code !== 0) {
             this.fire('error', {
               error: err,
-              options: [{
-                text: 'Try Again',
-                func: this.getItems.bind(this),
-              }],
             });
           }
           if (items === undefined || items === null || items.length < 2) {
@@ -168,17 +167,18 @@
           this.set('items', items);
         }.bind(this));
       },
-      _preorderPost: function(e) {
+      makePost: function(e) {
         var item = e.model.item;
-        item.is_order_now = false;
         this.fire('post', {item: item});
       },
-      _getPhoto: function(item) {
+      // getPhoto returns the first photo for the item
+      getPhoto: function(item) {
         if(item.photos === undefined || item.photos === null || item.photos[0] === '') {
           return 'data:image/svg+xml;utf8,<svg viewBox="0 0 304 171" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><rect fill="#929292" x="0" y="0" width="304" height="171"></rect><path d="M186.346124,89 L201.42488,89 C195.493404,110.894487 175.483744,127 151.71244,127 C127.941136,127 107.931477,110.894487 102,89 L179.7366,89 L204.639617,50.6527161 L207.155629,52.2866332 L185.411644,85.769434 L215.323046,57.8766002 L217.369041,60.0706613 L186.346124,89 Z" fill="#FFFFFF"></path></g></svg>';
         }
         return item.photos[0];
       },
+      // getItemDesc returns the description of the item that is less than 200 characters.
       getItemDesc: function(item) {
         if (item.description.length < 200) {
           return item.description;
