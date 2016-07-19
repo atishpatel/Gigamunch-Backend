@@ -62,6 +62,7 @@
 
       .photoRequired {
         color: #dd2c00;
+        white-space: normal;
       }
     </style>
     <template id="photos" is="dom-repeat" items="{{photos}}" as="photo">
@@ -70,7 +71,7 @@
         <img src="{{photo}}" alt="food photo"/>
       </div>
     </template>
-    <div hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required. Note: Please, use your camera in <strong>landscape</strong> orientation because all photos will be cropped to a 16 x 9 ratio from the center.</div>
+    <p hidden$="[[!showPhotoRequired]]" class="photoRequired">*A photo is required. Note: Please, use your camera in <strong>landscape</strong> orientation because all photos will be cropped to a 16 x 9 ratio from the center.</p>
     <div id="progressBar" hidden><paper-progress value="[[progress]]"></paper-progress></div>
     <file-input
       id="fileInput"

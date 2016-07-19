@@ -162,7 +162,7 @@
         this.$.times.value = date.toTimeString().substr(0,5);
       },
       setEpoch: function(d) {
-        this.set('epoch', Math.round(d.getTime() / 1000))
+        this.set('epoch', Math.round(d.getTime() / 1000));
         this.fire('changed');
       },
       updateEpoch: function () {
