@@ -76,6 +76,46 @@ func TestUnlike(t *testing.T) {
 	}
 }
 
+func TestGetNumLikes(t *testing.T) {
+	ctx, done, err := aetest.NewContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer done()
+	// setup
+	c := New(ctx)
+	userID := randUserID()
+	items := []int64{randItemID(), randItemID(), randItemID()}
+	for _, item := range items {
+		err = c.Like(userID, item)
+		if err != nil {
+			t.Fatal("Error while liking item: ", err)
+		}
+	}
+	err = c.Like(randUserID(), items[0])
+	if err != nil {
+		t.Fatal("Error while liking item: ", err)
+	}
+	err = c.Unlike(userID, items[1])
+	if err != nil {
+		t.Fatal("Error while unliking item: ", err)
+	}
+	// test
+	wantNumLikes := []int{2, 0, 1}
+	numLikes, err := c.GetNumLikes(items)
+	if err != nil {
+		t.Fatal("Error while calling LikesItems: ", err)
+	}
+	if len(wantNumLikes) != len(numLikes) {
+		t.Fatal("Array size of want and actual is different")
+	}
+	for i := range numLikes {
+		if numLikes[i] != wantNumLikes[i] {
+			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", wantNumLikes, numLikes)
+		}
+	}
+}
+
 func TestLikesItems(t *testing.T) {
 	ctx, done, err := aetest.NewContext()
 	if err != nil {
