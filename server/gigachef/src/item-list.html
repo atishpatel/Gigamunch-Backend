@@ -18,6 +18,7 @@
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 
 <link rel="import" href="app-icons.html">
+<link rel="import" href="like-icon.html">
 
 <dom-module id="item-list">
   <template>
@@ -73,13 +74,24 @@
         margin: 0;
       }
 
-      .editItem {
-        position: absolute;
-        top: 0;
-        right: 0;
+      .item-card-action-bar {
+        padding: 8px;
+        display: flex;
+        flex-direction: row;
         color: #727272;
-        border-radius: 50%;
-        margin: 10px;
+        border-bottom: 1px solid #e8e8e8;
+      }
+
+      .item-card-title {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+        padding: 8px 0 16px 0;
+      }
+
+      .item-card-support {
+        font-size: 14px;
+        margin: 0;
       }
 
       .divider {
@@ -101,10 +113,13 @@
         <div class="photo" >
           <img src='{{getPhoto(item)}}'></img>
         </div>
+        <div class="item-card-action-bar">
+            <like-icon numlikes="[[item.num_likes]]"></like-icon>
+            <paper-icon-button class="editItem" on-tap="_editItem" icon="app:edit"></paper-icon-button>
+          </div>
         <div class="card-content">
-          <h1>{{item.title}}</h1>
-          <p>[[getItemDesc(item)]]</p>
-          <paper-icon-button class="editItem" on-tap="_editItem" icon="app:edit"></paper-icon-button>
+          <h1 class="item-card-title">{{item.title}}</h1>
+          <p class="item-card-support">[[getItemDesc(item)]]</p>
         </div>
         <div class="card-actions">
           <paper-button on-tap="makePost">Post</paper-button>
@@ -178,12 +193,12 @@
         }
         return item.photos[0];
       },
-      // getItemDesc returns the description of the item that is less than 200 characters.
+      // getItemDesc returns the description of the item that is less than 130 characters.
       getItemDesc: function(item) {
-        if (item.description.length < 200) {
+        if (item.description.length < 130) {
           return item.description;
         }
-        return item.description.substring(0, 197) + '...';
+        return item.description.substring(0, 127) + '...';
       },
       _editItem: function(e) {
         this.fire('edit', { item: e.model.item });
