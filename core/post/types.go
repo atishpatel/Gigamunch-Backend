@@ -17,7 +17,7 @@ type OrderPost struct {
 	GigamuncherID       string                `json:"gigamuncher_id" datastore:",noindex"`
 	GigamuncherName     string                `json:"gigamuncher_name" datastore:",noindex"`
 	GigamuncherPhotoURL string                `json:"gigamuncher_photo_url" datastore:",noindex"`
-	GigamuncherGeopoint types.GeoPoint        `json:"gigamuncher_geopoint" datastore:",noindex"`
+	GigamuncherAddress  types.Address         `json:"gigamuncher_address" datastore:",noindex"`
 	ExchangeWindowIndex int32                 `json:"exchange_window_index" datastore:",noindex"`
 	ExchangeTime        time.Time             `json:"exchange_time" datastore:",noindex"`
 	ExchangeMethod      types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`

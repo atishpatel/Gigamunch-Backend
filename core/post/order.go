@@ -58,7 +58,7 @@ func (req *MakeOrderReq) valid() error {
 	}
 	if req.ExchangeMethod.Pickup() && req.ExchangeMethod.Delivery() ||
 		!req.ExchangeMethod.Pickup() && !req.ExchangeMethod.Delivery() {
-		return errInvalidParameter.WithMessage("Invalid exchange method. Must pick either pickup or delivery.")
+		return errInvalidParameter.WithMessage("Invalid exchange method. Must pick either pickup or delivery. ")
 	}
 	if !req.GigamuncherAddress.GeoPoint.Valid() {
 		return errInvalidParameter.WithMessage("Invalid location.")
@@ -67,32 +67,33 @@ func (req *MakeOrderReq) valid() error {
 }
 
 // MakeOrder makes and order for the post
-func (c Client) MakeOrder(req *MakeOrderReq) (*order.Resp, error) {
+func (c Client) MakeOrder(req *MakeOrderReq) (int64, *order.Order, error) {
 	err := req.valid()
 	if err != nil {
-		return nil, errors.Wrap("make order request is invalid", err)
+		return 0, nil, errors.Wrap("make order request is invalid", err)
 	}
 	orderC := order.New(c.ctx)
 	itemC := item.New(c.ctx)
 	return makeOrder(c.ctx, req, orderC, itemC)
 }
 
-func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC itemClient) (*order.Resp, error) {
+// TODO break down this function
+func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC itemClient) (int64, *order.Order, error) {
 	// get post stuff
 	p := new(Post)
 	err := get(ctx, req.PostID, p)
 	if err != nil {
-		return nil, errDatastore.WithError(err).Wrapf("cannot get post(%d)", req.PostID)
+		return 0, nil, errDatastore.WithError(err).Wrapf("cannot get post(%d)", req.PostID)
 	}
 	// check if post stuff is avaliable
 	if req.NumServings > p.ServingsOffered-p.NumServingsOrdered {
-		return nil, errNotEnoughServings
+		return 0, nil, errNotEnoughServings
 	}
 	if int(req.ExchangeWindowIndex) >= len(p.ExchangeTimes) {
-		return nil, errInvalidParameter.WithMessage("Pickup or Delivery window is out of range.")
+		return 0, nil, errInvalidParameter.WithMessage("Pickup or Delivery window is out of range.")
 	}
 	if time.Now().After(p.ClosingDateTime) || time.Now().After(p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime) {
-		return nil, errPostIsClosed
+		return 0, nil, errPostIsClosed
 	}
 	// calculate delivery info
 	var exchangeMethod types.ExchangeMethods
@@ -104,19 +105,19 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 		if req.ExchangeMethod.ChefDelivery() {
 			exchangeMethod.SetChefDelivery(true)
 			if !p.ExchangeTimes[req.ExchangeWindowIndex].AvailableExchangeMethods.ChefDelivery() {
-				return nil, errDelivery.Wrap("Chef delivery is not an avaliable option")
+				return 0, nil, errDelivery.Wrap("Chef delivery is not an avaliable option")
 			}
 			chefDeliveryPoints := []types.GeoPoint{req.GigamuncherAddress.GeoPoint}
 			// find all the waypoints for the time window with the same exchange method
 			for _, order := range p.Orders {
 				if order.ExchangeWindowIndex == req.ExchangeWindowIndex && order.ExchangeMethod.Equal(exchangeMethod) {
-					chefDeliveryPoints = append(chefDeliveryPoints, order.GigamuncherGeopoint)
+					chefDeliveryPoints = append(chefDeliveryPoints, order.GigamuncherAddress.GeoPoint)
 				}
 			}
 			// get chef delivery route info for this order
 			arrivalTimes, optimalRoute, err := maps.GetDirections(ctx, p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime, p.GigachefAddress.GeoPoint, chefDeliveryPoints)
 			if err != nil {
-				return nil, errors.Wrap("cannot maps.GetDirections", err)
+				return 0, nil, errors.Wrap("cannot maps.GetDirections", err)
 			}
 			var currentOrderRouteIndex int
 			precedingWaypoints := 0
@@ -139,11 +140,11 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 			exchangeCost = p.GigachefDelivery.BasePrice
 		} else {
 			// we don't support yet
-			return nil, errDelivery.Wrap("chosen delivery method is not an option")
+			return 0, nil, errDelivery.Wrap("chosen delivery method is not an option")
 		}
 	} else { // pickup
 		if !p.ExchangeTimes[req.ExchangeWindowIndex].AvailableExchangeMethods.Pickup() {
-			return nil, errDelivery.WithMessage("Pickup is not avaliable.").Wrap("pickup is not an avaliable option")
+			return 0, nil, errDelivery.WithMessage("Pickup is not avaliable.").Wrap("pickup is not an avaliable option")
 		}
 		exchangeCost = 0
 		exchangeMethod.SetPickup(true)
@@ -151,11 +152,12 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	}
 	// run in transaction
 	opts := &datastore.TransactionOptions{XG: true, Attempts: 1}
-	var order *order.Resp
+	var orderID int64
+	var order *order.Order
 	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
 		// make order
 		createOrderReq := createOrderRequest(p, req, exchangeMethod, exchangeCost, expectedExchangeTime, distance, duration)
-		orderID, _, err := orderC.Create(tc, createOrderReq)
+		orderID, order, err = orderC.Create(tc, createOrderReq)
 		if err != nil {
 			return errors.Wrap("cannot create order", err)
 		}
@@ -169,7 +171,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 			GigamuncherID:       req.GigamuncherID,
 			GigamuncherName:     req.GigamuncherName,
 			GigamuncherPhotoURL: req.GigamuncherPhotoURL,
-			GigamuncherGeopoint: req.GigamuncherAddress.GeoPoint,
+			GigamuncherAddress:  req.GigamuncherAddress,
 			ExchangeWindowIndex: req.ExchangeWindowIndex,
 			ExchangeTime:        createOrderReq.ExpectedExchangeTime,
 			ExchangeMethod:      exchangeMethod,
@@ -179,7 +181,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 		// put order to post
 		err = put(tc, req.PostID, p)
 		if err != nil {
-			_, cErr := orderC.Cancel(ctx, req.GigamuncherID, order.ID)
+			_, cErr := orderC.Cancel(ctx, req.GigamuncherID, orderID)
 			if cErr != nil {
 				utils.Criticalf(ctx, "BT Transaction (%s) was not voided! Err: %+v", order.PaymentInfo.BTTransactionID, cErr)
 			}
@@ -188,13 +190,13 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 		return nil
 	}, opts)
 	if err != nil {
-		return nil, errors.Wrap("cannot run in transaction", err)
+		return 0, nil, errors.Wrap("cannot run in transaction", err)
 	}
 	err = itemC.AddNumTotalOrders(p.ItemID, req.NumServings)
 	if err != nil {
 		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by %d : %s", p.ItemID, req.NumServings, err)
 	}
-	return order, nil
+	return orderID, order, nil
 }
 
 func createOrderRequest(p *Post, req *MakeOrderReq, exchangeMethod types.ExchangeMethods,
