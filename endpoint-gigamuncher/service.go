@@ -89,6 +89,7 @@ func init() {
 	// order
 	register("GetBraintreeToken", "getBraintreeToken", "GET", "gigamuncherservice/getBraintreeToken", "Get a braintreeToken.")
 	register("MakeOrder", "makeOrder", "POST", "gigamuncherservice/makeOrder", "Make an order.")
+	register("CancelOrder", "cancelOrder", "POST", "gigamuncherservice/cancelOrder", "Cancel an order.")
 	register("GetOrders", "getOrders", "GET", "gigamuncherservice/getOrders", "Gets the orders for a muncher.")
 	register("GetOrder", "getOrder", "GET", "gigamuncherservice/getOrder", "Get an order.")
 	// review
