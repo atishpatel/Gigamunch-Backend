@@ -103,6 +103,7 @@ type PostOrder struct {
 	GigamuncherID       string `json:"gigamuncher_id"`
 	GigamuncherName     string `json:"gigamuncher_name"`
 	GigamuncherPhotoURL string `json:"gigamuncher_photo_url"`
+	GigamuncherAddress  string `json:"gigamuncher_address"`
 	ExchangeTime        int    `json:"exchange_time"`
 	ExchangeMethod      int    `json:"exchange_method"`
 	Servings            int    `json:"servings"`
@@ -116,6 +117,7 @@ func (po *PostOrder) set(postOrder *post.OrderPost) {
 	po.ExchangeTime = ttoi(postOrder.ExchangeTime)
 	po.ExchangeMethod = int(postOrder.ExchangeMethod)
 	po.Servings = int(postOrder.Servings)
+	po.GigamuncherAddress = postOrder.GigamuncherAddress.String()
 }
 
 // Post is a meal that is no longer live
