@@ -277,7 +277,7 @@
         if (order.exchange_method == 1) {
           return 'Pickup';
         } else {
-          return 'Delivery';
+          return '<a href="http://maps.google.com/?q=' + order.gigamuncher_address + '">Delivery</a>';
         }
       },
     });
