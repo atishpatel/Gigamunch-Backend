@@ -42,7 +42,7 @@ type ExchangePlanInfo struct {
 	Duration           int           `json:"duration"`
 }
 
-func (epi *ExchangePlanInfo) set(o *order.Resp) {
+func (epi *ExchangePlanInfo) set(o *order.Order) {
 	epi.GigachefAddress = o.ExchangePlanInfo.GigachefAddress
 	epi.GigamuncherAddress = o.ExchangePlanInfo.GigamuncherAddress
 	epi.Distance = o.ExchangePlanInfo.Distance
@@ -92,8 +92,8 @@ type Order struct {
 	Status                   string           `json:"status"`
 }
 
-func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating, chefPhoneNumber string) {
-	o.ID = itos(order.ID)
+func (o *Order) set(orderID int64, order *order.Order, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating, chefPhoneNumber string) {
+	o.ID = itos(orderID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
 	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDateTime)
 	o.State = order.State
@@ -205,8 +205,7 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		GigamuncherName:     user.Name,
 		GigamuncherPhotoURL: user.PhotoURL,
 	}
-
-	order, err := postC.MakeOrder(postReq)
+	orderID, order, err := postC.MakeOrder(postReq)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
@@ -226,7 +225,7 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		return resp, nil
 	}
 
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
+	resp.Order.set(orderID, order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	return resp, nil
 }
 
@@ -290,7 +289,7 @@ func (service *Service) GetOrder(ctx context.Context, req *GetOrderReq) (*GetOrd
 		return resp, nil
 	}
 
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
+	resp.Order.set(order.ID, &order.Order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	// get review
 	reviewC := review.New(ctx)
 	review, err := reviewC.GetReview(order.ReviewID)
@@ -368,7 +367,7 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 
 	for i := range orders {
 		o := Order{}
-		o.set(&orders[i], numLikes[i], likes[i], chefs[i].Name, chefs[i].PhotoURL, chefs[i].Rating, chefs[i].PhoneNumber)
+		o.set(orders[i].ID, &orders[i].Order, numLikes[i], likes[i], chefs[i].Name, chefs[i].PhotoURL, chefs[i].Rating, chefs[i].PhoneNumber)
 		resp.Orders = append(resp.Orders, o)
 	}
 	return resp, nil
@@ -469,7 +468,7 @@ func (service *Service) CancelOrder(ctx context.Context, req *CancelOrderReq) (*
 		resp.Err = errors.Wrap("cannot get review", err)
 		return resp, nil
 	}
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
+	resp.Order.set(order.ID, &order.Order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	resp.Review.set(review)
 	return resp, nil
 }
