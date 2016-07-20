@@ -77,7 +77,7 @@ func (req *CreateReq) valid() error {
 		return errInvalidParameter.WithMessage("Invalid payment nonce.")
 	}
 	if req.ExchangeMethod.Pickup() && req.ExchangeMethod.Delivery() ||
-		!req.ExchangeMethod.Pickup() && req.ExchangeMethod.Delivery() {
+		!req.ExchangeMethod.Pickup() && !req.ExchangeMethod.Delivery() {
 		return errInvalidParameter.WithMessage("Invalid exchange method. Must pick either pickup or delivery.")
 	}
 	if !req.GigamuncherAddress.GeoPoint.Valid() {
