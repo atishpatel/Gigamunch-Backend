@@ -3,7 +3,9 @@ package gigachef
 import (
 	"fmt"
 
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
@@ -19,10 +21,11 @@ type Item struct {
 	NumTotalOrders    int     `json:"num_total_orders"`
 	AverageItemRating float32 `json:"average_item_rating"`
 	NumRatings        int     `json:"num_ratings"`
+	NumLikes          int     `json:"num_likes"`
 }
 
 // Set takes a item form the item package and converts it to a endpoint item
-func (i *Item) Set(id int64, item *item.Item) {
+func (i *Item) Set(id int64, item *item.Item, numLikes int) {
 	i.ID = itos(id)
 	i.ID64 = id
 	i.Title = item.Title
@@ -32,6 +35,7 @@ func (i *Item) Set(id int64, item *item.Item) {
 	i.DietaryNeedsTags = item.DietaryNeedsTags
 	i.Photos = item.Photos
 	i.LastUsedDateTime = ttoi(item.LastUsedDateTime)
+	i.NumLikes = numLikes
 }
 
 // Get creates a item.Item version of the endpoint item
@@ -99,7 +103,13 @@ func (service *Service) GetItem(ctx context.Context, req *GetItemReq) (*GetItemR
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.Item.Set(req.ID64, i)
+	likeC := like.New(ctx)
+	numLikes, err := likeC.GetNumLikes([]int64{req.ID64})
+	if err != nil {
+		utils.Errorf(ctx, "Failed to likeC.GetNumLikes for id(%d): %v", req.ID64, err)
+		numLikes = make([]int, 1)
+	}
+	resp.Item.Set(req.ID64, i, numLikes[0])
 	return resp, nil
 }
 
@@ -150,9 +160,15 @@ func (service *Service) GetItems(ctx context.Context, req *GetItemsReq) (*GetIte
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+	likeC := like.New(ctx)
+	likes, err := likeC.GetNumLikes(ids)
+	if err != nil {
+		utils.Errorf(ctx, "failed to likeC.GetNumLikes: %v", err)
+		likes = make([]int, len(ids))
+	}
 	resp.Items = make([]Item, len(ids))
 	for i := range ids {
-		resp.Items[i].Set(ids[i], &items[i])
+		resp.Items[i].Set(ids[i], &items[i], likes[i])
 	}
 	return resp, nil
 }
