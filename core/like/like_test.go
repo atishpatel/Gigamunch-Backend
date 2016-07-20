@@ -85,7 +85,8 @@ func TestGetNumLikes(t *testing.T) {
 	// setup
 	c := New(ctx)
 	userID := randUserID()
-	items := []int64{randItemID(), randItemID(), randItemID()}
+	repeatedItemID := randItemID()
+	items := []int64{repeatedItemID, randItemID(), randItemID(), repeatedItemID}
 	for _, item := range items {
 		err = c.Like(userID, item)
 		if err != nil {
@@ -101,7 +102,7 @@ func TestGetNumLikes(t *testing.T) {
 		t.Fatal("Error while unliking item: ", err)
 	}
 	// test
-	wantNumLikes := []int{2, 0, 1}
+	wantNumLikes := []int{2, 0, 1, 2}
 	numLikes, err := c.GetNumLikes(items)
 	if err != nil {
 		t.Fatal("Error while calling LikesItems: ", err)
@@ -111,7 +112,7 @@ func TestGetNumLikes(t *testing.T) {
 	}
 	for i := range numLikes {
 		if numLikes[i] != wantNumLikes[i] {
-			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", wantNumLikes, numLikes)
+			t.Fatalf("wantResults(%v) and actualResults(%v) aren't the same.", wantNumLikes, numLikes)
 		}
 	}
 }
@@ -125,7 +126,8 @@ func TestLikesItems(t *testing.T) {
 	// setup
 	c := New(ctx)
 	userID := randUserID()
-	items := []int64{randItemID(), randItemID(), randItemID()}
+	repeatedItemID := randItemID()
+	items := []int64{repeatedItemID, randItemID(), randItemID(), repeatedItemID}
 	for _, item := range items {
 		err = c.Like(userID, item)
 		if err != nil {
@@ -141,8 +143,8 @@ func TestLikesItems(t *testing.T) {
 		t.Fatal("Error while unliking item: ", err)
 	}
 	// test
-	wantLikes := []bool{true, false, true}
-	wantNumLikes := []int{2, 0, 1}
+	wantLikes := []bool{true, false, true, true}
+	wantNumLikes := []int{2, 0, 1, 2}
 	likes, numLikes, err := c.LikesItems(userID, items)
 	if err != nil {
 		t.Fatal("Error while calling LikesItems: ", err)
@@ -152,12 +154,12 @@ func TestLikesItems(t *testing.T) {
 	}
 	for i := range likes {
 		if likes[i] != wantLikes[i] {
-			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", likes, wantLikes)
+			t.Fatalf("wantResults(%v) and actualResults(%v) aren't the same.", wantLikes, likes)
 		}
 	}
 	for i := range numLikes {
 		if numLikes[i] != wantNumLikes[i] {
-			t.Fatalf("actualResults(%v) and wantResults(%v) aren't the same.", wantNumLikes, numLikes)
+			t.Fatalf("wantResults(%v) and actualResults(%v) aren't the same.", wantNumLikes, numLikes)
 		}
 	}
 }
