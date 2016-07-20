@@ -313,7 +313,7 @@
               <paper-tabs
                 class="nav-tabs"
                 attr-for-selected="name"
-                selected="{{page}}" tabindex="-1">
+                selected$="{{page}}" tabindex="-1">
                 <paper-tab name="dashboard" tabindex="-1">
                   <a class="nav-a" href$="[[baseUrl]]/"><span>Dashboard</span></a>
                 </paper-tab>
@@ -513,7 +513,8 @@
       _routePageChanged: function (page) {
         if (this.page !== page) {
           if (page === undefined || page === null || page === '') {
-            page = 'dashboard';
+            this.set('page', 'dashboard');
+            return;
           }
           this.set('page', page);
         }

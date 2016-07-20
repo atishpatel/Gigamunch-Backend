@@ -14,6 +14,7 @@
 <link rel="import" href="datetime-input.html">
 <link rel="import" href="app-icons.html">
 <link rel="import" href="item-fields.html">
+<link rel="import" href="like-icon.html">
 
 <dom-module id="post-form">
   <template>
@@ -100,7 +101,7 @@
         height: 32px;
         color: #727272;
         display: flex;
-        padding: 0 10px;
+        padding: 5px 10px;
         align-items: center;
       }
 
@@ -203,7 +204,7 @@
           <img src='{{photo}}'></img>
         </div>
         <div class="preview-likebar">
-          <iron-icon icon="app:favorite"></iron-icon>
+          <like-icon numlikes="[[post.num_likes]]"></like-icon>
           <span class="preview-likebar-price">$&nbsp;[[computedPrice]]</span>
         </div>
         <hr>
@@ -279,26 +280,26 @@
             on-changed="updateSubmitButtonState">
           </datetime-input>
         </div>
-        <div class="header">Self Delivery Time Logistics</div>
-        <paper-checkbox active="{{post.chef_delivery}}">I'll do order delivery for my customers.</paper-checkbox>
+        <div class="header">My Delivery Time Logistics</div>
+        <paper-checkbox active="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
         <div hidden$="[[!post.chef_delivery]]">
           <div class="row-fields">
             <datetime-input
               id="startChefDeliveryTime"
-              label="Start self delivery time*"
+              label="Start my delivery time*"
               epoch="{{post.start_chef_delivery_datetime}}"
               on-changed="updateSubmitButtonState">
             </datetime-input>
             <span class="range-divider"></span>
             <datetime-input
               id="endChefDeliveryTime"
-              label="End self delivery time*"
+              label="End my delivery time*"
               epoch="{{post.end_chef_delivery_datetime}}"
               on-changed="updateSubmitButtonState">
             </datetime-input>
           </div>
             <paper-input
-              label="Price for self delivery*"
+              label="Price for my delivery*"
               value="{{post.chef_delivery_base_price}}"
               type="number"
               step="0.50"
@@ -308,7 +309,7 @@
               <div prefix>$&nbsp;</div>
             </paper-input>
             <div class="chef-delivery-input">
-              <label>Delivery range in miles</label>
+              <label>My delivery range in miles</label>
               <div class="chef-delivery-range">
                 <paper-slider id="deliveryRange" class="chef-delivery-slider" pin snaps max="15" max-markers="15" step="1" value="{{post.chef_delivery_radius}}"></paper-slider>
                 <span class="chef-delivery-text">[[post.chef_delivery_radius]] miles</span>
@@ -421,6 +422,7 @@
         this.set('post.dietary_needs_tags', item.dietary_needs_tags);
         this.set('post.cuisine_tags', item.cuisine_tags);
         this.set('post.chef_delivery_radius', 3);
+        this.set('post.num_likes', item.num_likes);
         this.$.itemFields.update();
         this.$.closeTime.update();
         this.$.startPickupTime.update();
