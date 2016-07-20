@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 
 <link rel="import" href="app-icons.html">
+<link rel="import" href="like-icon.html">
 
 <dom-module id="post-list">
   <template>
@@ -26,38 +27,64 @@
         font-weight: 500;
       }
 
+      strong {
+        font-weight: 400;
+      }
+
       .post-card {
         background: white;
-        padding:10px;
         margin-bottom: 15px;
         width: 100%;
         font-weight: 300;
+        border-radius: 2px;
+        padding: 0;
       }
 
-      .post-card h2 {
-        font-size: 1.25em;
+      .post-card-title {
+        font-size: 16px;
         font-weight: 500;
-        margin: 0px;
+        padding: 16px;
+        margin: 0;
       }
 
-      .post-card h3 {
-        font-size: 1em;
-        font-weight: 400;
-        margin-bottom: 5px;
+      .post-card-image {
+        position: relative;
+        width: 100%;
       }
 
-      .post-card .order {
-        padding: 5px 0px;
+      .post-card-earned-text {
+        position: absolute; 
+        bottom: 0;
+        left: 0; 
+        width: 100%;
+      }
+
+      .post-card-earned-text > * {
+        background-color: rgba(0, 0, 0, 0.5);;
+        color: white;
+        padding: 16px;
+      }
+
+      .post-card-action-bar {
+        padding: 8px;
+      }
+
+      .post-card-orders {
+        padding: 8px;
+        width: 100%;
+        font-size: 14px;
+        letter-spacing: .05em;
+      }
+
+      .post-card-order {
+        padding-bottom: 4px;
         width: 100%;
         border-top: 1px solid #e8e8e8;
-        font-size: .9em;
-        letter-spacing: .05em;
       }
 
       .row {
         display: flex;
         flex-direction: row;
-        width: 100%;
       }
 
       .column {
@@ -71,6 +98,7 @@
       }
 
       .center-text {
+        text-align: center;
         justify-content: center;
       }
 
@@ -118,32 +146,26 @@
     <template is="dom-repeat" items="{{posts}}" as="post">
       <paper-material elevation="1" class="post-card">
         <div class="row">
-          <div class="column center-text">
-            <h2>[[post.title]]</h2>
-          </div>
-          <div class="column">
+          <h2 class="post-card-title">[[post.title]]</h2>
+        </div>
+        <div class="row">
+          <div class="post-card-image">
             <div class="photo">
               <img src="[[getPhoto(post)]]"></img>
             </div>
+            <div class="post-card-earned-text">
+              <div>
+                <strong>$[[getAmountEarned(post)]]</strong> earned from <strong>[[getNumOrders(post)]]</strong> servings
+              </div>
+            </div>
           </div>
         </div>
-        <div class="row">
-          <div class="column">
-            <h3>Earned:</h3>
-            <span>$[[getAmountEarned(post)]]</span>
-          </div>
-          <div class="column">
-            <h3>Servings:</h3>
-            <span>[[getNumOrders(post)]]</span>
-          </div>
-          <div class="column flex-2">
-            <h3>Make by:</h3>
-            <span>[[getMakeBy(post)]]</span>
-          </div>
+        <div class="row post-card-action-bar">
+          <like-icon numlikes="[[post.num_likes]]"></like-icon>
         </div>
-        <template is="dom-repeat" items="[[post.orders]]" as="order">
-          <div class="order">
-            <div class="row">
+        <template is="dom-repeat" items="[[post.orders]]" as="order" sort="sortByExchangeTime">
+          <div class="post-card-orders">
+            <div class="row post-card-order">
               <div class="column">
                 <div class="row">
                   <placeholder-img class="user-pic" icon="app:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
@@ -151,9 +173,7 @@
                 </div>
               </div>
               <div class="column center-text">
-                <span>
-                  [[getExchangeText(order)]] [[order.servings]] servings by [[getExchangeTime(order)]]
-                </span>
+                <span>[[getExchangeText(order)]] [[order.servings]] servings by [[getExchangeTime(order)]]</span>
               </div>
             </div>
           </div>
@@ -244,8 +264,11 @@
         }
         return e;
       },
-      getMakeBy: function(post) {
-        return (new Date(post.ready_datetime * 1000)).toLocaleString().replace(/:[0-9][0-9] /, ' ');
+      sortByExchangeTime: function(o1, o2) {
+        if (o1.exchange_time === o2.exchange_time) {
+          return o1.gigamuncher_name < o2.gigamuncher_name ? -1 : 1;
+        }
+        return o1.exchange_time < o2.exchange_time ? -1 : 1;
       },
       getExchangeTime: function(order) {
         return (new Date(order.exchange_time * 1000)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
