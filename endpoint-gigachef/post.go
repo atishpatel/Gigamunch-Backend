@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
@@ -128,10 +130,11 @@ type Post struct {
 	ChefPricePerServing string      `json:"chef_price_per_serving"`
 	PricePerServing     string      `json:"price_per_serving"`
 	Orders              []PostOrder `json:"orders"`
+	NumLikes            int         `json:"num_likes"`
 }
 
 // Set takes a post.Post and converts it to a endpoint post
-func (p *Post) set(id int64, post *post.Post) {
+func (p *Post) set(id int64, post *post.Post, numLikes int) {
 	p.ID = itos(id)
 	p.ItemID = itos(post.ItemID)
 	p.Title = post.Title
@@ -148,6 +151,7 @@ func (p *Post) set(id int64, post *post.Post) {
 	for i := range post.Orders {
 		p.Orders[i].set(&post.Orders[i])
 	}
+	p.NumLikes = numLikes
 }
 
 // PublishPostReq is the input request needed for PublishPost.
@@ -274,7 +278,13 @@ func (service *Service) PublishPost(ctx context.Context, req *PublishPostReq) (*
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	resp.Post.set(postID, p)
+	likeC := like.New(ctx)
+	numLikes, err := likeC.GetNumLikes([]int64{p.ItemID})
+	if err != nil {
+		utils.Errorf(ctx, "Failed to likeC.GetNumLikes for id(%d): %v", p.ItemID, err)
+		numLikes = make([]int, 1)
+	}
+	resp.Post.set(postID, p, numLikes[0])
 	return resp, nil
 }
 
@@ -320,9 +330,19 @@ func (service *Service) GetPosts(ctx context.Context, req *GetPostsReq) (*GetPos
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to post.GetUserPosts")
 		return resp, nil
 	}
+	itemIDs := make([]int64, len(postIDs))
+	for i := range posts {
+		itemIDs[i] = posts[i].ItemID
+	}
+	likeC := like.New(ctx)
+	likes, err := likeC.GetNumLikes(itemIDs)
+	if err != nil {
+		utils.Errorf(ctx, "failed to likeC.GetNumLikes: %v", err)
+		likes = make([]int, len(itemIDs))
+	}
 	resp.Posts = make([]Post, len(postIDs))
 	for i := range postIDs {
-		resp.Posts[i].set(postIDs[i], &posts[i])
+		resp.Posts[i].set(postIDs[i], &posts[i], likes[i])
 	}
 	return resp, nil
 }
