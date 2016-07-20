@@ -13,7 +13,6 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 const (
@@ -93,7 +92,6 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, chefC chefI
 			RoutingNumber: req.RoutingNumber,
 		},
 	}
-	utils.Errorf(ctx, "ma: %#v i: %#v ia: %#v f:", ma, ma.Individual, ma.Individual.Address, ma.FundingOptions)
 	_, err := bt.MerchantAccount().Find(req.ID)
 	if err == nil {
 		ma, err = bt.MerchantAccount().Update(ma)
@@ -111,14 +109,16 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, chefC chefI
 			}
 			return "", errBT.WithError(err).Wrapf("cannot create sub-merchant(%s)", req.ID)
 		}
+	}
+	if ma.Status != "pending" && ma.Status != "active" {
+		return "", errBT.WithMessage("Error creating sub-merchant account with status " + ma.Status)
+	}
+	if !user.HasSubMerchantID() {
 		user.SetSubMerchantID(true)
 		err = auth.SaveUser(ctx, user)
 		if err != nil {
 			return "", errors.Wrap("failed update user to has sub-merchant account", err)
 		}
-	}
-	if ma.Status != "pending" && ma.Status != "active" {
-		return "", errBT.WithMessage("Error creating sub-merchant account with status " + ma.Status)
 	}
 	_, err = chefC.UpdateSubMerchantStatus(ma.Id, ma.Status)
 	if err != nil {
