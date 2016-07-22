@@ -1,11 +1,13 @@
 package post
 
 import (
+	"fmt"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
@@ -74,11 +76,12 @@ func (c Client) MakeOrder(req *MakeOrderReq) (int64, *order.Order, error) {
 	}
 	orderC := order.New(c.ctx)
 	itemC := item.New(c.ctx)
-	return makeOrder(c.ctx, req, orderC, itemC)
+	chefC := gigachef.New(c.ctx)
+	return makeOrder(c.ctx, req, orderC, itemC, chefC)
 }
 
 // TODO break down this function
-func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC itemClient) (int64, *order.Order, error) {
+func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC itemClient, chefC chefClient) (int64, *order.Order, error) {
 	// get post stuff
 	p := new(Post)
 	err := get(ctx, req.PostID, p)
@@ -92,8 +95,12 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	if int(req.ExchangeWindowIndex) >= len(p.ExchangeTimes) {
 		return 0, nil, errInvalidParameter.WithMessage("Pickup or Delivery window is out of range.")
 	}
-	if time.Now().After(p.ClosingDateTime) || time.Now().After(p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime) {
-		return 0, nil, errPostIsClosed
+	now := time.Now()
+	if now.After(p.ClosingDateTime) {
+		return 0, nil, errPostIsClosed.Wrapf("post close datetime(%v) is after now(%v)", p.ClosingDateTime, now)
+	}
+	if now.After(p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime) {
+		return 0, nil, errInvalidParameter.WithMessage("The time window selected is no longer available.").Wrapf("post exchange window start datetime(%v) is after now(%v)", p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime, now)
 	}
 	// calculate delivery info
 	var exchangeMethod types.ExchangeMethods
@@ -196,6 +203,10 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	if err != nil {
 		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by %d : %s", p.ItemID, req.NumServings, err)
 	}
+	err = chefC.Notify(order.GigachefID, "Your customers are starving - Gigamunch", fmt.Sprintf("%s just order %d servings of %s at %s! :) https://gigamunchapp.com/posts", order.GigamuncherName, order.Servings, order.PostTitle, order.ExpectedExchangeDateTime.Format("01/02 at 03:04 PM")))
+	if err != nil {
+		utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
+	}
 	return orderID, order, nil
 }
 
@@ -242,10 +253,11 @@ func (c Client) CancelOrder(userID string, orderID int64) (*order.Resp, error) {
 	}
 	orderC := order.New(c.ctx)
 	itemC := item.New(c.ctx)
-	return cancelOrder(c.ctx, userID, orderID, orderC, itemC)
+	chefC := gigachef.New(c.ctx)
+	return cancelOrder(c.ctx, userID, orderID, orderC, itemC, chefC)
 }
 
-func cancelOrder(ctx context.Context, userID string, orderID int64, orderC orderClient, itemC itemClient) (*order.Resp, error) {
+func cancelOrder(ctx context.Context, userID string, orderID int64, orderC orderClient, itemC itemClient, chefC chefClient) (*order.Resp, error) {
 	postID, err := orderC.GetPostID(orderID)
 	if err != nil {
 		return nil, errors.Wrap("cannot get post id", err)
@@ -301,6 +313,10 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 	err = itemC.AddNumTotalOrders(p.ItemID, -numServings)
 	if err != nil {
 		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by -%d : %s", p.ItemID, numServings, err)
+	}
+	err = chefC.Notify(order.GigachefID, "Order Canceled - Gigamunch", fmt.Sprintf("Bummer, %s had to cancel their order (%d servings of %s)!", order.GigamuncherName, order.Servings, order.PostTitle))
+	if err != nil {
+		utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
 	}
 	return order, nil
 }
