@@ -5,7 +5,6 @@
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../bower_components/paper-collapse-item/paper-collapse-item.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
@@ -15,6 +14,7 @@
 <link rel="import" href="app-icons.html">
 <link rel="import" href="item-fields.html">
 <link rel="import" href="like-icon.html">
+<link rel="import" href="paper-collapse-item.html">
 
 <dom-module id="post-form">
   <template>
@@ -82,8 +82,10 @@
       }
 
       .preview hr {
+        border: none;
         margin: 0;
-        color: #727272;
+        background-color: #ececec;
+        height: 1px;
       }
 
       .preview-header {
@@ -260,7 +262,7 @@
           </paper-input>
         <datetime-input
           id="closeTime"
-          label="Post close time*"
+          label="Post close time (new order can't be made after this time)*"
           epoch="{{post.closing_datetime}}"
           on-changed="updateSubmitButtonState">
         </datetime-input>
@@ -281,7 +283,7 @@
           </datetime-input>
         </div>
         <div class="header">My Delivery Time Logistics</div>
-        <paper-checkbox active="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
+        <paper-checkbox active$="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
         <div hidden$="[[!post.chef_delivery]]">
           <div class="row-fields">
             <datetime-input
@@ -372,7 +374,7 @@
       postPriceChanged: function() {
         if (this.post !== undefined && this.post.chef_price_per_serving !== undefined 
             && this.post.chef_price_per_serving !== null) {
-          this.set('computedPrice', (this.post.chef_price_per_serving * 1.2).toFixed(2));
+          this.set('computedPrice', ((this.post.chef_price_per_serving * 1.2) + .005).toFixed(2));
         } else {
           this.set('computedPrice', '?');
         }
@@ -406,6 +408,7 @@
           this.fire('error', d);
           return;
         }
+        this.set('post', {'chef_delivery': false});
         if (this.item === undefined || this.item.id === undefined || this.item.id !== this.route.path.substring(1)) {
           this.getItem(this.route.path.substring(1));
         } else {
