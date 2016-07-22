@@ -1,7 +1,6 @@
 package gigachef
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 
 	"golang.org/x/net/context"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/payment"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
@@ -113,18 +111,6 @@ func handleClosePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if len(p.Orders) > 0 {
-		// notify chef
-		chefC := gigachef.New(ctx)
-		message := fmt.Sprintf("Hey! %d gigamunchers are starving for your %s! Checkout who they are http://www.gigamunchapp.com/posts. :)",
-			len(p.Orders),
-			p.Title,
-		)
-		err = chefC.Notify(chefID, "Your customers are starving - Gigamunch", message)
-		if err != nil {
-			utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
 		// get process-order queue tasks
 		orderIDs := make([]int64, len(p.Orders))
 		muncherIDs := make([]string, len(p.Orders))
