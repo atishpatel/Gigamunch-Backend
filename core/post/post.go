@@ -2,6 +2,7 @@ package post
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
@@ -55,6 +56,7 @@ type notifyClient interface {
 type chefClient interface {
 	GetPostInfo(string) (*gigachef.PostInfoResp, error)
 	IncrementNumPost(string) error
+	Notify(string, string, string) error
 }
 
 type itemClient interface {
@@ -117,7 +119,7 @@ func publishPost(ctx context.Context, req *PublishPostReq, chefC chefClient, ite
 		ServingsOffered:     req.ServingsOffered,
 		ChefPricePerServing: req.ChefPricePerServing,
 		TaxPercentage:       taxPercentage,
-		PricePerServing:     req.ChefPricePerServing * 1.2,
+		PricePerServing:     roundUp(float64(req.ChefPricePerServing)*1.2, 2),
 		GigachefAddress:     postInfo.Address,
 		BTSubMerchantID:     postInfo.BTSubMerchantID,
 	}
@@ -261,4 +263,13 @@ func (c *Client) ClosePost(postID int64, chefID string) (*Resp, error) {
 		Post: *p,
 	}
 	return resp, nil
+}
+
+func roundUp(input float64, places int) float32 {
+	var round float64
+	pow := math.Pow(10, float64(places))
+	input -= .001
+	digit := pow * input
+	round = math.Ceil(digit)
+	return float32(round / pow)
 }
