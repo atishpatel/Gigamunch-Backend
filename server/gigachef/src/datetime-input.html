@@ -160,6 +160,8 @@
         var date = new Date(this.epoch * 1000);
         this.$.dates.value = date.toDateString();
         this.$.times.value = date.toTimeString().substr(0,5);
+        this.time = date.toTimeString().substr(0,5);
+        this.set('date', date.toDateString());
       },
       setEpoch: function(d) {
         this.set('epoch', Math.round(d.getTime() / 1000));
