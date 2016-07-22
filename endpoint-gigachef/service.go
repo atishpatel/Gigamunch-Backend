@@ -43,7 +43,7 @@ func ftos(f float64) string {
 }
 
 func ftos64(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
+	return strconv.FormatFloat(f, 'f', 6, 64)
 }
 
 func stoi(s string) (int64, error) {
