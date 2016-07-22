@@ -28,8 +28,8 @@ func (req *GetAddressesReq) valid() error {
 
 // GetAddressesResp is the resp for GetAddresses
 type GetAddressesResp struct {
-	Addresses []gigamuncher.Addresses `json:"addresses,omitempty"`
-	Err       errors.ErrorWithCode    `json:"err"`
+	Addresses []Address            `json:"addresses,omitempty"`
+	Err       errors.ErrorWithCode `json:"err"`
 }
 
 // GetAddresses is used to like an item
@@ -42,18 +42,23 @@ func (service *Service) GetAddresses(ctx context.Context, req *GetAddressesReq) 
 		return resp, nil
 	}
 	muncerC := gigamuncher.New(ctx)
-	resp.Addresses, err = muncerC.GetAddresses(user.ID)
+	addresses, err := muncerC.GetAddresses(user.ID)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to gigamuncher.GetAddresses")
 		return resp, nil
+	}
+	resp.Addresses = make([]Address, len(addresses))
+	for i := range addresses {
+		resp.Addresses[i].set(&addresses[i].Address, &addresses[i].AddedDateTime, addresses[i].Selected)
 	}
 	return resp, nil
 }
 
 // SelectAddressReq is the req for SelectAddress
 type SelectAddressReq struct {
-	Gigatoken string        `json:"gigatoken"`
-	Address   types.Address `json:"address"`
+	Gigatoken   string         `json:"gigatoken"`
+	Address     Address        `json:"address"`
+	AddressType *types.Address `json:"-"`
 }
 
 func (req *SelectAddressReq) gigatoken() string {
@@ -63,6 +68,11 @@ func (req *SelectAddressReq) gigatoken() string {
 func (req *SelectAddressReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
+	}
+	var err error
+	req.AddressType, err = req.Address.get()
+	if err != nil {
+		return fmt.Errorf("Failed to decode address: %#v", err)
 	}
 	return nil
 }
@@ -83,7 +93,7 @@ func (service *Service) SelectAddress(ctx context.Context, req *SelectAddressReq
 		return resp, nil
 	}
 	muncerC := gigamuncher.New(ctx)
-	a, err := muncerC.SelectAddress(user.ID, &req.Address)
+	a, err := muncerC.SelectAddress(user.ID, req.AddressType)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to gigamuncher.SelectAddress")
 		return resp, nil

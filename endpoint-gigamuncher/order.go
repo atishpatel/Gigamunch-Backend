@@ -8,6 +8,7 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/payment"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
@@ -141,17 +142,18 @@ func (o *Order) set(orderID int64, order *order.Order, numLikes int, hasLiked bo
 
 // MakeOrderReq is the request for MakeOrder
 type MakeOrderReq struct {
-	Gigatoken           string        `json:"gigatoken"`
-	PostID              json.Number   `json:"post_id,omitempty"`
-	PostID64            int64         `json:"-"`
-	BraintreeNonce      string        `json:"braintree_nonce"`
-	Servings            int32         `json:"servings"`
-	ExchangeWindowIndex int32         `json:"exchange_window_index"`
-	ExchangeMethods     int32         `json:"exchange_methods"`
-	Latitude            float64       `json:"latitude"`  // REMOVE
-	Longitude           float64       `json:"longitude"` // REMOVE
-	Address             types.Address `json:"address"`
-	TotalPrice          float32       `json:"total_price"`
+	Gigatoken           string         `json:"gigatoken"`
+	PostID              json.Number    `json:"post_id,omitempty"`
+	PostID64            int64          `json:"-"`
+	BraintreeNonce      string         `json:"braintree_nonce"`
+	Servings            int32          `json:"servings"`
+	ExchangeWindowIndex int32          `json:"exchange_window_index"`
+	ExchangeMethods     int32          `json:"exchange_methods"`
+	Latitude            float64        `json:"latitude"`  // REMOVE
+	Longitude           float64        `json:"longitude"` // REMOVE
+	Address             Address        `json:"address"`
+	AddressType         *types.Address `json:"-"`
+	TotalPrice          float32        `json:"total_price"`
 }
 
 func (req *MakeOrderReq) gigatoken() string {
@@ -170,10 +172,15 @@ func (req *MakeOrderReq) valid() error {
 	if err != nil {
 		return fmt.Errorf("error with PostID: %v", err)
 	}
-	if req.Address.Longitude == 0 { // REMOVE
-		req.Address.Longitude = req.Longitude
-		req.Address.Latitude = req.Latitude
+	req.AddressType, err = req.Address.get()
+	if err != nil {
+		return fmt.Errorf("error with decoding address: %#v", err)
 	}
+	if req.AddressType.Longitude == 0 && req.AddressType.Latitude == 0 { // REMOVE
+		req.AddressType.Longitude = req.Longitude
+		req.AddressType.Latitude = req.Latitude
+	}
+
 	return nil
 }
 
@@ -192,6 +199,13 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+	if req.AddressType.Longitude == 0 && req.AddressType.Latitude == 0 {
+		err = maps.GetGeopointFromAddress(ctx, req.AddressType)
+		if err != nil {
+			resp.Err = errors.Wrap("failed to maps.GetGeopointFromAddress", err)
+			return resp, nil
+		}
+	}
 	exchangeMethods := types.ExchangeMethods(req.ExchangeMethods)
 	postC := post.New(ctx)
 	postReq := &post.MakeOrderReq{
@@ -200,7 +214,7 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		PaymentNonce:        req.BraintreeNonce,
 		ExchangeMethod:      exchangeMethods,
 		ExchangeWindowIndex: req.ExchangeWindowIndex,
-		GigamuncherAddress:  req.Address,
+		GigamuncherAddress:  *req.AddressType,
 		GigamuncherID:       user.ID,
 		GigamuncherName:     user.Name,
 		GigamuncherPhotoURL: user.PhotoURL,
