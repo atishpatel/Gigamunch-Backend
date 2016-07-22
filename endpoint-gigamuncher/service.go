@@ -31,6 +31,14 @@ func stoi(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
 
+func ftos64(f float64) string {
+	return strconv.FormatFloat(f, 'f', 6, 64)
+}
+
+func stof64(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
+}
+
 type validatableTokenReq interface {
 	gigatoken() string
 	valid() error
