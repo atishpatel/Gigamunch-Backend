@@ -22,7 +22,17 @@
         display: block;
         padding: 15px;
         background-color: white;
-        min-height: 86vh;
+        min-height: 95vh;
+      }
+
+      label {
+        font-size: 12px;
+        color: #727272;
+        --webkit-font-smoothing: antialiased;
+      }
+
+      paper-checkbox {
+        padding: 12px 0 5px 0;
       }
 
       #submitButton {
@@ -67,6 +77,7 @@
 
       .preview {
         display: none;
+        min-height: 86vh;
       }
 
       .preview hr {
@@ -85,12 +96,17 @@
         font-size: 10px;
       }
 
-      .preview-likeBar {
+      .preview-likebar {
         height: 32px;
         color: #727272;
         display: flex;
         padding: 0 10px;
         align-items: center;
+      }
+
+      .preview-likebar-price {
+        margin-left: auto;
+        color: var(--primary-text-color)
       }
 
       .preview-container {
@@ -129,13 +145,28 @@
       }
 
       .header {
-        font-size: 16px;
+        font-size: 14px;
         padding: 35px 0 5px 0;
         font-weight: 500;
       }
 
-      paper-checkbox {
-        padding: 12px 0 5px 0;
+      .chef-delivery-input {
+        padding-top: 10px;
+        
+      }
+
+      .chef-delivery-range {
+        display: flex;
+        align-items: center;
+      }
+
+      .chef-delivery-slider {
+        flex: 9;
+      }
+
+      .chef-delivery-text {
+        flex: 1;
+        text-align: center;
       }
 
       @media (min-width: 767px) {
@@ -171,8 +202,9 @@
         <div class="photo" >
           <img src='{{photo}}'></img>
         </div>
-        <div class="preview-likeBar">
-          <iron-icon icon="favorite"></iron-icon>
+        <div class="preview-likebar">
+          <iron-icon icon="app:favorite"></iron-icon>
+          <span class="preview-likebar-price">$&nbsp;[[computedPrice]]</span>
         </div>
         <hr>
         <div class="preview-container">
@@ -235,21 +267,21 @@
         <div class="row-fields">
           <datetime-input
             id="startPickupTime"
-            label="Start pick-up time*"
+            label="Start pickup time*"
             epoch="{{post.start_pickup_datetime}}"
             on-changed="updateSubmitButtonState">
           </datetime-input>
           <span class="range-divider"></span>
           <datetime-input
             id="endPickupTime"
-            label="End pick-up time*"
+            label="End pickup time*"
             epoch="{{post.end_pickup_datetime}}"
             on-changed="updateSubmitButtonState">
           </datetime-input>
         </div>
         <div class="header">Self Delivery Time Logistics</div>
         <paper-checkbox active="{{post.chef_delivery}}">I'll do order delivery for my customers.</paper-checkbox>
-        <template is="dom-if" if$="[[post.chef_delivery]]">
+        <div hidden$="[[!post.chef_delivery]]">
           <div class="row-fields">
             <datetime-input
               id="startChefDeliveryTime"
@@ -265,18 +297,24 @@
               on-changed="updateSubmitButtonState">
             </datetime-input>
           </div>
-          <paper-slider id="deliveryRange" pin snaps max="15" max-markers="15" step="1" value="3"></paper-slider>
-          <paper-input
-            label="Price for self delivery*"
-            value="{{post.chef_delivery_base_price}}"
-            type="number"
-            step="0.50"
-            min="0.00"
-            max="50"
-            auto-validate>
-            <div prefix>$&nbsp;</div>
-          </paper-input>
-        </template>
+            <paper-input
+              label="Price for self delivery*"
+              value="{{post.chef_delivery_base_price}}"
+              type="number"
+              step="0.50"
+              min="0.00"
+              max="50"
+              auto-validate>
+              <div prefix>$&nbsp;</div>
+            </paper-input>
+            <div class="chef-delivery-input">
+              <label>Delivery range in miles</label>
+              <div class="chef-delivery-range">
+                <paper-slider id="deliveryRange" class="chef-delivery-slider" pin snaps max="15" max-markers="15" step="1" value="{{post.chef_delivery_radius}}"></paper-slider>
+                <span class="chef-delivery-text">[[post.chef_delivery_radius]] miles</span>
+              </div>
+            </div>
+        </div>
         </paper-collapse-item>
         <!--<paper-collapse-item header="Post summary">
         </paper-collapse-item>-->
@@ -312,10 +350,15 @@
         photo: {
           type: String,
         },
+        computedPrice: {
+          type: String,
+        },
       },
       observers: [
         'postPhotosChanged(post.photos)',
+        'postPriceChanged(post.chef_price_per_serving)',
         'postStartPickupTimeChanged(post.start_pickup_datetime)',
+        'postStartDeliveryTimeChanged(post.start_chef_delivery_datetime)',
       ],
       postPhotosChanged: function (p) {
         this.updateSubmitButtonState();
@@ -325,12 +368,33 @@
           // make placeholder image
         }
       },
+      postPriceChanged: function() {
+        if (this.post !== undefined && this.post.chef_price_per_serving !== undefined 
+            && this.post.chef_price_per_serving !== null) {
+          this.set('computedPrice', (this.post.chef_price_per_serving * 1.2).toFixed(2));
+        } else {
+          this.set('computedPrice', '?');
+        }
+      },
+      postStartPickupTimeChanged: function() {
+        if (this.post.end_pickup_datetime < this.post.start_pickup_datetime) {
+          this.set('post.end_pickup_datetime', this.post.start_pickup_datetime + 7200);
+          this.$.endPickupTime.update();
+        }
+      },
+      postStartDeliveryTimeChanged: function() {
+        if (this.post.chef_delivery && this.post.end_chef_delivery_datetime < this.post.start_chef_delivery_datetime) {
+          this.set('post.end_chef_delivery_datetime', this.post.start_chef_delivery_datetime + 7200);
+          this.$.endChefDeliveryTime.update();
+        }
+      },
+      
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
         if (this.route.path.substring(1) === '') {
           var d = {
-            error: 'There is a problem with your URL. :( Please try to post an item again.',
+            error: 'There is a problem with your URL. :( Please try to post the item again.',
             options: [{
               text: 'Go to items',
               func: function () {
@@ -341,20 +405,28 @@
           this.fire('error', d);
           return;
         }
-        if (this.item.id !== this.route.path.substring(1)) {
+        if (this.item === undefined || this.item.id === undefined || this.item.id !== this.route.path.substring(1)) {
           this.getItem(this.route.path.substring(1));
         } else {
           this.setItem(this.item);
         }
       },
       setItem: function (item) {
-        this.set('post', item);
-        this.post.item_id = item.id;
-        this.post.id = '';
-        this.post.pickup = true; // TODO make radio button
+        this.set('post.item_id', item.id);
+        this.set('post.photos', item.photos);
+        this.set('post.title', item.title);
+        this.set('post.description', item.description);
+        this.set('post.general_tags', item.general_tags);
+        this.set('post.ingredients', item.ingredients);
+        this.set('post.dietary_needs_tags', item.dietary_needs_tags);
+        this.set('post.cuisine_tags', item.cuisine_tags);
+        this.set('post.chef_delivery_radius', 3);
         this.$.itemFields.update();
         this.$.closeTime.update();
-
+        this.$.startPickupTime.update();
+        this.$.endPickupTime.update();
+        this.$.startChefDeliveryTime.update();
+        this.$.endChefDeliveryTime.update();
       },
       getItem: function (id) {
         if (id === undefined || id === '' || id === '0') {
@@ -382,9 +454,9 @@
         this.$.spinner.hidden = false;
         this.$.spinner.active = true;
         this.$.submitButton.disabled = true;
-        this.postPost();
+        this.publishPost();
       },
-      postPost: function() {
+      publishPost: function() {
         if (!this.user.isVerifiedChef) {
           // TODO change to not error
           this.fire('error', {
@@ -395,7 +467,7 @@
           this.$.spinner.active = false;
           return;
         }
-        this.service.postPost(this.post, function(post, err) {
+        this.service.publishPost(this.post, function(post, err) {
           this.$.spinner.hidden = true;
           this.$.spinner.active = false;
           if (err.code !== 0) {
@@ -408,10 +480,6 @@
             } else {
               d = {
                 error: err,
-                options: [{
-                  text: 'Try Again',
-                  func: this.postPost.bind(this),
-                }],
               };
             }
             this.fire('error', d);
