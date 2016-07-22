@@ -2,9 +2,11 @@ package gigamuncher
 
 import (
 	"fmt"
+	"time"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/review"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 )
 
 /*
@@ -90,4 +92,67 @@ func (r *Review) set(review *review.Resp) {
 	r.HasResponse = review.HasResponse
 	r.Response.CreatedDateTime = ttoi(review.Response.CreatedDateTime)
 	r.Response.Text = review.Response.Text
+}
+
+// Address represents a location with GeoPoints and address
+type Address struct {
+	APT           string  `json:"apt"`
+	Street        string  `json:"street"`
+	City          string  `json:"city"`
+	State         string  `json:"state"`
+	Zip           string  `json:"zip"`
+	Country       string  `json:"country"`
+	Latitude      float32 `json:"latitude"`  // REMOVE
+	Longitude     float32 `json:"longitude"` // REMOVE
+	Lat           string  `json:"lat"`
+	Lon           string  `json:"lon"`
+	Selected      bool    `json:"selected"`
+	AddedDateTime int     `json:"added_datetime"`
+}
+
+func (a *Address) get() (*types.Address, error) {
+	var lat, long float64
+	var err error
+	if a.Lat != "" {
+		lat, err = stof64(a.Lat)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if a.Lon != "" {
+		long, err = stof64(a.Lon)
+		if err != nil {
+			return nil, err
+		}
+	}
+	add := &types.Address{
+		APT:     a.APT,
+		Street:  a.Street,
+		City:    a.City,
+		State:   a.State,
+		Zip:     a.Zip,
+		Country: a.Country,
+		GeoPoint: types.GeoPoint{
+			Latitude:  lat,
+			Longitude: long,
+		},
+	}
+	return add, nil
+}
+
+func (a *Address) set(add *types.Address, addedDateTime *time.Time, selected bool) {
+	a.APT = add.APT
+	a.Street = add.Street
+	a.City = add.City
+	a.State = add.State
+	a.Zip = add.Zip
+	a.Country = add.Country
+	a.Latitude = float32(add.Latitude)
+	a.Longitude = float32(add.Longitude)
+	a.Lat = ftos64(add.Latitude)
+	a.Lon = ftos64(add.Longitude)
+	if addedDateTime != nil {
+		a.AddedDateTime = ttoi(*addedDateTime)
+	}
+	a.Selected = selected
 }

@@ -38,6 +38,8 @@
         --secondary-text-color: #727272;
         --disabled-text-color: #9B9B9B;
         --divider-color: #B6B6B6;
+        color: var(--primary-text-color);
+
         /* Components */
 
         /* paper-drawer-panel */
@@ -53,21 +55,28 @@
           color: var(--text-primary-color);
           min-width: 5em;
         };
+        
         /* paper-fab */
         --paper-fab: {
           position: fixed;
           bottom: 4vh;
           right: 4vh;
         };
+        
         /* paper-tabs */
         --paper-tabs-selection-bar-color: var(--light-accent-color);
         --paper-tab: {
           padding: 0;
         };
         --paper-tab-ink: var(--light-accent-color);
+        
         /* paper-progress */
         --paper-progress-active-color: var(--accent-color);
-        color: var(--primary-text-color);
+
+        /* paper-slider */
+        --paper-slider-active-color: var(--dark-primary-color);
+        --paper-slider-knob-color: var(--dark-primary-color);
+        --paper-slider-pin-color: var(--dark-primary-color);
       }
 
       iron-pages {
@@ -95,6 +104,10 @@
 
       app-header {
         z-index: 8;
+      }
+
+      strong {
+        font-weight: 400;
       }
 
       #errorDialogDetails {
@@ -300,7 +313,7 @@
               <paper-tabs
                 class="nav-tabs"
                 attr-for-selected="name"
-                selected="{{page}}" tabindex="-1">
+                selected$="{{page}}" tabindex="-1">
                 <paper-tab name="dashboard" tabindex="-1">
                   <a class="nav-a" href$="[[baseUrl]]/"><span>Dashboard</span></a>
                 </paper-tab>
@@ -505,7 +518,11 @@
       },
       _routePageChanged: function (page) {
         if (this.page !== page) {
-          this.page = page || 'dashboard';
+          if (page === undefined || page === null || page === '') {
+            this.set('page', 'dashboard');
+            return;
+          }
+          this.set('page', page);
         }
       },
       _routePathChanged: function (path) {

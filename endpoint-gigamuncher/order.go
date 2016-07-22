@@ -8,6 +8,7 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/payment"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/post"
@@ -42,7 +43,7 @@ type ExchangePlanInfo struct {
 	Duration           int           `json:"duration"`
 }
 
-func (epi *ExchangePlanInfo) set(o *order.Resp) {
+func (epi *ExchangePlanInfo) set(o *order.Order) {
 	epi.GigachefAddress = o.ExchangePlanInfo.GigachefAddress
 	epi.GigamuncherAddress = o.ExchangePlanInfo.GigamuncherAddress
 	epi.Distance = o.ExchangePlanInfo.Distance
@@ -92,8 +93,8 @@ type Order struct {
 	Status                   string           `json:"status"`
 }
 
-func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating, chefPhoneNumber string) {
-	o.ID = itos(order.ID)
+func (o *Order) set(orderID int64, order *order.Order, numLikes int, hasLiked bool, chefName, chefPhotoURL string, chefRatings gigachef.Rating, chefPhoneNumber string) {
+	o.ID = itos(orderID)
 	o.CreatedDateTime = ttoi(order.CreatedDateTime)
 	o.ExpectedExchangeDateTime = ttoi(order.ExpectedExchangeDateTime)
 	o.State = order.State
@@ -121,13 +122,18 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, ch
 	o.NumLikes = numLikes
 	o.HasLiked = hasLiked
 
+	preparingStartTime := order.ExpectedExchangeDateTime.Add(-30 * time.Minute)
+	if preparingStartTime.After(order.PostCloseDateTime) {
+		preparingStartTime = order.PostCloseDateTime.Add(-30 * time.Minute)
+	}
+
 	if o.GigachefCanceled || o.GigamuncherCanceled {
 		o.Status = "canceled"
 	} else if time.Now().After(order.ExpectedExchangeDateTime.Add(1 * time.Hour)) {
 		o.Status = "closed"
 	} else if time.Now().After(order.ExpectedExchangeDateTime) {
 		o.Status = "open-received"
-	} else if time.Now().After(order.PostCloseDateTime) {
+	} else if preparingStartTime.After(order.PostCloseDateTime) {
 		o.Status = "open-preparing"
 	} else {
 		o.Status = "open-placed"
@@ -136,15 +142,18 @@ func (o *Order) set(order *order.Resp, numLikes int, hasLiked bool, chefName, ch
 
 // MakeOrderReq is the request for MakeOrder
 type MakeOrderReq struct {
-	PostID          json.Number `json:"post_id,omitempty"`
-	PostID64        int64       `json:"-"`
-	BraintreeNonce  string      `json:"braintree_nonce"`
-	Servings        int32       `json:"servings"`
-	ExchangeMethods int32       `json:"exchange_methods"`
-	Latitude        float64     `json:"latitude"`
-	Longitude       float64     `json:"longitude"`
-	TotalPrice      float32     `json:"total_price"`
-	Gigatoken       string      `json:"gigatoken"`
+	Gigatoken           string         `json:"gigatoken"`
+	PostID              json.Number    `json:"post_id,omitempty"`
+	PostID64            int64          `json:"-"`
+	BraintreeNonce      string         `json:"braintree_nonce"`
+	Servings            int32          `json:"servings"`
+	ExchangeWindowIndex int32          `json:"exchange_window_index"`
+	ExchangeMethods     int32          `json:"exchange_methods"`
+	Latitude            float64        `json:"latitude"`  // REMOVE
+	Longitude           float64        `json:"longitude"` // REMOVE
+	Address             Address        `json:"address"`
+	AddressType         *types.Address `json:"-"`
+	TotalPrice          float32        `json:"total_price"`
 }
 
 func (req *MakeOrderReq) gigatoken() string {
@@ -163,6 +172,15 @@ func (req *MakeOrderReq) valid() error {
 	if err != nil {
 		return fmt.Errorf("error with PostID: %v", err)
 	}
+	req.AddressType, err = req.Address.get()
+	if err != nil {
+		return fmt.Errorf("error with decoding address: %#v", err)
+	}
+	if req.AddressType.Longitude == 0 && req.AddressType.Latitude == 0 { // REMOVE
+		req.AddressType.Longitude = req.Longitude
+		req.AddressType.Latitude = req.Latitude
+	}
+
 	return nil
 }
 
@@ -181,26 +199,27 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-
+	if req.AddressType.Longitude == 0 && req.AddressType.Latitude == 0 {
+		err = maps.GetGeopointFromAddress(ctx, req.AddressType)
+		if err != nil {
+			resp.Err = errors.Wrap("failed to maps.GetGeopointFromAddress", err)
+			return resp, nil
+		}
+	}
 	exchangeMethods := types.ExchangeMethods(req.ExchangeMethods)
 	postC := post.New(ctx)
 	postReq := &post.MakeOrderReq{
-		PostID:         req.PostID64,
-		NumServings:    req.Servings,
-		PaymentNonce:   req.BraintreeNonce,
-		ExchangeMethod: exchangeMethods,
-		GigamuncherAddress: types.Address{
-			GeoPoint: types.GeoPoint{
-				Latitude:  req.Latitude,
-				Longitude: req.Longitude,
-			},
-		},
+		PostID:              req.PostID64,
+		NumServings:         req.Servings,
+		PaymentNonce:        req.BraintreeNonce,
+		ExchangeMethod:      exchangeMethods,
+		ExchangeWindowIndex: req.ExchangeWindowIndex,
+		GigamuncherAddress:  *req.AddressType,
 		GigamuncherID:       user.ID,
 		GigamuncherName:     user.Name,
 		GigamuncherPhotoURL: user.PhotoURL,
 	}
-
-	order, err := postC.MakeOrder(postReq)
+	orderID, order, err := postC.MakeOrder(postReq)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
@@ -220,7 +239,7 @@ func (service *Service) MakeOrder(ctx context.Context, req *MakeOrderReq) (*Make
 		return resp, nil
 	}
 
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
+	resp.Order.set(orderID, order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	return resp, nil
 }
 
@@ -284,7 +303,7 @@ func (service *Service) GetOrder(ctx context.Context, req *GetOrderReq) (*GetOrd
 		return resp, nil
 	}
 
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
+	resp.Order.set(order.ID, &order.Order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	// get review
 	reviewC := review.New(ctx)
 	review, err := reviewC.GetReview(order.ReviewID)
@@ -362,7 +381,7 @@ func (service *Service) GetOrders(ctx context.Context, req *GetOrdersReq) (*GetO
 
 	for i := range orders {
 		o := Order{}
-		o.set(&orders[i], numLikes[i], likes[i], chefs[i].Name, chefs[i].PhotoURL, chefs[i].Rating, chefs[i].PhoneNumber)
+		o.set(orders[i].ID, &orders[i].Order, numLikes[i], likes[i], chefs[i].Name, chefs[i].PhotoURL, chefs[i].Rating, chefs[i].PhoneNumber)
 		resp.Orders = append(resp.Orders, o)
 	}
 	return resp, nil
@@ -463,7 +482,7 @@ func (service *Service) CancelOrder(ctx context.Context, req *CancelOrderReq) (*
 		resp.Err = errors.Wrap("cannot get review", err)
 		return resp, nil
 	}
-	resp.Order.set(order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
+	resp.Order.set(order.ID, &order.Order, numLikes[0], likes[0], chef.Name, chef.PhotoURL, chef.Rating, chef.PhoneNumber)
 	resp.Review.set(review)
 	return resp, nil
 }

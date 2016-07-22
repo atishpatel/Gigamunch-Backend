@@ -1,7 +1,19 @@
 package types
 
+const (
+	// PickupOnlyExchangeMethod is an ExchangeMethods that is pickup only
+	PickupOnlyExchangeMethod ExchangeMethods = ExchangeMethods(1)
+	// ChefDeliveryOnlyExchangeMethod is an ExchangeMethods that is chef delivery only
+	ChefDeliveryOnlyExchangeMethod ExchangeMethods = ExchangeMethods(2)
+)
+
 // ExchangeMethods shows ExchangeMethod options
 type ExchangeMethods int32
+
+// IsZero returns true if there are no ExchangeMethods selected
+func (em *ExchangeMethods) IsZero() bool {
+	return int32(*em) == 0
+}
 
 // Pickup returns Pickup
 func (em *ExchangeMethods) Pickup() bool {
@@ -26,4 +38,9 @@ func (em *ExchangeMethods) ChefDelivery() bool {
 // SetChefDelivery sets ChefDelivery
 func (em *ExchangeMethods) SetChefDelivery(x bool) {
 	*em = ExchangeMethods(setKthBit(int32(*em), 1, x))
+}
+
+// Equal compares two exchangemethods
+func (em ExchangeMethods) Equal(em2 ExchangeMethods) bool {
+	return int32(em) == int32(em2)
 }

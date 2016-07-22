@@ -1,15 +1,23 @@
 package post
 
 import (
+	"fmt"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
+	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+)
+
+const (
+	chefExchangeMinutes = 5
 )
 
 var (
@@ -19,7 +27,7 @@ var (
 )
 
 type orderClient interface {
-	Create(context.Context, *order.CreateReq) (*order.Resp, error)
+	Create(context.Context, *order.CreateReq) (int64, *order.Order, error)
 	Cancel(context.Context, string, int64) (*order.Resp, error)
 	GetPostID(int64) (int64, error)
 }
@@ -29,6 +37,7 @@ type MakeOrderReq struct {
 	PostID              int64
 	NumServings         int32
 	PaymentNonce        string
+	ExchangeWindowIndex int32
 	ExchangeMethod      types.ExchangeMethods
 	GigamuncherAddress  types.Address
 	GigamuncherID       string
@@ -46,9 +55,12 @@ func (req *MakeOrderReq) valid() error {
 	if req.PaymentNonce == "" {
 		return errInvalidParameter.WithMessage("Invalid payment nonce.")
 	}
+	if req.ExchangeWindowIndex < 0 {
+		return errInvalidParameter.WithMessage("Invalid pickup or delivery method.")
+	}
 	if req.ExchangeMethod.Pickup() && req.ExchangeMethod.Delivery() ||
 		!req.ExchangeMethod.Pickup() && !req.ExchangeMethod.Delivery() {
-		return errInvalidParameter.WithMessage("Invalid exchange method. Must pick either pickup or delivery.")
+		return errInvalidParameter.WithMessage("Invalid exchange method. Must pick either pickup or delivery. ")
 	}
 	if !req.GigamuncherAddress.GeoPoint.Valid() {
 		return errInvalidParameter.WithMessage("Invalid location.")
@@ -57,29 +69,38 @@ func (req *MakeOrderReq) valid() error {
 }
 
 // MakeOrder makes and order for the post
-func (c Client) MakeOrder(req *MakeOrderReq) (*order.Resp, error) {
+func (c Client) MakeOrder(req *MakeOrderReq) (int64, *order.Order, error) {
 	err := req.valid()
 	if err != nil {
-		return nil, errors.Wrap("make order request is invalid", err)
+		return 0, nil, errors.Wrap("make order request is invalid", err)
 	}
 	orderC := order.New(c.ctx)
-
-	return makeOrder(c.ctx, req, orderC)
+	itemC := item.New(c.ctx)
+	chefC := gigachef.New(c.ctx)
+	return makeOrder(c.ctx, req, orderC, itemC, chefC)
 }
 
-func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*order.Resp, error) {
+// TODO break down this function
+func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC itemClient, chefC chefClient) (int64, *order.Order, error) {
 	// get post stuff
 	p := new(Post)
 	err := get(ctx, req.PostID, p)
 	if err != nil {
-		return nil, errDatastore.WithError(err).Wrapf("cannot get post(%d)", req.PostID)
+		return 0, nil, errDatastore.WithError(err).Wrapf("cannot get post(%d)", req.PostID)
 	}
 	// check if post stuff is avaliable
 	if req.NumServings > p.ServingsOffered-p.NumServingsOrdered {
-		return nil, errNotEnoughServings
+		return 0, nil, errNotEnoughServings
 	}
-	if time.Now().After(p.ClosingDateTime) {
-		return nil, errPostIsClosed
+	if int(req.ExchangeWindowIndex) >= len(p.ExchangeTimes) {
+		return 0, nil, errInvalidParameter.WithMessage("Pickup or Delivery window is out of range.")
+	}
+	now := time.Now()
+	if now.After(p.ClosingDateTime) {
+		return 0, nil, errPostIsClosed.Wrapf("post close datetime(%v) is after now(%v)", p.ClosingDateTime, now)
+	}
+	if now.After(p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime) {
+		return 0, nil, errInvalidParameter.WithMessage("The time window selected is no longer available.").Wrapf("post exchange window start datetime(%v) is after now(%v)", p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime, now)
 	}
 	// calculate delivery info
 	var exchangeMethod types.ExchangeMethods
@@ -89,53 +110,77 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 	duration := req.GigamuncherAddress.EstimatedDuration(p.GigachefAddress.GeoPoint)
 	if req.ExchangeMethod.Delivery() {
 		if req.ExchangeMethod.ChefDelivery() {
-			if !p.AvailableExchangeMethods.ChefDelivery() {
-				return nil, errDelivery.Wrap("chef delivery is not an avaliable option")
-			}
-			// TODO reculcate GigachefDelivery.TotalDuration
-			// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
-
 			exchangeMethod.SetChefDelivery(true)
-			expectedExchangeTime = p.ReadyDateTime.Add(time.Duration(duration) * time.Second)
-			exchangeCost = p.GigachefDelivery.Price
+			if !p.ExchangeTimes[req.ExchangeWindowIndex].AvailableExchangeMethods.ChefDelivery() {
+				return 0, nil, errDelivery.Wrap("Chef delivery is not an avaliable option")
+			}
+			chefDeliveryPoints := []types.GeoPoint{req.GigamuncherAddress.GeoPoint}
+			// find all the waypoints for the time window with the same exchange method
+			for _, order := range p.Orders {
+				if order.ExchangeWindowIndex == req.ExchangeWindowIndex && order.ExchangeMethod.Equal(exchangeMethod) {
+					chefDeliveryPoints = append(chefDeliveryPoints, order.GigamuncherAddress.GeoPoint)
+				}
+			}
+			// get chef delivery route info for this order
+			arrivalTimes, optimalRoute, err := maps.GetDirections(ctx, p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime, p.GigachefAddress.GeoPoint, chefDeliveryPoints)
+			if err != nil {
+				return 0, nil, errors.Wrap("cannot maps.GetDirections", err)
+			}
+			var currentOrderRouteIndex int
+			precedingWaypoints := 0
+			for i, v := range optimalRoute {
+				if v == 0 {
+					currentOrderRouteIndex = i
+				}
+				precedingWaypoints++
+			}
+			// update if exchange window is still avaliable for delivery
+			numDeliveries := len(chefDeliveryPoints)
+			deliveriesTimeBuffer := time.Duration(numDeliveries*chefExchangeMinutes) * time.Minute
+			lastDeliveryArrivalTime := arrivalTimes[len(arrivalTimes)-1].Add(deliveriesTimeBuffer)
+			if lastDeliveryArrivalTime.After(p.ExchangeTimes[req.ExchangeWindowIndex].EndDateTime) {
+				p.ExchangeTimes[req.ExchangeWindowIndex].AvailableExchangeMethods.SetChefDelivery(false)
+			}
+
+			deliveryTimeBuffer := time.Duration(chefExchangeMinutes*precedingWaypoints) * time.Minute // chef exchanging the food with person
+			expectedExchangeTime = arrivalTimes[currentOrderRouteIndex].Add(deliveryTimeBuffer)       // TODO update all expectedExchangeTimes
+			exchangeCost = p.GigachefDelivery.BasePrice
 		} else {
 			// we don't support yet
-			return nil, errDelivery.Wrap("chosen delivery method is not an option")
+			return 0, nil, errDelivery.Wrap("chosen delivery method is not an option")
 		}
 	} else { // pickup
-		if !p.AvailableExchangeMethods.Pickup() {
-			return nil, errDelivery.WithMessage("Pickup is not avaliable.").Wrap("pickup is not an avaliable option")
+		if !p.ExchangeTimes[req.ExchangeWindowIndex].AvailableExchangeMethods.Pickup() {
+			return 0, nil, errDelivery.WithMessage("Pickup is not avaliable.").Wrap("pickup is not an avaliable option")
 		}
 		exchangeCost = 0
 		exchangeMethod.SetPickup(true)
-		if p.IsOrderNow {
-			expectedExchangeTime = time.Now().Add(time.Duration(p.EstimatedPreperationTime) * time.Second)
-		} else {
-			expectedExchangeTime = p.ReadyDateTime
-		}
+		expectedExchangeTime = p.ExchangeTimes[req.ExchangeWindowIndex].StartDateTime
 	}
 	// run in transaction
 	opts := &datastore.TransactionOptions{XG: true, Attempts: 1}
-	var order *order.Resp
+	var orderID int64
+	var order *order.Order
 	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
 		// make order
 		createOrderReq := createOrderRequest(p, req, exchangeMethod, exchangeCost, expectedExchangeTime, distance, duration)
-		order, err = orderC.Create(tc, createOrderReq)
+		orderID, order, err = orderC.Create(tc, createOrderReq)
 		if err != nil {
 			return errors.Wrap("cannot create order", err)
 		}
 		// add order to post
 		p.NumServingsOrdered += req.NumServings
 		if req.ExchangeMethod.ChefDelivery() {
-			p.GigachefDelivery.TotalDuration += duration
+			// TODO
 		}
 		pOrder := OrderPost{
-			OrderID:             order.ID,
+			OrderID:             orderID,
 			GigamuncherID:       req.GigamuncherID,
 			GigamuncherName:     req.GigamuncherName,
 			GigamuncherPhotoURL: req.GigamuncherPhotoURL,
-			GigamuncherGeopoint: req.GigamuncherAddress.GeoPoint,
-			ExchangeTime:        order.ExpectedExchangeDateTime,
+			GigamuncherAddress:  req.GigamuncherAddress,
+			ExchangeWindowIndex: req.ExchangeWindowIndex,
+			ExchangeTime:        createOrderReq.ExpectedExchangeTime,
 			ExchangeMethod:      exchangeMethod,
 			Servings:            req.NumServings,
 		}
@@ -143,7 +188,7 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 		// put order to post
 		err = put(tc, req.PostID, p)
 		if err != nil {
-			_, cErr := orderC.Cancel(ctx, req.GigamuncherID, order.ID)
+			_, cErr := orderC.Cancel(ctx, req.GigamuncherID, orderID)
 			if cErr != nil {
 				utils.Criticalf(ctx, "BT Transaction (%s) was not voided! Err: %+v", order.PaymentInfo.BTTransactionID, cErr)
 			}
@@ -152,9 +197,17 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient) (*ord
 		return nil
 	}, opts)
 	if err != nil {
-		return nil, errors.Wrap("cannot run in transaction", err)
+		return 0, nil, errors.Wrap("cannot run in transaction", err)
 	}
-	return order, nil
+	err = itemC.AddNumTotalOrders(p.ItemID, req.NumServings)
+	if err != nil {
+		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by %d : %s", p.ItemID, req.NumServings, err)
+	}
+	err = chefC.Notify(order.GigachefID, "Your customers are starving - Gigamunch", fmt.Sprintf("%s just order %d servings of %s at %s! :) https://gigamunchapp.com/posts", order.GigamuncherName, order.Servings, order.PostTitle, order.ExpectedExchangeDateTime.Format("01/02 at 03:04 PM")))
+	if err != nil {
+		utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
+	}
+	return orderID, order, nil
 }
 
 func createOrderRequest(p *Post, req *MakeOrderReq, exchangeMethod types.ExchangeMethods,
@@ -182,7 +235,7 @@ func createOrderRequest(p *Post, req *MakeOrderReq, exchangeMethod types.Exchang
 		ExchangePrice:         exchangeCost,
 		ExpectedExchangeTime:  expectedExchangeTime,
 		CloseDateTime:         p.ClosingDateTime,
-		ReadyDateTime:         p.ReadyDateTime,
+		ReadyDateTime:         expectedExchangeTime,
 		GigachefAddress:       p.GigachefAddress,
 		Distance:              distance,
 		Duration:              duration,
@@ -199,10 +252,12 @@ func (c Client) CancelOrder(userID string, orderID int64) (*order.Resp, error) {
 		return nil, errInvalidParameter.WithMessage("Invalid order id.")
 	}
 	orderC := order.New(c.ctx)
-	return cancelOrder(c.ctx, userID, orderID, orderC)
+	itemC := item.New(c.ctx)
+	chefC := gigachef.New(c.ctx)
+	return cancelOrder(c.ctx, userID, orderID, orderC, itemC, chefC)
 }
 
-func cancelOrder(ctx context.Context, userID string, orderID int64, orderC orderClient) (*order.Resp, error) {
+func cancelOrder(ctx context.Context, userID string, orderID int64, orderC orderClient, itemC itemClient, chefC chefClient) (*order.Resp, error) {
 	postID, err := orderC.GetPostID(orderID)
 	if err != nil {
 		return nil, errors.Wrap("cannot get post id", err)
@@ -213,18 +268,20 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("cannot get post")
 	}
-	// check if order is cancelable
-	if time.Now().After(p.ClosingDateTime) {
-		return nil, errPostIsClosed
-	}
+
 	var orderIndex int
 	orderIndex, err = findOrderIndex(orderID, p)
 	if err != nil {
 		return nil, err
 	}
+	// check if it's too late to cancel the order
+	if time.Now().After(p.ClosingDateTime) || time.Now().After(p.ExchangeTimes[p.Orders[orderIndex].ExchangeWindowIndex].StartDateTime) {
+		return nil, errPostIsClosed
+	}
 	if p.GigachefID != userID && p.Orders[orderIndex].GigamuncherID != userID {
 		return nil, errUnauthorized.Wrap("user is not part of order or post.")
 	}
+	numServings := p.Orders[orderIndex].Servings
 	var order *order.Resp
 	// run in transaction
 	err = datastore.RunInTransaction(ctx, func(tc context.Context) error {
@@ -235,15 +292,13 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 		}
 		// remove order from post
 		if p.Orders[orderIndex].ExchangeMethod.ChefDelivery() {
-			// remove chef delivery duration
-			// TODO reculcate GigachefDelivery.TotalDuration
-			// p.GigachefDelivery.TotalDuration = maps.GetTotalTime(origins, destinations)
+			p.ExchangeTimes[p.Orders[orderIndex].ExchangeWindowIndex].AvailableExchangeMethods.SetChefDelivery(true)
 		}
 		p.NumServingsOrdered -= p.Orders[orderIndex].Servings
 		if orderIndex == 0 {
 			p.Orders = p.Orders[orderIndex+1:]
 		} else {
-			p.Orders = append(p.Orders[:orderIndex-1], p.Orders[orderIndex+1:]...)
+			p.Orders = append(p.Orders[:orderIndex], p.Orders[orderIndex+1:]...)
 		}
 		// save post
 		err = put(ctx, postID, p)
@@ -254,6 +309,14 @@ func cancelOrder(ctx context.Context, userID string, orderID int64, orderC order
 	}, nil)
 	if err != nil {
 		return nil, errors.Wrap("cannot run in transaction", err)
+	}
+	err = itemC.AddNumTotalOrders(p.ItemID, -numServings)
+	if err != nil {
+		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by -%d : %s", p.ItemID, numServings, err)
+	}
+	err = chefC.Notify(order.GigachefID, "Order Canceled - Gigamunch", fmt.Sprintf("Bummer, %s had to cancel their order (%d servings of %s)!", order.GigamuncherName, order.Servings, order.PostTitle))
+	if err != nil {
+		utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
 	}
 	return order, nil
 }

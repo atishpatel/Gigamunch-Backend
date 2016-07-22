@@ -24,7 +24,7 @@ indexes:
 - kind: Post
   properties:
   - name: GigachefID
-  - name: ReadyDateTime
+  - name: ClosingDateTime
     direction: desc
 
 - kind: Review

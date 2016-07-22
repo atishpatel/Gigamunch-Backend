@@ -4,13 +4,17 @@
 <link rel="import" href="../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
 
 <link rel="import" href="datetime-input.html">
 <link rel="import" href="app-icons.html">
 <link rel="import" href="item-fields.html">
+<link rel="import" href="like-icon.html">
+<link rel="import" href="paper-collapse-item.html">
 
 <dom-module id="post-form">
   <template>
@@ -19,7 +23,17 @@
         display: block;
         padding: 15px;
         background-color: white;
-        min-height: 86vh;
+        min-height: 95vh;
+      }
+
+      label {
+        font-size: 12px;
+        color: #727272;
+        --webkit-font-smoothing: antialiased;
+      }
+
+      paper-checkbox {
+        padding: 12px 0 5px 0;
       }
 
       #submitButton {
@@ -64,14 +78,17 @@
 
       .preview {
         display: none;
+        min-height: 86vh;
       }
 
       .preview hr {
+        border: none;
         margin: 0;
-        color: #727272;
+        background-color: #ececec;
+        height: 1px;
       }
 
-      .preview .header {
+      .preview-header {
         height: 64px;
         background-color: var(--primary-color);
         color: white;
@@ -82,25 +99,30 @@
         font-size: 10px;
       }
 
-      .preview .likeBar {
+      .preview-likebar {
         height: 32px;
         color: #727272;
         display: flex;
-        padding: 0 10px;
+        padding: 5px 10px;
         align-items: center;
       }
 
-      .preview .container {
+      .preview-likebar-price {
+        margin-left: auto;
+        color: var(--primary-text-color)
+      }
+
+      .preview-container {
         padding: 0 8px;
       }
 
-      .preview .title {
+      .preview-title {
         font-size: 16px;
         font-weight: 500;
         padding-top: 5px;
       }
 
-      .preview .desc {
+      .preview-desc {
         font-size: 12px;
         font-weight: 400;
         color: var(--secondary-text-color);
@@ -112,13 +134,51 @@
         flex-direction: column;
       }
 
+      .row-fields {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .row-fields > * {
+        flex: 1;
+      }
+
+      .range-divider {
+        flex: .05;
+      }
+
+      .header {
+        font-size: 14px;
+        padding: 35px 0 5px 0;
+        font-weight: 500;
+      }
+
+      .chef-delivery-input {
+        padding-top: 10px;
+        
+      }
+
+      .chef-delivery-range {
+        display: flex;
+        align-items: center;
+      }
+
+      .chef-delivery-slider {
+        flex: 9;
+      }
+
+      .chef-delivery-text {
+        flex: 1;
+        text-align: center;
+      }
+
       @media (min-width: 767px) {
         .preview {
           display: flex;
           padding: 15px;
         }
 
-        .preview .screen {
+        .preview-screen {
           width: 300px;
         }
 
@@ -137,29 +197,30 @@
     </app-route>
 
     <div class="flex-container">
-      <!--<div class="preview">
-        <paper-card class="screen">
-        <div class="header">
+      <div class="preview">
+        <paper-card class="preview-screen">
+        <div class="preview-header">
           <h1>Preview</h1>
         </div>
         <div class="photo" >
           <img src='{{photo}}'></img>
         </div>
-        <div class="likeBar">
-          <iron-icon icon="favorite"></iron-icon>
+        <div class="preview-likebar">
+          <like-icon numlikes="[[post.num_likes]]"></like-icon>
+          <span class="preview-likebar-price">$&nbsp;[[computedPrice]]</span>
         </div>
         <hr>
-        <div class="container">
-          <div class="title">
+        <div class="preview-container">
+          <div class="preview-title">
             [[post.title]]
           </div>
-          <div class="desc">
+          <div class="preview-desc">
             [[post.description]]
           </div>
         </div>
         <hr>
         </paper-card>
-      </div>-->
+      </div>
       <form
         is="iron-form"
         id="form"
@@ -167,59 +228,99 @@
         method="post"
         action="#"
         on-change="updateSubmitButtonState">
-        <item-fields
-          id="itemFields"
-          photos="{{post.photos}}"
-          title="{{post.title}}"
-          description="{{post.description}}"
-          ingredients="{{post.ingredients}}"
-          general-tags="{{post.general_tags}}"
-          dietary-needs-tags="{{post.dietary_needs_tags}}"
-          on-photos-changed="postPhotosChanged"
-          on-change="updateSubmitButtonState">
-        </item-fields>
-        <paper-input
-          label="Number of Servings to Offer*"
-          value="{{post.servings_offered}}"
-          type="number"
-          min="1"
-          required
-          auto-validate>
-        </paper-input>
-        <paper-input
-          label="Price per serving* (how much you'll make per serving')"
-          value="{{post.chef_price_per_serving}}"
-          type="number"
-          step="0.01"
-          min="0.50"
-          required
-          auto-validate>
-          <div prefix>$&nbsp;</div>
-        </paper-input>
-        <datetime-input
-          id="closeTime"
-          label="Post close time*"
-          epoch="{{post.closing_datetime}}"
-          on-changed="updateSubmitButtonState">
-        </datetime-input>
-        <datetime-input
-          hidden$="[[post.is_order_now]]"
-          id="readyTime"
-          label="Order pick-up time*"
-          epoch="{{post.ready_datetime}}"
-          on-changed="updateSubmitButtonState">
-        </datetime-input>
-        <template is="dom-if" if$="[[post.is_order_now]]" restamp="true">
+        <paper-collapse-item header="Item Details">
+          <item-fields
+            id="itemFields"
+            photos="{{post.photos}}"
+            title="{{post.title}}"
+            description="{{post.description}}"
+            ingredients="{{post.ingredients}}"
+            general-tags="{{post.general_tags}}"
+            dietary-needs-tags="{{post.dietary_needs_tags}}"
+            on-photos-changed="postPhotosChanged"
+            on-change="updateSubmitButtonState">
+          </item-fields>
+        </paper-collapse-item>
+        <paper-collapse-item header="Post Details" opened>        
           <paper-input
-            label="Estimated Preperation Time for One Order*"
-            value="{{ept}}"
+            label="Number of Servings Offered*"
+            value="{{post.servings_offered}}"
             type="number"
             min="1"
             required
             auto-validate>
-            <div suffix>minutes</div>
           </paper-input>
-        </template>
+          <paper-input
+            label="Price per serving*"
+            value="{{post.chef_price_per_serving}}"
+            type="number"
+            step="0.01"
+            min="0.50"
+            required
+            auto-validate>
+            <div prefix>$&nbsp;</div>
+          </paper-input>
+        <datetime-input
+          id="closeTime"
+          label="Post close time (new order can't be made after this time)*"
+          epoch="{{post.closing_datetime}}"
+          on-changed="updateSubmitButtonState">
+        </datetime-input>
+        <div class="header">Pickup Time Logistics</div>
+        <div class="row-fields">
+          <datetime-input
+            id="startPickupTime"
+            label="Start pickup time*"
+            epoch="{{post.start_pickup_datetime}}"
+            on-changed="updateSubmitButtonState">
+          </datetime-input>
+          <span class="range-divider"></span>
+          <datetime-input
+            id="endPickupTime"
+            label="End pickup time*"
+            epoch="{{post.end_pickup_datetime}}"
+            on-changed="updateSubmitButtonState">
+          </datetime-input>
+        </div>
+        <div class="header">My Delivery Time Logistics</div>
+        <paper-checkbox active$="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
+        <div hidden$="[[!post.chef_delivery]]">
+          <div class="row-fields">
+            <datetime-input
+              id="startChefDeliveryTime"
+              label="Start my delivery time*"
+              epoch="{{post.start_chef_delivery_datetime}}"
+              on-changed="updateSubmitButtonState">
+            </datetime-input>
+            <span class="range-divider"></span>
+            <datetime-input
+              id="endChefDeliveryTime"
+              label="End my delivery time*"
+              epoch="{{post.end_chef_delivery_datetime}}"
+              on-changed="updateSubmitButtonState">
+            </datetime-input>
+          </div>
+            <paper-input
+              label="Price for my delivery*"
+              value="{{post.chef_delivery_base_price}}"
+              type="number"
+              step="0.50"
+              min="0.00"
+              max="50"
+              auto-validate>
+              <div prefix>$&nbsp;</div>
+            </paper-input>
+            <div class="chef-delivery-input">
+              <label>My delivery range in miles</label>
+              <div class="chef-delivery-range">
+                <paper-slider id="deliveryRange" class="chef-delivery-slider" pin snaps max="15" max-markers="15" step="1" value="{{post.chef_delivery_radius}}"></paper-slider>
+                <span class="chef-delivery-text">[[post.chef_delivery_radius]] miles</span>
+              </div>
+            </div>
+        </div>
+        </paper-collapse-item>
+        <!--<paper-collapse-item header="Post summary">
+        </paper-collapse-item>-->
         <paper-button
           id="submitButton"
           on-tap="submit"
@@ -249,32 +350,54 @@
         user: {
           type: Object,
         },
-        ept: {
-          type: Number,
-          observer: 'eptChanged',
-        },
         photo: {
+          type: String,
+        },
+        computedPrice: {
           type: String,
         },
       },
       observers: [
-        'postPhotosChanged(post.photos)'
+        'postPhotosChanged(post.photos)',
+        'postPriceChanged(post.chef_price_per_serving)',
+        'postStartPickupTimeChanged(post.start_pickup_datetime)',
+        'postStartDeliveryTimeChanged(post.start_chef_delivery_datetime)',
       ],
       postPhotosChanged: function (p) {
         this.updateSubmitButtonState();
         if (this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0) {
           this.set('photo', this.post.photos[0]);
+        } else {
+          // make placeholder image
         }
       },
-      eptChanged: function (ept) {
-        this.post.estimated_preperation_time = this.ept * 60;
+      postPriceChanged: function() {
+        if (this.post !== undefined && this.post.chef_price_per_serving !== undefined 
+            && this.post.chef_price_per_serving !== null) {
+          this.set('computedPrice', ((this.post.chef_price_per_serving * 1.2) + .005).toFixed(2));
+        } else {
+          this.set('computedPrice', '?');
+        }
       },
+      postStartPickupTimeChanged: function() {
+        if (this.post.end_pickup_datetime < this.post.start_pickup_datetime) {
+          this.set('post.end_pickup_datetime', this.post.start_pickup_datetime + 7200);
+          this.$.endPickupTime.update();
+        }
+      },
+      postStartDeliveryTimeChanged: function() {
+        if (this.post.chef_delivery && this.post.end_chef_delivery_datetime < this.post.start_chef_delivery_datetime) {
+          this.set('post.end_chef_delivery_datetime', this.post.start_chef_delivery_datetime + 7200);
+          this.$.endChefDeliveryTime.update();
+        }
+      },
+      
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
         if (this.route.path.substring(1) === '') {
           var d = {
-            error: 'There is a problem with your URL. :( Please try to post an item again.',
+            error: 'There is a problem with your URL. :( Please try to post the item again.',
             options: [{
               text: 'Go to items',
               func: function () {
@@ -285,20 +408,30 @@
           this.fire('error', d);
           return;
         }
-        if (this.item.id !== this.route.path.substring(1)) {
+        this.set('post', {'chef_delivery': false});
+        if (this.item === undefined || this.item.id === undefined || this.item.id !== this.route.path.substring(1)) {
           this.getItem(this.route.path.substring(1));
         } else {
           this.setItem(this.item);
         }
       },
       setItem: function (item) {
-        this.set('post', item);
-        this.post.item_id = item.id;
-        this.post.id = '';
-        this.post.pickup = true; // TODO make radio button
+        this.set('post.item_id', item.id);
+        this.set('post.photos', item.photos);
+        this.set('post.title', item.title);
+        this.set('post.description', item.description);
+        this.set('post.general_tags', item.general_tags);
+        this.set('post.ingredients', item.ingredients);
+        this.set('post.dietary_needs_tags', item.dietary_needs_tags);
+        this.set('post.cuisine_tags', item.cuisine_tags);
+        this.set('post.chef_delivery_radius', 3);
+        this.set('post.num_likes', item.num_likes);
         this.$.itemFields.update();
         this.$.closeTime.update();
-        this.$.readyTime.update();
+        this.$.startPickupTime.update();
+        this.$.endPickupTime.update();
+        this.$.startChefDeliveryTime.update();
+        this.$.endChefDeliveryTime.update();
       },
       getItem: function (id) {
         if (id === undefined || id === '' || id === '0') {
@@ -326,9 +459,9 @@
         this.$.spinner.hidden = false;
         this.$.spinner.active = true;
         this.$.submitButton.disabled = true;
-        this.postPost();
+        this.publishPost();
       },
-      postPost: function() {
+      publishPost: function() {
         if (!this.user.isVerifiedChef) {
           // TODO change to not error
           this.fire('error', {
@@ -339,7 +472,7 @@
           this.$.spinner.active = false;
           return;
         }
-        this.service.postPost(this.post, function(post, err) {
+        this.service.publishPost(this.post, function(post, err) {
           this.$.spinner.hidden = true;
           this.$.spinner.active = false;
           if (err.code !== 0) {
@@ -352,10 +485,6 @@
             } else {
               d = {
                 error: err,
-                options: [{
-                  text: 'Try Again',
-                  func: this.postPost.bind(this),
-                }],
               };
             }
             this.fire('error', d);
@@ -369,7 +498,7 @@
         var form = this.$.form;
         var submitButton = this.$.submitButton;
         // Validate the entire form to see if we should enable the `Submit` button.
-        var hasPhoto = this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0;
+        var hasPhoto = this.post !== undefined && this.post.photos !== undefined && this.post.photos !== null && this.post.photos.length > 0;
         submitButton.disabled = !form.validate() || !hasPhoto;
       },
     });

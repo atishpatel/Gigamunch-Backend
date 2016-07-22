@@ -26,10 +26,10 @@ const (
 	datetimeFormat = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
 	sortByDate     = `SELECT post_id, item_id, gigachef_id,( 3959 * acos( cos( radians(%f) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(%f) ) + sin( radians(%f) ) * sin( radians( latitude ) ) ) ) AS distance
                       FROM live_posts
-											WHERE ready_datetime
+											WHERE last_exchange_datetime
 											BETWEEN %s
 											HAVING distance < %d
-                      ORDER BY ready_datetime %s, distance
+                      ORDER BY first_exchange_datetime %s, distance
                       LIMIT %d , %d`
 	selectClosedPosts = "SELECT post_id, gigachef_id FROM live_posts where close_datetime<'%s'"
 	deleteStatement   = "DELETE FROM live_posts WHERE post_id=%d"
@@ -39,19 +39,30 @@ func insertLivePost(ctx context.Context, postID int64, post *Post) error {
 	if mysqlDB == nil {
 		connectSQL(ctx)
 	}
+	if len(post.ExchangeTimes) == 0 {
+		errInvalidParameter.Wrap("length of post.ExchangeTimes is 0")
+	}
+	firstExchange := post.ExchangeTimes[0].StartDateTime
+	lastExchange := post.ExchangeTimes[0].EndDateTime
+	for i := range post.ExchangeTimes {
+		if post.ExchangeTimes[i].StartDateTime.Before(firstExchange) {
+			firstExchange = post.ExchangeTimes[i].StartDateTime
+		} else if post.ExchangeTimes[i].StartDateTime.After(lastExchange) {
+			lastExchange = post.ExchangeTimes[i].StartDateTime
+		}
+	}
 	_, err := mysqlDB.Exec(
 		`INSERT
 		INTO live_posts
-		(post_id, item_id, gigachef_id,close_datetime, ready_datetime, search_tags, is_order_now, is_experimental, is_baked_good, latitude, longitude)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+		(post_id, item_id, gigachef_id, close_datetime, first_exchange_datetime, last_exchange_datetime, search_tags, is_baked_good, latitude, longitude)
+		VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		postID,
 		post.ItemID,
 		post.GigachefID,
 		post.ClosingDateTime.UTC().Format(datetimeFormat),
-		post.ReadyDateTime.UTC().Format(datetimeFormat),
+		firstExchange,
+		lastExchange,
 		post.Title,
-		post.IsOrderNow,
-		0,
 		0,
 		post.GigachefAddress.Latitude,
 		post.GigachefAddress.Longitude,
@@ -173,6 +184,10 @@ func connectSQL(ctx context.Context) {
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal("Couldn't connect to mysql database")
+	}
+	err = mysqlDB.Ping()
+	if err != nil {
+		log.Fatal("failed to ping mysql database", err)
 	}
 }
 

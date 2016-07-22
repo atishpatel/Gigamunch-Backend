@@ -1,7 +1,7 @@
 package maps
 
 import (
-	"fmt"
+	"strconv"
 	"time"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/config"
@@ -24,10 +24,50 @@ var (
 	errMaps             = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with address."}
 )
 
+// GetDirections gets the optimal route for a list of points along with the total duration
+// returns: arrival times for each waypoint, optimal route order based on indexes from array, error
+func GetDirections(ctx context.Context, depratureTime time.Time, origin types.GeoPoint, points []types.GeoPoint) ([]time.Time, []int, error) {
+	if points == nil || len(points) == 0 {
+		return nil, nil, errInvalidParameter.WithMessage("Invalid waypoints")
+	}
+	if len(points) == 1 {
+		t := origin.EstimatedDuration(points[0])
+		duration := time.Duration(2*t) * time.Second
+		return []time.Time{depratureTime.Add(duration)}, []int{0}, nil
+	}
+	mapsClient, err := getMapsClient(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	waypoints := []string{"optimize:true"}
+	for _, v := range points {
+		waypoints = append(waypoints, v.String())
+	}
+	req := &maps.DirectionsRequest{
+		Origin:        origin.String(),
+		Destination:   origin.String(),
+		DepartureTime: ttos(depratureTime),
+		Units:         maps.UnitsImperial,
+		Waypoints:     waypoints,
+	}
+	routes, _, err := mapsClient.Directions(ctx, req)
+	if err != nil {
+		return nil, nil, errMaps.WithError(err).Wrap("cannot maps.Directions")
+	}
+	optimalPointsOrder := routes[0].WaypointOrder
+	// get arrival times
+	numLegs := len(routes[0].Legs)
+	var arrivalTimes []time.Time
+	for i := 0; i < numLegs-2; i++ {
+		arrivalTimes = append(arrivalTimes, routes[0].Legs[i].ArrivalTime)
+	}
+	return arrivalTimes, optimalPointsOrder, nil
+}
+
 // GetDistance returns the distance using roads between two points.
 // The points should return string "X,Y" where X and Y are floats.
 // returns miles, duration, err
-func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Duration, error) {
+func GetDistance(ctx context.Context, p1, p2 types.GeoPoint) (float32, *time.Duration, error) {
 	mapsClient, err := getMapsClient(ctx)
 	if err != nil {
 		return 0, nil, err
@@ -43,6 +83,9 @@ func GetDistance(ctx context.Context, p1, p2 fmt.Stringer) (float32, *time.Durat
 	}
 	element := mapsResp.Rows[0].Elements[0]
 	miles := float32(element.Distance.Meters) / metersInMile // convert to miles
+	if miles < .01 {
+		miles = p1.GreatCircleDistance(p2)
+	}
 	return miles, &element.Duration, nil
 }
 
@@ -83,4 +126,8 @@ func getMapsClient(ctx context.Context) (*maps.Client, error) {
 		return nil, errMapsConnect.WithError(err).Wrap("cannot get new maps client")
 	}
 	return mapsClient, nil
+}
+
+func ttos(t time.Time) string {
+	return strconv.FormatInt(t.Unix(), 10)
 }

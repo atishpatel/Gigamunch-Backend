@@ -1,0 +1,94 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-styles/default-theme.html">
+
+<link rel="import" href="app-icons.html">
+
+<dom-module id="like-icon">
+  <template strip-whitespace>
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        padding: 8px;
+        outline: none;
+        user-select: none;
+        z-index: 0;
+        line-height: 1;
+        color: #727272;
+        width: 50px;
+        height: 40px;
+        /* Because of polymer/2558, this style has lower specificity than * */
+        box-sizing: border-box !important;
+        @apply(--paper-icon-button);
+      }
+      :host #ink {
+        color: var(--paper-icon-button-ink-color, --primary-text-color);
+        opacity: 0.6;
+      }
+      :host([disabled]) {
+        color: var(--paper-icon-button-disabled-text, --disabled-text-color);
+        pointer-events: none;
+        cursor: auto;
+        @apply(--paper-icon-button-disabled);
+      }
+
+      #numlikes {
+          font-size: 14px;
+          position: absolute;
+          top: 5px;
+      }
+
+      iron-icon {
+        --iron-icon-width: 24px;
+        --iron-icon-height: 24px;
+      }
+    </style>
+    <iron-icon id="icon" icon="app:favorite" alt$="[[alt]]"></iron-icon>
+    <span id="numlikes">[[numlikes]]</span>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'like-icon',
+      hostAttributes: {
+        role: 'button',
+        tabindex: '0'
+      },
+      properties: {
+        /**
+         * The URL of an image for the icon. If the src property is specified,
+         * the icon property should not be.
+         */
+        src: {
+          type: String
+        },
+        /**
+         * Specifies the icon name or index in the set of icons available in
+         * the icon's icon set. If the icon property is specified,
+         * the src property should not be.
+         */
+        icon: {
+          type: String
+        },
+        numlikes: {
+          type: Number,
+          observer: "_numLikesChanged",
+          value: 0,
+        },
+        alt: {
+            type: String,
+        },
+      },
+      _numLikesChanged: function(newValue, oldValue) {
+        var label = this.getAttribute('aria-label');
+        var text = 'Item has ' + newValue + ' likes.'; 
+        this.set('alt', text);
+        // Don't stomp over a user-set aria-label.
+        if (!label || oldValue == label) {
+          this.setAttribute('aria-label', text);
+        }
+      }
+    });
+  </script>
+</dom-module>

@@ -69,7 +69,7 @@ func (g GeoPoint) GreatCircleDistance(p2 GeoPoint) float32 {
 // point to another at 15 miles/hour in seconds.
 func (g GeoPoint) EstimatedDuration(p2 GeoPoint) int64 {
 	distance := g.GreatCircleDistance(p2)
-	return int64(distance * 4.5)
+	return int64(distance * 4.5 * 60)
 }
 
 // Limit is the a range limit for quries

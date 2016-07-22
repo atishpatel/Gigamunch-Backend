@@ -30,10 +30,11 @@ const (
 )
 
 var (
-	connectOnce = sync.Once{}
-	mysqlDB     *sql.DB
-	errSQLDB    = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
-	errBuffer   = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "An unknown error occured."}
+	connectOnce         = sync.Once{}
+	mysqlDB             *sql.DB
+	errSQLDB            = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
+	errBuffer           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "An unknown error occured."}
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 )
 
 // Client is the client for likes
@@ -121,6 +122,55 @@ func (c *Client) Unlike(userID string, itemID int64) error {
 	return nil
 }
 
+// GetNumLikes returns the number of likes for each item in the array
+func (c *Client) GetNumLikes(items []int64) ([]int, error) {
+	numLikes := make([]int, len(items))
+	if len(items) == 0 {
+		return numLikes, nil
+	}
+	// create statement
+	statement, err := buildGetNumLikesStatement(items)
+	if err != nil {
+		return nil, errors.Wrap("failed to build get num likes statment", err)
+	}
+	rows, err := mysqlDB.Query(statement)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrap("cannot query following statement: " + statement)
+	}
+	defer handleCloser(c.ctx, rows)
+	var tmpItemID int64
+	var tmpNumLike int
+	for rows.Next() {
+		err = rows.Scan(&tmpItemID, &tmpNumLike)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
+		}
+		for i := range items {
+			if items[i] == tmpItemID {
+				numLikes[i] = tmpNumLike
+			}
+		}
+	}
+	return numLikes, nil
+}
+
+func buildGetNumLikesStatement(items []int64) (string, error) {
+	if len(items) == 0 {
+		return "", errInvalidParameter.Wrap("items length is 0")
+	}
+	var err error
+	var buffer bytes.Buffer
+	for i := range items[1:] {
+		_, err = buffer.WriteString(fmt.Sprintf(" OR item_id=%d", items[i+1]))
+		if err != nil {
+			return "", errBuffer.WithError(err)
+		}
+	}
+	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
+	st := fmt.Sprintf("SELECT item_id, num FROM `num_likes` WHERE %s", itemIDStatement)
+	return st, nil
+}
+
 // LikesItems returns an array that states if the muncher likes the item or not
 func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error) {
 	likesItem := make([]bool, len(items))
@@ -130,7 +180,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error)
 	}
 	statement, err := buildLikesItemsStatement(userID, items)
 	if err != nil {
-		return likesItem, numLikes, errors.Wrap("failed to build like item statment", err)
+		return likesItem, numLikes, errors.Wrap("failed to build likes item statement", err)
 	}
 	rows, err := mysqlDB.Query(statement)
 	if err != nil {
@@ -161,7 +211,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error)
 
 func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 	if len(items) == 0 {
-		panic("items legth is 0")
+		return "", errInvalidParameter.Wrap("items length is 0")
 	}
 	// -- old
 	// SELECT item_id, user_id, count(item_id) AS cnt FROM (( SELECT item_id, user_id FROM `like` WHERE (item_id=0 OR item_id=1)

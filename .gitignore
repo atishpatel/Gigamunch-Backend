@@ -2,6 +2,7 @@
 appengine-generated/
 private/
 .tags*
+.vscode
 tags
 dump.rdb
 node_modules

@@ -31,6 +31,14 @@ func stoi(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
 
+func ftos64(f float64) string {
+	return strconv.FormatFloat(f, 'f', 6, 64)
+}
+
+func stof64(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
+}
+
 type validatableTokenReq interface {
 	gigatoken() string
 	valid() error
@@ -77,6 +85,9 @@ func init() {
 	register("SignIn", "signIn", "POST", "gigamuncherservice/signIn", "Sign in a user using a gtoken.")
 	register("SignOut", "signOut", "POST", "gigamuncherservice/signOut", "Sign out a user.")
 	register("RefreshToken", "refreshToken", "POST", "gigamuncherservice/refreshToken", "Refresh a token.")
+	// address
+	register("GetAddresses", "getAddresses", "GET", "gigamuncherservice/getAddresses", "Get the muncher's addresses.")
+	register("SelectAddress", "selectAddress", "POST", "gigamuncherservice/selectAddress", "Select an Address.")
 	// post
 	register("GetPost", "getPost", "GET", "gigamuncherservice/getPost", "Get post details.")
 	register("GetLivePosts", "getLivePosts", "GET", "gigamuncherservice/getLivePosts", "Get live posts.")
@@ -86,6 +97,7 @@ func init() {
 	// order
 	register("GetBraintreeToken", "getBraintreeToken", "GET", "gigamuncherservice/getBraintreeToken", "Get a braintreeToken.")
 	register("MakeOrder", "makeOrder", "POST", "gigamuncherservice/makeOrder", "Make an order.")
+	register("CancelOrder", "cancelOrder", "POST", "gigamuncherservice/cancelOrder", "Cancel an order.")
 	register("GetOrders", "getOrders", "GET", "gigamuncherservice/getOrders", "Gets the orders for a muncher.")
 	register("GetOrder", "getOrder", "GET", "gigamuncherservice/getOrder", "Get an order.")
 	// review

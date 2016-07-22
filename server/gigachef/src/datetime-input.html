@@ -3,20 +3,15 @@
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-time-picker/paper-time-picker.html">
-<link rel="import" href="../bower_components/paper-date-picker/paper-date-picker.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 
 <link rel="import" href="app-icons.html">
-
+<link rel="import" href="select-with-options.html">
+<link rel="import" href="paper-select.html">
 
 <dom-module id="datetime-input">
   <template>
-    <style include="paper-time-picker-dialog-style">
+    <style include="paper-select">
       :host {
         display: block;
         padding-top: 10px;
@@ -24,11 +19,19 @@
         --paper-button: {
           background: white;
           color: var(--primary-color);
-        }
+        };
       }
 
       .divider {
         flex: .05;
+      }
+
+      .flex-layout {
+        display: flex;
+      }
+
+      .flex {
+        flex: 1;
       }
 
       label {
@@ -36,85 +39,74 @@
         color: #727272;
         -webkit-font-smoothing: antialiased;
       }
-      paper-input {
-        margin-top: -20px;
-      }
-
-    .paper-date-picker-dialog {
-      margin: 0;
-      max-height: 520px !important;
-      overflow: hidden;
-     }
-     .paper-date-picker-dialog > paper-date-picker {
-       --paper-calendar: {
-         padding-bottom: 0;
-       };
-       margin-top: 0 !important;
-       padding: 0;
-     }
-
-     .paper-date-picker-dialog > paper-date-picker:not([narrow]) {
-       --paper-date-picker-heading: {
-         margin-bottom: -62px;
-       };
-     }
-
-     .paper-time-picker-dialog {
-        margin: 0;
-        max-height: 520px !important;
-      }
-      .paper-time-picker-dialog > paper-time-picker {
-        --paper-calendar: {
-          padding-bottom: 0;
-        };
-        margin-top: 0 !important;
-        padding: 0;
-      }
-
-      .paper-time-picker-dialog > paper-time-picker:not([narrow]) {
-        --paper-time-picker-heading: {
-          margin-bottom: -56px;
-        };
-      }
-
     </style>
     <label>[[label]]</label>
-    <div class="layout horizontal">
-      <paper-input class="flex" id="dateInput" on-tap="_showDatePicker" value="{{_date}}" placeholder="mm/dd/yyyy">
-        <iron-icon icon="app:insert-invitation" suffix></iron-icon>
-      </paper-input>
-      <span class="divider">
-      </span>
-      <paper-input id="timeInput" class="flex" on-tap="_showTimePicker" value="{{_time}}" placeholder="hh:mm am/pm">
-        <iron-icon icon="app:access-time" suffix></iron-icon>
-      </paper-input>
+    <div class="flex-layout">
+      <paper-select class="flex">
+        <select id="dates" is="select-with-options" option-value="value" value="{{date::change}}" required>
+          <!-- dynamically generated-->
+        </select>
+        <paper-md-decorator>
+          <paper-underline></paper-underline>
+        </paper-md-decorator>
+      </paper-select>
+      <span class="divider"></span>
+      <paper-select class="flex">
+        <select id="times" is="select-with-options" option-value="value" value="{{time::change}}" required>
+          <option value="06:00">06:00 AM</option>
+          <option value="06:30">06:30 AM</option>
+          <option value="07:00">07:00 AM</option>
+          <option value="07:30">07:30 AM</option>
+          <option value="08:00">08:00 AM</option>
+          <option value="08:30">08:30 AM</option>
+          <option value="09:00">09:00 AM</option>
+          <option value="09:30">09:30 AM</option>
+          <option value="10:00">10:00 AM</option>
+          <option value="10:30">10:30 AM</option>
+          <option value="11:00">11:00 AM</option>
+          <option value="11:30">11:30 AM</option>
+          <option value="12:00">12:00 PM (noon)</option>
+          <option value="12:30">12:30 PM</option>
+          <option value="13:00">01:00 PM</option>
+          <option value="13:30">01:30 PM</option>
+          <option value="14:00">02:00 PM</option>
+          <option value="14:30">02:30 PM</option>
+          <option value="15:00">03:00 PM</option>
+          <option value="15:30">03:30 PM</option>
+          <option value="16:00">04:00 PM</option>
+          <option value="16:30">04:30 PM</option>
+          <option value="17:00">05:00 PM</option>
+          <option value="17:30">05:30 PM</option>
+          <option value="18:00">06:00 PM</option>
+          <option value="18:30">06:30 PM</option>
+          <option value="19:00">07:00 PM</option>
+          <option value="19:30">07:30 PM</option>
+          <option value="20:00">08:00 PM</option>
+          <option value="20:30">08:30 PM</option>
+          <option value="21:00">09:00 PM</option>
+          <option value="21:30">09:30 PM</option>
+          <option value="22:00">10:00 PM</option>
+          <option value="22:30">10:30 PM</option>
+          <option value="23:00">11:00 PM</option>
+          <option value="23:30">11:30 PM</option>
+          <option value="00:00">12:00 AM (midnight)</option>
+          <option value="00:30">12:30 AM</option>
+          <option value="01:00">01:00 AM</option>
+          <option value="01:30">01:30 AM</option>
+          <option value="02:00">02:00 AM</option>
+          <option value="02:30">02:30 AM</option>
+          <option value="03:00">03:00 AM</option>
+          <option value="03:30">03:30 AM</option>
+          <option value="04:00">04:00 AM</option>
+          <option value="04:30">04:30 AM</option>
+          <option value="05:00">05:00 AM</option>
+          <option value="05:30">05:30 AM</option>
+        </select>
+        <paper-md-decorator>
+          <paper-underline></paper-underline>
+        </paper-md-decorator>
+      </paper-select>
     </div>
-
-
-    <paper-dialog
-      id="datePickerDialog"
-      class="paper-date-picker-dialog"
-      modal
-      on-iron-overlay-closed="_dismissDateDialog">
-      <paper-date-picker id="datePicker" date="[[_d]]"></paper-date-picker>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm>OK</paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog
-      id="timePickerDialog"
-      modal
-      class="paper-time-picker-dialog"
-      on-iron-overlay-closed="_dismissTimeDialog">
-      <paper-time-picker id="timePicker" time="[[_time]]" animated="false"></paper-time-picker>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm>OK</paper-button>
-      </div>
-    </paper-dialog>
-
   </template>
   <script>
     'use strict';
@@ -133,56 +125,50 @@
           notify: true,
           value: 'Pick a date',
         },
-        _date: {
+        date: {
           type: String,
           notify: true,
+          observer: 'updateEpoch',
         },
-        _d: {
-          type: Date,
-          notify: true,
-        },
-        _time: {
+        time: {
           type: String,
           notify: true,
-          value: '7:00 PM',
+          observer: 'updateEpoch',
+          value: '12:00',
         },
+      },
+      ready: function() {
+        // add dynamically generated dates
+        var today = new Date();
+        this.date = today.toDateString();
+        var year = today.getFullYear();
+        var month = today.getMonth();
+        var date = today.getDate();
+        for(var i=0; i<30; i++){
+          var day = new Date(year, month, date + i);
+          var opt = document.createElement("option");
+          opt.innerHTML = day.toLocaleDateString();
+          opt.value = day.toDateString();
+          this.$.dates.appendChild(opt);
+        }
       },
       update: function () {
         if (this.epoch === undefined || this.epoch === null || this.epoch === 0) {
-          this.setEpoch(new Date());
+          this.updateEpoch();
+          return;
         }
         var date = new Date(this.epoch * 1000);
-        this._updateDate(date);
-        this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /, ' '));
+        this.$.dates.value = date.toDateString();
+        this.$.times.value = date.toTimeString().substr(0,5);
+        this.time = date.toTimeString().substr(0,5);
+        this.set('date', date.toDateString());
       },
       setEpoch: function(d) {
-        this.set('epoch', Math.round(d.getTime() / 1000))
+        this.set('epoch', Math.round(d.getTime() / 1000));
         this.fire('changed');
       },
-      _dismissTimeDialog: function (e) {
-        if (e.detail.confirmed) {
-          var date = new Date(this._date + ' ' + this.$.timePicker.time);
-          this.setEpoch(date);
-          this.set('_time', date.toLocaleTimeString().replace(/:[0-9][0-9] /,' '));
-        }
-        this.$.timePicker.view = 'hours';
-      },
-      _dismissDateDialog: function (e) {
-        if (e.detail.confirmed) { // pressed ok
-          var date = new Date(this.$.datePicker.date.toLocaleDateString() + ' ' + this._time);
-          this.setEpoch(date);
-          this._updateDate(date);
-        }
-      },
-      _updateDate: function (d) {
-        this.set('_d', d);
-        this.set('_date', d.toLocaleDateString());
-      },
-      _showTimePicker: function () {
-        this.$.timePickerDialog.open();
-      },
-      _showDatePicker: function () {
-        this.$.datePickerDialog.open();
+      updateEpoch: function () {
+        this.setEpoch(new Date(this.date + ' ' + this.time));
       },
     });
   </script>
