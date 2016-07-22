@@ -286,8 +286,9 @@ func (p *PostDetailed) set(userID string, id int64, numLikes int, hasLiked bool,
 	p.DietaryNeedsTags = post.DietaryNeedsTags
 	p.GeneralTags = post.GeneralTags
 	p.CuisineTags = post.CuisineTags
+	now := time.Now()
 	for i, exchangeTime := range post.ExchangeTimes {
-		if !exchangeTime.AvailableExchangeMethods.IsZero() {
+		if !exchangeTime.AvailableExchangeMethods.IsZero() && exchangeTime.StartDateTime.After(now) {
 			// add pickup option
 			if exchangeTime.AvailableExchangeMethods.Pickup() {
 				ets := ExchangeTimeSegment{
