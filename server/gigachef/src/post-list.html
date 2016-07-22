@@ -40,11 +40,22 @@
         padding: 0;
       }
 
+      .post-card-top-bar {
+        padding: 16px;
+        margin: 0;
+      }
+
       .post-card-title {
         font-size: 16px;
         font-weight: 500;
-        padding: 16px;
         margin: 0;
+      }
+
+      .post-card-subtitle {
+        font-size: 14px;
+        font-weight: 300;
+        margin: 0;
+        color: var(--secondary-text-color);
       }
 
       .post-card-image {
@@ -70,16 +81,28 @@
       }
 
       .post-card-orders {
-        padding: 8px;
-        width: 100%;
+        padding: 0 8px;
         font-size: 14px;
         letter-spacing: .05em;
       }
 
       .post-card-order {
-        padding-bottom: 4px;
-        width: 100%;
-        border-top: 1px solid #e8e8e8;
+        padding: 8px;
+        border-top: 1px solid #ececec;
+      }
+
+      .post-card-order-user {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .post-card-order-summary {
+        padding-left: 16px;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
       .row {
@@ -130,10 +153,6 @@
         color: var(--secondary-text-color);
       }
 
-      .user-name {
-        margin-left: 20px;
-      }
-
       @media (min-width: 767px) {
         paper-material {
           flex-basis: 45%;
@@ -145,8 +164,11 @@
 
     <template is="dom-repeat" items="{{posts}}" as="post">
       <paper-material elevation="1" class="post-card">
-        <div class="row">
-          <h2 class="post-card-title">[[post.title]]</h2>
+        <div class="row post-card-top-bar">
+          <div class="column">
+            <h2 class="post-card-title">[[getPostTitle(post)]]</h2>
+            <span class="post-card-subtitle">[[getCloseDatetime(post)]]</span>
+          </div>
         </div>
         <div class="row">
           <div class="post-card-image">
@@ -163,21 +185,25 @@
         <div class="row post-card-action-bar">
           <like-icon numlikes="[[post.num_likes]]"></like-icon>
         </div>
+        <div class="post-card-orders">
         <template is="dom-repeat" items="[[post.orders]]" as="order" sort="sortByExchangeTime">
-          <div class="post-card-orders">
             <div class="row post-card-order">
-              <div class="column">
-                <div class="row">
+                <div class="post-card-order-user">
                   <placeholder-img class="user-pic" icon="app:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
                   <span class="column center-text user-name">[[order.gigamuncher_name]]</span>
                 </div>
-              </div>
-              <div class="column center-text">
-                <span>[[getExchangeText(order)]] [[order.servings]] servings by [[getExchangeTime(order)]]</span>
+              <div class="post-card-order-summary">
+                <template is="dom-if" if$="[[isDelivery(order)]]">
+                  <a href="[[getExchangeLink(order)]]" target="blank">[[getExchangeText(order)]]</a>
+                </template>
+                <template is="dom-if" if$="[[!isDelivery(order)]]">
+                  <span>[[getExchangeText(order)]]</span>
+                </template>
+                <span>&nbsp;[[order.servings]] servings around [[getExchangeTime(order)]]</span>
               </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </paper-material>
     </template>
 
@@ -242,6 +268,17 @@
         }
         return post.photos[0];
       },
+      getPostTitle: function(post) {
+        if (post.title.length < 55) {
+          return post.title;
+        }
+        return post.title.substring(0, 52) + '...';
+        return 
+      },
+      getCloseDatetime: function(post) {
+        var d = new Date(post.closing_datetime * 1000);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+      },
       getAmountEarned: function(post) {
         var e = 0.0;
         if (post.orders !== undefined && post.orders !== null) {
@@ -251,7 +288,7 @@
             }
           );
         }
-        return e;
+        return e.toFixed(2);
       },
       getNumOrders: function(post) {
         var e = 0;
@@ -274,11 +311,21 @@
         return (new Date(order.exchange_time * 1000)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
       },
       getExchangeText: function(order) {
-        if (order.exchange_method == 1) {
+        if (order.exchange_method === 1) {
           return 'Pickup';
         } else {
-          return '<a href="http://maps.google.com/?q=' + order.gigamuncher_address + '">Delivery</a>';
+          return 'Delivery';
         }
+      },
+      getExchangeLink: function(order) {
+        if (order.exchange_method === 1) {
+          return 'posts';
+        } else {
+          return 'http://maps.google.com/?q=' + encodeURIComponent(order.gigamuncher_address);
+        }
+      },
+      isDelivery: function(order) {
+        return order.exchange_method !== 1;
       },
     });
   </script>
