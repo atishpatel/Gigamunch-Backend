@@ -193,13 +193,15 @@
                   <span class="column center-text user-name">[[order.gigamuncher_name]]</span>
                 </div>
               <div class="post-card-order-summary">
-                <template is="dom-if" if$="[[isDelivery(order)]]">
-                  <a href="[[getExchangeLink(order)]]" target="blank">[[getExchangeText(order)]]</a>
-                </template>
-                <template is="dom-if" if$="[[!isDelivery(order)]]">
-                  <span>[[getExchangeText(order)]]</span>
-                </template>
-                <span>&nbsp;[[order.servings]] servings around [[getExchangeTime(order)]]</span>
+                <div>
+                  <template is="dom-if" if$="[[isDelivery(order)]]">
+                    <a href="[[getExchangeLink(order)]]" target="blank">[[getExchangeText(order)]]</a>
+                  </template>
+                  <template is="dom-if" if$="[[!isDelivery(order)]]">
+                    <span>[[getExchangeText(order)]]</span>
+                  </template>
+                  <span>[[getServingsText(order)]] around [[getExchangeTime(order)]]</span>
+                </div>
               </div>
             </div>
           </template>
@@ -211,9 +213,9 @@
       <paper-material>
         <h1>Tutorial Card</h1>
         <p>
-          My Orders is where you can see the all your post and the number of servings each person ordered. 
+          My Orders is where you can see all your posts and the number of servings each person ordered. 
           <br><br>
-          Post a dish from <a href="/items">My Kitchen</a> to start building your brand and earn money cooking! :)
+          Post a dish from <a href="../items">My Kitchen</a> to start building your brand and earn money cooking! :)
         </p>
       </paper-card>
     </template>
@@ -314,7 +316,14 @@
         if (order.exchange_method === 1) {
           return 'Pickup';
         } else {
-          return 'Delivery';
+          return 'Deliver';
+        }
+      },
+      getServingsText: function(order) {
+        if (order.servings === 1) {
+          return order.servings + ' serving ';
+        } else {
+          return order.servings + ' servings ';
         }
       },
       getExchangeLink: function(order) {
