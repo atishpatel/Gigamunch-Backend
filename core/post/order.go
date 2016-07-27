@@ -203,7 +203,13 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	if err != nil {
 		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by %d : %s", p.ItemID, req.NumServings, err)
 	}
-	err = chefC.Notify(order.GigachefID, "Your customers are starving - Gigamunch", fmt.Sprintf("%s just order %d servings of %s at %s! :) https://gigamunchapp.com/posts", order.GigamuncherName, order.Servings, order.PostTitle, order.ExpectedExchangeDateTime.Format("01/02 at 03:04 PM")))
+	err = chefC.Notify(order.GigachefID, "Your customers are starving - Gigamunch",
+		fmt.Sprintf("%s just order %d servings of %s at %s! :) https://gigamunchapp.com/gigachef/posts",
+			order.GigamuncherName,
+			order.Servings,
+			order.PostTitle,
+			order.ExpectedExchangeDateTime.In(now.Location()).Format("01/02 at 03:04 PM")),
+	)
 	if err != nil {
 		utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
 	}

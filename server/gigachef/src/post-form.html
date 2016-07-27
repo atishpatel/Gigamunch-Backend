@@ -283,7 +283,7 @@
           </datetime-input>
         </div>
         <div class="header">My Delivery Time Logistics</div>
-        <paper-checkbox active$="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
+        <paper-checkbox active="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
         <div hidden$="[[!post.chef_delivery]]">
           <div class="row-fields">
             <datetime-input
@@ -432,6 +432,7 @@
         this.$.endPickupTime.update();
         this.$.startChefDeliveryTime.update();
         this.$.endChefDeliveryTime.update();
+        this.postPhotosChanged();
       },
       getItem: function (id) {
         if (id === undefined || id === '' || id === '0') {
