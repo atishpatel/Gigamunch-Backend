@@ -344,6 +344,11 @@
           notify: true,
           value: {},
         },
+        route: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+        },
         item: {
           type: Object,
         },
@@ -439,6 +444,7 @@
           return;
         }
         if (this.item.id === id) {
+          this.setItem(this.item);
           return;
         }
         this.service.getItem(id, function (item, err) {

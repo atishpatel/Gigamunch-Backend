@@ -60,6 +60,11 @@
       is: 'item-form',
 
       properties: {
+        route: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+        },
         item: {
           type: Object,
           notify: true,
