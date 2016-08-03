@@ -126,6 +126,7 @@ func publishPost(ctx context.Context, req *PublishPostReq, chefC chefClient, ite
 	post.CreatedDateTime = time.Now()
 	post.GigachefID = req.User.ID
 	// add pickup options
+	var lastStartExchangeTime time.Time
 	const pickupBuffer = 30 * time.Minute
 	var pickupExchange types.ExchangeMethods
 	pickupExchange.SetPickup(true)
@@ -137,6 +138,9 @@ func publishPost(ctx context.Context, req *PublishPostReq, chefC chefClient, ite
 			EndDateTime:              pickupTime.Add(pickupBuffer),
 			AvailableExchangeMethods: pickupExchange,
 		})
+		if pickupTime.After(lastStartExchangeTime) {
+			lastStartExchangeTime = pickupTime
+		}
 		pickupTime = pickupTime.Add(pickupBuffer)
 	}
 	// add chef delivery options
@@ -152,8 +156,15 @@ func publishPost(ctx context.Context, req *PublishPostReq, chefC chefClient, ite
 				EndDateTime:              chefDeliveryTime.Add(chefDeliveryBuffer),
 				AvailableExchangeMethods: chefDeliveryExchange,
 			})
+			if chefDeliveryTime.After(lastStartExchangeTime) {
+				lastStartExchangeTime = chefDeliveryTime
+			}
 			chefDeliveryTime = chefDeliveryTime.Add(chefDeliveryBuffer)
 		}
+	}
+	// fix close time so it's not after the last start window
+	if post.ClosingDateTime.After(lastStartExchangeTime) {
+		post.ClosingDateTime = lastStartExchangeTime
 	}
 	// make post
 	// put in datastore
