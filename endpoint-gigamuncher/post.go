@@ -272,7 +272,7 @@ type ExchangeTimeSegment struct {
 // PostDetailed has detailed information for a Post.
 type PostDetailed struct {
 	BasePost                               // embedded
-	ExchangeTimes    []ExchangeTimeSegment `json:"exchange_times"`
+	ExchangeTimes    []ExchangeTimeSegment `json:"exchange_times,omitempty"`
 	Ingredients      []string              `json:"ingredients,omitempty"`
 	DietaryNeedsTags []string              `json:"dietary_needs_tags,omitempty"`
 	GeneralTags      []string              `json:"general_tags,omitempty"`
