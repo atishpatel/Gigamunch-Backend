@@ -203,12 +203,18 @@ func makeOrder(ctx context.Context, req *MakeOrderReq, orderC orderClient, itemC
 	if err != nil {
 		utils.Errorf(ctx, "failed to itemC.AddNumTotalOrders for itemID(%d) by %d : %s", p.ItemID, req.NumServings, err)
 	}
+	servingText := "serving"
+	if order.Servings > 1 {
+		servingText = "servings"
+	}
+	// TODO change ExpectedExchangeDateTime.In(cdt zone) to be a dynamic time zone
 	err = chefC.Notify(order.GigachefID, "Your customers are starving - Gigamunch",
-		fmt.Sprintf("%s just order %d servings of %s at %s! :) https://gigamunchapp.com/gigachef/posts",
+		fmt.Sprintf("%s just order %d %s of %s at %s! :) https://gigamunchapp.com/gigachef/posts",
 			order.GigamuncherName,
 			order.Servings,
+			servingText,
 			order.PostTitle,
-			order.ExpectedExchangeDateTime.In(now.Location()).Format("01/02 at 03:04 PM")),
+			order.ExpectedExchangeDateTime.In(time.FixedZone("CDT", -5*3600)).Format("01/02 at 03:04 PM")),
 	)
 	if err != nil {
 		utils.Errorf(ctx, "Failed to notify chef. Err: ", err)
