@@ -69,6 +69,12 @@
         --paper-icon-button-ink-color: black;
       }
 
+      .content {
+        width: 100%;
+        max-width: 1000px;
+        margin: auto;
+      }
+
       @font-face {
         font-family: 'NexaBold';
         src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
@@ -120,17 +126,19 @@
 
       .toolbar {
         display: flex;
-        align-items: center;
         height: 100%;
+        justify-content: space-between;
+      }
+
+      .toolbar-left, .toolbar-right {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
       }
 
       .toolbar-title {
         margin-top: 3px;
         color: var(--app-primary-color);
-      }
-
-      .toolbar-left {
-        margin-right: auto;
       }
 
       .nav-tabs {
@@ -179,39 +187,41 @@
       <app-header-layout id="headerLayout" has-scrolling-region>
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
-            <div class="toolbar toolbar-left">
-              <paper-icon-button
-                id="menuIcon"
-                class="hide"
-                icon="app:menu"
-                on-tap="toggleDrawer">
-              </paper-icon-button>
-              <a class="nav-a" href="/"><div class="toolbar-title logo" title>Gigamunch</div></a>
-            </div>
-            <div id="toolbarRight" class="toolbar hide">
-              <paper-tabs
-                class="nav-tabs"
-                attr-for-selected="name"
-                selected="{{page}}" tabindex="-1">
-                <paper-tab name="home" tabindex="-1">
-                  <a class="nav-a" href="/"><span>Home</span></a>
-                </paper-tab>
-                <paper-tab name="becomechef" tabindex="-1">
-                  <a class="nav-a" href="/becomechef"><span>Become a chef</span></a>
-                </paper-tab>
-                <paper-tab name="faq" tabindex="-1">
-                  <a class="nav-a" href="/faq"><span>FAQ</span></a>
-                </paper-tab>
-                <paper-tab name="about" tabindex="-1">
-                  <a class="nav-a" href="/about"><span>About</span></a>
-                </paper-tab>
-                <div class="fake-paper-tab">
-                  <a class="nav-a" href="[[loginBtnUrl]]">
-                    <span>[[loginBtnText]]</span>
-                  </a>
-                </div>
-              </a>
-              </paper-tabs>
+            <div class="toolbar content">
+              <div class="toolbar-left">
+                <paper-icon-button
+                  id="menuIcon"
+                  class="hide"
+                  icon="app:menu"
+                  on-tap="toggleDrawer">
+                </paper-icon-button>
+                <a class="nav-a" href="/"><div class="toolbar-title logo" title>Gigamunch</div></a>
+              </div>
+              <div id="toolbarRight" class="toolbar-right hide">
+                <paper-tabs
+                  class="nav-tabs"
+                  attr-for-selected="name"
+                  selected="{{page}}" tabindex="-1">
+                  <paper-tab name="home" tabindex="-1">
+                    <a class="nav-a" href="/"><span>Home</span></a>
+                  </paper-tab>
+                  <paper-tab name="becomechef" tabindex="-1">
+                    <a class="nav-a" href="/becomechef"><span>Become a chef</span></a>
+                  </paper-tab>
+                  <paper-tab name="faq" tabindex="-1">
+                    <a class="nav-a" href="/faq"><span>FAQ</span></a>
+                  </paper-tab>
+                  <paper-tab name="about" tabindex="-1">
+                    <a class="nav-a" href="/about"><span>About</span></a>
+                  </paper-tab>
+                  <div class="fake-paper-tab">
+                    <a class="nav-a" href="[[loginBtnUrl]]">
+                      <span>[[loginBtnText]]</span>
+                    </a>
+                  </div>
+                </a>
+                </paper-tabs>
+              </div>
             </div>
           </app-toolbar>
         </app-header>
