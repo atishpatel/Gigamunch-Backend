@@ -82,6 +82,10 @@
 
       iron-pages {
         min-height: 96vh;
+      }
+
+      .content {
+        width: 100%;
         max-width: 1000px;
         margin: auto;
       }
@@ -204,12 +208,14 @@
 
       .toolbar {
         display: flex;
-        align-items: center;
         height: 100%;
+        justify-content: space-between;
       }
 
-      .toolbar-left {
-        margin-right: auto;
+      .toolbar-left, .toolbar-right {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
       }
 
       .nav-tabs {
@@ -295,51 +301,53 @@
       <!-- <app-header-layout has-scrolling-region> -->
         <app-header shadow>
           <app-toolbar>
-            <div class="toolbar toolbar-left">
-              <paper-icon-button
-                id="arrowBack"
-                class="hide"
-                icon="app:arrow-back"
-                on-tap="_backTaped">
-              </paper-icon-button>
-              <paper-icon-button
-                id="menuIcon"
-                class="hide"
-                icon="app:menu"
-                on-tap="_toggleDrawer">
-              </paper-icon-button>
-              <div class="toolbar-title" title>[[title]]</div>
-            </div>
-            <div id="toolbarRight" class="toolbar hide" >
-              <paper-tabs
-                class="nav-tabs"
-                attr-for-selected="name"
-                selected$="{{page}}" tabindex="-1">
-                <paper-tab name="dashboard" tabindex="-1">
-                  <a class="nav-a" href$="[[baseUrl]]/"><span>Dashboard</span></a>
-                </paper-tab>
-                <paper-tab name="items" tabindex="-1">
-                  <a class="nav-a" href$="[[baseUrl]]/items"><span>My Kitchen</span></a>
-                </paper-tab>
-                <paper-tab name="posts" tabindex="-1">
-                  <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
-                </paper-tab>
-              </paper-tabs>
-              <placeholder-img class="user-pic" icon="app:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img>
-              <paper-menu-button horizontal-align="right" vertical-offset="15" >
-                <paper-icon-button icon="app:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
-                <paper-menu class="dropdown-content">
-                  <paper-item disabled>Messages - Coming soon!</paper-item>
-                  <!-- <a class="nav-a" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
-                  <a class="nav-a" href="/signout"><paper-item>Log out</paper-item></a>
-                </paper-menu>
-              </paper-menu-button>
+            <div class="content toolbar">
+              <div class="toolbar-left">
+                <paper-icon-button
+                  id="arrowBack"
+                  class="hide"
+                  icon="app:arrow-back"
+                  on-tap="_backTaped">
+                </paper-icon-button>
+                <paper-icon-button
+                  id="menuIcon"
+                  class="hide"
+                  icon="app:menu"
+                  on-tap="_toggleDrawer">
+                </paper-icon-button>
+                <div class="toolbar-title" title>[[title]]</div>
+              </div>
+              <div id="toolbarRight" class="toolbar-right hide" >
+                <paper-tabs
+                  class="nav-tabs"
+                  attr-for-selected="name"
+                  selected$="{{page}}" tabindex="-1">
+                  <paper-tab name="dashboard" tabindex="-1">
+                    <a class="nav-a" href$="[[baseUrl]]/"><span>Dashboard</span></a>
+                  </paper-tab>
+                  <paper-tab name="items" tabindex="-1">
+                    <a class="nav-a" href$="[[baseUrl]]/items"><span>My Kitchen</span></a>
+                  </paper-tab>
+                  <paper-tab name="posts" tabindex="-1">
+                    <a class="nav-a" href$="[[baseUrl]]/posts"><span>My Orders</span></a>
+                  </paper-tab>
+                </paper-tabs>
+                <a href="../updateprofile"><placeholder-img class="user-pic" icon="app:account-circle" alt="user profile picture" src="[[user.photo_url]]"></placeholder-img></a>
+                <paper-menu-button horizontal-align="right" vertical-offset="15" >
+                  <paper-icon-button icon="app:more-vert" class="dropdown-trigger" alt="bottom align"></paper-icon-button>
+                  <paper-menu class="dropdown-content">
+                    <paper-item disabled>Messages - Coming soon!</paper-item>
+                    <!-- <a class="nav-a" href$="[[baseUrl]]/settings"><paper-item>Settings</paper-item></a> -->
+                    <a class="nav-a" href="/signout"><paper-item>Log out</paper-item></a>
+                  </paper-menu>
+                </paper-menu-button>
+              </div>
             </div>
           </app-toolbar>
 
         </app-header>
 
-        <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
+        <iron-pages class="content" role="main" selected="[[page]]" attr-for-selected="name">
           <dashboard-page
             id="dashboard"
             name="dashboard"
