@@ -1,0 +1,314 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="like-icon.html">
+
+<dom-module id="post-card">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      paper-material {
+        background: white;
+        padding: 10px;
+      }
+
+      paper-material h1 {
+        font-size: 1.25em;
+        font-weight: 500;
+      }
+
+      strong {
+        font-weight: 400;
+      }
+
+      .post-card {
+        background: white;
+        margin-bottom: 15px;
+        width: 100%;
+        font-weight: 300;
+        border-radius: 2px;
+        padding: 0;
+      }
+
+      .post-card-top-bar {
+        padding: 16px;
+        margin: 0;
+      }
+
+      .post-card-title {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+      }
+
+      .post-card-subtitle {
+        font-size: 14px;
+        font-weight: 300;
+        margin: 0;
+        color: var(--secondary-text-color);
+      }
+
+      .post-card-image {
+        position: relative;
+        width: 100%;
+      }
+
+      .post-card-earned-text {
+        position: absolute; 
+        bottom: 0;
+        left: 0; 
+        width: 100%;
+      }
+
+      .post-card-earned-text > * {
+        background-color: rgba(0, 0, 0, 0.5);;
+        color: white;
+        padding: 16px;
+      }
+
+      .post-card-action-bar {
+        padding: 8px;
+      }
+
+      .post-card-orders {
+        padding: 0 8px;
+        font-size: 14px;
+        letter-spacing: .05em;
+      }
+
+      .post-card-order {
+        padding: 8px;
+        border-top: 1px solid #ececec;
+      }
+
+      .post-card-order-user {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .post-card-order-summary {
+        padding-left: 16px;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .flex-2 {
+        flex: 2;
+      }
+
+      .center-text {
+        text-align: center;
+        justify-content: center;
+      }
+
+      .photo {
+        display: block;
+        width: 100%;
+      	position: relative;
+      	height: 0;
+      	padding: 56.25% 0 0 0;
+        overflow: hidden;
+      }
+
+      .photo img {
+      	position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+
+      .user-pic {
+        height: 35px;
+        width: 35px;
+        border-radius: 50%;
+        background-color: white;
+        color: var(--secondary-text-color);
+      }
+    </style>
+    <paper-material elevation="1" class="post-card">
+        <div class="row post-card-top-bar">
+            <div class="column">
+            <h2 class="post-card-title">[[title]]</h2>
+            <span class="post-card-subtitle">[[closeDatetime]]</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="post-card-image">
+            <div class="photo">
+                <img src="[[photo]]"></img>
+            </div>
+            <div class="post-card-earned-text">
+                <div>
+                <strong>$<span>[[amountEarned]]</span></strong> earned from <strong>[[numOrders]]</strong> servings
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="row post-card-action-bar">
+            <like-icon numlikes="[[post.num_likes]]"></like-icon>
+        </div>
+        <div class="post-card-orders">
+        <template is="dom-repeat" items="[[post.orders]]" as="order" sort="sortByExchangeTime">
+            <div class="row post-card-order">
+                <div class="post-card-order-user">
+                    <placeholder-img class="user-pic" icon="app:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
+                    <span class="column center-text user-name">[[order.gigamuncher_name]]</span>
+                </div>
+                <div class="post-card-order-summary">
+                <div>
+                    <template is="dom-if" if$="[[isDelivery(order)]]">
+                    <a href="[[getExchangeLink(order)]]" target="blank">[[getExchangeText(order)]]</a>
+                    </template>
+                    <template is="dom-if" if$="[[!isDelivery(order)]]">
+                    <span>[[getExchangeText(order)]]</span>
+                    </template>
+                    <span>[[getServingsText(order)]] around [[getExchangeTime(order)]]</span>
+                </div>
+                </div>
+            </div>
+            </template>
+        </div>
+    </paper-material>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'post-card',
+
+      properties: {
+        post: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          value: {},
+          observer: 'postChanged'
+        },
+        title: {
+            type: String,
+        },
+        closeDatetime: {
+            type: String,
+        },
+        photo: {
+            type: String,
+        },
+        amountEarned: {
+            type: String,
+        },
+        numOrders: {
+            type: Number,
+        },
+      },
+      postChanged: function() {
+          this.updatePhoto();
+          this.updateTitle();
+          this.updateCloseDatetime();
+          this.updateNumOrders();
+      },
+      updatePhoto: function() {
+        if(this.post === undefined || this.post.photos === undefined || this.post.photos === null || this.post.photos[0] === '') {
+          return;
+        }
+        this.photo = this.post.photos[0];
+      },
+      updateTitle: function() {
+        if (this.post === undefined || this.post === null) {
+            this.title = '████████████████████';
+            return;
+        }
+        if (this.post.title.length < 55) {
+          this.title = this.post.title;
+          return;
+        }
+        this.title =  this.post.title.substring(0, 52) + '...';
+      },
+      updateCloseDatetime: function() {
+        if (this.post == undefined) {
+            this.closeDatetime = '███████';
+        }
+        var d = new Date(this.post.closing_datetime * 1000);
+        this.closeDatetime = d.toLocaleDateString() + ' ' + d.toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+      },
+      getAmountEarned: function() {
+        var e = 0.0;
+        if (this.post !== undefined && this.post.orders !== undefined && this.post.orders !== null) {
+          this.post.orders.forEach(
+            function(order) {
+              e += order.servings * this.post.chef_price_per_serving;
+            }
+          );
+        }
+        this.amountEarned = e.toFixed(2);
+      },
+      updateNumOrders: function() {
+        var e = 0;
+        if (this.post !== undefined && this.post.orders !== undefined && this.post.orders !== null) {
+          this.post.orders.forEach(
+            function(order) {
+              e += order.servings;
+            }
+          );
+        }
+        this.numOrders = e;
+      },
+      sortByExchangeTime: function(o1, o2) {
+        if (o1.exchange_time === o2.exchange_time) {
+          return o1.gigamuncher_name < o2.gigamuncher_name ? -1 : 1;
+        }
+        return o1.exchange_time < o2.exchange_time ? -1 : 1;
+      },
+      getExchangeTime: function(order) {
+        return (new Date(order.exchange_time * 1000)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+      },
+      getExchangeText: function(order) {
+        if (order.exchange_method === 1) {
+          return 'Pickup';
+        } else {
+          return 'Deliver';
+        }
+      },
+      getServingsText: function(order) {
+        if (order.servings === 1) {
+          return order.servings + ' serving ';
+        } else {
+          return order.servings + ' servings ';
+        }
+      },
+      getExchangeLink: function(order) {
+        if (order.exchange_method === 1) {
+          return 'posts';
+        } else {
+          return 'http://maps.google.com/?q=' + encodeURIComponent(order.gigamuncher_address);
+        }
+      },
+      isDelivery: function(order) {
+        return order.exchange_method !== 1;
+      },
+    });
+  </script>
+</dom-module>

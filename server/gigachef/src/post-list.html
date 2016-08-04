@@ -4,17 +4,13 @@
 
 <link rel="import" href="app-icons.html">
 <link rel="import" href="like-icon.html">
+<link rel="import" href="post-card.html">
 
 <dom-module id="post-list">
   <template>
     <style>
       :host {
         display: block;
-        padding: 15px;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-between;
       }
 
       paper-material {
@@ -27,82 +23,32 @@
         font-weight: 500;
       }
 
-      strong {
-        font-weight: 400;
-      }
-
-      .post-card {
-        background: white;
-        margin-bottom: 15px;
-        width: 100%;
-        font-weight: 300;
-        border-radius: 2px;
-        padding: 0;
-      }
-
-      .post-card-top-bar {
-        padding: 16px;
+      hr {
+        border: none;
         margin: 0;
+        background-color: var(--secondary-text-color);
+        height: 1px;
       }
 
-      .post-card-title {
-        font-size: 16px;
-        font-weight: 500;
-        margin: 0;
+      .grid {
+        padding: 15px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
       }
 
-      .post-card-subtitle {
-        font-size: 14px;
-        font-weight: 300;
-        margin: 0;
+      .post-divider {
+        padding: 15px;
         color: var(--secondary-text-color);
       }
 
-      .post-card-image {
-        position: relative;
-        width: 100%;
+      .post-divider-text {
+        padding: 0 0 8px 1%;
       }
 
-      .post-card-earned-text {
-        position: absolute; 
-        bottom: 0;
-        left: 0; 
-        width: 100%;
-      }
-
-      .post-card-earned-text > * {
-        background-color: rgba(0, 0, 0, 0.5);;
-        color: white;
-        padding: 16px;
-      }
-
-      .post-card-action-bar {
-        padding: 8px;
-      }
-
-      .post-card-orders {
-        padding: 0 8px;
-        font-size: 14px;
-        letter-spacing: .05em;
-      }
-
-      .post-card-order {
-        padding: 8px;
-        border-top: 1px solid #ececec;
-      }
-
-      .post-card-order-user {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .post-card-order-summary {
-        padding-left: 16px;
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      strong {
+        font-weight: 400;
       }
 
       .row {
@@ -125,36 +71,8 @@
         justify-content: center;
       }
 
-      .photo {
-        display: block;
-        width: 100%;
-      	position: relative;
-      	height: 0;
-      	padding: 56.25% 0 0 0;
-        overflow: hidden;
-      }
-
-      .photo img {
-      	position: absolute;
-        display: block;
-        width: 100%;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-      }
-
-      .user-pic {
-        height: 35px;
-        width: 35px;
-        border-radius: 50%;
-        background-color: white;
-        color: var(--secondary-text-color);
-      }
-
       @media (min-width: 767px) {
-        paper-material {
+        post-card, paper-material {
           flex-basis: 45%;
           max-width: 44%;
           margin: 1%;
@@ -162,63 +80,31 @@
       }
     </style>
 
-    <template is="dom-repeat" items="{{posts}}" as="post">
-      <paper-material elevation="1" class="post-card">
-        <div class="row post-card-top-bar">
-          <div class="column">
-            <h2 class="post-card-title">[[getPostTitle(post)]]</h2>
-            <span class="post-card-subtitle">[[getCloseDatetime(post)]]</span>
-          </div>
-        </div>
-        <div class="row">
-          <div class="post-card-image">
-            <div class="photo">
-              <img src="[[getPhoto(post)]]"></img>
-            </div>
-            <div class="post-card-earned-text">
-              <div>
-                <strong>$[[getAmountEarned(post)]]</strong> earned from <strong>[[getNumOrders(post)]]</strong> servings
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row post-card-action-bar">
-          <like-icon numlikes="[[post.num_likes]]"></like-icon>
-        </div>
-        <div class="post-card-orders">
-        <template is="dom-repeat" items="[[post.orders]]" as="order" sort="sortByExchangeTime">
-            <div class="row post-card-order">
-                <div class="post-card-order-user">
-                  <placeholder-img class="user-pic" icon="app:account-circle" src="[[order.gigamuncher_photo_url]]"></placeholder-img>
-                  <span class="column center-text user-name">[[order.gigamuncher_name]]</span>
-                </div>
-              <div class="post-card-order-summary">
-                <div>
-                  <template is="dom-if" if$="[[isDelivery(order)]]">
-                    <a href="[[getExchangeLink(order)]]" target="blank">[[getExchangeText(order)]]</a>
-                  </template>
-                  <template is="dom-if" if$="[[!isDelivery(order)]]">
-                    <span>[[getExchangeText(order)]]</span>
-                  </template>
-                  <span>[[getServingsText(order)]] around [[getExchangeTime(order)]]</span>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </paper-material>
-    </template>
+    <div class="grid">
+      <template is="dom-repeat" items="{{posts}}" as="post" filter="isOpenPost" sort="sortByCloseTime">
+        <post-card post="[[post]]"></post-card>
+      </template>
 
-    <template is="dom-if" if="[[showTutorialCard]]">
-      <paper-material>
-        <h1>Tutorial Card</h1>
-        <p>
-          My Orders is where you can see all your posts and the number of servings each person ordered. 
-          <br><br>
-          Post a dish from <a href="../items">My Kitchen</a> to start building your brand and earn money cooking! :)
-        </p>
-      </paper-card>
-    </template>
+      <template is="dom-if" if="[[showTutorialCard]]">
+        <paper-material>
+          <h1>Tutorial Card</h1>
+          <p>
+            My Orders is where you can see all your posts and the number of servings each person ordered. 
+            <br><br>
+            Post a dish from <a href="../items">My Kitchen</a> to start building your brand and earn money cooking! :)
+          </p>
+        </paper-card>
+      </template>
+    </div>
+    <div class="post-divider">
+      <div class="post-divider-text">Closed Posts</div>
+      <hr>
+    </div>
+    <div class="grid">
+      <template is="dom-repeat" items="{{posts}}" as="post" filter="isClosedPost" sort="sortByCloseTime">
+        <post-card post="[[post]]"></post-card>
+      </template>
+    </div>
 
   </template>
   <script>
@@ -264,77 +150,16 @@
           this.set('posts', posts);
         }.bind(this));
       },
-      getPhoto: function(post) {
-        if(post.photos === undefined || post.photos === null || post.photos[0] === '') {
-          return '';
-        }
-        return post.photos[0];
+      isOpenPost: function(post) {
+        var now = new Date();
+        var closeDate = new Date(post.closing_datetime * 1000);
+        return closeDate >= now
       },
-      getPostTitle: function(post) {
-        if (post.title.length < 55) {
-          return post.title;
-        }
-        return post.title.substring(0, 52) + '...';
-        return 
+      isClosedPost: function(post) {
+        return !this.isOpenPost(post);
       },
-      getCloseDatetime: function(post) {
-        var d = new Date(post.closing_datetime * 1000);
-        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
-      },
-      getAmountEarned: function(post) {
-        var e = 0.0;
-        if (post.orders !== undefined && post.orders !== null) {
-          post.orders.forEach(
-            function(order) {
-              e += order.servings * post.chef_price_per_serving;
-            }
-          );
-        }
-        return e.toFixed(2);
-      },
-      getNumOrders: function(post) {
-        var e = 0;
-        if (post.orders !== undefined && post.orders !== null) {
-          post.orders.forEach(
-            function(order) {
-              e += order.servings;
-            }
-          );
-        }
-        return e;
-      },
-      sortByExchangeTime: function(o1, o2) {
-        if (o1.exchange_time === o2.exchange_time) {
-          return o1.gigamuncher_name < o2.gigamuncher_name ? -1 : 1;
-        }
-        return o1.exchange_time < o2.exchange_time ? -1 : 1;
-      },
-      getExchangeTime: function(order) {
-        return (new Date(order.exchange_time * 1000)).toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
-      },
-      getExchangeText: function(order) {
-        if (order.exchange_method === 1) {
-          return 'Pickup';
-        } else {
-          return 'Deliver';
-        }
-      },
-      getServingsText: function(order) {
-        if (order.servings === 1) {
-          return order.servings + ' serving ';
-        } else {
-          return order.servings + ' servings ';
-        }
-      },
-      getExchangeLink: function(order) {
-        if (order.exchange_method === 1) {
-          return 'posts';
-        } else {
-          return 'http://maps.google.com/?q=' + encodeURIComponent(order.gigamuncher_address);
-        }
-      },
-      isDelivery: function(order) {
-        return order.exchange_method !== 1;
+      sortByCloseTime: function(p1, p2) {
+        return p1.closing_datetime < p2.closing_datetime ? -1 : 1;
       },
     });
   </script>
