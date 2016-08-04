@@ -127,6 +127,7 @@
       	height: 0;
       	padding: 56.25% 0 0 0;
         overflow: hidden;
+        background-color: #B6B6B6;
       }
 
       .photo img {
@@ -228,6 +229,7 @@
           this.updatePhoto();
           this.updateTitle();
           this.updateCloseDatetime();
+          this.updateAmountEarned();
           this.updateNumOrders();
       },
       updatePhoto: function() {
@@ -254,12 +256,13 @@
         var d = new Date(this.post.closing_datetime * 1000);
         this.closeDatetime = d.toLocaleDateString() + ' ' + d.toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
       },
-      getAmountEarned: function() {
+      updateAmountEarned: function() {
         var e = 0.0;
         if (this.post !== undefined && this.post.orders !== undefined && this.post.orders !== null) {
+          var chefPPS = this.post.chef_price_per_serving;
           this.post.orders.forEach(
             function(order) {
-              e += order.servings * this.post.chef_price_per_serving;
+              e += order.servings * chefPPS;
             }
           );
         }
