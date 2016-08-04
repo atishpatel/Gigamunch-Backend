@@ -159,7 +159,7 @@
         return !this.isOpenPost(post);
       },
       sortByCloseTime: function(p1, p2) {
-        return p1.closing_datetime < p2.closing_datetime ? -1 : 1;
+        return p1.closing_datetime > p2.closing_datetime ? -1 : 1;
       },
     });
   </script>
