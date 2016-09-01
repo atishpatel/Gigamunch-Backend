@@ -7,7 +7,10 @@ The following programs need to be installed:
   - redis 3.2+
 
 In order to do local development, the following config files are needed:
-  - session_config.json
+  - bt_config.json
+  - gitkit_cert.json
+  - gitkit_config.json
+  - twilio_config.json
 
 Do the following in your .bashprofile file:
   - export GIGAMUNCH_PRIVATE_DIR = point to the private directory with config files

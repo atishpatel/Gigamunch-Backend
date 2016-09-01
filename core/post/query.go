@@ -183,10 +183,12 @@ func connectSQL(ctx context.Context) {
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {
+		utils.Errorf(ctx, "Couldn't connect to mysql database: %+v", err)
 		log.Fatal("Couldn't connect to mysql database")
 	}
 	err = mysqlDB.Ping()
 	if err != nil {
+		utils.Errorf(ctx, "failed to ping mysql database %+v", err)
 		log.Fatal("failed to ping mysql database", err)
 	}
 }

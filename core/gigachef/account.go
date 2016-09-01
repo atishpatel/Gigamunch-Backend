@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
-
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -14,6 +12,7 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/notification"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 // Client is a client for gigachef
@@ -163,6 +162,7 @@ func GetMultiInfo(ctx context.Context, ids []string) ([]Gigachef, error) {
 
 // PostInfoResp contains information related to a post
 type PostInfoResp struct {
+	ChefName            string        `json:"chef_name"`
 	Address             types.Address `json:"address"`
 	DeliveryRange       int32         `json:"delivery_range"`
 	BTSubMerchantID     string        `json:"bt_sub_merchant_id"`
@@ -179,6 +179,7 @@ func (c *Client) GetPostInfo(id string) (*PostInfoResp, error) {
 		return nil, errDatastore.WithError(err).Wrap("cannot get gigachef")
 	}
 	postInfo := &PostInfoResp{
+		ChefName:            chef.Name,
 		Address:             chef.Address,
 		DeliveryRange:       chef.DeliveryRange,
 		BTSubMerchantID:     chef.BTSubMerchantID,

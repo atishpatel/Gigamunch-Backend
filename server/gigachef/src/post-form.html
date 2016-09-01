@@ -10,8 +10,9 @@
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/paper-slider/paper-slider.html">
 
-<link rel="import" href="datetime-input.html">
 <link rel="import" href="app-icons.html">
+<link rel="import" href="datetime-input.html">
+<link rel="import" href="datetime-range.html">
 <link rel="import" href="item-fields.html">
 <link rel="import" href="like-icon.html">
 <link rel="import" href="paper-collapse-item.html">
@@ -24,6 +25,7 @@
         padding: 15px;
         background-color: white;
         min-height: 95vh;
+        color: var(--primary-text-color);
       }
 
       label {
@@ -32,8 +34,8 @@
         --webkit-font-smoothing: antialiased;
       }
 
-      paper-checkbox {
-        padding: 12px 0 5px 0;
+      paper-input, datetime-range, datetime-input, paper-checkbox {
+        padding: 8px 0;
       }
 
       #submitButton {
@@ -63,6 +65,7 @@
       	height: 0;
       	padding: 56.25% 0 0 0;
         overflow: hidden;
+        background-color: #B6B6B6;
       }
 
       .photo img {
@@ -81,7 +84,7 @@
         min-height: 86vh;
       }
 
-      .preview hr {
+      hr {
         border: none;
         margin: 0;
         background-color: #ececec;
@@ -109,7 +112,6 @@
 
       .preview-likebar-price {
         margin-left: auto;
-        color: var(--primary-text-color)
       }
 
       .preview-container {
@@ -143,19 +145,17 @@
         flex: 1;
       }
 
-      .range-divider {
-        flex: .05;
+      .half-field {
+        width: 48.5%;
       }
 
       .header {
-        font-size: 14px;
-        padding: 35px 0 5px 0;
-        font-weight: 500;
+        font-size: 13px;
+        margin: 11px 0;
       }
 
       .chef-delivery-input {
         padding-top: 10px;
-        
       }
 
       .chef-delivery-range {
@@ -164,7 +164,8 @@
       }
 
       .chef-delivery-slider {
-        flex: 9;
+        flex: 8;
+        margin-left: -15px;
       }
 
       .chef-delivery-text {
@@ -241,8 +242,11 @@
             on-change="updateSubmitButtonState">
           </item-fields>
         </paper-collapse-item>
-        <paper-collapse-item header="Post Details" opened>        
+        <paper-collapse-item header="Post Details" opened>
+          <h2 class="header">Availability</h2>
+          <hr>
           <paper-input
+            class="half-field"
             label="Number of Servings Offered*"
             value="{{post.servings_offered}}"
             type="number"
@@ -251,6 +255,7 @@
             auto-validate>
           </paper-input>
           <paper-input
+            class="half-field"
             label="Price per serving*"
             value="{{post.chef_price_per_serving}}"
             type="number"
@@ -260,64 +265,53 @@
             auto-validate>
             <div prefix>$&nbsp;</div>
           </paper-input>
-        <datetime-input
-          id="closeTime"
-          label="Post close time (new order can't be made after this time)*"
-          epoch="{{post.closing_datetime}}"
-          on-changed="updateSubmitButtonState">
-        </datetime-input>
-        <div class="header">Pickup Time Logistics</div>
-        <div class="row-fields">
+          <h2 class="header header-padding">Time Logistics</h2>
+          <hr>
           <datetime-input
-            id="startPickupTime"
-            label="Start pickup time*"
-            epoch="{{post.start_pickup_datetime}}"
+            id="closeTime"
+            label="Post close time (new order can't be made after this time)*"
+            epoch="{{post.closing_datetime}}"
             on-changed="updateSubmitButtonState">
           </datetime-input>
-          <span class="range-divider"></span>
-          <datetime-input
-            id="endPickupTime"
-            label="End pickup time*"
-            epoch="{{post.end_pickup_datetime}}"
+          <datetime-range
+            id="pickupTimeRange"
+            label="Pickup time window*"
+            startepoch="{{post.start_pickup_datetime}}"
+            endepoch="{{post.end_pickup_datetime}}"
             on-changed="updateSubmitButtonState">
-          </datetime-input>
-        </div>
-        <div class="header">My Delivery Time Logistics</div>
-        <paper-checkbox active="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
-        <div hidden$="[[!post.chef_delivery]]">
-          <div class="row-fields">
-            <datetime-input
-              id="startChefDeliveryTime"
-              label="Start my delivery time*"
-              epoch="{{post.start_chef_delivery_datetime}}"
-              on-changed="updateSubmitButtonState">
-            </datetime-input>
-            <span class="range-divider"></span>
-            <datetime-input
-              id="endChefDeliveryTime"
-              label="End my delivery time*"
-              epoch="{{post.end_chef_delivery_datetime}}"
-              on-changed="updateSubmitButtonState">
-            </datetime-input>
-          </div>
-            <paper-input
-              label="Price for my delivery*"
-              value="{{post.chef_delivery_base_price}}"
-              type="number"
-              step="0.50"
-              min="0.00"
-              max="50"
-              auto-validate>
-              <div prefix>$&nbsp;</div>
-            </paper-input>
-            <div class="chef-delivery-input">
-              <label>My delivery range in miles</label>
-              <div class="chef-delivery-range">
-                <paper-slider id="deliveryRange" class="chef-delivery-slider" pin snaps max="15" max-markers="15" step="1" value="{{post.chef_delivery_radius}}"></paper-slider>
-                <span class="chef-delivery-text">[[post.chef_delivery_radius]] miles</span>
-              </div>
+          </datetime-range>
+          <h2 class="header header-padding">Delivery Logistics</h2>
+          <hr>
+          <paper-checkbox active="{{post.chef_delivery}}">I'll do delivery for my customers.</paper-checkbox>
+          <div hidden$="[[!post.chef_delivery]]">
+            <div class="row-fields">
+              <datetime-range
+                id="chefDeliveryTimeRange"
+                label="Delivery time window*"
+                startepoch="{{post.start_chef_delivery_datetime}}"
+                endepoch="{{post.end_chef_delivery_datetime}}"
+                on-changed="updateSubmitButtonState">
+              </datetime-range>
             </div>
-        </div>
+              <paper-input
+                class="half-field"
+                label="Delivery Price*"
+                value="{{post.chef_delivery_base_price}}"
+                type="number"
+                step="0.50"
+                min="0.00"
+                max="50"
+                auto-validate>
+                <div prefix>$&nbsp;</div>
+              </paper-input>
+              <div class="chef-delivery-input">
+                <label>My delivery range in miles</label>
+                <div class="chef-delivery-range">
+                  <paper-slider id="deliveryRange" class="chef-delivery-slider" pin snaps max="15" max-markers="15" step="1" value="{{post.chef_delivery_radius}}"></paper-slider>
+                  <span class="chef-delivery-text">[[post.chef_delivery_radius]] miles</span>
+                </div>
+              </div>
+          </div>
         </paper-collapse-item>
         <!--<paper-collapse-item header="Post summary">
           TODO: add stuff like you'll be smsed or emailed when an order is made
@@ -366,8 +360,6 @@
       observers: [
         'postPhotosChanged(post.photos)',
         'postPriceChanged(post.chef_price_per_serving)',
-        'postStartPickupTimeChanged(post.start_pickup_datetime)',
-        'postStartDeliveryTimeChanged(post.start_chef_delivery_datetime)',
       ],
       postPhotosChanged: function (p) {
         this.updateSubmitButtonState();
@@ -385,19 +377,6 @@
           this.set('computedPrice', '?');
         }
       },
-      postStartPickupTimeChanged: function() {
-        if (this.post.end_pickup_datetime < this.post.start_pickup_datetime) {
-          this.set('post.end_pickup_datetime', this.post.start_pickup_datetime + 7200);
-          this.$.endPickupTime.update();
-        }
-      },
-      postStartDeliveryTimeChanged: function() {
-        if (this.post.chef_delivery && this.post.end_chef_delivery_datetime < this.post.start_chef_delivery_datetime) {
-          this.set('post.end_chef_delivery_datetime', this.post.start_chef_delivery_datetime + 7200);
-          this.$.endChefDeliveryTime.update();
-        }
-      },
-      
       selected: function () {
         this.$.spinner.hidden = true;
         this.$.spinner.active = false;
@@ -434,10 +413,8 @@
         this.set('post.num_likes', item.num_likes);
         this.$.itemFields.update();
         this.$.closeTime.update();
-        this.$.startPickupTime.update();
-        this.$.endPickupTime.update();
-        this.$.startChefDeliveryTime.update();
-        this.$.endChefDeliveryTime.update();
+        this.$.pickupTimeRange.update();
+        this.$.chefDeliveryTimeRange.update();
         this.postPhotosChanged();
       },
       getItem: function (id) {

@@ -144,6 +144,9 @@ func disbursementException(ctx context.Context, signature, payload string, bt *b
 	if err != nil {
 		return nil, err
 	}
+	if notification == nil || notification.MerchantAccount() == nil {
+		return nil, errInternal.Wrapf("there was an error with notification (%+v) subject(%+v) MerchantAccount(%+v) Disbursement(%+v)", notification, notification.Subject, notification.MerchantAccount(), notification.Disbursement())
+	}
 	chef, err := chefC.FindBySubMerchantID(notification.MerchantAccount().Id)
 	if err != nil {
 		return nil, errors.Wrap("failed to find chef by submerchantID", err)

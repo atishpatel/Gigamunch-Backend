@@ -31,3 +31,4 @@ indexes:
   properties:
   - name: GigachefID
   - name: CreatedDateTime
+    direction: desc

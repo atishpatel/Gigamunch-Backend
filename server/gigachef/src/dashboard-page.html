@@ -101,6 +101,11 @@
           notify: true,
           value: false,
         },
+        hasFirstPost: {
+          type: Boolean,
+          notify: true,
+          value: false,
+        },
       },
       observers: [
         'userUpdated(user)',
@@ -128,6 +133,7 @@
           }
 
           this.set('gigachef', chef);
+          this.set('hasFirstPost', (chef.num_posts !== undefined && chef.num_posts > 0));
         }.bind(this));
       },
       infoDialog: function (e) {
@@ -160,9 +166,6 @@
         }
         this.$.infoDialogText.innerHTML = text;
         this.$.infoDialog.open();
-      },
-      hasFirstPost: function() {
-        return (this.gigachef.num_posts !== undefined && this.gigachef.num_posts > 0);
       },
     });
   </script>

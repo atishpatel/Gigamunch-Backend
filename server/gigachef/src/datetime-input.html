@@ -115,15 +115,15 @@
       is: 'datetime-input',
 
       properties: {
-        epoch: {
-          type: Number,
-          notify: true,
-          reflectToAttribute: true,
-        },
         label: {
           type: String,
           notify: true,
           value: 'Pick a date',
+        },
+        epoch: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
         },
         date: {
           type: String,

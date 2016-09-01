@@ -1,15 +1,17 @@
 package review
 
 import (
+	"fmt"
 	"time"
 
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
-	"appengine/datastore"
+	"google.golang.org/appengine/datastore"
 )
 
 var (
@@ -80,16 +82,15 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 	}
 	oldRating := review.Rating
 	review.Rating = rating
-	errChan := make(chan error, 1)
+	chefErrChan := make(chan error, 1)
 	go func() {
 		// update chef avg rating
-		errChan <- gigachef.UpdateAvgRating(c.ctx, review.GigachefID, oldRating, rating)
+		chefErrChan <- gigachef.UpdateAvgRating(c.ctx, review.GigachefID, oldRating, rating)
 	}()
 	// TODO update avg item review
 	// update review
 	if isNewReview {
 		reviewID, err = putIncomplete(c.ctx, review)
-
 	} else {
 		err = put(c.ctx, reviewID, review)
 	}
@@ -101,8 +102,29 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 		if err != nil {
 			return nil, errors.Wrap("failed to update review id for order", err)
 		}
+		// notify chef about review
+		chefC := gigachef.New(c.ctx)
+		var subject, message string
+		if review.Text == "" {
+			subject = fmt.Sprintf("%s just wrote a review for you", review.GigamuncherName)
+			message = fmt.Sprintf("%s just gave you a %d star review on your %s. \n- Gigamunch :)",
+				review.GigamuncherName,
+				rating,
+				review.Post.Title)
+		} else {
+			subject = fmt.Sprintf("%s just wrote a review for you", review.GigamuncherName)
+			message = fmt.Sprintf("%s just gave you a %d star review. Here's what they thought about your %s: \n\"%s\" \n- Gigamunch :)",
+				review.GigamuncherName,
+				rating,
+				review.Post.Title,
+				review.Text)
+		}
+		err = chefC.Notify(review.GigachefID, subject, message)
+		if err != nil {
+			utils.Errorf(c.ctx, "failed to notify chef(%s): %#v", review.GigachefID, err)
+		}
 	}
-	err = <-errChan
+	err = <-chefErrChan
 	if err != nil {
 		return nil, err
 	}

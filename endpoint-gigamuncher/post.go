@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
-
 	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/like"
@@ -15,6 +13,7 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/core/review"
 	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
 	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 )
 
@@ -272,7 +271,7 @@ type ExchangeTimeSegment struct {
 // PostDetailed has detailed information for a Post.
 type PostDetailed struct {
 	BasePost                               // embedded
-	ExchangeTimes    []ExchangeTimeSegment `json:"exchange_times"`
+	ExchangeTimes    []ExchangeTimeSegment `json:"exchange_times,omitempty"`
 	Ingredients      []string              `json:"ingredients,omitempty"`
 	DietaryNeedsTags []string              `json:"dietary_needs_tags,omitempty"`
 	GeneralTags      []string              `json:"general_tags,omitempty"`
