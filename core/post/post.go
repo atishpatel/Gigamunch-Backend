@@ -190,7 +190,7 @@ func publishPost(ctx context.Context, req *PublishPostReq, chefC chefClient, ite
 		if len(post.Photos) != 0 {
 			photo = post.Photos[0]
 		}
-		err = nC.SendSMS("6153975516", fmt.Sprintf("A new post was made. \n Title: %s \n Desc: %s \n Image: %s \n\nPostID: %s", post.Title, post.Description, photo, postID))
+		err = nC.SendSMS("6153975516", fmt.Sprintf("A new post was made. \n Title: %s \n Desc: %s \n Image: %s \n\nPostID:%s \nGigachef Name:%s", post.Title, post.Description, photo, postID, postInfo.ChefName))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to notify enis about chef(%s) making a post(%s)", req.User.ID, postID)
 		}
