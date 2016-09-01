@@ -11,7 +11,7 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
-	"appengine/datastore"
+	"google.golang.org/appengine/datastore"
 )
 
 var (
@@ -107,7 +107,10 @@ func (c *Client) PostReview(user *types.User, reviewID int64, rating int, rating
 		var subject, message string
 		if review.Text == "" {
 			subject = fmt.Sprintf("%s just wrote a review for you", review.GigamuncherName)
-			message = fmt.Sprintf("%s just gave you a %d star review. \n- Gigamunch :)", review.GigamuncherName, rating)
+			message = fmt.Sprintf("%s just gave you a %d star review on your %s. \n- Gigamunch :)",
+				review.GigamuncherName,
+				rating,
+				review.Post.Title)
 		} else {
 			subject = fmt.Sprintf("%s just wrote a review for you", review.GigamuncherName)
 			message = fmt.Sprintf("%s just gave you a %d star review. Here's what they thought about your %s: \n\"%s\" \n- Gigamunch :)",

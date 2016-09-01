@@ -17,7 +17,7 @@ import (
 	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
-	"appengine"
+	"google.golang.org/appengine"
 )
 
 const (
