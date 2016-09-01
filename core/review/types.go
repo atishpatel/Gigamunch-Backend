@@ -9,7 +9,7 @@ const (
 // Review is a review from a Gigamuncher about a post. It also contains a
 // response from the Gigachef
 type Review struct {
-	CreatedDateTime     time.Time      `json:"created_datetime" datastore:",noindex"`
+	CreatedDateTime     time.Time      `json:"created_datetime"`
 	IsEdited            bool           `json:"is_edited" datastore:",noindex"`
 	EditedDateTime      time.Time      `json:"edited_datetime" datastore:",noindex"`
 	GigachefID          string         `json:"gigachef_id"`
