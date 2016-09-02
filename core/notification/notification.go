@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	twilio "github.com/atishpatel/twiliogo"
-	"gitlab.com/atishpatel/Gigamunch-Backend/config"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/mail"

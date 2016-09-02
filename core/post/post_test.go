@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/misc/testhelper"
+	"github.com/atishpatel/Gigamunch-Backend/misc/testhelper"
 
 	"google.golang.org/appengine/aetest"
 )

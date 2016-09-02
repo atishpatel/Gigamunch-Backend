@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/account"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/account"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
 )

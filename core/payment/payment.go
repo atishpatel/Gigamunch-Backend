@@ -2,9 +2,9 @@ package payment
 
 import (
 	"github.com/atishpatel/braintree-go"
-	"gitlab.com/atishpatel/Gigamunch-Backend/config"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/urlfetch"

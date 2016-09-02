@@ -8,11 +8,11 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/notification"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
+	"github.com/atishpatel/Gigamunch-Backend/core/notification"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 // Client is a client for gigachef

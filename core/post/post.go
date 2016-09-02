@@ -5,17 +5,17 @@ import (
 	"math"
 	"time"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/notification"
+	"github.com/atishpatel/Gigamunch-Backend/core/item"
+	"github.com/atishpatel/Gigamunch-Backend/core/notification"
 
 	"appengine"
 
 	"golang.org/x/net/context"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 const (

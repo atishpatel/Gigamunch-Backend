@@ -3,13 +3,13 @@ package gigamuncher
 import (
 	"time"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
 var (

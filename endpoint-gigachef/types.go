@@ -3,8 +3,8 @@ package gigachef
 import (
 	"fmt"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
 // BaseItem is the basic stuff in an Item

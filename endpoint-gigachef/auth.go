@@ -1,8 +1,8 @@
 package gigachef
 
 import (
-	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"golang.org/x/net/context"
 )
 

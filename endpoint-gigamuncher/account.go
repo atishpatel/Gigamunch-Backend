@@ -3,9 +3,9 @@ package gigamuncher
 import (
 	"fmt"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/core/gigamuncher"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 
 	"golang.org/x/net/context"
 )
