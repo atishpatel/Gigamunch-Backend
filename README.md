@@ -34,7 +34,7 @@ gigamuncherendpoint:
   - In the 'endpoint/gigamuncher' folder.
 
 # Styling notes
-  - gigachef and gigamuncher variables should be chef and muncher respectively to
+  - gigachef and gigamuncher variables should be chef and muncher respectively to avoid
     confusion with the packages gigachef and gigamuncher
 
 # Other notes
