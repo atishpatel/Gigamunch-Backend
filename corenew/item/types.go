@@ -9,8 +9,8 @@ type Item struct {
 	CreatedDateTime     time.Time       `json:"created_datetime" datastore:",noindex"`
 	Active              bool            `json:"active" datastore:",noindex"`
 	IsCatering          bool            `json:"is_catering" datastore:",noindex"`
-	CookID              string          `json:"cook_id" datastore:",noindex"`
-	MenuID              int64           `json:"menu_id" datastore:",index"`
+	CookID              string          `json:"cook_id" datastore:",index"`
+	MenuID              int64           `json:"menu_id,string" datastore:",index"`
 	Title               string          `json:"title" datastore:",noindex"`
 	Description         string          `json:"description" datastore:",noindex"`
 	DietaryConcerns     DietaryConcerns `json:"dietary_concerns" datastore:",noindex"`
