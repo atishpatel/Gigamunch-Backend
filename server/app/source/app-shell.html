@@ -299,6 +299,8 @@
       routePageChanged: function(page) {
         this.page = page || 'home';
       },
+      // routePathChanged determines if the page is part of this app or a URL outside this app. 
+      // If the URL is outside this app, it causes the browser to go to that app.
       routePathChanged: function (path) {
         // ** all pages must be in this list
         var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about'];
