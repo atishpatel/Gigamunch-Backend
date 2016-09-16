@@ -13,7 +13,6 @@ import (
 
 	"google.golang.org/appengine"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -35,6 +34,8 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 
 	defer handleURLResp(ctx, w, resp)
+
+	time.Sleep(1 * time.Second) // check if failed to find blob file bug is fixed with this
 
 	// get file
 	blobs, _, err := blobstore.ParseUpload(req)
@@ -61,7 +62,7 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 	resp.URL = url.String()
 }
 
-func hangleGetUploadURL(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func handleGetUploadURL(w http.ResponseWriter, req *http.Request) {
 	resp := new(urlResp)
 	ctx := appengine.NewContext(req)
 	defer handleURLResp(ctx, w, resp)

@@ -2,8 +2,6 @@ package cookendpoint
 
 import (
 	"log"
-	"strconv"
-	"time"
 
 	"golang.org/x/net/context"
 
@@ -13,62 +11,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
-
-func itot(i int) time.Time {
-	return time.Unix(int64(i), 0)
-}
-
-func ttoi(t time.Time) int {
-	return int(t.Unix())
-}
-
-func ttos(t time.Time) string {
-	return strconv.FormatInt(t.Unix(), 10)
-}
-
-func stot(ts string) (time.Time, error) {
-	ti, err := strconv.ParseInt(ts, 10, 64)
-	if err != nil {
-		return time.Now(), err
-	}
-	return time.Unix(ti, 0), nil
-}
-
-func itos(i int64) string {
-	return strconv.FormatInt(i, 10)
-}
-
-func ftos(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 32)
-}
-
-func ftos64(f float64) string {
-	return strconv.FormatFloat(f, 'f', 6, 64)
-}
-
-func stoi(s string) (int64, error) {
-	return strconv.ParseInt(s, 10, 64)
-}
-
-func stoi32(s string) (int32, error) {
-	i, err := strconv.ParseInt(s, 10, 32)
-	if err != nil {
-		return 0, err
-	}
-	return int32(i), err
-}
-
-func stof(s string) (float32, error) {
-	f, err := strconv.ParseFloat(s, 32)
-	if err != nil {
-		return 0, err
-	}
-	return float32(f), nil
-}
-
-func stof64(s string) (float64, error) {
-	return strconv.ParseFloat(s, 64)
-}
 
 type coder interface {
 	GetCode() int
@@ -122,7 +64,7 @@ func init() {
 	// // item stuff
 	// register("SaveItem", "saveItem", "POST", "gigachefservice/saveItem", "Save a item.")
 	// register("GetItem", "getItem", "GET", "gigachefservice/getItem", "Get a item.")
-	// register("GetItems", "getItems", "GET", "gigachefservice/getItems", "Gets items sorted by last used.")
+	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
 	// // post stuff
 	// register("PublishPost", "publishPost", "POST", "gigachefservice/publishPost", "Publish a post.")
 	// register("GetPosts", "getPosts", "GET", "gigachefservice/getPosts", "Get a chef's posts.")

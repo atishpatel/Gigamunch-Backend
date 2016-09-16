@@ -13,12 +13,13 @@ func init() {
 	r.GET(signOutURL, handleSignout)
 
 	// r.POST("/upload", handleUpload)
-	r.GET("/get-upload-url", hangleGetUploadURL)
+	// r.GET("/get-upload-url", handleGetUploadURL)
 
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
 	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
 	r.NotFound = http.HandlerFunc(handle404)
+	http.HandleFunc("/get-upload-url", handleGetUploadURL)
 	http.HandleFunc("/upload", handleUpload)
 	http.Handle("/", r)
 }
