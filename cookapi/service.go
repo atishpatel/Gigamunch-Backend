@@ -58,16 +58,13 @@ func init() {
 	register("RefreshToken", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
 	// cook stuff
 	register("GetCook", "getCook", "GET", "cookservice/getCook", "Get the cook info.")
-	// register("UpdateProfile", "updateProfile", "POST", "gigachefservice/updateProfile", "Update chef profile.")
+	register("UpdateCook", "updateCook", "POST", "cookservice/updateCook", "Update cook information.")
 	// register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
 	// register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
 	// // item stuff
 	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save a item.")
-	// register("GetItem", "getItem", "GET", "gigachefservice/getItem", "Get a item.")
+	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get a item.")
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
-	// // post stuff
-	// register("PublishPost", "publishPost", "POST", "gigachefservice/publishPost", "Publish a post.")
-	// register("GetPosts", "getPosts", "GET", "gigachefservice/getPosts", "Get a chef's posts.")
 
 	endpoints.HandleHTTP()
 }
