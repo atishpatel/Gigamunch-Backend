@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
@@ -13,7 +14,7 @@ type cookClient interface {
 }
 
 // Save saves the item.
-func (c *Client) Save(id, menuID int64, cookID, title, desc string,
+func (c *Client) Save(user *types.User, id, menuID int64, cookID, title, desc string,
 	dietaryConcerns DietaryConcerns, ingredients, photos []string,
 	cookPricePerServing float32, minServings, maxServings int32) (int64, *Item, error) {
 	if cookID == "" {
@@ -28,6 +29,7 @@ func (c *Client) Save(id, menuID int64, cookID, title, desc string,
 		// create is a new item
 		item = &Item{
 			CreatedDateTime: time.Now(),
+			CookID:          cookID,
 		}
 	} else {
 		// get item
@@ -36,7 +38,9 @@ func (c *Client) Save(id, menuID int64, cookID, title, desc string,
 			return 0, nil, errDatastore.WithError(err).Wrapf("failed to get item(%d)", id)
 		}
 	}
-
+	if !user.IsAdmin() && item.CookID != cookID {
+		return 0, nil, errUnauthorizedAccess.Wrapf("CookID(%s) does not have permission to change item(%d)", cookID, id)
+	}
 	item.MenuID = menuID
 	item.CookID = cookID
 	item.Title = title
