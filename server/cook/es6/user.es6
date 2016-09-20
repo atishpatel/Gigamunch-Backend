@@ -30,12 +30,14 @@ class User {
     this.isVerifiedCook = this.getKthBit(jwt.perm, 1);
     this.hasAddress = this.getKthBit(jwt.perm, 4);
     this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
-    this.IsOnboard = this.getKthBit(jwt.perm, 6);
+    this.isOnboard = this.getKthBit(jwt.perm, 6);
     // update coookie to new token
     if (setCookie) {
       this.setTokenCookie(token, jwt.exp);
     }
-    document.dispatchEvent(new Event('userUpdated', { bubbles: true }));
+    document.dispatchEvent(new Event('userUpdated', {
+      bubbles: true
+    }));
   }
 
   getTokenCookie() {
@@ -43,7 +45,7 @@ class User {
     const ca = document.cookie.split(';');
     for (let i = 0; i < ca.length; i++) {
       let c = ca[i];
-      while (c.charAt(0) === ' ')c = c.substring(1);
+      while (c.charAt(0) === ' ') c = c.substring(1);
       if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
     }
     return '';

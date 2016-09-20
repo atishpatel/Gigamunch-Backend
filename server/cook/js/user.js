@@ -42,12 +42,14 @@ var User = function () {
       this.isVerifiedCook = this.getKthBit(jwt.perm, 1);
       this.hasAddress = this.getKthBit(jwt.perm, 4);
       this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
-      this.IsOnboard = this.getKthBit(jwt.perm, 6);
+      this.isOnboard = this.getKthBit(jwt.perm, 6);
       // update coookie to new token
       if (setCookie) {
         this.setTokenCookie(token, jwt.exp);
       }
-      document.dispatchEvent(new Event('userUpdated', { bubbles: true }));
+      document.dispatchEvent(new Event('userUpdated', {
+        bubbles: true
+      }));
     }
   }, {
     key: 'getTokenCookie',
