@@ -36,3 +36,10 @@ func put(ctx context.Context, id int64, menu *Menu) error {
 	_, err = datastore.Put(ctx, key, menu)
 	return err
 }
+
+func putIncomplete(ctx context.Context, menu *Menu) (int64, error) {
+	var err error
+	key := datastore.NewIncompleteKey(ctx, kindMenu, nil)
+	key, err = datastore.Put(ctx, key, menu)
+	return key.IntID(), err
+}
