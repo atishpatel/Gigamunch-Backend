@@ -30,8 +30,8 @@ func (c *Client) Get(id int64) (*Item, error) {
 	return item, nil
 }
 
-// GetCookItems returns an array of items of the cookID
-func (c *Client) GetCookItems(cookID string) ([]int64, []Item, error) {
+// GetAllByCook returns an array of items of the cookID
+func (c *Client) GetAllByCook(cookID string) ([]int64, []Item, error) {
 	ids, items, err := getCookItems(c.ctx, cookID)
 	if err != nil {
 		return nil, nil, errDatastore.WithError(err).Wrap("cannot getCookItems")
@@ -39,8 +39,8 @@ func (c *Client) GetCookItems(cookID string) ([]int64, []Item, error) {
 	return ids, items, nil
 }
 
-// GetItems returns an array of items.
-func (c *Client) GetItems(ids []int64) ([]Item, error) {
+// GetMulti returns an array of items.
+func (c *Client) GetMulti(ids []int64) ([]Item, error) {
 	items, err := getMulti(c.ctx, ids)
 	if err != nil {
 		return nil, errors.Wrap("failed to getMulti items", err)
