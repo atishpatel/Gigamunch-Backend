@@ -37,7 +37,12 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMe
 		return resp, nil
 	}
 	for i := range menuIDs {
-		menu := MenuWithItems{ID: menuIDs[i], Menu: menus[i]}
+		menu := MenuWithItems{
+			Menu: Menu{
+				ID:   menuIDs[i],
+				Menu: menus[i],
+			},
+		}
 		for j := len(itemIDs); j >= 0; j-- {
 			if items[j].MenuID == menu.ID {
 				item := Item{
