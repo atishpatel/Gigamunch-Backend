@@ -90,3 +90,13 @@ func (user *User) HasSubMerchantID() bool {
 func (user *User) SetSubMerchantID(x bool) {
 	user.Permissions = setKthBit(user.Permissions, 5, x)
 }
+
+// IsOnboard returns true if a user has completed Onboarding
+func (user *User) IsOnboard() bool {
+	return getKthBit(user.Permissions, 6)
+}
+
+// SetOnboard updates the permission of the user
+func (user *User) SetOnboard(x bool) {
+	user.Permissions = setKthBit(user.Permissions, 6, x)
+}
