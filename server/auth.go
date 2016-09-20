@@ -123,7 +123,7 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 func makeCook(ctx context.Context, user *types.User, authToken string) (string, error) {
 	// create a cook account
 	cookC := cook.New(ctx)
-	_, err := cookC.Update(user, nil, "", "", 0, nil)
+	_, err := cookC.Update(user, nil, "", "", 0, nil, "", "", "")
 	if err != nil {
 		return "", errors.Wrap("Error cookC.Update", err)
 	}

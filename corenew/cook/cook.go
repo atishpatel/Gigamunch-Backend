@@ -35,7 +35,8 @@ func (c *Client) Get(id string) (*Cook, error) {
 }
 
 // Update updates a cook's info.
-func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, bio string, deliveryRange int32, weekSchedule []WeekSchedule) (*Cook, error) {
+func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, bio string,
+	deliveryRange int32, weekSchedule []WeekSchedule, instagramID, twitterID, snapchatID string) (*Cook, error) {
 	cook, err := get(c.ctx, user.ID)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		return nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", user.ID)
@@ -66,8 +67,17 @@ func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, b
 	if bio != "" {
 		cook.Bio = bio
 	}
-	if len(weekSchedule) == 7 {
+	if len(weekSchedule) >= 7 {
 		cook.WeekSchedule = weekSchedule
+	}
+	if instagramID != "" {
+		cook.InstagramID = instagramID
+	}
+	if twitterID != "" {
+		cook.TwitterID = twitterID
+	}
+	if snapchatID != "" {
+		cook.SnapchatID = snapchatID
 	}
 	err = put(c.ctx, user.ID, cook)
 	if err != nil {
