@@ -9,13 +9,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
-// MenuWithItems is a Menu with all it's Items.
-type MenuWithItems struct {
-	ID int64 `json:"id,string"`
-	menu.Menu
-	Items []Item `json:"items"`
-}
-
 // GetMenusResp is the response for GetMenusResp.
 type GetMenusResp struct {
 	Menus []MenuWithItems      `json:"menus"`
@@ -23,7 +16,7 @@ type GetMenusResp struct {
 }
 
 // GetMenus gets the Menus for a cook.
-func (service *Service) GetMenus(ctx context.Context, req *GigatokenOnlyReq) (*GetMenusResp, error) {
+func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMenusResp, error) {
 	resp := new(GetMenusResp)
 	defer handleResp(ctx, "GetMenus", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
@@ -69,3 +62,35 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenOnlyReq) (*G
 	}
 	return resp, nil
 }
+
+// // SaveMenuReq is the request for SaveMenu.
+// type SaveMenuReq struct {
+// 	GigatokenReq
+// 	Menu Menu `json:"menu"`
+// }
+
+// type SaveMenuResp struct {
+// 	Menu MenuWithItems `json:"menu"`
+// 	ErrorOnlyResp
+// }
+
+// // SaveMenu creates or updates an Menu.
+// func (service *Service) SaveMenu(ctx context.Context, req *SaveMenuReq) (*SaveMenuResp, error) {
+// 	resp := new(SaveMenuResp)
+// 	defer handleResp(ctx, "SaveMenu", resp.Err)
+// 	user, err := validateRequestAndGetUser(ctx, req)
+// 	if err != nil {
+// 		resp.Err = errors.GetErrorWithCode(err)
+// 		return resp, nil
+// 	}
+
+// 	// create new menu
+// 	menuC := menu.New(ctx)
+// 	menuID, menu, err := menuC.Save(user, req.Menu.ID, req.Menu.CookID, req.Menu.Name, req.Menu.Color)
+// 	if err != nil {
+// 		resp.Err = errors.Wrap("failed to menuC.Save", err)
+// 		return resp, nil
+// 	}
+
+// 	return resp, nil
+// }

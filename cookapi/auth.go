@@ -14,7 +14,7 @@ type RefreshTokenResp struct {
 }
 
 // RefreshToken refreshs a token. A token should be refreshed at least ever hour.
-func (service *Service) RefreshToken(ctx context.Context, req *GigatokenOnlyReq) (*RefreshTokenResp, error) {
+func (service *Service) RefreshToken(ctx context.Context, req *GigatokenReq) (*RefreshTokenResp, error) {
 	resp := new(RefreshTokenResp)
 	defer handleResp(ctx, "RefreshToken", resp.Err)
 	var err error

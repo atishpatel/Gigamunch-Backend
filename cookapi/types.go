@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
@@ -13,21 +14,39 @@ type Item struct {
 	item.Item
 }
 
-// GigatokenOnlyReq is a request with only a gigatoken input
-type GigatokenOnlyReq struct {
+// Menu is a Menu.
+type Menu struct {
+	ID int64 `json:"id,string"`
+	menu.Menu
+}
+
+// MenuWithItems is a Menu with all it's Items.
+type MenuWithItems struct {
+	Menu
+	Items []Item `json:"items"`
+}
+
+// GigatokenReq is a request with only a gigatoken input
+type GigatokenReq struct {
 	Gigatoken string `json:"gigatoken"`
 }
 
-func (req *GigatokenOnlyReq) gigatoken() string {
+func (req *GigatokenReq) gigatoken() string {
 	return req.Gigatoken
 }
 
 // valid validates a req
-func (req *GigatokenOnlyReq) valid() error {
+func (req *GigatokenReq) valid() error {
 	if req.Gigatoken == "" {
 		return fmt.Errorf("Gigatoken is empty.")
 	}
 	return nil
+}
+
+// IDReq is for request with only and ID and Gigatoken
+type IDReq struct {
+	ID int64 `json:"id,string"`
+	GigatokenReq
 }
 
 // ErrorOnlyResp is a response with only an error with code

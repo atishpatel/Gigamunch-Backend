@@ -15,7 +15,7 @@ type CookResp struct {
 }
 
 // GetCook is an endpoint that get the chef info.
-func (service *Service) GetCook(ctx context.Context, req *GigatokenOnlyReq) (*CookResp, error) {
+func (service *Service) GetCook(ctx context.Context, req *GigatokenReq) (*CookResp, error) {
 	resp := new(CookResp)
 	defer handleResp(ctx, "GetCook", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
@@ -61,7 +61,8 @@ func (service *Service) UpdateCook(ctx context.Context, req *UpdateCookReq) (*Co
 		return resp, nil
 	}
 	cookC := cook.New(ctx)
-	cook, err := cookC.Update(user, &req.Cook.Address, req.Cook.PhoneNumber, req.Cook.Bio, req.Cook.DeliveryRange, req.Cook.WeekSchedule)
+	cook, err := cookC.Update(user, &req.Cook.Address, req.Cook.PhoneNumber, req.Cook.Bio, req.Cook.DeliveryRange,
+		req.Cook.WeekSchedule, req.Cook.InstagramID, req.Cook.TwitterID, req.Cook.SnapchatID)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to update cook")
 		return resp, nil

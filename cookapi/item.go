@@ -9,12 +9,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// Menu is a Menu.
-type Menu struct {
-	ID int64 `json:"id,string"`
-	menu.Menu
-}
-
 // SaveItemReq is the request for SaveItem.
 type SaveItemReq struct {
 	Gigatoken string `json:"gigatoken"`
@@ -34,15 +28,15 @@ func (req *SaveItemReq) valid() error {
 	return nil
 }
 
-// ItemOnlyResp is a response with only an Item and err.
-type ItemOnlyResp struct {
+// ItemResp is a response with only an Item and err.
+type ItemResp struct {
 	Item Item                 `json:"item"`
 	Err  errors.ErrorWithCode `json:"err"`
 }
 
 // SaveItem creates or updates an Item. If the menu does not exist, it creates the menu
-func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemOnlyResp, error) {
-	resp := new(ItemOnlyResp)
+func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemResp, error) {
+	resp := new(ItemResp)
 	defer handleResp(ctx, "SaveItem", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
@@ -53,7 +47,7 @@ func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemOn
 	if menuID == 0 {
 		// create new menu
 		menuC := menu.New(ctx)
-		menuID, _, err = menuC.Save(menuID, user.ID, req.Menu.Name, req.Menu.Color)
+		menuID, _, err = menuC.Save(user, menuID, user.ID, req.Menu.Name, req.Menu.Color)
 		if err != nil {
 			resp.Err = errors.Wrap("failed to menuC.Save", err)
 			return resp, nil
@@ -61,7 +55,7 @@ func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemOn
 	}
 
 	itemC := item.New(ctx)
-	id, item, err := itemC.Save(req.Item.ID, menuID, user.ID, req.Item.Title, req.Item.Description,
+	id, item, err := itemC.Save(user, req.Item.ID, menuID, user.ID, req.Item.Title, req.Item.Description,
 		req.Item.DietaryConcerns, req.Item.Ingredients, req.Item.Photos,
 		req.Item.CookPricePerServing, req.Item.MinServings, req.Item.MaxServings)
 	if err != nil {
@@ -69,6 +63,26 @@ func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemOn
 		return resp, nil
 	}
 	resp.Item.ID = id
+	resp.Item.Item = *item
+	return resp, nil
+}
+
+// GetItem gets an Item.
+func (service *Service) GetItem(ctx context.Context, req *IDReq) (*ItemResp, error) {
+	resp := new(ItemResp)
+	defer handleResp(ctx, "GetItem", resp.Err)
+	// user, err := validateRequestAndGetUser(ctx, req)
+	// if err != nil {
+	// 	resp.Err = errors.GetErrorWithCode(err)
+	// 	return resp, nil
+	// }
+	itemC := item.New(ctx)
+	item, err := itemC.Get(req.ID)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to itemC.Get", err)
+		return resp, nil
+	}
+	resp.Item.ID = req.ID
 	resp.Item.Item = *item
 	return resp, nil
 }
