@@ -1,10 +1,17 @@
-package cookendpoint
+package cookapi
 
 import (
 	"fmt"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
+
+// Item is an Item.
+type Item struct {
+	ID int64 `json:"id,string"`
+	item.Item
+}
 
 // GigatokenOnlyReq is a request with only a gigatoken input
 type GigatokenOnlyReq struct {

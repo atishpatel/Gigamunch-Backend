@@ -1,4 +1,4 @@
-package cookendpoint
+package cookapi
 
 import (
 	"context"
