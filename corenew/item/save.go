@@ -1,6 +1,16 @@
 package item
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
+)
+
+type cookClient interface {
+	UpdateNumItemsBy(string, int32) error
+}
 
 // Save saves the item.
 func (c *Client) Save(id, menuID int64, cookID, title, desc string,
@@ -44,6 +54,11 @@ func (c *Client) Save(id, menuID int64, cookID, title, desc string,
 		if err != nil {
 			return 0, nil, errDatastore.WithError(err).Wrapf("failed to putIncomplete Item(%v)", *item)
 		}
+		cookC := getCookClient(c.ctx)
+		err = cookC.UpdateNumItemsBy(cookID, 1)
+		if err != nil {
+			utils.Errorf(c.ctx, "failed to cookC.UpdateNumItemsBy: %+v", err)
+		}
 	} else {
 		// update item
 		err = put(c.ctx, id, item)
@@ -52,4 +67,8 @@ func (c *Client) Save(id, menuID int64, cookID, title, desc string,
 		}
 	}
 	return id, item, nil
+}
+
+var getCookClient = func(ctx context.Context) cookClient {
+	return cook.New(ctx)
 }
