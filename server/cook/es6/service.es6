@@ -10,26 +10,26 @@ class Service {
   }
 
   endpointLoaded() {
-    this.loaded = true;
-    this.service = gapi.client.cookservice;
-    // remove functions from callQueue after calling them.
-    if (this.callQueue !== undefined || this.callQueue !== null) {
-      for (const fn of this.callQueue) {
-        fn();
+      this.loaded = true;
+      this.service = gapi.client.cookservice;
+      // remove functions from callQueue after calling them.
+      if (this.callQueue !== undefined || this.callQueue !== null) {
+        for (const fn of this.callQueue) {
+          fn();
+        }
+        this.callQueue = [];
       }
-      this.callQueue = [];
+      this.refreshToken();
+      ga('send', {
+        hitType: 'timing',
+        timingCategory: 'endpoint',
+        timingVar: 'load',
+        timingValue: window.performance.now(),
+      });
     }
-    this.refreshToken();
-    ga('send', {
-      hitType: 'timing',
-      timingCategory: 'endpoint',
-      timingVar: 'load',
-      timingValue: window.performance.now(),
-    });
-  }
-  /*
-   * Cook
-   */
+    /*
+     * Cook
+     */
   getCook(callback) {
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -52,50 +52,52 @@ class Service {
   }
 
   updateCook(cook, callback) {
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.updateCook(cook, callback);
-      });
-      return;
+      if (!this.loaded) {
+        this.callQueue.push(() => {
+          this.updateCook(cook, callback);
+        });
+        return;
+      }
+      const request = {
+        gigatoken: this.getToken(),
+        cook,
+      };
+      this
+        .service
+        .updateCook(request)
+        .execute(
+          (resp) => {
+            this.logError('updateCook', resp.err);
+            callback(resp.cook, resp.err);
+            setTimeout(() => {
+              this.refreshToken();
+            }, 1);
+          }
+        );
     }
-    const request = {
-      gigatoken: this.getToken(),
-      cook,
-    };
-    this
-      .service
-      .updateCook(request)
-      .execute(
-        (resp) => {
-          this.logError('updateCook', resp.err);
-          callback(resp.cook, resp.err);
-          setTimeout(() => { this.refreshToken(); }, 1);
-        }
-      );
-  }
-  /*
-   * Payout Method
-   */
-  // getSubMerchant(callback) {
-  //   if (!this.loaded) {
-  //     this.callQueue.push(() => {
-  //       this.getSubMerchant(callback);
-  //     });
-  //     return;
-  //   }
-  //   const request = {
-  //     gigatoken: this.getToken(),
-  //   };
-  //   this
-  //     .service
-  //     .getSubMerchant(request)
-  //     .execute(
-  //       (resp) => {
-  //         this.logError('getSubMerchant', resp.err);
-  //         callback(resp.sub_merchant, resp.err);
-  //       }
-  //     );
-  // }
+    /*
+     * Payout Method
+     */
+    // getSubMerchant(callback) {
+    //   if (!this.loaded) {
+    //     this.callQueue.push(() => {
+    //       this.getSubMerchant(callback);
+    //     });
+    //     return;
+    //   }
+    //   const request = {
+    //     gigatoken: this.getToken(),
+    //   };
+    //   this
+    //     .service
+    //     .getSubMerchant(request)
+    //     .execute(
+    //       (resp) => {
+    //         this.logError('getSubMerchant', resp.err);
+    //         callback(resp.sub_merchant, resp.err);
+    //       }
+    //     );
+    // }
 
   // updateSubMerchant(submerchant, callback) {
   //   if (!this.loaded) {
@@ -123,29 +125,29 @@ class Service {
    * Menu
    */
   getMenus(callback) {
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.getMenus(callback);
-      });
-      return;
-    }
+      if (!this.loaded) {
+        this.callQueue.push(() => {
+          this.getMenus(callback);
+        });
+        return;
+      }
 
-    const request = {
-      gigatoken: this.getToken(),
-    };
-    this
-      .service
-      .getMenus(request)
-      .execute(
-        (resp) => {
-          this.logError('getMenus', resp.err);
-          callback(resp.menus, resp.err);
-        }
-      );
-  }
-  /*
-   * Item
-   */
+      const request = {
+        gigatoken: this.getToken(),
+      };
+      this
+        .service
+        .getMenus(request)
+        .execute(
+          (resp) => {
+            this.logError('getMenus', resp.err);
+            callback(resp.menus, resp.err);
+          }
+        );
+    }
+    /*
+     * Item
+     */
   getItem(id, callback) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
@@ -171,39 +173,39 @@ class Service {
   }
 
   saveItem(item, callback) {
-    // if api is not loaded, add to callQueue
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.saveItem(item, callback);
-      });
-      return;
+      // if api is not loaded, add to callQueue
+      if (!this.loaded) {
+        this.callQueue.push(() => {
+          this.saveItem(item, callback);
+        });
+        return;
+      }
+
+      const request = {
+        gigatoken: this.getToken(),
+        item,
+      };
+
+      this
+        .service
+        .saveItem(request)
+        .execute(
+          (resp) => {
+            this.logError('saveItem', resp.err);
+            callback(resp.item, resp.err);
+          }
+        );
     }
-
-    const request = {
-      gigatoken: this.getToken(),
-      item,
-    };
-
-    this
-      .service
-      .saveItem(request)
-      .execute(
-        (resp) => {
-          this.logError('saveItem', resp.err);
-          callback(resp.item, resp.err);
-        }
-      );
-  }
-  /*
-   * Post
-   */
-  // getPosts(startLimit, endLimit, callback) {
-  //   if (!this.loaded) {
-  //     this.callQueue.push(() => {
-  //       this.getPosts(startLimit, endLimit, callback);
-  //     });
-  //     return;
-  //   }
+    /*
+     * Post
+     */
+    // getPosts(startLimit, endLimit, callback) {
+    //   if (!this.loaded) {
+    //     this.callQueue.push(() => {
+    //       this.getPosts(startLimit, endLimit, callback);
+    //     });
+    //     return;
+    //   }
 
   //   const request = {
   //     gigatoken: this.getToken(),
@@ -243,28 +245,28 @@ class Service {
   // }
 
   refreshToken() {
-    // if api is not loaded, add to _callQueue
-    if (!this.loaded) {
-      this.callQueue.push(this.refreshToken);
-      return;
-    }
-    const request = {
-      gigatoken: this.getToken(),
-    };
-    this
-      .service
-      .refreshToken(request)
-      .execute(
-        (resp) => {
-          if (!this.logError('refreshToken', resp.err)) {
-            COOK.User.update(resp.gigatoken);
+      // if api is not loaded, add to _callQueue
+      if (!this.loaded) {
+        this.callQueue.push(this.refreshToken);
+        return;
+      }
+      const request = {
+        gigatoken: this.getToken(),
+      };
+      this
+        .service
+        .refreshToken(request)
+        .execute(
+          (resp) => {
+            if (!this.logError('refreshToken', resp.err)) {
+              COOK.User.update(resp.gigatoken);
+            }
           }
-        }
-      );
-  }
-  /*
-   * utils
-   */
+        );
+    }
+    /*
+     * utils
+     */
   getToken() {
     return COOK.User.token;
   }
@@ -300,7 +302,9 @@ function initService() {
     default:
       apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
   }
-  gapi.client.load('cookservice', 'v1', () => { COOK.Service.endpointLoaded(); }, apiRoot);
+  gapi.client.load('cookservice', 'v1', () => {
+    COOK.Service.endpointLoaded();
+  }, apiRoot);
   ga('send', {
     hitType: 'timing',
     timingCategory: 'endpoint',

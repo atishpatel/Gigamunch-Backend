@@ -1,41 +1,47 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="item-list.html">
-
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="item-list.html">
 <dom-module id="cook-menu">
   <template>
-    <style>
-      :host {
-        display: block;
-      }
+  <style>
+    :host {
+      display: block;
+    }
+    
+    .menu-name {
+      font-size: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e8e8e8;
+    }
 
-      .menu-name {
-        font-size: 18px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #e8e8e8;
-      }
-    </style>
+  </style>
 
-    <span id="menuName" class="menu-name">[[menu.name]]</span>
-    <item-list items="[[menu.items]]"
-               on-additem="additem">
-    </item-list>
+  <span id="menuName"
+        class="menu-name">[[menu.name]]</span>
+  <item-list items="[[menu.items]]"
+             on-additem="additem">
+  </item-list>
   </template>
-
   <script>
     Polymer({
       is: 'cook-menu',
       properties: {
-          menu: {
-              type: Object,
-              notify: true,
-              reflectToAttribute: true,
-              value: {id: '0', name: 'New Menu', color: '#81bdcb'},
-              observer: 'menuUpdated',
+        menu: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          value: {
+            id: '0',
+            name: 'New Menu',
+            color: '#81bdcb'
           },
-          name: {
-            type: String,
-            notify: true,
-          }
+          observer: 'menuUpdated',
+        },
+        name: {
+          type: String,
+          notify: true,
+        }
       },
       menuUpdated: function() {
         this.$.menuName.style.color = this.menu.color;
@@ -51,8 +57,11 @@
           item = {}
         }
         item.menu_id = this.menu_id;
-        this.fire('addmenuitem', {'item': item});
+        this.fire('addmenuitem', {
+          'item': item
+        });
       },
     });
+
   </script>
 </dom-module>
