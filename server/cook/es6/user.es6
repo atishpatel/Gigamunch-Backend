@@ -26,8 +26,8 @@ class User {
       }
     }
     // set permissions
-    this.isChef = this.getKthBit(jwt.perm, 0);
-    this.isVerifiedChef = this.getKthBit(jwt.perm, 1);
+    this.isCook = this.getKthBit(jwt.perm, 0);
+    this.isVerifiedCook = this.getKthBit(jwt.perm, 1);
     this.hasAddress = this.getKthBit(jwt.perm, 4);
     this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
     this.IsOnboard = this.getKthBit(jwt.perm, 6);
