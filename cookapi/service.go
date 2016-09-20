@@ -62,7 +62,7 @@ func init() {
 	// register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
 	// register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
 	// // item stuff
-	// register("SaveItem", "saveItem", "POST", "gigachefservice/saveItem", "Save a item.")
+	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save a item.")
 	// register("GetItem", "getItem", "GET", "gigachefservice/getItem", "Get a item.")
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
 	// // post stuff
