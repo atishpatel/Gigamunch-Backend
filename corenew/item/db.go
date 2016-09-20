@@ -20,6 +20,13 @@ func put(ctx context.Context, id int64, item *Item) error {
 	return err
 }
 
+func putIncomplete(ctx context.Context, item *Item) (int64, error) {
+	var err error
+	key := datastore.NewIncompleteKey(ctx, kindItem, nil)
+	key, err = datastore.Put(ctx, key, item)
+	return key.IntID(), err
+}
+
 // getCookItems returns a list of Items by ordered by MenuID
 func getCookItems(ctx context.Context, cookID string) ([]int64, []Item, error) {
 	query := datastore.NewQuery(kindItem).
