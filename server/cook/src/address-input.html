@@ -1,0 +1,120 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/google-apis/google-maps-api.html">
+
+<link rel="import" href="app-input.html">
+
+<dom-module id="address-input">
+  <template>
+    <style include="app-input">
+      :host {
+        display: block;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+      }
+
+      .row > *:not(:first-child) {
+        margin-left: 8px;
+      }
+
+      .flex-1 {
+        flex: 1;
+      }
+
+      .flex-2 {
+        flex: 2;
+      }
+
+      .flex-3 {
+        flex: 3;
+      }
+
+      label {
+        line-height: 20px;
+      }
+
+      paper-progress {
+        width: 100%;
+        padding-top: 20px;
+      } 
+    </style>
+    <google-maps-api id="mapsapi" api-key="AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y" on-api-load="mapsLoaded"></google-maps-api>
+      <div class="row">
+        <app-input class="flex-1">
+          <input id="addressInput"
+              placeholder="Apt #" value="{{address.apt}}">
+          <app-md-decorator aria-hidden="true">
+            <label>Apt #</label>
+            <app-underline></app-underline>
+          </app-md-decorator>
+        </app-input>
+        <app-input  class="flex-3">
+          <input id="addressInput"
+              placeholder="Enter Address*" required>
+          <app-md-decorator error-message="Invalid Address" aria-hidden="true">
+            <label>Enter Address</label>
+            <app-underline></app-underline>
+          </app-md-decorator>
+        </app-input>
+      </div>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'address-input',
+
+      properties: {
+        address: {
+            type: Object,
+            notify: true,
+            reflectToAttribute: true,
+        },
+        autocomplete: {
+          type: Object,
+        },
+      },
+      selected: function () {
+
+      },
+      mapsLoaded: function() {
+        var addressInput = this.$.addressInput;
+        this.autocomplete = new this.$.mapsapi.api.places.Autocomplete(addressInput, {types: ['address']});
+        this.autocomplete.addListener('place_changed', this.autocompleteSelected.bind(this));
+      },
+      autocompleteSelected: function() {
+        var componentForm = {
+          street_number: 'short_name',
+          route: 'long_name',
+          locality: 'long_name',
+          administrative_area_level_1: 'short_name',
+          country: 'long_name',
+          postal_code: 'short_name'
+        };
+        // Get the place details from the autocomplete object.
+        var place = this.autocomplete.getPlace();
+
+        for (var component in componentForm) {
+          // document.getElementById(component).value = '';
+        }
+
+        // Get each component of the address from the place details
+        // and fill the corresponding field on the form.
+        for (var i = 0; i < place.address_components.length; i++) {
+          var addressType = place.address_components[i].types[0];
+          if (componentForm[addressType]) {
+            var val = place.address_components[i][componentForm[addressType]];
+            // document.getElementById(addressType).value = val;
+          }
+        }
+      },
+      addressChanged: function() {
+
+      }
+    });
+  </script>
+</dom-module>

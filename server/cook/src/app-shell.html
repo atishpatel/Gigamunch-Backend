@@ -1,0 +1,234 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="item-form.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="app-shell">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        color: var(--primary-text-color);
+      }
+
+      .content {
+        max-width: var(--max-content-width);
+        margin: auto;
+      }
+
+      app-header {
+        color: var(--primary-color);
+        background-color: #fff;
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      .drawer-list {
+        margin: 0 20px;
+      }
+
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--link-color);
+        line-height: 40px;
+      }
+
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+
+      .full-screen-dialog {
+        position: fixed;
+        overflow-x: hidden;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .full-screen-dialog > paper-dialog-scrollable {
+        padding: 0;
+      }
+
+      .full-screen-dialog-close-icon {
+        margin: 16px 0 0 16px;
+      }
+
+      .full-screen-dialog-content {
+        padding: 24px;
+      }
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="[[baseurl]]/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+    <iron-media-query 
+        query="max-width: 767px" 
+        query-matches="{{smallScreen}}">
+    </iron-media-query>
+
+    <paper-dialog id="itemDialog" class="full-screen-dialog">
+      <paper-dialog-scrollable>
+        <div>
+          <paper-icon-button class="full-screen-dialog-close-icon" icon="app:close" dialog-dismiss></paper-icon-button>
+          <span class="toolbar-title">[[itemFormTitle]]</span>
+        </div>
+        <item-form id="itemForm" 
+                   class="full-screen-dialog-content content"
+                   title="{{itemFormTitle}}"
+                   item="{{item}}">
+        </item-form>
+      </paper-dialog-scrollable>
+    </paper-dialog>
+
+    <app-drawer-layout fullbleed force-narrow>
+      <!-- Drawer content -->
+      <app-drawer>
+        <app-toolbar>Gigamunch</app-toolbar>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a name="view1" href="../view1">View One</a>
+        </iron-selector>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+
+        <app-header condenses reveals effects="waterfall">
+          <app-toolbar class="content">
+            <paper-icon-button icon="app:menu" drawer-toggle></paper-icon-button>
+            <div main-title>Gigamunch</div>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="view404"
+            role="main">
+          <kitchen-page id="kitchen" name="kitchen"></kitchen-page>
+          <onboard-steps id="onboard" name="onboard" smallScreen="[[smallScreen]]"></onboard-steps>
+          <my-view404 name="view404"></my-view404>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'app-shell',
+
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged'
+        },
+        route: {
+          type: Object,
+          notify: true,
+        },
+        subroute: {
+          type: Object,
+          notify: true,
+        },
+        item: {
+          type: Object,
+          notify: true,
+        },
+      },
+
+      observers: [
+        '_routePageChanged(routeData.page)',
+        '_pageOrScreenChanged(page, smallScreen)',
+      ],
+      listeners: {
+        'addmenuitem': 'addMenuItem',
+      },
+      addMenuItem: function(e) {
+        console.log('addmenuitem called', e.detail.item);
+        this.set('item', e.detail.item);
+        this.$.itemDialog.open();
+        this.$.itemForm.selected();
+      },
+      ready: function() {
+
+        ga('send', {
+          hitType: 'timing',
+          timingCategory: 'shell',
+          timingVar: 'ready',
+          timingValue: window.performance.now(),
+        });
+      },
+
+      _routePageChanged: function(page) {
+        this.page = page || 'dashboard';
+      },
+
+      _pageChanged: function(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageURL;
+        var element;
+        switch (page) {
+          case 'onboard':
+            resolvedPageURL = this.resolveUrl('onboard-steps.html');
+            element = this.$.onboard;
+            break; 
+          case 'kitchen':
+            resolvedPageURL = this.resolveUrl('kitchen-page.html');
+            element = this.$.kitchen;
+            break; 
+          default:
+            resolvedPageURL = this.resolveUrl('my-' + page + '.html');
+        }
+        this.importHref(resolvedPageURL, function() {
+          try {
+            element.selected();
+          } catch (err) {
+            console.warn(err);
+          }
+        }, this._showPage404, true);
+      },
+      _pageOrScreenChanged: function (page, smallScreen) {
+        // var backPage = (page === 'edititem' || page === 'postitem'
+        //   || page === 'updateprofile' || page === 'updatepayout');
+        // this.$.arrowBack.toggleClass('hide', !backPage);
+        // this.$.menuIcon.toggleClass('hide', (!smallScreen || backPage));
+        // if (smallScreen || backPage) {
+        //   this.$.toolbarRight.className += ' hide';
+        // } else {
+        //   this.$.toolbarRight.className = this.$.toolbarRight.className.replace(/hide/g, '');
+        // }
+      },
+      titleUpdated: function (title) {
+        document.title = title + ' - Gigachef | Gigamunch';
+      },
+      _showPage404: function() {
+        this.page = 'view404';
+      }
+    });
+  </script>
+</dom-module>

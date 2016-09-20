@@ -1,0 +1,96 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+<dom-module id="placeholder-img">
+
+  <template>
+
+    <style>
+
+      :host {
+        display: block;
+        overflow: hidden;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      iron-icon {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: 0.3s opacity;
+      }
+
+      img {
+        display: hidden;
+        width: 0px;
+        height: 0px;
+      }
+
+    </style>
+
+    <iron-icon id="icon" icon="[[icon]]" alt$="[[alt]]"></iron-icon>
+    <img id="img" alt$="[[alt]]" on-load="_onImgLoad" on-error="_onImgError">
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'placeholder-img',
+
+      properties: {
+
+        alt: String,
+
+        src: {
+          type: String,
+          observer: '_srcChanged'
+        },
+
+        placeholderIcon: {
+          type: String,
+          notify: true
+        },
+
+        placeholderImg: {
+          type: String,
+          observer: '_placeholderImgChanged'
+        },
+
+      },
+
+      _srcChanged: function(src) {
+        this.$.img.removeAttribute('src');
+        this.$.img.style.transition = '';
+        this.$.img.style.opacity = 0;
+        if (src) {
+          this.$.img.src = src;
+
+          // this.$.icon.hidden = true;
+        }
+      },
+
+      _onImgLoad: function() {
+        this.$.icon.style.transition = '0.3s opacity';
+        this.$.icon.style.opacity = 0;
+        this.style.backgroundImage = 'url(\'' + this.$.img.src + '\')';
+      },
+
+      _onImgError: function() {
+        if (!this.placeholderImg) {
+          this.$.img.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#CCC" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>');
+        }
+      },
+
+      _placeholderImgChanged: function(placeholder) {
+        this.style.backgroundImage = 'url(\'' + placeholder + '\')';
+      }
+
+    });
+
+  </script>
+
+</dom-module>

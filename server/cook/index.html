@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>Cook | Gigamunch</title>
+
+    <base href="/cook/">
+
+    <link rel="manifest" href="manifest.json">
+
+    <!-- See https://goo.gl/qRE0vM -->
+    <meta name="theme-color" content="#fffff">
+
+    <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Cook by Gigamunch">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cook by Gigamunch">
+
+    <!-- Homescreen icons -->
+    <link rel="apple-touch-icon" href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-circle.svg">
+    <link rel="apple-touch-icon" sizes="72x72" href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-circle.svg">
+    <link rel="apple-touch-icon" sizes="96x96" href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-circle.svg">
+    <link rel="apple-touch-icon" sizes="144x144" href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-144.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-circle.svg">
+
+    <!-- Tile icon for Windows 8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-144.png">
+    <meta name="msapplication-TileColor" content="#ff7043">
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <script async src="https://www.google-analytics.com/analytics.js"></script>
+    <script>
+      // Setup Polymer options
+      window.Polymer = {
+        dom: 'shadow',
+        lazyRegister: true
+      };
+
+      // Load webcomponentsjs polyfill if browser does not support native Web Components
+      (function() {
+        'use strict';
+
+        var onload = function() {
+          // For native Imports, manually fire WebComponentsReady so user code
+          // can use the same code path for native and polyfill'd imports.
+          if (!window.HTMLImports) {
+            document.dispatchEvent(
+              new CustomEvent('WebComponentsReady', {bubbles: true})
+            );
+          }
+        };
+
+        var webComponentsSupported = (
+          'registerElement' in document
+          && 'import' in document.createElement('link')
+          && 'content' in document.createElement('template')
+        );
+
+        if (!webComponentsSupported) {
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = '../bower_components/webcomponentsjs/webcomponents-lite.min.js';
+          script.onload = onload;
+          document.head.appendChild(script);
+        } else {
+          onload();
+        }
+      })();
+
+      // Load pre-caching Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/cook/service-worker.js');
+        });
+      }
+
+      // Set Environment
+    var COOK = COOK || {};
+    COOK.isDev = false;
+    COOK.isStage = false;
+    COOK.isProd = false;
+    switch (location.hostname) {
+      case 'localhost':
+        COOK.isDev = true;
+        break;
+      case 'gigamunch-omninexus-dev.appspot.com':
+        COOK.isStage = true;
+        break;
+      default:
+        COOK.isProd = true;
+    }
+
+    // Google Analytics
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    var ua = COOK.isProd ? 'UA-71567908-1' : 'UA-71567908-4';
+    ga('create', ua, 'auto');
+    ga('send', 'pageview');
+    // Setup error tracking before anything else runs.
+    window.onerror = function(message, file, lineNumber, columnNumber, error) {
+      console.log("calling ga send error");
+      // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
+      try {
+        // Some browsers don't support error param yet.
+        if (error !== undefined) {
+          message = error.stack;
+        }
+        ga('send', 'event', 'error', file + ':' + lineNumber, message);
+      } catch (e) {
+        // no-op
+      }
+    };
+    ga('send', {
+      hitType: 'timing',
+      timingCategory: 'index',
+      timingVar: 'load',
+      timingValue: window.performance.now(),
+    });
+    // End Google Analytics
+
+    // Upgrade browser
+    // Code from Google IO 2016
+    // Check if browser is supported by web components polyfill.
+    // Feature detection isn't sufficient; webcomponentsjs attempts to polyfill
+    // missing features, but some browsers are known to not work under it.
+    var supported = (function whatBrowserYouBe() {
+      var uaString = navigator.userAgent;
+
+      // Sorry IE < 10.
+      var msie = /MSIE +([\d\.]+)/.exec(uaString);
+      if (msie && msie[1]) {
+        if (msie[1] === '7.0') {
+          var tridentVersion = /Trident\/(\d.\d)/.exec(uaString);
+          if (tridentVersion && tridentVersion[1]) {
+            return parseInt(tridentVersion[1], 10) >= 6;
+          } else {
+            return false;
+          }
+        } else {
+          return parseInt(msie[1], 10) >= 10;
+        }
+      }
+      // Sorry older Android browser.
+      if (uaString.indexOf('Chrome') === -1 && uaString.indexOf('Android') !== -1) {
+        return !/^Google/.test(navigator.vendor);
+      }
+      // Sorry Opera < 15.
+      if (uaString.indexOf('Opera') !== -1) {
+        return false;
+      }
+      // Everyone else goes through.
+      return true;
+    })();
+
+    if (!supported) {
+      var redirectToUpgradePage = function() {
+        window.location = "/upgrade";
+      };
+      // Sends a pageview here because this code will run before IOWA.Analytics is initialized.
+      ga('send', 'pageview');
+      ga('send', 'event', 'Polymer', 'unsupported-browser', navigator.userAgent, {
+        hitCallback: redirectToUpgradePage
+      });
+      // Adds a timeout to redirect in the event that analytics.js fails to
+      // load or is blocked by a browser extension.
+      setTimeout(redirectToUpgradePage, 5000);
+    }
+    </script>
+
+    <link rel="import" href="src/app-shell.html">
+
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        line-height: 1.5;
+        min-height: 100vh;
+        background-color: #eeeeee;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/user.js"></script>
+    <script src="js/service.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=initService"></script>
+
+    <app-shell id="app" baseurl="/cook"></app-shell>
+    
+    <script>
+      var app = document.querySelector('#app');
+    </script>
+  </body>
+</html>

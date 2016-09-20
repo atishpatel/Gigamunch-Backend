@@ -1,0 +1,38 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="menu-list.html">
+
+<dom-module id="kitchen-page">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      #spinner {
+          margin: auto;
+      }
+    </style>
+
+    <paper-spinner id="spinner" hidden></paper-spinner>
+    <menu-list id="menuList" menus="[[menus]]"></menu-list>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'kitchen-page',
+      properties: {
+          menus: {
+              type: Array,
+              notify: true,
+              value: [],
+          },
+      },
+      selected: function() {
+
+      },
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,58 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="item-list.html">
+
+<dom-module id="cook-menu">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .menu-name {
+        font-size: 18px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e8e8e8;
+      }
+    </style>
+
+    <span id="menuName" class="menu-name">[[menu.name]]</span>
+    <item-list items="[[menu.items]]"
+               on-additem="additem">
+    </item-list>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'cook-menu',
+      properties: {
+          menu: {
+              type: Object,
+              notify: true,
+              reflectToAttribute: true,
+              value: {id: '0', name: 'New Menu', color: '#81bdcb'},
+              observer: 'menuUpdated',
+          },
+          name: {
+            type: String,
+            notify: true,
+          }
+      },
+      menuUpdated: function() {
+        this.$.menuName.style.color = this.menu.color;
+        if (this.menu.name === '') {
+          this.name = 'Unnamed';
+        } else {
+          this.name = this.menu.name;
+        }
+      },
+      additem: function(e) {
+        var item = e.detail.item;
+        if (item === undefined || item === null) {
+          item = {}
+        }
+        item.menu_id = this.menu_id;
+        this.fire('addmenuitem', {'item': item});
+      },
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,118 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-stepper/paper-stepper.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="profile-fields.html">
+<link rel="import" href="menu-list.html">
+
+<dom-module id="onboard-steps">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        background: white;
+        --paper-stepper-horizontal-opened-height: 90vh;
+      }
+
+      .header {
+        padding-bottom: 24px;
+      }
+
+      .header-title {
+        font-size: 18px;
+      }
+
+      .header-desc {
+        font-size: 12px;
+        line-height: 14px;
+        color: var(--secondary-text-color);
+      }
+
+      .step-link-content {
+        padding: 32px 24px 24px 24px;
+      }
+
+      /* not smallScreen */
+      @media (min-width: 767px) {
+        paper-step > * {
+          padding: 0 24px;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+      }
+    </style>
+
+    <div class="">
+        <paper-stepper id="stepper" selected="{{selectedStep}}" opened alternative-label linear>
+            <paper-step id="perfStep" label="Your Preferences" editable>
+              <form
+                id="prefForm"
+                is="iron-form"
+                method="post"
+                action="#">
+                <div class="header">
+                  <div class="header-title">Your Preferences</div>
+                  <div class="header-desc">Let's get started! Tell us a bit about yourself.</div>
+                </div>
+                <profile-fields
+                  id="profileFields"
+                  photo-url="{{cook.photo_url}}"
+                  name="{{cook.name}}"
+                  phone-number="{{cook.phone_number}}"
+                  address="{{cook.address}}">
+                </profile-fields>
+                <paper-checkbox id="agreeCheckbox" required>I agree to the <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a></paper-checkbox>
+              </form>
+            </paper-step>
+            <paper-step label="Add Your Creations" editable saved>
+              <div class="header">
+                <div class="header-title">Add Your Creations</div>
+                <div class="header-desc">Make Menus like "Paleo Palace" and "Atish's Desserts".<br>Add as many Items as you can to the Menus. More Items more changes to be discovered!</div>
+              </div>
+              <menu-list></menu-list>
+            </paper-step>
+            <paper-step label="Get Verified" editable>
+              <div class="header">
+                <div class="header-title">Submit Your Background Check</div>
+                <div class="header-desc"></div>
+              </div>
+              <a class="step-link-content" href="https://checkr.com/apply/gigamunch/0347ac549c16">Submit a Checkr Application</a>
+              <div class="header">
+                <div class="header-title">Schedule a Kitchen Visit</div>
+                <div class="header-desc">We have a relationship with all our cook. The Kitchen Visit is a great opportunity for us to meet you and take pictures of your creations!</div>
+              </div>
+              <a class="step-link-content" href="#">Pick a time</a>
+            </paper-step>
+            <paper-step label="Be Prepared" editable optional>
+
+            </paper-step>
+        </paper-stepper>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'onboard-steps',
+       properties: {
+        selectedStep: {
+          type: Number,
+          notify: true,
+          value: 1,
+        },
+        smallScreen: {
+          type: Boolean,
+        },
+      },
+      selected: function() {
+        this.$.stepper.progress();
+      },
+      listeners: {
+        'itemadded': 'tmptest',
+      },
+      tmptest: function() {
+        console.log('itemadded called');
+      },
+    });
+  </script>
+</dom-module>
