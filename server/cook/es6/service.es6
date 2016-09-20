@@ -1,5 +1,5 @@
 /* exported initService */
-/* global CHEF gapi ga */
+/* global COOK gapi ga initService */
 
 window.COOK = window.COOK || {};
 
@@ -51,24 +51,24 @@ class Service {
       );
   }
 
-  updateProfile(chef, callback) {
+  updateCook(cook, callback) {
     if (!this.loaded) {
       this.callQueue.push(() => {
-        this.updateProfile(chef, callback);
+        this.updateCook(cook, callback);
       });
       return;
     }
     const request = {
       gigatoken: this.getToken(),
-      gigachef: chef,
+      cook,
     };
     this
       .service
-      .updateProfile(request)
+      .updateCook(request)
       .execute(
         (resp) => {
-          this.logError('updateProfile', resp.err);
-          callback(resp.gigachef, resp.err);
+          this.logError('updateCook', resp.err);
+          callback(resp.cook, resp.err);
           setTimeout(() => { this.refreshToken(); }, 1);
         }
       );
@@ -76,78 +76,78 @@ class Service {
   /*
    * Payout Method
    */
-  getSubMerchant(callback) {
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.getSubMerchant(callback);
-      });
-      return;
-    }
-    const request = {
-      gigatoken: this.getToken(),
-    };
-    this
-      .service
-      .getSubMerchant(request)
-      .execute(
-        (resp) => {
-          this.logError('getSubMerchant', resp.err);
-          callback(resp.sub_merchant, resp.err);
-        }
-      );
-  }
+  // getSubMerchant(callback) {
+  //   if (!this.loaded) {
+  //     this.callQueue.push(() => {
+  //       this.getSubMerchant(callback);
+  //     });
+  //     return;
+  //   }
+  //   const request = {
+  //     gigatoken: this.getToken(),
+  //   };
+  //   this
+  //     .service
+  //     .getSubMerchant(request)
+  //     .execute(
+  //       (resp) => {
+  //         this.logError('getSubMerchant', resp.err);
+  //         callback(resp.sub_merchant, resp.err);
+  //       }
+  //     );
+  // }
 
-  updateSubMerchant(submerchant, callback) {
+  // updateSubMerchant(submerchant, callback) {
+  //   if (!this.loaded) {
+  //     this.callQueue.push(() => {
+  //       this.updateSubMerchant(submerchant, callback);
+  //     });
+  //     return;
+  //   }
+  //   const request = {
+  //     gigatoken: this.getToken(),
+  //     sub_merchant: submerchant,
+  //   };
+  //   this
+  //     .service
+  //     .updateSubMerchant(request)
+  //     .execute(
+  //       (resp) => {
+  //         this.logError('updateSubMerchant', resp.err);
+  //         callback(resp.gigachef, resp.err);
+  //         setTimeout(() => { this.refreshToken(); }, 1);
+  //       }
+  //     );
+  // }
+  /*
+   * Menu
+   */
+  getMenus(callback) {
     if (!this.loaded) {
       this.callQueue.push(() => {
-        this.updateSubMerchant(submerchant, callback);
+        this.getMenus(callback);
       });
       return;
     }
+
     const request = {
       gigatoken: this.getToken(),
-      sub_merchant: submerchant,
     };
     this
       .service
-      .updateSubMerchant(request)
+      .getMenus(request)
       .execute(
         (resp) => {
-          this.logError('updateSubMerchant', resp.err);
-          callback(resp.gigachef, resp.err);
-          setTimeout(() => { this.refreshToken(); }, 1);
+          this.logError('getMenus', resp.err);
+          callback(resp.menus, resp.err);
         }
       );
   }
   /*
    * Item
    */
-  getItems(startLimit, endLimit, callback) {
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.getItems(startLimit, endLimit, callback);
-      });
-      return;
-    }
-
-    const request = {
-      gigatoken: this.getToken(),
-      start_limit: startLimit,
-      end_limit: endLimit,
-    };
-    this
-      .service
-      .getItems(request)
-      .execute(
-        (resp) => {
-          this.logError('getItems', resp.err);
-          callback(resp.items, resp.err);
-        }
-      );
-  }
-
   getItem(id, callback) {
-    // if api is not loaded, add to _callQueue
+    // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getItem(id, callback);
@@ -197,50 +197,50 @@ class Service {
   /*
    * Post
    */
-  getPosts(startLimit, endLimit, callback) {
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.getPosts(startLimit, endLimit, callback);
-      });
-      return;
-    }
+  // getPosts(startLimit, endLimit, callback) {
+  //   if (!this.loaded) {
+  //     this.callQueue.push(() => {
+  //       this.getPosts(startLimit, endLimit, callback);
+  //     });
+  //     return;
+  //   }
 
-    const request = {
-      gigatoken: this.getToken(),
-      start_limit: startLimit,
-      end_limit: endLimit,
-    };
-    this
-     .service
-     .getPosts(request)
-     .execute(
-       (resp) => {
-         this.logError('getPosts', resp.err);
-         callback(resp.posts, resp.err);
-       }
-     );
-  }
+  //   const request = {
+  //     gigatoken: this.getToken(),
+  //     start_limit: startLimit,
+  //     end_limit: endLimit,
+  //   };
+  //   this
+  //    .service
+  //    .getPosts(request)
+  //    .execute(
+  //      (resp) => {
+  //        this.logError('getPosts', resp.err);
+  //        callback(resp.posts, resp.err);
+  //      }
+  //    );
+  // }
 
-  publishPost(postReq, callback) {
-    // if api is not loaded, add to _callQueue
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.postPost(postReq, callback);
-      });
-      return;
-    }
+  // publishPost(postReq, callback) {
+  //   // if api is not loaded, add to _callQueue
+  //   if (!this.loaded) {
+  //     this.callQueue.push(() => {
+  //       this.postPost(postReq, callback);
+  //     });
+  //     return;
+  //   }
 
-    postReq.gigatoken = this.getToken();
-    this
-      .service
-      .publishPost(postReq)
-      .execute(
-        (resp) => {
-          this.logError('publishPost', resp.err);
-          callback(resp.post, resp.err);
-        }
-      );
-  }
+  //   postReq.gigatoken = this.getToken();
+  //   this
+  //     .service
+  //     .publishPost(postReq)
+  //     .execute(
+  //       (resp) => {
+  //         this.logError('publishPost', resp.err);
+  //         callback(resp.post, resp.err);
+  //       }
+  //     );
+  // }
 
   refreshToken() {
     // if api is not loaded, add to _callQueue
