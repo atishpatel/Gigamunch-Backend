@@ -1,118 +1,209 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/iron-form/iron-form.html">
-<link rel="import" href="../bower_components/paper-stepper/paper-stepper.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-form/iron-form.html">
+<link rel="import"
+      href="../bower_components/paper-stepper/paper-stepper.html">
 
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="profile-fields.html">
-<link rel="import" href="menu-list.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="profile-fields.html">
+<link rel="import"
+      href="menu-list.html">
 
 <dom-module id="onboard-steps">
   <template>
     <style include="shared-styles">
-      :host {
+       :host {
         display: block;
         background: white;
-        --paper-stepper-horizontal-opened-height: 90vh;
+        --paper-stepper-horizontal-opened-height: 90.5vh;
       }
-
+      
       .header {
         padding-bottom: 24px;
       }
-
+      
       .header-title {
         font-size: 18px;
       }
-
+      
       .header-desc {
         font-size: 12px;
         line-height: 14px;
         color: var(--secondary-text-color);
       }
-
+      
       .step-link-content {
         padding: 32px 24px 24px 24px;
       }
-
       /* not smallScreen */
+      
       @media (min-width: 767px) {
-        paper-step > * {
+        paper-step>* {
           padding: 0 24px;
           max-width: var(--max-content-width);
           margin: auto;
         }
       }
+
     </style>
 
-    <div class="">
-        <paper-stepper id="stepper" selected="{{selectedStep}}" opened alternative-label linear>
-            <paper-step id="perfStep" label="Your Preferences" editable>
-              <form
-                id="prefForm"
+    <div>
+      <paper-stepper id="stepper"
+                     selected="{{selectedStep}}"
+                     opened
+                     alternative-label
+                     linear>
+        <!-- Step 1 -->
+        <paper-step id="prefStep"
+                    label="Your Preferences"
+                    editable>
+          <form id="prefForm"
                 is="iron-form"
                 method="post"
                 action="#">
-                <div class="header">
-                  <div class="header-title">Your Preferences</div>
-                  <div class="header-desc">Let's get started! Tell us a bit about yourself.</div>
-                </div>
-                <profile-fields
-                  id="profileFields"
-                  photo-url="{{cook.photo_url}}"
-                  name="{{cook.name}}"
-                  phone-number="{{cook.phone_number}}"
-                  address="{{cook.address}}">
-                </profile-fields>
-                <paper-checkbox id="agreeCheckbox" required>I agree to the <a href="/terms" target="_blank">Terms &amp; Conditions</a> and <a href="/privacy" target="_blank">Privacy Policy</a></paper-checkbox>
-              </form>
-            </paper-step>
-            <paper-step label="Add Your Creations" editable saved>
-              <div class="header">
-                <div class="header-title">Add Your Creations</div>
-                <div class="header-desc">Make Menus like "Paleo Palace" and "Atish's Desserts".<br>Add as many Items as you can to the Menus. More Items more changes to be discovered!</div>
-              </div>
-              <menu-list></menu-list>
-            </paper-step>
-            <paper-step label="Get Verified" editable>
-              <div class="header">
-                <div class="header-title">Submit Your Background Check</div>
-                <div class="header-desc"></div>
-              </div>
-              <a class="step-link-content" href="https://checkr.com/apply/gigamunch/0347ac549c16">Submit a Checkr Application</a>
-              <div class="header">
-                <div class="header-title">Schedule a Kitchen Visit</div>
-                <div class="header-desc">We have a relationship with all our cook. The Kitchen Visit is a great opportunity for us to meet you and take pictures of your creations!</div>
-              </div>
-              <a class="step-link-content" href="#">Pick a time</a>
-            </paper-step>
-            <paper-step label="Be Prepared" editable optional>
-
-            </paper-step>
-        </paper-stepper>
+            <div class="header">
+              <div class="header-title">Your Preferences</div>
+              <div class="header-desc">Let's get started! Tell us a bit about yourself.</div>
+            </div>
+            <profile-fields id="profileFields"
+                            photo-url="{{cook.photo_url}}"
+                            name="{{cook.name}}"
+                            email="{{cook.email}}"
+                            phone-number="{{cook.phone_number}}"
+                            address="{{cook.address}}">
+            </profile-fields>
+            <div class="header">
+              <div class="header-title">Schedule</div>
+              <div class="header-desc">Let's figure out when you absolutely can't make food for someone.</div>
+            </div>
+            <work-schedule id="workSchedule"
+                           week-schedule="{{cook.week_schedule}}">
+            </work-schedule>
+            <paper-checkbox id="agreeCheckbox"
+                            required>I agree to the <a href="/terms"
+                 target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
+                 target="_blank">Privacy Policy</a></paper-checkbox>
+          </form>
+        </paper-step>
+        <!-- Step 2 -->
+        <paper-step id="itemsStep"
+                    label="Add Your Creations"
+                    editable
+                    saved>
+          <div class="header">
+            <div class="header-title">Add Your Creations</div>
+            <div class="header-desc">Make Menus like "Paleo Palace" and "Atish's Desserts".<br>Add as many Items as you can to the Menus. More Items more changes to be discovered!</div>
+          </div>
+          <menu-list></menu-list>
+        </paper-step>
+        <!-- Step 3 -->
+        <paper-step label="Get Verified"
+                    editable>
+          <div class="header">
+            <div class="header-title">Submit Your Background Check</div>
+            <div class="header-desc"></div>
+          </div>
+          <a class="step-link-content"
+             href="https://checkr.com/apply/gigamunch/0347ac549c16">Submit a Checkr Application</a>
+          <div class="header">
+            <div class="header-title">Schedule a Kitchen Visit</div>
+            <div class="header-desc">We have a relationship with all our cook. The Kitchen Visit is a great opportunity for us to meet you and take pictures of your creations!</div>
+          </div>
+          <a class="step-link-content"
+             href="#">Pick a time</a>
+        </paper-step>
+        <!-- Step 4 -->
+        <paper-step label="Be Prepared"
+                    editable
+                    optional
+                    has-skip-button
+                    skip-text="Remind me Later">
+          <div class="header">
+            <div class="header-title">Optional Banking Info</div>
+            <div class="header-desc">If you have your banking info handy, tell us how you want to get payed.</div>
+          </div>
+          <submerchant-fields></submerchant-fields>
+        </paper-step>
+      </paper-stepper>
     </div>
   </template>
 
   <script>
     Polymer({
       is: 'onboard-steps',
-       properties: {
+      properties: {
         selectedStep: {
           type: Number,
           notify: true,
-          value: 1,
+          value: 0,
         },
         smallScreen: {
           type: Boolean,
         },
+        service: {
+          type: Object
+        },
+        cook: {
+          type: Object,
+          notify: true,
+        },
+        menus: {
+          type: Array,
+          notify: true,
+        },
       },
       selected: function() {
+        this.setupValidation();
+
+        this.getOnboardVars();
         this.$.stepper.progress();
       },
-      listeners: {
-        'itemadded': 'tmptest',
+      getOnboardVars: function() {
+        this.service.getCook(function(cook, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+
+          this.set('cook', cook);
+        }.bind(this))
       },
-      tmptest: function() {
-        console.log('itemadded called');
+      setupValidation: function() {
+        // steup step1
+        var prefStep = this.$.prefStep;
+        prefStep._getValidity = this.submitPrefStep.bind(this);
+        // setup step2
+        var itemsStep = this.$.itemsStep;
+        itemsStep._getValidity = function() {
+          return this.menus !== undefined && this.menus.length > 0
+        }.bind(this);
       },
+      submitPrefStep: function() {
+        var valid = this.$.prefForm.validate();
+        if (!valid) {
+          return false;
+        }
+        // update cook
+        this.service.updateCook(this.cook, function(cook, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('cook', cook);
+        }.bind(this));
+        return true;
+      },
+      showSpinner: function() {
+
+      },
+      hideSpinner: function() {
+
+      },
+
     });
+
   </script>
 </dom-module>
