@@ -1,4 +1,4 @@
-package cookapi
+package main
 
 import (
 	"log"
@@ -54,14 +54,16 @@ func init() {
 		i := m.Info()
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
-	// refresh stuff
+	// Page stuff
+	// register("OnboardingPage", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
+	// Refresh stuff
 	register("RefreshToken", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
-	// cook stuff
+	// Cook stuff
 	register("GetCook", "getCook", "GET", "cookservice/getCook", "Get the cook info.")
 	register("UpdateCook", "updateCook", "POST", "cookservice/updateCook", "Update cook information.")
 	// register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
 	// register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
-	// // item stuff
+	// Item stuff
 	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save a item.")
 	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get a item.")
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")

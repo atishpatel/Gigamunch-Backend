@@ -1,4 +1,4 @@
-package cookapi
+package main
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMe
 				Menu: menus[i],
 			},
 		}
-		for j := len(itemIDs); j >= 0; j-- {
+		for j := len(itemIDs) - 1; j >= 0; j-- {
 			if items[j].MenuID == menu.ID {
 				item := Item{
 					ID:   itemIDs[j],

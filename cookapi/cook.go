@@ -1,4 +1,4 @@
-package cookapi
+package main
 
 import (
 	"context"
