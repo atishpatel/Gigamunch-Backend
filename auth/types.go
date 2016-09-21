@@ -44,7 +44,7 @@ func (token *Token) IsExpired() bool {
 
 // IsOld returns true if the token issue time is >60 minutes
 func (token *Token) IsOld() bool {
-	return time.Now().Sub(token.ITA) > 1*time.Minute // TODO switch back to 60
+	return time.Since(token.ITA) > 60*time.Minute
 }
 
 // JWTString returns a signed JSON Web Token string
