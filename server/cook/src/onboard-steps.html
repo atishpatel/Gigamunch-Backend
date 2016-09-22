@@ -21,6 +21,14 @@
         --paper-stepper-horizontal-opened-height: 90.5vh;
       }
       
+      paper-stepper {
+        --paper-button: {
+          background: white;
+          color: var(--primary-color);
+          min-width: 5em;
+        }
+      }
+      
       .header {
         padding-bottom: 24px;
       }
@@ -95,9 +103,9 @@
                     saved>
           <div class="header">
             <div class="header-title">Add Your Creations</div>
-            <div class="header-desc">Make Menus like "Paleo Palace" and "Atish's Desserts".<br>Add as many Items as you can to the Menus. More Items more changes to be discovered!</div>
+            <div class="header-desc">Make Menus like "Paleo Palace" and "Atish's Desserts".<br>Add as many Items as you can to the Menus. More Items, more changes to be discovered!</div>
           </div>
-          <menu-list></menu-list>
+          <menu-list menus="[[menus]]"></menu-list>
         </paper-step>
         <!-- Step 3 -->
         <paper-step label="Get Verified"
@@ -155,6 +163,13 @@
           notify: true,
         },
       },
+      ready: function() {
+        document.addEventListener('itemChangedOrAdded', function(e) {
+          var item = e.detail.item;
+          // TODO add logic to edit or add item to menu if it exist 
+          this.getMenus();
+        }.bind(this));
+      },
       selected: function() {
         this.setupValidation();
 
@@ -162,14 +177,26 @@
         this.$.stepper.progress();
       },
       getOnboardVars: function() {
+        this.getCook();
+        this.getMenus();
+      },
+      getCook: function() {
         this.service.getCook(function(cook, err) {
           if (err.code !== 0) {
             this.fire('error', err);
             return;
           }
-
           this.set('cook', cook);
-        }.bind(this))
+        }.bind(this));
+      },
+      getMenus: function() {
+        this.service.getMenus(function(menus, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('menus', menus);
+        }.bind(this));
       },
       setupValidation: function() {
         // steup step1

@@ -213,7 +213,9 @@ var Service = function () {
         });
         return;
       }
-
+      item.min_servings = Number(item.min_servings);
+      item.max_servings = Number(item.max_servings);
+      item.cook_price_per_serving = Number(item.cook_price_per_serving);
       var request = {
         gigatoken: this.getToken(),
         item: item

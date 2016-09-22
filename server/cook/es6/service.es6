@@ -180,7 +180,9 @@ class Service {
         });
         return;
       }
-
+      item.min_servings = Number(item.min_servings);
+      item.max_servings = Number(item.max_servings);
+      item.cook_price_per_serving = Number(item.cook_price_per_serving);
       const request = {
         gigatoken: this.getToken(),
         item,

@@ -122,7 +122,8 @@
                    class="full-screen-dialog-content content"
                    service="[[service]]"
                    title="{{itemFormTitle}}"
-                   item="{{item}}">
+                   item="{{item}}"
+                   on-saved="itemSaved">
         </item-form>
       </paper-dialog-scrollable>
     </paper-dialog>
@@ -222,16 +223,17 @@
         '_pageOrScreenChanged(page, smallScreen)',
       ],
       listeners: {
-        'addmenuitem': 'addMenuItem',
+        'editmenuitem': 'addMenuItem',
       },
       addMenuItem: function(e) {
-        console.log('addmenuitem called', e.detail.item);
         this.set('item', e.detail.item);
         this.$.itemDialog.open();
         this.$.itemForm.selected();
       },
+      itemSaved: function() {
+        this.$.itemDialog.close();
+      },
       ready: function() {
-        console.log('ready');
         this.addEventListener('userUpdated', function() {
           this.set('user', COOK.User);
         }.bind(this));
@@ -242,11 +244,9 @@
           timingValue: window.performance.now(),
         });
       },
-
       _routePageChanged: function(page) {
         this.page = page || 'kitchen';
       },
-
       _pageChanged: function(page) {
         console.log('page', page);
         if (COOK.User !== undefined && COOK.User !== null) {
