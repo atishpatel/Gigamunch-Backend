@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 // SaveItemReq is the request for SaveItem.
@@ -82,7 +84,22 @@ func (service *Service) GetItem(ctx context.Context, req *IDReq) (*ItemResp, err
 		resp.Err = errors.Wrap("failed to itemC.Get", err)
 		return resp, nil
 	}
+	// get likes for item
+	ids := []int64{req.ID}
+	likes := getLikes(ctx, ids)
+	// set item
 	resp.Item.ID = req.ID
 	resp.Item.Item = *item
+	resp.Item.NumLikes = likes[0]
 	return resp, nil
+}
+
+func getLikes(ctx context.Context, ids []int64) []int {
+	likeC := like.New(ctx)
+	likes, err := likeC.GetNumLikes(ids)
+	if err != nil {
+		utils.Errorf(ctx, "failed to likeC.GetNumLikes: %v", err)
+		likes = make([]int, len(ids))
+	}
+	return likes
 }

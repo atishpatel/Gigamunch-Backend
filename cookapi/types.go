@@ -12,6 +12,7 @@ import (
 type Item struct {
 	ID int64 `json:"id,string"`
 	item.Item
+	NumLikes int `json:"num_likes"`
 }
 
 // Menu is a Menu.
