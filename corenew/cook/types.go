@@ -79,19 +79,18 @@ type Cook struct {
 	TwitterID   string `json:"twitter_id" datastore:",noindex"`
 	SnapchatID  string `json:"snapchat_id" datastore:",noindex"`
 	// Stats
-	AverageResponseTime  int   `json:"average_response_time" datastore:",noindex"`
-	NumResponses         int   `json:"num_responses" datastore:",noindex"`
-	NumAcceptedInquiries int   `json:"num_accepted_inquiries" datastore:",noindex"`
-	NumDeclinedInquiries int   `json:"num_declined_inquiries" datastore:",noindex"`
-	NumIgnoredInquiries  int   `json:"num_ignored_inquiries" datastore:",noindex"`
-	NumItems             int32 `json:"num_items" datastore:",noindex"`
+	AverageResponseTime  int `json:"average_response_time" datastore:",noindex"`
+	NumResponses         int `json:"num_responses" datastore:",noindex"`
+	NumAcceptedInquiries int `json:"num_accepted_inquiries" datastore:",noindex"`
+	NumDeclinedInquiries int `json:"num_declined_inquiries" datastore:",noindex"`
+	NumIgnoredInquiries  int `json:"num_ignored_inquiries" datastore:",noindex"`
 }
 
 // WeekSchedule is used to make a cook's week's schedule.
 type WeekSchedule struct {
 	DayOfWeek int32 `json:"day_of_week" datastore:",noindex"`
-	StartTime int   `json:"start_time" datastore:",noindex"`
-	EndTime   int   `json:"end_time" datastore:",noindex"`
+	StartTime int32 `json:"start_time" datastore:",noindex"`
+	EndTime   int32 `json:"end_time" datastore:",noindex"`
 }
 
 // ScheduleModifications is used to add modifications to a cook's week's schedule.
