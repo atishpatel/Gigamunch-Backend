@@ -5,8 +5,14 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
+
+// SubMerchant is the submerchant payout info
+type SubMerchant struct {
+	payment.SubMerchantInfo
+}
 
 // Item is an Item.
 type Item struct {

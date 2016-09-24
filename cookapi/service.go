@@ -55,14 +55,15 @@ func init() {
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
 	// Page stuff
-	// register("OnboardingPage", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
+	register("FinishOnboarding", "finishOnboarding", "POST", "cookservice/finishOnboarding", "Updates cook and submerchant")
 	// Refresh stuff
 	register("RefreshToken", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
 	// Cook stuff
 	register("GetCook", "getCook", "GET", "cookservice/getCook", "Get the cook info.")
 	register("UpdateCook", "updateCook", "POST", "cookservice/updateCook", "Update cook information.")
-	// register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
-	// register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
+	// Submerchant stuff
+	register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
+	register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
 	// Item stuff
 	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save a item.")
 	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get a item.")
