@@ -3,12 +3,11 @@
   "shell": "src/app-shell.html",
   "fragments": [
     "src/onboard-steps.html",
-    "src/dashboard-page.html",
     "src/kitchen-page.html"
   ],
   "sourceGlobs": [
-   "src/**/*",
-   "bower.json"
+    "src/**/*",
+    "bower.json"
   ],
   "includeDependencies": [
     "manifest.json",

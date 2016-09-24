@@ -32,7 +32,7 @@ func handle404(w http.ResponseWriter, req *http.Request) {
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	user := CurrentUser(w, req)
 	if user != nil {
-		http.Redirect(w, req, baseGigachefURL, http.StatusTemporaryRedirect)
+		http.Redirect(w, req, baseCookURL, http.StatusTemporaryRedirect)
 		return
 	}
 	removeCookies(w)

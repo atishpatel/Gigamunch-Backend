@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,8 +9,6 @@ import (
 
 	"google.golang.org/appengine/blobstore"
 	"google.golang.org/appengine/image"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/appengine"
 
@@ -52,7 +51,7 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 		Secure: true,
 		Crop:   true,
 	}
-	ctx, _ = context.WithDeadline(ctx, time.Now().Add(60*time.Second))
+	// ctx, _ = context.WithDeadline(ctx, time.Now().Add(60*time.Second))
 	url, err := image.ServingURL(ctx, file[0].BlobKey, opts)
 	if err != nil {
 		deadline, _ := ctx.Deadline()

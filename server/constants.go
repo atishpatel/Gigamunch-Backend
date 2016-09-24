@@ -2,6 +2,7 @@ package server
 
 const (
 	baseGigachefURL = "/gigachef"
+	baseCookURL     = "/cook"
 	baseAdminURL    = "/admin"
 	/*****************************************************************************
 	*	URLs
