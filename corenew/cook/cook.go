@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/appengine/datastore"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/notification"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
@@ -84,4 +85,48 @@ func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, b
 		return nil, errDatastore.WithError(err).Wrapf("cannot put cook(%s)", user.ID)
 	}
 	return cook, nil
+}
+
+// FindBySubMerchantID finds a cook by submerchantID
+func (c *Client) FindBySubMerchantID(submerchantID string) (string, *Cook, error) {
+	if submerchantID == "" {
+		return "", nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
+	}
+	id, cook, err := getBySubmerchantID(c.ctx, submerchantID)
+	if err != nil {
+		return "", nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
+	}
+	return id, cook, nil
+}
+
+// UpdateSubMerchantStatus updates the chef's SubMerchantStatus status
+func (c *Client) UpdateSubMerchantStatus(submerchantID, status string) (string, *Cook, error) {
+	if submerchantID == "" {
+		return "", nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
+	}
+	id, cook, err := getBySubmerchantID(c.ctx, submerchantID)
+	if err != nil {
+		return "", nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
+	}
+	cook.SubMerchantStatus = status
+	err = put(c.ctx, id, cook)
+	if err != nil {
+		return "", nil, errDatastore.WithError(err).Wrap("failed to put chef")
+	}
+	return id, cook, nil
+}
+
+// Notify notifies chef with the message
+func (c *Client) Notify(id, subject, message string) error {
+	cook, err := get(c.ctx, id)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("failed to get by chef")
+	}
+	notifcationC := notification.New(c.ctx)
+	err = notifcationC.SendSMS(cook.PhoneNumber, message)
+	if err != nil {
+		return errors.Wrap("failed to send sms", err)
+	}
+
+	return nil
 }
