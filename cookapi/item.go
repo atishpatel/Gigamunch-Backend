@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
