@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
