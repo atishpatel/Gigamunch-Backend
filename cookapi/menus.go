@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"

@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"context"
+	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
