@@ -1,7 +1,7 @@
 package server
 
 import (
-	"context"
+	"golang.org/x/net/context"
 	"encoding/json"
 	"fmt"
 	"net/http"
