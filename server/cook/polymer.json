@@ -7,6 +7,7 @@
   ],
   "sourceGlobs": [
     "src/**/*",
+    "js/**/*",
     "bower.json"
   ],
   "includeDependencies": [
