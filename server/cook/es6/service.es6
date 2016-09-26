@@ -286,16 +286,11 @@ class Service {
 window.COOK.Service = new Service();
 
 function initService() {
-  let apiRoot;
-  switch (COOK.Env) {
-    case COOK.DEV:
-      apiRoot = 'http://localhost:8080/_ah/api';
-      break;
-    case COOK.STAGE:
-      apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
-      break;
-    default:
-      apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
+  let apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
+  if (COOK.isDev) {
+    apiRoot = 'http://localhost:8080/_ah/api';
+  } else if (COOK.isStage) {
+    apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
   }
   gapi.client.load('cookservice', 'v1', () => {
     COOK.Service.endpointLoaded();
