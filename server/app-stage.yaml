@@ -35,7 +35,7 @@ handlers:
   static_files: cook/build/bundled/index.html
   upload: cook/build/bundled/index.html
   http_headers:
-    Link: '</cook/js/user.js>; rel=preload; as=script, </cook/js/service.js>; rel=preload; as=script, </gigachef/src/app-shell.html>; rel=preload; as=document'
+    Link: '</cook/js/user.js>; rel=preload; as=script, </cook/js/service.js>; rel=preload; as=script, </cook/src/app-shell.html>; rel=preload; as=document'
   secure: always
 
 
