@@ -324,10 +324,13 @@
             startTime = this.getSeconds(workEndTime);
             workEndTime = new Date('1/1/2016 23:59');
           }
-          var endTime = this.getSeconds(bedTime);
-          // add availbility at early day if they sleep after 12 pm
-          for (var i = 0; i < this.weekDays.length; i++) {
-            newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime));
+          // if they don't sleep at midnight
+          if (startTime !== 0) {
+            var endTime = this.getSeconds(bedTime);
+            // add availbility at early day if they sleep after 12 pm
+            for (var i = 0; i < this.weekDays.length; i++) {
+              newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime - 1));
+            }
           }
           bedTime = new Date('1/1/2016 23:59');
         }
@@ -340,20 +343,20 @@
               // add time between wakeup and starting work
               var startTime = this.getSeconds(wakeupTime);
               var endTime = startTime + Math.round(((workStartTime - wakeupTime) / 1000));
-              newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime));
+              newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime - 1));
             }
             // add time after work ends to bed time
             if (workEndTime < bedTime) {
               // add time between end of work and bedTime
               var startTime = this.getSeconds(workEndTime);
               var endTime = startTime + Math.round(((bedTime - workEndTime) / 1000));
-              newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime));
+              newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime - 1));
             }
           } else {
             // add on a non-work day
             var startTime = this.getSeconds(wakeupTime);
             var endTime = this.getSeconds(bedTime);
-            newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime));
+            newSchedule.push(this.newWeekScheduleObject(i, startTime, endTime - 1));
           }
         }
         this.weekSchedule = newSchedule;
