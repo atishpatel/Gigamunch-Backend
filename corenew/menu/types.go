@@ -8,6 +8,22 @@ import (
 
 const kindMenu = "Menu"
 
+var colors = []string{
+	"#66BB6A", // Green      400
+	"#689F38", // LightGreen 700
+	"#EA9E22", // Yellow     850
+	"#F57C00", // Orange     700
+	"#FF7D54", // DeepOrange 350
+	"#EF5350", // Red        400
+	"#EA4F83", // Pink       350
+	"#B159BF", // Purple     350
+	"#9575CD", // DeepPurple 300
+	"#5C6BC0", // Indigo     400
+	"#0192D9", // Light Blue 650
+	"#00ACC1", // Cyan       600
+	"#26A69A", // Teal       400
+}
+
 // Menu is a menu of items from a cook.
 type Menu struct {
 	CreatedDateTime time.Time `json:"created_datetime" datastore:",noindex"`
@@ -22,7 +38,7 @@ type Color int32
 
 // NewColor returns a new random color
 func NewColor() Color {
-	return Color(rand.Int31n(7) + 1)
+	return Color(rand.Int31n(int32(len(colors))) + 1)
 }
 
 func (c Color) isZero() bool {
@@ -31,16 +47,11 @@ func (c Color) isZero() bool {
 
 // HexValue returns the hex value of the color
 func (c Color) HexValue() string {
-	val := int32(c)
-	switch val {
-	case 1: // green
-		return "#4CAF50"
-	case 2: // teal
-		return "#009688"
-	case 3: // cyan
-		return "#00BCD4"
+	val := int(c)
+	if val <= 0 || val >= len(colors) {
+		return colors[0]
 	}
-	return "#4CAF50"
+	return colors[val-1]
 }
 
 // MarshalJSON converts Color into a HexValue
@@ -52,13 +63,12 @@ func (c Color) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON converts Color into a int32
 func (c *Color) UnmarshalJSON(data []byte) error {
 	colorString := string(data[1 : len(data)-1])
-	switch colorString {
-	case "#009688":
-		*c = 2
-	case "#00BCD4":
-		*c = 3
-	default:
-		*c = NewColor()
+	for i, color := range colors {
+		if color == colorString {
+			*c = Color(i + 1)
+			return nil
+		}
 	}
+	*c = NewColor()
 	return nil
 }

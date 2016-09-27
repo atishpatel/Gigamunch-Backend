@@ -45,15 +45,17 @@
         background-color: transparent;
         color: var(--primary-color);
         margin-left: auto;
-        padding: 8px;
       }
       
       .menu-row {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
       }
       
       .name-input {
+        flex: 1;
+        padding: 8px 0;
         background-color: white;
         border: none;
         color: #4fc3f7;
@@ -75,6 +77,15 @@
       .save-button {
         margin: auto 12px;
       }
+      
+      @media (max-width: 450px) {
+        .name-input {
+          min-width: 300px;
+        }
+        .button {
+          margin: 10px auto;
+        }
+      }
 
     </style>
 
@@ -83,7 +94,7 @@
         <div id="menuName"
              class="menu-name"><span>[[name]]</span></div>
         <paper-button id="editButton"
-                      class="edit-button"
+                      class="button edit-button"
                       on-tap="editMenu">Edit</paper-button>
       </div>
       <item-list items="[[menu.items]]"
@@ -104,7 +115,8 @@
                       class="button save-button"
                       on-tap="saveEdit">Save</paper-button>
       </div>
-      <radio-color-picker selected="{{selectedColor}}"></radio-color-picker>
+      <radio-color-picker colors="[[colors]]"
+                          selected="{{selectedColor}}"></radio-color-picker>
     </div>
   </template>
   <script>
@@ -134,7 +146,11 @@
         editMode: {
           type: Boolean,
           value: false,
-        }
+        },
+        colors: {
+          type: Array,
+          value: ["#66BB6A", "#689F38", "#EA9E22", "#F57C00", "#FF7D54", "#EF5350", "#EA4F83", "#B159BF", "#9575CD", "#5C6BC0", "#0192D9", "#00ACC1", "#26A69A"],
+        },
       },
       menuUpdated: function() {
         if (this.menu !== undefined) {
@@ -163,7 +179,9 @@
         this.editMode = false;
       },
       saveEdit: function() {
-        if (this.name !== 'Unnamed') {
+        if (this.name === 'Unnamed' || this.name === 'New Menu') {
+          this.menu.name = '';
+        } else {
           this.menu.name = this.name;
         }
         this.set('menu.color', this.selectedColor);
@@ -172,6 +190,11 @@
         this.editMode = false;
       },
       editItem: function(e) {
+        // create menu instead of create item if it's a new menu
+        if (this.menu.id === undefined || this.menu.id === null || this.menu.id === '' || this.menu.id === '0') {
+          this.editMenu();
+          return
+        }
         var item = e.detail.item;
         if (item === undefined || item === null) {
           item = {
