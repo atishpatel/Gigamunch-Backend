@@ -74,34 +74,40 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMe
 	return resp, nil
 }
 
-// // SaveMenuReq is the request for SaveMenu.
-// type SaveMenuReq struct {
-// 	GigatokenReq
-// 	Menu Menu `json:"menu"`
-// }
+// SaveMenuReq is the request for SaveMenu.
+type SaveMenuReq struct {
+	GigatokenReq
+	Menu Menu `json:"menu"`
+}
 
-// type SaveMenuResp struct {
-// 	Menu MenuWithItems `json:"menu"`
-// 	ErrorOnlyResp
-// }
+// MenuResp has a menu and error code
+type MenuResp struct {
+	Menu Menu `json:"menu"`
+	ErrorOnlyResp
+}
 
-// // SaveMenu creates or updates an Menu.
-// func (service *Service) SaveMenu(ctx context.Context, req *SaveMenuReq) (*SaveMenuResp, error) {
-// 	resp := new(SaveMenuResp)
-// 	defer handleResp(ctx, "SaveMenu", resp.Err)
-// 	user, err := validateRequestAndGetUser(ctx, req)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err)
-// 		return resp, nil
-// 	}
+// SaveMenu creates or updates an Menu.
+func (service *Service) SaveMenu(ctx context.Context, req *SaveMenuReq) (*MenuResp, error) {
+	resp := new(MenuResp)
+	defer handleResp(ctx, "SaveMenu", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
 
-// 	// create new menu
-// 	menuC := menu.New(ctx)
-// 	menuID, menu, err := menuC.Save(user, req.Menu.ID, req.Menu.CookID, req.Menu.Name, req.Menu.Color)
-// 	if err != nil {
-// 		resp.Err = errors.Wrap("failed to menuC.Save", err)
-// 		return resp, nil
-// 	}
+	if req.Menu.CookID == "" {
+		req.Menu.CookID = user.ID
+	}
 
-// 	return resp, nil
-// }
+	// save menu or create new menu
+	menuC := menu.New(ctx)
+	menuID, menu, err := menuC.Save(user, req.Menu.ID, req.Menu.CookID, req.Menu.Name, req.Menu.Color)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to menuC.Save", err)
+		return resp, nil
+	}
+	resp.Menu.ID = menuID
+	resp.Menu.Menu = *menu
+	return resp, nil
+}

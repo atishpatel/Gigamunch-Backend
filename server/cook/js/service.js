@@ -205,6 +205,28 @@ var Service = function () {
         callback(resp.menus, resp.err);
       });
     }
+  }, {
+    key: 'saveMenu',
+    value: function saveMenu(menu, callback) {
+      var _this7 = this;
+
+      // if api is not loaded, add to callQueue
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this7.saveMenu(menu, callback);
+        });
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken(),
+        menu: menu
+      };
+
+      this.service.saveMenu(request).execute(function (resp) {
+        _this7.logError('saveMenu', resp.err);
+        callback(resp.menu, resp.err);
+      });
+    }
 
     /*
      * Item
@@ -213,12 +235,12 @@ var Service = function () {
   }, {
     key: 'getItem',
     value: function getItem(id, callback) {
-      var _this7 = this;
+      var _this8 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this7.getItem(id, callback);
+          _this8.getItem(id, callback);
         });
         return;
       }
@@ -228,19 +250,19 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.getItem(request).execute(function (resp) {
-        _this7.logError('getItem', resp.err);
+        _this8.logError('getItem', resp.err);
         callback(resp.item, resp.err);
       });
     }
   }, {
     key: 'saveItem',
     value: function saveItem(item, callback) {
-      var _this8 = this;
+      var _this9 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this8.saveItem(item, callback);
+          _this9.saveItem(item, callback);
         });
         return;
       }
@@ -253,14 +275,14 @@ var Service = function () {
       };
 
       this.service.saveItem(request).execute(function (resp) {
-        _this8.logError('saveItem', resp.err);
+        _this9.logError('saveItem', resp.err);
         callback(resp.item, resp.err);
       });
     }
   }, {
     key: 'refreshToken',
     value: function refreshToken() {
-      var _this9 = this;
+      var _this10 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
@@ -271,7 +293,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this9.logError('refreshToken', resp.err)) {
+        if (!_this10.logError('refreshToken', resp.err)) {
           COOK.User.update(resp.gigatoken);
         }
       });

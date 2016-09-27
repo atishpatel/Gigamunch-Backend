@@ -182,6 +182,31 @@ class Service {
       );
   }
 
+  saveMenu(menu, callback) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.saveMenu(menu, callback);
+      });
+      return;
+    }
+    delete menu.items;
+    const request = {
+      gigatoken: this.getToken(),
+      menu,
+    };
+
+    this
+      .service
+      .saveMenu(request)
+      .execute(
+        (resp) => {
+          this.logError('saveMenu', resp.err);
+          callback(resp.menu, resp.err);
+        }
+      );
+  }
+
   /*
    * Item
    */

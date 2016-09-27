@@ -67,7 +67,9 @@ func init() {
 	// Item stuff
 	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save a item.")
 	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get a item.")
+	// Menu stuff
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
+	register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")
 
 	endpoints.HandleHTTP()
 }
