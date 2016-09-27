@@ -1,29 +1,111 @@
 <link rel="import"
       href="../bower_components/polymer/polymer.html">
 <link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/radio-color-picker/radio-color-picker.html">
+<link rel="import"
       href="item-list.html">
+<link rel="import"
+      href="shared-styles.html">
+
+
 <dom-module id="cook-menu">
   <template>
-    <style>
+    <style include="shared-styles">
        :host {
         display: block;
+        overflow: hidden;
+        --radio-color-picker-color: {
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+          transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+        }
+        --radio-color-picker-color-hover: {
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16), 0 6px 6px rgba(0, 0, 0, 0.23);
+        }
+      }
+      
+      radio-color-picker {
+        padding: 24px 0;
+      }
+      
+      .menu-header {
+        display: flex;
       }
       
       .menu-name {
         font-size: 18px;
-        padding-bottom: 8px;
         border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        align-items: center;
+        letter-spacing: .5px
+      }
+      
+      .edit-button {
+        background-color: transparent;
+        color: var(--primary-color);
+        margin-left: auto;
+        padding: 8px;
+      }
+      
+      .menu-row {
+        display: flex;
+        flex-direction: row;
+      }
+      
+      .name-input {
+        background-color: white;
+        border: none;
+        color: #4fc3f7;
+        font-size: 18px;
+        border-bottom: 1px solid #e8e8e8;
+        outline: none;
+      }
+      
+      .button {
+        padding: 8px;
+      }
+      
+      .cancel-button {
+        margin-left: auto;
+        background-color: transparent;
+        color: var(--primary-color);
+      }
+      
+      .save-button {
+        margin: auto 12px;
       }
 
     </style>
 
-    <span id="menuName"
-          class="menu-name">[[name]]</span>
-    <item-list items="[[menu.items]]"
-               on-additem="editItem"
-               on-edititem="editItem"
-               menu-color="[[menu.color]]">
-    </item-list>
+    <div hidden="[[editMode]]">
+      <div class="menu-header">
+        <div id="menuName"
+             class="menu-name"><span>[[name]]</span></div>
+        <paper-button id="editButton"
+                      class="edit-button"
+                      on-tap="editMenu">Edit</paper-button>
+      </div>
+      <item-list items="[[menu.items]]"
+                 on-additem="editItem"
+                 on-edititem="editItem"
+                 menu-color="[[menu.color]]">
+      </item-list>
+    </div>
+    <div hidden$="[[!editMode]]">
+      <div class="menu-row">
+        <input id="nameInput"
+               class="name-input"
+               value="{{name::change}}" />
+        <paper-button id="cancelButton"
+                      class="button cancel-button"
+                      on-tap="cancelEdit">Cancel</paper-button>
+        <paper-button id="saveButton"
+                      class="button save-button"
+                      on-tap="saveEdit">Save</paper-button>
+      </div>
+      <radio-color-picker selected="{{selectedColor}}"></radio-color-picker>
+    </div>
   </template>
   <script>
     Polymer({
@@ -44,16 +126,50 @@
           type: String,
           notify: true,
         },
+        selectedColor: {
+          type: String,
+          value: '#03A9F4',
+          observer: 'selectedColorChanged',
+        },
+        editMode: {
+          type: Boolean,
+          value: false,
+        }
       },
       menuUpdated: function() {
         if (this.menu !== undefined) {
           this.$.menuName.style.color = this.menu.color;
+          this.$.editButton.style.color = this.menu.color;
           if (this.menu.name === '') {
             this.name = 'Unnamed';
           } else {
             this.name = this.menu.name;
           }
         }
+      },
+      editMenu: function() {
+        this.selectedColor = this.menu.color;
+        this.editMode = true;
+        this.$.nameInput.focus();
+      },
+      selectedColorChanged: function() {
+        this.$.nameInput.style.color = this.selectedColor;
+        this.$.cancelButton.style.color = this.selectedColor;
+        this.$.saveButton.style.backgroundColor = this.selectedColor;
+      },
+      cancelEdit: function() {
+        this.name = this.menu.name;
+        this.selectedColor = this.menu.color;
+        this.editMode = false;
+      },
+      saveEdit: function() {
+        if (this.name !== 'Unnamed') {
+          this.menu.name = this.name;
+        }
+        this.set('menu.color', this.selectedColor);
+        this.fire('savemenu', this.menu);
+        this.menuUpdated();
+        this.editMode = false;
       },
       editItem: function(e) {
         var item = e.detail.item;

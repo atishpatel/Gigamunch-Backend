@@ -231,12 +231,28 @@
       listeners: {
         'editmenuitem': 'addMenuItem',
         'onboardfinished': 'onboardFinished',
+        'savemenu': 'saveMenu',
       },
       onboardFinished: function() {
         this.setPath('kitchen');
       },
       addMenuItem: function(e) {
         this.set('item', e.detail.item);
+        this.openItemForm();
+      },
+      saveMenu: function(e, menu) {
+        delete menu.items;
+        if (menu.id === undefined || menu.id === null || menu.id === '' || menu.id === '0') {
+          this.openItemForm();
+        }
+        this.service.saveMenu(menu, function(menu, err) {
+          if (err.code !== 0) {
+            return;
+          }
+          this.set('item.menu_id', menu.id);
+        }.bind(this));
+      },
+      openItemForm: function() {
         this.$.itemDialog.open();
         this.$.itemForm.selected();
       },
@@ -258,7 +274,6 @@
         this.page = page || 'kitchen';
       },
       _pageChanged: function(page) {
-        console.log('page', page);
         if (this.user !== undefined && this.user !== null && !this.user.isOnboard && page !== 'onboard') {
           this.setPath('onboard');
           return;
