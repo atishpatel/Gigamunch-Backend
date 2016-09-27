@@ -115,6 +115,7 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 			PhotoURL:    gitkitUser.PhotoURL,
 			Permissions: 0,
 		}
+		// update PhotoURL given by Google so it's higher resolution
 		userSessions.User.PhotoURL = strings.Replace(userSessions.User.PhotoURL, "s96-c", "s250-c", 0)
 	}
 	// create the token

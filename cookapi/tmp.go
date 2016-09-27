@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/datastore"
@@ -23,7 +25,7 @@ var (
 		cook.WeekSchedule{
 			DayOfWeek: 1,
 			StartTime: 6 * 60 * 60,
-			EndTime:   8 * 60 * 60,
+			EndTime:   (8 * 60 * 60) - 1,
 		},
 		cook.WeekSchedule{
 			DayOfWeek: 1,
@@ -33,7 +35,7 @@ var (
 		cook.WeekSchedule{
 			DayOfWeek: 2,
 			StartTime: 6 * 60 * 60,
-			EndTime:   8 * 60 * 60,
+			EndTime:   (8 * 60 * 60) - 1,
 		},
 		cook.WeekSchedule{
 			DayOfWeek: 2,
@@ -43,7 +45,7 @@ var (
 		cook.WeekSchedule{
 			DayOfWeek: 3,
 			StartTime: 6 * 60 * 60,
-			EndTime:   8 * 60 * 60,
+			EndTime:   (8 * 60 * 60) - 1,
 		},
 		cook.WeekSchedule{
 			DayOfWeek: 3,
@@ -53,7 +55,7 @@ var (
 		cook.WeekSchedule{
 			DayOfWeek: 4,
 			StartTime: 6 * 60 * 60,
-			EndTime:   8 * 60 * 60,
+			EndTime:   (8 * 60 * 60) - 1,
 		},
 		cook.WeekSchedule{
 			DayOfWeek: 4,
@@ -63,7 +65,7 @@ var (
 		cook.WeekSchedule{
 			DayOfWeek: 5,
 			StartTime: 6 * 60 * 60,
-			EndTime:   8 * 60 * 60,
+			EndTime:   (8 * 60 * 60) - 1,
 		},
 		cook.WeekSchedule{
 			DayOfWeek: 5,
@@ -104,6 +106,7 @@ func (service *Service) CopyOverCooks(ctx context.Context, req *GigatokenReq) (*
 		newKeys[i] = datastore.NewKey(ctx, kindNew, oldKeys[i].StringID(), 0, nil)
 		cooks[i].CreatedDatetime = results[i].CreatedDatetime
 		cooks[i].UserDetail = results[i].UserDetail
+		cooks[i].UserDetail.PhotoURL = strings.Replace(cooks[i].UserDetail.PhotoURL, "s96-c", "s250-c", 0)
 		cooks[i].Bio = results[i].Bio
 		cooks[i].PhoneNumber = results[i].PhoneNumber
 		cooks[i].Address = results[i].Address
