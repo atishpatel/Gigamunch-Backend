@@ -25,6 +25,8 @@
 <link rel="import"
       href="app-icons.html">
 <link rel="import"
+      href="dietary-concerns-input.html">
+<link rel="import"
       href="paper-collapse-item.html">
 
 <dom-module id="item-form">
@@ -52,8 +54,8 @@
       
       .submit-button {
         align-self: flex-end;
-        width: 200px;
-        margin: 32px 24px 0 0;
+        width: 250px;
+        margin-top: 32px;
       }
       
       paper-input,
@@ -69,16 +71,18 @@
       }
       /* TODO Remove */
       
-      .photo paper-icon-button {
+      .photo-16-9 {
+        margin: 12px 0;
+      }
+      
+      .photo-16-9 paper-icon-button {
         z-index: 1;
         position: absolute;
         top: 15px;
         right: 15px;
-        --paper-icon-button: {
-          background-color: gray;
-          color: white;
-          border-radius: 50%;
-        }
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
       }
       
       paper-progress {
@@ -94,6 +98,7 @@
       @media (max-width: 767px) {
         .submit-button {
           width: 100%;
+          margin: auto;
         }
       }
 
@@ -125,7 +130,7 @@
           <paper-progress value="[[progress]]"></paper-progress>
         </div>
         <file-input id="fileInput"
-                    photos="{{photos}}"
+                    photos="{{item.photos}}"
                     url-postfix="=s1080"
                     on-photoschanged="photosChanged"
                     on-progressstart="progressStart"
@@ -159,11 +164,7 @@
                         auto-validate>
         </paper-textarea>
         <!-- TODO: switch to a checklist for dietary needs -->
-        <!--<paper-input label="Dietary Concerns Tags"
-                                placeholder="dairy, nuts, meat"
-                                value="{{_dietary_needs_tags}}"
-                                auto-validate>
-                    </paper-input>-->
+        <dietary-concerns-input dietary-concerns="{{item.dietary_concerns}}"></dietary-concerns-input>
         <div>
           <paper-input class="half-field"
                        label="Price per serving*"
@@ -286,6 +287,7 @@
           this.submitText = 'Update Item';
           this.title = 'Edit Item';
         }
+        this.photosUpdated(this.item.photos);
       },
       submit: function() {
         this.activateSpinner();
@@ -370,9 +372,9 @@
         }
       },
       removePhoto: function(e) {
-        var index = this.photos.indexOf(e.model.photo);
-        this.splice('photos', index, 1);
-        this.photosUpdated(this.photos);
+        var index = this.item.photos.indexOf(e.model.photo);
+        this.splice('item.photos', index, 1);
+        this.photosUpdated(this.item.photos);
       },
       photosUpdated: function(photos) {
         if (photos === undefined || photos === null || photos.length === 0) {
