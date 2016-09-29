@@ -23,6 +23,11 @@ handlers:
   upload: cook/service-worker.js
   secure: always
 
+- url: /cook/manifest.json
+  static_files: cook/manifest.json
+  upload: cook/manifest.json
+  secure: always
+
 - url: /cook/js
   static_dir: cook/js
   secure: always

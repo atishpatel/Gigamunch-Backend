@@ -23,11 +23,16 @@ handlers:
   upload: cook/build/bundled/service-worker.js
   secure: always
 
+- url: /cook/manifest.json
+  static_files: cook/build/bundled/manifest.json
+  upload: cook/build/bundled/manifest.json
+  secure: always
+
 - url: /cook/js
   static_dir: cook/build/bundled/js
   secure: always
 
-- url: /.*src
+- url: /cook/src
   static_dir: cook/build/bundled/src
   secure: always
 
@@ -53,7 +58,7 @@ handlers:
   static_dir: gigachef/build/bundled/js
   secure: always
 
-- url: /.*src
+- url: /gigachef/src
   static_dir: gigachef/build/bundled/src
   secure: always
 
