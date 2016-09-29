@@ -1,9 +1,10 @@
 package main
 
 import (
-	"golang.org/x/net/context"
 	"fmt"
 	"strings"
+
+	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
@@ -159,6 +160,7 @@ type FinishOnboardingReq struct {
 	SubMerchant SubMerchant `json:"sub_merchant"`
 }
 
+// FinishOnboarding is the function to finish the onboarding process
 func (service *Service) FinishOnboarding(ctx context.Context, req *FinishOnboardingReq) (*RefreshTokenResp, error) {
 	resp := new(RefreshTokenResp)
 	defer handleResp(ctx, "FinishOnboarding", resp.Err)
