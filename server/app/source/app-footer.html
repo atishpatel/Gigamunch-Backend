@@ -1,27 +1,30 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="app-icons.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import"
+      href="app-icons.html">
 
 <dom-module id="app-footer">
 
   <template>
 
     <style>
-      :host {
+       :host {
         display: block;
       }
-
+      
       @font-face {
         font-family: 'NexaBold';
         src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
       }
-
+      
       .logo {
         font-family: 'NexaBold', sans-serif;
         letter-spacing: .05em;
         text-decoration: none;
       }
-
+      
       footer {
         background-color: #797c82;
         color: #fff;
@@ -29,30 +32,30 @@
         position: relative;
         font-size: 14px;
       }
-
+      
       footer .container {
         max-width: 1000px;
         margin: 0 auto;
         padding: 0 32px;
       }
-
+      
       footer .join-us {
         background: var(--app-primary-color);
         padding: 20px;
         color: white;
       }
-
+      
       footer .join-us-title {
         font-size: 1em;
         text-align: center;
       }
-
+      
       footer .join-us-links {
         display: flex;
         justify-content: center;
         align-items: center;
       }
-
+      
       footer .join-us-links a {
         display: inline-block;
         padding: 3px 7px;
@@ -64,100 +67,94 @@
         min-width: 100px;
         color: white;
       }
-
+      
       footer .join-us-links span {
         display: none;
       }
-
+      
       footer .logo {
         font-size: 1.5em;
         color: white;
         margin: 25px 0;
       }
-
+      
       footer .love .logo {
         font-size: 1em;
       }
-
+      
       footer .nav {
         display: flex;
         flex-direction: column;
         letter-spacing: 0.35px;
       }
-
+      
       footer section {
         padding: 10px 0;
       }
-
+      
       footer .nav section:last-child {
         margin-right: auto;
       }
-
+      
       footer .title {
         color: #fff;
         font-weight: bold;
         margin: 5px 0;
       }
-
+      
       footer ul {
         list-style: none;
         margin: 0;
         padding: 0
       }
-
+      
       footer ul li {
         font-size: 14px;
         font-weight: 400;
         line-height: 26px
       }
-
+      
       footer a {
         text-decoration: none;
       }
-
+      
       footer .nav a {
         color: #c6c7ca;
       }
-
+      
       footer .nav a:hover {
         color: #fff;
       }
-
+      
       @media (min-width: 767px) {
         footer {
           padding-bottom: 60px;
         }
-
         footer .join-us-links span {
           display: inline-block;
         }
-
         footer .logo {
           margin: 20px 0 40px;
         }
-
         footer .content {
           padding: 0 20px;
         }
-
         footer .nav {
           flex-direction: row;
           justify-content: space-around;
         }
-
         footer .nav section:last-child {
           margin-left: auto;
           text-align: center;
         }
-
         footer section {
           padding-right: 40px;
         }
-
         footer .love {
           text-align: center;
         }
       }
+
     </style>
     <footer>
       <section class="join-us">
@@ -196,15 +193,15 @@
             </ul>
           </section>
           <section>
-              <div class="title">Gigachef Website</div>
-              <ul>
-                <li><a href="/gigachef/">Dashboard</a></li>
-                <li><a href="/gigachef/items">My Items</a></li>
-                <li><a href="/gigachef/posts">My Orders</a></li>
-                <li><a href="/gigachef/updateprofile">Update Profile</a></li>
-                <li><a href="/gigachef/updatepayout">Update Payout Method</a></li>
-              </ul>
-            </section>
+            <div class="title">Gigachef Website</div>
+            <ul>
+              <li><a href="/gigachef/">Dashboard</a></li>
+              <li><a href="/gigachef/items">My Items</a></li>
+              <li><a href="/gigachef/posts">My Orders</a></li>
+              <li><a href="/gigachef/updateprofile">Update Profile</a></li>
+              <li><a href="/gigachef/updatepayout">Update Payout Method</a></li>
+            </ul>
+          </section>
           <section>
             <div class="title">Legal</div>
             <ul>
@@ -220,14 +217,17 @@
           </section>
         </div>
         <div class="love">
-          Made with <iron-icon style="color:#FF7043" icon="app:favorite"></iron-icon> by <span class="logo">Gigamunch</span> | <iron-icon style="width:14px" icon="app:copyright"></iron-icon> 2016
+          Made with
+          <iron-icon style="color:#FF7043"
+                     icon="app:favorite"></iron-icon> by <span class="logo">Gigamunch</span> |
+          <iron-icon style="width:14px"
+                     icon="app:copyright"></iron-icon> 2016
         </div>
       </div>
     </footer>
   </template>
 
   <script>
-
     Polymer({
       is: 'app-footer'
     });

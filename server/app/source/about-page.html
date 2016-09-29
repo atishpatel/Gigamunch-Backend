@@ -1,147 +1,151 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
 
 <dom-module id="about-page">
 
   <template>
 
     <style>
-    :host {
-      display: block;
-      padding: 10px;
-      color: var(--primary-text-color);
-    }
-
-    h1, h2, p {
-      font-size: 1em;
-    }
-
-    h2 {
-      font-weight: 500;
-    }
-
-    p {
-      font-weight: 300;
-    }
-
-    paper-material {
-      padding: 10px;
-      min-height: 50vh;
-      margin: auto;
-      max-width: 1000px;
-    }
-
-    .center {
-      text-align: center;
-    }
-
-    .bg-white {
-      background-color: white;
-    }
-
-    .team {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-    }
-
-    .person {
+       :host {
+        display: block;
+        padding: 10px;
+        color: var(--primary-text-color);
+      }
+      
+      h1,
+      h2,
+      p {
+        font-size: 1em;
+      }
+      
+      h2 {
+        font-weight: 500;
+      }
+      
+      p {
+        font-weight: 300;
+      }
+      
+      paper-material {
+        padding: 10px;
+        min-height: 50vh;
+        margin: auto;
+        max-width: 1000px;
+      }
+      
+      .center {
+        text-align: center;
+      }
+      
+      .bg-white {
+        background-color: white;
+      }
+      
+      .team {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+      
+      .person {
         max-width: 50%;
-    }
-
-    .pic {
+      }
+      
+      .pic {
         margin: auto;
         width: 150px;
-    }
-
-    .pic img {
+      }
+      
+      .pic img {
         width: 100%;
         border-radius: 50%;
-    }
-
-    .job {
+      }
+      
+      .job {
         color: #727272;
-    }
-
-    @media (max-width: 767px) {
+      }
+      
+      @media (max-width: 767px) {
         .pic {
-            width: 100px;
+          width: 100px;
         }
-
         .person {
-            width: 50%;
+          width: 50%;
         }
-    }
-  </style>
+      }
 
-  <paper-material elevation="1" class="bg-white">
-    <div class="center">
-      <h1>The Team</h1>
-      <div class="team">
-        <div class="person">
+    </style>
+
+    <paper-material elevation="1"
+                    class="bg-white">
+      <div class="center">
+        <h1>The Team</h1>
+        <div class="team">
+          <div class="person">
             <div class="pic">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/atish-300.jpg" alt="Atish Patel">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/atish-300.jpg"
+                   alt="Atish Patel">
             </div>
             <div class="name">
-               Atish Patel 
+              Atish Patel
             </div>
             <div class="job">
-                Full Stack Developer
+              Full Stack Developer
             </div>
-        </div>
-        <div class="person">
+          </div>
+          <div class="person">
             <div class="pic">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/chris-300.jpg" alt="Chris Sipe">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/chris-300.jpg"
+                   alt="Chris Sipe">
             </div>
             <div class="name">
-               Chris Sipe 
+              Chris Sipe
             </div>
             <div class="job">
-                iOS Developer
+              iOS Developer
             </div>
-        </div>
-        <div class="person">
+          </div>
+          <div class="person">
             <div class="pic">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/enis-300.jpg" alt="Enis Cirak">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/enis-300.jpg"
+                   alt="Enis Cirak">
             </div>
             <div class="name">
-               Enis Cirak 
+              Enis Cirak
             </div>
             <div class="job">
-                Marketing & Chef Relations
+              Marketing & Chef Relations
             </div>
-        </div>
-        <div class="person">
+          </div>
+          <div class="person">
             <div class="pic">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/piyush-300.jpg" alt="Piyush Patel">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/about/piyush-300.jpg"
+                   alt="Piyush Patel">
             </div>
             <div class="name">
-               Piyush Patel 
+              Piyush Patel
             </div>
             <div class="job">
-                Business
+              Business
             </div>
+          </div>
         </div>
+        <h1>Our Mission</h1>
+        <p>
+          To unlock the full potential of the food experience by unleashing the creativity of the people and empowering them to do something they love.
+        </p>
+        <h1>Our Origin</h1>
+        <p>
+          One night, we were having dinner at Atish’s house, and his mom made us amazing indian food. We talked about how awesome it would be if you could buy her homemade food whenever you want. We decided to enter the idea into a business competition at our school.
+          We fell in love with the idea as we worked on it, and ended up winning first place.
+        </p>
       </div>
-      <h1>Our Mission</h1>
-      <p>
-        To unlock the full potential of the food experience by unleashing 
-        the creativity of the people and empowering them to do something they love.
-      </p>
-      <h1>Our Origin</h1>
-      <p>
-        One night, we were having dinner at Atish’s house, and his mom made us amazing indian food. 
-        We talked about how awesome it would be if you could buy her homemade food whenever you want. 
-        We decided to enter the idea into a business competition at our school. 
-        We fell in love with the idea as we worked on it, and ended up winning first place.
-      </p>
-    </div>
 
-  </paper-material>
+    </paper-material>
 
   </template>
 
   <script>
-
     Polymer({
 
       is: 'about-page'

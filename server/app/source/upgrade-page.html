@@ -1,57 +1,61 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
 
 <dom-module id="upgrade-page">
 
   <template>
 
     <style>
-    :host {
-      display: block;
-      padding: 10px;
-      color: var(--primary-text-color);
-    }
+       :host {
+        display: block;
+        padding: 10px;
+        color: var(--primary-text-color);
+      }
+      
+      h1,
+      h2,
+      p {
+        font-size: 1em;
+      }
+      
+      h2 {
+        font-weight: 500;
+      }
+      
+      p {
+        font-weight: 300;
+      }
+      
+      paper-material {
+        padding: 10px;
+        min-height: 50vh
+      }
+      
+      .center {
+        text-align: center;
+      }
+      
+      .bg-white {
+        background-color: white;
+      }
 
-    h1, h2, p {
-      font-size: 1em;
-    }
+    </style>
 
-    h2 {
-      font-weight: 500;
-    }
+    <paper-material elevation="1"
+                    class="bg-white">
+      <div class="center">
+        <h1>Oh no! It looks like your browser is old and tired.</h1>
+        <p>
+          For the best experience on our website, please upgrade your browser to
+          <a href="https://www.google.com/chrome/browser/">Google Chrome</a> and try again.
+        </p>
+      </div>
 
-    p {
-      font-weight: 300;
-    }
-
-    paper-material {
-      padding: 10px;
-      min-height: 50vh
-    }
-
-    .center {
-      text-align: center;
-    }
-
-    .bg-white {
-      background-color: white;
-    }
-  </style>
-
-  <paper-material elevation="1" class="bg-white">
-    <div class="center">
-      <h1>Oh no! It looks like your browser is old and tired.</h1>
-      <p>
-        For the best experience on our website, please upgrade your browser to
-        <a href="https://www.google.com/chrome/browser/">Google Chrome</a> and try again.
-      </p>
-    </div>
-
-  </paper-material>
+    </paper-material>
 
   </template>
 
   <script>
-
     Polymer({
 
       is: 'upgrade-page'
