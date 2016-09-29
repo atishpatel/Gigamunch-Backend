@@ -1,7 +1,7 @@
 {
   "name": "Cook by Gigamunch",
   "short_name": "Cook",
-  "start_url": "/",
+  "start_url": "/cook/",
   "display": "standalone",
   "theme_color": "#FF7043",
   "background_color": "#FF7043",
