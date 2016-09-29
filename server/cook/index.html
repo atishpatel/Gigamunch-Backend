@@ -206,7 +206,7 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'FontRegular', 'Roboto', sans-serif;
       line-height: 1.5;
       min-height: 100vh;
       /*background-color: #eee;*/
@@ -228,6 +228,21 @@
     var app = document.querySelector('#app');
 
   </script>
+  <style>
+    /* Fix issue with font not importing */
+    
+    @font-face {
+      font-family: 'FontRegular';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
+    }
+    
+    @font-face {
+      font-family: 'FontBold';
+      font-weight: bold;
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
+    }
+
+  </style>
 </body>
 
 </html>

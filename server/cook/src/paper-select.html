@@ -1,9 +1,12 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
 
 <dom-module id="paper-select">
   <template>
     <style>
       paper-select {
+        font-family: 'FontRegular', 'Roboto';
+        letter-spacing: .5px;
         display: inline-block;
         position: relative;
         /* create a layer to avoid invalidation from other controls*/
@@ -11,19 +14,19 @@
         transform: translateZ(0);
         padding-bottom: 6px;
       }
-
-      paper-select > label {
+      
+      paper-select>label {
         line-height: 20px;
       }
-
-      paper-select > paper-md-decorator {
+      
+      paper-select>paper-md-decorator {
         display: block;
         border-top: 1px solid #727272;
         height: 1px;
         speak: none;
       }
-
-      paper-select > paper-md-decorator::after {
+      
+      paper-select>paper-md-decorator::after {
         content: '\25BC';
         display: block;
         position: absolute;
@@ -35,8 +38,10 @@
         color: var(--secondary-text-color);
         pointer-events: none;
       }
-
-      paper-select > select {
+      
+      paper-select>select {
+        font-family: 'FontRegular', 'Roboto';
+        letter-spacing: .5px;
         width: 100%;
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -51,12 +56,12 @@
         margin: 0;
         outline: none;
       }
-
-      paper-select > select::-ms-expand {
+      
+      paper-select>select::-ms-expand {
         display: none;
       }
-
-      paper-select > paper-md-decorator > paper-underline {
+      
+      paper-select>paper-md-decorator>paper-underline {
         display: block;
         background-color: var(--primary-color);
         height: 2px;
@@ -69,27 +74,27 @@
         transition: -webkit-transform 0.2s ease-in;
         transition: transform 0.2s ease-in;
       }
-
-      paper-select > select:focus + paper-md-decorator > paper-underline {
+      
+      paper-select>select:focus+paper-md-decorator>paper-underline {
         -webkit-transform: scale3d(1, 1, 1);
         transform: scale3d(1, 1, 1);
         transition: -webkit-transform 0.2s ease-out;
         transition: transform 0.2s ease-out;
       }
-
-      paper-select > select:focus + paper-md-decorator::before,
-      paper-select > select:focus + paper-md-decorator::after,
-      paper-select > select:focus {
+      
+      paper-select>select:focus+paper-md-decorator::before,
+      paper-select>select:focus+paper-md-decorator::after,
+      paper-select>select:focus {
         color: black;
       }
-
       /* hide the focus ring in firefox */
-      paper-select > select:focus:-moz-focusring {
+      
+      paper-select>select:focus:-moz-focusring {
         color: transparent;
         text-shadow: 0 0 0 #000;
       }
-
-      paper-select > [prefix] {
+      
+      paper-select>[prefix] {
         position: absolute;
         left: 0px;
         top: calc(50% - 8px);

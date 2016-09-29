@@ -226,6 +226,7 @@
 
       observers: [
         '_routePageChanged(routeData.page)',
+        '_routePathChanged(route.path)',
         '_pageOrScreenChanged(page, smallScreen)',
       ],
       listeners: {
@@ -269,9 +270,16 @@
           timingVar: 'ready',
           timingValue: window.performance.now(),
         });
+        this.loadDate = new Date();
       },
       _routePageChanged: function(page) {
         this.page = page || 'kitchen';
+      },
+      _routePathChanged: function(path) {
+        // if it's been 2 days since page loaded, reload.
+        if (this.loadDate && (new Date() - this.loadDate) > 2 * 86400 * 1000) {
+          window.location = path;
+        }
       },
       _pageChanged: function(page) {
         if (this.user !== undefined && this.user !== null && !this.user.isOnboard && page !== 'onboard') {
@@ -303,7 +311,7 @@
             element.selected();
             this.set('title', title);
           } catch (err) {
-            console.warn(err);
+            console.error(err);
           }
         }.bind(this), this._showPage404, true);
       },
@@ -329,7 +337,6 @@
         if (path !== undefined) {
           route += path;
         }
-        console.log('route', route);
         this.set('route.path', this.baseurl + route);
       },
     });
