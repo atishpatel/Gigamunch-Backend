@@ -1,28 +1,36 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta http-equiv="x-ua-compatible"
+        content="ie=edge">
+  <meta name="viewport"
+        content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
   <title>Gigachef | Gigamunch</title>
 
   <base href="/gigachef/">
 
-  <meta name="theme-color" content="#FF7043">
-  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color"
+        content="#FF7043">
+  <link rel="manifest"
+        href="manifest.json">
 
-  <script async src="https://www.google-analytics.com/analytics.js"></script>
+  <script async
+          src="https://www.google-analytics.com/analytics.js"></script>
   <script>
-
     // setup Polymer options
-    window.Polymer = {lazyRegister: true, dom: 'shadow'};
+    window.Polymer = {
+      lazyRegister: true,
+      dom: 'shadow'
+    };
 
     // load webcomponents polyfills
     (function() {
-      if ('registerElement' in document
-          && 'import' in document.createElement('link')
-          && 'content' in document.createElement('template')) {
+      if ('registerElement' in document &&
+        'import' in document.createElement('link') &&
+        'content' in document.createElement('template')) {
         // browser has web components
       } else {
         // polyfill web components
@@ -62,7 +70,10 @@
     }
 
     // Google Analytics
-    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    window.ga = window.ga || function() {
+      (ga.q = ga.q || []).push(arguments)
+    };
+    ga.l = +new Date;
     var ua = CHEF.isProd ? 'UA-71567908-1' : 'UA-71567908-4';
     ga('create', ua, 'auto');
     ga('send', 'pageview');
@@ -134,11 +145,12 @@
       // load or is blocked by a browser extension.
       setTimeout(redirectToUpgradePage, 5000);
     }
+
   </script>
-  <link rel="import" href="src/app-shell.html">
+  <link rel="import"
+        href="src/app-shell.html">
 
   <style>
-
     body {
       margin: 0;
       font-family: 'Roboto', 'Noto', sans-serif;
@@ -149,15 +161,19 @@
 
   </style>
 </head>
+
 <body>
   <script src="js/user.js"></script>
   <script src="js/service.js"></script>
   <script src="https://apis.google.com/js/client.js?onload=initService"></script>
 
-  <app-shell id="app" base-url="/gigachef"></app-shell>
+  <app-shell id="app"
+             base-url="/gigachef"></app-shell>
 
   <script>
     var app = document.querySelector('#app');
+
   </script>
 </body>
+
 </html>

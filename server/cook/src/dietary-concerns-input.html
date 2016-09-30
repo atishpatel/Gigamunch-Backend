@@ -33,7 +33,7 @@
     <div class="list">
       <paper-checkbox checked="{{vegan}}">Vegan</paper-checkbox>
       <paper-checkbox checked="{{vegetarian}}">Vegetarian</paper-checkbox>
-      <paper-checkbox checked="{{palio}}">Palio</paper-checkbox>
+      <paper-checkbox checked="{{paleo}}">Paleo</paper-checkbox>
       <paper-checkbox checked="{{glutenFree}}">Gluten-Free</paper-checkbox>
       <paper-checkbox checked="{{kosher}}">Kosher</paper-checkbox>
     </div>
@@ -58,7 +58,7 @@
           type: Boolean,
           observer: 'checkUpdated'
         },
-        palio: {
+        paleo: {
           type: Boolean,
           observer: 'checkUpdated'
         },
@@ -81,7 +81,7 @@
         // update checks
         this.vegan = this.getKthBit(this.dietaryConcerns, 0);
         this.vegetarian = this.getKthBit(this.dietaryConcerns, 1);
-        this.palio = this.getKthBit(this.dietaryConcerns, 2);
+        this.paleo = this.getKthBit(this.dietaryConcerns, 2);
         this.glutenFree = this.getKthBit(this.dietaryConcerns, 3);
         this.kosher = this.getKthBit(this.dietaryConcerns, 4);
         // unlock
@@ -94,7 +94,7 @@
         var newDietaryConcerns = 0;
         newDietaryConcerns = this.setKthBit(newDietaryConcerns, 0, this.vegan);
         newDietaryConcerns = this.setKthBit(newDietaryConcerns, 1, this.vegetarian);
-        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 2, this.palio);
+        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 2, this.paleo);
         newDietaryConcerns = this.setKthBit(newDietaryConcerns, 3, this.glutenFree);
         newDietaryConcerns = this.setKthBit(newDietaryConcerns, 4, this.kosher);
         if (this.dietaryConcerns !== newDietaryConcerns) {
