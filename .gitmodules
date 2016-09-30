@@ -1,0 +1,3 @@
+[submodule "Gigamunch-Proto"]
+	path = Gigamunch-Proto
+	url = https://github.com/atishpatel/Gigamunch-Proto.git
