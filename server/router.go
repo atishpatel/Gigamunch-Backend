@@ -13,12 +13,13 @@ func init() {
 	r.GET(signOutURL, handleSignout)
 
 	// r.POST("/upload", handleUpload)
-	r.GET("/get-upload-url", hangleGetUploadURL)
+	// r.GET("/get-upload-url", handleGetUploadURL)
 
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
 	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
 	r.NotFound = http.HandlerFunc(handle404)
+	http.HandleFunc("/get-upload-url", handleGetUploadURL)
 	http.HandleFunc("/upload", handleUpload)
 	http.Handle("/", r)
 }
@@ -31,7 +32,7 @@ func handle404(w http.ResponseWriter, req *http.Request) {
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	user := CurrentUser(w, req)
 	if user != nil {
-		http.Redirect(w, req, baseGigachefURL, http.StatusTemporaryRedirect)
+		http.Redirect(w, req, baseCookURL, http.StatusTemporaryRedirect)
 		return
 	}
 	removeCookies(w)

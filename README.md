@@ -24,9 +24,11 @@ default:
   - In the 'main' folder.
   - This module serves all front-end related request such as template based page rendering.
 endpoint-gigachef:
-  - In the 'endpoints/gigachef' folder.
+  - In the 'endpoints-gigachef' folder.
 endpoint-gigamuncher:
-  - In the 'endpoint/gigamuncher' folder.
+  - In the 'endpoint-gigamuncher' folder.
+cookapi:
+  - 'cookapi' folder
 
 # Other notes
   - When added a page to the website, the app.yaml and app-shell.html page must be edited or the page will keep reloading.

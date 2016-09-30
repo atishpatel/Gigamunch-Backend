@@ -1,0 +1,17 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/app-shell.html",
+  "fragments": [
+    "src/onboard-steps.html",
+    "src/kitchen-page.html"
+  ],
+  "sourceGlobs": [
+    "src/**/*",
+    "js/**/*",
+    "bower.json"
+  ],
+  "includeDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+  ]
+}

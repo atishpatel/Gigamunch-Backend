@@ -1,6 +1,7 @@
 package server
 
 import (
+	"golang.org/x/net/context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,14 +10,11 @@ import (
 	"google.golang.org/appengine/blobstore"
 	"google.golang.org/appengine/image"
 
-	"golang.org/x/net/context"
-
 	"google.golang.org/appengine"
 
-	"github.com/julienschmidt/httprouter"
-	"gitlab.com/atishpatel/Gigamunch-Backend/config"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -36,6 +34,8 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 
 	defer handleURLResp(ctx, w, resp)
 
+	time.Sleep(1 * time.Second) // check if failed to find blob file bug is fixed with this
+
 	// get file
 	blobs, _, err := blobstore.ParseUpload(req)
 	if err != nil {
@@ -51,7 +51,7 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 		Secure: true,
 		Crop:   true,
 	}
-	ctx, _ = context.WithDeadline(ctx, time.Now().Add(60*time.Second))
+	// ctx, _ = context.WithDeadline(ctx, time.Now().Add(60*time.Second))
 	url, err := image.ServingURL(ctx, file[0].BlobKey, opts)
 	if err != nil {
 		deadline, _ := ctx.Deadline()
@@ -61,7 +61,7 @@ func handleUpload(w http.ResponseWriter, req *http.Request) {
 	resp.URL = url.String()
 }
 
-func hangleGetUploadURL(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func handleGetUploadURL(w http.ResponseWriter, req *http.Request) {
 	resp := new(urlResp)
 	ctx := appengine.NewContext(req)
 	defer handleURLResp(ctx, w, resp)

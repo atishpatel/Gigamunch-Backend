@@ -13,6 +13,37 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
+# Cook app
+- url: /.*bower_components
+  static_dir: cook/build/bundled/bower_components
+  secure: always
+
+- url: /cook/service-worker.js
+  static_files: cook/build/bundled/service-worker.js
+  upload: cook/build/bundled/service-worker.js
+  secure: always
+
+- url: /cook/manifest.json
+  static_files: cook/build/bundled/manifest.json
+  upload: cook/build/bundled/manifest.json
+  secure: always
+
+- url: /cook/js
+  static_dir: cook/build/bundled/js
+  secure: always
+
+- url: /cook/src
+  static_dir: cook/build/bundled/src
+  secure: always
+
+- url: /cook.*
+  static_files: cook/build/bundled/index.html
+  upload: cook/build/bundled/index.html
+  http_headers:
+    Link: '</cook/js/user.js>; rel=preload; as=script, </cook/js/service.js>; rel=preload; as=script, </cook/src/app-shell.html>; rel=preload; as=document'
+  secure: always
+
+
 # Gigachef app
 - url: /.*bower_components
   static_dir: gigachef/build/bundled/bower_components
@@ -27,7 +58,7 @@ handlers:
   static_dir: gigachef/build/bundled/js
   secure: always
 
-- url: /.*src
+- url: /gigachef/src
   static_dir: gigachef/build/bundled/src
   secure: always
 

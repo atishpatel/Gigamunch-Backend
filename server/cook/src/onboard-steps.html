@@ -1,0 +1,323 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-form/iron-form.html">
+<link rel="import"
+      href="../bower_components/paper-stepper/paper-stepper.html">
+<link rel="import"
+      href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="profile-fields.html">
+<link rel="import"
+      href="work-schedule.html">
+<link rel="import"
+      href="menu-list.html">
+<link rel="import"
+      href="profile-social-fields.html">
+<link rel="import"
+      href="submerchant-fields.html">
+
+<dom-module id="onboard-steps">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: block;
+        background: white;
+        --paper-stepper-horizontal-opened-height: 90.5vh;
+      }
+      
+      paper-stepper {
+        --paper-button: {
+          background: white;
+          color: var(--primary-color);
+          min-width: 5em;
+        }
+      }
+      
+      paper-step .header:not(:first-child) {
+        padding-top: 24px;
+      }
+      
+      .header {
+        padding-bottom: 24px;
+      }
+      
+      .header-title {
+        font-size: 20px;
+        font-weight: bold;
+      }
+      
+      .header-desc {
+        font-size: 14px;
+        line-height: 16px;
+        color: var(--secondary-text-color);
+      }
+      
+      #agreeCheckbox {
+        padding: 12px 0;
+      }
+      /* not smallScreen */
+      
+      @media (min-width: 767px) {
+        paper-step>* {
+          display: block;
+          padding: 0 24px;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+      }
+
+    </style>
+
+    <div>
+      <paper-stepper id="stepper"
+                     selected="{{selectedStep}}"
+                     opened
+                     alternative-label
+                     linear>
+        <!-- Step 1 -->
+        <paper-step id="prefStep"
+                    label="Your Preferences"
+                    editable>
+          <form id="prefForm"
+                is="iron-form"
+                method="post"
+                action="#">
+            <div class="header">
+              <div class="header-title">Your Preferences</div>
+              <div class="header-desc">Let's get started! Tell us a bit about yourself.</div>
+            </div>
+            <profile-fields id="profileFields"
+                            photo-url="{{cook.photo_url}}"
+                            name="{{cook.name}}"
+                            email="{{cook.email}}"
+                            phone-number="{{cook.phone_number}}"
+                            address="{{cook.address}}">
+            </profile-fields>
+            <div class="header">
+              <div class="header-title">Schedule</div>
+              <div class="header-desc">Let's figure out when you absolutely can't make food for someone.</div>
+            </div>
+            <work-schedule id="workSchedule"
+                           week-schedule="{{cook.week_schedule}}">
+            </work-schedule>
+            <paper-checkbox id="agreeCheckbox"
+                            required>I agree to the <a href="/terms"
+                 target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
+                 target="_blank">Privacy Policy</a></paper-checkbox>
+          </form>
+        </paper-step>
+        <!-- Step 2 -->
+        <paper-step id="itemsStep"
+                    label="Add Your Creations"
+                    editable
+                    saved>
+          <div class="header">
+            <div class="header-title">Add Your Creations</div>
+            <div class="header-desc">Make Menus like "Paleo Palace" and "Atish's Desserts".<br>Add as many Items as you can to the Menus. More Items, more changes to be discovered!</div>
+          </div>
+          <menu-list menus="[[menus]]"></menu-list>
+        </paper-step>
+        <!-- Step 3 -->
+        <paper-step label="Get Verified"
+                    editable>
+          <div class="header">
+            <div class="header-title">Submit Your Background Check</div>
+            <div class="header-desc"></div>
+          </div>
+          <a href="https://checkr.com/apply/gigamunch/0347ac549c16"
+             target="_blank">Submit a Checkr Application</a>
+          <div class="header">
+            <div class="header-title">Schedule a Kitchen Visit</div>
+            <div class="header-desc">We have a relationship with all our cook. The Kitchen Visit is a great opportunity for us to meet you and take pictures of your creations!</div>
+          </div>
+          <a href="https://calendly.com/kitchenvisit"
+             target="_blank">Pick a time. Visits take less than 30 minutes.</a>
+        </paper-step>
+        <!-- Step 4 -->
+        <paper-step id="prepStep"
+                    label="Be Prepared"
+                    editable
+                    optional
+                    has-skip-button
+                    skip-text="Remind me Later">
+          <form id="prepForm"
+                is="iron-form"
+                method="post"
+                action="#">
+            <div class="header">
+              <div class="header-title">Gigamunch is built on relationships. Help other people get to know you.</div>
+              <div class="header-desc">Tell them about why you're sharing you creations.<br>Tell them about how you started cooking.<br>Tell them about you.</div>
+            </div>
+            <profile-social-fields></profile-social-fields>
+            <!--<div class="header">
+              <div class="header-title">Optional Banking Info</div>
+              <div class="header-desc">If you have your banking info handy, tell us how you want to get payed.</div>
+            </div>
+            <paper-checkbox id="haveBankingInfoCheckbox"
+                            checked="{{hasBankingInfo}}">I have my banking info.</paper-checkbox>
+            <submerchant-fields hidden$="[[!hasBankingInfo]]"
+                                first-name="{{submerchant.first_name}}"
+                                last-name="{{submerchant.last_name}}"
+                                routing-number="{{submerchant.routing_number}}"
+                                account-number="{{submerchant.account_number}}"
+                                address="{{submerchant.address}}">
+            </submerchant-fields>-->
+          </form>
+        </paper-step>
+      </paper-stepper>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'onboard-steps',
+      properties: {
+        selectedStep: {
+          type: Number,
+          notify: true,
+          value: 0,
+        },
+        smallScreen: {
+          type: Boolean,
+        },
+        service: {
+          type: Object
+        },
+        user: {
+          type: Object
+        },
+        cook: {
+          type: Object,
+          notify: true,
+        },
+        menus: {
+          type: Array,
+          notify: true,
+        },
+        submerchant: {
+          type: Object,
+          notify: true,
+        },
+        hasBankingInfo: {
+          type: Boolean,
+          value: false,
+          notify: true,
+        },
+        finishOnboarding: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      ready: function() {
+        document.addEventListener('itemChangedOrAdded', function(e) {
+          var item = e.detail.item;
+          // TODO add logic to edit or add item to menu if it exist 
+          this.getMenus();
+        }.bind(this));
+      },
+      selected: function() {
+        this.setupValidation();
+
+        this.getOnboardVars();
+        this.$.stepper.progress();
+      },
+      getOnboardVars: function() {
+        this.getCook();
+        this.getMenus();
+        this.getSubmerchant();
+      },
+      getCook: function() {
+        this.service.getCook(function(cook, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('cook', cook);
+        }.bind(this));
+      },
+      getMenus: function() {
+        this.service.getMenus(function(menus, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('menus', menus);
+        }.bind(this));
+      },
+      getSubmerchant: function() {
+        this.service.getSubMerchant(function(submerchant, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('submerchant', submerchant);
+        }.bind(this));
+      },
+      setupValidation: function() {
+        // steup step1
+        var prefStep = this.$.prefStep;
+        prefStep._getValidity = this.submitPrefStep.bind(this);
+        // setup step2
+        var itemsStep = this.$.itemsStep;
+        itemsStep._getValidity = function() {
+          this.fire('toast', {
+            message: 'You must create at least one item!',
+          });
+          return this.menus !== undefined && this.menus.length > 0
+        }.bind(this);
+        // setup step4
+        var prepStep = this.$.prepStep;
+        prepStep._getValidity = this.submitPrepStep.bind(this);
+      },
+      submitPrefStep: function() {
+        var valid = this.$.prefForm.validate();
+        if (!valid) {
+          return false;
+        }
+        // update cook
+        this.service.updateCook(this.cook, function(cook, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('cook', cook);
+        }.bind(this));
+        return true;
+      },
+      submitPrepStep: function() {
+        if (this.finishOnboarding) {
+          this.hideSpinner();
+          this.fire('onboardfinished');
+          return true;
+        }
+        this.showSpinner();
+        if (!this.hasBankingInfo) {
+          this.submerchant.account_number = '';
+        }
+        // update cook
+        this.service.finishOnboarding(this.cook, this.submerchant, function(err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.user.isOnboard = true;
+          this.finishOnboarding = true;
+          this.$.stepper.continue();
+        }.bind(this));
+        return false;
+      },
+      showSpinner: function() {
+
+      },
+      hideSpinner: function() {
+
+      },
+
+    });
+
+  </script>
+</dom-module>

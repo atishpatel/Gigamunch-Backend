@@ -1,0 +1,42 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="cook-menu.html">
+
+<dom-module id="menu-list">
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+      
+      cook-menu {
+        padding: 12px 0;
+      }
+
+    </style>
+
+    <template is="dom-repeat"
+              items="[[menus]]"
+              as="menu">
+      <cook-menu menu="[[menu]]"></cook-menu>
+    </template>
+
+    <cook-menu></cook-menu>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'menu-list',
+      properties: {
+        menus: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+      },
+    });
+
+  </script>
+</dom-module>

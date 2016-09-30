@@ -1,0 +1,73 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="menu-list.html">
+
+<dom-module id="kitchen-page">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: block;
+        padding: 0 24px;
+        background-color: white;
+        min-height: 85vh;
+        max-width: var(--max-content-width);
+        margin: auto;
+      }
+      
+      #spinner {
+        margin: auto;
+      }
+
+    </style>
+    <div class="page-header">
+      <span class="page-header-title">
+        Kitchen
+      </span>
+    </div>
+    <paper-spinner id="spinner"
+                   hidden></paper-spinner>
+    <menu-list id="menuList"
+               menus="[[menus]]"></menu-list>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'kitchen-page',
+      properties: {
+        menus: {
+          type: Array,
+          notify: true,
+          value: [],
+        },
+        service: {
+          type: Object,
+        },
+      },
+      selected: function() {
+        this.getMenus();
+      },
+      ready: function() {
+        document.addEventListener('itemChangedOrAdded', function(e) {
+          var item = e.detail.item;
+          // TODO add logic to edit or add item to menu if it exist 
+          this.getMenus();
+        }.bind(this));
+      },
+      getMenus: function() {
+        this.service.getMenus(function(menus, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('menus', menus);
+        }.bind(this));
+      },
+    });
+
+  </script>
+</dom-module>

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -13,9 +14,9 @@ import (
 	"golang.org/x/net/context"
 	jwt "gopkg.in/dgrijalva/jwt-go.v2"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/config"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
 var (
@@ -50,10 +51,7 @@ func DeleteSessionToken(ctx context.Context, JWTString string) error {
 		}
 	}
 	err = putUserSessions(ctx, token.User.ID, userSessions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // SaveUser saves user information such as permissions
@@ -66,10 +64,7 @@ func SaveUser(ctx context.Context, user *types.User) error {
 	}
 	userSessions.User = *user
 	err = putUserSessions(ctx, user.ID, userSessions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // GetSessionWithGToken takes a GITKIT token string.
@@ -82,7 +77,7 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 		return nil, "", errInvalidGToken
 	}
 	gtoken, err := gitkitClient.ValidateToken(ctx, gTokenString, gitkitAudiences)
-	if err != nil || time.Now().Sub(gtoken.IssueAt) > 15*time.Minute {
+	if err != nil || time.Since(gtoken.IssueAt) > 15*time.Minute {
 		return nil, "", errInvalidGToken.WithError(err)
 	}
 	// get user info from gitkit servers
@@ -120,6 +115,8 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 			PhotoURL:    gitkitUser.PhotoURL,
 			Permissions: 0,
 		}
+		// update PhotoURL given by Google so it's higher resolution
+		userSessions.User.PhotoURL = strings.Replace(userSessions.User.PhotoURL, "s96-c", "s250-c", 0)
 	}
 	// create the token
 	token := &Token{

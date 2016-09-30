@@ -11,10 +11,10 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/config"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (

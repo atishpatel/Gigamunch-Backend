@@ -8,6 +8,7 @@ node_modules
 *.tmp
 .publish
 .datastore
+.old_datastore
 bower_components
 dist
 build

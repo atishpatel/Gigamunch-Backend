@@ -5,8 +5,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
 var (

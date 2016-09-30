@@ -7,13 +7,13 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/gigachef"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/item"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/maps"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/order"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/core/gigachef"
+	"github.com/atishpatel/Gigamunch-Backend/core/item"
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
+	"github.com/atishpatel/Gigamunch-Backend/core/order"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 const (

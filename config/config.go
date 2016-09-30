@@ -10,11 +10,10 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"os"
 
 	"golang.org/x/net/context"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -43,7 +42,8 @@ const (
 	// BTSandbox is the Braintree sandbox env
 	BTSandbox = "sandbox"
 	// BTProduction is the Braintree production env
-	BTProduction = "production"
+	BTProduction   = "production"
+	privateDirPath = "../private"
 )
 
 // BTConfig has all the config needed for Braintree
@@ -72,9 +72,8 @@ type TwilioConfig struct {
 }
 
 var (
-	gitkitConfig   *GitkitConfig
-	config         *Config
-	privateDirPath string
+	gitkitConfig *GitkitConfig
+	config       *Config
 )
 
 // GetTwilioConfig returns the twilio configs
@@ -159,7 +158,7 @@ func loadGitkitConfig(ctx context.Context) {
 		filedata := readFile("gitkit_config.json")
 		err = json.Unmarshal(filedata, &gitkitConfig)
 		if err != nil {
-			log.Println("Failed to unmarshal gitkit config file.")
+			log.Println("Failed to unmarshal gitkit config file from.")
 			log.Fatal(err)
 		}
 	} else {
@@ -198,17 +197,8 @@ func getDatastoreConfig(ctx context.Context) {
 func readFile(fileName string) []byte {
 	filedata, err := ioutil.ReadFile(privateDirPath + "/" + fileName)
 	if err != nil {
-		log.Printf("Failed to open %s file in private folder.", fileName)
+		log.Printf("Failed to open %s file in private folder(path: '%s').", fileName, privateDirPath)
 		log.Fatal(err)
 	}
 	return filedata
-}
-
-func init() {
-	if appengine.IsDevAppServer() {
-		privateDirPath = os.Getenv("GIGAMUNCH_PRIVATE_DIR")
-		if privateDirPath == "" {
-			log.Fatal("environment variable GIGAMUNCH_PRIVATE_DIR not set")
-		}
-	}
 }

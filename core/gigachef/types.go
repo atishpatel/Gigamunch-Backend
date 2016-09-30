@@ -3,7 +3,7 @@ package gigachef
 import (
 	"time"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
 const (

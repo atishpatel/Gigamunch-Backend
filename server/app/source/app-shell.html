@@ -1,30 +1,46 @@
-
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/app-route/app-location.html">
-<link rel="import" href="../bower_components/app-route/app-route.html">
-<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
-<link rel="import" href="app-icons.html">
-<link rel="import" href="app-footer.html">
-<link rel="import" href="home-page.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/app-route/app-location.html">
+<link rel="import"
+      href="../bower_components/app-route/app-route.html">
+<link rel="import"
+      href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import"
+      href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import"
+      href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import"
+      href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import"
+      href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import"
+      href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import"
+      href="../bower_components/paper-item/paper-item.html">
+<link rel="import"
+      href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import"
+      href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import"
+      href="../bower_components/iron-media-query/iron-media-query.html">
+<link rel="import"
+      href="app-icons.html">
+<link rel="import"
+      href="app-footer.html">
+<link rel="import"
+      href="home-page.html">
 
 <dom-module id="app-shell">
 
   <template>
 
     <style>
-
-      :host {
+       :host {
         display: block;
         --app-primary-color: #FF7043;
         --accent-color: var(--paper-light-blue-a200);
@@ -41,209 +57,267 @@
           color: white;
           min-width: 5em;
           text-transform: none;
-        };
+        }
+        ;
       }
-
+      
       app-drawer {
         z-index: 10;
       }
-
+      
       app-toolbar {
         z-index: 9;
       }
-
-      app-header, app-header-layout {
+      
+      app-header,
+      app-header-layout {
         z-index: 8;
       }
-
+      
       app-header-layout {
         position: inherit;
       }
-
+      
       app-header {
         background-color: white;
         color: var(--app-primary-color);
       }
-
+      
       app-header paper-icon-button {
         --paper-icon-button-ink-color: black;
       }
-
+      
       .content {
         width: 100%;
         max-width: 1000px;
         margin: auto;
       }
-
+      
       @font-face {
         font-family: 'NexaBold';
         src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
       }
-
+      
       .logo {
         font-family: 'NexaBold', sans-serif;
         letter-spacing: .05em;
         text-decoration: none;
       }
-
+      
       .nav-a {
         text-decoration: none;
         outline: 0;
         color: #546E7A;
       }
-
+      
       .drawer-toolbar {
         height: 64px;
         background-color: var(--app-primary-color);
         font-size: 14px;
       }
-
+      
       .drawer-toolbar .logo {
         font-size: 20px;
         color: white;
         text-decoration: none;
         outline: 0;
       }
-
+      
       .drawer-list {
         padding-top: 8px;
         font-size: 14px;
       }
-
+      
       .drawer-list a {
         display: block;
         color: #546E7A;
       }
-
+      
       .drawer-list a.iron-selected {
         background-color: #ECEFF1;
       }
-
+      
       .drawer-list paper-item {
         font-size: inherit;
         font-weight: 500;
       }
-
+      
       .toolbar {
         display: flex;
         height: 100%;
         justify-content: space-between;
       }
-
-      .toolbar-left, .toolbar-right {
+      
+      .toolbar-left,
+      .toolbar-right {
         display: flex;
         align-items: center;
         flex-direction: row;
       }
-
+      
       .toolbar-title {
         margin-top: 3px;
         color: var(--app-primary-color);
       }
-
+      
       .nav-tabs {
         height: 100%;
         margin-right: 12px
       }
-
+      
       .nav-tabs .fake-paper-tab {
         display: inline-flex;
         opacity: .8;
         -webkit-font-smoothing: antialiased;
       }
-
+      
       .nav-tabs a {
         display: flex;
         align-items: center;
         padding: 0 15px;
       }
-
+      
       .hide {
         display: none;
       }
+
     </style>
 
     <app-location route="{{route}}"></app-location>
-    <app-route
-        route="{{route}}"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
-    <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
+    <app-route route="{{route}}"
+               pattern="/:page"
+               data="{{routeData}}"
+               tail="{{subroute}}"></app-route>
+    <iron-media-query query="max-width: 767px"
+                      query-matches="{{smallScreen}}"></iron-media-query>
 
-      <!-- Drawer content -->
-      <app-drawer id="drawer" opened="{{drawerOpened}}" swipe-open="[[smallScreen]]">
-        <app-toolbar  class="drawer-toolbar"><a class="nav-a" href="/"><div class="logo">Gigamunch</div></a></app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a class="nav-a" href="[[loginBtnUrl]]"><paper-item>[[loginBtnText]]</paper-item></a>
-          <a class="nav-a" name="home" href="/"><paper-item>Home</paper-item></a>
-          <a class="nav-a" name="becomechef" href="/becomechef"><paper-item>Become a chef</paper-item></a>
-          <a class="nav-a" name="faq" href="/faq"><paper-item>FAQ</paper-item></a>
-          <a class="nav-a" name="about" href="/about"><paper-item>About</paper-item></a>
-        </iron-selector>
-      </app-drawer>
+    <!-- Drawer content -->
+    <app-drawer id="drawer"
+                opened="{{drawerOpened}}"
+                swipe-open="[[smallScreen]]">
+      <app-toolbar class="drawer-toolbar">
+        <a class="nav-a"
+           href="/">
+          <div class="logo">Gigamunch</div>
+        </a>
+      </app-toolbar>
+      <iron-selector selected="[[page]]"
+                     attr-for-selected="name"
+                     class="drawer-list"
+                     role="navigation">
+        <a class="nav-a"
+           href="[[loginBtnUrl]]">
+          <paper-item>[[loginBtnText]]</paper-item>
+        </a>
+        <a class="nav-a"
+           name="home"
+           href="/">
+          <paper-item>Home</paper-item>
+        </a>
+        <a class="nav-a"
+           name="becomechef"
+           href="/becomechef">
+          <paper-item>Become a chef</paper-item>
+        </a>
+        <a class="nav-a"
+           name="faq"
+           href="/faq">
+          <paper-item>FAQ</paper-item>
+        </a>
+        <a class="nav-a"
+           name="about"
+           href="/about">
+          <paper-item>About</paper-item>
+        </a>
+      </iron-selector>
+    </app-drawer>
 
-      <!-- Main content -->
-      <app-header-layout id="headerLayout" has-scrolling-region>
-        <app-header condenses reveals effects="waterfall">
-          <app-toolbar>
-            <div class="toolbar content">
-              <div class="toolbar-left">
-                <paper-icon-button
-                  id="menuIcon"
-                  class="hide"
-                  icon="app:menu"
-                  on-tap="toggleDrawer">
-                </paper-icon-button>
-                <a class="nav-a" href="/"><div class="toolbar-title logo" title>Gigamunch</div></a>
-              </div>
-              <div id="toolbarRight" class="toolbar-right hide">
-                <paper-tabs
-                  class="nav-tabs"
-                  attr-for-selected="name"
-                  selected="{{page}}" tabindex="-1">
-                  <paper-tab name="home" tabindex="-1">
-                    <a class="nav-a" href="/"><span>Home</span></a>
-                  </paper-tab>
-                  <paper-tab name="becomechef" tabindex="-1">
-                    <a class="nav-a" href="/becomechef"><span>Become a chef</span></a>
-                  </paper-tab>
-                  <paper-tab name="faq" tabindex="-1">
-                    <a class="nav-a" href="/faq"><span>FAQ</span></a>
-                  </paper-tab>
-                  <paper-tab name="about" tabindex="-1">
-                    <a class="nav-a" href="/about"><span>About</span></a>
-                  </paper-tab>
-                  <div class="fake-paper-tab">
-                    <a class="nav-a" href="[[loginBtnUrl]]">
-                      <span>[[loginBtnText]]</span>
-                    </a>
-                  </div>
-                </a>
-                </paper-tabs>
-              </div>
+    <!-- Main content -->
+    <app-header-layout id="headerLayout"
+                       has-scrolling-region>
+      <app-header condenses
+                  reveals
+                  effects="waterfall">
+        <app-toolbar>
+          <div class="toolbar content">
+            <div class="toolbar-left">
+              <paper-icon-button id="menuIcon"
+                                 class="hide"
+                                 icon="app:menu"
+                                 on-tap="toggleDrawer">
+              </paper-icon-button>
+              <a class="nav-a"
+                 href="/">
+                <div class="toolbar-title logo"
+                     title>Gigamunch</div>
+              </a>
             </div>
-          </app-toolbar>
-        </app-header>
+            <div id="toolbarRight"
+                 class="toolbar-right hide">
+              <paper-tabs class="nav-tabs"
+                          attr-for-selected="name"
+                          selected="{{page}}"
+                          tabindex="-1">
+                <paper-tab name="home"
+                           tabindex="-1">
+                  <a class="nav-a"
+                     href="/"><span>Home</span></a>
+                </paper-tab>
+                <paper-tab name="becomechef"
+                           tabindex="-1">
+                  <a class="nav-a"
+                     href="/becomechef"><span>Become a chef</span></a>
+                </paper-tab>
+                <paper-tab name="faq"
+                           tabindex="-1">
+                  <a class="nav-a"
+                     href="/faq"><span>FAQ</span></a>
+                </paper-tab>
+                <paper-tab name="about"
+                           tabindex="-1">
+                  <a class="nav-a"
+                     href="/about"><span>About</span></a>
+                </paper-tab>
+                <div class="fake-paper-tab">
+                  <a class="nav-a"
+                     href="[[loginBtnUrl]]">
+                    <span>[[loginBtnText]]</span>
+                  </a>
+                </div>
+                </a>
+              </paper-tabs>
+            </div>
+          </div>
+        </app-toolbar>
+      </app-header>
 
-        <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-          <home-page id="home" user="[[user]]" name="home"></home-page>
-          <becomechef-page id="becomechef" user="[[user]]" name="becomechef"></becomechef-page>
-          <faq-page id="faq" name="faq"></faq-page>
-          <terms-page id="terms" name="terms"></terms-page>
-          <privacy-page id="privacy" name="privacy"></privacy-page>
-          <upgrade-page name="upgrade"></upgrade-page>
-          <about-page id="about" name="about"></about-page>
-        </iron-pages>
+      <iron-pages role="main"
+                  selected="[[page]]"
+                  attr-for-selected="name">
+        <home-page id="home"
+                   user="[[user]]"
+                   name="home"></home-page>
+        <becomechef-page id="becomechef"
+                         user="[[user]]"
+                         name="becomechef"></becomechef-page>
+        <faq-page id="faq"
+                  name="faq"></faq-page>
+        <terms-page id="terms"
+                    name="terms"></terms-page>
+        <privacy-page id="privacy"
+                      name="privacy"></privacy-page>
+        <upgrade-page name="upgrade"></upgrade-page>
+        <about-page id="about"
+                    name="about"></about-page>
+      </iron-pages>
 
-        <!-- Footer -->
-        <app-footer></app-footer>
-      </app-header-layout>
+      <!-- Footer -->
+      <app-footer></app-footer>
+    </app-header-layout>
 
   </template>
 
   <script>
-
     Polymer({
 
       is: 'app-shell',
@@ -279,8 +353,8 @@
       updateIsUserLoggedIn: function() {
         var token = this.getTokenCookie();
         if (token !== undefined && token !== '') {
-          this.loginBtnUrl = '/gigachef/';
-          this.loginBtnText= 'My Dashboard';
+          this.loginBtnUrl = '/cook/';
+          this.loginBtnText = 'My Dashboard';
           this.user = {};
           var userString = token.split('.')[1];
           var jwt = JSON.parse(window.atob(userString));
@@ -292,7 +366,7 @@
           return;
         }
         this.loginBtnUrl = '/becomechef';
-        this.loginBtnText= 'Sign up/Log in';
+        this.loginBtnText = 'Sign up/Log in';
         this.user = null;
         return;
       },
@@ -301,7 +375,7 @@
       },
       // routePathChanged determines if the page is part of this app or a URL outside this app. 
       // If the URL is outside this app, it causes the browser to go to that app.
-      routePathChanged: function (path) {
+      routePathChanged: function(path) {
         // ** all pages must be in this list
         var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about'];
         var found = false;
@@ -330,9 +404,9 @@
         }
         document.title = title + ' | Gigamunch';
         app.$.headerLayout.$.contentContainer.scrollTop = 0;
-        
+
       },
-      screenChanged: function (smallScreen) {
+      screenChanged: function(smallScreen) {
         this.$.menuIcon.toggleClass('hide', !smallScreen);
         if (smallScreen) {
           this.$.toolbarRight.className += ' hide';
@@ -340,7 +414,7 @@
           this.$.toolbarRight.className = this.$.toolbarRight.className.replace(/hide/g, '');
         }
       },
-      toggleDrawer: function () {
+      toggleDrawer: function() {
         this.drawerOpened = !this.drawerOpened;
       },
       getTokenCookie: function() {
@@ -348,7 +422,7 @@
         var ca = document.cookie.split(';');
         for (var i = 0; i < ca.length; i++) {
           var c = ca[i];
-          while (c.charAt(0) === ' ')c = c.substring(1);
+          while (c.charAt(0) === ' ') c = c.substring(1);
           if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
         }
         return '';

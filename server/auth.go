@@ -1,14 +1,15 @@
 package server
 
 import (
+	"golang.org/x/net/context"
 	"net/http"
 	"time"
 
-	"gitlab.com/atishpatel/Gigamunch-Backend/auth"
-	"gitlab.com/atishpatel/Gigamunch-Backend/core/account"
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
-	"gitlab.com/atishpatel/Gigamunch-Backend/types"
-	"gitlab.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
 )
@@ -88,22 +89,11 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 			}
 			return nil
 		}
-		// if user isn't a chef make them a chef
-		if !user.IsChef() {
-			user.SetChef(true)
-			err = auth.SaveUser(ctx, user)
+		// if user isn't a cook make them a cook
+		if !user.IsCook() {
+			authToken, err = makeCook(ctx, user, authToken)
 			if err != nil {
-				utils.Errorf(ctx, "Error auth.SaveUser", err)
-				// TODO redirect?
-			}
-			err = account.SaveUserInfo(ctx, user, nil, "")
-			if err != nil {
-				utils.Errorf(ctx, "Error account.SavingUserInfo", err)
-				return nil
-			}
-			authToken, err = auth.RefreshToken(ctx, authToken)
-			if err != nil {
-				utils.Errorf(ctx, "failed to refresh token ", err)
+				utils.Errorf(ctx, "failed to makeCook: %+v", err)
 				return nil
 			}
 		}
@@ -128,4 +118,25 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 	}
 	// saveAuthCookie(w, authToken)
 	return user
+}
+
+func makeCook(ctx context.Context, user *types.User, authToken string) (string, error) {
+	// create a cook account
+	cookC := cook.New(ctx)
+	_, err := cookC.Update(user, nil, "", "", 0, nil, "", "", "")
+	if err != nil {
+		return "", errors.Wrap("Error cookC.Update", err)
+	}
+	// update user
+	user.SetCook(true)
+	err = auth.SaveUser(ctx, user)
+	if err != nil {
+		return "", errors.Wrap("Error auth.SaveUser", err)
+	}
+	// refresh token
+	authToken, err = auth.RefreshToken(ctx, authToken)
+	if err != nil {
+		return "", errors.Wrap("Error auth.RefreshToken", err)
+	}
+	return authToken, nil
 }

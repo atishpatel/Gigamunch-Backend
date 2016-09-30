@@ -1,7 +1,7 @@
 package order
 
 import (
-	"gitlab.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"golang.org/x/net/context"
 )
 
