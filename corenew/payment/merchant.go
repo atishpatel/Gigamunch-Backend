@@ -57,8 +57,8 @@ func (c *Client) CreateFakeSubMerchant(user *types.User, id string) error {
 		LastName:      "Info",
 		Email:         user.Email,
 		DateOfBirth:   fakeDOB,
-		AccountNumber: "1",
-		RoutingNumber: "064101233",
+		AccountNumber: "1234567",
+		RoutingNumber: "064102740",
 		Address: types.Address{
 			Street:  "140 W 7th St",
 			City:    "Cookeville",
