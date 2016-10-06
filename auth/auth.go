@@ -86,6 +86,9 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error while signing in."}.WithError(err).Wrap("failed to fetch user from gitkit server")
 	}
 	token, err := createSessionToken(ctx, gitkitUser)
+	if err != nil {
+		return nil, "", errors.Wrap("failed to create session token", err)
+	}
 	jwtString, err := token.JWTString()
 	if err != nil {
 		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Failed to encode user."}
