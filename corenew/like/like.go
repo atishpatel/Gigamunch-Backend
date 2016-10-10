@@ -254,7 +254,6 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 
 func connectSQL(ctx context.Context) {
 	var err error
-	// TODO switch to config
 	var connectionString string
 	if appengine.IsDevAppServer() {
 		// "user:password@/dbname"

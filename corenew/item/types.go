@@ -27,3 +27,26 @@ type Item struct {
 
 // DietaryConcerns is a list of booleans that address dietary concerns.
 type DietaryConcerns int32
+
+func (d DietaryConcerns) vegan() bool {
+	return getKthBit(int32(d), 0)
+}
+func (d DietaryConcerns) vegetarian() bool {
+	return getKthBit(int32(d), 1)
+}
+
+func (d DietaryConcerns) paleo() bool {
+	return getKthBit(int32(d), 2)
+}
+
+func (d DietaryConcerns) glutenFree() bool {
+	return getKthBit(int32(d), 3)
+}
+
+func (d DietaryConcerns) kosher() bool {
+	return getKthBit(int32(d), 4)
+}
+
+func getKthBit(num int32, k uint32) bool {
+	return (uint32(num)>>k)&1 == 1
+}
