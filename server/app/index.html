@@ -1,39 +1,60 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport"
+        content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
   <title>Gigamunch | Buy homemade food from local cooks</title>
 
-  <meta name="description" content="Gigamunch allows you to buy homemade food from local cooks. Save time by using your smartphone to order vegan, gluten free, paleo, organic, and other healthy and nourishing food nearby.">
-  <meta name="keywords" content="gigamunch, local, nashville, chef, cook, homemade, online, buy, startup, meal, cooking, eat, job, sell, food, home">
-  <meta property="og:title" content="Gigamunch | Buy homemade food from local cooks" />
-  <meta property="og:site_name" content="Gigamunch" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.gigamunchapp.com" />
-  <meta property="og:image" content="https://storage.googleapis.com/gigamunch-omninexus-website/social/facebook_share_image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="628" />
-  <meta property="og:description" content="Gigamunch allows you to buy homemade food from local cooks. Save time by using your smartphone to order vegan, gluten free, paleo, organic, and other healthy and nourishing food nearby." />
-  <meta property="twitter:site" content="@gigamunchapp"/>
-  <meta name="twitter:image" content="https://storage.googleapis.com/gigamunch-omninexus-website/social/twitter_share_image.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta property="fb:admins" content="100001118620838" />
-  <meta property="fb:admins" content="100000667982153" />
+  <meta name="description"
+        content="Gigamunch allows you to buy homemade food from local cooks. Save time by using your smartphone to order vegan, gluten free, paleo, organic, and other healthy and nourishing food nearby.">
+  <meta name="keywords"
+        content="gigamunch, local, nashville, chef, cook, homemade, online, buy, startup, meal, cooking, eat, job, sell, food, home">
+  <meta property="og:title"
+        content="Gigamunch | Buy homemade food from local cooks" />
+  <meta property="og:site_name"
+        content="Gigamunch" />
+  <meta property="og:type"
+        content="website" />
+  <meta property="og:url"
+        content="https://www.gigamunchapp.com" />
+  <meta property="og:image"
+        content="https://storage.googleapis.com/gigamunch-omninexus-website/social/facebook_share_image.png" />
+  <meta property="og:image:width"
+        content="1200" />
+  <meta property="og:image:height"
+        content="628" />
+  <meta property="og:description"
+        content="Gigamunch allows you to buy homemade food from local cooks. Save time by using your smartphone to order vegan, gluten free, paleo, organic, and other healthy and nourishing food nearby." />
+  <meta property="twitter:site"
+        content="@gigamunchapp" />
+  <meta name="twitter:image"
+        content="https://storage.googleapis.com/gigamunch-omninexus-website/social/twitter_share_image.png">
+  <meta name="twitter:card"
+        content="summary_large_image">
+  <meta property="fb:admins"
+        content="100001118620838" />
+  <meta property="fb:admins"
+        content="100000667982153" />
 
-  <meta name="theme-color" content="#546E7A">
-  <script async src="https://www.google-analytics.com/analytics.js"></script>
+  <meta name="theme-color"
+        content="#546E7A">
+  <script async
+          src="https://www.google-analytics.com/analytics.js"></script>
   <script>
-
     // setup Polymer options
-    window.Polymer = {lazyRegister: true, dom: 'shady'};
+    window.Polymer = {
+      lazyRegister: true,
+      dom: 'shady'
+    };
 
     // load webcomponents polyfills
     (function() {
-      if ('registerElement' in document
-          && 'import' in document.createElement('link')
-          && 'content' in document.createElement('template')) {
+      if ('registerElement' in document &&
+        'import' in document.createElement('link') &&
+        'content' in document.createElement('template')) {
         // browser has web components
       } else {
         // polyfill web components
@@ -58,7 +79,10 @@
     }
 
     // Google Analytics
-    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    window.ga = window.ga || function() {
+      (ga.q = ga.q || []).push(arguments)
+    };
+    ga.l = +new Date;
     var ua = isProd ? 'UA-71567908-1' : 'UA-71567908-4';
     ga('create', ua, 'auto');
     ga('send', 'pageview');
@@ -76,26 +100,42 @@
       }
     };
     // End Google Analytics
+
   </script>
   <!-- Facebook Pixel Code -->
   <script>
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-    document,'script','//connect.facebook.net/en_US/fbevents.js');
+    ! function(f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function() {
+        n.callMethod ?
+          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = !0;
+      n.version = '2.0';
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = !0;
+      t.src = v;
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s)
+    }(window,
+      document, 'script', '//connect.facebook.net/en_US/fbevents.js');
     fbq('init', '1118457214861493');
     fbq('track', "PageView");
+
   </script>
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1118457214861493&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Facebook Pixel Code -->
 
-  <link rel="import" href="/source/app-shell.html">
-  <script type="text/javascript" src="https://www.gstatic.com/authtoolkit/js/gitkit.js"></script>
+  <link rel="import"
+        href="/source/app-shell.html">
+  <script type="text/javascript"
+          src="https://www.gstatic.com/authtoolkit/js/gitkit.js"></script>
   <style>
-
     body {
       margin: 0;
       font-family: 'Roboto', 'Noto', sans-serif;
@@ -107,19 +147,45 @@
   </style>
 
 </head>
+
 <body>
 
   <app-shell id="app"></app-shell>
   <script>
     var app = document.querySelector('#app');
+
   </script>
+
+  <style>
+    /* Fix issue with font not importing */
+    
+    @font-face {
+      font-family: 'FontRegular';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
+    }
+    
+    @font-face {
+      font-family: 'FontRegular';
+      font-weight: bold;
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
+    }
+
+  </style>
   <!-- Twitter universal website tag code -->
-  <script src="//platform.twitter.com/oct.js" type="text/javascript"></script>
-  <script type="text/javascript">twttr.conversion.trackPid('nutpc', { tw_sale_amount: 0, tw_order_quantity: 0 });</script>
+  <script src="//platform.twitter.com/oct.js"
+          type="text/javascript"></script>
+  <script type="text/javascript">
+    twttr.conversion.trackPid('nutpc', {
+      tw_sale_amount: 0,
+      tw_order_quantity: 0
+    });
+
+  </script>
   <noscript>
   <img height="1" width="1" style="display:none;" alt="" src="https://analytics.twitter.com/i/adsct?txn_id=nutpc&p_id=Twitter&tw_sale_amount=0&tw_order_quantity=0" />
   <img height="1" width="1" style="display:none;" alt="" src="//t.co/i/adsct?txn_id=nutpc&p_id=Twitter&tw_sale_amount=0&tw_order_quantity=0" />
   </noscript>
   <!-- End Twitter universal website tag code -->
 </body>
+
 </html>
