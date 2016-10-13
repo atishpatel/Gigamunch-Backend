@@ -1,0 +1,24 @@
+service: eaterapi
+runtime: go
+vm: true
+threadsafe: true
+
+# beta_settings:
+#     cloud_sql_instances: gigamunch-omninexus-dev:us-central1:gigasqldb
+
+health_check:
+    enable_health_check: False
+
+manual_scaling:
+  instances: 2
+
+network:
+  forwarded_ports:
+  - 50051
+  instance_tag: grpcserver
+  name: default
+
+# resources:
+#   cpu: .5
+#   memory_gb: 1.3
+#   disk_size_gb: 10
