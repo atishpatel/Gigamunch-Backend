@@ -26,6 +26,9 @@
       href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import"
       href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import"
+      href="../bower_components/paper-toast/paper-toast.html">
+
 
 <!--<link rel="import"
       href="app-footer.html">-->
@@ -112,7 +115,7 @@
     <iron-media-query query="max-width: 767px"
                       query-matches="{{smallScreen}}">
     </iron-media-query>
-
+    <paper-toast id="toast"></paper-toast>
     <paper-dialog id="itemDialog"
                   class="full-screen-dialog">
       <paper-dialog-scrollable>
@@ -166,7 +169,8 @@
                     role="main">
           <kitchen-page id="kitchen"
                         name="kitchen"
-                        service="[[service]]">
+                        service="[[service]]"
+                        user="{{user}}">
           </kitchen-page>
           <onboard-steps id="onboard"
                          name="onboard"
@@ -230,9 +234,16 @@
         '_pageOrScreenChanged(page, smallScreen)',
       ],
       listeners: {
-        'editmenuitem': 'addMenuItem',
-        'onboardfinished': 'onboardFinished',
         'savemenu': 'saveMenu',
+        'editmenuitem': 'addMenuItem',
+        'activateitem': 'activateItem',
+        'onboardfinished': 'onboardFinished',
+        'toast': 'toastEvent',
+      },
+      activateItem: function(e, detail) {
+        var itemID = detail.id;
+        var callback = detail.callback;
+        this.service.activateItem(itemID, callback);
       },
       onboardFinished: function() {
         this.setPath('kitchen');
@@ -338,6 +349,16 @@
           route += path;
         }
         this.set('route.path', this.baseurl + route);
+      },
+      toastEvent: function(e, detail) {
+        var text = detail.text;
+        if (text && text !== "") {
+          var duration = detail.duration || 3000;
+          this.$.toast.show({
+            text: text,
+            duration: duration
+          });
+        }
       },
     });
 

@@ -85,7 +85,7 @@ func getMulti(ctx context.Context, ids []int64) ([]Item, error) {
 	return dst, nil
 }
 
-func insertOrUpdateActiveItem(id int64, item *Item, lat, long float64) error {
+func insertOrUpdateActiveItem(ctx context.Context, id int64, item *Item, lat, long float64) error {
 	if item.Active {
 		st := fmt.Sprintf(updateStatement, item.MenuID, item.CookPricePerServing, item.MinServings, item.MaxServings, lat, long,
 			item.DietaryConcerns.vegan(), item.DietaryConcerns.vegetarian(), item.DietaryConcerns.paleo(), item.DietaryConcerns.glutenFree(), item.DietaryConcerns.kosher(),
@@ -106,6 +106,11 @@ func insertOrUpdateActiveItem(id int64, item *Item, lat, long float64) error {
 	_, err := mysqlDB.Exec(st)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrapf("failed to execute: %s", st)
+	}
+	item.Active = true
+	err = put(ctx, id, item)
+	if err != nil {
+		return errDatastore.WithError(err).Wrapf("failed to put item(%d)", id)
 	}
 	return nil
 }

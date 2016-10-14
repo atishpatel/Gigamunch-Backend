@@ -1,8 +1,9 @@
 package main
 
 import (
-	"golang.org/x/net/context"
 	"fmt"
+
+	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
@@ -73,11 +74,6 @@ func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemRe
 func (service *Service) GetItem(ctx context.Context, req *IDReq) (*ItemResp, error) {
 	resp := new(ItemResp)
 	defer handleResp(ctx, "GetItem", resp.Err)
-	// user, err := validateRequestAndGetUser(ctx, req)
-	// if err != nil {
-	// 	resp.Err = errors.GetErrorWithCode(err)
-	// 	return resp, nil
-	// }
 	itemC := item.New(ctx)
 	item, err := itemC.Get(req.ID)
 	if err != nil {
@@ -91,6 +87,24 @@ func (service *Service) GetItem(ctx context.Context, req *IDReq) (*ItemResp, err
 	resp.Item.ID = req.ID
 	resp.Item.Item = *item
 	resp.Item.NumLikes = likes[0]
+	return resp, nil
+}
+
+// ActivateItem activates an item so it's on the feed
+func (service *Service) ActivateItem(ctx context.Context, req *IDReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "ActivateItem", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	itemC := item.New(ctx)
+	err = itemC.Activate(user, req.ID)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to itemC.Activate", err)
+		return resp, nil
+	}
 	return resp, nil
 }
 

@@ -19,7 +19,8 @@
     <template is="dom-repeat"
               items="[[menus]]"
               as="menu">
-      <cook-menu menu="[[menu]]"></cook-menu>
+      <cook-menu menu="[[menu]]"
+                 allow-activating="[[allowActivating]]"></cook-menu>
     </template>
 
     <cook-menu></cook-menu>
@@ -35,6 +36,16 @@
           reflectToAttribute: true,
           value: [],
         },
+        user: {
+          type: Object,
+          observer: 'userUpdated',
+        },
+        allowActivating: {
+          type: Boolean,
+        }
+      },
+      userUpdated: function() {
+        this.allowActivating = this.user.isVerifiedCook;
       },
     });
 

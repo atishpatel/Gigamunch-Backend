@@ -4,6 +4,8 @@
       href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import"
       href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import"
       href="shared-styles.html">
@@ -58,9 +60,13 @@
     </div>
     <div class="title">[[item.title]]</div>
     <paper-button class="activate-toggle"
-                  toggle
-                  active="{{active}}"
-                  disabled>Activate</paper-button>
+                  active="{{item.active}}"
+                  on-tap="activateButtonTapped"
+                  disabled$="[[!allowActivating]]">
+      [[activateButtonText]]
+      <paper-spinner id="spinner"
+                     hidden></paper-spinner>
+    </paper-button>
   </template>
 
   <script>
@@ -74,6 +80,7 @@
           value: {
             title: 'Add an Item'
           },
+          observer: 'itemChanged',
         },
         menuColor: {
           type: String,
@@ -81,10 +88,86 @@
           reflectToAttribute: true,
           observer: 'colorChanged',
         },
+        allowActivating: {
+          type: Boolean,
+          value: false,
+        },
+        activateButtonText: {
+          type: String,
+        },
+      },
+      observer: [
+        'itemChanged(item.active)',
+      ],
+      activateButtonTapped: function() {
+        var spinner = this.$.spinner;
+        var tmpActiveButtonText = this.activateButtonText;
+        var tmpAllowActivating = this.allowActivating;
+        var resetState = function() {
+          spinner.active = false;
+          spinner.hidden = true;
+          this.activateButtonText = tmpActiveButtonText;
+          this.allowActivating = tmpAllowActivating;
+        }.bind(this);
+        spinner.active = true;
+        spinner.hidden = false;
+        this.activateButtonText = "";
+        this.allowActivating = false;
+        // activate item
+        if (!this.item.active) {
+          this.fire('activateitem', {
+            id: this.item.id,
+            callback: function(err) {
+              resetState();
+              if (err) {
+                if (err.code !== 0) {
+                  this.fire('toast', {
+                    text: err.message,
+                    duration: 4000,
+                  });
+                  return
+                }
+                this.set('item.active', true);
+                this.itemChanged();
+              }
+            }.bind(this)
+          });
+          return
+        }
+        // deactivate item
+        if (this.item.active) {
+          this.fire('deactivateitem', {
+            id: this.item.id,
+            callback: function(err) {
+              resetState();
+              if (err) {
+                if (err.code !== 0) {
+                  this.fire('toast', {
+                    text: err.message,
+                    duration: 4000,
+                  });
+                  return
+                }
+                this.set('item.active', false);
+                this.itemChanged();
+              }
+            }.bind(this)
+          });
+          return
+        }
       },
       colorChanged: function() {
         if (this.menuColor !== undefined && this.menuColor !== '') {
           this.$.photo.style.backgroundColor = this.menuColor;
+        }
+      },
+      itemChanged: function() {
+        if (this.item) {
+          if (this.item.active) {
+            this.activateButtonText = "Deactivate";
+          } else {
+            this.activateButtonText = "Activate";
+          }
         }
       },
       editItem: function(e) {

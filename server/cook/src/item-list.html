@@ -42,7 +42,8 @@
       <template is="dom-repeat"
                 items="[[items]]">
         <cook-item item="[[item]]"
-                   menu-color="[[menuColor]]"></cook-item>
+                   menu-color="[[menuColor]]"
+                   allow-activating="[[allowActivating]]"></cook-item>
       </template>
       <cook-item class="add-card"
                  on-tap="addItem"
@@ -64,6 +65,9 @@
           type: String,
           notify: true,
           reflectToAttribute: true,
+        },
+        allowActivating: {
+          type: Boolean,
         },
       },
       addItem: function() {

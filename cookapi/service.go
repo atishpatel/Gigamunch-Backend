@@ -18,7 +18,10 @@ type coder interface {
 
 func handleResp(ctx context.Context, fnName string, resp coder) {
 	code := resp.GetCode()
-	if code != 0 && code != errors.CodeInvalidParameter {
+	if code == errors.CodeInvalidParameter {
+		utils.Warningf(ctx, "%s invalid parameter: %+v", fnName, resp)
+		return
+	} else if code != 0 {
 		utils.Errorf(ctx, "%s err: %+v", fnName, resp)
 	}
 }
@@ -65,8 +68,9 @@ func init() {
 	register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
 	register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
 	// Item stuff
-	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save a item.")
-	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get a item.")
+	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save an item.")
+	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get an item.")
+	register("ActivateItem", "activateItem", "POST", "cookservice/activateItem", "Activate an item.")
 	// Menu stuff
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
 	register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")

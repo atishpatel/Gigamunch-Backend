@@ -32,7 +32,9 @@
     <paper-spinner id="spinner"
                    hidden></paper-spinner>
     <menu-list id="menuList"
+               user="[[user]]"
                menus="[[menus]]"></menu-list>
+
   </template>
 
   <script>
@@ -46,6 +48,10 @@
         },
         service: {
           type: Object,
+        },
+        user: {
+          type: Object,
+          notify: true,
         },
       },
       selected: function() {

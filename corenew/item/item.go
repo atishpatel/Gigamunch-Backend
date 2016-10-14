@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -38,6 +39,10 @@ func (c *Client) Get(id int64) (*Item, error) {
 	}
 	return item, nil
 }
+
+// func (c *Client) GetActiveItems(startIndex, endIndex int, long, lat float64) ([]int64, []Item, error) {
+// return ids, items, nil
+// }
 
 // GetAllByCook returns an array of items of the cookID
 func (c *Client) GetAllByCook(cookID string) ([]int64, []Item, error) {
@@ -122,17 +127,23 @@ func (c *Client) Save(user *types.User, id, menuID int64, cookID, title, desc st
 func (c *Client) Activate(user *types.User, id int64) error {
 	item, err := get(c.ctx, id)
 	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return errInvalidParameter.WithError(err).Wrapf("item(%d) does not exist", id)
+		}
 		return errDatastore.WithError(err).Wrapf("failed to get item(%d)", id)
 	}
 	if !user.IsAdmin() && user.ID != item.CookID {
 		return errUnauthorizedAccess.Wrapf("CookID(%s) does not have permission to change item(%d)", item.CookID, id)
+	}
+	if !user.IsAdmin() && !user.IsVerifiedCook() {
+		return errUnauthorizedAccess.WithMessage("Only verifed cook are allowed to activate items. Get verfied asap! :)")
 	}
 	cookC := cook.New(c.ctx)
 	cook, err := cookC.Get(item.CookID)
 	if err != nil {
 		return errors.Wrap("failed to cookC.Get", err)
 	}
-	err = insertOrUpdateActiveItem(id, item, cook.Address.Latitude, cook.Address.Longitude)
+	err = insertOrUpdateActiveItem(c.ctx, id, item, cook.Address.Latitude, cook.Address.Longitude)
 	if err != nil {
 		return errors.Wrap("failed to insertOrUpdateActiveItem", err)
 	}

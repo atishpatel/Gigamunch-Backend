@@ -15,6 +15,7 @@
     <style include="shared-styles">
        :host {
         display: block;
+        min-height: 430px;
         overflow: hidden;
         --radio-color-picker-color: {
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -85,6 +86,9 @@
         .button {
           margin: 10px auto;
         }
+        .edit-button {
+          margin: 0 0 0 auto;
+        }
       }
 
     </style>
@@ -100,7 +104,8 @@
       <item-list items="[[menu.items]]"
                  on-additem="editItem"
                  on-edititem="editItem"
-                 menu-color="[[menu.color]]">
+                 menu-color="[[menu.color]]"
+                 allow-activating="[[allowActivating]]">
       </item-list>
     </div>
     <div hidden$="[[!editMode]]">
@@ -150,6 +155,9 @@
         colors: {
           type: Array,
           value: ["#66BB6A", "#689F38", "#EA9E22", "#F57C00", "#FF7D54", "#EF5350", "#EA4F83", "#B159BF", "#9575CD", "#5C6BC0", "#0192D9", "#00ACC1", "#26A69A"],
+        },
+        allowActivating: {
+          type: Boolean,
         },
       },
       menuUpdated: function() {

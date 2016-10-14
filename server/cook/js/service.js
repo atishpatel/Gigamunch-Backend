@@ -217,6 +217,7 @@ var Service = function () {
         });
         return;
       }
+      delete menu.items;
       var request = {
         gigatoken: this.getToken(),
         menu: menu
@@ -280,9 +281,31 @@ var Service = function () {
       });
     }
   }, {
+    key: 'activateItem',
+    value: function activateItem(id, callback) {
+      var _this10 = this;
+
+      // if api is not loaded, add to callQueue
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this10.activateItem(id, callback);
+        });
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken(),
+        id: id
+      };
+
+      this.service.activateItem(request).execute(function (resp) {
+        _this10.logError('activateItem', resp.err);
+        callback(resp.err);
+      });
+    }
+  }, {
     key: 'refreshToken',
     value: function refreshToken() {
-      var _this10 = this;
+      var _this11 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
@@ -293,7 +316,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this10.logError('refreshToken', resp.err)) {
+        if (!_this11.logError('refreshToken', resp.err)) {
           COOK.User.update(resp.gigatoken);
         }
       });

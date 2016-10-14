@@ -262,6 +262,30 @@ class Service {
       );
   }
 
+  activateItem(id, callback) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.activateItem(id, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      id,
+    };
+
+    this
+      .service
+      .activateItem(request)
+      .execute(
+        (resp) => {
+          this.logError('activateItem', resp.err);
+          callback(resp.err);
+        }
+      );
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
