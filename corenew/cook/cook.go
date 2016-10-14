@@ -1,14 +1,18 @@
 package cook
 
 import (
-	"golang.org/x/net/context"
+	"fmt"
 	"time"
 
+	"golang.org/x/net/context"
+
+	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/notification"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -43,6 +47,15 @@ func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, b
 		return nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", user.ID)
 	}
 	if cook.CreatedDatetime.IsZero() {
+		// is new cook
+		if !appengine.IsDevAppServer() {
+			// notify enis
+			nC := notification.New(c.ctx)
+			err = nC.SendSMS("6153975516", fmt.Sprintf("%s just started an application. get on that booty. email: %s", user.Name, user.Email))
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to notify enis about cook(%s) submitting application", user.ID)
+			}
+		}
 		cook.CreatedDatetime = time.Now()
 	}
 	cook.Name = user.Name

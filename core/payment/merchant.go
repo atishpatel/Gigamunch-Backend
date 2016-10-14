@@ -145,7 +145,7 @@ func disbursementException(ctx context.Context, signature, payload string, bt *b
 		return nil, err
 	}
 	if notification == nil || notification.MerchantAccount() == nil {
-		return nil, errInternal.Wrapf("there was an error with notification (%+v) subject(%+v) MerchantAccount(%+v) Disbursement(%+v)", notification, notification.Subject, notification.MerchantAccount(), notification.Disbursement())
+		return nil, errInternal.Wrapf("payload(%s) \nthere was an error with notification (%+v)\nsubject(%+v) \nMerchantAccount(%+v) \nDisbursement(%+v)", payload, notification, notification.Subject, notification.MerchantAccount(), notification.Disbursement())
 	}
 	chef, err := chefC.FindBySubMerchantID(notification.MerchantAccount().Id)
 	if err != nil {
