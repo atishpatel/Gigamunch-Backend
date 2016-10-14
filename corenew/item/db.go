@@ -21,6 +21,7 @@ const (
 	datetimeFormat  = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
 	insertStatement = "INSERT INTO `active_items` (id, menu_id, cook_id, created_datetime, cook_price_per_serving, min_servings, max_servings, latitude, longitude, vegan, vegetarian, paleo, gluten_free, kosher) VALUES (%d, %d, '%s', '%s', %f, %d, %d, %f, %f, %t, %t, %t, %t, %t)"
 	updateStatement = "UPDATE `active_items` SET menu_id=%d AND cook_price_per_serving=%f AND min_servings=%d AND max_servings=%d AND latitude=%f AND longitude=%f AND vegan=%t AND vegetarian=%t AND paleo=%t AND gluten_free=%t AND kosher=%t WHERE id=%d"
+	deleteStatement = "DELETE FROM active_items WHERE id=%d"
 )
 
 var (
@@ -108,6 +109,20 @@ func insertOrUpdateActiveItem(ctx context.Context, id int64, item *Item, lat, lo
 		return errSQLDB.WithError(err).Wrapf("failed to execute: %s", st)
 	}
 	item.Active = true
+	err = put(ctx, id, item)
+	if err != nil {
+		return errDatastore.WithError(err).Wrapf("failed to put item(%d)", id)
+	}
+	return nil
+}
+
+func deleteActiveItem(ctx context.Context, id int64, item *Item) error {
+	st := fmt.Sprintf(deleteStatement, id)
+	_, err := mysqlDB.Exec(st)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrapf("failed to execute: %s", st)
+	}
+	item.Active = false
 	err = put(ctx, id, item)
 	if err != nil {
 		return errDatastore.WithError(err).Wrapf("failed to put item(%d)", id)

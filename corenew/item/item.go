@@ -138,7 +138,7 @@ func (c *Client) Activate(user *types.User, id int64) error {
 	if !user.IsAdmin() && !user.IsVerifiedCook() {
 		return errUnauthorizedAccess.WithMessage("Only verifed cook are allowed to activate items. Get verfied asap! :)")
 	}
-	cookC := cook.New(c.ctx)
+	cookC := getCookClient(c.ctx)
 	cook, err := cookC.Get(item.CookID)
 	if err != nil {
 		return errors.Wrap("failed to cookC.Get", err)
@@ -148,4 +148,34 @@ func (c *Client) Activate(user *types.User, id int64) error {
 		return errors.Wrap("failed to insertOrUpdateActiveItem", err)
 	}
 	return nil
+}
+
+// Deactivate activates an item
+func (c *Client) Deactivate(user *types.User, id int64) error {
+	item, err := get(c.ctx, id)
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return errInvalidParameter.WithError(err).Wrapf("item(%d) does not exist", id)
+		}
+		return errDatastore.WithError(err).Wrapf("failed to get item(%d)", id)
+	}
+	if !user.IsAdmin() && user.ID != item.CookID {
+		return errUnauthorizedAccess.Wrapf("CookID(%s) does not have permission to change item(%d)", item.CookID, id)
+	}
+	if !user.IsAdmin() && !user.IsVerifiedCook() { // should never happen
+		return errUnauthorizedAccess.WithMessage("Only verifed cook are allowed to deactivate items.")
+	}
+	err = deleteActiveItem(c.ctx, id, item)
+	if err != nil {
+		return errors.Wrap("failed to deleteActiveItem", err)
+	}
+	return nil
+}
+
+var getCookClient = func(ctx context.Context) cookInterface {
+	return cook.New(ctx)
+}
+
+type cookInterface interface {
+	Get(string) (*cook.Cook, error)
 }

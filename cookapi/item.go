@@ -108,6 +108,24 @@ func (service *Service) ActivateItem(ctx context.Context, req *IDReq) (*ErrorOnl
 	return resp, nil
 }
 
+// DeactivateItem deactivates an item so it's not on the feed
+func (service *Service) DeactivateItem(ctx context.Context, req *IDReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "DeactivateItem", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	itemC := item.New(ctx)
+	err = itemC.Deactivate(user, req.ID)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to itemC.Deactivate", err)
+		return resp, nil
+	}
+	return resp, nil
+}
+
 func getLikes(ctx context.Context, ids []int64) []int {
 	likeC := like.New(ctx)
 	likes, err := likeC.GetNumLikes(ids)

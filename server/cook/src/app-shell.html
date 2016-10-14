@@ -237,6 +237,7 @@
         'savemenu': 'saveMenu',
         'editmenuitem': 'addMenuItem',
         'activateitem': 'activateItem',
+        'deactivateitem': 'deactivateItem',
         'onboardfinished': 'onboardFinished',
         'toast': 'toastEvent',
       },
@@ -244,6 +245,11 @@
         var itemID = detail.id;
         var callback = detail.callback;
         this.service.activateItem(itemID, callback);
+      },
+      deactivateItem: function(e, detail) {
+        var itemID = detail.id;
+        var callback = detail.callback;
+        this.service.deactivateItem(itemID, callback);
       },
       onboardFinished: function() {
         this.setPath('kitchen');

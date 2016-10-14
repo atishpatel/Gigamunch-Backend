@@ -286,6 +286,30 @@ class Service {
       );
   }
 
+  deactivateItem(id, callback) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.deactivateItem(id, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      id,
+    };
+
+    this
+      .service
+      .deactivateItem(request)
+      .execute(
+        (resp) => {
+          this.logError('deactivateItem', resp.err);
+          callback(resp.err);
+        }
+      );
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {

@@ -71,6 +71,7 @@ func init() {
 	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save an item.")
 	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get an item.")
 	register("ActivateItem", "activateItem", "POST", "cookservice/activateItem", "Activate an item.")
+	register("DeactivateItem", "deactivateItem", "POST", "cookservice/deactivateItem", "Deactivate an item.")
 	// Menu stuff
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
 	register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")

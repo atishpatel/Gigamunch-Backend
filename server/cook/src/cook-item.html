@@ -60,7 +60,6 @@
     </div>
     <div class="title">[[item.title]]</div>
     <paper-button class="activate-toggle"
-                  active="{{item.active}}"
                   on-tap="activateButtonTapped"
                   disabled$="[[!allowActivating]]">
       [[activateButtonText]]
@@ -96,9 +95,6 @@
           type: String,
         },
       },
-      observer: [
-        'itemChanged(item.active)',
-      ],
       activateButtonTapped: function() {
         var spinner = this.$.spinner;
         var tmpActiveButtonText = this.activateButtonText;
