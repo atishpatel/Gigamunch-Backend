@@ -14,7 +14,7 @@ handlers:
   upload: robots.txt
 
 # Cook app
-- url: /.*bower_components
+- url: /cook/src/bower_components
   static_dir: cook/build/bundled/bower_components
   secure: always
 
@@ -45,7 +45,7 @@ handlers:
 
 
 # Gigachef app
-- url: /.*bower_components
+- url: /gigachef/src/bower_components
   static_dir: gigachef/build/bundled/bower_components
   secure: always
 

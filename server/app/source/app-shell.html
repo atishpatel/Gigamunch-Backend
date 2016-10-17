@@ -918,9 +918,7 @@
 
   <script>
     Polymer({
-
       is: 'app-shell',
-
       properties: {
         page: {
           type: String,
@@ -939,7 +937,7 @@
         user: {
           type: Object,
           notify: true,
-        }
+        },
       },
       observers: [
         'routePageChanged(routeData.page)',
