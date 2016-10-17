@@ -1,5 +1,5 @@
-application: gigamunch-omninexus-dev
-module: default
+application: PROJECT_ID
+module: MODULE
 version: 2
 runtime: go
 api_version: go1
@@ -15,30 +15,30 @@ handlers:
 
 # Cook app
 - url: /cook/src/bower_components
-  static_dir: cook/build/bundled/bower_components
+  static_dir: cook_SERVEPATH_/bower_components
   secure: always
 
 - url: /cook/service-worker.js
-  static_files: cook/build/bundled/service-worker.js
-  upload: cook/build/bundled/service-worker.js
+  static_files: cook_SERVEPATH_/service-worker.js
+  upload: cook_SERVEPATH_/service-worker.js
   secure: always
 
 - url: /cook/manifest.json
-  static_files: cook/build/bundled/manifest.json
-  upload: cook/build/bundled/manifest.json
+  static_files: cook_SERVEPATH_/manifest.json
+  upload: cook_SERVEPATH_/manifest.json
   secure: always
 
 - url: /cook/js
-  static_dir: cook/build/bundled/js
+  static_dir: cook_SERVEPATH_/js
   secure: always
 
 - url: /cook/src
-  static_dir: cook/build/bundled/src
+  static_dir: cook_SERVEPATH_/src
   secure: always
 
 - url: /cook.*
-  static_files: cook/build/bundled/index.html
-  upload: cook/build/bundled/index.html
+  static_files: cook_SERVEPATH_/index.html
+  upload: cook_SERVEPATH_/index.html
   http_headers:
     Link: '</cook/js/user.js>; rel=preload; as=script, </cook/js/service.js>; rel=preload; as=script, </cook/src/app-shell.html>; rel=preload; as=document'
   secure: always
@@ -46,37 +46,37 @@ handlers:
 
 # Gigachef app
 - url: /gigachef/src/bower_components
-  static_dir: gigachef/build/bundled/bower_components
+  static_dir: gigachef_SERVEPATH_/bower_components
   secure: always
 
 - url: /gigachef/service-worker.js
-  static_files: gigachef/build/bundled/service-worker.js
-  upload: gigachef/build/bundled/service-worker.js
+  static_files: gigachef_SERVEPATH_/service-worker.js
+  upload: gigachef_SERVEPATH_/service-worker.js
   secure: always
 
 - url: /gigachef/js
-  static_dir: gigachef/build/bundled/js
+  static_dir: gigachef_SERVEPATH_/js
   secure: always
 
 - url: /gigachef/src
-  static_dir: gigachef/build/bundled/src
+  static_dir: gigachef_SERVEPATH_/src
   secure: always
 
 - url: /gigachef.*
-  static_files: gigachef/build/bundled/index.html
-  upload: gigachef/build/bundled/index.html
+  static_files: gigachef_SERVEPATH_/index.html
+  upload: gigachef_SERVEPATH_/index.html
   http_headers:
     Link: '</gigachef/js/user.js>; rel=preload; as=script, </gigachef/js/service.js>; rel=preload; as=script, </gigachef/src/app-shell.html>; rel=preload; as=document'
   secure: always
 
 # Website app
 - url: /source
-  static_dir: app/build/bundled/source
+  static_dir: app_SERVEPATH_/source
   secure: always
 
 - url: /(|home|becomechef|faq|terms|privacy|upgrade|about)$
-  static_files: app/build/bundled/index.html
-  upload: app/build/bundled/index.html
+  static_files: app_SERVEPATH_/index.html
+  upload: app_SERVEPATH_/index.html
   http_headers:
     Link: '</source/app-shell.html>; rel=preload; as=document, </source/home-page.html>; rel=preload; as=document'
   secure: always
