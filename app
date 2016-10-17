@@ -1,6 +1,17 @@
 #!/bin/bash
 
 ################################################################################
+# help
+################################################################################
+if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
+  echo "Here are the commands supported by the script:"
+  echo -e "\tapp [help|serve|build|deploy]"
+  echo -e "\tapp serve [eater|*]"
+  echo -e "\tapp build [app|cook|proto]"
+  echo -e "\tapp deploy [--prod|*] [eater|server|cook]"
+fi 
+
+################################################################################
 # build 
 ################################################################################
 if [[ $1 == "build" ]]; then
@@ -61,7 +72,7 @@ fi
 ################################################################################
 # serve
 ################################################################################
-if [[ $1 == "serve" ]] || [[ $1 == "" ]]; then
+if [[ $1 == "serve" ]]; then
   # setup mysql
   /usr/local/opt/mysql56/bin/mysql.server start
   # create gigamunch database
@@ -70,12 +81,12 @@ if [[ $1 == "serve" ]] || [[ $1 == "" ]]; then
   project="gigamunch-omninexus-dev"
   if [[ $2 == "eater" ]]; then
     echo "Starting eaterapi and server."
-    dev_appserver.py --datastore_path ./.datastore endpoint-gigamuncher/app.yaml server/app-dev.yaml
+    dev_appserver.py --datastore_path ./.datastore endpoint-gigamuncher/app.yaml server/app.yaml
   else
     echo "Starting cookapi and server."
     cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g" > cookapi/app.yaml
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore cookapi/app.yaml server/app-dev.yaml
+    dev_appserver.py --datastore_path ./.datastore cookapi/app.yaml server/app.yaml
   fi
   # stop mysql
   /usr/local/opt/mysql56/bin/mysql.server stop
