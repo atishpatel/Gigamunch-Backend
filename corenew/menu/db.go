@@ -10,6 +10,7 @@ func get(ctx context.Context, id int64) (*Menu, error) {
 	menu := new(Menu)
 	key := datastore.NewKey(ctx, kindMenu, "", id, nil)
 	err := datastore.Get(ctx, key, menu)
+	menu.ID = id
 	return menu, err
 }
 
@@ -32,6 +33,7 @@ func getCookMenus(ctx context.Context, cookID string) ([]int64, []Menu, error) {
 
 func put(ctx context.Context, id int64, menu *Menu) error {
 	var err error
+	menu.ID = id
 	key := datastore.NewKey(ctx, kindMenu, "", id, nil)
 	_, err = datastore.Put(ctx, key, menu)
 	return err
@@ -41,5 +43,6 @@ func putIncomplete(ctx context.Context, menu *Menu) (int64, error) {
 	var err error
 	key := datastore.NewIncompleteKey(ctx, kindMenu, nil)
 	key, err = datastore.Put(ctx, key, menu)
+	menu.ID = key.IntID()
 	return key.IntID(), err
 }
