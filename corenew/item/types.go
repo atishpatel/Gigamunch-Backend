@@ -6,6 +6,7 @@ const kindItem = "MenuItem"
 
 // Item is an item on a menu.
 type Item struct {
+	ID              int64     `json:"id" datastore:",noindex"`
 	CreatedDateTime time.Time `json:"created_datetime" datastore:",noindex"`
 	Active          bool      `json:"active" datastore:",noindex"`
 	// IsCatering          bool            `json:"is_catering" datastore:",noindex"`

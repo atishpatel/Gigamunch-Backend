@@ -22,6 +22,8 @@ const (
 	insertStatement = "INSERT INTO `active_items` (id, menu_id, cook_id, created_datetime, cook_price_per_serving, min_servings, max_servings, latitude, longitude, vegan, vegetarian, paleo, gluten_free, kosher) VALUES (%d, %d, '%s', '%s', %f, %d, %d, %f, %f, %t, %t, %t, %t, %t)"
 	updateStatement = "UPDATE `active_items` SET menu_id=%d AND cook_price_per_serving=%f AND min_servings=%d AND max_servings=%d AND latitude=%f AND longitude=%f AND vegan=%t AND vegetarian=%t AND paleo=%t AND gluten_free=%t AND kosher=%t WHERE id=%d"
 	deleteStatement = "DELETE FROM active_items WHERE id=%d"
+	// This select statement gets items sorted by distance and newness. A logarithmic function is applied to newness to the magnititude that an item 85 miles away is ranked higher than an item newly created (a month old item drops to the same rank as one 7 miles away)
+	selectStatement = "SELECT a.id, a.menu_id, a.cook_id FROM active_items as a, (SELECT menu_id,(3959*acos(cos(radians(%f))*cos(radians(latitude))*cos(radians(longitude)-radians(%f))+sin(radians(%f))*sin(radians(latitude))))+LEAST(log((Now()-MAX(created_datetime))/200000000)*10,0) as s FROM active_items GROUP BY menu_id ORDER BY s LIMIT %d, %d) as b WHERE b.menu_id = a.menu_id"
 )
 
 var (
@@ -33,11 +35,13 @@ func get(ctx context.Context, id int64) (*Item, error) {
 	item := new(Item)
 	key := datastore.NewKey(ctx, kindItem, "", id, nil)
 	err := datastore.Get(ctx, key, item)
+	item.ID = id
 	return item, err
 }
 
 func put(ctx context.Context, id int64, item *Item) error {
 	var err error
+	item.ID = id
 	key := datastore.NewKey(ctx, kindItem, "", id, nil)
 	_, err = datastore.Put(ctx, key, item)
 	return err
@@ -47,7 +51,35 @@ func putIncomplete(ctx context.Context, item *Item) (int64, error) {
 	var err error
 	key := datastore.NewIncompleteKey(ctx, kindItem, nil)
 	key, err = datastore.Put(ctx, key, item)
+	item.ID = key.IntID()
 	return key.IntID(), err
+}
+
+func getRankedActiveItem(ctx context.Context, lat, long float64, startLimit, endLimit int) ([]int64, []int64, []string, error) {
+	var err error
+	st := fmt.Sprintf(selectStatement, lat, long, lat, startLimit, endLimit)
+	rows, err := mysqlDB.Query(st)
+	if err != nil {
+		return nil, nil, nil, errSQLDB.WithError(err).Wrapf("failed to run query: %s", st)
+	}
+	defer handleCloser(ctx, rows)
+	var itemIDs []int64
+	var itemID int64
+	var menuIDs []int64
+	var menuID int64
+	var cookIDs []string
+	var cookID string
+	for rows.Next() {
+		_ = rows.Scan(&itemID, &menuID, &cookID)
+		itemIDs = append(itemIDs, itemID)
+		menuIDs = append(menuIDs, menuID)
+		cookIDs = append(cookIDs, cookID)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, nil, nil, errSQLDB.WithError(err).Wrap("failed at scanning rows")
+	}
+	return itemIDs, menuIDs, cookIDs, nil
 }
 
 // getCookItems returns a list of Items by ordered by MenuID
