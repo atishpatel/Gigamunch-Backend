@@ -10,7 +10,7 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
-	"github.com/google/identity-toolkit-go-client/gitkit"
+	"github.com/atishpatel/firegitkit/firegitkit"
 	"golang.org/x/net/context"
 	jwt "gopkg.in/dgrijalva/jwt-go.v2"
 
@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	gitkitClient    *gitkit.Client
+	gitkitClient    *firegitkit.Client
 	gitkitAudiences []string
 	jwtKey          []byte
 )
@@ -81,11 +81,11 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 		return nil, "", errInvalidGToken.WithError(err)
 	}
 	// get user info from gitkit servers
-	gitkitUser, err := gitkitClient.UserByLocalID(ctx, gtoken.LocalID)
-	if err != nil {
-		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error while signing in."}.WithError(err).Wrap("failed to fetch user from gitkit server")
-	}
-	token, err := createSessionToken(ctx, gitkitUser)
+	// gitkitUser, err := gitkitClient.UserByLocalID(ctx, gtoken.LocalID)
+	// if err != nil {
+	// 	return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error while signing in."}.WithError(err).Wrap("failed to fetch user from gitkit server")
+	// }
+	token, err := createSessionToken(ctx, gtoken.LocalID, gtoken.DisplayName, gtoken.Email, gtoken.ProviderID, gtoken.PhotoURL)
 	if err != nil {
 		return nil, "", errors.Wrap("failed to create session token", err)
 	}
@@ -96,10 +96,10 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 	return &token.User, jwtString, nil
 }
 
-func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, error) {
+func createSessionToken(ctx context.Context, id, name, email, providerID, photoURL string) (*Token, error) {
 	var err error
 	userSessions := &UserSessions{}
-	err = getUserSessions(ctx, gitkitUser.LocalID, userSessions)
+	err = getUserSessions(ctx, id, userSessions)
 	firstTime := false
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
@@ -111,11 +111,11 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 	if firstTime {
 		// create UserSessions kind
 		userSessions.User = types.User{
-			ID:          gitkitUser.LocalID,
-			Name:        gitkitUser.DisplayName,
-			Email:       gitkitUser.Email,
-			ProviderID:  gitkitUser.ProviderID,
-			PhotoURL:    gitkitUser.PhotoURL,
+			ID:          id,
+			Name:        name,
+			Email:       email,
+			ProviderID:  providerID,
+			PhotoURL:    photoURL,
 			Permissions: 0,
 		}
 		// update PhotoURL given by Google so it's higher resolution
@@ -133,7 +133,7 @@ func createSessionToken(ctx context.Context, gitkitUser *gitkit.User) (*Token, e
 	if err != nil {
 		return nil, errors.ErrorWithCode{
 			Code:    errors.CodeInternalServerErr,
-			Message: fmt.Sprintf("error put UserSession(%s) err: %+v", gitkitUser.LocalID, err),
+			Message: fmt.Sprintf("error put UserSession(%s) err: %+v", id, err),
 		}
 	}
 	return token, nil
@@ -322,14 +322,14 @@ func extractClaims(jwtToken *jwt.Token) (*Token, error) {
 func getConfig(ctx context.Context) {
 	config := config.GetGitkitConfig(ctx)
 	// setup gitkit
-	c := &gitkit.Config{
+	c := &firegitkit.Config{
 		WidgetURL: loginURL,
 	}
 	if appengine.IsDevAppServer() {
 		c.GoogleAppCredentialsPath = config.GoogleAppCredentialsPath
 	}
 	var err error
-	gitkitClient, err = gitkit.New(context.Background(), c)
+	gitkitClient, err = firegitkit.New(context.Background(), c)
 	if err != nil {
 		log.Fatal(err)
 	}
