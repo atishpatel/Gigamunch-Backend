@@ -26,7 +26,6 @@ if [[ $1 == "build" ]]; then
     echo "Building server/cook:"
     cd server/cook
     polymer build
-    cat build/bundled/service-worker.js | sed "s/\[\"\//\[\"\/cook\//g" > build/bundled/service-worker.js
     rm -rf build/unbundled
     cd ../..
   fi
