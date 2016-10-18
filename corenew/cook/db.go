@@ -12,6 +12,7 @@ func get(ctx context.Context, id string) (*Cook, error) {
 	cook := new(Cook)
 	key := datastore.NewKey(ctx, kindCook, id, 0, nil)
 	err := datastore.Get(ctx, key, cook)
+	cook.ID = id
 	return cook, err
 }
 
@@ -31,6 +32,7 @@ func getBySubmerchantID(ctx context.Context, submerchantID string) (string, *Coo
 
 func put(ctx context.Context, id string, cook *Cook) error {
 	var err error
+	cook.ID = id
 	key := datastore.NewKey(ctx, kindCook, id, 0, nil)
 	_, err = datastore.Put(ctx, key, cook)
 	return err

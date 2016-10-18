@@ -58,6 +58,7 @@ func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, b
 		}
 		cook.CreatedDatetime = time.Now()
 	}
+	cook.ID = user.ID
 	cook.Name = user.Name
 	cook.PhotoURL = user.PhotoURL
 	cook.Email = user.Email

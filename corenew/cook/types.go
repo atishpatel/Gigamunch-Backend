@@ -57,6 +57,7 @@ func (r *Rating) changeRating(rating, value int) {
 
 // Cook contains all the information related to a cook.
 type Cook struct {
+	ID               string        `json:"id" datastore:",noindex"`
 	CreatedDatetime  time.Time     `json:"created_datetime" datastore:",index"`
 	types.UserDetail               // embedded
 	Bio              string        `json:"bio" datastore:",noindex"`
