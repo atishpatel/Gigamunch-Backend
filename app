@@ -57,7 +57,7 @@ if [[ $1 == "deploy" ]]; then
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_/\/build\/bundled/g; s/MODULE/default/g" > server/app.yaml
-    goapp deploy server/app-stage.yaml
+    goapp deploy server/app.yaml
   fi
   if [[ $* == *cook* ]]; then
     echo "Deploying cook:"
@@ -80,6 +80,7 @@ if [[ $1 == "serve" ]]; then
   project="gigamunch-omninexus-dev"
   if [[ $2 == "eater" ]]; then
     echo "Starting eaterapi and server."
+    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
     dev_appserver.py --datastore_path ./.datastore endpoint-gigamuncher/app.yaml server/app.yaml
   else
     echo "Starting cookapi and server."
