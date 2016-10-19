@@ -62,7 +62,7 @@ func (c *Client) GetAllByCook(cookID string) ([]int64, []Item, error) {
 func (c *Client) GetMulti(ids []int64) ([]Item, error) {
 	items, err := getMulti(c.ctx, ids)
 	if err != nil {
-		return nil, errors.Wrap("failed to getMulti items", err)
+		return nil, errDatastore.WithError(err).Wrapf("failed to getMulti items ids: %v", ids)
 	}
 	return items, nil
 }

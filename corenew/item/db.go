@@ -2,6 +2,7 @@ package item
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -103,7 +104,7 @@ func getCookItems(ctx context.Context, cookID string) ([]int64, []Item, error) {
 // getMulti gets a list of Items
 func getMulti(ctx context.Context, ids []int64) ([]Item, error) {
 	if len(ids) == 0 {
-		return nil, errInvalidParameter.Wrap("ids cannot be 0 for getMulti")
+		return nil, errors.New("ids cannot be 0 for getMulti")
 	}
 	dst := make([]Item, len(ids))
 	var err error
