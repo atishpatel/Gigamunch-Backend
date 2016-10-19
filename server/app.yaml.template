@@ -81,6 +81,10 @@ handlers:
     Link: '</source/app-shell.html>; rel=preload; as=document, </source/home-page.html>; rel=preload; as=document'
   secure: always
 
+- url: /bower_components
+  static_dir: app_SERVEPATH_/bower_components
+  secure: always
+
 - url: /.*
   script: _go_app
   secure: always

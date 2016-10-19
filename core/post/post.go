@@ -8,7 +8,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/item"
 	"github.com/atishpatel/Gigamunch-Backend/core/notification"
 
-	"appengine"
+	"google.golang.org/appengine"
 
 	"golang.org/x/net/context"
 
