@@ -42,16 +42,8 @@ func (s *service) GetBraintreeToken(ctx context.Context, req *pb.GigatokenOnlyRe
 	return resp, nil
 }
 
-func (s *service) GetAddresses(ctx context.Context, req *pb.GigatokenOnlyRequest) (*pb.GetAddressesResponse, error) {
-	resp := new(pb.GetAddressesResponse)
-	defer handleResp(ctx, "GetAddresses", resp.Error)
+func (s *service) CheckDeliveryAddresses(ctx context.Context, req *CheckDeliveryAddressesRequest) (resp *CheckDeliveryAddressesResponse, unknownErr error) {
+	defer handleResp(ctx, "CheckDeliveryAddresses", resp.Error)
 
-	return resp, nil
-}
-
-func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressRequest) (*pb.SelectAddressResponse, error) {
-	resp := new(pb.SelectAddressResponse)
-	defer handleResp(ctx, "SelectAddress", resp.Error)
-
-	return resp, nil
+	return
 }

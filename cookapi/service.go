@@ -13,7 +13,7 @@ import (
 )
 
 type coder interface {
-	GetCode() int
+	GetCode() int32
 }
 
 func handleResp(ctx context.Context, fnName string, resp coder) {
