@@ -39,6 +39,15 @@ func (c *Client) Get(id string) (*Cook, error) {
 	return cook, nil
 }
 
+// GetMulti returns an array of Cooks.
+func (c *Client) GetMulti(ids []string) ([]Cook, error) {
+	cooks, err := getMulti(c.ctx, ids)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("failed to getMulti menu ids: %v", ids)
+	}
+	return cooks, nil
+}
+
 // Update updates a cook's info.
 func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, bio string,
 	deliveryRange int32, weekSchedule []WeekSchedule, instagramID, twitterID, snapchatID string) (*Cook, error) {

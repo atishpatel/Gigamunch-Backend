@@ -1,6 +1,7 @@
 package cook
 
 import (
+	"errors"
 	"fmt"
 
 	"golang.org/x/net/context"
@@ -14,6 +15,23 @@ func get(ctx context.Context, id string) (*Cook, error) {
 	err := datastore.Get(ctx, key, cook)
 	cook.ID = id
 	return cook, err
+}
+
+func getMulti(ctx context.Context, ids []string) ([]Cook, error) {
+	if len(ids) == 0 {
+		return nil, errors.New("ids cannot be 0 for getMulti")
+	}
+	dst := make([]Cook, len(ids))
+	var err error
+	keys := make([]*datastore.Key, len(ids))
+	for i := range ids {
+		keys[i] = datastore.NewKey(ctx, kindCook, ids[i], 0, nil)
+	}
+	err = datastore.GetMulti(ctx, keys, dst)
+	if err != nil && err.Error() != "(0 errors)" { // GetMulti always returns appengine.MultiError which is stupid
+		return nil, err
+	}
+	return dst, nil
 }
 
 func getBySubmerchantID(ctx context.Context, submerchantID string) (string, *Cook, error) {
