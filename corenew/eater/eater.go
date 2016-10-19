@@ -36,8 +36,8 @@ func (c *Client) Get(id string) (*Eater, error) {
 }
 
 // GetBTCustomerID gets the eater Braintree customer id
-func GetBTCustomerID(ctx context.Context, id string) (string, error) {
-	eater, err := get(ctx, id)
+func (c *Client) GetBTCustomerID(id string) (string, error) {
+	eater, err := get(c.ctx, id)
 	if err != nil {
 		return "", errDatastore.WithError(err).Wrapf("cannot get eater(%s)", id)
 	}
