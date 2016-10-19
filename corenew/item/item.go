@@ -41,7 +41,7 @@ func (c *Client) Get(id int64) (*Item, error) {
 }
 
 // GetActiveItemIDs returns an array of itemIDs, menuIDs, and cookIDs
-func (c *Client) GetActiveItemIDs(startIndex, endIndex int, lat, long float64) ([]int64, []int64, []string, error) {
+func (c *Client) GetActiveItemIDs(startIndex, endIndex int32, lat, long float64) ([]int64, []int64, []string, error) {
 	itemIDs, menuIDs, cookIDs, err := getRankedActiveItem(c.ctx, lat, long, startIndex, endIndex)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap("failed to getRankedActiveItem", err)

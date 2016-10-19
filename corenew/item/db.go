@@ -56,7 +56,7 @@ func putIncomplete(ctx context.Context, item *Item) (int64, error) {
 	return key.IntID(), err
 }
 
-func getRankedActiveItem(ctx context.Context, lat, long float64, startLimit, endLimit int) ([]int64, []int64, []string, error) {
+func getRankedActiveItem(ctx context.Context, lat, long float64, startLimit, endLimit int32) ([]int64, []int64, []string, error) {
 	var err error
 	st := fmt.Sprintf(selectStatement, lat, long, lat, startLimit, endLimit)
 	rows, err := mysqlDB.Query(st)
