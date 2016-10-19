@@ -172,9 +172,9 @@ func buildGetNumLikesStatement(items []int64) (string, error) {
 }
 
 // LikesItems returns an array that states if the muncher likes the item or not
-func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error) {
+func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int32, error) {
 	likesItem := make([]bool, len(items))
-	numLikes := make([]int, len(items))
+	numLikes := make([]int32, len(items))
 	if len(items) == 0 {
 		return likesItem, numLikes, nil
 	}
@@ -190,7 +190,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int, error)
 
 	var tmpItemID int64
 	var tmpUserID string
-	var tmpNumLike int
+	var tmpNumLike int32
 	for rows.Next() {
 		err = rows.Scan(&tmpItemID, &tmpUserID, &tmpNumLike)
 		if err != nil {

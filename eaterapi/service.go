@@ -38,6 +38,18 @@ func handleResp(ctx context.Context, fnName string, err *pb.Error) {
 	}
 }
 
+// processErrorChans returns an error if any of the error channels return an error
+func processErrorChans(errs ...<-chan error) error {
+	var err error
+	for _, v := range errs {
+		err <- v
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type service struct{}
 
 func main() {
