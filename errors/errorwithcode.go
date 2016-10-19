@@ -7,13 +7,13 @@ import "fmt"
 // The message is a human readable message.
 // The details is the error message itself.
 type ErrorWithCode struct {
-	Code    int    `json:"code"`
+	Code    int32  `json:"code"`
 	Message string `json:"message"`
 	Detail  string `json:"detail"`
 }
 
 // GetCode return the code
-func (err ErrorWithCode) GetCode() int {
+func (err ErrorWithCode) GetCode() int32 {
 	return err.Code
 }
 

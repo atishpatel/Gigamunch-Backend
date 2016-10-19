@@ -16,6 +16,15 @@ import (
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 )
 
+func getGRPCError(err error, detail string) *pb.Error {
+	cErr := errors.Wrap(detail, err)
+	return &pb.Error{
+		Code:    cErr.Code,
+		Message: cErr.Message,
+		Detail:  cErr.Detail,
+	}
+}
+
 func handleResp(ctx context.Context, fnName string, err *pb.Error) {
 	if err == nil { // there was no error
 		return

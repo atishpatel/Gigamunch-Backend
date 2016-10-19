@@ -71,7 +71,7 @@ func stof64(s string) (float64, error) {
 }
 
 type coder interface {
-	GetCode() int
+	GetCode() int32
 }
 
 func handleResp(ctx context.Context, fnName string, resp coder) {

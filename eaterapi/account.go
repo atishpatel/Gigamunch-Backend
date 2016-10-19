@@ -35,7 +35,7 @@ func (s *service) SignOut(ctx context.Context, req *pb.GigatokenOnlyRequest) (*p
 	}
 	err := auth.DeleteSessionToken(ctx, req.Gigatoken)
 	if err != nil {
-		resp.Err = getGRPCError(err, "failed to auth.DeleteSessionToken")
+		resp.Error = getGRPCError(err, "failed to auth.DeleteSessionToken")
 	}
 	return resp, nil
 }
