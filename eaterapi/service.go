@@ -42,7 +42,7 @@ func handleResp(ctx context.Context, fnName string, err *pb.Error) {
 func processErrorChans(errs ...<-chan error) error {
 	var err error
 	for _, v := range errs {
-		err <- v
+		err = <-v
 		if err != nil {
 			return err
 		}

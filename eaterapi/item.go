@@ -11,45 +11,45 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
 )
 
-func (s *service) GetItem(ctx context.Context, id *pb.GetItemRequest) (resp *pb.GetItemResponse, unknownErr error) {
+func (s *service) GetItem(ctx context.Context, id *pb.GetItemRequest) (resp *pb.GetItemResponse, unusedErr error) {
 	defer handleResp(ctx, "GetItem", resp.Error)
 
 	return
 }
 
-func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb.GetFeedResponse, unknownErr error) {
+func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb.GetFeedResponse, unusedErr error) {
 	defer handleResp(ctx, "GetFeed", resp.Error)
 	itemC := item.New(ctx)
 	itemIDs, menuIDs, cookIDs, err := itemC.GetActiveItemIDs(req.StartIndex, req.EndIndex, req.Latitude, req.Longitude)
 	if err != nil {
-		resp.Err = getGRPCError(err, "failed to itemC.GetActiveItemIDs")
+		resp.Error = getGRPCError(err, "failed to itemC.GetActiveItemIDs")
 		return
 	}
 	// get items
 	var items []item.Item
 	itemsErrChan := make(chan error, 1)
 	go func() {
-		var err error
-		items, err = itemC.GetMulti(itemIDs)
-		itemsErrChan <- err
+		var goErr error
+		items, goErr = itemC.GetMulti(itemIDs)
+		itemsErrChan <- goErr
 	}()
 	// get menus
 	var menus map[int64]*menu.Menu
 	menusErrChan := make(chan error, 1)
 	go func() {
-		var err error
+		var goErr error
 		menuC := menu.New(ctx)
-		menus, err = menuC.GetMulti(menuIDs)
-		menusErrChan <- err
+		menus, goErr = menuC.GetMulti(menuIDs)
+		menusErrChan <- goErr
 	}()
 	// get cooks
 	var cooks map[string]*cook.Cook
 	cooksErrChan := make(chan error, 1)
 	go func() {
-		var err error
+		var goErr error
 		cookC := cook.New(ctx)
-		cooks, err = cookC.GetMulti(cookIDs)
-		cooksErrChan <- err
+		cooks, goErr = cookC.GetMulti(cookIDs)
+		cooksErrChan <- goErr
 	}()
 	// get likes
 	var likes []bool
@@ -64,10 +64,10 @@ func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb
 				userID = user.ID
 			}
 		}
-		var err error
+		var goErr error
 		likeC := like.New(ctx)
-		likes, numLikes, err = likeC.LikesItems(userID, itemIDs)
-		likeErrChan <- err
+		likes, numLikes, goErr = likeC.LikesItems(userID, itemIDs)
+		likeErrChan <- goErr
 	}()
 	// handle errors
 	err = processErrorChans(itemsErrChan, menusErrChan, cooksErrChan, likeErrChan)
@@ -105,8 +105,23 @@ func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb
 	return
 }
 
-func (s *service) LikeItem(ctx context.Context, req *pb.LikeItemRequest) (resp *pb.ErrorOnlyResponse, unknownErr error) {
+func (s *service) LikeItem(ctx context.Context, req *pb.LikeItemRequest) (resp *pb.ErrorOnlyResponse, unusedErr error) {
 	defer handleResp(ctx, "LikeItem", resp.Error)
-
+	user, validateErr := validateLikeItemRequest(ctx, req)
+	if validateErr != nil {
+		resp.Error = validateErr
+		return
+	}
+	likeC := like.New(ctx)
+	var err error
+	if req.Like {
+		err = likeC.Like(user.ID, req.ItemId, req.MenuId, req.CookId)
+	} else {
+		err = likeC.Unlike(user.ID, req.ItemId)
+	}
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to like or unlike")
+		return
+	}
 	return
 }
