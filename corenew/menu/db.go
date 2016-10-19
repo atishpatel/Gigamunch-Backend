@@ -1,6 +1,8 @@
 package menu
 
 import (
+	"errors"
+
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/datastore"
@@ -12,6 +14,23 @@ func get(ctx context.Context, id int64) (*Menu, error) {
 	err := datastore.Get(ctx, key, menu)
 	menu.ID = id
 	return menu, err
+}
+
+func getMulti(ctx context.Context, ids []int64) ([]Menu, error) {
+	if len(ids) == 0 {
+		return nil, errors.New("ids cannot be 0 for getMulti")
+	}
+	dst := make([]Menu, len(ids))
+	var err error
+	keys := make([]*datastore.Key, len(ids))
+	for i := range ids {
+		keys[i] = datastore.NewKey(ctx, kindMenu, "", ids[i], nil)
+	}
+	err = datastore.GetMulti(ctx, keys, dst)
+	if err != nil && err.Error() != "(0 errors)" { // GetMulti always returns appengine.MultiError which is stupid
+		return nil, err
+	}
+	return dst, nil
 }
 
 // getCookMenus returns a list of Menus
