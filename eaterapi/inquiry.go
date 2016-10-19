@@ -4,6 +4,8 @@ import (
 	"golang.org/x/net/context"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/eater"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 )
 
 func (s *service) MakeInquiry(ctx context.Context, req *pb.MakeInquiryRequest) (*pb.MakeInquiryResponse, error) {
@@ -35,14 +37,30 @@ func (s *service) CancelInquiry(ctx context.Context, req *pb.CancelInquiryReques
 	return resp, nil
 }
 
-func (s *service) GetBraintreeToken(ctx context.Context, req *pb.GigatokenOnlyRequest) (*pb.GetBraintreeTokenResponse, error) {
-	resp := new(pb.GetBraintreeTokenResponse)
+func (s *service) GetBraintreeToken(ctx context.Context, req *pb.GigatokenOnlyRequest) (resp *pb.GetBraintreeTokenResponse, unusedErr error) {
 	defer handleResp(ctx, "GetBraintreeToken", resp.Error)
-
+	user, validateErr := validateGigatokenAndGetUser(ctx, req.Gigatoken)
+	if validateErr != nil {
+		resp.Error = validateErr
+		return
+	}
+	eaterC := eater.New(ctx)
+	customerID, err := eaterC.GetBTCustomerID(user.ID)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to eater.GetBTCustomerID")
+		return
+	}
+	paymentC := payment.New(ctx)
+	token, err := paymentC.GenerateToken(customerID)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to payment.GenerateToken")
+		return
+	}
+	resp.BraintreeToken = token
 	return resp, nil
 }
 
-func (s *service) CheckDeliveryAddresses(ctx context.Context, req *CheckDeliveryAddressesRequest) (resp *CheckDeliveryAddressesResponse, unknownErr error) {
+func (s *service) CheckDeliveryAddresses(ctx context.Context, req *pb.CheckDeliveryAddressesRequest) (resp *pb.CheckDeliveryAddressesResponse, unusedErr error) {
 	defer handleResp(ctx, "CheckDeliveryAddresses", resp.Error)
 
 	return

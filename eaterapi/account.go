@@ -91,16 +91,16 @@ func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressReques
 	}
 	eaterC := eater.New(ctx)
 	address, err := eaterC.SelectAddress(user.ID, &types.Address{
-		Country:   req.Address.Country,
-		State:     req.Address.State,
-		City:      req.Address.City,
-		Zip:       req.Address.Zip,
-		Street:    req.Address.Street,
-		APT:       req.Address.UnitNumber,
-		GeoPoint: types.GeoPoint {
+		Country: req.Address.Country,
+		State:   req.Address.State,
+		City:    req.Address.City,
+		Zip:     req.Address.Zip,
+		Street:  req.Address.Street,
+		APT:     req.Address.UnitNumber,
+		GeoPoint: types.GeoPoint{
 			Latitude:  req.Address.Latitude,
 			Longitude: req.Address.Longitude,
-		}
+		},
 	})
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to eater.SelectAddress")
@@ -117,5 +117,11 @@ func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressReques
 		Longitude:  address.Longitude,
 		IsSelected: address.Selected,
 	}
+	return
+}
+
+func (s *service) RegisterNotificationToken(ctx context.Context, req *pb.RegisterNotificationTokenRequest) (resp *pb.ErrorOnlyResponse, unusedErr error) {
+	defer handleResp(ctx, "RegisterNotificationToken", resp.Error)
+
 	return
 }
