@@ -11,12 +11,12 @@ const kindCook = "Cook"
 // Rating is all the rating info for a cook
 type Rating struct {
 	AverageRating       float32 `json:"average_rating" datastore:",index"`
-	NumRatings          int     `json:"num_ratings" datastore:",index"`
-	NumOneStarRatings   int     `json:"num_one_star_ratings" datastore:",noindex"`
-	NumTwoStarRatings   int     `json:"num_two_star_ratings" datastore:",noindex"`
-	NumThreeStarRatings int     `json:"num_three_star_ratings" datastore:",noindex"`
-	NumFourStarRatings  int     `json:"num_four_star_ratings" datastore:",noindex"`
-	NumFiveStarRatings  int     `json:"num_five_star_ratings" datastore:",noindex"`
+	NumRatings          int32   `json:"num_ratings" datastore:",index"`
+	NumOneStarRatings   int32   `json:"num_one_star_ratings" datastore:",noindex"`
+	NumTwoStarRatings   int32   `json:"num_two_star_ratings" datastore:",noindex"`
+	NumThreeStarRatings int32   `json:"num_three_star_ratings" datastore:",noindex"`
+	NumFourStarRatings  int32   `json:"num_four_star_ratings" datastore:",noindex"`
+	NumFiveStarRatings  int32   `json:"num_five_star_ratings" datastore:",noindex"`
 }
 
 func (r *Rating) updateAvg() {
@@ -29,16 +29,16 @@ func (r *Rating) updateAvg() {
 }
 
 // addRating adds a rating and updates average rating
-func (r *Rating) addRating(rating int) {
+func (r *Rating) addRating(rating int32) {
 	r.changeRating(rating, 1)
 }
 
 // removeRating removes a rating and updates average rating
-func (r *Rating) removeRating(rating int) {
+func (r *Rating) removeRating(rating int32) {
 	r.changeRating(rating, -1)
 }
 
-func (r *Rating) changeRating(rating, value int) {
+func (r *Rating) changeRating(rating, value int32) {
 	switch rating {
 	case 1:
 		r.NumOneStarRatings += value

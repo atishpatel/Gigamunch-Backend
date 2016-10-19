@@ -40,10 +40,24 @@ func (c *Client) Get(id string) (*Cook, error) {
 }
 
 // GetMulti returns an array of Cooks.
-func (c *Client) GetMulti(ids []string) ([]Cook, error) {
-	cooks, err := getMulti(c.ctx, ids)
+func (c *Client) GetMulti(ids []string) (map[string]*Cook, error) {
+	cooks := make(map[string]*Cook, len(ids))
+	for _, v := range ids {
+		cooks[v] = nil
+	}
+	ids = nil
+	unDupedIDs := make([]string, len(cooks))
+	index := 0
+	for i := range cooks {
+		unDupedIDs[index] = i
+		index++
+	}
+	results, err := getMulti(c.ctx, unDupedIDs)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to getMulti menu ids: %v", ids)
+	}
+	for i, v := range unDupedIDs {
+		cooks[v] = &results[i]
 	}
 	return cooks, nil
 }
