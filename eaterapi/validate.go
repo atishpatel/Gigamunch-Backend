@@ -52,3 +52,10 @@ func validateLikeItemRequest(ctx context.Context, req *pb.LikeItemRequest) (*typ
 	}
 	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
 }
+
+func validateRegisterNotificationTokenRequest(ctx context.Context, req *pb.RegisterNotificationTokenRequest) (*types.User, *pb.Error) {
+	if req.NotificationToken == "" {
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "NotificationToken cannot be empty."}
+	}
+	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
+}

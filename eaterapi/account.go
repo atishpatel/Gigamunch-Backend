@@ -122,6 +122,15 @@ func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressReques
 
 func (s *service) RegisterNotificationToken(ctx context.Context, req *pb.RegisterNotificationTokenRequest) (resp *pb.ErrorOnlyResponse, unusedErr error) {
 	defer handleResp(ctx, "RegisterNotificationToken", resp.Error)
-
+	user, validateErr := validateRegisterNotificationTokenRequest(ctx, req)
+	if validateErr != nil {
+		resp.Error = validateErr
+		return
+	}
+	eaterC := eater.New(ctx)
+	err := eaterC.RegisterNotificationToken(user.ID, req.NotificationToken)
+	if err != nil {
+		getGRPCError(err, "failed to eater.RegisterNotificationToken")
+	}
 	return
 }
