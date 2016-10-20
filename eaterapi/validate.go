@@ -42,10 +42,10 @@ func validateSelectAddressRequest(ctx context.Context, req *pb.SelectAddressRequ
 
 func validateLikeItemRequest(ctx context.Context, req *pb.LikeItemRequest) (*types.User, *pb.Error) {
 	if req.ItemId == 0 {
-		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "ItemID cannot be empty."}
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "ItemID cannot be 0."}
 	}
 	if req.MenuId == 0 {
-		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "MenuID cannot be empty."}
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "MenuID cannot be 0."}
 	}
 	if req.CookId == "" {
 		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "CookID cannot be empty."}
@@ -58,4 +58,11 @@ func validateRegisterNotificationTokenRequest(ctx context.Context, req *pb.Regis
 		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "NotificationToken cannot be empty."}
 	}
 	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
+}
+
+func validateGetItemRequest(req *pb.GetItemRequest) *pb.Error {
+	if req.ItemId == 0 {
+		return &pb.Error{Code: errors.CodeInvalidParameter, Message: "ItemID cannot be 0."}
+	}
+	return nil
 }

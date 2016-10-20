@@ -5,15 +5,73 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
-func (s *service) GetItem(ctx context.Context, id *pb.GetItemRequest) (resp *pb.GetItemResponse, unusedErr error) {
+func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (resp *pb.GetItemResponse, unusedErr error) {
 	defer handleResp(ctx, "GetItem", resp.Error)
+	validateErr := validateGetItemRequest(req)
+	if validateErr != nil {
+		resp.Error = validateErr
+		return
+	}
+	// get item
+	itemC := item.New(ctx)
+	item, err := itemC.Get(req.ItemId)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to item.Get")
+		return
+	}
+	// get cook
+	var c *cook.Cook
+	cooksErrChan := make(chan error, 1)
+	go func() {
+		var goErr error
+		cookC := cook.New(ctx)
+		c, goErr = cookC.Get(item.CookID)
+		cooksErrChan <- goErr
+	}()
+	// TODO get reviews
 
+	// get likes
+	var likes []bool
+	var numLikes []int32
+	likeErrChan := make(chan error, 1)
+	go func() {
+		// get user if there
+		var userID string
+		if req.Gigatoken != "" {
+			user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
+			if user != nil {
+				userID = user.ID
+			}
+		}
+		var goErr error
+		likeC := like.New(ctx)
+		likes, numLikes, goErr = likeC.LikesItems(userID, []int64{item.ID})
+		likeErrChan <- goErr
+	}()
+	// handle errors
+	err = processErrorChans(cooksErrChan, likeErrChan)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to cook.Get or like.LikesItems")
+		return
+	}
+	// get distance
+	cookPoint := c.Address.GeoPoint
+	eaterPoint := types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
+	distance, _, err := maps.GetDistance(ctx, cookPoint, eaterPoint)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to maps.GetDistance")
+		return
+	}
+	// TODO add exchangeoptions and cook likes
+	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, nil, 0)
 	return
 }
 
