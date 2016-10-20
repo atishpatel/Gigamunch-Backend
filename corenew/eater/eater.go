@@ -120,3 +120,23 @@ func (c *Client) SelectAddress(id string, address *types.Address) (*Address, err
 	}
 	return a, nil
 }
+
+// RegisterNotificationToken adds a device token to eater if not already registered.
+func (c *Client) RegisterNotificationToken(id, notificationToken string) error {
+	eater, err := get(c.ctx, id)
+	if err != nil {
+		return errDatastore.WithError(err).Wrapf("cannot get eater(%s)", id)
+	}
+	for _, v := range eater.NotificationTokens {
+		if v == notificationToken {
+			return nil // exit
+		}
+	}
+	// not found
+	eater.NotificationTokens = append(eater.NotificationTokens, notificationToken)
+	err = put(c.ctx, id, eater)
+	if err != nil {
+		return errDatastore.WithError(err).Wrapf("cannot put eater(%s)", id)
+	}
+	return nil
+}
