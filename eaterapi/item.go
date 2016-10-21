@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang.org/x/net/context"
+	"google.golang.org/appengine"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
@@ -13,19 +14,21 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
-func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (resp *pb.GetItemResponse, unusedErr error) {
+func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetItemResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.GetItemResponse)
 	defer handleResp(ctx, "GetItem", resp.Error)
 	validateErr := validateGetItemRequest(req)
 	if validateErr != nil {
 		resp.Error = validateErr
-		return
+		return resp, nil
 	}
 	// get item
 	itemC := item.New(ctx)
 	item, err := itemC.Get(req.ItemId)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to item.Get")
-		return
+		return resp, nil
 	}
 	// get cook
 	var c *cook.Cook
@@ -60,7 +63,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (resp *pb
 	err = processErrorChans(cooksErrChan, likeErrChan)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to cook.Get or like.LikesItems")
-		return
+		return resp, nil
 	}
 	// get distance
 	cookPoint := c.Address.GeoPoint
@@ -68,20 +71,22 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (resp *pb
 	distance, _, err := maps.GetDistance(ctx, cookPoint, eaterPoint)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to maps.GetDistance")
-		return
+		return resp, nil
 	}
 	// TODO add exchangeoptions and cook likes
 	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, nil, 0)
-	return
+	return resp, nil
 }
 
-func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb.GetFeedResponse, unusedErr error) {
+func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.GetFeedResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.GetFeedResponse)
 	defer handleResp(ctx, "GetFeed", resp.Error)
 	itemC := item.New(ctx)
 	itemIDs, menuIDs, cookIDs, err := itemC.GetActiveItemIDs(req.StartIndex, req.EndIndex, req.Latitude, req.Longitude)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to itemC.GetActiveItemIDs")
-		return
+		return resp, nil
 	}
 	// get items
 	var items []item.Item
@@ -131,7 +136,7 @@ func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb
 	err = processErrorChans(itemsErrChan, menusErrChan, cooksErrChan, likeErrChan)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to item.GetMulti or menu.GetMulti or cook.GetMulti")
-		return
+		return resp, nil
 	}
 	// get menu order
 	menuOrder := make([]int64, len(menus))
@@ -160,15 +165,17 @@ func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (resp *pb
 			}
 		}
 	}
-	return
+	return resp, nil
 }
 
-func (s *service) LikeItem(ctx context.Context, req *pb.LikeItemRequest) (resp *pb.ErrorOnlyResponse, unusedErr error) {
+func (s *service) LikeItem(ctx context.Context, req *pb.LikeItemRequest) (*pb.ErrorOnlyResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.ErrorOnlyResponse)
 	defer handleResp(ctx, "LikeItem", resp.Error)
 	user, validateErr := validateLikeItemRequest(ctx, req)
 	if validateErr != nil {
 		resp.Error = validateErr
-		return
+		return resp, nil
 	}
 	likeC := like.New(ctx)
 	var err error
@@ -179,7 +186,7 @@ func (s *service) LikeItem(ctx context.Context, req *pb.LikeItemRequest) (resp *
 	}
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to like or unlike")
-		return
+		return resp, nil
 	}
-	return
+	return resp, nil
 }

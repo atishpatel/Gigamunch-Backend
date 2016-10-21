@@ -3,17 +3,22 @@ package main
 import (
 	"golang.org/x/net/context"
 
+	"google.golang.org/appengine"
+
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/eater"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
-func (s *service) SignIn(ctx context.Context, req *pb.SignInRequest) (resp *pb.SignInResponse, unusedErr error) {
+func (s *service) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.SignInResponse)
 	defer handleResp(ctx, "SignIn", resp.Error)
 	user, gigatoken, err := auth.GetSessionWithGToken(ctx, req.Gtoken)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to auth.GetSessionWithGToken")
+		return resp, nil
 	}
 	eaterC := eater.New(ctx)
 	_, err = eaterC.Update(user)
@@ -25,7 +30,9 @@ func (s *service) SignIn(ctx context.Context, req *pb.SignInRequest) (resp *pb.S
 	return resp, nil
 }
 
-func (s *service) SignOut(ctx context.Context, req *pb.GigatokenOnlyRequest) (resp *pb.ErrorOnlyResponse, unusedErr error) {
+func (s *service) SignOut(ctx context.Context, req *pb.GigatokenOnlyRequest) (*pb.ErrorOnlyResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.ErrorOnlyResponse)
 	defer handleResp(ctx, "SignOut", resp.Error)
 	if req.Gigatoken == "" {
 		return resp, nil
@@ -37,7 +44,9 @@ func (s *service) SignOut(ctx context.Context, req *pb.GigatokenOnlyRequest) (re
 	return resp, nil
 }
 
-func (s *service) RefreshToken(ctx context.Context, req *pb.GigatokenOnlyRequest) (resp *pb.RefreshTokenResponse, unusedErr error) {
+func (s *service) RefreshToken(ctx context.Context, req *pb.GigatokenOnlyRequest) (*pb.RefreshTokenResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.RefreshTokenResponse)
 	defer handleResp(ctx, "RefreshToken", resp.Error)
 	if validateErr := validateGigatokenOnlyReq(req); validateErr != nil {
 		resp.Error = validateErr
@@ -52,18 +61,20 @@ func (s *service) RefreshToken(ctx context.Context, req *pb.GigatokenOnlyRequest
 	return resp, nil
 }
 
-func (s *service) GetAddresses(ctx context.Context, req *pb.GigatokenOnlyRequest) (resp *pb.GetAddressesResponse, unusedErr error) {
+func (s *service) GetAddresses(ctx context.Context, req *pb.GigatokenOnlyRequest) (*pb.GetAddressesResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.GetAddressesResponse)
 	defer handleResp(ctx, "GetAddresses", resp.Error)
 	user, validateErr := validateGigatokenAndGetUser(ctx, req.Gigatoken)
 	if validateErr != nil {
 		resp.Error = validateErr
-		return
+		return resp, nil
 	}
 	eaterC := eater.New(ctx)
 	addresses, err := eaterC.GetAddresses(user.ID)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to eater.GetAddresses")
-		return
+		return resp, nil
 	}
 	resp.Addresses = make([]*pb.Address, len(addresses))
 	for i := range addresses {
@@ -79,15 +90,17 @@ func (s *service) GetAddresses(ctx context.Context, req *pb.GigatokenOnlyRequest
 			IsSelected: addresses[i].Selected,
 		}
 	}
-	return
+	return resp, nil
 }
 
-func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressRequest) (resp *pb.SelectAddressResponse, unusedErr error) {
+func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressRequest) (*pb.SelectAddressResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.SelectAddressResponse)
 	defer handleResp(ctx, "SelectAddress", resp.Error)
 	user, validateErr := validateSelectAddressRequest(ctx, req)
 	if validateErr != nil {
 		resp.Error = validateErr
-		return
+		return resp, nil
 	}
 	eaterC := eater.New(ctx)
 	address, err := eaterC.SelectAddress(user.ID, &types.Address{
@@ -104,7 +117,7 @@ func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressReques
 	})
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to eater.SelectAddress")
-		return
+		return resp, nil
 	}
 	resp.Address = &pb.Address{
 		Country:    address.Country,
@@ -117,20 +130,22 @@ func (s *service) SelectAddress(ctx context.Context, req *pb.SelectAddressReques
 		Longitude:  address.Longitude,
 		IsSelected: address.Selected,
 	}
-	return
+	return resp, nil
 }
 
-func (s *service) RegisterNotificationToken(ctx context.Context, req *pb.RegisterNotificationTokenRequest) (resp *pb.ErrorOnlyResponse, unusedErr error) {
+func (s *service) RegisterNotificationToken(ctx context.Context, req *pb.RegisterNotificationTokenRequest) (*pb.ErrorOnlyResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.ErrorOnlyResponse)
 	defer handleResp(ctx, "RegisterNotificationToken", resp.Error)
 	user, validateErr := validateRegisterNotificationTokenRequest(ctx, req)
 	if validateErr != nil {
 		resp.Error = validateErr
-		return
+		return resp, nil
 	}
 	eaterC := eater.New(ctx)
 	err := eaterC.RegisterNotificationToken(user.ID, req.NotificationToken)
 	if err != nil {
 		getGRPCError(err, "failed to eater.RegisterNotificationToken")
 	}
-	return
+	return resp, nil
 }
