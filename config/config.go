@@ -179,9 +179,10 @@ func getDatastoreConfig(ctx context.Context) {
 			if err == datastore.ErrNoSuchEntity {
 				config.PhoneNumbers = []string{"14243484448"}
 				_, _ = datastore.Put(ctx, key, config)
+			} else {
+				utils.Errorf(ctx, "getDatastoreConfig get error: %+v", err)
+				log.Fatalf("Error getting Config from datastore: %+v", err)
 			}
-			utils.Errorf(ctx, "getDatastoreConfig get error: %+v", err)
-			log.Fatalf("Error getting Config from datastore: %+v", err)
 		}
 		if len(config.PhoneNumbers) == 0 {
 			config.PhoneNumbers = []string{"14243484448"}
