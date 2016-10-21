@@ -12,6 +12,8 @@ type Review struct {
 	EaterPhotoURL   string    `json:"eater_photo_url"`
 	InquiryID       int64     `json:"inquiry_id,string"`
 	ItemID          int64     `json:"item_id,string"`
+	ItemName        string    `json:"item_name"`
+	ItemPhotoURL    string    `json:"item_photo_url"`
 	MenuID          int64     `json:"menu_id,string"`
 	CreatedDateTime time.Time `json:"created_datetime"`
 	// eater review

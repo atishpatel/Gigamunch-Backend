@@ -22,10 +22,12 @@ import (
 
 const (
 	// datetimeFormat        = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
-	insertStatement       = "INSERT INTO review (cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,menu_id,rating,text) VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,'%s')"
+	insertStatement       = "INSERT INTO review (cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,rating,text) VALUES ('%s','%s','%s','%s',%d,%d,'%s','%s',%d,%d,'%s')"
 	updateStatement       = "UPDATE TABLE review (eater_name,eater_photo_url,rating,text,edited_datetime,is_edited) VALUES ('%s','%s',%d,'%s',NOW(),1) WHERE id=%d"
 	updateCookResponse    = "UPDATE TABLE review (has_response,response_created_datetime,response_text) VALUES (1,NOW(),%s) WHERE id=%d"
-	selectReviewStatement = "SELECT (id,cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text) FROM review WHERE id=%d %s"
+	selectReviewStatement = "SELECT (id,cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text) FROM review WHERE id=%d %s"
+	// TODO change to fn(created_datetime, item_id)
+	selectReviewByCookID = "SELECT (id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text) FROM review WHERE cook_id='%s' ORDER BY created_datetime DESC LIMIT %d,%d"
 	// selectCookReviews     = "SELECT "
 	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
 )
@@ -52,7 +54,7 @@ func New(ctx context.Context) *Client {
 }
 
 // Post posts or updates a review.
-func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, itemID, menuID int64, rating int32, text string) (*Review, error) {
+func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, itemID int64, itemName, itemPhotoURL string, menuID int64, rating int32, text string) (*Review, error) {
 	if rating < 1 || rating > 5 {
 		return nil, errInvalidParameter.WithMessage("A rating has to be between 1 star and 5 stars.")
 	}
@@ -65,13 +67,15 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		CookID:          cookID,
 		InquiryID:       inquiryID,
 		ItemID:          itemID,
+		ItemName:        itemName,
+		ItemPhotoURL:    itemPhotoURL,
 		MenuID:          menuID,
 		Rating:          rating,
 		Text:            text,
 	}
 	if isNewReview {
 		// insert review
-		st := fmt.Sprintf(insertStatement, cookID, user.ID, user.Name, user.PhotoURL, inquiryID, itemID, menuID, rating, text)
+		st := fmt.Sprintf(insertStatement, cookID, user.ID, user.Name, user.PhotoURL, inquiryID, itemID, itemName, itemPhotoURL, menuID, rating, text)
 		results, err := mysqlDB.Exec(st)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrapf("failed execute %s", st)
@@ -124,6 +128,45 @@ func (c *Client) PostResponse(user *types.User, id int64, text string) error {
 
 // func (c *Client) GetMultiByCookID() ([]*Review, error) {}
 
+// GetByCookID gets reviews for a cook.
+func (c *Client) GetByCookID(cookID string, itemID int64, startIndex, endIndex int32) ([]*Review, error) {
+	var reviews []*Review
+	if cookID == "" {
+		return reviews, nil
+	}
+	st := fmt.Sprintf(selectReviewByCookID, cookID, startIndex, endIndex)
+	rows, err := mysqlDB.Query(st)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrapf("failed to execute %s", st)
+	}
+	defer handleCloser(c.ctx, rows)
+	for rows.Next() {
+		review := new(Review)
+		review.CookID = cookID
+		var createdNulltime mysql.NullTime
+		var editedNulltime mysql.NullTime
+		var responseCreatedNulltime mysql.NullTime
+		err = rows.Scan(&review.ID, &review.EaterID, &review.EaterName, &review.EaterPhotoURL,
+			&review.InquiryID, &review.ItemID, &review.ItemName, &review.ItemPhotoURL, &review.MenuID, &createdNulltime,
+			&review.Rating, &review.Text, &review.IsEdited, &editedNulltime,
+			&review.HasResponse, &responseCreatedNulltime, &review.ResponseText)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
+		}
+		if createdNulltime.Valid {
+			review.CreatedDateTime = createdNulltime.Time
+		}
+		if editedNulltime.Valid {
+			review.EditedDateTime = editedNulltime.Time
+		}
+		if responseCreatedNulltime.Valid {
+			review.ResponseCreatedDateTime = responseCreatedNulltime.Time
+		}
+		reviews = append(reviews, review)
+	}
+	return reviews, nil
+}
+
 func getSelectReviewStatement(ids []int64) (string, error) {
 	if len(ids) == 0 {
 		return "", errInvalidParameter
@@ -160,7 +203,7 @@ func (c *Client) GetMultiByID(ids []int64) ([]*Review, error) {
 			var editedNulltime mysql.NullTime
 			var responseCreatedNulltime mysql.NullTime
 			err = rows.Scan(&review.ID, &review.CookID, &review.EaterID, &review.EaterName, &review.EaterPhotoURL,
-				&review.InquiryID, &review.ItemID, &review.MenuID, &createdNulltime,
+				&review.InquiryID, &review.ItemID, &review.ItemName, &review.ItemPhotoURL, &review.MenuID, &createdNulltime,
 				&review.Rating, &review.Text, &review.IsEdited, &editedNulltime,
 				&review.HasResponse, &responseCreatedNulltime, &review.ResponseText)
 			if err != nil {
