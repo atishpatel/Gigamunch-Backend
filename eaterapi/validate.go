@@ -66,3 +66,16 @@ func validateGetItemRequest(req *pb.GetItemRequest) *pb.Error {
 	}
 	return nil
 }
+
+func validateGetReviewsRequest(req *pb.GetReviewsRequest) *pb.Error {
+	if req.CookId == "" {
+		return &pb.Error{Code: errors.CodeInvalidParameter, Message: "CookID cannot be empty."}
+	}
+	if req.StartIndex < 0 {
+		return &pb.Error{Code: errors.CodeInvalidParameter, Message: "StartIndex must be greater than 0."}
+	}
+	if req.EndIndex <= req.StartIndex {
+		return &pb.Error{Code: errors.CodeInvalidParameter, Message: "EndIndex must be greater than StartIndex."}
+	}
+	return nil
+}
