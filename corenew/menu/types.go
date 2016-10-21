@@ -26,7 +26,7 @@ var colors = []string{
 
 // Menu is a menu of items from a cook.
 type Menu struct {
-	ID              int64     `json:"id" datastore:",noindex"`
+	ID              int64     `json:"id,string" datastore:",noindex"`
 	CreatedDateTime time.Time `json:"created_datetime" datastore:",noindex"`
 	// EditedDateTime  time.Time `json:"edited_datetime" datastore:",noindex"`
 	CookID string `json:"cook_id" datastore:",index"`
