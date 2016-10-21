@@ -24,20 +24,28 @@ CREATE TABLE IF NOT EXISTS `active_items` (
   INDEX(`menu_id`)
 ) ENGINE = MYISAM;
 -- create like table
-CREATE TABLE IF NOT EXISTS `like` (
+CREATE TABLE IF NOT EXISTS `likes` (
   `user_id` VARCHAR(45) NOT NULL,
   `item_id` BIGINT NOT NULL,
+  `cook_id` VARCHAR(45) NOT NULL,
+  `menu_id` BIGINT NOT NULL,
   `created_datetime` DATETIME NOT NULL,
   PRIMARY KEY (`item_id`, `user_id`)
 ) ENGINE = InnoDB;
+-- CREATE TABLE IF NOT EXISTS `like` (
+--   `user_id` VARCHAR(45) NOT NULL,
+--   `item_id` BIGINT NOT NULL,
+--   `created_datetime` DATETIME NOT NULL,
+--   PRIMARY KEY (`item_id`, `user_id`)
+-- ) ENGINE = InnoDB;
 -- create num_likes table
-CREATE TABLE IF NOT EXISTS `num_likes` (
-  `item_id` BIGINT NOT NULL PRIMARY KEY,
-  `num` BIGINT NOT NULL
-) ENGINE = InnoDB;
+-- CREATE TABLE IF NOT EXISTS `num_likes` (
+--   `item_id` BIGINT NOT NULL PRIMARY KEY,
+--   `num` BIGINT NOT NULL
+-- ) ENGINE = InnoDB;
 -- create review table
 CREATE TABLE IF NOT EXISTS `review` (
-  `id` BIGINT NOT NULL PRIMARY KEY,
+  `id` BIGINT NOT NULL PRIMARY KEY AUTOINCREMENT,
   `cook_id` VARCHAR(45) NOT NULL,
   `eater_id` VARCHAR(45) NOT NULL,
   `eater_name` VARCHAR(100) NOT NULL,
@@ -45,15 +53,15 @@ CREATE TABLE IF NOT EXISTS `review` (
   `inquiry_id` BIGINT NOT NULL,
   `item_id` BIGINT NOT NULL,
   `menu_id` BIGINT NOT NULL,
-  `created_datetime` DATETIME NOT NULL,
+  `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
   `rating` INT NOT NULL,
-  `text` VARCHAR(1200) NOT NULL,
-  `edited_datetime` DATETIME NOT NULL,
+  `text` VARCHAR(1200),
+  `edited_datetime` DATETIME NOT NULL DEFAULT NOW(),
   `is_edited` BOOLEAN NOT NULL DEFAULT 0,
   -- cook response stuff
   `has_response` BOOLEAN NOT NULL DEFAULT 0,
-  `response_created_datetime` DATETIME NOT NULL,
-  `response_text` VARCHAR(1200) NOT NULL,
+  `response_created_datetime` DATETIME,
+  `response_text` VARCHAR(1200),
   INDEX(`item_id`),
   INDEX(`created_datetime`)
 ) ENGINE = InnoDB;
