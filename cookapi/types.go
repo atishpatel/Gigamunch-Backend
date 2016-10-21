@@ -23,7 +23,6 @@ type Item struct {
 
 // Menu is a Menu.
 type Menu struct {
-	ID int64 `json:"id,string"`
 	menu.Menu
 }
 

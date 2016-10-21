@@ -25,7 +25,7 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMe
 		return resp, nil
 	}
 	menuC := menu.New(ctx)
-	menuIDs, menus, err := menuC.GetCookMenus(user.ID)
+	menus, err := menuC.GetCookMenus(user.ID)
 	if err != nil {
 		resp.Err = errors.Wrap("failed to menuC.GetCookMenus", err)
 		return resp, nil
@@ -39,12 +39,9 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMe
 	// get likes
 	likes := getLikes(ctx, itemIDs)
 	// set menus and items
-	for i := range menuIDs {
+	for i := range menus {
 		menu := MenuWithItems{
-			Menu: Menu{
-				ID:   menuIDs[i],
-				Menu: menus[i],
-			},
+			Menu: menus[i],
 		}
 		for j := len(itemIDs) - 1; j >= 0; j-- {
 			if items[j].MenuID == menu.ID {

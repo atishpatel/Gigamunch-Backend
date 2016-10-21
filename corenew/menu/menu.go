@@ -58,12 +58,12 @@ func (c *Client) GetMulti(ids []int64) (map[int64]*Menu, error) {
 }
 
 // GetCookMenus returns an array of all the Menus for a Cook.
-func (c *Client) GetCookMenus(cookID string) ([]int64, []Menu, error) {
-	ids, menus, err := getCookMenus(c.ctx, cookID)
+func (c *Client) GetCookMenus(cookID string) ([]Menu, error) {
+	menus, err := getCookMenus(c.ctx, cookID)
 	if err != nil {
-		return nil, nil, errDatastore.WithError(err).Wrap("cannot getCookMenus")
+		return nil, errDatastore.WithError(err).Wrap("cannot getCookMenus")
 	}
-	return ids, menus, nil
+	return menus, nil
 }
 
 // Save saves the Menu.
