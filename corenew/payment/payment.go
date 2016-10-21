@@ -1,10 +1,12 @@
 package payment
 
 import (
-	"github.com/atishpatel/braintree-go"
+	"math"
+
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/braintree-go"
 	"golang.org/x/net/context"
 
 	"google.golang.org/appengine/urlfetch"
@@ -16,6 +18,16 @@ var (
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was something went wrong."}
 	btConfig            config.BTConfig
 )
+
+// GetPricePerServing returns the price per serving from cook price per serving.
+func GetPricePerServing(cookPPS float32) float32 {
+	return float32(math.Ceil(float64(cookPPS) * 1.2))
+}
+
+// GetTaxPrice returns the tax percentage.
+func GetTaxPrice(pricePerServing float32, lat, long float64) float32 {
+	return 7.5 * pricePerServing
+}
 
 // Client is the payment client.  A new client should be created for each context.
 type Client struct {

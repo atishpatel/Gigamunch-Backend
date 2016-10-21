@@ -5,6 +5,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
 
 	"github.com/golang/protobuf/ptypes"
@@ -76,13 +77,14 @@ func getPBCook(cook *cook.Cook, distance float32, exchangeOptions []*pb.Exchange
 
 // TODO add reviews
 func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, distance float32, exchangeOptions []*pb.ExchangeOption, cookLikes int32, reviews []*review.Review) *pb.Item {
+	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
 	i := &pb.Item{
 		Id:              item.ID,
 		MenuId:          item.MenuID,
 		Name:            item.Title,
 		Description:     item.Description,
 		DietaryConcerns: int64(item.DietaryConcerns),
-		PricePerServing: item.CookPricePerServing * 1.2, // TODO move out of here
+		PricePerServing: pricePerServing,
 		MinServings:     item.MinServings,
 		MaxServings:     item.MaxServings,
 		Images:          item.Photos,
@@ -93,8 +95,9 @@ func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, 
 		Ingredients:     item.Ingredients,
 		PriceInfo: &pb.PriceInfo{
 			CookPricePerServing:  item.CookPricePerServing,
-			ServiceFeePercentage: .2,
-			TaxPercentage:        7.25,
+			ServiceFeePrice:      pricePerServing - item.CookPricePerServing,
+			ServiceFeePercentage: pricePerServing / item.CookPricePerServing,
+			TaxPrice:             payment.GetTaxPrice(pricePerServing, cook.Address.Latitude, cook.Address.Longitude),
 		},
 		Cook: getPBCook(cook, distance, exchangeOptions, cookLikes),
 	}
@@ -104,13 +107,14 @@ func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, 
 }
 
 func getPBBaseItem(item *item.Item, numLikes int32, hasLiked bool) *pb.BaseItem {
+	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
 	i := &pb.BaseItem{
 		Id:              item.ID,
 		MenuId:          item.MenuID,
 		Name:            item.Title,
 		Description:     item.Description,
 		DietaryConcerns: int64(item.DietaryConcerns),
-		PricePerServing: item.CookPricePerServing * 1.2, // TODO move out of here
+		PricePerServing: pricePerServing,
 		MinServings:     item.MinServings,
 		MaxServings:     item.MaxServings,
 		Images:          item.Photos,
