@@ -11,6 +11,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
@@ -39,8 +40,15 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 		c, goErr = cookC.Get(item.CookID)
 		cooksErrChan <- goErr
 	}()
-	// TODO get reviews
-
+	// get reviews
+	var reviews []*review.Review
+	reviewErrChan := make(chan error, 1)
+	go func() {
+		var goErr error
+		reviewC := review.New(ctx)
+		reviews, goErr = reviewC.GetByCookID(item.CookID, item.ID, 0, 5)
+		reviewErrChan <- goErr
+	}()
 	// get likes
 	var likes []bool
 	var numLikes []int32
@@ -60,7 +68,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 		likeErrChan <- goErr
 	}()
 	// handle errors
-	err = processErrorChans(cooksErrChan, likeErrChan)
+	err = processErrorChans(cooksErrChan, reviewErrChan, likeErrChan)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to cook.Get or like.LikesItems")
 		return resp, nil
@@ -74,7 +82,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 		return resp, nil
 	}
 	// TODO add exchangeoptions and cook likes
-	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, nil, 0)
+	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, nil, 0, reviews)
 	return resp, nil
 }
 

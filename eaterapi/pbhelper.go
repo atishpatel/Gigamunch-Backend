@@ -5,6 +5,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
 
 	"github.com/golang/protobuf/ptypes"
 )
@@ -74,7 +75,7 @@ func getPBCook(cook *cook.Cook, distance float32, exchangeOptions []*pb.Exchange
 }
 
 // TODO add reviews
-func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, distance float32, exchangeOptions []*pb.ExchangeOption, cookLikes int32) *pb.Item {
+func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, distance float32, exchangeOptions []*pb.ExchangeOption, cookLikes int32, reviews []*review.Review) *pb.Item {
 	i := &pb.Item{
 		Id:              item.ID,
 		MenuId:          item.MenuID,
@@ -98,6 +99,7 @@ func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, 
 		Cook: getPBCook(cook, distance, exchangeOptions, cookLikes),
 	}
 	i.CreatedDatetime, _ = ptypes.TimestampProto(item.CreatedDateTime)
+	i.Reviews = getPBReviews(reviews)
 	return i
 }
 
@@ -121,10 +123,35 @@ func getPBBaseItem(item *item.Item, numLikes int32, hasLiked bool) *pb.BaseItem 
 	return i
 }
 
-// func getPBReviews(reviews []review.Review) []*pb.Review {
-// 	r := make([]*pb.Review, len(reviews))
-// 	for i := range reviews {
+func getPBReviews(reviews []*review.Review) []*pb.Review {
+	r := make([]*pb.Review, len(reviews))
+	for i := range reviews {
+		r[i] = getPBReview(reviews[i])
+	}
+	return r
+}
 
-// 	}
-// 	return r
-// }
+func getPBReview(review *review.Review) *pb.Review {
+	createdTimestamp, _ := ptypes.TimestampProto(review.CreatedDateTime)
+	editedTimestamp, _ := ptypes.TimestampProto(review.EditedDateTime)
+	responseCreatedTimestamp, _ := ptypes.TimestampProto(review.ResponseCreatedDateTime)
+	return &pb.Review{
+		Id:                      review.ID,
+		CookId:                  review.CookID,
+		EaterId:                 review.EaterID,
+		InquiryId:               review.InquiryID,
+		ItemId:                  review.ItemID,
+		EaterName:               review.EaterName,
+		EaterImage:              review.EaterPhotoURL,
+		CreatedDatetime:         createdTimestamp,
+		IsEdited:                review.IsEdited,
+		EditedDatetime:          editedTimestamp,
+		Rating:                  review.Rating,
+		Text:                    review.Text,
+		HasResponse:             review.HasResponse,
+		ResponseCreatedDatetime: responseCreatedTimestamp,
+		ResponseText:            review.ResponseText,
+		ItemImage:               review.ItemPhotoURL,
+		ItemName:                review.ItemName,
+	}
+}
