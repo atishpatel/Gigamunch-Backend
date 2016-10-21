@@ -28,7 +28,7 @@ type Menu struct {
 
 // MenuWithItems is a Menu with all it's Items.
 type MenuWithItems struct {
-	Menu
+	menu.Menu
 	Items []Item `json:"items"`
 }
 

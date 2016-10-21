@@ -99,12 +99,11 @@ func (service *Service) SaveMenu(ctx context.Context, req *SaveMenuReq) (*MenuRe
 
 	// save menu or create new menu
 	menuC := menu.New(ctx)
-	menuID, menu, err := menuC.Save(user, req.Menu.ID, req.Menu.CookID, req.Menu.Name, req.Menu.Color)
+	menu, err := menuC.Save(user, req.Menu.ID, req.Menu.CookID, req.Menu.Name, req.Menu.Color)
 	if err != nil {
 		resp.Err = errors.Wrap("failed to menuC.Save", err)
 		return resp, nil
 	}
-	resp.Menu.ID = menuID
 	resp.Menu.Menu = *menu
 	return resp, nil
 }

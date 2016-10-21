@@ -50,7 +50,10 @@ func (service *Service) SaveItem(ctx context.Context, req *SaveItemReq) (*ItemRe
 	if menuID == 0 {
 		// create new menu
 		menuC := menu.New(ctx)
-		menuID, _, err = menuC.Save(user, menuID, user.ID, req.Menu.Name, req.Menu.Color)
+		var menu *menu.Menu
+		menu, err = menuC.Save(user, menuID, user.ID, req.Menu.Name, req.Menu.Color)
+		menuID = menu.ID
+		menu = nil
 		if err != nil {
 			resp.Err = errors.Wrap("failed to menuC.Save", err)
 			return resp, nil
