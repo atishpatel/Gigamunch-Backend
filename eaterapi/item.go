@@ -6,10 +6,10 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
 	"github.com/atishpatel/Gigamunch-Backend/types"

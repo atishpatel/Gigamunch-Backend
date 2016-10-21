@@ -9,7 +9,7 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/notification"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/notification"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"

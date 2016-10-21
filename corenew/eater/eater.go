@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/maps"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
