@@ -50,7 +50,7 @@ if [[ $1 == "deploy" ]]; then
   if [[ $* == *eater* ]]; then
     echo "Deploying eater:"
     cd eaterapi
-    # cat eaterapi/app.yaml.template | sed 's/PROJECT_ID/$project/g' > eaterapi/app.yaml
+    cat eaterapi/app.yaml.template | sed 's/PROJECT_ID/$project/g' > eaterapi/app.yaml
     aedeploy gcloud app deploy --project=$project --version=1
     cd ..
   fi

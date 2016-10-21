@@ -3,8 +3,8 @@ runtime: go
 vm: true
 threadsafe: true
 
-# beta_settings:
-#     cloud_sql_instances: gigamunch-omninexus-dev:us-central1:gigasqldb
+beta_settings:
+    cloud_sql_instances: PROJECT_ID:us-central1:gigasqldb
 
 health_check:
     enable_health_check: False
