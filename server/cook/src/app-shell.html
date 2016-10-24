@@ -104,6 +104,22 @@
       .full-screen-dialog-content {
         padding: 24px;
       }
+      
+      #errorDialogDetails {
+        color: var(--secondary-text-color);
+      }
+      
+      #notificationDialog paper-button,
+      #errorDialog paper-button {
+        color: var(--primary-color);
+        background-color: white;
+      }
+      
+      #notificationDialog .buttons,
+      #errorDialog .buttons {
+        margin-top: 20px;
+        min-width: 300px;
+      }
 
     </style>
     <app-location route="{{route}}"></app-location>
@@ -115,6 +131,23 @@
     <iron-media-query query="max-width: 767px"
                       query-matches="{{smallScreen}}">
     </iron-media-query>
+    <paper-dialog id="notificationDialog"
+                  modal>
+      <div id="notificationDialogText"></div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="errorDialog"
+                  modal>
+      <h1 id="errorDialogTitle">Woops! Something went wrong! :(</h1>
+      <div>We're sorry for the inconvenience. Try again in a few minutes. If the issue persist, please send a screen shot of this to atish@gigamunchapp.com. Our developer, Atish, will work on fixing it ASAP! </div>
+      <div id="errorDialogText"></div>
+      <div id="errorDialogDetails"></div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
     <paper-toast id="toast"></paper-toast>
     <paper-dialog id="itemDialog"
                   class="full-screen-dialog">
@@ -240,6 +273,7 @@
         'deactivateitem': 'deactivateItem',
         'onboardfinished': 'onboardFinished',
         'toast': 'toastEvent',
+        'error': 'errorEvent',
       },
       activateItem: function(e, detail) {
         var itemID = detail.id;
@@ -265,6 +299,7 @@
         }
         this.service.saveMenu(menu, function(menu, err) {
           if (err.code !== 0) {
+            this.fire('error', err)
             return;
           }
           this.set('item.menu_id', menu.id);
@@ -355,6 +390,7 @@
           route += path;
         }
         this.set('route.path', this.baseurl + route);
+        this.page = path;
       },
       toastEvent: function(e, detail) {
         var text = detail.text;
@@ -364,6 +400,34 @@
             text: text,
             duration: duration
           });
+        }
+      },
+      errorEvent: function(e, error) {
+        var text;
+        var details;
+        switch (typeof(error)) {
+          case 'object':
+            if (typeof(error) === 'string') {
+              text = error;
+            } else {
+              text = error.message;
+              if (error.detail !== undefined && error.detail !== '') {
+                details += error.detail;
+              }
+            }
+            break;
+          default:
+            text = error.toString();
+        }
+        if (error.notification === true || (error !== undefined && error.code !== undefined && error.code === 400)) {
+          this.$.notificationDialogText.innerHTML = text;
+          this.$.notificationDialog.open();
+        } else {
+          if (details !== '') {
+            this.$.errorDialogDetails.innerHTML = 'Detailed gibberish:' + details;
+          }
+          this.$.errorDialogText.innerHTML = text;
+          this.$.errorDialog.open();
         }
       },
     });

@@ -196,7 +196,7 @@
                        value="{{item.max_servings}}"
                        type="number"
                        min="4"
-                       max="40"
+                       max="50"
                        required
                        auto-validate>
           </paper-input>
@@ -278,7 +278,7 @@
           this.set('item.min_servings', '1');
         }
         if (this.item.max_servings === undefined) {
-          this.set('item.max_servings', '20');
+          this.set('item.max_servings', '30');
         }
         if (this.item.id === undefined || this.item.id === '' || this.item.id === '0') {
           this.title = 'Create Item';
@@ -300,18 +300,10 @@
         this.service.saveItem(this.item, function(item, err) {
           this.deactivateSpinner();
           if (err.code !== 0) {
-            var d;
             if (err.code === 400) {
-              d = {
-                notification: true,
-                error: err.message,
-              };
-            } else {
-              d = {
-                error: err,
-              };
+              err.notification = true;
             }
-            this.fire('error', d);
+            this.fire('error', err);
             return;
           }
           ga('send', 'event', 'item', 'created');
