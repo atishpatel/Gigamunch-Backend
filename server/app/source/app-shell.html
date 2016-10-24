@@ -954,6 +954,7 @@
         }
         // set text to register
         this.$.signUp.open();
+        return;
       },
       login: function() {
         if (this.user && this.user.id) {
@@ -961,6 +962,7 @@
         }
         // set text to login
         this.$.signUp.open();
+        return;
       },
       ready: function() {
         this.updateIsUserLoggedIn();
@@ -1013,7 +1015,7 @@
       // If the URL is outside this app, it causes the browser to go to that app.
       routePathChanged: function(path) {
         // ** all pages must be in this list
-        var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about'];
+        var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell'];
         var found = false;
         for (var i = 0; i < pages.length; i++) {
           if (path === pages[i]) {

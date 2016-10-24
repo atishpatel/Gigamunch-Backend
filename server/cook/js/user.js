@@ -30,7 +30,7 @@ var User = function () {
         return;
       }
       this.token = token;
-      var userString = token.split('.')[1];
+      var userString = token.split('.')[1].replace(/\s/g, '');
       var jwt = JSON.parse(window.atob(userString));
       for (var k in jwt) {
         if (k !== '__proto__') {

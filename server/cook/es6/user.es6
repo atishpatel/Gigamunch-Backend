@@ -18,7 +18,7 @@ class User {
       return;
     }
     this.token = token;
-    const userString = token.split('.')[1];
+    const userString = token.split('.')[1].replace(/\s/g, '');
     const jwt = JSON.parse(window.atob(userString));
     for (const k in jwt) {
       if (k !== '__proto__') {
