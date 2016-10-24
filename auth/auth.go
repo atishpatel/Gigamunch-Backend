@@ -131,10 +131,7 @@ func createSessionToken(ctx context.Context, id, name, email, providerID, photoU
 	userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: token.JTI, Expire: token.Expire})
 	err = putUserSessions(ctx, token.User.ID, userSessions)
 	if err != nil {
-		return nil, errors.ErrorWithCode{
-			Code:    errors.CodeInternalServerErr,
-			Message: fmt.Sprintf("error put UserSession(%s) err: %+v", id, err),
-		}
+		return nil, errDatastore.WithError(err).Wrapf("failed to putUserSession for userID(%s)", id)
 	}
 	return token, nil
 }
