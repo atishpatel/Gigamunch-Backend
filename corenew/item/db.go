@@ -116,6 +116,9 @@ func getMulti(ctx context.Context, ids []int64) ([]Item, error) {
 	if err != nil && err.Error() != "(0 errors)" { // GetMulti always returns appengine.MultiError which is stupid
 		return nil, err
 	}
+	for i := range dst {
+		dst[i].ID = ids[i]
+	}
 	return dst, nil
 }
 
