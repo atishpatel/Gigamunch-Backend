@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `active_items` (
   INDEX(`longitude`),
   INDEX(`created_datetime`),
   INDEX(`menu_id`)
-) ENGINE = MYISAM;
+) ENGINE = MYISAM CHARACTER SET utf8mb4;
 -- create like table
 CREATE TABLE IF NOT EXISTS `likes` (
   `user_id` VARCHAR(45) NOT NULL,
@@ -45,16 +45,18 @@ CREATE TABLE IF NOT EXISTS `likes` (
 -- ) ENGINE = InnoDB;
 -- create review table
 CREATE TABLE IF NOT EXISTS `review` (
-  `id` BIGINT NOT NULL PRIMARY KEY AUTOINCREMENT,
+  `id` BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `cook_id` VARCHAR(45) NOT NULL,
   `eater_id` VARCHAR(45) NOT NULL,
   `eater_name` VARCHAR(100) NOT NULL,
-  `eater_photo_url` VARCHAR(200) NOT NULL,
+  `eater_photo_url` VARCHAR(350) NOT NULL,
   `inquiry_id` BIGINT NOT NULL,
   `item_id` BIGINT NOT NULL,
+  `item_photo_url` VARCHAR(350) NOT NULL,
+  `item_name` VARCHAR(100) NOT NULL,
   `menu_id` BIGINT NOT NULL,
   `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
-  `rating` INT NOT NULL,
+  `rating` TINYINT NOT NULL,
   `text` VARCHAR(1200),
   `edited_datetime` DATETIME NOT NULL DEFAULT NOW(),
   `is_edited` BOOLEAN NOT NULL DEFAULT 0,
@@ -64,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `review` (
   `response_text` VARCHAR(1200),
   INDEX(`item_id`),
   INDEX(`created_datetime`)
-) ENGINE = InnoDB;
+) ENGINE = InnoDB CHARACTER SET utf8mb4;
 -- create completed_inquries table 
 CREATE TABLE IF NOT EXISTS `completed_inquries` (
   `id` BIGINT NOT NULL PRIMARY KEY,
