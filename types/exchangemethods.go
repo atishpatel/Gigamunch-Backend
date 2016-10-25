@@ -44,3 +44,16 @@ func (em *ExchangeMethods) SetChefDelivery(x bool) {
 func (em ExchangeMethods) Equal(em2 ExchangeMethods) bool {
 	return int32(em) == int32(em2)
 }
+
+func (em ExchangeMethods) String() string {
+	v := int32(em)
+	switch v {
+	case 1:
+		return "Pickup"
+	case 2:
+		return "Cook Delivery"
+	case 4:
+		return "Gigamunch Delivery"
+	}
+	return ""
+}

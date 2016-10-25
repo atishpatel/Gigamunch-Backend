@@ -3,10 +3,12 @@ package main
 import (
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 
 	"github.com/golang/protobuf/ptypes"
 )
@@ -157,5 +159,96 @@ func getPBReview(review *review.Review) *pb.Review {
 		ResponseText:            review.ResponseText,
 		ItemImage:               review.ItemPhotoURL,
 		ItemName:                review.ItemName,
+	}
+}
+
+func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string) *pb.Inquiry {
+	createdDatetime, _ := ptypes.TimestampProto(inq.CreatedDateTime)
+	expectedExchangeDatetime, _ := ptypes.TimestampProto(inq.ExpectedExchangeDateTime)
+	return &pb.Inquiry{
+		Id:                    inq.ID,
+		CookId:                inq.CookID,
+		EaterId:               inq.EaterID,
+		ReviewId:              inq.ReviewID,
+		ItemId:                inq.ItemID,
+		BtTransactionId:       inq.BTTransactionID,
+		BtRefundTransactionId: inq.BTRefundTransactionID,
+		CreatedDatetime:       createdDatetime,
+		Item: &pb.InquiryItem{
+			Name:            inq.Item.Name,
+			Description:     inq.Item.Description,
+			DietaryConcerns: int64(inq.Item.DietaryConcerns),
+			Images:          inq.Item.Photos,
+			Ingredients:     inq.Item.Ingredients,
+		},
+		ExpectedExchangeDatetime: expectedExchangeDatetime,
+		EaterImage:               inq.EaterPhotoURL,
+		EaterName:                inq.EaterName,
+		CookName:                 cookName,
+		CookImage:                cookImage,
+		Servings:                 inq.Servings,
+		TotalPriceInfo: &pb.TotalPriceInfo{
+			CookPricePerServing: inq.CookPricePerServing,
+			TotalCookPrice:      inq.PaymentInfo.CookPrice,
+			ExchangePrice:       inq.PaymentInfo.ExchangePrice,
+			TaxPrice:            inq.PaymentInfo.TaxPrice,
+			ServiceFeePrice:     inq.PaymentInfo.ServiceFee,
+			TotalPrice:          inq.PaymentInfo.TotalPrice,
+		},
+		ExchangePlanInfo: &pb.ExchangePlanInfo{
+			MethodName:   inq.ExchangeMethod.String(),
+			EaterAddress: getPBAddress(&inq.ExchangePlanInfo.EaterAddress, false),
+			CookAddress:  getPBAddress(&inq.ExchangePlanInfo.EaterAddress, false),
+			Distance:     inq.ExchangePlanInfo.Distance,
+			Duration:     int32(inq.ExchangePlanInfo.Duration),
+		},
+		State:       inq.State,
+		EaterAction: inq.EaterAction,
+		CookAction:  inq.CookAction,
+		HasIssue:    inq.Issue,
+	}
+}
+
+func getPBInquiries(inqs []*inquiry.Inquiry, cookNames, cookImages []string) []*pb.Inquiry {
+	l := len(inqs)
+	is := make([]*pb.Inquiry, l)
+	if len(cookNames) != l {
+		cookNames = make([]string, l)
+	}
+	if len(cookImages) != l {
+		cookImages = make([]string, l)
+	}
+	for i := range inqs {
+		is[i] = getPBInquiry(inqs[i], cookNames[i], cookImages[i])
+	}
+	return is
+}
+
+func getPBAddress(addr *types.Address, selected bool) *pb.Address {
+	return &pb.Address{
+		Country:    addr.Country,
+		State:      addr.State,
+		City:       addr.City,
+		Zip:        addr.Zip,
+		Street:     addr.Street,
+		UnitNumber: addr.APT,
+		Latitude:   addr.Latitude,
+		Longitude:  addr.Longitude,
+		IsSelected: selected,
+	}
+}
+
+func getAddress(addr *pb.Address) *types.Address {
+	return &types.Address{
+		Country: addr.Country,
+		State:   addr.State,
+		City:    addr.City,
+		Zip:     addr.Zip,
+		Street:  addr.Street,
+		APT:     addr.UnitNumber,
+		GeoPoint: types.GeoPoint{
+			Latitude:  addr.Latitude,
+			Longitude: addr.Longitude,
+		},
 	}
 }

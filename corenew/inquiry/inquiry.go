@@ -31,10 +31,13 @@ func New(ctx context.Context) *Client {
 }
 
 // Get gets the inquiry by ID.
-func (c *Client) Get(id int64) (*Inquiry, error) {
+func (c *Client) Get(user *types.User, id int64) (*Inquiry, error) {
 	inquiry, err := get(c.ctx, id)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to get inquiry(%d)", id)
+	}
+	if !user.IsAdmin() && inquiry.CookID != user.ID && inquiry.EaterID != user.ID {
+		return nil, errUnauthorized.WithMessage("User does not have access to Inquiry.")
 	}
 	return inquiry, nil
 }
@@ -129,10 +132,6 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	if err != nil {
 		return nil, errors.Wrap("failed to paymentC.StartSale", err)
 	}
-	var itemPhoto string
-	if len(item.Photos) > 0 {
-		itemPhoto = item.Photos[0]
-	}
 	// get cheap estimate for distance and duration
 	distance := eaterAddress.GreatCircleDistance(cook.Address.GeoPoint)
 	duration := eaterAddress.EstimatedDuration(cook.Address.GeoPoint)
@@ -146,7 +145,7 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		Item: ItemInfo{
 			Name:            item.Title,
 			Description:     item.Description,
-			PhotoURL:        itemPhoto,
+			Photos:          item.Photos,
 			Ingredients:     item.Ingredients,
 			DietaryConcerns: item.DietaryConcerns,
 		},
@@ -158,13 +157,13 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		CookPricePerServing:      item.CookPricePerServing,
 		Servings:                 numServings,
 		PaymentInfo: PaymentInfo{
-			Price:         totalCookPrice,
+			CookPrice:     totalCookPrice,
 			ExchangePrice: exchangePrice,
 			TaxPrice:      totalTaxPrice,
 			ServiceFee:    totalGigaFee,
 			TotalPrice:    totalPrice,
 		},
-		ExchangeMethod: int32(exchangeMethod),
+		ExchangeMethod: exchangeMethod,
 		ExchangePlanInfo: ExchangePlanInfo{
 			EaterAddress: *eaterAddress,
 			CookAddress:  cook.Address,
@@ -190,7 +189,7 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to get Inquiry(%d)", id)
 	}
-	if !user.IsAdmin() || user.ID != inquiry.CookID {
+	if !user.IsAdmin() && user.ID != inquiry.CookID {
 		return nil, errUnauthorized.WithMessage("You are not the cook of the Inquiry.")
 	}
 	if inquiry.State != State.Pending {
@@ -221,7 +220,7 @@ func (c *Client) CookDecline(user *types.User, id int64) (*Inquiry, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to get Inquiry(%d)", id)
 	}
-	if !user.IsAdmin() || user.ID != inquiry.CookID {
+	if !user.IsAdmin() && user.ID != inquiry.CookID {
 		return nil, errUnauthorized.WithMessage("You are not the cook of the Inquiry.")
 	}
 	if inquiry.State != State.Pending {
@@ -258,7 +257,7 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to get Inquiry(%d)", id)
 	}
-	if !user.IsAdmin() || user.ID != inquiry.EaterID {
+	if !user.IsAdmin() && user.ID != inquiry.EaterID {
 		return nil, errUnauthorized.WithMessage("You are not part of the Inquiry.")
 	}
 	if inquiry.State != State.Pending {
