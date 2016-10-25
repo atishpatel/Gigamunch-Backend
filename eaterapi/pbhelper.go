@@ -97,7 +97,7 @@ func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, 
 			CookPricePerServing:  item.CookPricePerServing,
 			ServiceFeePrice:      pricePerServing - item.CookPricePerServing,
 			ServiceFeePercentage: pricePerServing / item.CookPricePerServing,
-			TaxPrice:             payment.GetTaxPrice(pricePerServing, cook.Address.Latitude, cook.Address.Longitude),
+			TaxPercentage:        payment.GetTaxPercentage(cook.Address.Latitude, cook.Address.Longitude),
 		},
 		Cook: getPBCook(cook, distance, exchangeOptions, cookLikes),
 	}

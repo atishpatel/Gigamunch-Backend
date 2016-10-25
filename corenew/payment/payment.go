@@ -24,9 +24,9 @@ func GetPricePerServing(cookPPS float32) float32 {
 	return float32(math.Ceil(float64(cookPPS) * 1.2))
 }
 
-// GetTaxPrice returns the tax percentage.
-func GetTaxPrice(pricePerServing float32, lat, long float64) float32 {
-	return 7.5 * pricePerServing
+// GetTaxPercentage returns the tax percentage.
+func GetTaxPercentage(lat, long float64) float32 {
+	return 7.5
 }
 
 // Client is the payment client.  A new client should be created for each context.
@@ -36,8 +36,8 @@ type Client struct {
 }
 
 // New returns a new Client. A new client should be created for each context.
-func New(ctx context.Context) Client {
-	return Client{
+func New(ctx context.Context) *Client {
+	return &Client{
 		ctx: ctx,
 		bt:  getBTClient(ctx),
 	}
@@ -45,7 +45,7 @@ func New(ctx context.Context) Client {
 
 // GenerateToken generates a token with a customerID
 // customerID must be 36 long.
-func (c Client) GenerateToken(customerID string) (string, error) {
+func (c *Client) GenerateToken(customerID string) (string, error) {
 	if len(customerID) != 36 {
 		return "", errInvalidParameter.Wrap("customerID is invalid")
 	}
@@ -72,7 +72,7 @@ func (c Client) GenerateToken(customerID string) (string, error) {
 }
 
 // ReleaseSale release a sale with the SaleID
-func (c Client) ReleaseSale(id string) (string, error) {
+func (c *Client) ReleaseSale(id string) (string, error) {
 	t, err := c.bt.Transaction().ReleaseFromEscrow(id)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot release transaction(%d) from escrow", id)
@@ -84,7 +84,7 @@ func (c Client) ReleaseSale(id string) (string, error) {
 }
 
 // CancelRelease cancels release a sale with the SaleID
-func (c Client) CancelRelease(id string) (string, error) {
+func (c *Client) CancelRelease(id string) (string, error) {
 	t, err := c.bt.Transaction().CancelRelease(id)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot cancel release transaction(%d) from escrow", id)
@@ -95,7 +95,7 @@ func (c Client) CancelRelease(id string) (string, error) {
 	return t.Id, nil
 }
 
-func (c Client) getTransactionStatus(id string) (string, error) {
+func (c *Client) getTransactionStatus(id string) (string, error) {
 	t, err := c.bt.Transaction().Find(id)
 	if err != nil {
 		return "", errBT.WithError(err)
@@ -104,7 +104,7 @@ func (c Client) getTransactionStatus(id string) (string, error) {
 }
 
 // RefundSale voids a sale with the SaleID
-func (c Client) RefundSale(id string) (string, error) {
+func (c *Client) RefundSale(id string) (string, error) {
 	status, err := c.getTransactionStatus(id)
 	if err != nil {
 		return "", errors.Wrap("cannot find sale", err)
@@ -121,8 +121,17 @@ func (c Client) RefundSale(id string) (string, error) {
 	return t.Id, nil
 }
 
-// MakeSale makes an escrow sale
-func (c Client) MakeSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {
+// SubmitForSettlement submits a Sale for settlement with the SaleID.
+func (c *Client) SubmitForSettlement(id string) error {
+	_, err := c.bt.Transaction().SubmitForSettlement(id)
+	if err != nil {
+		return errBT.WithError(err)
+	}
+	return nil
+}
+
+// StartSale makes an escrow sale
+func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {
 	t := &braintree.Transaction{
 		Type:               "sale",
 		MerchantAccountId:  subMerchantID,
@@ -130,7 +139,7 @@ func (c Client) MakeSale(subMerchantID, nonce string, amount, serviceFee float32
 		Amount:             getBTDecimal(amount),
 		ServiceFeeAmount:   getBTDecimal(serviceFee),
 		Options: &braintree.TransactionOptions{
-			SubmitForSettlement: true,
+			SubmitForSettlement: false,
 			HoldInEscrow:        true,
 		},
 	}
