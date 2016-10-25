@@ -30,6 +30,21 @@ func New(ctx context.Context) *Client {
 	return &Client{ctx: ctx}
 }
 
+// GetMultiNamesAndPhotos returns an array of names and photos for the CookIDs.
+func (c *Client) GetMultiNamesAndPhotos(ids []string) ([]string, []string, error) {
+	cooks, err := getMulti(c.ctx, ids)
+	if err != nil {
+		return nil, nil, errDatastore.WithError(err).Wrapf("failed to getMulti menu ids: %v", ids)
+	}
+	names := make([]string, len(cooks))
+	photos := make([]string, len(cooks))
+	for i := range cooks {
+		names[i] = cooks[i].Name
+		photos[i] = cooks[i].PhotoURL
+	}
+	return names, photos, nil
+}
+
 // Get gets the cook.
 func (c *Client) Get(id string) (*Cook, error) {
 	cook, err := get(c.ctx, id)
