@@ -18,6 +18,7 @@ type Item struct {
 	Ingredients         []string        `json:"ingredients" datastore:",noindex"`
 	Photos              []string        `json:"photos" datastore:",noindex"`
 	CookPricePerServing float32         `json:"cook_price_per_serving" datastore:",noindex"`
+	ServingDescription  string          `json:"serving_description" datastore:",noindex"`
 	MaxServings         int32           `json:"max_servings" datastore:",noindex"`
 	MinServings         int32           `json:"min_servings" datastore:",noindex"`
 	// Stats
