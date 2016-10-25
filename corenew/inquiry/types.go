@@ -48,11 +48,12 @@ type PaymentInfo struct {
 
 // ItemInfo contains information about the Item related to an Inquiry.
 type ItemInfo struct {
-	Name            string               `json:"name" datastore:",noindex"`
-	Description     string               `json:"description" datastore:",noindex"`
-	Photos          []string             `json:"photos" datastore:",noindex"`
-	Ingredients     []string             `json:"ingredients" datastore:",noindex"`
-	DietaryConcerns item.DietaryConcerns `json:"dietary_concerns" datastore:",noindex"`
+	Name               string               `json:"name" datastore:",noindex"`
+	Description        string               `json:"description" datastore:",noindex"`
+	Photos             []string             `json:"photos" datastore:",noindex"`
+	Ingredients        []string             `json:"ingredients" datastore:",noindex"`
+	DietaryConcerns    item.DietaryConcerns `json:"dietary_concerns" datastore:",noindex"`
+	ServingDescription string               `json:"serving_description" datastore:",noindex"`
 }
 
 // ExchangePlanInfo is the basic information need for an exchange plan.
