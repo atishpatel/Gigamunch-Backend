@@ -24,6 +24,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 		resp.Error = validateErr
 		return resp, nil
 	}
+	likeC := like.New(ctx)
 	// get item
 	itemC := item.New(ctx)
 	item, err := itemC.Get(req.ItemId)
@@ -63,26 +64,34 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 			}
 		}
 		var goErr error
-		likeC := like.New(ctx)
 		likes, numLikes, goErr = likeC.LikesItems(userID, []int64{item.ID})
 		likeErrChan <- goErr
 	}()
+	// get cook likes
+	var cookLikes int32
+	cookLikeErrChan := make(chan error, 1)
+	go func() {
+		var goErr error
+		cookLikes, goErr = likeC.GetNumCookLikes(item.CookID)
+		cookLikeErrChan <- goErr
+	}()
 	// handle errors
-	err = processErrorChans(cooksErrChan, reviewErrChan, likeErrChan)
+	err = processErrorChans(cooksErrChan, reviewErrChan, likeErrChan, cookLikeErrChan)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to cook.Get or like.LikesItems")
 		return resp, nil
 	}
-	// get distance
-	cookPoint := c.Address.GeoPoint
 	eaterPoint := types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
+	cookPoint := c.Address.GeoPoint
+	// get distance
 	distance, _, err := maps.GetDistance(ctx, cookPoint, eaterPoint)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to maps.GetDistance")
 		return resp, nil
 	}
-	// TODO add exchangeoptions and cook likes
-	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, nil, 0, reviews)
+	// get exchangeoptions
+	ems := types.GetExchangeMethods(cookPoint, c.DeliveryRange, c.DeliveryPrice, eaterPoint)
+	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, ems, cookLikes, reviews)
 	return resp, nil
 }
 
@@ -162,10 +171,14 @@ func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.GetF
 		}
 	}
 	// set menus
+	eaterPoint := types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
 	resp.Menus = make([]*pb.Menu, len(menus))
 	for i, v := range menuOrder {
-		// TODO add cookDistance and exchangeoptions
-		resp.Menus[i] = getPBMenu(menus[v], cooks[menus[v].CookID], 0, nil)
+		c := cooks[menus[v].CookID] // cook for this menu
+		// get exchangeoptions and distance
+		ems := types.GetExchangeMethods(c.Address.GeoPoint, c.DeliveryRange, c.DeliveryPrice, eaterPoint)
+		distance := eaterPoint.GreatCircleDistance(c.Address.GeoPoint)
+		resp.Menus[i] = getPBMenu(menus[v], c, distance, ems)
 		menuID := menus[v].ID
 		for i := range items {
 			if items[i].MenuID == menuID {

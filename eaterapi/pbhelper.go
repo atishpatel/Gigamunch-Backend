@@ -13,16 +13,16 @@ import (
 	"github.com/golang/protobuf/ptypes"
 )
 
-func getPBMenu(menu *menu.Menu, cook *cook.Cook, cookDistance float32, exchangeOptions []*pb.ExchangeOption) *pb.Menu {
+func getPBMenu(menu *menu.Menu, cook *cook.Cook, cookDistance float32, ems []types.ExchangeMethodWithPrice) *pb.Menu {
 	return &pb.Menu{
 		Id:    menu.ID,
 		Name:  menu.Name,
 		Color: menu.Color.HexValue(),
-		Cook:  getPBBaseCook(cook, cookDistance, exchangeOptions),
+		Cook:  getPBBaseCook(cook, cookDistance, ems),
 	}
 }
 
-func getPBBaseCook(cook *cook.Cook, distance float32, exchangeOptions []*pb.ExchangeOption) *pb.BaseCook {
+func getPBBaseCook(cook *cook.Cook, distance float32, ems []types.ExchangeMethodWithPrice) *pb.BaseCook {
 	return &pb.BaseCook{
 		Id:              cook.ID,
 		Name:            cook.Name,
@@ -30,17 +30,17 @@ func getPBBaseCook(cook *cook.Cook, distance float32, exchangeOptions []*pb.Exch
 		NumRatings:      cook.NumRatings,
 		Rating:          cook.AverageRating,
 		Distance:        distance,
-		ExchangeOptions: exchangeOptions,
+		ExchangeOptions: getPBExchangeOptions(ems),
 	}
 }
 
-func getPBCook(cook *cook.Cook, distance float32, exchangeOptions []*pb.ExchangeOption, totalLikes int32) *pb.Cook {
+func getPBCook(cook *cook.Cook, distance float32, ems []types.ExchangeMethodWithPrice, totalLikes int32) *pb.Cook {
 	c := &pb.Cook{
 		Id:              cook.ID,
 		Name:            cook.Name,
 		Image:           cook.PhotoURL,
 		Distance:        distance,
-		ExchangeOptions: exchangeOptions,
+		ExchangeOptions: getPBExchangeOptions(ems),
 		Latitude:        cook.Address.Latitude,
 		Longitude:       cook.Address.Longitude,
 		KitchenImages:   cook.KitchenPhotoURLs,
@@ -77,8 +77,7 @@ func getPBCook(cook *cook.Cook, distance float32, exchangeOptions []*pb.Exchange
 	return c
 }
 
-// TODO add reviews
-func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, distance float32, exchangeOptions []*pb.ExchangeOption, cookLikes int32, reviews []*review.Review) *pb.Item {
+func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, distance float32, ems []types.ExchangeMethodWithPrice, cookLikes int32, reviews []*review.Review) *pb.Item {
 	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
 	i := &pb.Item{
 		Id:              item.ID,
@@ -102,7 +101,7 @@ func getPBItem(item *item.Item, numLikes int32, hasLiked bool, cook *cook.Cook, 
 			ServiceFeePercentage: pricePerServing / item.CookPricePerServing,
 			TaxPercentage:        payment.GetTaxPercentage(cook.Address.Latitude, cook.Address.Longitude),
 		},
-		Cook: getPBCook(cook, distance, exchangeOptions, cookLikes),
+		Cook: getPBCook(cook, distance, ems, cookLikes),
 	}
 	i.CreatedDatetime, _ = ptypes.TimestampProto(item.CreatedDateTime)
 	i.Reviews = getPBReviews(reviews)
@@ -251,5 +250,17 @@ func getAddress(addr *pb.Address) *types.Address {
 			Latitude:  addr.Latitude,
 			Longitude: addr.Longitude,
 		},
+	}
+}
+
+func getPBExchangeOptions(ems []types.ExchangeMethodWithPrice) []*pb.ExchangeOption {
+	pbems := make([]*pb.ExchangeOption, len(ems))
+	for i := range ems {
+		pbems[i] = &pb.ExchangeOption{
+			Id:         ems[i].ID(),
+			Name:       ems[i].String(),
+			IsDelivery: ems[i].Delivery(),
+			Price:      ems[i].Price,
+		}
 	}
 }
