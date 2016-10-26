@@ -26,8 +26,8 @@ const (
 	deleteStatement                    = "DELETE FROM `likes` WHERE user_id='%s' AND item_id=%d"
 	selectNumLikesStatement            = "SELECT item_id, COUNT(item_id) FROM `likes` WHERE %s GROUP BY item_id"
 	selectNumLikesAndHasLikedStatement = "SELECT item_id, user_id, count(item_id) FROM (SELECT user_id, item_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1  ELSE 2  END) as l GROUP BY item_id"
-	selectNumCookLikesStatement        = "SELECT cook_id, COUNT(cook_id) FROM `likes` WHERE cook_id=%s"
-	selectNumMenuLikesStatement        = "SELECT menu_id, COUNT(menu_id) FROM `likes` WHERE menu_id=%d"
+	selectNumCookLikesStatement        = "SELECT COUNT(cook_id) FROM `likes` WHERE cook_id=%s"
+	// selectNumMenuLikesStatement        = "SELECT COUNT(menu_id) FROM `likes` WHERE menu_id=%d"
 	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
 )
 
@@ -86,6 +86,28 @@ func (c *Client) Unlike(userID string, itemID int64) error {
 		return errSQLDB.WithError(err).Wrapf("cannot execute delete statement(%s)", st)
 	}
 	return nil
+}
+
+// GetNumCookLikes returns the number of likes for the cookID.
+func (c *Client) GetNumCookLikes(cookID string) (int32, error) {
+	if cookID == "" {
+		return 0, nil
+	}
+	// create statement
+	st := fmt.Sprintf(selectNumCookLikesStatement, cookID)
+	rows, err := mysqlDB.Query(st)
+	if err != nil {
+		return 0, errSQLDB.WithError(err).Wrap("cannot query following statement: " + st)
+	}
+	defer handleCloser(c.ctx, rows)
+	var numLikes int32
+	for rows.Next() {
+		err = rows.Scan(&numLikes)
+		if err != nil {
+			return 0, errSQLDB.WithError(err).Wrap("cannot scan rows")
+		}
+	}
+	return numLikes, nil
 }
 
 // GetNumLikes returns the number of likes for each item in the array
