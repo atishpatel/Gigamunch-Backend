@@ -86,10 +86,10 @@ type Inquiry struct {
 	BTRefundTransactionID string `json:"bt_refund_transaction_id" datastore:",noindex"`
 
 	// Exchange Info
-	ExpectedExchangeDateTime time.Time             `json:"expected_exchange_datetime" datastore:",index"`
-	CookPricePerServing      float32               `json:"cook_price_per_serving" datastore:",noindex"`
-	Servings                 int32                 `json:"servings" datastore:",noindex"`
-	PaymentInfo              PaymentInfo           `json:"payment_info" datastore:",noindex"`
-	ExchangeMethod           types.ExchangeMethods `json:"exchange_method" datastore:",noindex"`
-	ExchangePlanInfo         ExchangePlanInfo      `json:"exchange_plan_info" datastore:",noindex"`
+	ExpectedExchangeDateTime time.Time            `json:"expected_exchange_datetime" datastore:",index"`
+	CookPricePerServing      float32              `json:"cook_price_per_serving" datastore:",noindex"`
+	Servings                 int32                `json:"servings" datastore:",noindex"`
+	PaymentInfo              PaymentInfo          `json:"payment_info" datastore:",noindex"`
+	ExchangeMethod           types.ExchangeMethod `json:"exchange_method" datastore:",noindex"`
+	ExchangePlanInfo         ExchangePlanInfo     `json:"exchange_plan_info" datastore:",noindex"`
 }

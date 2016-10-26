@@ -69,7 +69,7 @@ func (c *Client) GetByTransactionID(transactionID string) (*Inquiry, error) {
 	return inquiry, nil
 }
 
-func validateMakeParams(itemID int64, nonce string, eaterID string, eaterAddress *types.Address, numServings int32) error {
+func validateMakeParams(itemID int64, nonce string, eaterID string, eaterAddress *types.Address, numServings int32, exchangeMethod types.ExchangeMethod) error {
 	if itemID == 0 {
 		return errInvalidParameter.WithMessage("ItemID cannot be 0.")
 	}
@@ -85,12 +85,15 @@ func validateMakeParams(itemID int64, nonce string, eaterID string, eaterAddress
 	if numServings == 0 {
 		return errInvalidParameter.WithMessage("NumServings cannot be empty.")
 	}
+	if !exchangeMethod.Valid() {
+		return errInvalidParameter.WithMessage("Exchange method is not valid.")
+	}
 	return nil
 }
 
 // Make makes a new Inquiry.
-func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *types.Address, numServings int32, exchangeMethod types.ExchangeMethods, expectedExchangeTime time.Time, exchangePrice float32) (*Inquiry, error) {
-	if err := validateMakeParams(itemID, nonce, eaterID, eaterAddress, numServings); err != nil {
+func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *types.Address, numServings int32, exchangeMethod types.ExchangeMethod, expectedExchangeTime time.Time) (*Inquiry, error) {
+	if err := validateMakeParams(itemID, nonce, eaterID, eaterAddress, numServings, exchangeMethod); err != nil {
 		return nil, err
 	}
 	// get item
@@ -111,6 +114,18 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	if err != nil {
 		return nil, errors.Wrap("failed to cookC.Get", err)
 	}
+	ems := types.GetExchangeMethods(cook.Address.GeoPoint, cook.DeliveryRange, cook.DeliveryPrice, eaterAddress.GeoPoint)
+	found := false
+	var exchangePrice float32
+	for _, v := range ems {
+		if v.Equal(exchangeMethod) {
+			exchangePrice = v.Price
+			found = true
+		}
+	}
+	if !found {
+		return nil, errInvalidParameter.WithMessage("The selected exchange method is not available.")
+	}
 	// calculate pricing
 	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
 	totalPricePerServing := pricePerServing * float32(numServings)
@@ -121,7 +136,7 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	totalGigaFee := totalPricePerServing - totalCookPrice
 	cookPriceWithDelivery := totalCookPrice
 	gigaFeeWithDelivery := totalGigaFee
-	if exchangeMethod.Pickup() || exchangeMethod.ChefDelivery() {
+	if exchangeMethod.Pickup() || exchangeMethod.CookDelivery() {
 		cookPriceWithDelivery += exchangePrice
 	} else {
 		gigaFeeWithDelivery += exchangePrice
