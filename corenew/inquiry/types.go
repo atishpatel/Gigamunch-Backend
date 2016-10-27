@@ -39,11 +39,13 @@ var CookAction = struct{ Pending, Accepted, Declined, Canceled, Refunded string 
 
 // PaymentInfo is the payment information related to an Inquiry.
 type PaymentInfo struct {
-	CookPrice     float32 `json:"cook_price" datastore:",noindex"`
-	ExchangePrice float32 `json:"exchange_price" datastore:",noindex"`
-	TaxPrice      float32 `json:"tax_price" datastore:",noindex"`
-	ServiceFee    float32 `json:"service_fee" datastore:",noindex"`
-	TotalPrice    float32 `json:"total_price" datastore:",noindex"`
+	CookPricePerServing float32 `json:"cook_price_per_serving" datastore:",noindex"`
+	PricePerServing     float32 `json:"price_per_serving" datastore:",noindex"`
+	CookPrice           float32 `json:"cook_price" datastore:",noindex"`
+	ExchangePrice       float32 `json:"exchange_price" datastore:",noindex"`
+	TaxPrice            float32 `json:"tax_price" datastore:",noindex"`
+	ServiceFee          float32 `json:"service_fee" datastore:",noindex"`
+	TotalPrice          float32 `json:"total_price" datastore:",noindex"`
 }
 
 // ItemInfo contains information about the Item related to an Inquiry.
@@ -86,10 +88,10 @@ type Inquiry struct {
 	BTRefundTransactionID string `json:"bt_refund_transaction_id" datastore:",noindex"`
 
 	// Exchange Info
-	ExpectedExchangeDateTime time.Time            `json:"expected_exchange_datetime" datastore:",index"`
-	CookPricePerServing      float32              `json:"cook_price_per_serving" datastore:",noindex"`
-	Servings                 int32                `json:"servings" datastore:",noindex"`
-	PaymentInfo              PaymentInfo          `json:"payment_info" datastore:",noindex"`
-	ExchangeMethod           types.ExchangeMethod `json:"exchange_method" datastore:",noindex"`
-	ExchangePlanInfo         ExchangePlanInfo     `json:"exchange_plan_info" datastore:",noindex"`
+	ExpectedExchangeDateTime time.Time `json:"expected_exchange_datetime" datastore:",index"`
+
+	Servings         int32                `json:"servings" datastore:",noindex"`
+	PaymentInfo      PaymentInfo          `json:"payment_info" datastore:",noindex"`
+	ExchangeMethod   types.ExchangeMethod `json:"exchange_method" datastore:",noindex"`
+	ExchangePlanInfo ExchangePlanInfo     `json:"exchange_plan_info" datastore:",noindex"`
 }

@@ -188,7 +188,8 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string) *pb.Inquiry 
 		CookImage:                cookImage,
 		Servings:                 inq.Servings,
 		TotalPriceInfo: &pb.TotalPriceInfo{
-			CookPricePerServing: inq.CookPricePerServing,
+			CookPricePerServing: inq.PaymentInfo.CookPricePerServing,
+			PricePerServing:     inq.PaymentInfo.PricePerServing,
 			TotalCookPrice:      inq.PaymentInfo.CookPrice,
 			ExchangePrice:       inq.PaymentInfo.ExchangePrice,
 			TaxPrice:            inq.PaymentInfo.TaxPrice,
@@ -263,4 +264,5 @@ func getPBExchangeOptions(ems []types.ExchangeMethodWithPrice) []*pb.ExchangeOpt
 			Price:      ems[i].Price,
 		}
 	}
+	return pbems
 }
