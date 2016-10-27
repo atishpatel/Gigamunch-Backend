@@ -9,7 +9,7 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
-	"github.com/atishpatel/Gigamunch-Backend/corenew/notification"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -88,8 +88,8 @@ func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, b
 		// is new cook
 		if !appengine.IsDevAppServer() {
 			// notify enis
-			nC := notification.New(c.ctx)
-			err = nC.SendSMS("6153975516", fmt.Sprintf("%s just started an application. get on that booty. email: %s", user.Name, user.Email))
+			mC := message.New(c.ctx)
+			err = mC.SendSMS("6153975516", fmt.Sprintf("%s just started an application. get on that booty. email: %s", user.Name, user.Email))
 			if err != nil {
 				utils.Criticalf(c.ctx, "failed to notify enis about cook(%s) submitting application", user.ID)
 			}
@@ -169,13 +169,13 @@ func (c *Client) UpdateSubMerchantStatus(submerchantID, status string) (string, 
 }
 
 // Notify notifies chef with the message
-func (c *Client) Notify(id, subject, message string) error {
+func (c *Client) Notify(id, subject, msg string) error {
 	cook, err := get(c.ctx, id)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("failed to get by chef")
 	}
-	notifcationC := notification.New(c.ctx)
-	err = notifcationC.SendSMS(cook.PhoneNumber, message)
+	messageC := message.New(c.ctx)
+	err = messageC.SendSMS(cook.PhoneNumber, msg)
 	if err != nil {
 		return errors.Wrap("failed to send sms", err)
 	}
