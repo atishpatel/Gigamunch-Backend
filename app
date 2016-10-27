@@ -43,13 +43,15 @@ fi
 
 if [[ $1 == "deploy" ]]; then 
   project="gigamunch-omninexus-dev"
+  sqlip="104.154.108.220"
   if [[ $* == *--prod* ]] || [[ $* == *-p* ]]; then
     project="gigamunch-omninexus"
+    sqlip="104.154.236.200"
   fi
   echo "Deploying the following to $project" 
   if [[ $* == *eater* ]]; then
     echo "Deploying eater:"
-    cat eaterapi/app.yaml.template | sed 's/PROJECT_ID/$project/g' > eaterapi/app.yaml
+    cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g" > eaterapi/app.yaml
     cd eaterapi
     aedeploy gcloud app deploy --project=$project --version=1
     cd ..

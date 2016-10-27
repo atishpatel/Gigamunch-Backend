@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 
 	// driver for mysql
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
@@ -24,7 +24,7 @@ const (
 	updateStatement = "UPDATE `active_items` SET menu_id=%d AND cook_price_per_serving=%f AND min_servings=%d AND max_servings=%d AND latitude=%f AND longitude=%f AND vegan=%t AND vegetarian=%t AND paleo=%t AND gluten_free=%t AND kosher=%t WHERE id=%d"
 	deleteStatement = "DELETE FROM active_items WHERE id=%d"
 	// This select statement gets items sorted by distance and newness. A logarithmic function is applied to newness to the magnititude that an item 85 miles away is ranked higher than an item newly created (a month old item drops to the same rank as one 7 miles away)
-	selectStatement = "SELECT a.id, a.menu_id, a.cook_id FROM active_items as a, (SELECT menu_id,(3959*acos(cos(radians(%f))*cos(radians(latitude))*cos(radians(longitude)-radians(%f))+sin(radians(%f))*sin(radians(latitude))))+LEAST(log((Now()-MAX(created_datetime))/200000000)*10,0) as s FROM active_items GROUP BY menu_id ORDER BY s LIMIT %d, %d) as b WHERE b.menu_id = a.menu_id"
+	selectStatement = "SELECT a.id, a.menu_id, a.cook_id FROM active_items as a, (SELECT menu_id,(3959*acos(cos(radians(%f))*cos(radians(latitude))*cos(radians(longitude)-radians(%f))+sin(radians(%f))*sin(radians(latitude))))+LEAST(log((Now()-MAX(created_datetime))/200000000)*10,0) as s FROM active_items GROUP BY menu_id,latitude,longitude ORDER BY s LIMIT %d, %d) as b WHERE b.menu_id = a.menu_id"
 )
 
 var (
@@ -173,8 +173,7 @@ func connectSQL(ctx context.Context) {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		projectID := config.GetProjectID(ctx)
-		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
+		connectionString = os.Getenv("MYSQL_CONNECTION")
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {

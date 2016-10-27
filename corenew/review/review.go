@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 
 	// driver for mysql
 	mysql "github.com/go-sql-driver/mysql"
 
-	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -25,9 +25,9 @@ const (
 	insertStatement       = "INSERT INTO review (cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,rating,text) VALUES ('%s','%s','%s','%s',%d,%d,'%s','%s',%d,%d,'%s')"
 	updateStatement       = "UPDATE TABLE review (eater_name,eater_photo_url,rating,text,edited_datetime,is_edited) VALUES ('%s','%s',%d,'%s',NOW(),1) WHERE id=%d"
 	updateCookResponse    = "UPDATE TABLE review (has_response,response_created_datetime,response_text) VALUES (1,NOW(),%s) WHERE id=%d"
-	selectReviewStatement = "SELECT (id,cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text) FROM review WHERE id=%d %s"
+	selectReviewStatement = "SELECT id,cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text FROM review WHERE id=%d %s"
 	// TODO change to fn(created_datetime, item_id)
-	selectReviewByCookID = "SELECT (id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text) FROM review WHERE cook_id='%s' ORDER BY created_datetime DESC LIMIT %d,%d"
+	selectReviewByCookID = "SELECT id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text FROM review WHERE cook_id='%s' ORDER BY created_datetime DESC LIMIT %d,%d"
 	// selectCookReviews     = "SELECT "
 	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
 )
@@ -245,8 +245,7 @@ func connectSQL(ctx context.Context) {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		projectID := config.GetProjectID(ctx)
-		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
+		connectionString = os.Getenv("MYSQL_CONNECTION")
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {

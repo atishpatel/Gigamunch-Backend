@@ -18,4 +18,7 @@ handlers:
     secure: always
 
 beta_settings:
-      cloud_sql_instances: gigasqldb
+    cloud_sql_instances: gigasqldb
+
+env_variables:
+    MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECT_ID:us-central1:gigasqldb)/gigamunch

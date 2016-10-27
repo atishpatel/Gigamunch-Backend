@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -12,7 +13,6 @@ import (
 	// driver for mysql
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
@@ -25,8 +25,8 @@ const (
 	insertStatement                    = "INSERT INTO `likes` (created_datetime, user_id, item_id, menu_id, cook_id) VALUES ('%s','%s',%d, %d, '%s')"
 	deleteStatement                    = "DELETE FROM `likes` WHERE user_id='%s' AND item_id=%d"
 	selectNumLikesStatement            = "SELECT item_id, COUNT(item_id) FROM `likes` WHERE %s GROUP BY item_id"
-	selectNumLikesAndHasLikedStatement = "SELECT item_id, user_id, count(item_id) FROM (SELECT user_id, item_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1  ELSE 2  END) as l GROUP BY item_id"
-	selectNumCookLikesStatement        = "SELECT COUNT(cook_id) FROM `likes` WHERE cook_id=%s"
+	selectNumLikesAndHasLikedStatement = "SELECT item_id, user_id, count(item_id) FROM (SELECT user_id, item_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1  ELSE 2  END) as l GROUP BY item_id,user_id"
+	selectNumCookLikesStatement        = "SELECT COUNT(cook_id) FROM `likes` WHERE cook_id='%s'"
 	// selectNumMenuLikesStatement        = "SELECT COUNT(menu_id) FROM `likes` WHERE menu_id=%d"
 	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
 )
@@ -220,8 +220,7 @@ func connectSQL(ctx context.Context) {
 		// "user:password@/dbname"
 		connectionString = "root@/gigamunch"
 	} else {
-		projectID := config.GetProjectID(ctx)
-		connectionString = fmt.Sprintf("root@cloudsql(%s:us-central1:gigasqldb)/gigamunch", projectID)
+		connectionString = os.Getenv("MYSQL_CONNECTION")
 	}
 	mysqlDB, err = sql.Open("mysql", connectionString)
 	if err != nil {
