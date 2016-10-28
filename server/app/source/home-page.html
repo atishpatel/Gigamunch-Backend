@@ -99,7 +99,7 @@
       
       .features-panel {
         background-color: white;
-        padding: 15px 0px;
+        padding: 30px 0px;
         z-index: 19;
       }
       
@@ -154,9 +154,12 @@
         padding-bottom: 18px;
       }
       
+      .featured-on-list>* {
+        padding: 20px;
+      }
+      
       .featured-on-icon {
         height: 20px;
-        padding: 20px;
       }
       
       .becomechef-card {
@@ -189,6 +192,65 @@
       
       .becomechef-text .action {
         text-align: center;
+      }
+      
+      .hiw-card {
+        padding: 0 50px 50px 50px;
+      }
+      
+      .how-it-works {
+        padding: 30px 0 10px 0;
+        text-align: center;
+      }
+      
+      .how-it-works>* {
+        text-transform: none;
+      }
+      
+      .hiw-list {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .hiw-step {
+        padding: 12px 0;
+      }
+      
+      .hiw-title-row {
+        display: flex;
+        margin: auto 0;
+      }
+      
+      .hiw-title {
+        font-size: 16px;
+        font-weight: bold;
+        padding-left: 25px;
+        margin: auto 0;
+      }
+      
+      .hiw-desc {
+        padding-left: 55px;
+        font-size: 14px;
+      }
+      
+      .circle-orange {
+        background: #ED5A29;
+        border-radius: 50%;
+        height: 30px;
+        width: 30px;
+        color: white;
+        font-weight: bold;
+        display: flex;
+      }
+      
+      .circle-orange p {
+        text-transform: none;
+        margin: auto;
+        font-size: 16px;
+      }
+      
+      .bold {
+        font-weight: 600;
       }
       
       @media (max-width: 1080px) {
@@ -224,6 +286,9 @@
         }
         .becomechef-image {
           min-height: 216px;
+        }
+        .hiw-card {
+          padding: 0 20px 50px 20px;
         }
       }
 
@@ -294,6 +359,53 @@
           <a href="https://www.kickstarter.com/projects/261196021/gigamunch"
              target="blank"><img class="featured-on-icon"
                  src="https://storage.googleapis.com/gigamunch-omninexus-website/home/kickstarter-grey.png" /></a>
+        </div>
+      </paper-material>
+      <paper-material elevation="0"
+                      class="bg-white hiw-card">
+        <div class="how-it-works">
+          <h3>How It Works</h3>
+        </div>
+        <div class="content hiw-list">
+          <div class="hiw-step">
+            <div class="hiw-title-row">
+              <div class="circle-orange">
+                <p class="bold">1</p>
+              </div>
+              <p class="hiw-title">
+                Download the App
+              </p>
+            </div>
+            <div class="hiw-desc">
+              Browse a huge variety of homemade food. Get access to foods you never imagined from home cooks nearby.
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-title-row">
+              <div class="circle-orange">
+                <p class="bold">2</p>
+              </div>
+              <p class="hiw-title">
+                Send a Request
+              </p>
+            </div>
+            <div class="hiw-desc">
+              Tell the cook how you want it and when you want it. Have a real conversation with the cook through the app.
+            </div>
+          </div>
+          <div class="hiw-step">
+            <div class="hiw-title-row">
+              <div class="circle-orange">
+                <p class="bold">3</p>
+              </div>
+              <p class="hiw-title">
+                Delivery or Pickup
+              </p>
+            </div>
+            <div class="hiw-desc">
+              Once the request is accepted, you’re all set! Go pick it up or have it delivered.
+            </div>
+          </div>
         </div>
       </paper-material>
       <div id="becomeGigachef"
