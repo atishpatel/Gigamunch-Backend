@@ -1,7 +1,0 @@
-{
-  "jwt_secret": "ZjM2M2YzY2NkY2IxMmJiOC2BaFhVRF4y0GZrQOs4RglElet8yBPzorQEKmxQrcWj" ,
-  "browser_api_key": "AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g",
-  "server_api_key" : "AIzaSyBvKsTJmYK3xoqWqUS-cca_dvVW73SMC5w",
-  "client_id" : "108585202286-nk443rt83o6hivl7t6c3r3vdc8b659dl.apps.googleusercontent.com",
-  "google_app_credentials_path": "/Users/atish/Development/go/src/github.com/atishpatel/Gigamunch-Backend/private/gitkit_cert.json"
-}
