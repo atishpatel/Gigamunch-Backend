@@ -7,7 +7,9 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/eater"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
@@ -146,6 +148,59 @@ func (s *service) RegisterNotificationToken(ctx context.Context, req *pb.Registe
 	err := eaterC.RegisterNotificationToken(user.ID, req.NotificationToken)
 	if err != nil {
 		getGRPCError(err, "failed to eater.RegisterNotificationToken")
+	}
+	return resp, nil
+}
+
+func (s *service) GetMessageToken(ctx context.Context, req *pb.GetMessageTokenRequest) (*pb.GetMessageTokenResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.GetMessageTokenResponse)
+	defer handleResp(ctx, "GetMessageToken", resp.Error)
+	user, validateErr := validateGetMessageTokenRequest(ctx, req)
+	if validateErr != nil {
+		resp.Error = validateErr
+		return resp, nil
+	}
+	messageC := message.New(ctx)
+	tkn, err := messageC.GetToken(user, req.DeviceId)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to message.GetToken")
+		return resp, nil
+	}
+	resp.Token = tkn
+	return resp, nil
+}
+
+func (s *service) CreateMessageChannel(ctx context.Context, req *pb.CreateMessageChannelRequest) (*pb.ErrorOnlyResponse, error) {
+	ctx = appengine.BackgroundContext()
+	resp := new(pb.ErrorOnlyResponse)
+	defer handleResp(ctx, "CreateMessageChannel", resp.Error)
+	user, validateErr := validateCreateMessageChannelRequest(ctx, req)
+	if validateErr != nil {
+		resp.Error = validateErr
+		return resp, nil
+	}
+	cookC := cook.New(ctx)
+	ck, err := cookC.Get(req.CookId)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to cook.Get")
+		return resp, nil
+	}
+	cookInfo := &message.UserInfo{
+		ID:    ck.ID,
+		Name:  ck.Name,
+		Image: ck.PhotoURL,
+	}
+	eaterInfo := &message.UserInfo{
+		ID:    user.ID,
+		Name:  user.Name,
+		Image: user.PhotoURL,
+	}
+	messageC := message.New(ctx)
+	err = messageC.UpdateChannel(cookInfo, eaterInfo, nil)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to message.UpdateChannel")
+		return resp, nil
 	}
 	return resp, nil
 }
