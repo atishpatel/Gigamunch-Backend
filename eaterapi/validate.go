@@ -70,6 +70,16 @@ func validateGetItemRequest(req *pb.GetItemRequest) *pb.Error {
 	return nil
 }
 
+func validatePostReviewRequest(ctx context.Context, req *pb.PostReviewRequest) (*types.User, *pb.Error) {
+	if req.InquiryId == 0 {
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "InquiryID cannot be 0."}
+	}
+	if req.Rating == 0 {
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "Rating cannot be 0."}
+	}
+	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
+}
+
 func validateGetReviewsRequest(req *pb.GetReviewsRequest) *pb.Error {
 	if req.CookId == "" {
 		return &pb.Error{Code: errors.CodeInvalidParameter, Message: "CookID cannot be empty."}

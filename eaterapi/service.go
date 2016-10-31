@@ -8,8 +8,11 @@ import (
 
 	"golang.org/x/net/context"
 
+	// mysql "github.com/go-sql-driver/mysql"
+
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
+
 	"google.golang.org/appengine"
 	"google.golang.org/grpc"
 
@@ -62,6 +65,7 @@ func main() {
 	go func() {
 		http.HandleFunc("/_ah/health", healthCheckHandler)
 		http.HandleFunc("/", fronthandler)
+		// http.HandleFunc("/sql", sqlTest)
 		appengine.Main()
 	}()
 	err = s.Serve(lis)
@@ -77,3 +81,18 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 func fronthandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Whatcha doin' here?")
 }
+
+// func sqlTest(w http.ResponseWriter, r *http.Request) {
+// 	v := r.URL.Query()
+// 	q := v.Get("cs")
+// 	output := fmt.Sprintf("running sqlConnection test %s \n", q)
+// 	mysqlDB, err := sql.Open("mysql", q)
+// 	if err != nil {
+// 		output += "Error doing sql.Open: " + err.Error()
+// 	}
+// 	err = mysqlDB.Ping()
+// 	if err != nil {
+// 		output += "Error doing sql.Ping: " + err.Error()
+// 	}
+// 	fmt.Fprintln(w, output)
+// }
