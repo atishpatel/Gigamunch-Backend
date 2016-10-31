@@ -29,6 +29,7 @@ type Config struct {
 	BTPublicKey          string   `json:"bt_public_key" datastore:",noindex"`
 	BTPrivateKey         string   `json:"bt_private_key" datastore:",noindex"`
 	TwilioAccountSID     string   `json:"twilio_account_sid" datastore:",noindex"`
+	TwilioKeySID         string   `json:"twilio_key_sid" datastore:",noindex"`
 	TwilioAuthToken      string   `json:"twilio_auth_token" datastore:",noindex"`
 	TwilioIPMessagingSID string   `json:"twilio_ip_messaging_sid" datastore:",noindex"`
 	PhoneNumbers         []string `json:"phone_numbers" datastore:",noindex"`
@@ -68,6 +69,7 @@ type GitkitConfig struct {
 // TwilioConfig is used to load twilio configurations
 type TwilioConfig struct {
 	AccountSID     string   `json:"account_sid"`
+	KeySID         string   `json:"key_sid"`
 	AuthToken      string   `json:"auth_token"`
 	IPMessagingSID string   `json:"ip_messaging_sid"`
 	PhoneNumbers   []string `json:"phone_numbers"`
