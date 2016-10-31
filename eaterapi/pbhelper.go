@@ -162,7 +162,7 @@ func getPBReview(review *review.Review) *pb.Review {
 	}
 }
 
-func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string) *pb.Inquiry {
+func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string, menuID int64, numLikes int32, hasLiked bool) *pb.Inquiry {
 	createdDatetime, _ := ptypes.TimestampProto(inq.CreatedDateTime)
 	expectedExchangeDatetime, _ := ptypes.TimestampProto(inq.ExpectedExchangeDateTime)
 	return &pb.Inquiry{
@@ -180,6 +180,9 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string) *pb.Inquiry 
 			DietaryConcerns: int64(inq.Item.DietaryConcerns),
 			Images:          inq.Item.Photos,
 			Ingredients:     inq.Item.Ingredients,
+			MenuId:          menuID,
+			NumLikes:        numLikes,
+			HasLiked:        hasLiked,
 		},
 		ExpectedExchangeDatetime: expectedExchangeDatetime,
 		EaterImage:               inq.EaterPhotoURL,
@@ -198,6 +201,7 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string) *pb.Inquiry 
 		},
 		ExchangePlanInfo: &pb.ExchangePlanInfo{
 			MethodName:   inq.ExchangeMethod.String(),
+			IsDelivery:   inq.ExchangeMethod.Delivery(),
 			EaterAddress: getPBAddress(&inq.ExchangePlanInfo.EaterAddress, false),
 			CookAddress:  getPBAddress(&inq.ExchangePlanInfo.EaterAddress, false),
 			Distance:     inq.ExchangePlanInfo.Distance,
@@ -210,7 +214,7 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string) *pb.Inquiry 
 	}
 }
 
-func getPBInquiries(inqs []*inquiry.Inquiry, cookNames, cookImages []string) []*pb.Inquiry {
+func getPBInquiries(inqs []*inquiry.Inquiry, cookNames, cookImages []string, menuIDs []int64, numLikes []int32, hasLiked []bool) []*pb.Inquiry {
 	l := len(inqs)
 	is := make([]*pb.Inquiry, l)
 	if len(cookNames) != l {
@@ -220,7 +224,7 @@ func getPBInquiries(inqs []*inquiry.Inquiry, cookNames, cookImages []string) []*
 		cookImages = make([]string, l)
 	}
 	for i := range inqs {
-		is[i] = getPBInquiry(inqs[i], cookNames[i], cookImages[i])
+		is[i] = getPBInquiry(inqs[i], cookNames[i], cookImages[i], menuIDs[i], numLikes[i], hasLiked[i])
 	}
 	return is
 }
