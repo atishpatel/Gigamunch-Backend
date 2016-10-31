@@ -128,3 +128,17 @@ func validateGetInquiriesRequest(ctx context.Context, req *pb.GetInquiriesReques
 	}
 	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
 }
+
+func validateGetMessageTokenRequest(ctx context.Context, req *pb.GetMessageTokenRequest) (*types.User, *pb.Error) {
+	if req.DeviceId == "" {
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "DeviceID cannot be empty."}
+	}
+	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
+}
+
+func validateCreateMessageChannelRequest(ctx context.Context, req *pb.CreateMessageChannelRequest) (*types.User, *pb.Error) {
+	if req.CookId == "" {
+		return nil, &pb.Error{Code: errors.CodeInvalidParameter, Message: "CookID cannot be empty."}
+	}
+	return validateGigatokenAndGetUser(ctx, req.Gigatoken)
+}
