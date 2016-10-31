@@ -78,7 +78,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 	// handle errors
 	err = processErrorChans(cooksErrChan, reviewErrChan, likeErrChan, cookLikeErrChan)
 	if err != nil {
-		resp.Error = getGRPCError(err, "failed to cook.Get or like.LikesItems")
+		resp.Error = getGRPCError(err, "failed to cook.Get or review.GetByCookID or like.LikesItems or like.GetNumCookLikes")
 		return resp, nil
 	}
 	eaterPoint := types.GeoPoint{Latitude: req.Latitude, Longitude: req.Longitude}
@@ -180,9 +180,9 @@ func (s *service) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.GetF
 		distance := eaterPoint.GreatCircleDistance(c.Address.GeoPoint)
 		resp.Menus[i] = getPBMenu(menus[v], c, distance, ems)
 		menuID := menus[v].ID
-		for i := range items {
-			if items[i].MenuID == menuID {
-				resp.Menus[i].Items = append(resp.Menus[i].Items, getPBBaseItem(&items[i], numLikes[i], likes[i]))
+		for j := range items {
+			if items[j].MenuID == menuID {
+				resp.Menus[i].Items = append(resp.Menus[i].Items, getPBBaseItem(&items[j], numLikes[j], likes[j]))
 			}
 		}
 	}
