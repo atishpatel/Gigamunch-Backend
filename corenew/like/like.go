@@ -25,7 +25,8 @@ const (
 	insertStatement                    = "INSERT INTO `likes` (created_datetime, user_id, item_id, menu_id, cook_id) VALUES ('%s','%s',%d, %d, '%s')"
 	deleteStatement                    = "DELETE FROM `likes` WHERE user_id='%s' AND item_id=%d"
 	selectNumLikesStatement            = "SELECT item_id, COUNT(item_id) FROM `likes` WHERE %s GROUP BY item_id"
-	selectNumLikesAndHasLikedStatement = "SELECT item_id, user_id, count(item_id) FROM (SELECT user_id, item_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1  ELSE 2  END) as l GROUP BY item_id,user_id"
+	selectNumLikesWithMenuIDStatement  = "SELECT item_id, menu_id, user_id, COUNT(item_id) FROM (SELECT user_id, item_id, menu_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1  ELSE 2  END) as l GROUP BY item_id,user_id,menu_id"
+	selectNumLikesAndHasLikedStatement = "SELECT item_id, user_id, COUNT(item_id) FROM (SELECT user_id, item_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1  ELSE 2  END) as l GROUP BY item_id,user_id"
 	selectNumCookLikesStatement        = "SELECT COUNT(cook_id) FROM `likes` WHERE cook_id='%s'"
 	// selectNumMenuLikesStatement        = "SELECT COUNT(menu_id) FROM `likes` WHERE menu_id=%d"
 	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
@@ -156,6 +157,63 @@ func buildGetNumLikesStatement(items []int64) (string, error) {
 	}
 	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
 	st := fmt.Sprintf(selectNumLikesStatement, itemIDStatement)
+	return st, nil
+}
+
+// GetNumLikesWithMenuID returns the likesItem, numLikes, menuID, error.
+func (c *Client) GetNumLikesWithMenuID(userID string, items []int64) ([]bool, []int32, []int64, error) {
+	likesItem := make([]bool, len(items))
+	numLikes := make([]int32, len(items))
+	menuIDs := make([]int64, len(items))
+	if len(items) == 0 {
+		return likesItem, numLikes, menuIDs, nil
+	}
+	// create statement
+	st, err := buildLikesWithMenuIDStatement(userID, items)
+	if err != nil {
+		return likesItem, numLikes, menuIDs, errors.Wrap("failed to build likes item statement", err)
+	}
+	rows, err := mysqlDB.Query(st)
+	if err != nil {
+		return likesItem, numLikes, menuIDs, errSQLDB.WithError(err).Wrap("cannot query following statement: " + st)
+	}
+	defer handleCloser(c.ctx, rows)
+	var tmpMenuID int64
+	var tmpItemID int64
+	var tmpUserID string
+	var tmpNumLike int32
+	for rows.Next() {
+		err = rows.Scan(&tmpItemID, &tmpMenuID, &tmpUserID, &numLikes)
+		if err != nil {
+			return likesItem, numLikes, menuIDs, errSQLDB.WithError(err).Wrap("cannot scan rows")
+		}
+		for i := range items {
+			if items[i] == tmpItemID {
+				if tmpUserID == userID {
+					likesItem[i] = true
+				}
+				numLikes[i] = tmpNumLike
+				menuIDs[i] = tmpMenuID
+			}
+		}
+	}
+	return likesItem, numLikes, menuIDs, nil
+}
+
+func buildLikesWithMenuIDStatement(userID string, items []int64) (string, error) {
+	if len(items) == 0 {
+		return "", errInvalidParameter.Wrap("items length is 0")
+	}
+	var err error
+	var buffer bytes.Buffer
+	for i := range items[1:] {
+		_, err = buffer.WriteString(fmt.Sprintf(" OR item_id=%d", items[i+1]))
+		if err != nil {
+			return "", errBuffer.WithError(err)
+		}
+	}
+	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
+	st := fmt.Sprintf(selectNumLikesWithMenuIDStatement, itemIDStatement, userID)
 	return st, nil
 }
 
