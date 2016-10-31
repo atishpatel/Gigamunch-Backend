@@ -77,6 +77,15 @@ func (c *Client) GetMulti(ids []string) (map[string]*Cook, error) {
 	return cooks, nil
 }
 
+// GetAddress gets the cook.
+func (c *Client) GetAddress(id string) (*types.Address, error) {
+	cook, err := get(c.ctx, id)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", id)
+	}
+	return &cook.Address, nil
+}
+
 // Update updates a cook's info.
 func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, bio string,
 	deliveryRange int32, weekSchedule []WeekSchedule, instagramID, twitterID, snapchatID string) (*Cook, error) {
