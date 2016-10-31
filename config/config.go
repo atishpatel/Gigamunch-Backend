@@ -93,6 +93,7 @@ func GetTwilioConfig(ctx context.Context) TwilioConfig {
 	} else {
 		getDatastoreConfig(ctx)
 		twilioConfig.AccountSID = config.TwilioAccountSID
+		twilioConfig.KeySID = config.TwilioKeySID
 		twilioConfig.IPMessagingSID = config.TwilioIPMessagingSID
 		twilioConfig.AuthToken = config.TwilioAuthToken
 		twilioConfig.PhoneNumbers = config.PhoneNumbers
