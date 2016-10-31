@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"time"
+
+	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/types"
 	twilio "github.com/atishpatel/twiliogo"
-	"golang.org/x/net/context"
+	jwt "gopkg.in/dgrijalva/jwt-go.v2"
 
 	"google.golang.org/appengine/mail"
 	"google.golang.org/appengine/urlfetch"
@@ -27,17 +31,21 @@ var (
 	inquiryBotSID       string
 	inquiryStatusBotSID string
 	gigamunchBotSID     string
-	errTwilio           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio sms."}
+	errInvalidParamter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Something went wrong with the server."}
+	errTwilio           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio."}
 	errEmail            = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with sending email."}
 	errFakeInput        = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Input is invalid."}
 )
 
+// Client is the client for ip messaging, sms, and email.
 type Client struct {
 	ctx       context.Context
 	twilioC   *twilio.TwilioClient
 	twilioIPC *twilio.TwilioIPMessagingClient
 }
 
+// New creates a message client.
 func New(ctx context.Context) *Client {
 	onceConfig.Do(func() {
 		twilioConfig = config.GetTwilioConfig(ctx)
@@ -47,7 +55,7 @@ func New(ctx context.Context) *Client {
 	c := &Client{
 		ctx: ctx,
 	}
-	c.twilioC, c.twilioIPC = getTwilioClients(ctx, twilioConfig.AccountSID, twilioConfig.AuthToken)
+	c.twilioC, c.twilioIPC = getTwilioClients(ctx, twilioConfig.AccountSID, twilioConfig.KeySID, twilioConfig.AuthToken)
 	return c
 }
 
@@ -119,6 +127,12 @@ func getUserAttr(u *UserInfo) string {
 
 // UpdateChannel creates or updates a channel
 func (c *Client) UpdateChannel(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {
+	if cookInfo == nil || eaterInfo == nil {
+		return errInvalidParamter.Wrap("cookInfo and eaterInfo cannot be nil")
+	}
+	if inquiryInfo == nil {
+		inquiryInfo = new(InquiryInfo)
+	}
 	friendlyName, uniqueName, attributes := getChannelNamesAndAttr(cookInfo, eaterInfo, inquiryInfo)
 	channel, err := twilio.GetIPChannel(c.twilioIPC, serviceSID, uniqueName)
 	isNew := false
@@ -217,11 +231,11 @@ func createUser(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *UserInfo) (
 	return twilio.NewIPUser(twilioIPC, serviceSID, userInfo.ID, "", attributes)
 }
 
-// func (c *Client) AddInquiry() error {}
+// func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {}
 
-// func (c *Client) UpdateInquiryStatus() error {}
+// func (c *Client) SendInquiryStatusBotMessage()
 
-// func (c *Client)
+// func (c *Client) SendGigamunchBotMessage()
 
 // UpdateUser creates or updates a user
 func (c *Client) UpdateUser(userInfo *UserInfo) error {
@@ -250,11 +264,35 @@ func (c *Client) UpdateUser(userInfo *UserInfo) error {
 	return nil
 }
 
-func getTwilioClients(ctx context.Context, accountSID, authToken string) (*twilio.TwilioClient, *twilio.TwilioIPMessagingClient) {
-	client := twilio.NewClient(twilioConfig.AccountSID, twilioConfig.AuthToken)
+// GetToken gets a messaging token for the user.
+func (c *Client) GetToken(user *types.User, deviceID string) (string, error) {
+	endpointID := fmt.Sprintf("Gigamunch:%s:%s", user.ID, deviceID)
+	jwtToken := jwt.New(jwt.SigningMethodHS256)
+	nowUnix := time.Now().Unix()
+	jwtToken.Header["cty"] = "twilio-fpa;v=1"
+	jwtToken.Claims["jti"] = fmt.Sprintf("%s-%d", twilioConfig.KeySID, nowUnix)
+	jwtToken.Claims["iss"] = twilioConfig.KeySID
+	jwtToken.Claims["sub"] = twilioConfig.AccountSID
+	jwtToken.Claims["exp"] = nowUnix + 7200 // 2 hours
+	ipMessaging := make(map[string]string, 2)
+	ipMessaging["service_sid"] = serviceSID
+	ipMessaging["endpoint_id"] = endpointID
+	grants := make(map[string]interface{}, 2)
+	grants["identity"] = user.ID
+	grants["ip_messaging"] = ipMessaging
+	jwtToken.Claims["grants"] = grants
+	tkn, err := jwtToken.SignedString([]byte(twilioConfig.AuthToken))
+	if err != nil {
+		return "", errInternal.WithError(err).Wrap("failed to jwt.SignedString")
+	}
+	return tkn, nil
+}
+
+func getTwilioClients(ctx context.Context, accountSID, keySID, apiSecret string) (*twilio.TwilioClient, *twilio.TwilioIPMessagingClient) {
+	client := twilio.NewClient(accountSID, apiSecret)
 	httpClient := urlfetch.Client(ctx)
 	client.HTTPClient = httpClient
-	ipClient := twilio.NewIPMessagingClient(accountSID, authToken)
+	ipClient := twilio.NewIPMessagingClient(keySID, apiSecret)
 	ipClient.HTTPClient = httpClient
 	return client, ipClient
 }
