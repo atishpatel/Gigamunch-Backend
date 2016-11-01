@@ -131,7 +131,7 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
 	totalPricePerServing := pricePerServing * float32(numServings)
 	taxPercentage := payment.GetTaxPercentage(cook.Address.Latitude, cook.Address.Longitude)
-	totalPrice := (totalPricePerServing + exchangePrice) * (taxPercentage / 100)
+	totalPrice := (totalPricePerServing + exchangePrice) * ((taxPercentage / 100) + 1)
 	totalTaxPrice := totalPrice - (totalPricePerServing + exchangePrice)
 	totalCookPrice := item.CookPricePerServing * float32(numServings)
 	totalGigaFee := totalPricePerServing - totalCookPrice
@@ -325,7 +325,7 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	if inquiry.State != State.Pending {
 		return nil, errInvalidParameter.WithMessage("Inquiry is no long in a pending state.")
 	}
-	if inquiry.ExpectedExchangeDateTime.Sub(time.Now()) > time.Duration(12)*time.Hour {
+	if inquiry.ExpectedExchangeDateTime.Sub(time.Now()) < time.Duration(12)*time.Hour {
 		return nil, errInvalidParameter.WithMessage("The Inquiry can no longer be canceled.")
 	}
 	inquiry.EaterAction = EaterAction.Canceled

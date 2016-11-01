@@ -12,10 +12,11 @@ const (
 )
 
 // State is the possible states for an Inquiry.
-var State = struct{ Pending, Accepted, Declined, Canceled, RefundRequested, Refunded, Fulfilled, Paid string }{
+var State = struct{ Pending, Accepted, Declined, TimedOut, Canceled, RefundRequested, Refunded, Fulfilled, Paid string }{
 	Pending:         "Pending",
 	Accepted:        "Accepted",
 	Declined:        "Declined",
+	TimedOut:        "TimedOut",
 	Canceled:        "Canceled",
 	RefundRequested: "RefundRequested",
 	Refunded:        "Refunded",
