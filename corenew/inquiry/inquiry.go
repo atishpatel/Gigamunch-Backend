@@ -142,12 +142,6 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	} else {
 		gigaFeeWithDelivery += exchangePrice
 	}
-	// start payment
-	paymentC := getPaymentClient(c.ctx)
-	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, cookPriceWithDelivery, gigaFeeWithDelivery)
-	if err != nil {
-		return nil, errors.Wrap("failed to paymentC.StartSale", err)
-	}
 	// get cheap estimate for distance and duration
 	distance := eaterAddress.GreatCircleDistance(cook.Address.GeoPoint)
 	duration := eaterAddress.EstimatedDuration(cook.Address.GeoPoint)
@@ -169,7 +163,6 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		State:                    State.Pending,
 		EaterAction:              EaterAction.Accepted,
 		CookAction:               CookAction.Pending,
-		BTTransactionID:          transactionID,
 		ExpectedExchangeDateTime: expectedExchangeTime,
 		Servings:                 numServings,
 		PaymentInfo: PaymentInfo{
@@ -189,6 +182,25 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 			Duration:     duration,
 		},
 	}
+	// Send inquiry bot message
+	messageC := getMessageClient(c.ctx)
+	cookUI, eaterUI := getCookAndEaterUserInfo(cook.ID, cook.Name, cook.PhotoURL, eater.ID, eater.Name, eater.PhotoURL)
+	inquiryI := getInquiryInfo(inquiry)
+	messageID, err := messageC.SendInquiryBotMessage(cookUI, eaterUI, inquiryI)
+	if err != nil {
+		utils.Criticalf(c.ctx, "failed to messageC.SendInquiryBotMessage err: %v", err)
+		return inquiry, errors.Wrap("failed to message.SendInquiryBotMessage", err)
+	}
+	inquiry.MessageID = messageID
+
+	// Create Transaction
+	paymentC := getPaymentClient(c.ctx)
+	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, cookPriceWithDelivery, gigaFeeWithDelivery)
+	if err != nil {
+		return nil, errors.Wrap("failed to paymentC.StartSale", err)
+	}
+	inquiry.BTTransactionID = transactionID
+	// Put Inquiry in datastore
 	_, err = putIncomplete(c.ctx, inquiry)
 	if err != nil {
 		_, pErr := paymentC.RefundSale(transactionID)
@@ -196,37 +208,6 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 			utils.Criticalf(c.ctx, "BT Transaction (%s) was not voided! Err: %+v", transactionID, pErr)
 		}
 		return nil, errDatastore.WithError(err).Wrap("cannot putIncomplete inquiry")
-	}
-	// Start inquiry bot message
-	messageC := getMessageClient(c.ctx)
-	cookUI := &message.UserInfo{
-		ID:    cook.ID,
-		Name:  cook.Name,
-		Image: cook.PhotoURL,
-	}
-	eaterUI := &message.UserInfo{
-		ID:    eater.ID,
-		Name:  eater.Name,
-		Image: eater.PhotoURL,
-	}
-	var photoURL string
-	if len(inquiry.Item.Photos) > 0 {
-		photoURL = inquiry.Item.Photos[0]
-	}
-	inquiryI := &message.InquiryInfo{
-		ID:          inquiry.ID,
-		State:       inquiry.State,
-		CookAction:  inquiry.CookAction,
-		EaterAction: inquiry.EaterAction,
-		ItemID:      inquiry.ItemID,
-		ItemName:    inquiry.Item.Name,
-		ItemImage:   photoURL,
-	}
-
-	err = messageC.SendInquiryBotMessage(cookUI, eaterUI, inquiryI)
-	if err != nil {
-		utils.Criticalf(c.ctx, "failed to messageC.SendInquiryBotMessage err: %v", err)
-		return inquiry, errors.Wrap("failed to message.SendInquiryBotMessage", err)
 	}
 	// TODO add task to where cook has (exchangeTime || 12 hours) to reply
 	return inquiry, nil
@@ -247,6 +228,7 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 	if inquiry.CookAction != CookAction.Accepted {
 		inquiry.CookAction = CookAction.Accepted
 		if inquiry.EaterAction == EaterAction.Accepted {
+			inquiry.State = State.Accepted
 			// submit transaction for settlement
 			paymentC := getPaymentClient(c.ctx)
 			err = paymentC.SubmitForSettlement(inquiry.BTTransactionID)
@@ -258,6 +240,10 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 		err = put(c.ctx, id, inquiry)
 		if err != nil {
 			return nil, errDatastore.WithError(err).Wrapf("failed to put Inquiry(%d) after submitting for settlement", id)
+		}
+		err = sendUpdatedActionMessage(c.ctx, inquiry)
+		if err != nil {
+			return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
 		}
 	}
 	return inquiry, nil
@@ -277,6 +263,7 @@ func (c *Client) CookDecline(user *types.User, id int64) (*Inquiry, error) {
 	}
 	if inquiry.CookAction != CookAction.Declined {
 		inquiry.CookAction = CookAction.Declined
+		inquiry.State = State.Declined
 		// submit transaction for refund
 		paymentC := getPaymentClient(c.ctx)
 		var refundID string
@@ -290,8 +277,34 @@ func (c *Client) CookDecline(user *types.User, id int64) (*Inquiry, error) {
 		if err != nil {
 			return nil, errDatastore.WithError(err).Wrapf("failed to put Inquiry(%d) after submitting for settlement", id)
 		}
+		err = sendUpdatedActionMessage(c.ctx, inquiry)
+		if err != nil {
+			return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
+		}
 	}
 	return inquiry, nil
+}
+
+func sendUpdatedActionMessage(ctx context.Context, inquiry *Inquiry) error {
+	cookC := getCookClient(ctx)
+	cookName, cookPhotoURL, err := cookC.GetDisplayInfo(inquiry.CookID)
+	if err != nil {
+		return errors.Wrap("failed to cook.GetDisplayInfo", err)
+	}
+
+	eaterC := getEaterClient(ctx)
+	eaterName, eaterPhotoURL, err := eaterC.GetDisplayInfo(inquiry.CookID)
+	if err != nil {
+		return errors.Wrap("failed to eater.GetDisplayInfo", err)
+	}
+	cookUI, eaterUI := getCookAndEaterUserInfo(inquiry.CookID, cookName, cookPhotoURL, inquiry.EaterID, eaterName, eaterPhotoURL)
+	inquiryI := getInquiryInfo(inquiry)
+	messageC := getMessageClient(ctx)
+	err = messageC.UpdateInquiryStatus(inquiry.MessageID, cookUI, eaterUI, inquiryI)
+	if err != nil {
+		return errors.Wrap("failed to message.UpdateInquiryStatus", err)
+	}
+	return nil
 }
 
 // CookCancel
@@ -315,8 +328,8 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	if inquiry.ExpectedExchangeDateTime.Sub(time.Now()) > time.Duration(12)*time.Hour {
 		return nil, errInvalidParameter.WithMessage("The Inquiry can no longer be canceled.")
 	}
-	inquiry.State = State.Refunded
 	inquiry.EaterAction = EaterAction.Canceled
+	inquiry.State = State.Canceled
 	// submit transaction for refund
 	paymentC := getPaymentClient(c.ctx)
 	var refundID string
@@ -330,6 +343,10 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to put Inquiry(%d) after submitting for settlement", id)
 	}
+	err = sendUpdatedActionMessage(c.ctx, inquiry)
+	if err != nil {
+		return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
+	}
 	return inquiry, nil
 }
 
@@ -341,8 +358,9 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 // Process
 
 type messageClient interface {
-	SendInquiryBotMessage(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
+	SendInquiryBotMessage(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) (string, error)
 	UpdateChannel(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
+	UpdateInquiryStatus(messageID string, cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
 }
 
 var getMessageClient = func(ctx context.Context) messageClient {
@@ -375,6 +393,7 @@ var getEaterClient = func(ctx context.Context) eaterClient {
 
 type eaterClient interface {
 	Get(string) (*eater.Eater, error)
+	GetDisplayInfo(id string) (string, string, error)
 }
 
 var getCookClient = func(ctx context.Context) cookClient {
@@ -382,5 +401,40 @@ var getCookClient = func(ctx context.Context) cookClient {
 }
 
 type cookClient interface {
-	Get(string) (*cook.Cook, error)
+	Get(id string) (*cook.Cook, error)
+	GetDisplayInfo(id string) (string, string, error)
+}
+
+func getCookAndEaterUserInfo(cookID, cookName, cookPhotoURL, eaterID, eaterName, eaterPhotoURL string) (*message.UserInfo, *message.UserInfo) {
+	cookUI := &message.UserInfo{
+		ID:    cookID,
+		Name:  cookName,
+		Image: cookPhotoURL,
+	}
+	eaterUI := &message.UserInfo{
+		ID:    eaterID,
+		Name:  eaterName,
+		Image: eaterPhotoURL,
+	}
+	return cookUI, eaterUI
+}
+
+func getInquiryInfo(inquiry *Inquiry) *message.InquiryInfo {
+	var photoURL string
+	if len(inquiry.Item.Photos) > 0 {
+		photoURL = inquiry.Item.Photos[0]
+	}
+	return &message.InquiryInfo{
+		ID:           inquiry.ID,
+		State:        inquiry.State,
+		CookAction:   inquiry.CookAction,
+		EaterAction:  inquiry.EaterAction,
+		ItemID:       inquiry.ItemID,
+		ItemName:     inquiry.Item.Name,
+		ItemImage:    photoURL,
+		Price:        inquiry.PaymentInfo.TotalPrice,
+		IsDelivery:   inquiry.ExchangeMethod.Delivery(),
+		Servings:     inquiry.Servings,
+		ExchangeTime: inquiry.ExpectedExchangeDateTime,
+	}
 }

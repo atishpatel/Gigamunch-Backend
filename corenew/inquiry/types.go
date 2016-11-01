@@ -12,8 +12,11 @@ const (
 )
 
 // State is the possible states for an Inquiry.
-var State = struct{ Pending, RefundRequested, Refunded, Fulfilled, Paid string }{
+var State = struct{ Pending, Accepted, Declined, Canceled, RefundRequested, Refunded, Fulfilled, Paid string }{
 	Pending:         "Pending",
+	Accepted:        "Accepted",
+	Declined:        "Declined",
+	Canceled:        "Canceled",
 	RefundRequested: "RefundRequested",
 	Refunded:        "Refunded",
 	Fulfilled:       "Fulfilled",
@@ -94,4 +97,7 @@ type Inquiry struct {
 	PaymentInfo      PaymentInfo          `json:"payment_info" datastore:",noindex"`
 	ExchangeMethod   types.ExchangeMethod `json:"exchange_method" datastore:",noindex"`
 	ExchangePlanInfo ExchangePlanInfo     `json:"exchange_plan_info" datastore:",noindex"`
+
+	// Message Info
+	MessageID string `json:"message_id" datastore:",noindex"`
 }
