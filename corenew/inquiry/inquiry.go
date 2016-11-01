@@ -8,6 +8,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/eater"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -196,6 +197,37 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		}
 		return nil, errDatastore.WithError(err).Wrap("cannot putIncomplete inquiry")
 	}
+	// Start inquiry bot message
+	messageC := getMessageClient(c.ctx)
+	cookUI := &message.UserInfo{
+		ID:    cook.ID,
+		Name:  cook.Name,
+		Image: cook.PhotoURL,
+	}
+	eaterUI := &message.UserInfo{
+		ID:    eater.ID,
+		Name:  eater.Name,
+		Image: eater.PhotoURL,
+	}
+	var photoURL string
+	if len(inquiry.Item.Photos) > 0 {
+		photoURL = inquiry.Item.Photos[0]
+	}
+	inquiryI := &message.InquiryInfo{
+		ID:          inquiry.ID,
+		State:       inquiry.State,
+		CookAction:  inquiry.CookAction,
+		EaterAction: inquiry.EaterAction,
+		ItemID:      inquiry.ItemID,
+		ItemName:    inquiry.Item.Name,
+		ItemImage:   photoURL,
+	}
+
+	err = messageC.SendInquiryBotMessage(cookUI, eaterUI, inquiryI)
+	if err != nil {
+		utils.Criticalf(c.ctx, "failed to messageC.SendInquiryBotMessage err: %v", err)
+		return inquiry, errors.Wrap("failed to message.SendInquiryBotMessage", err)
+	}
 	// TODO add task to where cook has (exchangeTime || 12 hours) to reply
 	return inquiry, nil
 }
@@ -307,6 +339,15 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 // CookAutoDecline
 
 // Process
+
+type messageClient interface {
+	SendInquiryBotMessage(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
+	UpdateChannel(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
+}
+
+var getMessageClient = func(ctx context.Context) messageClient {
+	return message.New(ctx)
+}
 
 var getPaymentClient = func(ctx context.Context) paymentClient {
 	return payment.New(ctx)
