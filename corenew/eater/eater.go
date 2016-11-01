@@ -39,7 +39,7 @@ func (c *Client) Get(id string) (*Eater, error) {
 func (c *Client) GetDisplayInfo(id string) (string, string, error) {
 	eater, err := get(c.ctx, id)
 	if err != nil {
-		return "", nil, errDatastore.WithError(err).Wrapf("failed to get eater(%s)", id)
+		return "", "", errDatastore.WithError(err).Wrapf("failed to get eater(%s)", id)
 	}
 	return eater.Name, eater.PhotoURL, nil
 }
