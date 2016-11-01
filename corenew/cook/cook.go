@@ -86,6 +86,15 @@ func (c *Client) GetAddress(id string) (*types.Address, error) {
 	return &cook.Address, nil
 }
 
+// GetDisplayInfo returns the cook Name, PhotoURL, error.
+func (c *Client) GetDisplayInfo(id string) (string, string, error) {
+	cook, err := get(c.ctx, id)
+	if err != nil {
+		return "", nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", id)
+	}
+	return cook.Name, cook.PhotoURL, nil
+}
+
 // Update updates a cook's info.
 func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, bio string,
 	deliveryRange int32, weekSchedule []WeekSchedule, instagramID, twitterID, snapchatID string) (*Cook, error) {
