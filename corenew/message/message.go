@@ -12,14 +12,14 @@ import (
 	twilio "github.com/atishpatel/twiliogo"
 	jwt "gopkg.in/dgrijalva/jwt-go.v2"
 
-	"google.golang.org/appengine/mail"
 	"google.golang.org/appengine/urlfetch"
 )
 
 const (
 	channelAttr        = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
 	userAttr           = `{"id":"%s","name":"%s","image":"%s"}`
-	inquiryAttr        = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
+	inquiryAttr        = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","price":"%f","is_delivery":"%t","servings":"%d","exchange_time":"%d"}`
+	inquiryStatusAttr  = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
 	inquiryBotID       = "InquiryBot"
 	inquiryStatusBotID = "InquiryStatusBot"
 	gigamunchBotID     = "GigamunchBot"
@@ -33,8 +33,8 @@ var (
 	errInvalidParamter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 	errInternal        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Something went wrong with the server."}
 	errTwilio          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio."}
-	errEmail           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with sending email."}
-	errFakeInput       = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Input is invalid."}
+	// errEmail           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with sending email."}
+	errFakeInput = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Input is invalid."}
 )
 
 // Client is the client for ip messaging, sms, and email.
@@ -58,18 +58,18 @@ func New(ctx context.Context) *Client {
 	return c
 }
 
-func (c *Client) SendEmail(to, subject, message string) error {
-	msg := &mail.Message{
-		Sender:  "support@gigamunchapp.com",
-		To:      []string{to},
-		Subject: subject,
-		Body:    message,
-	}
-	if err := mail.Send(c.ctx, msg); err != nil {
-		return errEmail.WithError(err).Wrap("error sending email")
-	}
-	return nil
-}
+// func (c *Client) SendEmail(to, subject, message string) error {
+// 	msg := &mail.Message{
+// 		Sender:  "support@gigamunchapp.com",
+// 		To:      []string{to},
+// 		Subject: subject,
+// 		Body:    message,
+// 	}
+// 	if err := mail.Send(c.ctx, msg); err != nil {
+// 		return errEmail.WithError(err).Wrap("error sending email")
+// 	}
+// 	return nil
+// }
 
 // SendSMS sends an sms to the user
 func (c *Client) SendSMS(to, message string) error {
@@ -99,13 +99,17 @@ type UserInfo struct {
 
 // InquiryInfo contains info attached to an Inquiry for message.
 type InquiryInfo struct {
-	ID          int64  `json:"id,string"`
-	State       string `json:"state"`
-	CookAction  string `json:"cook_action"`
-	EaterAction string `json:"eater_action"`
-	ItemID      int64  `json:"item_id"`
-	ItemName    string `json:"item_name"`
-	ItemImage   string `json:"item_image"`
+	ID           int64     `json:"id,string"`
+	State        string    `json:"state"`
+	CookAction   string    `json:"cook_action"`
+	EaterAction  string    `json:"eater_action"`
+	ItemID       int64     `json:"item_id"`
+	ItemName     string    `json:"item_name"`
+	ItemImage    string    `json:"item_image"`
+	Price        float32   `json:"price"`
+	IsDelivery   bool      `json:"is_delivery"`
+	Servings     int32     `json:"servings"`
+	ExchangeTime time.Time `json:"exchange_time"`
 }
 
 func getChannelUniqueName(cookID, eaterID string) string {
@@ -243,18 +247,47 @@ func createUserIfNotExist(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *U
 
 func getInquiryBodyAndAttributes(inqI *InquiryInfo) (string, string) {
 	body := fmt.Sprintf("There is an update about your request for %s", inqI.ItemName)
-	attr := fmt.Sprintf(inquiryAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage)
+	attr := fmt.Sprintf(inquiryAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage, inqI.Price, inqI.IsDelivery, inqI.Servings, inqI.ExchangeTime.Unix())
 	return body, attr
 }
 
-// SendInquiryBotMessage sends a inquiry message from the InquiryBot to the apporiate channel. This function calls UpdateChannel.
-func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {
+// SendInquiryBotMessage sends a inquiry message from the InquiryBot to the apporiate channel. This function calls UpdateChannel. Returns MessageID, error.
+func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) (string, error) {
+	err := c.UpdateChannel(cookInfo, eaterInfo, inquiryInfo)
+	if err != nil {
+		return "", errors.Wrap("failed to message.UpdateChannel", err)
+	}
+	if cookInfo == nil || eaterInfo == nil || inquiryInfo == nil {
+		return "", errInvalidParamter.Wrap("inquiryInfo, cookInfo, and eaterInfo cannot be nil")
+	}
+	channelUniqueName := getChannelUniqueName(cookInfo.ID, eaterInfo.ID)
+	// get channel
+	channel, err := twilio.GetIPChannel(c.twilioIPC, serviceSID, channelUniqueName)
+	if err != nil {
+		return "", errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+	}
+	body, attr := getInquiryBodyAndAttributes(inquiryInfo)
+	msg, err := twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryBotID, body, attr)
+	if err != nil {
+		return "", errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+	}
+	return msg.Sid, nil
+}
+
+func getInquiryStatusBodyAndAttributes(cookInfo *UserInfo, inqI *InquiryInfo) (string, string) {
+	body := fmt.Sprintf("There is an update about your request for %s", inqI.ItemName)
+	attr := fmt.Sprintf(inquiryStatusAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage)
+	return body, attr
+}
+
+// UpdateInquiryStatus sends a inquiry message from the InquiryStatusBot to the apporiate channel, and updates the InquiryBot Message. This function calls UpdateChannel.
+func (c *Client) UpdateInquiryStatus(messageSID string, cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {
 	err := c.UpdateChannel(cookInfo, eaterInfo, inquiryInfo)
 	if err != nil {
 		return errors.Wrap("failed to message.UpdateChannel", err)
 	}
-	if cookInfo == nil || eaterInfo == nil || inquiryInfo == nil {
-		return errInvalidParamter.Wrap("inquiryInfo, cookInfo, and eaterInfo cannot be nil")
+	if messageSID == "" || cookInfo == nil || eaterInfo == nil || inquiryInfo == nil {
+		return errInvalidParamter.Wrap("messageSID, inquiryInfo, cookInfo, and eaterInfo cannot be nil")
 	}
 	channelUniqueName := getChannelUniqueName(cookInfo.ID, eaterInfo.ID)
 	// get channel
@@ -262,17 +295,22 @@ func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, 
 	if err != nil {
 		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 	}
-	body, attr := getInquiryBodyAndAttributes(inquiryInfo)
-	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryBotID, body, attr)
+	// send message
+	body, attr := getInquiryStatusBodyAndAttributes(cookInfo, inquiryInfo)
+	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryStatusBotID, body, attr)
 	if err != nil {
 		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+	}
+	// update InquiryBot message
+	body, attr = getInquiryBodyAndAttributes(inquiryInfo)
+	_, err = twilio.UpdateIPMessage(c.twilioIPC, serviceSID, channel.Sid, messageSID, body, attr)
+	if err != nil {
+		return errTwilio.WithError(err).Wrap("failed to twilio.UpdateIPMessage")
 	}
 	return nil
 }
 
-// func (c *Client) SendInquiryStatusBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {}
-
-// func (c *Client) SendGigamunchBotMessage()
+// func (c *Client) SendGigamunchBotMessage() error {}
 
 // UpdateUser creates or updates a user
 func (c *Client) UpdateUser(userInfo *UserInfo) error {
