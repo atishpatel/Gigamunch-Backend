@@ -78,8 +78,8 @@ type Inquiry struct {
 	EaterID         string    `json:"eater_id" datastore:",index"`
 	EaterPhotoURL   string    `json:"eater_photo_url" datastore:",noindex"`
 	EaterName       string    `json:"eater_name" datastore:",noindex"`
-	ReviewID        int64     `json:"review_id" datastore:",noindex"`
-	ItemID          int64     `json:"item_id" datastore:",index"`
+	ReviewID        int64     `json:"review_id,string" datastore:",noindex"`
+	ItemID          int64     `json:"item_id,string" datastore:",index"`
 	Item            ItemInfo  `json:"item" datastore:",noindex"`
 	MarkedAsDone    bool      `json:"marked_as_done" datastore:",index"`
 	State           string    `json:"state" datastore:",noindex"`

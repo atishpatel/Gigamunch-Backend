@@ -135,12 +135,15 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	totalTaxPrice := totalPrice - (totalPricePerServing + exchangePrice)
 	totalCookPrice := item.CookPricePerServing * float32(numServings)
 	totalGigaFee := totalPricePerServing - totalCookPrice
-	cookPriceWithDelivery := totalCookPrice
 	gigaFeeWithDelivery := totalGigaFee
-	if exchangeMethod.Pickup() || exchangeMethod.CookDelivery() {
-		cookPriceWithDelivery += exchangePrice
-	} else {
+	if !exchangeMethod.Pickup() && !exchangeMethod.CookDelivery() {
 		gigaFeeWithDelivery += exchangePrice
+	}
+	// Create Transaction
+	paymentC := getPaymentClient(c.ctx)
+	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, totalPrice, gigaFeeWithDelivery)
+	if err != nil {
+		return nil, errors.Wrap("failed to paymentC.StartSale", err)
 	}
 	// get cheap estimate for distance and duration
 	distance := eaterAddress.GreatCircleDistance(cook.Address.GeoPoint)
@@ -165,6 +168,7 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		CookAction:               CookAction.Pending,
 		ExpectedExchangeDateTime: expectedExchangeTime,
 		Servings:                 numServings,
+		BTTransactionID:          transactionID,
 		PaymentInfo: PaymentInfo{
 			CookPricePerServing: item.CookPricePerServing,
 			PricePerServing:     pricePerServing,
@@ -182,6 +186,15 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 			Duration:     duration,
 		},
 	}
+	// Put Inquiry in datastore
+	_, err = putIncomplete(c.ctx, inquiry)
+	if err != nil {
+		_, pErr := paymentC.RefundSale(transactionID)
+		if pErr != nil {
+			utils.Criticalf(c.ctx, "BT Transaction (%s) was not voided! Err: %+v", transactionID, pErr)
+		}
+		return nil, errDatastore.WithError(err).Wrap("cannot putIncomplete inquiry")
+	}
 	// Send inquiry bot message
 	messageC := getMessageClient(c.ctx)
 	cookUI, eaterUI := getCookAndEaterUserInfo(cook.ID, cook.Name, cook.PhotoURL, eater.ID, eater.Name, eater.PhotoURL)
@@ -192,22 +205,11 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		return inquiry, errors.Wrap("failed to message.SendInquiryBotMessage", err)
 	}
 	inquiry.MessageID = messageID
-
-	// Create Transaction
-	paymentC := getPaymentClient(c.ctx)
-	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, cookPriceWithDelivery, gigaFeeWithDelivery)
+	// update inquiry with messageID
+	err = put(c.ctx, inquiry.ID, inquiry)
 	if err != nil {
-		return nil, errors.Wrap("failed to paymentC.StartSale", err)
-	}
-	inquiry.BTTransactionID = transactionID
-	// Put Inquiry in datastore
-	_, err = putIncomplete(c.ctx, inquiry)
-	if err != nil {
-		_, pErr := paymentC.RefundSale(transactionID)
-		if pErr != nil {
-			utils.Criticalf(c.ctx, "BT Transaction (%s) was not voided! Err: %+v", transactionID, pErr)
-		}
-		return nil, errDatastore.WithError(err).Wrap("cannot putIncomplete inquiry")
+		utils.Criticalf(c.ctx, "failed to put inquiry(%d) after sending InquiryBotMessage err: %v", inquiry.ID, err)
+		return inquiry, errDatastore.WithError(err).Wrapf("failed to put inquiry(%d) after sending InquiryBotMessage.", inquiry.ID)
 	}
 	// TODO add task to where cook has (exchangeTime || 12 hours) to reply
 	return inquiry, nil
