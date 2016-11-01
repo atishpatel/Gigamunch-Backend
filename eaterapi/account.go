@@ -162,7 +162,12 @@ func (s *service) GetMessageToken(ctx context.Context, req *pb.GetMessageTokenRe
 		return resp, nil
 	}
 	messageC := message.New(ctx)
-	tkn, err := messageC.GetToken(user, req.DeviceId)
+	userInfo := &message.UserInfo{
+		ID:    user.ID,
+		Name:  user.Name,
+		Image: user.PhotoURL,
+	}
+	tkn, err := messageC.GetToken(userInfo, req.DeviceId)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to message.GetToken")
 		return resp, nil
