@@ -32,17 +32,6 @@ CREATE TABLE IF NOT EXISTS `likes` (
   `created_datetime` DATETIME NOT NULL,
   PRIMARY KEY (`item_id`, `user_id`)
 ) ENGINE = InnoDB;
--- CREATE TABLE IF NOT EXISTS `like` (
---   `user_id` VARCHAR(45) NOT NULL,
---   `item_id` BIGINT NOT NULL,
---   `created_datetime` DATETIME NOT NULL,
---   PRIMARY KEY (`item_id`, `user_id`)
--- ) ENGINE = InnoDB;
--- create num_likes table
--- CREATE TABLE IF NOT EXISTS `num_likes` (
---   `item_id` BIGINT NOT NULL PRIMARY KEY,
---   `num` BIGINT NOT NULL
--- ) ENGINE = InnoDB;
 -- create review table
 CREATE TABLE IF NOT EXISTS `review` (
   `id` BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -68,14 +57,14 @@ CREATE TABLE IF NOT EXISTS `review` (
   INDEX(`created_datetime`)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 -- create completed_inquries table 
-CREATE TABLE IF NOT EXISTS `completed_inquries` (
-  `id` BIGINT NOT NULL PRIMARY KEY,
-  `servings` SMALLINT UNSIGNED NOT NULL,
-  `cook_id` VARCHAR(45) NOT NULL,
-  `item_id` BIGINT NOT NULL,
-  `menu_id` BIGINT NOT NULL,
-  `created_datetime` DATETIME NOT NULL,
-  `cook_price_per_serving` FLOAT(10,2) NOT NULL,
-  `cook_revenue` FLOAT(10,2) NOT NULL,
-  INDEX(`cook_id`)
-) ENGINE = InnoDB;
+-- CREATE TABLE IF NOT EXISTS `completed_inquiries` (
+--   `id` BIGINT NOT NULL PRIMARY KEY,
+--   `servings` SMALLINT UNSIGNED NOT NULL,
+--   `cook_id` VARCHAR(45) NOT NULL,
+--   `item_id` BIGINT NOT NULL,
+--   `menu_id` BIGINT NOT NULL,
+--   `created_datetime` DATETIME NOT NULL,
+--   `cook_price_per_serving` FLOAT(10,2) NOT NULL,
+--   `cook_revenue` FLOAT(10,2) NOT NULL,
+--   INDEX(`cook_id`)
+-- ) ENGINE = InnoDB;
