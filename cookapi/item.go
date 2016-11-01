@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
@@ -14,21 +12,9 @@ import (
 
 // SaveItemReq is the request for SaveItem.
 type SaveItemReq struct {
-	Gigatoken string `json:"gigatoken"`
-	Item      Item   `json:"item"`
-	Menu      Menu   `json:"menu"`
-}
-
-func (req *SaveItemReq) gigatoken() string {
-	return req.Gigatoken
-}
-
-// valid validates a req
-func (req *SaveItemReq) valid() error {
-	if req.Gigatoken == "" {
-		return fmt.Errorf("Gigatoken is empty.")
-	}
-	return nil
+	GigatokenReq
+	Item Item `json:"item"`
+	Menu Menu `json:"menu"`
 }
 
 // ItemResp is a response with only an Item and err.

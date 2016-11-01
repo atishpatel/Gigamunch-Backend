@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"golang.org/x/net/context"
@@ -19,7 +18,7 @@ type CookResp struct {
 	Err  errors.ErrorWithCode `json:"err"`
 }
 
-// GetCook is an endpoint that get the chef info.
+// GetCook is an endpoint that get the cook info.
 func (service *Service) GetCook(ctx context.Context, req *GigatokenReq) (*CookResp, error) {
 	resp := new(CookResp)
 	defer handleResp(ctx, "GetCook", resp.Err)
@@ -40,20 +39,8 @@ func (service *Service) GetCook(ctx context.Context, req *GigatokenReq) (*CookRe
 
 // UpdateCookReq is a request for UpdateCook.
 type UpdateCookReq struct {
-	Gigatoken string    `json:"gigatoken"`
-	Cook      cook.Cook `json:"cook"`
-}
-
-func (req *UpdateCookReq) gigatoken() string {
-	return req.Gigatoken
-}
-
-// valid validates a req
-func (req *UpdateCookReq) valid() error {
-	if req.Gigatoken == "" {
-		return fmt.Errorf("Gigatoken is empty.")
-	}
-	return nil
+	GigatokenReq
+	Cook cook.Cook `json:"cook"`
 }
 
 // UpdateCook updates the cook profile.
