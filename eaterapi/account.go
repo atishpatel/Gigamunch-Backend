@@ -22,6 +22,14 @@ func (s *service) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignIn
 		resp.Error = getGRPCError(err, "failed to auth.GetSessionWithGToken")
 		return resp, nil
 	}
+	if user.Name == "" && req.Name != "" {
+		user.Name = req.Name
+		err = auth.SaveUser(ctx, user)
+		if err != nil {
+			resp.Error = getGRPCError(err, "failed to auth.SaveUser")
+			return resp, nil
+		}
+	}
 	eaterC := eater.New(ctx)
 	_, err = eaterC.Update(user)
 	if err != nil {

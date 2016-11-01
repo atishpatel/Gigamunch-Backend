@@ -293,9 +293,8 @@ func sendUpdatedActionMessage(ctx context.Context, inquiry *Inquiry) error {
 	if err != nil {
 		return errors.Wrap("failed to cook.GetDisplayInfo", err)
 	}
-
 	eaterC := getEaterClient(ctx)
-	eaterName, eaterPhotoURL, err := eaterC.GetDisplayInfo(inquiry.CookID)
+	eaterName, eaterPhotoURL, err := eaterC.GetDisplayInfo(inquiry.EaterID)
 	if err != nil {
 		return errors.Wrap("failed to eater.GetDisplayInfo", err)
 	}
