@@ -75,6 +75,7 @@ func init() {
 	// Menu stuff
 	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
 	register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")
-
+	// Inquiry stuffffffffff
+	register("GetMessageToken", "getMessageToken", "GET", "cookservice/getMessageToken", "Gets the a token for messaging.")
 	endpoints.HandleHTTP()
 }

@@ -7,11 +7,13 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
+// CreateFakeGigatokenReq is the request for CreateFakeGigatoken.
 type CreateFakeGigatokenReq struct {
 	GigatokenReq
 	UserID string `json:"user_id"`
 }
 
+// CreateFakeGigatoken creates a fake Gigatoken if user is an admin.
 func (service *Service) CreateFakeGigatoken(ctx context.Context, req *CreateFakeGigatokenReq) (*RefreshTokenResp, error) {
 	resp := new(RefreshTokenResp)
 	defer handleResp(ctx, "CreateFakeGigatoken", resp.Err)
