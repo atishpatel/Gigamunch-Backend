@@ -90,7 +90,7 @@ func (c *Client) GetAddress(id string) (*types.Address, error) {
 func (c *Client) GetDisplayInfo(id string) (string, string, error) {
 	cook, err := get(c.ctx, id)
 	if err != nil {
-		return "", nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", id)
+		return "", "", errDatastore.WithError(err).Wrapf("failed to get cook(%s)", id)
 	}
 	return cook.Name, cook.PhotoURL, nil
 }
