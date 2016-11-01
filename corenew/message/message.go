@@ -2,7 +2,6 @@ package message
 
 import (
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
 	twilio "github.com/atishpatel/twiliogo"
 	jwt "gopkg.in/dgrijalva/jwt-go.v2"
 
@@ -19,23 +17,24 @@ import (
 )
 
 const (
-	channelAttr = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%s","inquiry_status":"%s","cook_action":"%s","eater_action":"%s","item_id":"%s",item_name":"%s","item_image":"%s"}`
-	userAttr    = `{"id":"%s","name":"%s","image":"%s"}`
+	channelAttr        = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
+	userAttr           = `{"id":"%s","name":"%s","image":"%s"}`
+	inquiryAttr        = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
+	inquiryBotID       = "InquiryBot"
+	inquiryStatusBotID = "InquiryStatusBot"
+	gigamunchBotID     = "GigamunchBot"
 )
 
 var (
-	onceConfig          = sync.Once{}
-	twilioConfig        config.TwilioConfig
-	from                []string
-	serviceSID          string
-	inquiryBotSID       string
-	inquiryStatusBotSID string
-	gigamunchBotSID     string
-	errInvalidParamter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Something went wrong with the server."}
-	errTwilio           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio."}
-	errEmail            = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with sending email."}
-	errFakeInput        = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Input is invalid."}
+	onceConfig         = sync.Once{}
+	twilioConfig       config.TwilioConfig
+	from               []string
+	serviceSID         string
+	errInvalidParamter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errInternal        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Something went wrong with the server."}
+	errTwilio          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio."}
+	errEmail           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with sending email."}
+	errFakeInput       = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Input is invalid."}
 )
 
 // Client is the client for ip messaging, sms, and email.
@@ -101,7 +100,7 @@ type UserInfo struct {
 // InquiryInfo contains info attached to an Inquiry for message.
 type InquiryInfo struct {
 	ID          int64  `json:"id,string"`
-	Status      string `json:"status"`
+	State       string `json:"state"`
 	CookAction  string `json:"cook_action"`
 	EaterAction string `json:"eater_action"`
 	ItemID      int64  `json:"item_id"`
@@ -109,13 +108,15 @@ type InquiryInfo struct {
 	ItemImage   string `json:"item_image"`
 }
 
+func getChannelUniqueName(cookID, eaterID string) string {
+	return fmt.Sprintf("%s<;>%s", cookID, eaterID)
+}
+
 // returns friendlyName, uniqueName, attributes
 func getChannelNamesAndAttr(c *UserInfo, e *UserInfo, i *InquiryInfo) (string, string, string) {
-	inqID := strconv.FormatInt(i.ID, 10)
-	itemID := strconv.FormatInt(i.ItemID, 10)
 	friendlyName := fmt.Sprintf("%s<;>%s", c.Name, e.Name)
-	uniqueName := fmt.Sprintf("%s<;>%s", c.ID, e.ID)
-	attr := fmt.Sprintf(channelAttr, c.ID, c.Name, c.Image, e.ID, e.Name, e.Image, inqID, i.Status, i.CookAction, i.EaterAction, itemID, i.ItemName, i.ItemImage)
+	uniqueName := getChannelUniqueName(c.ID, e.ID)
+	attr := fmt.Sprintf(channelAttr, c.ID, c.Name, c.Image, e.ID, e.Name, e.Image, i.ID, i.State, i.CookAction, i.EaterAction, i.ItemID, i.ItemName, i.ItemImage)
 	return friendlyName, uniqueName, attr
 }
 
@@ -139,14 +140,14 @@ func (c *Client) UpdateChannel(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryI
 	if err != nil {
 		tErr, ok := err.(*twilio.TwilioError)
 		if !ok || tErr.Code != twilio.CodeNotFound {
-			return errTwilio.WithError(err).Wrap("failed to GetIPChannel")
+			return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 		}
 		isNew = true
 	}
 	if isNew {
-		_, err = twilio.NewIPChannel(c.twilioIPC, serviceSID, friendlyName, uniqueName, false, attributes)
+		channel, err = twilio.NewIPChannel(c.twilioIPC, serviceSID, friendlyName, uniqueName, false, attributes)
 		if err != nil {
-			return errTwilio.WithError(err)
+			return errTwilio.WithError(err).Wrap("failed to twilio.NewIPChannel")
 		}
 		// add users to channel
 		err = addUserToChannel(c.twilioIPC, channel.Sid, cookInfo)
@@ -162,44 +163,28 @@ func (c *Client) UpdateChannel(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryI
 			return errors.Wrap("failed to addBotsToChannel", err)
 		}
 	} else {
-		_, err = twilio.UpdateIPChannel(c.twilioIPC, serviceSID, friendlyName, uniqueName, uniqueName, false, attributes)
-	}
-	if err != nil {
-		return errTwilio.WithError(err)
+		_, err = twilio.UpdateIPChannel(c.twilioIPC, serviceSID, uniqueName, friendlyName, uniqueName, false, attributes)
+		if err != nil {
+			return errTwilio.WithError(err).Wrap("failed to twilio.UpdateIPChannel")
+		}
 	}
 	return nil
 }
 
 func addBotsToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID string) error {
-	var err error
-	if inquiryBotSID == "" {
-		// get bot SIDs
-		var u *twilio.IPUser
-		u, err = twilio.GetIPUser(twilioIPC, serviceSID, "GigamunchBot")
-		if err != nil {
-			return errTwilio.WithError(err).Wrap("failed to get GigamunchBot")
-		}
-		gigamunchBotSID = u.Sid
-		u, err = twilio.GetIPUser(twilioIPC, serviceSID, "InquiryBot")
-		if err != nil {
-			return errTwilio.WithError(err).Wrap("failed to get InquiryBot")
-		}
-		inquiryBotSID = u.Sid
-		u, err = twilio.GetIPUser(twilioIPC, serviceSID, "InquiryStatusBot")
-		if err != nil {
-			return errTwilio.WithError(err).Wrap("failed to get InquiryStatusBot")
-		}
-		inquiryStatusBotSID = u.Sid
+	if channelSID == "" {
+		return errInvalidParamter.Wrap("channelSID cannot be an empty string")
 	}
-	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, gigamunchBotSID, "")
+	var err error
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, gigamunchBotID, "")
 	if err != nil {
 		return errTwilio.WithError(err).Wrapf("failed to add GigamunchBot to channel(%s)", channelSID)
 	}
-	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, inquiryBotSID, "")
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, inquiryBotID, "")
 	if err != nil {
 		return errTwilio.WithError(err).Wrapf("failed to add InquiryBot to channel(%s)", channelSID)
 	}
-	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, inquiryStatusBotSID, "")
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, inquiryStatusBotID, "")
 	if err != nil {
 		return errTwilio.WithError(err).Wrapf("failed to add InquiryStatusBot to channel(%s)", channelSID)
 	}
@@ -207,12 +192,18 @@ func addBotsToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID stri
 }
 
 func addUserToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID string, userInfo *UserInfo) error {
+	if channelSID == "" {
+		return errInvalidParamter.Wrap("channelSID cannot be an empty string")
+	}
+	if userInfo == nil || userInfo.ID == "" {
+		return errInvalidParamter.Wrap("User ID cannot be an empty string")
+	}
 	doesntExist := false
 	_, err := twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, userInfo.ID, "")
 	if err != nil {
 		tErr, ok := err.(*twilio.TwilioError)
 		if !ok || tErr.Code != twilio.CodeNotFound {
-			return errTwilio.WithError(err).Wrap("failed to AddIPMemberToChannel")
+			return errTwilio.WithError(err).Wrap("failed to twilio.AddIPMemberToChannel")
 		}
 		doesntExist = true
 	}
@@ -228,12 +219,58 @@ func addUserToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID stri
 
 func createUser(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *UserInfo) (*twilio.IPUser, error) {
 	attributes := getUserAttr(userInfo)
-	return twilio.NewIPUser(twilioIPC, serviceSID, userInfo.ID, "", attributes)
+	user, err := twilio.NewIPUser(twilioIPC, serviceSID, userInfo.ID, "", attributes)
+	if err != nil {
+		return nil, errTwilio.WithError(err).Wrap("failed to twilio.NewIPUser")
+	}
+	return user, nil
 }
 
-// func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {}
+func createUserIfNotExist(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *UserInfo) (*twilio.IPUser, error) {
+	user, err := twilio.GetIPUser(twilioIPC, serviceSID, userInfo.ID)
+	if err != nil {
+		tErr, ok := err.(*twilio.TwilioError)
+		if !ok || tErr.Code != twilio.CodeNotFound {
+			return nil, errTwilio.WithError(err).Wrap("failed to twilio.AddIPMemberToChannel")
+		}
+		user, err = createUser(twilioIPC, userInfo)
+		if err != nil {
+			return nil, errors.Wrap("failed to createUser", err)
+		}
+	}
+	return user, nil
+}
 
-// func (c *Client) SendInquiryStatusBotMessage()
+func getInquiryBodyAndAttributes(inqI *InquiryInfo) (string, string) {
+	body := fmt.Sprintf("There is an update about your request for %s", inqI.ItemName)
+	attr := fmt.Sprintf(inquiryAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage)
+	return body, attr
+}
+
+// SendInquiryBotMessage sends a inquiry message from the InquiryBot to the apporiate channel. This function calls UpdateChannel.
+func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {
+	err := c.UpdateChannel(cookInfo, eaterInfo, inquiryInfo)
+	if err != nil {
+		return errors.Wrap("failed to message.UpdateChannel", err)
+	}
+	if cookInfo == nil || eaterInfo == nil || inquiryInfo == nil {
+		return errInvalidParamter.Wrap("inquiryInfo, cookInfo, and eaterInfo cannot be nil")
+	}
+	channelUniqueName := getChannelUniqueName(cookInfo.ID, eaterInfo.ID)
+	// get channel
+	channel, err := twilio.GetIPChannel(c.twilioIPC, serviceSID, channelUniqueName)
+	if err != nil {
+		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+	}
+	body, attr := getInquiryBodyAndAttributes(inquiryInfo)
+	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryBotID, body, attr)
+	if err != nil {
+		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+	}
+	return nil
+}
+
+// func (c *Client) SendInquiryStatusBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryInfo *InquiryInfo) error {}
 
 // func (c *Client) SendGigamunchBotMessage()
 
@@ -265,8 +302,12 @@ func (c *Client) UpdateUser(userInfo *UserInfo) error {
 }
 
 // GetToken gets a messaging token for the user.
-func (c *Client) GetToken(user *types.User, deviceID string) (string, error) {
-	endpointID := fmt.Sprintf("Gigamunch:%s:%s", user.ID, deviceID)
+func (c *Client) GetToken(userInfo *UserInfo, deviceID string) (string, error) {
+	_, err := createUserIfNotExist(c.twilioIPC, userInfo)
+	if err != nil {
+		return "", err
+	}
+	endpointID := fmt.Sprintf("Gigamunch:%s:%s", userInfo.ID, deviceID)
 	jwtToken := jwt.New(jwt.SigningMethodHS256)
 	nowUnix := time.Now().Unix()
 	jwtToken.Header["cty"] = "twilio-fpa;v=1"
@@ -278,7 +319,7 @@ func (c *Client) GetToken(user *types.User, deviceID string) (string, error) {
 	ipMessaging["service_sid"] = serviceSID
 	ipMessaging["endpoint_id"] = endpointID
 	grants := make(map[string]interface{}, 2)
-	grants["identity"] = user.ID
+	grants["identity"] = userInfo.ID
 	grants["ip_messaging"] = ipMessaging
 	jwtToken.Claims["grants"] = grants
 	tkn, err := jwtToken.SignedString([]byte(twilioConfig.AuthToken))
