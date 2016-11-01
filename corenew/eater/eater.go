@@ -35,6 +35,15 @@ func (c *Client) Get(id string) (*Eater, error) {
 	return eater, nil
 }
 
+// GetDisplayInfo returns the eater Name, PhotoURL, error.
+func (c *Client) GetDisplayInfo(id string) (string, string, error) {
+	eater, err := get(c.ctx, id)
+	if err != nil {
+		return "", nil, errDatastore.WithError(err).Wrapf("failed to get eater(%s)", id)
+	}
+	return eater.Name, eater.PhotoURL, nil
+}
+
 // GetBTCustomerID gets the eater Braintree customer id
 func (c *Client) GetBTCustomerID(id string) (string, error) {
 	eater, err := get(c.ctx, id)
