@@ -203,7 +203,7 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string, menuID int64
 			MethodName:   inq.ExchangeMethod.String(),
 			IsDelivery:   inq.ExchangeMethod.Delivery(),
 			EaterAddress: getPBAddress(&inq.ExchangePlanInfo.EaterAddress, false),
-			CookAddress:  getPBAddress(&inq.ExchangePlanInfo.EaterAddress, false),
+			CookAddress:  getPBAddress(&inq.ExchangePlanInfo.CookAddress, false),
 			Distance:     inq.ExchangePlanInfo.Distance,
 			Duration:     int32(inq.ExchangePlanInfo.Duration),
 		},
