@@ -136,7 +136,10 @@
             address[addressType] = val;
           }
         }
-        var apt = this.address.apt.toUpperCase();
+        var apt = '';
+        if (this.address.apt) {
+          apt = this.address.apt.toUpperCase();
+        }
         var street = address['street_number'] + ' ' + address['route'];
         var city = address['locality'];
         var state = address['administrative_area_level_1'];
