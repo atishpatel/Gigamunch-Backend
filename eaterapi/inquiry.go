@@ -10,6 +10,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
@@ -123,9 +124,16 @@ func (s *service) GetInquiry(ctx context.Context, req *pb.GetInquiryRequest) (*p
 		numLikes = make([]int32, 1)
 		menuIDs = make([]int64, 1)
 	}
+	// get review
+	reviewC := review.New(ctx)
+	rvw, err := reviewC.Get(inq.ReviewID)
+	if err != nil {
+		resp.Error = getGRPCError(err, "failed to review.Get")
+	} else {
+		resp.Review = getPBReview(rvw)
+	}
 	resp.Inquiry = getPBInquiry(inq, names[0], photos[0], menuIDs[0], numLikes[0], hasLiked[0])
 	return resp, nil
-
 }
 
 func (s *service) CancelInquiry(ctx context.Context, req *pb.CancelInquiryRequest) (*pb.CancelInquiryResponse, error) {
