@@ -223,7 +223,7 @@ func addUserToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID stri
 
 func createUser(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *UserInfo) (*twilio.IPUser, error) {
 	attributes := getUserAttr(userInfo)
-	user, err := twilio.NewIPUser(twilioIPC, serviceSID, userInfo.ID, "", attributes)
+	user, err := twilio.NewIPUser(twilioIPC, serviceSID, userInfo.ID, userInfo.Name+":", "", attributes)
 	if err != nil {
 		return nil, errTwilio.WithError(err).Wrap("failed to twilio.NewIPUser")
 	}
@@ -331,7 +331,7 @@ func (c *Client) UpdateUser(userInfo *UserInfo) error {
 		}
 	} else {
 		attributes := getUserAttr(userInfo)
-		_, err := twilio.UpdateIPUser(c.twilioIPC, serviceSID, user.Sid, userInfo.ID, "", attributes)
+		_, err := twilio.UpdateIPUser(c.twilioIPC, serviceSID, user.Sid, userInfo.ID, userInfo.Name+":", "", attributes)
 		if err != nil {
 			return errTwilio.WithError(err).Wrap("failed to createUser")
 		}
@@ -353,9 +353,10 @@ func (c *Client) GetToken(userInfo *UserInfo, deviceID string) (string, error) {
 	jwtToken.Claims["iss"] = twilioConfig.KeySID
 	jwtToken.Claims["sub"] = twilioConfig.AccountSID
 	jwtToken.Claims["exp"] = nowUnix + 7200 // 2 hours
-	ipMessaging := make(map[string]string, 2)
+	ipMessaging := make(map[string]string, 3)
 	ipMessaging["service_sid"] = serviceSID
 	ipMessaging["endpoint_id"] = endpointID
+	ipMessaging["push_credential_sid"] = twilioConfig.PushCredentialSID
 	grants := make(map[string]interface{}, 2)
 	grants["identity"] = userInfo.ID
 	grants["ip_messaging"] = ipMessaging
