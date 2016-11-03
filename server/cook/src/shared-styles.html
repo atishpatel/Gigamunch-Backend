@@ -23,10 +23,13 @@
       
        :host {
         font-family: 'FontRegular', 'Roboto';
+        font-smoothing: antialiased;
+        -webkit-font-smoothing: antialiased;
         letter-spacing: .5px;
         --primary-color: #FF7043;
         --light-primary-color: #FF8A65;
         --dark-primary-color: #FF5722;
+        --gray-line-color: #CFD8DC;
         --link-color: #899BA3;
         --accent-color: var(--paper-light-blue-a200);
         --light-accent-color: var(--paper-light-blue-a100);
@@ -39,10 +42,14 @@
           font-family: 'FontRegular', 'Roboto';
           letter-spacing: .5px;
           font-weight: bold;
+          font-smoothing: antialiased;
+          -webkit-font-smoothing: antialiased;
         }
         --font: {
           font-family: 'FontRegular', 'Roboto';
           letter-spacing: .5px;
+          font-smoothing: antialiased;
+          -webkit-font-smoothing: antialiased;
         }
         /* paper-button */
         --paper-button: {
@@ -91,6 +98,10 @@
       
       .font-bold {
         @apply(--font-bold);
+      }
+      
+      a {
+        text-decoration: none;
       }
       
       a:link,
@@ -174,6 +185,10 @@
       
       .half-field {
         max-width: 49.5%;
+      }
+      
+      .bold {
+        font-weight: bold;
       }
 
     </style>
