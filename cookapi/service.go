@@ -77,9 +77,9 @@ func init() {
 	register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")
 	// Inquiry stuffffffffff
 	register("GetMessageToken", "getMessageToken", "GET", "cookservice/getMessageToken", "Gets the a token for messaging.")
-	register("GetInquiries", "GetInquiries", "GET", "cookservice/GetInquiries", "GetInquiries gets a cook's inquiries.")
-	register("GetInquiry", "GetInquiry", "GET", "cookservice/GetInquiry", "GetInquiry gets a cook's inquiry.")
-	register("AcceptInquiry", "AcceptInquiry", "POST", "cookservice/acceptInquiry", "AcceptInquiry accepts an inquiry for a cook.")
-	register("DeclineInquiry", "DeclineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
+	register("GetInquiries", "getInquiries", "GET", "cookservice/getInquiries", "GetInquiries gets a cook's inquiries.")
+	register("GetInquiry", "getInquiry", "GET", "cookservice/getInquiry", "GetInquiry gets a cook's inquiry.")
+	register("AcceptInquiry", "acceptInquiry", "POST", "cookservice/acceptInquiry", "AcceptInquiry accepts an inquiry for a cook.")
+	register("DeclineInquiry", "declineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
 	endpoints.HandleHTTP()
 }
