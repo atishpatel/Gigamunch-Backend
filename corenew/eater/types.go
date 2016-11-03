@@ -6,7 +6,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
-const kindEater = "eater"
+const kindEater = "Eater"
 
 // Eater is someone who uses the eater app for Gigamunch.
 type Eater struct {
