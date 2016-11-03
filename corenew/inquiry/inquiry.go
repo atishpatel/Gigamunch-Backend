@@ -352,6 +352,20 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	return inquiry, nil
 }
 
+// SetReviewID sets the inquiry's ReviewID.
+func (c *Client) SetReviewID(id, reviewID int64) error {
+	inquiry, err := get(c.ctx, id)
+	if err != nil {
+		return errDatastore.WithError(err).Wrapf("failed to get inquiry(%d)", id)
+	}
+	inquiry.ReviewID = reviewID
+	err = put(c.ctx, id, inquiry)
+	if err != nil {
+		return errDatastore.WithError(err).Wrapf("failed to put Inquiry(%d)", id)
+	}
+	return nil
+}
+
 // EaterRequestRefund
 // TODO Add request refund feature
 
