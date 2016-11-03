@@ -6,25 +6,26 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
 	// driver for mysql
 	mysql "github.com/go-sql-driver/mysql"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"golang.org/x/net/context"
-
-	"google.golang.org/appengine"
 )
 
 const (
 	// datetimeFormat        = "2006-01-02 15:04:05" //"Jan 2, 2006 at 3:04pm (MST)"
 	insertStatement       = "INSERT INTO review (cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,rating,text) VALUES ('%s','%s','%s','%s',%d,%d,'%s','%s',%d,%d,'%s')"
-	updateStatement       = "UPDATE TABLE review (eater_name,eater_photo_url,rating,text,edited_datetime,is_edited) VALUES ('%s','%s',%d,'%s',NOW(),1) WHERE id=%d"
-	updateCookResponse    = "UPDATE TABLE review (has_response,response_created_datetime,response_text) VALUES (1,NOW(),%s) WHERE id=%d"
+	updateStatement       = "UPDATE review SET eater_name='%s', eater_photo_url='%s', rating=%d, text='%s', edited_datetime=NOW(), is_edited=1 WHERE id=%d"
+	updateCookResponse    = "UPDATE review SET has_response=1, response_created_datetime=NOW(), response_text='%s' WHERE id=%d"
 	selectReviewStatement = "SELECT id,cook_id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text FROM review WHERE id=%d %s"
 	// TODO change to fn(created_datetime, item_id)
 	selectReviewByCookID = "SELECT id,eater_id,eater_name,eater_photo_url,inquiry_id,item_id,item_name,item_photo_url,menu_id,created_datetime,rating,text,is_edited,edited_datetime,has_response,response_created_datetime,response_text FROM review WHERE cook_id='%s' ORDER BY created_datetime DESC LIMIT %d,%d"
@@ -71,7 +72,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		ItemPhotoURL:    itemPhotoURL,
 		MenuID:          menuID,
 		Rating:          rating,
-		Text:            text,
+		Text:            getEscapedString(text),
 	}
 	if isNewReview {
 		// insert review
@@ -85,6 +86,11 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 			return nil, errSQLDB.WithError(err).Wrap("failed to results.LastInsertId()")
 		}
 		review.ID = id
+		inquiryC := inquiry.New(c.ctx)
+		err = inquiryC.SetReviewID(inquiryID, id)
+		if err != nil {
+			return nil, errors.Wrap("failed to inquiry.SetReviewID", err)
+		}
 	} else {
 		// update review
 		st := fmt.Sprintf(updateStatement, user.Name, user.PhotoURL, rating, text, id)
@@ -111,7 +117,7 @@ func (c *Client) PostResponse(user *types.User, id int64, text string) error {
 		return errInvalidParameter.WithMessage("ReviewID cannot be 0.")
 	}
 	// update review
-	st := fmt.Sprintf(updateCookResponse, text, id)
+	st := fmt.Sprintf(updateCookResponse, getEscapedString(text), id)
 	results, err := mysqlDB.Exec(st)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrapf("failed execute %s", st)
@@ -146,10 +152,12 @@ func (c *Client) GetByCookID(cookID string, itemID int64, startIndex, endIndex i
 		var createdNulltime mysql.NullTime
 		var editedNulltime mysql.NullTime
 		var responseCreatedNulltime mysql.NullTime
+		var text sql.NullString
+		var responseText sql.NullString
 		err = rows.Scan(&review.ID, &review.EaterID, &review.EaterName, &review.EaterPhotoURL,
 			&review.InquiryID, &review.ItemID, &review.ItemName, &review.ItemPhotoURL, &review.MenuID, &createdNulltime,
-			&review.Rating, &review.Text, &review.IsEdited, &editedNulltime,
-			&review.HasResponse, &responseCreatedNulltime, &review.ResponseText)
+			&review.Rating, &text, &review.IsEdited, &editedNulltime,
+			&review.HasResponse, &responseCreatedNulltime, &responseText)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
 		}
@@ -162,9 +170,23 @@ func (c *Client) GetByCookID(cookID string, itemID int64, startIndex, endIndex i
 		if responseCreatedNulltime.Valid {
 			review.ResponseCreatedDateTime = responseCreatedNulltime.Time
 		}
+		if text.Valid {
+			review.Text = getUnescapedString(text.String)
+		}
+		if responseText.Valid {
+			review.ResponseText = getUnescapedString(responseText.String)
+		}
 		reviews = append(reviews, review)
 	}
 	return reviews, nil
+}
+
+func getEscapedString(s string) string {
+	return strings.Replace(s, "'", "\\'", -1)
+}
+
+func getUnescapedString(s string) string {
+	return strings.Replace(s, "\\'", "'", -1)
 }
 
 func getSelectReviewStatement(ids []int64) (string, error) {
@@ -202,10 +224,12 @@ func (c *Client) GetMultiByID(ids []int64) ([]*Review, error) {
 			var createdNulltime mysql.NullTime
 			var editedNulltime mysql.NullTime
 			var responseCreatedNulltime mysql.NullTime
+			var text sql.NullString
+			var responseText sql.NullString
 			err = rows.Scan(&review.ID, &review.CookID, &review.EaterID, &review.EaterName, &review.EaterPhotoURL,
 				&review.InquiryID, &review.ItemID, &review.ItemName, &review.ItemPhotoURL, &review.MenuID, &createdNulltime,
-				&review.Rating, &review.Text, &review.IsEdited, &editedNulltime,
-				&review.HasResponse, &responseCreatedNulltime, &review.ResponseText)
+				&review.Rating, &text, &review.IsEdited, &editedNulltime,
+				&review.HasResponse, &responseCreatedNulltime, &responseText)
 			if err != nil {
 				return nil, errSQLDB.WithError(err).Wrap("cannot scan rows")
 			}
@@ -217,6 +241,12 @@ func (c *Client) GetMultiByID(ids []int64) ([]*Review, error) {
 			}
 			if responseCreatedNulltime.Valid {
 				review.ResponseCreatedDateTime = responseCreatedNulltime.Time
+			}
+			if text.Valid {
+				review.Text = getUnescapedString(text.String)
+			}
+			if responseText.Valid {
+				review.ResponseText = getUnescapedString(responseText.String)
 			}
 			for i := range ids {
 				if ids[i] == review.ID {
