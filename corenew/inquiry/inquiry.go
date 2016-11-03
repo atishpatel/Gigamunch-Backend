@@ -1,6 +1,7 @@
 package inquiry
 
 import (
+	"math"
 	"time"
 
 	"golang.org/x/net/context"
@@ -129,9 +130,9 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	}
 	// calculate pricing
 	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
-	totalPricePerServing := pricePerServing * float32(numServings)
+	totalPricePerServing := toFixed(pricePerServing*float32(numServings), 2)
 	taxPercentage := payment.GetTaxPercentage(cook.Address.Latitude, cook.Address.Longitude)
-	totalPrice := (totalPricePerServing + exchangePrice) * ((taxPercentage / 100) + 1)
+	totalPrice := toFixed((totalPricePerServing+exchangePrice)*((taxPercentage/100)+1), 2)
 	totalTaxPrice := totalPrice - (totalPricePerServing + exchangePrice)
 	totalCookPrice := item.CookPricePerServing * float32(numServings)
 	totalGigaFee := totalPricePerServing - totalCookPrice
@@ -438,4 +439,13 @@ func getInquiryInfo(inquiry *Inquiry) *message.InquiryInfo {
 		Servings:     inquiry.Servings,
 		ExchangeTime: inquiry.ExpectedExchangeDateTime,
 	}
+}
+
+func round(num float32) int {
+	return int(num + float32(math.Copysign(0.5, float64(num))))
+}
+
+func toFixed(num float32, precision int) float32 {
+	output := float32(math.Pow(10, float64(precision)))
+	return float32(round(num*output)) / output
 }
