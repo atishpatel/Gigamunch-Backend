@@ -25,8 +25,8 @@ const (
 	insertStatement                    = "INSERT INTO `likes` (created_datetime, user_id, item_id, menu_id, cook_id) VALUES ('%s','%s',%d, %d, '%s')"
 	deleteStatement                    = "DELETE FROM `likes` WHERE user_id='%s' AND item_id=%d"
 	selectNumLikesStatement            = "SELECT item_id, COUNT(item_id) FROM `likes` WHERE %s GROUP BY item_id"
-	selectNumLikesWithMenuIDStatement  = "SELECT item_id, menu_id, user_id, COUNT(item_id) FROM (SELECT user_id, item_id, menu_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1 ELSE 2 END) as l GROUP BY item_id"
-	selectNumLikesAndHasLikedStatement = "SELECT item_id, user_id, COUNT(item_id) FROM (SELECT user_id, item_id FROM `likes` WHERE %s ORDER BY CASE WHEN user_id='%s' THEN 1 ELSE 2 END) as l GROUP BY item_id"
+	selectNumLikesWithMenuIDStatement  = "SELECT item_id, menu_id, MIN(a), COUNT(item_id) FROM (SELECT CASE WHEN user_id='%s' THEN 0 ELSE 1 END AS a, item_id, menu_id FROM `likes` WHERE %s ORDER BY a) AS l GROUP BY item_id"
+	selectNumLikesAndHasLikedStatement = "SELECT item_id, MIN(a), COUNT(item_id) FROM (SELECT CASE WHEN user_id='%s' THEN 0 ELSE 1 END AS a, item_id FROM `likes` WHERE %s ORDER BY a) as l GROUP BY item_id"
 	selectNumCookLikesStatement        = "SELECT COUNT(cook_id) FROM `likes` WHERE cook_id='%s'"
 	// selectNumMenuLikesStatement        = "SELECT COUNT(menu_id) FROM `likes` WHERE menu_id=%d"
 	// selectByUserID   = "SELECT item_id FROM `like` WHERE user_id=? ORDER BY item_id ASC"
@@ -180,7 +180,7 @@ func (c *Client) GetNumLikesWithMenuID(userID string, items []int64) ([]bool, []
 	defer handleCloser(c.ctx, rows)
 	var tmpMenuID int64
 	var tmpItemID int64
-	var tmpUserID string
+	var tmpUserID int32
 	var tmpNumLike int32
 	for rows.Next() {
 		err = rows.Scan(&tmpItemID, &tmpMenuID, &tmpUserID, &numLikes)
@@ -189,7 +189,7 @@ func (c *Client) GetNumLikesWithMenuID(userID string, items []int64) ([]bool, []
 		}
 		for i := range items {
 			if items[i] == tmpItemID {
-				if tmpUserID == userID {
+				if tmpUserID == 0 {
 					likesItem[i] = true
 				}
 				numLikes[i] = tmpNumLike
@@ -213,7 +213,7 @@ func buildLikesWithMenuIDStatement(userID string, items []int64) (string, error)
 		}
 	}
 	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
-	st := fmt.Sprintf(selectNumLikesWithMenuIDStatement, itemIDStatement, userID)
+	st := fmt.Sprintf(selectNumLikesWithMenuIDStatement, userID, itemIDStatement)
 	return st, nil
 }
 
@@ -235,7 +235,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int32, erro
 	defer handleCloser(c.ctx, rows)
 
 	var tmpItemID int64
-	var tmpUserID string
+	var tmpUserID int32
 	var tmpNumLike int32
 	for rows.Next() {
 		err = rows.Scan(&tmpItemID, &tmpUserID, &tmpNumLike)
@@ -244,7 +244,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int32, erro
 		}
 		for i := range items {
 			if items[i] == tmpItemID {
-				if tmpUserID == userID {
+				if tmpUserID == 0 {
 					likesItem[i] = true
 				}
 				numLikes[i] = tmpNumLike
@@ -267,7 +267,7 @@ func buildLikesItemsStatement(userID string, items []int64) (string, error) {
 		}
 	}
 	itemIDStatement := fmt.Sprintf("item_id=%d %s", items[0], buffer.String())
-	st := fmt.Sprintf(selectNumLikesAndHasLikedStatement, itemIDStatement, userID)
+	st := fmt.Sprintf(selectNumLikesAndHasLikedStatement, userID, itemIDStatement)
 	return st, nil
 }
 
