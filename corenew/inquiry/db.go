@@ -25,6 +25,9 @@ func getMulti(ctx context.Context, ids []int64) ([]Inquiry, error) {
 	var err error
 	keys := make([]*datastore.Key, len(ids))
 	for i := range ids {
+		if ids[i] == 0 {
+			return nil, errors.New("ids cannot contain a 0")
+		}
 		keys[i] = datastore.NewKey(ctx, kindInquiry, "", ids[i], nil)
 	}
 	err = datastore.GetMulti(ctx, keys, dst)

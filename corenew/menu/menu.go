@@ -37,6 +37,9 @@ func (c *Client) Get(id int64) (*Menu, error) {
 // GetMulti returns an array of Menus.
 func (c *Client) GetMulti(ids []int64) (map[int64]*Menu, error) {
 	menus := make(map[int64]*Menu, len(ids))
+	if len(ids) == 0 {
+		return menus, nil
+	}
 	for _, v := range ids {
 		menus[v] = nil
 	}

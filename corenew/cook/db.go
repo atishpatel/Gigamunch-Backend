@@ -25,6 +25,9 @@ func getMulti(ctx context.Context, ids []string) ([]Cook, error) {
 	var err error
 	keys := make([]*datastore.Key, len(ids))
 	for i := range ids {
+		if ids[i] == "" {
+			return nil, errors.New("ids cannot contain an empty string")
+		}
 		keys[i] = datastore.NewKey(ctx, kindCook, ids[i], 0, nil)
 	}
 	err = datastore.GetMulti(ctx, keys, dst)

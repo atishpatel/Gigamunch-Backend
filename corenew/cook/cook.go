@@ -32,9 +32,12 @@ func New(ctx context.Context) *Client {
 
 // GetMultiNamesAndPhotos returns an array of names and photos for the CookIDs.
 func (c *Client) GetMultiNamesAndPhotos(ids []string) ([]string, []string, error) {
+	if len(ids) == 0 {
+		return []string{}, []string{}, nil
+	}
 	cooks, err := getMulti(c.ctx, ids)
 	if err != nil {
-		return nil, nil, errDatastore.WithError(err).Wrapf("failed to getMulti menu ids: %v", ids)
+		return nil, nil, errDatastore.WithError(err).Wrapf("failed to getMulti cook ids: %v", ids)
 	}
 	names := make([]string, len(cooks))
 	photos := make([]string, len(cooks))
@@ -57,6 +60,9 @@ func (c *Client) Get(id string) (*Cook, error) {
 // GetMulti returns an array of Cooks.
 func (c *Client) GetMulti(ids []string) (map[string]*Cook, error) {
 	cooks := make(map[string]*Cook, len(ids))
+	if len(ids) == 0 {
+		return cooks, nil
+	}
 	for _, v := range ids {
 		cooks[v] = nil
 	}
@@ -69,7 +75,7 @@ func (c *Client) GetMulti(ids []string) (map[string]*Cook, error) {
 	}
 	results, err := getMulti(c.ctx, unDupedIDs)
 	if err != nil {
-		return nil, errDatastore.WithError(err).Wrapf("failed to getMulti menu ids: %v", ids)
+		return nil, errDatastore.WithError(err).Wrapf("failed to getMulti cook ids: %v", ids)
 	}
 	for i, v := range unDupedIDs {
 		cooks[v] = &results[i]
