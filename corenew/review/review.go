@@ -256,11 +256,19 @@ func (c *Client) GetMultiByID(ids []int64) ([]*Review, error) {
 			}
 		}
 	}
+	for i := range reviews {
+		if reviews[i] == nil {
+			reviews[i] = new(Review)
+		}
+	}
 	return reviews, nil
 }
 
 // Get gets a review.
 func (c *Client) Get(id int64) (*Review, error) {
+	if id == 0 {
+		return new(Review), nil
+	}
 	reviews, err := c.GetMultiByID([]int64{id})
 	if err != nil {
 		return nil, err
