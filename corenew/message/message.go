@@ -19,7 +19,7 @@ const (
 	channelAttr        = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
 	userAttr           = `{"id":"%s","name":"%s","image":"%s"}`
 	inquiryAttr        = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","price":"%f","is_delivery":"%t","servings":"%d","exchange_time":"%d"}`
-	inquiryStatusAttr  = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
+	inquiryStatusAttr  = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","title":"%s","message":"%s"}`
 	inquiryBotID       = "InquiryBot"
 	inquiryStatusBotID = "InquiryStatusBot"
 	gigamunchBotID     = "GigamunchBot"
@@ -274,9 +274,44 @@ func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, 
 	return msg.Sid, nil
 }
 
-func getInquiryStatusBodyAndAttributes(cookInfo *UserInfo, inqI *InquiryInfo) (string, string) {
-	body := fmt.Sprintf("There is an update about your request for %s", inqI.ItemName)
-	attr := fmt.Sprintf(inquiryStatusAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage)
+func getInquiryStatusBodyAndAttributes(c *Client, cookInfo *UserInfo, eaterInfo *UserInfo, inqI *InquiryInfo) (string, string) {
+	var message string
+	var title string
+	const canceled = "Canceled"
+	switch inqI.State {
+	case "Accepted":
+		if inqI.CookAction == "Accepted" {
+			message = fmt.Sprintf("%s just accepted your request for %s", cookInfo.Name, inqI.ItemName)
+		} else {
+			message = fmt.Sprintf("%s just accepted your request for %s", eaterInfo.Name, inqI.ItemName)
+		}
+		title = "Request Accepted"
+	case "Declined":
+		if inqI.CookAction == "Declined" {
+			message = fmt.Sprintf("%s just declined your request for %s", cookInfo.Name, inqI.ItemName)
+		}
+		title = "Request Declined"
+	case "TimedOut":
+		message = fmt.Sprintf("%s couldn't fulfill your request for %s", cookInfo.Name, inqI.ItemName)
+		title = "Request Timed Out"
+	case canceled:
+		if inqI.CookAction == canceled {
+			message = fmt.Sprintf("%s just canceled your request for %s", cookInfo.Name, inqI.ItemName)
+		} else if inqI.EaterAction == canceled {
+			message = fmt.Sprintf("%s just canceled their request for %s", eaterInfo.Name, inqI.ItemName)
+		}
+		title = "Request Canceled"
+	}
+	if message == "" {
+		_ = c.SendSMS("9316445311", fmt.Sprintf("Unknown Action cook(%s)/eater(%s) for State(%s) for inquiry state bot message updated!!!", inqI.CookAction, inqI.EaterAction, inqI.State))
+		message = fmt.Sprintf("There is an update about your request for %s", inqI.ItemName)
+	}
+	if title == "" {
+		_ = c.SendSMS("9316445311", fmt.Sprintf("Unknown title for Action cook(%s)/eater(%s) for State(%s) for inquiry state bot message updated!!!", inqI.CookAction, inqI.EaterAction, inqI.State))
+		title = "-"
+	}
+	body := message
+	attr := fmt.Sprintf(inquiryStatusAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage, title, message)
 	return body, attr
 }
 
@@ -296,7 +331,7 @@ func (c *Client) UpdateInquiryStatus(messageSID string, cookInfo *UserInfo, eate
 		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 	}
 	// send message
-	body, attr := getInquiryStatusBodyAndAttributes(cookInfo, inquiryInfo)
+	body, attr := getInquiryStatusBodyAndAttributes(c, cookInfo, eaterInfo, inquiryInfo)
 	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryStatusBotID, body, attr)
 	if err != nil {
 		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
