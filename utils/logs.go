@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"fmt"
+
 	"golang.org/x/net/context"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"google.golang.org/appengine"
 	aelog "google.golang.org/appengine/log"
 )
@@ -35,7 +38,10 @@ func Warningf(ctx context.Context, format string, args ...interface{}) {
 
 // Criticalf logs critical messages. Critical means the app is failing.
 func Criticalf(ctx context.Context, format string, args ...interface{}) {
-	aelog.Criticalf(ctx, format, args...)
+	formatedMessage := fmt.Sprintf(format, args...)
+	msgC := message.New(ctx)
+	_ = msgC.SendSMS("9316445311", formatedMessage)
+	aelog.Criticalf(ctx, formatedMessage)
 }
 
 // Errorf logs error messages.
