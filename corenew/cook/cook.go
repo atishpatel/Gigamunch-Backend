@@ -206,3 +206,26 @@ func (c *Client) Notify(id, subject, msg string) error {
 
 	return nil
 }
+
+// UpdateAvgRating updates the cook's rating.
+func (c *Client) UpdateAvgRating(id string, oldRating int32, newRating int32) error {
+	if id == "" || oldRating < 0 || oldRating > 5 || newRating < 1 || newRating > 5 {
+		return errInvalidParameter.WithError(fmt.Errorf("id(%s) oldRating(%d) newRating(%d)", id, oldRating, newRating))
+	}
+	if oldRating == newRating {
+		return nil
+	}
+	cook, err := get(c.ctx, id)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot get cook")
+	}
+	if oldRating != 0 {
+		cook.removeRating(oldRating)
+	}
+	cook.addRating(newRating)
+	err = put(c.ctx, id, cook)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("cannot put cook")
+	}
+	return nil
+}
