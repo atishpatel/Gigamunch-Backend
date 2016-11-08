@@ -182,17 +182,137 @@ var Service = function () {
     }
 
     /*
+     * Message
+     */
+
+  }, {
+    key: 'getMessageToken',
+    value: function getMessageToken(callback) {
+      var _this6 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this6.getMessageToken(callback);
+        });
+        return;
+      }
+
+      var request = {
+        gigatoken: this.getToken(),
+        device_id: 'browser'
+      };
+      this.service.getMessageToken(request).execute(function (resp) {
+        _this6.logError('getMessageToken', resp.err);
+        callback(resp.token, resp.err);
+      });
+    }
+
+    /*
+     * Inquiry
+     */
+
+  }, {
+    key: 'getInquiry',
+    value: function getInquiry(id, callback) {
+      var _this7 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this7.getInquiry(id, callback);
+        });
+        return;
+      }
+
+      var request = {
+        gigatoken: this.getToken(),
+        id: id
+      };
+      this.service.getInquiry(request).execute(function (resp) {
+        _this7.logError('getInquiry', resp.err);
+        callback(resp.inquiry, resp.err);
+      });
+    }
+  }, {
+    key: 'getInquiries',
+    value: function getInquiries(startIndex, endIndex, callback) {
+      var _this8 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this8.getInquiries(startIndex, endIndex, callback);
+        });
+        return;
+      }
+
+      var request = {
+        gigatoken: this.getToken(),
+        start_index: startIndex,
+        end_index: endIndex
+      };
+      this.service.getInquiries(request).execute(function (resp) {
+        _this8.logError('getInquiries', resp.err);
+        // if (window.COOK.isDev) {
+        //   callback(this.getFakeInquiries(), resp.err);
+        //   return;
+        // }
+        callback(resp.inquiries, resp.err);
+      });
+    }
+  }, {
+    key: 'acceptInquiry',
+    value: function acceptInquiry(id, callback) {
+      var _this9 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this9.acceptInquiry(id, callback);
+        });
+        return;
+      }
+
+      var request = {
+        gigatoken: this.getToken(),
+        id: id
+      };
+      this.service.acceptInquiry(request).execute(function (resp) {
+        _this9.logError('acceptInquiry', resp.err);
+        callback(resp.inquiry, resp.err);
+      });
+    }
+  }, {
+    key: 'declineInquiry',
+    value: function declineInquiry(id, callback) {
+      var _this10 = this;
+
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this10.declineInquiry(id, callback);
+        });
+        return;
+      }
+
+      var request = {
+        gigatoken: this.getToken(),
+        id: id
+      };
+      this.service.declineInquiry(request).execute(function (resp) {
+        _this10.logError('declineInquiry', resp.err);
+        callback(resp.inquiry, resp.err);
+      });
+    }
+
+    /*
      * Menu
      */
 
   }, {
     key: 'getMenus',
     value: function getMenus(callback) {
-      var _this6 = this;
+      var _this11 = this;
 
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this6.getMenus(callback);
+          _this11.getMenus(callback);
         });
         return;
       }
@@ -201,19 +321,19 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.getMenus(request).execute(function (resp) {
-        _this6.logError('getMenus', resp.err);
+        _this11.logError('getMenus', resp.err);
         callback(resp.menus, resp.err);
       });
     }
   }, {
     key: 'saveMenu',
     value: function saveMenu(menu, callback) {
-      var _this7 = this;
+      var _this12 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this7.saveMenu(menu, callback);
+          _this12.saveMenu(menu, callback);
         });
         return;
       }
@@ -224,7 +344,7 @@ var Service = function () {
       };
 
       this.service.saveMenu(request).execute(function (resp) {
-        _this7.logError('saveMenu', resp.err);
+        _this12.logError('saveMenu', resp.err);
         callback(resp.menu, resp.err);
       });
     }
@@ -236,12 +356,12 @@ var Service = function () {
   }, {
     key: 'getItem',
     value: function getItem(id, callback) {
-      var _this8 = this;
+      var _this13 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this8.getItem(id, callback);
+          _this13.getItem(id, callback);
         });
         return;
       }
@@ -251,19 +371,19 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.getItem(request).execute(function (resp) {
-        _this8.logError('getItem', resp.err);
+        _this13.logError('getItem', resp.err);
         callback(resp.item, resp.err);
       });
     }
   }, {
     key: 'saveItem',
     value: function saveItem(item, callback) {
-      var _this9 = this;
+      var _this14 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this9.saveItem(item, callback);
+          _this14.saveItem(item, callback);
         });
         return;
       }
@@ -276,19 +396,19 @@ var Service = function () {
       };
 
       this.service.saveItem(request).execute(function (resp) {
-        _this9.logError('saveItem', resp.err);
+        _this14.logError('saveItem', resp.err);
         callback(resp.item, resp.err);
       });
     }
   }, {
     key: 'activateItem',
     value: function activateItem(id, callback) {
-      var _this10 = this;
+      var _this15 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this10.activateItem(id, callback);
+          _this15.activateItem(id, callback);
         });
         return;
       }
@@ -298,19 +418,19 @@ var Service = function () {
       };
 
       this.service.activateItem(request).execute(function (resp) {
-        _this10.logError('activateItem', resp.err);
+        _this15.logError('activateItem', resp.err);
         callback(resp.err);
       });
     }
   }, {
     key: 'deactivateItem',
     value: function deactivateItem(id, callback) {
-      var _this11 = this;
+      var _this16 = this;
 
       // if api is not loaded, add to callQueue
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this11.deactivateItem(id, callback);
+          _this16.deactivateItem(id, callback);
         });
         return;
       }
@@ -320,14 +440,14 @@ var Service = function () {
       };
 
       this.service.deactivateItem(request).execute(function (resp) {
-        _this11.logError('deactivateItem', resp.err);
+        _this16.logError('deactivateItem', resp.err);
         callback(resp.err);
       });
     }
   }, {
     key: 'refreshToken',
     value: function refreshToken() {
-      var _this12 = this;
+      var _this17 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
@@ -338,7 +458,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this12.logError('refreshToken', resp.err)) {
+        if (!_this17.logError('refreshToken', resp.err)) {
           COOK.User.update(resp.gigatoken);
         }
       });

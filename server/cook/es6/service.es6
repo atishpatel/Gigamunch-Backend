@@ -157,6 +157,135 @@ class Service {
   }
 
   /*
+   * Message
+   */
+
+  getMessageToken(callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getMessageToken(callback);
+      });
+      return;
+    }
+
+    const request = {
+      gigatoken: this.getToken(),
+      device_id: 'browser',
+    };
+    this
+      .service
+      .getMessageToken(request)
+      .execute(
+        (resp) => {
+          this.logError('getMessageToken', resp.err);
+          callback(resp.token, resp.err);
+        }
+      );
+  }
+
+  /*
+   * Inquiry
+   */
+
+  getInquiry(id, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getInquiry(id, callback);
+      });
+      return;
+    }
+
+    const request = {
+      gigatoken: this.getToken(),
+      id,
+    };
+    this
+      .service
+      .getInquiry(request)
+      .execute(
+        (resp) => {
+          this.logError('getInquiry', resp.err);
+          callback(resp.inquiry, resp.err);
+        }
+      );
+  }
+
+  getInquiries(startIndex, endIndex, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getInquiries(startIndex, endIndex, callback);
+      });
+      return;
+    }
+
+    const request = {
+      gigatoken: this.getToken(),
+      start_index: startIndex,
+      end_index: endIndex,
+    };
+    this
+      .service
+      .getInquiries(request)
+      .execute(
+        (resp) => {
+          this.logError('getInquiries', resp.err);
+          // if (window.COOK.isDev) {
+          //   callback(this.getFakeInquiries(), resp.err);
+          //   return;
+          // }
+          callback(resp.inquiries, resp.err);
+        }
+      );
+  }
+
+  acceptInquiry(id, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.acceptInquiry(id, callback);
+      });
+      return;
+    }
+
+    const request = {
+      gigatoken: this.getToken(),
+      id,
+    };
+    this
+      .service
+      .acceptInquiry(request)
+      .execute(
+        (resp) => {
+          this.logError('acceptInquiry', resp.err);
+          callback(resp.inquiry, resp.err);
+        }
+      );
+  }
+
+  declineInquiry(id, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.declineInquiry(id, callback);
+      });
+      return;
+    }
+
+    const request = {
+      gigatoken: this.getToken(),
+      id,
+    };
+    this
+      .service
+      .declineInquiry(request)
+      .execute(
+        (resp) => {
+          this.logError('declineInquiry', resp.err);
+          callback(resp.inquiry, resp.err);
+        }
+      );
+  }
+
+
+  /*
    * Menu
    */
 
