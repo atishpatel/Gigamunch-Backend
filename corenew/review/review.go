@@ -15,6 +15,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -74,6 +75,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		Rating:          rating,
 		Text:            getEscapedString(text),
 	}
+	var oldRating int32
 	if isNewReview {
 		// insert review
 		st := fmt.Sprintf(insertStatement, cookID, user.ID, user.Name, user.PhotoURL, inquiryID, itemID, itemName, itemPhotoURL, menuID, rating, text)
@@ -86,12 +88,18 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 			return nil, errSQLDB.WithError(err).Wrap("failed to results.LastInsertId()")
 		}
 		review.ID = id
+		// set review ID for Inquiry.
 		inquiryC := inquiry.New(c.ctx)
 		err = inquiryC.SetReviewID(inquiryID, id)
 		if err != nil {
 			return nil, errors.Wrap("failed to inquiry.SetReviewID", err)
 		}
 	} else {
+		oldReview, err := c.Get(id)
+		if err != nil {
+			return nil, errors.Wrap("failed to review.Get", err)
+		}
+		oldRating = oldReview.Rating
 		// update review
 		st := fmt.Sprintf(updateStatement, user.Name, user.PhotoURL, rating, text, id)
 		results, err := mysqlDB.Exec(st)
@@ -107,6 +115,12 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		}
 		review.IsEdited = true
 		review.EditedDateTime = time.Now()
+	}
+	// update cook rating
+	cookC := cook.New(c.ctx)
+	err := cookC.UpdateAvgRating(cookID, oldRating, rating)
+	if err != nil {
+		return nil, errors.Wrap("faield to cook.UpdateAvgRating", err)
 	}
 	return review, nil
 }
@@ -258,7 +272,7 @@ func (c *Client) GetMultiByID(ids []int64) ([]*Review, error) {
 	}
 	for i := range reviews {
 		if reviews[i] == nil {
-			reviews[i] = new(Review)
+			return nil, errInvalidParameter.WithMessage("Invalid parameter. Review does not exist.").Wrapf("review id(%d) does not exist", ids[i])
 		}
 	}
 	return reviews, nil
