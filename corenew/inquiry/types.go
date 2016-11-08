@@ -33,12 +33,13 @@ var EaterAction = struct{ Pending, Accepted, Canceled, RefundRequested string }{
 }
 
 // CookAction is the possible states for a Cook in regards to an Inquiry.
-var CookAction = struct{ Pending, Accepted, Declined, Canceled, Refunded string }{
-	Pending:  "Pending",
-	Accepted: "Accepted",
-	Declined: "Declined",
-	Canceled: "Canceled",
-	Refunded: "Refunded",
+var CookAction = struct{ Pending, Accepted, Declined, Canceled, RefundAccepted, RefundDeclined string }{
+	Pending:        "Pending",
+	Accepted:       "Accepted",
+	Declined:       "Declined",
+	Canceled:       "Canceled",
+	RefundAccepted: "RefundAccepted",
+	RefundDeclined: "RefundDeclined",
 }
 
 // PaymentInfo is the payment information related to an Inquiry.
