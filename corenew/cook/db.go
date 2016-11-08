@@ -37,7 +37,7 @@ func getMulti(ctx context.Context, ids []string) ([]Cook, error) {
 	return dst, nil
 }
 
-func getBySubmerchantID(ctx context.Context, submerchantID string) (string, *Cook, error) {
+func getBySubmerchantID(ctx context.Context, submerchantID string) (*Cook, error) {
 	query := datastore.NewQuery(kindCook).
 		Filter("BTSubMerchantID =", submerchantID)
 	var results []Cook
@@ -48,7 +48,8 @@ func getBySubmerchantID(ctx context.Context, submerchantID string) (string, *Coo
 	if len(results) != 1 {
 		return "", nil, fmt.Errorf("failed to find 1 cook by submerchantID(%s): found: %v", submerchantID, results)
 	}
-	return keys[0].StringID(), &results[0], nil
+	results[0].ID = keys[0].StringID()
+	return &results[0], nil
 }
 
 func put(ctx context.Context, id string, cook *Cook) error {
