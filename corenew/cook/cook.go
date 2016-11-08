@@ -229,3 +229,15 @@ func (c *Client) UpdateAvgRating(id string, oldRating int32, newRating int32) er
 	}
 	return nil
 }
+
+// IsSubMerchantApproved returns if submerchant account is in approved status.
+func (c *Client) IsSubMerchantApproved(id string) (bool, error) {
+	cook, err := get(c.ctx, id)
+	if err != nil {
+		return false, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", id)
+	}
+	if cook.SubMerchantStatus != "active" {
+		return false, nil
+	}
+	return true, nil
+}

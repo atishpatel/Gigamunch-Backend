@@ -57,15 +57,14 @@ func (r *Rating) changeRating(rating, value int32) {
 
 // Cook contains all the information related to a cook.
 type Cook struct {
-	ID               string        `json:"id" datastore:",noindex"`
-	CreatedDatetime  time.Time     `json:"created_datetime" datastore:",index"`
-	types.UserDetail               // embedded
-	Bio              string        `json:"bio" datastore:",noindex"`
-	PhoneNumber      string        `json:"phone_number" datastore:",noindex"`
-	Address          types.Address `json:"address" datastore:",noindex"`
-	DeliveryPrice    float32       `json:"delivery_price" datastore:",noindex"`
-	DeliveryRange    int32         `json:"delivery_range" datastore:",noindex"`
-	// TODO add WeekSchedule and ScheduleModifications
+	ID                    string                  `json:"id" datastore:",noindex"`
+	CreatedDatetime       time.Time               `json:"created_datetime" datastore:",index"`
+	types.UserDetail                              // embedded
+	Bio                   string                  `json:"bio" datastore:",noindex"`
+	PhoneNumber           string                  `json:"phone_number" datastore:",noindex"`
+	Address               types.Address           `json:"address" datastore:",noindex"`
+	DeliveryPrice         float32                 `json:"delivery_price" datastore:",noindex"`
+	DeliveryRange         int32                   `json:"delivery_range" datastore:",noindex"`
 	WeekSchedule          []WeekSchedule          `json:"week_schedule" datastore:",noindex"`
 	ScheduleModifications []ScheduleModifications `json:"schedule_modifications" datastore:",noindex"`
 	Rating                                        // embedded
