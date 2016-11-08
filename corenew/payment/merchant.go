@@ -159,7 +159,7 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, cookC cookI
 			return errors.Wrap("failed update user to has sub-merchant account", err)
 		}
 	}
-	_, _, err = cookC.UpdateSubMerchantStatus(ma.Id, ma.Status)
+	_, err = cookC.UpdateSubMerchantStatus(ma.Id, ma.Status)
 	if err != nil {
 		return errors.Wrap("failed to cookC.UpdateSubMerchantStatus", err)
 	}
@@ -167,8 +167,8 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, cookC cookI
 }
 
 type cookInterface interface {
-	FindBySubMerchantID(string) (string, *cook.Cook, error)
-	UpdateSubMerchantStatus(string, string) (string, *cook.Cook, error)
+	FindBySubMerchantID(string) (*cook.Cook, error)
+	UpdateSubMerchantStatus(string, string) (*cook.Cook, error)
 	Notify(string, string, string) error
 }
 
@@ -186,13 +186,13 @@ func disbursementException(ctx context.Context, signature, payload string, bt *b
 	if notification == nil || notification.MerchantAccount() == nil {
 		return nil, errInternal.Wrapf("there was an error with notification (%+v) subject(%+v) MerchantAccount(%+v) Disbursement(%+v)", notification, notification.Subject, notification.MerchantAccount(), notification.Disbursement())
 	}
-	cookID, _, err := cookC.FindBySubMerchantID(notification.MerchantAccount().Id)
+	cook, err := cookC.UpdateSubMerchantStatus(notification.MerchantAccount().Id, "disbursement")
 	if err != nil {
-		return nil, errors.Wrap("failed to find cook by submerchantID", err)
+		return nil, errors.Wrap("failed to update cook by submerchantID", err)
 	}
 	disbursement := notification.Disbursement()
 	message := fmt.Sprintf("A transaction to your account failed because '%s' please take the following action: '%s'", disbursement.ExceptionMessage, disbursement.FollowUpAction)
-	err = cookC.Notify(cookID, "There was a problem sending money to you! - Gigamunch", message)
+	err = cookC.Notify(cook.ID, "There was a problem sending money to you! Please update your banking info. - Gigamunch", message) // TODO add update your info button
 	if err != nil {
 		return nil, errors.Wrap("failed to notify cook", err)
 	}
@@ -211,7 +211,7 @@ func subMerchantApproved(ctx context.Context, signature, payload string, bt *bra
 		return err
 	}
 	merch := notification.MerchantAccount()
-	_, _, err = cookC.UpdateSubMerchantStatus(merch.Id, merch.Status)
+	_, err = cookC.UpdateSubMerchantStatus(merch.Id, merch.Status)
 	if err != nil {
 		return errors.Wrap(fmt.Sprintf("failed to update submerchant(%s) status(%s)", merch.Id, merch.Status), err)
 	}
@@ -230,11 +230,11 @@ func subMerchantDeclined(ctx context.Context, signature, payload string, bt *bra
 		return err
 	}
 	merch := notification.MerchantAccount()
-	cookID, _, err := cookC.UpdateSubMerchantStatus(merch.Id, merch.Status)
+	cook, err := cookC.UpdateSubMerchantStatus(merch.Id, merch.Status)
 	if err != nil {
 		return errors.Wrap(fmt.Sprintf("failed to update submerchant(%s) status(%s)", merch.Id, merch.Status), err)
 	}
-	err = cookC.Notify(cookID, "There was a problem with the approving your bank info - Gigamunch", notification.Subject.APIErrorResponse.ErrorMessage)
+	err = cookC.Notify(cook.ID, "There was a problem with the approving your bank info - Gigamunch", notification.Subject.APIErrorResponse.ErrorMessage)
 	if err != nil {
 		return errors.Wrap("failed to notify cook", err)
 	}

@@ -164,32 +164,32 @@ func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, b
 }
 
 // FindBySubMerchantID finds a cook by submerchantID
-func (c *Client) FindBySubMerchantID(submerchantID string) (string, *Cook, error) {
+func (c *Client) FindBySubMerchantID(submerchantID string) (*Cook, error) {
 	if submerchantID == "" {
-		return "", nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
+		return nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
 	}
-	id, cook, err := getBySubmerchantID(c.ctx, submerchantID)
+	cook, err := getBySubmerchantID(c.ctx, submerchantID)
 	if err != nil {
-		return "", nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
+		return nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
 	}
-	return id, cook, nil
+	return cook, nil
 }
 
 // UpdateSubMerchantStatus updates the chef's SubMerchantStatus status
-func (c *Client) UpdateSubMerchantStatus(submerchantID, status string) (string, *Cook, error) {
+func (c *Client) UpdateSubMerchantStatus(submerchantID, status string) (*Cook, error) {
 	if submerchantID == "" {
-		return "", nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
+		return nil, errInvalidParameter.WithMessage("submerchantID is invalid.")
 	}
-	id, cook, err := getBySubmerchantID(c.ctx, submerchantID)
+	cook, err := getBySubmerchantID(c.ctx, submerchantID)
 	if err != nil {
-		return "", nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
+		return nil, errDatastore.WithError(err).Wrap("failed to get by submerchantID")
 	}
 	cook.SubMerchantStatus = status
-	err = put(c.ctx, id, cook)
+	err = put(c.ctx, cook.ID, cook)
 	if err != nil {
-		return "", nil, errDatastore.WithError(err).Wrap("failed to put chef")
+		return nil, errDatastore.WithError(err).Wrap("failed to put chef")
 	}
-	return id, cook, nil
+	return cook, nil
 }
 
 // Notify notifies chef with the message

@@ -72,15 +72,15 @@ func (c *Client) GenerateToken(customerID string) (string, error) {
 }
 
 // ReleaseSale release a sale with the SaleID
-func (c *Client) ReleaseSale(id string) (string, error) {
+func (c *Client) ReleaseSale(id string) error {
 	t, err := c.bt.Transaction().ReleaseFromEscrow(id)
 	if err != nil {
-		return "", errBT.WithError(err).Wrapf("cannot release transaction(%d) from escrow", id)
+		return errBT.WithError(err).Wrapf("cannot release transaction(%d) from escrow", id)
 	}
 	if t.EscrowStatus != braintree.EscrowStatus.ReleasePending && t.EscrowStatus != braintree.EscrowStatus.Released {
-		return "", errBT.Wrapf("invalid escrow status on release: escrow status:%s transactionID: %s", t.EscrowStatus, t.Id)
+		return errBT.Wrapf("invalid escrow status on release: escrow status:%s transactionID: %s", t.EscrowStatus, t.Id)
 	}
-	return t.Id, nil
+	return nil
 }
 
 // CancelRelease cancels release a sale with the SaleID
