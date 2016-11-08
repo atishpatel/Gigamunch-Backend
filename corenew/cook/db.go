@@ -43,10 +43,10 @@ func getBySubmerchantID(ctx context.Context, submerchantID string) (*Cook, error
 	var results []Cook
 	keys, err := query.GetAll(ctx, &results)
 	if err != nil {
-		return "", nil, err
+		return nil, err
 	}
 	if len(results) != 1 {
-		return "", nil, fmt.Errorf("failed to find 1 cook by submerchantID(%s): found: %v", submerchantID, results)
+		return nil, fmt.Errorf("failed to find 1 cook by submerchantID(%s): found: %v", submerchantID, results)
 	}
 	results[0].ID = keys[0].StringID()
 	return &results[0], nil
