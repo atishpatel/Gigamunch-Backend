@@ -93,7 +93,6 @@ handlers:
 
 skip_files:
   - ^(.*/node_modules/.*)
-  - ^(.*/node_modules/.*)
   - ^(.*/)?.*/test/.*$
   - ^(.*/)?.*/tests/.*$
   - ^(.*/)?.*\.DS_Store$

@@ -9,5 +9,13 @@
     "source/terms-page.html",
     "source/privacy-page.html",
     "source/upgrade-page.html"
+  ],
+  "sources": [
+    "source/**/*",
+    "js/**/*",
+    "bower.json"
+  ],
+  "includeDependencies": [
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
   ]
 }
