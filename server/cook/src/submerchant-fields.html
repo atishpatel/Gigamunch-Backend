@@ -23,40 +23,37 @@
       label {
         line-height: 20px;
       }
+      
+      .check-image {
+        width: 50%;
+      }
+      
+      @media (max-width: 500px) {
+        .check-image {
+          width: 100%;
+        }
+      }
 
     </style>
 
     <div class="row">
-      <paper-input label="Legal First Name"
+      <paper-input class="flex-1"
+                   label="Legal First Name"
                    value="{{firstName}}"
                    required
                    auto-validate>
       </paper-input>
-      <paper-input label="Legal Last Name"
+      <paper-input class="flex-1"
+                   label="Legal Last Name"
                    value="{{lastName}}"
                    required
                    auto-validate>
       </paper-input>
-      <paper-input label="Date of Birth*"
+      <paper-input class="flex-1"
+                   label="Date of Birth*"
                    type="date"
                    value="{{dob}}"
                    placeholder="mm/dd/yyyy"
-                   required
-                   auto-validate>
-      </paper-input>
-    </div>
-    <div>
-      <img alt="A check with routing and account number."
-           src="http://banks-america.com/info/wp-content/uploads/2014/08/routing-number-check.jpg"></img>
-    </div>
-    <div class="row">
-      <paper-input label="Routing Number*"
-                   value="{{routingNumber}}"
-                   required
-                   auto-validate>
-      </paper-input>
-      <paper-input label="Account Number*"
-                   value="{{accountNumber}}"
                    required
                    auto-validate>
       </paper-input>
@@ -65,6 +62,26 @@
                    address="{{address}}"
                    required>
     </address-input>
+    <div class="row">
+      <paper-input class="flex-1"
+                   label="Routing Number*"
+                   value="{{routingNumber}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input class="flex-1"
+                   label="Account Number*"
+                   value="{{accountNumber}}"
+                   required
+                   auto-validate>
+      </paper-input>
+    </div>
+    <div>
+      <img class="check-image"
+           alt="A check with routing and account number."
+           src="https://storage.googleapis.com/gigamunch-omninexus-website/cook/routing-number-check.jpg"></img>
+    </div>
+
   </template>
   <script>
     'use strict';
