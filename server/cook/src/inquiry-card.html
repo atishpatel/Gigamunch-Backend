@@ -1,0 +1,296 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="app-icons.html">
+
+
+<dom-module id="inquiry-card">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: flex;
+        flex-direction: column;
+        border: solid var(--gray-line-color) 1px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      
+      iron-icon {
+        color: var(--primary-text-color);
+      }
+      
+      .bar {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+      }
+      
+      .eater-bar {
+        padding-bottom: 12px;
+        border-bottom: solid var(--gray-line-color) 1px;
+      }
+      
+      .eater-image {
+        width: 48px;
+        border-radius: 50%;
+      }
+      
+      .eater-name-message {
+        padding-left: 24px;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .inquiry-id {
+        margin-left: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .item-bar {
+        height: 50px;
+      }
+      
+      .item-image {
+        width: 48px;
+        border-radius: 5%;
+        overflow: hidden;
+      }
+      
+      .item-name {
+        padding-left: 24px;
+      }
+      
+      .time-servings-bar>*,
+      .exchange-total-bar>* {
+        flex: 1;
+      }
+      
+      .icon-detail {
+        display: flex;
+        flex-direction: row;
+      }
+      
+      .icon-detail-text {
+        padding-left: 8px;
+      }
+      
+      .button-bar>* {
+        flex: 1;
+        margin: 0;
+        border-radius: 0;
+      }
+      
+      .button-bar>*:not(:last-child) {
+        margin-right: 1px;
+      }
+      
+      .button-bar {
+        padding: 0;
+        margin-top: 12px;
+      }
+      
+      .spinner-container {
+        min-height: 46px;
+        display: flex;
+        background-color: var(--primary-color);
+      }
+      
+      .spinner-container>* {
+        margin: auto;
+      }
+
+    </style>
+
+    <div class="bar eater-bar">
+      <placeholder-img placeholder-icon="app:account-circle"
+                       class="eater-image"
+                       src="[[inquiry.eater_photo_url]]">
+      </placeholder-img>
+      <div class="eater-name-message">
+        <span class="eater-name">[[inquiry.eater_name]]</span>
+        <div class="eater-message">
+          <a href="#">Message</a>
+        </div>
+      </div>
+      <div class="inquiry-id">
+        <span class="bold">Inquiry ID:</span>
+        <span>[[inquiryID]]</span>
+      </div>
+    </div>
+    <div class="bar item-bar">
+      <div class="item-image">
+        <div class="photo-16-9">
+          <img src="[[itemImage]]"></img>
+        </div>
+      </div>
+      <span class="item-name bold">
+          [[inquiry.item.name]]
+      </span>
+    </div>
+    <div class="bar time-servings-bar">
+      <div class="icon-detail">
+        <iron-icon icon="app:insert-invitation"></iron-icon>
+        <span class="icon-detail-text">[[exchangeDatetime]]</span>
+      </div>
+      <div class="icon-detail">
+        <iron-icon icon="app:dining"></iron-icon>
+        <span class="icon-detail-text">[[inquiry.servings]]</span>
+      </div>
+    </div>
+    <div class="bar exchange-total-bar">
+      <div class="icon-detail">
+        <iron-icon hidden$="[[deliveryIcon]]"
+                   icon="app:home"></iron-icon>
+        <iron-icon hidden$="[[!deliveryIcon]]"
+                   icon="app:delivery-car"></iron-icon>
+        <span class="icon-detail-text"
+              hidden$="[[cookDelivery]]">[[exchangeText]]</span>
+        <a href="[[cookDeliveryURL]]"
+           hidden$="[[!cookDelivery]]">
+          <span class="icon-detail-text">[[exchangeText]]</span>
+        </a>
+      </div>
+      <div class="icon-detail">
+        <iron-icon icon="app:money"></iron-icon>
+        <span class="icon-detail-text">[[inquiry.payment_info.total_price]]</span>
+      </div>
+    </div>
+    <div class="bar button-bar">
+      <div hidden$="[[!hideButtons]]"
+           class="spinner-container">
+        <paper-spinner id="spinner"
+                       active$="[[hideButtons]]"></paper-spinner>
+      </div>
+      <paper-button hidden="[[hideButtons]]">Details</paper-button>
+      <paper-button hidden="[[hideButtons]]"
+                    on-tap="declineInquiry">Decline</paper-button>
+      <paper-button hidden="[[hideButtons]]"
+                    on-tap="acceptInquiry">Accept</paper-button>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'inquiry-card',
+      properties: {
+        inquiry: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          observer: 'inquiryUpdated',
+        },
+        itemImage: {
+          type: String,
+        },
+        exchangeDatetime: {
+          type: String,
+        },
+        inquiryID: {
+          type: String,
+        },
+        hideButtons: {
+          type: Boolean,
+          value: false,
+        },
+        deliveryIcon: {
+          type: Boolean,
+          value: false,
+        },
+        cookDelivery: {
+          type: Boolean,
+          value: false,
+        },
+        cookDeliveryURL: {
+          type: String,
+          value: '',
+        },
+        exchangeText: {
+          type: String,
+          value: 'Pickup',
+        },
+      },
+      inquiryUpdated: function() {
+        if (this.inquiry) {
+          var itemImage = "";
+          if (this.inquiry.item.photos.length > 0) {
+            itemImage = this.inquiry.item.photos[0];
+          }
+          this.set('itemImage', itemImage);
+          // set exchangeDatetime 
+          var today = new Date();
+          var tomorrow = new Date();
+          tomorrow.setDate(today.getDate() + 1);
+          var d = new Date(this.inquiry.expected_exchange_datetime);
+          var dateStringArray = d.toDateString().split(' ');
+          var dateString = dateStringArray[1] + ' ' + dateStringArray[2];
+          if (dateStringArray[3] !== today.getFullYear().toString()) {
+            dateString += ' ' + dateStringArray[3];
+          }
+          if (dateString === today.toLocaleDateString()) {
+            dateString = 'Today';
+          } else if (dateString === tomorrow.toLocaleDateString()) {
+            dateString = 'Tomorrow';
+          }
+          var timeString = d.toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+          this.set('exchangeDatetime', dateString + ' ' + timeString);
+          // set InquiryID 
+          this.set('inquiryID', Number(this.inquiry.id).toString(36));
+          // exchange info 
+          if (this.inquiry.exchange_method === 1) {
+            // pickup
+            this.cookDelivery = false;
+            this.deliveryIcon = false;
+            this.exchangeText = 'Pickup';
+          } else if (this.inquiry.exchange_method === 2) {
+            // cook delivery
+            this.cookDelivery = true;
+            this.deliveryIcon = true;
+            this.exchangeText = 'Delivery';
+          } else {
+            // 3rd party delivery
+            this.cookDelivery = false;
+            this.deliveryIcon = true;
+            this.exchangeText = '3rd Party Delivery';
+          }
+        }
+      },
+      acceptInquiry: function() {
+        this.set('hideButtons', true);
+        this.fire('acceptinquiry', {
+          id: this.inquiry.id,
+          callback: this.updateInquiry.bind(this),
+        });
+      },
+      declineInquiry: function() {
+        this.set('hideButtons', true);
+        this.fire('declineinquiry', {
+          id: this.inquiry.id,
+          callback: this.updateInquiry.bind(this),
+        });
+      },
+      updateInquiry: function(inquiry, err) {
+        this.set('hideButtons', false);
+        if (err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+        }
+        this.inquiry = inquiry;
+      },
+    });
+
+  </script>
+</dom-module>
