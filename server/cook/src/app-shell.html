@@ -25,6 +25,14 @@
 <link rel="import"
       href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import"
+      href="../bower_components/paper-item/paper-item.html">
+<link rel="import"
+      href="../bower_components/paper-menu/paper-menu.html">
+<link rel="import"
+      href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import"
+      href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import"
       href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import"
       href="../bower_components/paper-toast/paper-toast.html">
@@ -37,6 +45,8 @@
 <link rel="import"
       href="item-form.html">
 <link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
       href="shared-styles.html">
 
 <dom-module id="app-shell">
@@ -45,6 +55,8 @@
        :host {
         display: block;
         color: var(--primary-text-color);
+        --paper-tabs-selection-bar-color: #546E7A;
+        --paper-tab-ink: #546E7A;
       }
       
       .content {
@@ -53,33 +65,123 @@
       }
       
       app-header {
-        color: var(--primary-color);
+        color: var(--primary-text-color);
         background-color: #fff;
+      }
+      
+      app-header .logo {
+        color: var(--primary-color);
       }
       
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
       
+      .page-header-title {
+        @apply(--font-bold);
+        font-size: 24px;
+      }
+      
+      .toolbar-right {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+      }
+      
+      .nav-a,
+      .nav-a:link,
+      .nav-a:visited {
+        text-decoration: none;
+        outline: 0;
+        color: #546E7A;
+      }
+      
+      .nav-tabs {
+        height: 100%;
+        margin-right: 12px;
+        font-size: 16px;
+      }
+      
+      .nav-tabs a {
+        padding: 0 15px;
+        text-decoration: none;
+        outline: 0;
+        color: #546E7A;
+      }
+      
+      .user-pic {
+        height: 30px;
+        width: 30px;
+        border-radius: 50%;
+        background-color: white;
+        color: var(--secondary-text-color);
+      }
+      
       .main-toolbar {
         padding: 0 24px;
       }
       
+      .drawer-toolbar {
+        height: 100px;
+        justify-content: space-around;
+        align-items: flex-start;
+        flex-direction: column;
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      .drawer-user-info {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .drawer-user-info .user-pic {
+        margin-right: 12px;
+      }
+      
+      .drawer-user-name {
+        font-size: 16px;
+      }
+      
+      .drawer-user-email {
+        font-size: 12px;
+      }
+      
       .drawer-list {
-        margin: 0 20px;
+        padding-top: 8px;
+      }
+      
+      .drawer-list paper-item {
+        font-size: 16px;
+        outline: none;
       }
       
       .drawer-list a {
         display: block;
-        padding: 0 16px;
         text-decoration: none;
         color: var(--link-color);
         line-height: 40px;
+        outline: none;
       }
       
       .drawer-list a.iron-selected {
-        color: black;
+        color: #5d686d;
+        background-color: #ECEFF1;
         font-weight: bold;
+      }
+      
+      .drawer-stuff {
+        display: none;
+      }
+      
+      @media (max-width: 767px) {
+        .nav-tabs-stuff {
+          display: none;
+        }
+        .drawer-stuff {
+          display: initial;
+        }
       }
       
       .full-screen-dialog {
@@ -141,7 +243,7 @@
     <paper-dialog id="errorDialog"
                   modal>
       <h1 id="errorDialogTitle">Woops! Something went wrong! :(</h1>
-      <div>We're sorry for the inconvenience. Try again in a few minutes. If the issue persist, please send a screen shot of this to atish@gigamunchapp.com. Our developer, Atish, will work on fixing it ASAP! </div>
+      <div>We're sorry for the inconvenience. Refresh the page and try again in a few minutes. If the issue persist, please send a screen shot of this to atish@gigamunchapp.com. Our developer, Atish, will work on fixing it ASAP! </div>
       <div id="errorDialogText"></div>
       <div id="errorDialogDetails"></div>
       <div class="buttons">
@@ -171,14 +273,36 @@
     <app-drawer-layout fullbleed
                        force-narrow>
       <!-- Drawer content -->
-      <app-drawer>
-        <app-toolbar class="logo">Gigamunch</app-toolbar>
+      <app-drawer class="drawer-stuff">
+        <app-toolbar class="drawer-toolbar">
+          <div class="logo">Gigamunch</div>
+          <div class="drawer-user-info">
+            <placeholder-img class="user-pic"
+                             icon="app:account-circle"
+                             alt="user profile picture"
+                             src="[[user.photo_url]]"></placeholder-img>
+            <div class="drawer-user-text">
+              <!-- TODO set ... on name and email -->
+              <div class="drawer-user-name"><strong>[[user.name]]</strong></div>
+              <div class="drawer-user-email">[[user.email]]</div>
+            </div>
+          </div>
+        </app-toolbar>
         <iron-selector selected="[[page]]"
                        attr-for-selected="name"
                        class="drawer-list"
                        role="navigation">
-          <a name="view1"
-             href="../view1">View One</a>
+          <a name="kitchen"
+             href="../kitchen">
+            <paper-item>Kitchen</paper-item>
+          </a>
+          <a name="account"
+             href="../account">
+            <paper-item>Account</paper-item>
+          </a>
+          <a href="/signout">
+            <paper-item>Log out</paper-item>
+          </a>
         </iron-selector>
       </app-drawer>
 
@@ -188,11 +312,56 @@
                     reveals
                     effects="waterfall">
           <app-toolbar class="content main-toolbar">
-            <!--<paper-icon-button icon="app:menu"
+            <paper-icon-button class="drawer-stuff"
+                               icon="app:menu"
                                drawer-toggle>
-            </paper-icon-button>-->
-            <div main-title
-                 class="logo">Gigamunch</div>
+            </paper-icon-button>
+            <div main-title>
+              <div hidden$="[[hideHeaderLogo]]"
+                   class="logo">Gigamunch</div>
+              <div hidden$="[[!hideHeaderLogo]]"
+                   class="page-header">
+                <span class="page-header-title">[[title]]</span>
+              </div>
+            </div>
+            <div class="toolbar-right nav-tabs-stuff">
+              <paper-tabs class="nav-tabs vertical-align-center"
+                          attr-for-selected="name"
+                          selected="{{page}}">
+                <paper-tab name="kitchen">
+                  <a class="nav-a vertical-align-center"
+                     href="../kitchen"><span>Kitchen</span></a>
+                </paper-tab>
+                <paper-tab name="account">
+                  <a class="nav-a vertical-align-center"
+                     href="../account"><span>Account</span></a>
+                </paper-tab>
+              </paper-tabs>
+              <a class="vertical-align-center"
+                 href="../account">
+                <placeholder-img class="user-pic"
+                                 icon="app:account-circle"
+                                 alt="user profile picture"
+                                 src="[[user.photo_url]]"></placeholder-img>
+              </a>
+              <paper-menu-button horizontal-align="right"
+                                 vertical-offset="15"
+                                 class="vertical-align-center">
+                <paper-icon-button icon="app:more-vert"
+                                   class="dropdown-trigger"
+                                   alt="bottom align"></paper-icon-button>
+                <paper-menu class="dropdown-content">
+                  <a class="nav-a"
+                     href="../account">
+                    <paper-item class="bold">Account</paper-item>
+                  </a>
+                  <a class="nav-a"
+                     href="/signout">
+                    <paper-item class="bold">Log out</paper-item>
+                  </a>
+                </paper-menu>
+              </paper-menu-button>
+            </div>
           </app-toolbar>
         </app-header>
 
@@ -205,12 +374,27 @@
                         service="[[service]]"
                         user="{{user}}">
           </kitchen-page>
+          <inquiries-page id="inquiries"
+                          name="inquiries"
+                          service="[[service]]"
+                          user="{{user}}">
+          </inquiries-page>
+          <messages-page id="messages"
+                         name="messages"
+                         service="[[service]]"
+                         user="{{user}}">
+          </messages-page>
           <onboard-steps id="onboard"
                          name="onboard"
                          smallScreen="[[smallScreen]]"
                          service="[[service]]"
                          user="{{user}}">
           </onboard-steps>
+          <account-page id="account"
+                        name="account"
+                        service="[[service]]"
+                        user="{{user}}">
+          </account-page>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
         <!--<app-footer></app-footer>-->
@@ -258,7 +442,11 @@
           value: function() {
             return COOK.User;
           }
-        }
+        },
+        hideHeaderLogo: {
+          type: Boolean,
+          value: true,
+        },
       },
 
       observers: [
@@ -267,6 +455,8 @@
         '_pageOrScreenChanged(page, smallScreen)',
       ],
       listeners: {
+        'acceptinquiry': 'acceptInquiry',
+        'declineinquiry': 'declineInquiry',
         'savemenu': 'saveMenu',
         'editmenuitem': 'addMenuItem',
         'activateitem': 'activateItem',
@@ -274,6 +464,16 @@
         'onboardfinished': 'onboardFinished',
         'toast': 'toastEvent',
         'error': 'errorEvent',
+      },
+      acceptInquiry: function(e, detail) {
+        var inquiryID = detail.id;
+        var callback = detail.callback;
+        this.service.acceptInquiry(inquiryID, callback);
+      },
+      declineInquiry: function(e, detail) {
+        var inquiryID = detail.id;
+        var callback = detail.callback;
+        this.service.declineInquiry(inquiryID, callback);
       },
       activateItem: function(e, detail) {
         var itemID = detail.id;
@@ -342,6 +542,7 @@
           this.setPath('kitchen');
           return;
         }
+        var hideHeaderLogo = false;
         // Load page import on demand. Show 404 page if fails
         var resolvedPageURL, element, title;
         switch (page) {
@@ -354,14 +555,34 @@
             resolvedPageURL = this.resolveUrl('kitchen-page.html');
             element = this.$.kitchen;
             title = 'Kitchen';
+            hideHeaderLogo = true;
+            break;
+          case 'inquiries':
+            resolvedPageURL = this.resolveUrl('inquiries-page.html');
+            element = this.$.inquiries;
+            title = 'Inquiries';
+            hideHeaderLogo = true;
+            break;
+          case 'messages':
+            resolvedPageURL = this.resolveUrl('messages-page.html');
+            element = this.$.messages;
+            title = 'Messages';
+            hideHeaderLogo = true;
+            break;
+          case 'account':
+            resolvedPageURL = this.resolveUrl('account-page.html');
+            element = this.$.account;
+            title = 'Account';
+            hideHeaderLogo = true;
             break;
           default:
             resolvedPageURL = this.resolveUrl('my-' + page + '.html');
         }
         this.importHref(resolvedPageURL, function() {
           try {
-            element.selected();
             this.set('title', title);
+            this.set('hideHeaderLogo', hideHeaderLogo);
+            element.selected();
           } catch (err) {
             console.error(err);
           }
@@ -383,6 +604,7 @@
       },
       _showPage404: function() {
         this.page = 'view404';
+        this.title = 'Page not found';
       },
       setPath: function(path) {
         var route = '/';

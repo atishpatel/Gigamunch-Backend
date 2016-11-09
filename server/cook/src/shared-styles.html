@@ -68,12 +68,6 @@
         --paper-input-container-input: {
           @apply(--font);
         }
-        /* paper-tabs */
-        --paper-tabs-selection-bar-color: var(--light-accent-color);
-        --paper-tab: {
-          padding: 0;
-        }
-        ;
         --paper-tab-ink: var(--light-accent-color);
         /* paper-progress */
         --paper-progress-active-color: var(--accent-color);
@@ -84,12 +78,28 @@
         --paper-collapse-item-content: {
           @apply(--font)
         }
+        /* paper-slider */
+        --paper-slider-active-color: var(--dark-primary-color);
+        --paper-slider-knob-color: var(--dark-primary-color);
+        --paper-slider-pin-color: var(--dark-primary-color);
       }
       
       paper-checkbox,
       paper-input,
       paper-button {
         @apply(--font);
+      }
+      
+      paper-tab {
+        @apply(--font-bold);
+      }
+      
+      paper-item {
+        @apply(--font);
+      }
+      
+      paper-menu {
+        min-width: 175px;
       }
       
       .logo {
@@ -122,17 +132,6 @@
       paper-icon-button {
         color: var(--link-color);
         /* --link-color */
-      }
-      
-      .page-header {
-        margin-bottom: 24px;
-      }
-      
-      .page-header-title {
-        @apply(--font-bold);
-        font-size: 32px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #e8e8e8;
       }
       
       .photo-16-9 {
@@ -189,6 +188,11 @@
       
       .bold {
         font-weight: bold;
+      }
+      
+      .vertical-align-center {
+        display: flex;
+        align-items: center;
       }
 
     </style>

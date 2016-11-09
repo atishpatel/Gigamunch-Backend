@@ -3,7 +3,10 @@
   "shell": "src/app-shell.html",
   "fragments": [
     "src/onboard-steps.html",
-    "src/kitchen-page.html"
+    "src/kitchen-page.html",
+    "src/inquiries-page.html",
+    "src/messages-page.html",
+    "src/account-page.html"
   ],
   "sourceGlobs": [
     "src/**/*",
