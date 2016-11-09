@@ -1,0 +1,47 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="channel-list">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: flex;
+        flex-direction: column;
+      }
+
+    </style>
+    <template is="dom-repeat"
+              items="[[channels]]"
+              as="channel">
+      <a href$="channel/[[channel.sid]]">
+        <div>[[channel.uniqueName]]</div>
+      </a>
+    </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'channel-list',
+      properties: {
+        channels: {
+          type: Array,
+          notify: true,
+          value: [],
+        },
+        user: {
+          type: Object,
+          notify: true,
+        },
+        client: {
+          type: Object,
+        },
+      },
+      selected: function() {},
+      ready: function() {},
+    });
+
+  </script>
+</dom-module>
