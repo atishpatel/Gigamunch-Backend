@@ -49,11 +49,13 @@
                    required
                    auto-validate>
       </paper-input>
-      <paper-input class="flex-1"
+      <paper-input id="dob"
+                   class="flex-1"
                    label="Date of Birth*"
                    type="date"
-                   value="{{dob}}"
+                   value="{{_dob}}"
                    placeholder="mm/dd/yyyy"
+                   min="1900-01-01"
                    required
                    auto-validate>
       </paper-input>
@@ -115,6 +117,37 @@
           notify: true,
           reflectToAttribute: true,
         },
+        dob: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        _dob: {
+          type: String,
+          observer: '_dobUpdated',
+        },
+      },
+      _dobUpdated: function() {
+        if (this._dob && this._dob.length === 10) {
+          var date = new Date(this._dob);
+          if (date && date.getDate()) {
+            this.dob = date.toISOString();
+          }
+        }
+      },
+      ready: function() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+          dd = '0' + dd
+        }
+        if (mm < 10) {
+          mm = '0' + mm
+        }
+        today = yyyy + '-' + mm + '-' + dd;
+        this.$.dob.setAttribute("max", today);
       },
     });
 

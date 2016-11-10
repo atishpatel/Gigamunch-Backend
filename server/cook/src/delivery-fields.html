@@ -1,0 +1,94 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../bower_components/paper-slider/paper-slider.html">
+
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="delivery-fields">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: flex;
+        flex-direction: row;
+      }
+      
+      .price {
+        flex: 1;
+      }
+      
+      .range-input {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .range-slider {
+        width: 100%;
+      }
+      
+      label {
+        line-height: 20px;
+        color: var(--secondary-text-color);
+        font-size: 12px;
+      }
+      
+      @media (max-width: 700px) {
+         :host {
+          flex-direction: column;
+        }
+        .range-input {
+          padding-top: 12px;
+        }
+      }
+
+    </style>
+
+    <paper-input class="price"
+                 label="Delivery Price"
+                 value="{{price}}"
+                 type="number"
+                 min="0"
+                 step="1"
+                 max="10"
+                 auto-validate>
+    </paper-input>
+    <div class="range-input">
+      <label>Delivery range in miles</label>
+      <paper-slider id="range"
+                    class="range-slider"
+                    pin
+                    snaps
+                    max="60"
+                    max-markers="60"
+                    step="1"
+                    value="{{range}}">
+      </paper-slider>
+    </div>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'delivery-fields',
+
+      properties: {
+        range: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        price: {
+          type: Number,
+          notify: true,
+          reflectToAttribute: true,
+        },
+      },
+    });
+
+  </script>
+</dom-module>

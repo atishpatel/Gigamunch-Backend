@@ -7,6 +7,8 @@
 <link rel="import"
       href="shared-styles.html">
 <link rel="import"
+      href="delivery-fields.html">
+<link rel="import"
       href="profile-fields.html">
 <link rel="import"
       href="profile-social-fields.html">
@@ -66,6 +68,7 @@
       @media (max-width: 1000px) {
         .card {
           border-radius: 0;
+          border-bottom: none;
         }
       }
       
@@ -97,10 +100,22 @@
           <br>Tell them about you.
         </p>
 
-        <profile-social-fields bio="{{cook.bio}}"
+        <profile-social-fields id="profileSocialFields"
+                               bio="{{cook.bio}}"
                                instagram-id="{{cook.instagram_id}}"
                                twitter-id="{{cook.twitter_id}}">
         </profile-social-fields>
+
+        <div class="bold sub-header">Delivery</div>
+        <p>
+          Set how far you are willing to deliver your food, and how much you will charge for each delivery.
+          <br><span class="secondary-text">Setting range to 0 will disable delivery.</span>
+        </p>
+
+        <delivery-fields id="deliveryFields"
+                         price="{{cook.delivery_price}}"
+                         range="{{cook.delivery_range}}">
+        </delivery-fields>
 
         <div class="save-button-container">
           <paper-button class="save-button"
@@ -121,11 +136,14 @@
         <span class="sub-header-title">Payout Preferences</span>
       </div>
       <div class="card-body">
-        <p>Payouts for completed orders are released to you 48 hours after the order is completed. <br>Note: saved payout information is not desplayed below for safety.</p>
-        <submerchant-fields first-name="{{submerchant.first_name}}"
+        <p>Payouts for completed orders are released to you 48 hours after the order is completed.
+          <br>Note: saved payout information is not desplayed below for safety.</p>
+        <submerchant-fields id="submerchantFields"
+                            first-name="{{submerchant.first_name}}"
                             last-name="{{submerchant.last_name}}"
                             routing-number="{{submerchant.routing_number}}"
                             account-number="{{submerchant.account_number}}"
+                            dob="{{submerchant.date_of_birth}}"
                             address="{{submerchant.address}}">
         </submerchant-fields>
         <div class="save-button-container">

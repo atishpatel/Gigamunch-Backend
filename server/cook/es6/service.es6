@@ -19,7 +19,9 @@ class Service {
       }
       this.callQueue = [];
     }
-    this.refreshToken();
+    setTimeout(() => {
+      this.refreshToken();
+    }, 3000);
     ga('send', {
       hitType: 'timing',
       timingCategory: 'endpoint',
@@ -88,6 +90,7 @@ class Service {
       });
       return;
     }
+    cook.delivery_price = String(cook.delivery_price);
     const request = {
       gigatoken: this.getToken(),
       cook,

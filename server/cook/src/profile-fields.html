@@ -91,23 +91,33 @@
         width: 100%;
         padding-top: 20px;
       }
+      
+      .file-input-container {
+        display: flex;
+      }
+      
+      file-input {
+        margin: auto;
+      }
 
     </style>
-    <file-input id="fileInput"
-                photos="{{photos}}"
-                url-postfix="=s250-c"
-                on-photoschanged="photosChanged"
-                on-progressstart="progressStart"
-                on-progressend="progressEnd"
-                progress="{{progress}}">
-      <div class="profile-pic">
-        <placeholder-img icon="app:account-circle"
-                         alt="user profile picture"
-                         src="[[photoUrl]]">
-        </placeholder-img>
-        <span class="change-photo-text">Change</span>
-      </div>
-    </file-input>
+    <div class="file-input-container">
+      <file-input id="fileInput"
+                  photos="{{photos}}"
+                  url-postfix="=s250-c"
+                  on-photoschanged="photosChanged"
+                  on-progressstart="progressStart"
+                  on-progressend="progressEnd"
+                  progress="{{progress}}">
+        <div class="profile-pic">
+          <placeholder-img icon="app:account-circle"
+                           alt="user profile picture"
+                           src="[[photoUrl]]">
+          </placeholder-img>
+          <span class="change-photo-text">Change</span>
+        </div>
+      </file-input>
+    </div>
     <div id="progressBar"
          hidden>
       <paper-progress value="[[progress]]"></paper-progress>

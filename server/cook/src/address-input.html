@@ -137,7 +137,7 @@
           }
         }
         var apt = '';
-        if (this.address.apt) {
+        if (this.address && this.address.apt) {
           apt = this.address.apt.toUpperCase();
         }
         var street = address['street_number'] + ' ' + address['route'];
