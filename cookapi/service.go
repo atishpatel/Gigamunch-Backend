@@ -1,12 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/http"
+	"time"
+
+	"google.golang.org/appengine"
 
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -37,13 +47,21 @@ func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*t
 		return nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}.Wrap("failed to validate request")
 	}
 	user, err := auth.GetUserFromToken(ctx, req.gigatoken())
+	if err != nil && errors.GetErrorWithCode(err).Code == errors.CodeSignOut {
+		utils.Warningf(ctx, "A signout code was issued to. err: %+v", err)
+	}
 	return user, err
 }
 
 // Service is the REST API Endpoint exposed to Gigamunchers
 type Service struct{}
 
-func init() {
+func main() {
+	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
+	http.HandleFunc("/sub-merchant-approved", handleSubMerchantApproved)
+	http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
+	http.HandleFunc("/sub-merchant-disbursement-exception", handleDisbursementException)
+	http.HandleFunc("/on-message-sent", handleOnMessageSent)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
 	if err != nil {
 		log.Fatalf("Failed to register service: %#v", err)
@@ -82,4 +100,133 @@ func init() {
 	register("AcceptInquiry", "acceptInquiry", "POST", "cookservice/acceptInquiry", "AcceptInquiry accepts an inquiry for a cook.")
 	register("DeclineInquiry", "declineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
 	endpoints.HandleHTTP()
+	appengine.Main()
+}
+
+func handleProcessInquiry(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	inquiryID, err := tasks.ParseInquiryID(req)
+	if err != nil {
+		utils.Criticalf(ctx, "Failed to parse process inquiry request. Err: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	inquiryC := inquiry.New(ctx)
+	err = inquiryC.Process(inquiryID)
+	if err != nil {
+		utils.Criticalf(ctx, "Failed to process inquiry(%d). Err: %v", inquiryID, err)
+		taskC := tasks.New(ctx)
+		err = taskC.AddProcessInquiry(inquiryID, time.Now().Add(1*time.Hour))
+		if err != nil {
+			utils.Criticalf(ctx, "Failed to add inquiry(%d) in processInquiry queue. Err: %v", inquiryID, err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleSubMerchantApproved(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	paymentC := payment.New(ctx)
+	btNotification(ctx, w, req, "SubMerchantApproved", paymentC.SubMerchantApproved)
+}
+
+func handleSubMerchantDeclined(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	paymentC := payment.New(ctx)
+	btNotification(ctx, w, req, "SubMerchantDeclined", paymentC.SubMerchantDeclined)
+}
+
+func btNotification(ctx context.Context, w http.ResponseWriter, req *http.Request, fnName string, fn func(string, string) error) {
+	err := req.ParseForm()
+	if err != nil {
+		utils.Criticalf(ctx, "Error parsing %s request form: %v", fnName, err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	payload := req.FormValue("bt_payload")
+	signature := req.FormValue("bt_signature")
+	utils.Infof(ctx, "payload:%#v signature: %s", payload, signature)
+	err = fn(signature, payload)
+	if err != nil {
+		utils.Criticalf(ctx, "Error doing %s: %v", "SubMerchantApproved", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	err := req.ParseForm()
+	if err != nil {
+		utils.Criticalf(ctx, "Error parsing %s request form: %v", "DisbursementException", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	paymentC := payment.New(ctx)
+	payload := req.FormValue("bt_payload")
+	signature := req.FormValue("bt_signature")
+	transactionIDs, err := paymentC.DisbursementException(signature, payload)
+	if err != nil {
+		utils.Criticalf(ctx, "Error doing %s: %v", "SubMerchantApproved", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// set inquiries to fulfilled
+	inquiryC := inquiry.New(ctx)
+	_, err = inquiryC.SetToFulfilledByTransactionIDs(transactionIDs)
+	if err != nil {
+		utils.Criticalf(ctx, "Error doing %s: %v", "inquiry.SetToFulfilledByTransactionIDs", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	err := req.ParseForm()
+	if err != nil {
+		utils.Criticalf(ctx, "Error parsing %s request form: %v", "OnMessageSent", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	eventType := req.FormValue("EventType")
+	if eventType != "onMessageSent" {
+		utils.Warningf(ctx, "invalid event type for handleOnMessageSent: eventType: %+v", eventType)
+	}
+	channelSid := req.FormValue("ChannelSid")
+	body := req.FormValue("Body")
+	from := req.FormValue("From")
+	if body == "" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	messageC := message.New(ctx)
+	resp, err := messageC.GetChannelInfo(channelSid)
+	if err != nil {
+		utils.Criticalf(ctx, "errors while to message.GetChannelInfo onMessageSent. err: %+v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	userInfo, err := messageC.GetUserInfo(from)
+	if err != nil {
+		utils.Criticalf(ctx, "errors while to message.GetUserInfo onMessageSent. err: %+v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	shouldNotifyCook := resp.CookID != userInfo.ID // isn't cook
+	if shouldNotifyCook {
+		cookC := cook.New(ctx)
+		msg := fmt.Sprintf("%s just sent you a message on Gigamunch:\n\"%s\"", userInfo.Name, body)
+		err = cookC.Notify(resp.CookID, "You just got a message", msg)
+		if err != nil {
+			utils.Criticalf(ctx, "failed to cook.Notify cookID(%s) in onMessageSent. err: %+v", resp.CookID, err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
 }

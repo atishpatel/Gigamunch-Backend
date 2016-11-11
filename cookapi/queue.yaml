@@ -1,0 +1,3 @@
+queue:
+- name: process-inquiry
+  rate: 40/s
