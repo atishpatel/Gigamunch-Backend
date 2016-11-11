@@ -74,11 +74,11 @@ func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User
 		getConfig(ctx)
 	}
 	if gTokenString == "" {
-		return nil, "", errInvalidGToken
+		return nil, "", errInvalidGToken.Wrap("gtoken is empty")
 	}
 	gtoken, err := gitkitClient.ValidateToken(ctx, gTokenString, gitkitAudiences)
 	if err != nil || time.Since(gtoken.IssueAt) > 15*time.Minute {
-		return nil, "", errInvalidGToken.WithError(err)
+		return nil, "", errInvalidGToken.WithError(err).Wrap("token is too old")
 	}
 	// get user info from gitkit servers
 	// gitkitUser, err := gitkitClient.UserByLocalID(ctx, gtoken.LocalID)
@@ -144,7 +144,7 @@ func GetUserFromToken(ctx context.Context, JWTString string) (*types.User, error
 		return nil, err
 	}
 	if token.IsExpired() {
-		return nil, errTokenExpired
+		return nil, errTokenExpired.Wrap("token is expired")
 	}
 	// TODO if issue time is old, check in database
 	// log a "token miss"
@@ -153,7 +153,7 @@ func GetUserFromToken(ctx context.Context, JWTString string) (*types.User, error
 		err := getUserSessions(ctx, token.User.ID, userSessions)
 		if err != nil {
 			// error doesn't matter. They should just call RefreshToken
-			return nil, errInvalidToken.WithMessage("Datastore error.").WithError(err)
+			return nil, errInvalidToken.WithMessage("Datastore error.").WithError(err).Wrapf("error with getUserSessions")
 		}
 		return &userSessions.User, nil
 	}
@@ -173,11 +173,11 @@ func getAuthTokenFromString(ctx context.Context, JWTString string) (*Token, erro
 	})
 	if err != nil || !jwtToken.Valid {
 		// Token is invalid
-		return nil, errInvalidToken
+		return nil, errInvalidToken.Wrap("jwtToken is not valid")
 	}
 	token, err := extractClaims(jwtToken)
 	if err != nil {
-		return nil, errInvalidToken
+		return nil, errInvalidToken.Wrap("error while extracting token claims")
 	}
 	return token, nil
 }
@@ -232,7 +232,7 @@ func RefreshToken(ctx context.Context, JWTString string) (string, error) {
 		}
 	}
 	if !found {
-		return "", errInvalidToken
+		return "", errInvalidToken.Wrap("jti not found")
 	}
 	token.User = userSessions.User
 	jwtString, err := token.JWTString()
@@ -299,7 +299,7 @@ func extractClaims(jwtToken *jwt.Token) (*Token, error) {
 	ita, ok = getTimeClaim("ita", ok)
 	expire, ok = getTimeClaim("exp", ok)
 	if !ok {
-		return nil, errInvalidToken
+		return nil, errInvalidToken.Wrap("failed to extract claims from token")
 	}
 	token := new(Token)
 	token.User = types.User{
