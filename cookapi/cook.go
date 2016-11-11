@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"golang.org/x/net/context"
@@ -53,8 +54,18 @@ func (service *Service) UpdateCook(ctx context.Context, req *UpdateCookReq) (*Co
 		return resp, nil
 	}
 	cookC := cook.New(ctx)
-	cook, err := cookC.Update(user, &req.Cook.Address, req.Cook.PhoneNumber, req.Cook.Bio, req.Cook.DeliveryRange,
-		req.Cook.WeekSchedule, req.Cook.InstagramID, req.Cook.TwitterID, req.Cook.SnapchatID)
+	updateCookReq := &cook.UpdateCookReq{
+		User:          user,
+		PhoneNumber:   req.Cook.PhoneNumber,
+		Address:       &req.Cook.Address,
+		Bio:           req.Cook.Bio,
+		DeliveryPrice: req.Cook.DeliveryPrice,
+		DeliveryRange: req.Cook.DeliveryRange,
+		WeekSchedule:  req.Cook.WeekSchedule,
+		InstagramID:   req.Cook.InstagramID,
+		TwitterID:     req.Cook.TwitterID,
+	}
+	cook, err := cookC.Update(updateCookReq)
 	if err != nil {
 		resp.Err = errors.Wrap("failed to update cook", err)
 		return resp, nil
@@ -113,6 +124,28 @@ type UpdateSubMerchantReq struct {
 	SubMerchant SubMerchant `json:"sub_merchant"`
 }
 
+func (req *UpdateSubMerchantReq) valid() error {
+	if req.SubMerchant.FirstName == "" {
+		return fmt.Errorf("First name cannot be empty.")
+	}
+	if req.SubMerchant.LastName == "" {
+		return fmt.Errorf("Last name cannot be empty.")
+	}
+	if req.SubMerchant.Address.Street == "" {
+		return fmt.Errorf("An address must be selected.")
+	}
+	if req.SubMerchant.AccountNumber == "" {
+		return fmt.Errorf("Account number cannot be empty.")
+	}
+	if req.SubMerchant.RoutingNumber == "" {
+		return fmt.Errorf("Routing number cannot be empty.")
+	}
+	if req.SubMerchant.DateOfBirth.IsZero() {
+		return fmt.Errorf("Date of birth is invalid.")
+	}
+	return nil
+}
+
 // UpdateSubMerchant creates or updates sub-merchant info
 func (service *Service) UpdateSubMerchant(ctx context.Context, req *UpdateSubMerchantReq) (*CookResp, error) {
 	resp := new(CookResp)
@@ -159,8 +192,18 @@ func (service *Service) FinishOnboarding(ctx context.Context, req *FinishOnboard
 
 	// update cook
 	cookC := cook.New(ctx)
-	cook, err := cookC.Update(user, &req.Cook.Address, req.Cook.PhoneNumber, req.Cook.Bio, req.Cook.DeliveryRange,
-		req.Cook.WeekSchedule, req.Cook.InstagramID, req.Cook.TwitterID, req.Cook.SnapchatID)
+	updateCookReq := &cook.UpdateCookReq{
+		User:          user,
+		PhoneNumber:   req.Cook.PhoneNumber,
+		Address:       &req.Cook.Address,
+		Bio:           req.Cook.Bio,
+		DeliveryPrice: req.Cook.DeliveryPrice,
+		DeliveryRange: req.Cook.DeliveryRange,
+		WeekSchedule:  req.Cook.WeekSchedule,
+		InstagramID:   req.Cook.InstagramID,
+		TwitterID:     req.Cook.TwitterID,
+	}
+	cook, err := cookC.Update(updateCookReq)
 	if err != nil {
 		resp.Err = errors.Wrap("failed to update cook", err)
 		return resp, nil

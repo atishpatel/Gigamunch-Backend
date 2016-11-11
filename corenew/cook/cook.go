@@ -9,6 +9,7 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -101,64 +102,77 @@ func (c *Client) GetDisplayInfo(id string) (string, string, error) {
 	return cook.Name, cook.PhotoURL, nil
 }
 
+// UpdateCookReq is the request to UpdateCook
+type UpdateCookReq struct {
+	User          *types.User
+	PhoneNumber   string
+	Address       *types.Address
+	Bio           string
+	DeliveryPrice float32
+	DeliveryRange int32
+	WeekSchedule  []WeekSchedule
+	InstagramID   string
+	TwitterID     string
+}
+
 // Update updates a cook's info.
-func (c *Client) Update(user *types.User, address *types.Address, phoneNumber, bio string,
-	deliveryRange int32, weekSchedule []WeekSchedule, instagramID, twitterID, snapchatID string) (*Cook, error) {
-	cook, err := get(c.ctx, user.ID)
+func (c *Client) Update(req *UpdateCookReq) (*Cook, error) {
+	if req == nil {
+		return nil, errInvalidParameter.WithMessage("Request cannot be nil.").Wrap("Request cannot be nil for Update")
+	}
+	cook, err := get(c.ctx, req.User.ID)
 	if err != nil && err != datastore.ErrNoSuchEntity {
-		return nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", user.ID)
+		return nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", req.User.ID)
 	}
 	if cook.CreatedDatetime.IsZero() {
 		// is new cook
 		if !appengine.IsDevAppServer() {
 			// notify enis
 			mC := message.New(c.ctx)
-			err = mC.SendSMS("6153975516", fmt.Sprintf("%s just started an application. get on that booty. email: %s", user.Name, user.Email))
+			err = mC.SendSMS("6153975516", fmt.Sprintf("%s just started an application. get on that booty. email: %s", req.User.Name, req.User.Email))
 			if err != nil {
-				utils.Criticalf(c.ctx, "failed to notify enis about cook(%s) submitting application", user.ID)
+				utils.Criticalf(c.ctx, "failed to notify enis about cook(%s) submitting application", req.User.ID)
 			}
 		}
 		cook.CreatedDatetime = time.Now()
 	}
-	cook.ID = user.ID
-	cook.Name = user.Name
-	cook.PhotoURL = user.PhotoURL
-	cook.Email = user.Email
-	cook.ProviderID = user.ProviderID
-	if address != nil {
-		cook.Address = *address
+	cook.ID = req.User.ID
+	cook.Name = req.User.Name
+	cook.PhotoURL = req.User.PhotoURL
+	cook.Email = req.User.Email
+	cook.ProviderID = req.User.ProviderID
+	if req.Address != nil {
+		if req.Address.Longitude == 0 && req.Address.Latitude == 0 {
+			err = maps.GetGeopointFromAddress(c.ctx, req.Address)
+			if err != nil {
+				return nil, errors.Wrap("failed to maps.GetGeopointFromAddress", err)
+			}
+		}
+		cook.Address = *req.Address
 	}
-	if phoneNumber != "" {
-		cook.PhoneNumber = phoneNumber
+	if req.PhoneNumber != "" {
+		cook.PhoneNumber = req.PhoneNumber
 	}
 	if cook.BTSubMerchantID == "" {
-		tmpID := user.ID
+		tmpID := req.User.ID
 		for len(tmpID) <= 32 {
 			tmpID += tmpID
 		}
 		cook.BTSubMerchantID = tmpID[:32]
 	}
-	if deliveryRange != 0 {
-		cook.DeliveryRange = deliveryRange
+	cook.DeliveryRange = req.DeliveryRange
+	cook.DeliveryPrice = req.DeliveryPrice
+	if req.Bio != "" {
+		cook.Bio = req.Bio
 	}
-	if bio != "" {
-		cook.Bio = bio
+	if len(req.WeekSchedule) >= 7 {
+		cook.WeekSchedule = req.WeekSchedule
 	}
-	if len(weekSchedule) >= 7 {
-		cook.WeekSchedule = weekSchedule
-	}
-	if instagramID != "" {
-		cook.InstagramID = instagramID
-	}
-	if twitterID != "" {
-		cook.TwitterID = twitterID
-	}
-	if snapchatID != "" {
-		cook.SnapchatID = snapchatID
-	}
-	err = put(c.ctx, user.ID, cook)
+	cook.InstagramID = req.InstagramID
+	cook.TwitterID = req.TwitterID
+	err = put(c.ctx, req.User.ID, cook)
 	if err != nil {
-		return nil, errDatastore.WithError(err).Wrapf("cannot put cook(%s)", user.ID)
+		return nil, errDatastore.WithError(err).Wrapf("cannot put cook(%s)", req.User.ID)
 	}
 	return cook, nil
 }
