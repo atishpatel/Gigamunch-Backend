@@ -63,7 +63,7 @@ type Cook struct {
 	Bio                   string                  `json:"bio" datastore:",noindex"`
 	PhoneNumber           string                  `json:"phone_number" datastore:",noindex"`
 	Address               types.Address           `json:"address" datastore:",noindex"`
-	DeliveryPrice         float32                 `json:"delivery_price" datastore:",noindex"`
+	DeliveryPrice         float32                 `json:"delivery_price,string" datastore:",noindex"`
 	DeliveryRange         int32                   `json:"delivery_range" datastore:",noindex"`
 	WeekSchedule          []WeekSchedule          `json:"week_schedule" datastore:",noindex"`
 	ScheduleModifications []ScheduleModifications `json:"schedule_modifications" datastore:",noindex"`
