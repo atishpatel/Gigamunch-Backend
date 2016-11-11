@@ -1,28 +1,32 @@
 package message
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
 	"golang.org/x/net/context"
+	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	twilio "github.com/atishpatel/twiliogo"
 	jwt "gopkg.in/dgrijalva/jwt-go.v2"
-
-	"google.golang.org/appengine/urlfetch"
 )
 
 const (
-	channelAttr        = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
-	userAttr           = `{"id":"%s","name":"%s","image":"%s"}`
-	inquiryAttr        = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","price":"%f","is_delivery":"%t","servings":"%d","exchange_time":"%d"}`
-	inquiryStatusAttr  = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","title":"%s","message":"%s"}`
-	inquiryBotID       = "InquiryBot"
-	inquiryStatusBotID = "InquiryStatusBot"
-	gigamunchBotID     = "GigamunchBot"
+	channelAttr       = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
+	userAttr          = `{"id":"%s","name":"%s","image":"%s"}`
+	inquiryAttr       = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","price":"%f","is_delivery":"%t","servings":"%d","exchange_time":"%d"}`
+	inquiryStatusAttr = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","title":"%s","message":"%s"}`
+	// InquiryBotID is the Unique Name for the InquiryBot.
+	InquiryBotID = "InquiryBot"
+	// InquiryStatusBotID is the Unique Name for the InquiryStatusBot.
+	InquiryStatusBotID = "InquiryStatusBot"
+	// GigamunchBotID is the Unique Name for the GigamunchBot.
+	GigamunchBotID = "GigamunchBot"
 )
 
 var (
@@ -54,7 +58,7 @@ func New(ctx context.Context) *Client {
 	c := &Client{
 		ctx: ctx,
 	}
-	c.twilioC, c.twilioIPC = getTwilioClients(ctx, twilioConfig.AccountSID, twilioConfig.KeySID, twilioConfig.AuthToken)
+	c.twilioC, c.twilioIPC = getTwilioClients(ctx, twilioConfig.AccountSID, twilioConfig.AuthToken, twilioConfig.KeySID, twilioConfig.KeyAuthToken)
 	return c
 }
 
@@ -180,15 +184,15 @@ func addBotsToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID stri
 		return errInvalidParamter.Wrap("channelSID cannot be an empty string")
 	}
 	var err error
-	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, gigamunchBotID, "")
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, GigamunchBotID, "")
 	if err != nil {
 		return errTwilio.WithError(err).Wrapf("failed to add GigamunchBot to channel(%s)", channelSID)
 	}
-	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, inquiryBotID, "")
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, InquiryBotID, "")
 	if err != nil {
 		return errTwilio.WithError(err).Wrapf("failed to add InquiryBot to channel(%s)", channelSID)
 	}
-	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, inquiryStatusBotID, "")
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, InquiryStatusBotID, "")
 	if err != nil {
 		return errTwilio.WithError(err).Wrapf("failed to add InquiryStatusBot to channel(%s)", channelSID)
 	}
@@ -267,7 +271,7 @@ func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, 
 		return "", errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 	}
 	body, attr := getInquiryBodyAndAttributes(inquiryInfo)
-	msg, err := twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryBotID, body, attr)
+	msg, err := twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, InquiryBotID, body, attr)
 	if err != nil {
 		return "", errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 	}
@@ -332,7 +336,7 @@ func (c *Client) UpdateInquiryStatus(messageSID string, cookInfo *UserInfo, eate
 	}
 	// send message
 	body, attr := getInquiryStatusBodyAndAttributes(c, cookInfo, eaterInfo, inquiryInfo)
-	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, inquiryStatusBotID, body, attr)
+	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, InquiryStatusBotID, body, attr)
 	if err != nil {
 		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 	}
@@ -396,15 +400,51 @@ func (c *Client) GetToken(userInfo *UserInfo, deviceID string) (string, error) {
 	grants["identity"] = userInfo.ID
 	grants["ip_messaging"] = ipMessaging
 	jwtToken.Claims["grants"] = grants
-	tkn, err := jwtToken.SignedString([]byte(twilioConfig.AuthToken))
+	tkn, err := jwtToken.SignedString([]byte(twilioConfig.KeyAuthToken))
 	if err != nil {
 		return "", errInternal.WithError(err).Wrap("failed to jwt.SignedString")
 	}
 	return tkn, nil
 }
 
-func getTwilioClients(ctx context.Context, accountSID, keySID, apiSecret string) (*twilio.TwilioClient, *twilio.TwilioIPMessagingClient) {
-	client := twilio.NewClient(accountSID, apiSecret)
+// GetChannelInfoResp is the response for GetChannelInfo.
+type GetChannelInfoResp struct {
+	EaterID string
+	CookID  string
+}
+
+// GetChannelInfo returns the Cook and Eater ids.
+func (c *Client) GetChannelInfo(channelSID string) (*GetChannelInfoResp, error) {
+	channel, err := twilio.GetIPChannel(c.twilioIPC, serviceSID, channelSID)
+	if err != nil {
+		return nil, errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+	}
+	ids := strings.Split(channel.UniqueName, "<;>")
+	if len(ids) != 2 {
+		return nil, errInternal.WithMessage("Channel has invalid name.").Wrapf("Invalid channel uniqueName(%s)", channel.UniqueName)
+	}
+	resp := new(GetChannelInfoResp)
+	resp.CookID = ids[0]
+	resp.EaterID = ids[1]
+	return resp, nil
+}
+
+// GetUserInfo returns the user info for a UserSID.
+func (c *Client) GetUserInfo(userSID string) (*UserInfo, error) {
+	user, err := twilio.GetIPUser(c.twilioIPC, serviceSID, userSID)
+	if err != nil {
+		return nil, errTwilio.WithError(err).Wrap("failed to twilio.GetIPUser")
+	}
+	userInfo := new(UserInfo)
+	err = json.Unmarshal([]byte(user.Attributes), userInfo)
+	if err != nil {
+		return nil, errInternal.WithError(err).Wrapf("failed to json.Unmarshal userSID(%s) attributes: %s", userSID, user.Attributes)
+	}
+	return userInfo, nil
+}
+
+func getTwilioClients(ctx context.Context, accountSID, authToken, keySID, apiSecret string) (*twilio.TwilioClient, *twilio.TwilioIPMessagingClient) {
+	client := twilio.NewClient(accountSID, authToken)
 	httpClient := urlfetch.Client(ctx)
 	client.HTTPClient = httpClient
 	ipClient := twilio.NewIPMessagingClient(keySID, apiSecret)
