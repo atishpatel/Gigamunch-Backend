@@ -10,11 +10,15 @@ import (
 
 	// mysql "github.com/go-sql-driver/mysql"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine"
 	"google.golang.org/grpc"
+
+	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
 )
@@ -65,6 +69,7 @@ func main() {
 	go func() {
 		http.HandleFunc("/_ah/health", healthCheckHandler)
 		http.HandleFunc("/", fronthandler)
+		http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
 		// http.HandleFunc("/sql", sqlTest)
 		appengine.Main()
 	}()
@@ -96,3 +101,26 @@ func fronthandler(w http.ResponseWriter, r *http.Request) {
 // 	}
 // 	fmt.Fprintln(w, output)
 // }
+
+func handleProcessInquiry(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	inquiryID, err := tasks.ParseInquiryID(req)
+	if err != nil {
+		utils.Errorf(ctx, "Failed to parse process inquiry request. Err: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	inquiryC := inquiry.New(ctx)
+	err = inquiryC.Process(inquiryID)
+	if err != nil {
+		utils.Criticalf(ctx, "Failed to process inquiry(%d). Err: %v", inquiryID, err)
+		taskC := tasks.New(ctx)
+		err = taskC.AddProcessInquiry(inquiryID, time.Now().Add(1*time.Hour))
+		if err != nil {
+			utils.Criticalf(ctx, "Failed to add inquiry(%d) in processInquiry queue. Err: %v", inquiryID, err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+}
