@@ -1,9 +1,10 @@
 package server
 
 import (
-	"golang.org/x/net/context"
 	"net/http"
 	"time"
+
+	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
@@ -123,7 +124,10 @@ func CurrentUser(w http.ResponseWriter, req *http.Request) *types.User {
 func makeCook(ctx context.Context, user *types.User, authToken string) (string, error) {
 	// create a cook account
 	cookC := cook.New(ctx)
-	_, err := cookC.Update(user, nil, "", "", 0, nil, "", "", "")
+	updateCookReq := &cook.UpdateCookReq{
+		User: user,
+	}
+	_, err := cookC.Update(updateCookReq)
 	if err != nil {
 		return "", errors.Wrap("Error cookC.Update", err)
 	}
