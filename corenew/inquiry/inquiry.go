@@ -18,12 +18,16 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
+const (
+	datetimeFormat = "01/02 at 03:04 PM"
+)
+
 var (
 	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 	errUnauthorized     = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There is a problem. Try again in a few minutes."}
-	fixedTimeZone       = time.FixedZone("CDT", -5*3600)
+	fixedTimeZone       = time.FixedZone("CDT", -6*3600)
 )
 
 // Client is a client for Inquiry.
@@ -33,6 +37,15 @@ type Client struct {
 
 // New returns a new Client.
 func New(ctx context.Context) *Client {
+	if fixedTimeZone == nil {
+		// TODO figure out a way to get timezone
+		// var err error
+		// fixedTimeZone, err =  time.LoadLocation("CDT")
+		// if err != nil {
+		// 	utils.Criticalf(ctx, "failed to get fixedTimeZone. err: %+v", err)
+		// 	fixedTimeZone = time.FixedZone("CDT", -6*3600)
+		// }
+	}
 	return &Client{ctx: ctx}
 }
 
@@ -251,11 +264,11 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		utils.Criticalf(c.ctx, "failed to tasks.AddProcessInquiry inquiry(%d): %+v", inquiry.ID, err)
 	}
 	subject := fmt.Sprintf("%s just requested %s", eater.Name, inquiry.Item.Name)
-	msg := fmt.Sprintf("%s just requested %d servings of %s. You have until %s to Accept or Decline the request. https://gigamunchapp.com/cook/inquiries",
+	msg := fmt.Sprintf("%s just requested %d servings of '%s'.\n\nYou have until %s to Accept or Decline the request.\n\nhttps://gigamunchapp.com/cook/inquiries",
 		eater.Name,
 		inquiry.Servings,
 		inquiry.Item.Name,
-		at.In(fixedTimeZone).Format("01/02 at 03:04 PM"))
+		at.In(fixedTimeZone).Format(datetimeFormat))
 	err = cookC.Notify(cook.ID, subject, msg)
 	if err != nil {
 		utils.Criticalf(c.ctx, "failed to notify cook(%s ID: %s) about inquiry(%d) err: %+v", cook.Name, cook.ID, inquiry.ID, err)
@@ -294,6 +307,21 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 		err = sendUpdatedActionMessage(c.ctx, inquiry)
 		if err != nil {
 			return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
+		}
+		// notify Gigamunch if it's a Gigamunch Delivery
+		if inquiry.ExchangeMethod.GigamunchDelivery() {
+			messageC := getMessageClient(c.ctx)
+			err = messageC.SendSMS("9316445311,9316446755,6153975516,6155454989",
+				fmt.Sprintf("Time to do a GigaDelivery bras!\n\nItem:%s\n\nDate and time:%s\n\nPickup Location:%s\n\nDropoff Location:%s\n\nInquiryID:%d",
+					inquiry.Item.Name,
+					inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+					inquiry.ExchangePlanInfo.CookAddress.String(),
+					inquiry.ExchangePlanInfo.EaterAddress.String(),
+					inquiry.ID,
+				))
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to notify about GigaDelivery for inquiry(%d). Err: %+v", inquiry.ID, err)
+			}
 		}
 	}
 	return inquiry, nil
@@ -387,7 +415,6 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 		return nil, errors.Wrap("failed to payment.SubmitForSettlement", err)
 	}
 	inquiry.BTRefundTransactionID = refundID
-	// TODO notify eater and send twilio status message to channel
 	err = put(c.ctx, id, inquiry)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("failed to put Inquiry(%d) after submitting for settlement", id)
@@ -395,6 +422,25 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	err = sendUpdatedActionMessage(c.ctx, inquiry)
 	if err != nil {
 		return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
+	}
+	msg := fmt.Sprintf("%s just canceled their request for '%s'.", inquiry.EaterName, inquiry.Item.Name)
+	cookC := getCookClient(c.ctx)
+	err = cookC.Notify(inquiry.CookID, "Order Canceled", msg)
+	if err != nil {
+		utils.Criticalf(c.ctx, "Failed to notify cook(%d) about inquiry(%d) cancel. Err: %+v", inquiry.CookID, inquiry.ID, err)
+	}
+	// notify Gigamunch if it's a Gigamunch Delivery
+	if inquiry.ExchangeMethod.GigamunchDelivery() {
+		messageC := getMessageClient(c.ctx)
+		err = messageC.SendSMS("9316445311,9316446755,6153975516,6155454989",
+			fmt.Sprintf("GigaDelivery canceled.\n\nItem:%s\n\nDate and time:%s\n\nInquiryID:%d",
+				inquiry.Item.Name,
+				inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+				inquiry.ID,
+			))
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to notify about GigaDelivery for inquiry(%d). Err: %+v", inquiry.ID, err)
+		}
 	}
 	return inquiry, nil
 }
@@ -464,7 +510,7 @@ func (c *Client) Process(id int64) error {
 		// If after ExchangeTime, set to Fulfilled state.
 		taskC := tasks.New(c.ctx)
 		now := time.Now()
-		if inquiry.ExpectedExchangeDateTime.Before(now) {
+		if now.Before(inquiry.ExpectedExchangeDateTime) {
 			err = taskC.AddProcessInquiry(id, inquiry.ExpectedExchangeDateTime)
 			if err != nil {
 				return errors.Wrap("faield to task.AddProcessInquiry", err)
@@ -521,6 +567,7 @@ type messageClient interface {
 	SendInquiryBotMessage(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) (string, error)
 	UpdateChannel(cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
 	UpdateInquiryStatus(messageID string, cookUI *message.UserInfo, eaterUI *message.UserInfo, inquiryI *message.InquiryInfo) error
+	SendSMS(to, message string) error
 }
 
 var getMessageClient = func(ctx context.Context) messageClient {
