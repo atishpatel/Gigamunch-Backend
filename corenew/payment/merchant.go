@@ -67,17 +67,26 @@ func (c *Client) CreateFakeSubMerchant(user *types.User, id string) error {
 			Country: "USA",
 		},
 	}
-
 	nameArray := strings.Split(user.Name, " ")
 	switch len(nameArray) {
 	case 3:
-		req.FirstName = nameArray[0]
-		req.LastName = nameArray[2]
+		if len(nameArray[0]) > 2 {
+			req.FirstName = nameArray[0]
+		}
+		if len(nameArray[2]) > 2 {
+			req.LastName = nameArray[2]
+		} else if len(nameArray[1]) > 2 {
+			req.LastName = nameArray[1]
+		}
 	case 2:
-		req.LastName = nameArray[1]
+		if len(nameArray[1]) > 2 {
+			req.LastName = nameArray[1]
+		}
 		fallthrough
 	case 1:
-		req.FirstName = nameArray[0]
+		if len(nameArray[0]) > 2 {
+			req.FirstName = nameArray[0]
+		}
 	}
 	cookC := cook.New(c.ctx)
 	return updateSubMerchant(c.ctx, c.bt, cookC, user, req)
