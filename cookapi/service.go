@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"google.golang.org/appengine"
@@ -20,6 +21,10 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
+)
+
+var (
+	domainURL string
 )
 
 type coder interface {
@@ -57,6 +62,7 @@ func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*t
 type Service struct{}
 
 func main() {
+	getDomainString()
 	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
 	http.HandleFunc("/sub-merchant-approved", handleSubMerchantApproved)
 	http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
@@ -101,6 +107,12 @@ func main() {
 	register("DeclineInquiry", "declineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
 	endpoints.HandleHTTP()
 	appengine.Main()
+}
+
+func getDomainString() {
+	if domainURL == "" {
+		domainURL = os.Getenv("DOMAIN_URL")
+	}
 }
 
 func handleProcessInquiry(w http.ResponseWriter, req *http.Request) {
@@ -220,7 +232,8 @@ func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
 	shouldNotifyCook := resp.CookID != userInfo.ID // isn't cook
 	if shouldNotifyCook {
 		cookC := cook.New(ctx)
-		msg := fmt.Sprintf("%s just sent you a message on Gigamunch:\n\"%s\"", userInfo.Name, body)
+		encodedChannelName := resp.CookID + "%3C%3B%3E" + resp.EaterID
+		msg := fmt.Sprintf("%s just sent you a message on Gigamunch:\n\"%s\"\n\n%s/cook/channel/%s", userInfo.Name, body, domainURL, encodedChannelName)
 		err = cookC.Notify(resp.CookID, "You just got a message", msg)
 		if err != nil {
 			utils.Criticalf(ctx, "failed to cook.Notify cookID(%s) in onMessageSent. err: %+v", resp.CookID, err)

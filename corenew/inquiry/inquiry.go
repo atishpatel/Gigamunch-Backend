@@ -3,6 +3,7 @@ package inquiry
 import (
 	"fmt"
 	"math"
+	"os"
 	"time"
 
 	"golang.org/x/net/context"
@@ -28,6 +29,7 @@ var (
 	errUnauthorized     = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User does not have access."}
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There is a problem. Try again in a few minutes."}
 	fixedTimeZone       = time.FixedZone("CDT", -6*3600)
+	domainURL           string
 )
 
 // Client is a client for Inquiry.
@@ -37,15 +39,16 @@ type Client struct {
 
 // New returns a new Client.
 func New(ctx context.Context) *Client {
-	if fixedTimeZone == nil {
-		// TODO figure out a way to get timezone
-		// var err error
-		// fixedTimeZone, err =  time.LoadLocation("CDT")
-		// if err != nil {
-		// 	utils.Criticalf(ctx, "failed to get fixedTimeZone. err: %+v", err)
-		// 	fixedTimeZone = time.FixedZone("CDT", -6*3600)
-		// }
-	}
+	getDomainString()
+	// if fixedTimeZone == nil {
+	// TODO figure out a way to get timezone
+	// var err error
+	// fixedTimeZone, err =  time.LoadLocation("CDT")
+	// if err != nil {
+	// 	utils.Criticalf(ctx, "failed to get fixedTimeZone. err: %+v", err)
+	// 	fixedTimeZone = time.FixedZone("CDT", -6*3600)
+	// }
+	// }
 	return &Client{ctx: ctx}
 }
 
@@ -177,13 +180,13 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	totalTaxPrice := totalPrice - (totalPricePerServing + exchangePrice)
 	totalCookPrice := item.CookPricePerServing * float32(numServings)
 	totalGigaFee := totalPricePerServing - totalCookPrice
-	gigaFeeWithDelivery := totalGigaFee
+	gigaFeeWithDeliveryAndTax := totalGigaFee + totalTaxPrice
 	if !exchangeMethod.Pickup() && !exchangeMethod.CookDelivery() {
-		gigaFeeWithDelivery += exchangePrice
+		gigaFeeWithDeliveryAndTax += exchangePrice
 	}
 	// Create Transaction
 	paymentC := getPaymentClient(c.ctx)
-	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, totalPrice, gigaFeeWithDelivery)
+	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, totalPrice, gigaFeeWithDeliveryAndTax)
 	if err != nil {
 		return nil, errors.Wrap("failed to paymentC.StartSale", err)
 	}
@@ -264,11 +267,11 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		utils.Criticalf(c.ctx, "failed to tasks.AddProcessInquiry inquiry(%d): %+v", inquiry.ID, err)
 	}
 	subject := fmt.Sprintf("%s just requested %s", eater.Name, inquiry.Item.Name)
-	msg := fmt.Sprintf("%s just requested %d servings of '%s'.\n\nYou have until %s to Accept or Decline the request.\n\nhttps://gigamunchapp.com/cook/inquiries",
+	msg := fmt.Sprintf("%s just requested %d servings of '%s'.\n\nPlease accept or decline the request within 12 hours.\n\n%s/cook/inquiries",
 		eater.Name,
 		inquiry.Servings,
 		inquiry.Item.Name,
-		at.In(fixedTimeZone).Format(datetimeFormat))
+		domainURL)
 	err = cookC.Notify(cook.ID, subject, msg)
 	if err != nil {
 		utils.Criticalf(c.ctx, "failed to notify cook(%s ID: %s) about inquiry(%d) err: %+v", cook.Name, cook.ID, inquiry.ID, err)
@@ -654,4 +657,10 @@ func round(num float32) int {
 func toFixed(num float32, precision int) float32 {
 	output := float32(math.Pow(10, float64(precision)))
 	return float32(round(num*output)) / output
+}
+
+func getDomainString() {
+	if domainURL == "" {
+		domainURL = os.Getenv("DOMAIN_URL")
+	}
 }
