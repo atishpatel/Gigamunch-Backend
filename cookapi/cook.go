@@ -53,6 +53,14 @@ func (service *Service) UpdateCook(ctx context.Context, req *UpdateCookReq) (*Co
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+	user.PhotoURL = req.Cook.PhotoURL
+	user.Name = req.Cook.Name
+	user.Email = req.Cook.Email
+	err = auth.SaveUser(ctx, user)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to auth.SaveUser")
+		return resp, nil
+	}
 	cookC := cook.New(ctx)
 	updateCookReq := &cook.UpdateCookReq{
 		User:          user,
