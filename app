@@ -45,26 +45,28 @@ fi
 if [[ $1 == "deploy" ]]; then 
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
+  domain="gigamunch-omninexus-dev.appspot"
   if [[ $* == *--prod* ]] || [[ $* == *-p* ]]; then
     project="gigamunch-omninexus"
     sqlip="104.154.236.200"
+    domain="gigamunchapp"
   fi
   echo "Deploying the following to $project" 
   if [[ $* == *eater* ]]; then
     echo "Deploying eater:"
-    cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g" > eaterapi/app.yaml
+    cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > eaterapi/app.yaml
     cd eaterapi
     aedeploy gcloud app deploy --project=$project --version=1
     cd ..
   fi
   if [[ $* == *cook* ]]; then
     echo "Deploying cook:"
-    cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g" > cookapi/app.yaml
+    cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
     goapp deploy cookapi/app.yaml
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
-    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_/\/build\/bundled/g; s/MODULE/default/g" > server/app.yaml
+    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/bundled/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
     goapp deploy server/app.yaml
   fi
   exit 0

@@ -91,6 +91,10 @@ handlers:
   script: _go_app
   secure: always
 
+env_variables:
+  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECT_ID:us-central1:gigasqldb)/gigamunch?collation=utf8mb4_general_ci
+  DOMAIN_URL: https://_DOMAIN_.com/
+
 skip_files:
   - ^(.*/node_modules/.*)
   - ^(.*/)?.*/test/.*$
