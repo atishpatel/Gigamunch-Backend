@@ -41,6 +41,7 @@ func Criticalf(ctx context.Context, format string, args ...interface{}) {
 	formatedMessage := fmt.Sprintf(format, args...)
 	msgC := message.New(ctx)
 	_ = msgC.SendSMS("9316445311", formatedMessage)
+	_ = msgC.SendSMS("6155454989", formatedMessage)
 	aelog.Criticalf(ctx, formatedMessage)
 }
 
