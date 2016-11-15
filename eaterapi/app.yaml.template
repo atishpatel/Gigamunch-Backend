@@ -26,3 +26,4 @@ beta_settings:
 env_variables:
   MYSQL_CONNECTION: server:gigamunch@tcp(SQL_IP:3306)/gigamunch?collation=utf8mb4_general_ci
   DOMAIN_URL: https://_DOMAIN_.com
+  PROJECTID: PROJECT_ID
