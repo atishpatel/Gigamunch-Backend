@@ -156,7 +156,7 @@ func GetServerKey(ctx context.Context) string {
 
 // GetGitkitConfig returns the configurations for gitkit on the server
 func GetGitkitConfig(ctx context.Context) *GitkitConfig {
-	if gitkitConfig == nil {
+	if gitkitConfig == nil || gitkitConfig.JWTSecret == "" {
 		loadGitkitConfig(ctx)
 	}
 	return gitkitConfig
@@ -181,7 +181,7 @@ func loadGitkitConfig(ctx context.Context) {
 }
 
 func getDatastoreConfig(ctx context.Context) {
-	if config == nil {
+	if config == nil || config.JWTSecret == "" {
 		config = new(Config)
 		key := datastore.NewKey(ctx, "Config", "", 100, nil)
 		err := datastore.Get(ctx, key, config)

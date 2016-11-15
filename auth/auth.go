@@ -17,6 +17,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
 var (
@@ -70,7 +71,7 @@ func SaveUser(ctx context.Context, user *types.User) error {
 // GetSessionWithGToken takes a GITKIT token string.
 // Returns: User, JWTString,error
 func GetSessionWithGToken(ctx context.Context, gTokenString string) (*types.User, string, error) {
-	if gitkitClient == nil {
+	if gitkitClient == nil || len(jwtKey) < 2 {
 		getConfig(ctx)
 	}
 	if gTokenString == "" {
@@ -161,7 +162,7 @@ func GetUserFromToken(ctx context.Context, JWTString string) (*types.User, error
 }
 
 func getAuthTokenFromString(ctx context.Context, JWTString string) (*Token, error) {
-	if jwtKey == nil {
+	if jwtKey == nil || len(jwtKey) < 2 {
 		getConfig(ctx)
 	}
 	jwtToken, err := jwt.Parse(JWTString, func(token *jwt.Token) (interface{}, error) {
@@ -172,8 +173,9 @@ func getAuthTokenFromString(ctx context.Context, JWTString string) (*Token, erro
 		return jwtKey, nil
 	})
 	if err != nil || !jwtToken.Valid {
+		utils.Criticalf(ctx, "invalid jwtToken: err: %s key: %s \n\n %v", err, jwtKey, jwtKey)
 		// Token is invalid
-		return nil, errInvalidToken.Wrap("jwtToken is not valid")
+		return nil, errInvalidToken.Wrapf("jwtToken is not valid. err: %+v", err)
 	}
 	token, err := extractClaims(jwtToken)
 	if err != nil {
@@ -331,6 +333,9 @@ func getConfig(ctx context.Context) {
 		log.Fatal(err)
 	}
 	gitkitAudiences = []string{config.ClientID, "gigamunch-omninexus-dev", "gigamunch-omninexus"}
+	if config.JWTSecret == "" {
+		utils.Criticalf(ctx, "jwt string is empty")
+	}
 	jwtKey = []byte(config.JWTSecret)
 }
 

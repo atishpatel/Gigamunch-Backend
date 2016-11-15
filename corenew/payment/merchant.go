@@ -32,6 +32,9 @@ func (c *Client) GetSubMerchant(subMerchantID string) (*SubMerchantInfo, error) 
 	if err != nil {
 		return nil, errBT.WithError(err).Wrapf("cannot bt.MerchantAccount().Find sub-merchant(%s)", subMerchantID)
 	}
+	if ma == nil {
+		return new(SubMerchantInfo), nil
+	}
 	dob, err := time.Parse(dateOfBirthFormat, ma.Individual.DateOfBirth)
 	if err != nil {
 		return nil, errInternal.WithError(err).Wrapf("failed to parse time from string(%s)", ma.Individual.DateOfBirth)

@@ -47,7 +47,7 @@ type Client struct {
 
 // New creates a message client.
 func New(ctx context.Context) *Client {
-	if serviceSID == "" {
+	if serviceSID == "" || len(from) == 0 {
 		twilioConfig = config.GetTwilioConfig(ctx)
 		serviceSID = twilioConfig.IPMessagingSID
 		from = twilioConfig.PhoneNumbers
