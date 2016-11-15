@@ -25,6 +25,7 @@ import (
 
 var (
 	domainURL string
+	projectID string
 )
 
 type coder interface {
@@ -37,7 +38,10 @@ func handleResp(ctx context.Context, fnName string, resp coder) {
 		utils.Warningf(ctx, "%s invalid parameter: %+v", fnName, resp)
 		return
 	} else if code != 0 {
-		utils.Errorf(ctx, "%s err: %+v", fnName, resp)
+		if projectID == "" {
+			projectID = os.Getenv("PROJECTID")
+		}
+		utils.Criticalf(ctx, "%s COOKAPI: %s err: %+v", projectID, fnName, resp)
 	}
 }
 

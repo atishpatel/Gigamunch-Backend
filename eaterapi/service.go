@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"golang.org/x/net/context"
 
@@ -21,6 +22,10 @@ import (
 	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/eater"
+)
+
+var (
+	projectID string
 )
 
 func getGRPCError(err error, detail string) *pb.Error {
@@ -41,7 +46,10 @@ func handleResp(ctx context.Context, fnName string, err *pb.Error) {
 		utils.Warningf(ctx, "%s invalid parameter: %+v", fnName, *err)
 		return
 	} else if code != 0 {
-		utils.Errorf(ctx, "%s err: %+v", fnName, *err)
+		if projectID == "" {
+			projectID = os.Getenv("PROJECTID")
+		}
+		utils.Criticalf(ctx, "%s EATERAPI: %s err: %+v", projectID, fnName, *err)
 	}
 }
 

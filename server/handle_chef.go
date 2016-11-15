@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"golang.org/x/net/context"
@@ -22,6 +23,7 @@ var (
 	bucketName          string
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error while uploading file."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
+	projectID           string
 )
 
 type urlResp struct {
@@ -90,12 +92,15 @@ func handleGetUploadURL(w http.ResponseWriter, req *http.Request) {
 
 func handleURLResp(ctx context.Context, w http.ResponseWriter, resp *urlResp) {
 	// encode json resp and log errors
+	if projectID == "" {
+		projectID = os.Getenv("PROJECTID")
+	}
 	if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-		utils.Criticalf(ctx, "Error uploading file: %+v", resp.Err)
+		utils.Criticalf(ctx, "SERVER: Error uploading file: %+v", resp.Err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
-		utils.Criticalf(ctx, "Error encoding json: %+v", err)
+		utils.Criticalf(ctx, "SERVER: Error encoding json: %+v", err)
 	}
 }
