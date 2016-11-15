@@ -66,7 +66,7 @@ func (service *Service) GetMenus(ctx context.Context, req *GigatokenReq) (*GetMe
 	}
 	if len(itemIDs) != 0 {
 		// shouldn't every happen
-		utils.Errorf(ctx, "GetMenus: cook(%s) has items(%v) that have no menu", user.ID, itemIDs)
+		utils.Criticalf(ctx, "GetMenus: cook(%s) has items(%v) that have no menu", user.ID, itemIDs)
 	}
 	return resp, nil
 }

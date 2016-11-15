@@ -53,7 +53,7 @@ func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*t
 	}
 	user, err := auth.GetUserFromToken(ctx, req.gigatoken())
 	if err != nil && errors.GetErrorWithCode(err).Code == errors.CodeSignOut {
-		utils.Warningf(ctx, "A signout code was issued to. err: %+v", err)
+		utils.Criticalf(ctx, "A signout code was issued to. err: %+v", err)
 	}
 	return user, err
 }
