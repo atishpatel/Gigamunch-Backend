@@ -30,6 +30,7 @@ var (
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There is a problem. Try again in a few minutes."}
 	fixedTimeZone       = time.FixedZone("CDT", -6*3600)
 	domainURL           string
+	squadNumbers        = []string{"9316445311", "9316446755", "6153975516", "6155454989"}
 )
 
 // Client is a client for Inquiry.
@@ -181,8 +182,11 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	totalCookPrice := item.CookPricePerServing * float32(numServings)
 	totalGigaFee := totalPricePerServing - totalCookPrice
 	gigaFeeWithDeliveryAndTax := totalGigaFee + totalTaxPrice
+	cookPriceWithDelivery := totalCookPrice
 	if !exchangeMethod.Pickup() && !exchangeMethod.CookDelivery() {
 		gigaFeeWithDeliveryAndTax += exchangePrice
+	} else {
+		cookPriceWithDelivery += exchangePrice
 	}
 	// Create Transaction
 	paymentC := getPaymentClient(c.ctx)
@@ -267,15 +271,34 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		utils.Criticalf(c.ctx, "failed to tasks.AddProcessInquiry inquiry(%d): %+v", inquiry.ID, err)
 	}
 	subject := fmt.Sprintf("%s just requested %s", eater.Name, inquiry.Item.Name)
-	msg := fmt.Sprintf("%s just requested %d servings of '%s'.\n\nPlease accept or decline the request within 12 hours.\n\n%s/cook/inquiries",
+	hours := 12
+	timeDifference := expectedExchangeTime.Sub(time.Now())
+	if timeDifference < 12*time.Hour {
+		hours = int(timeDifference / time.Hour)
+	}
+	msg := fmt.Sprintf("%s just requested %d servings of '%s'. You will earn $%.2f.\n\nPlease accept or decline the request within %d hours.\n\n%s/cook/inquiries",
 		eater.Name,
 		inquiry.Servings,
 		inquiry.Item.Name,
+		cookPriceWithDelivery,
+		hours,
 		domainURL)
 	err = cookC.Notify(cook.ID, subject, msg)
 	if err != nil {
 		utils.Criticalf(c.ctx, "failed to notify cook(%s ID: %s) about inquiry(%d) err: %+v", cook.Name, cook.ID, inquiry.ID, err)
 	}
+	for _, v := range squadNumbers {
+		err = messageC.SendSMS(v,
+			fmt.Sprintf("An inquiry was just made bras.\n\nItem:%s\n\nDate and time:%s\n\nInquiryID:%d",
+				inquiry.Item.Name,
+				inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+				inquiry.ID,
+			))
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
+		}
+	}
+
 	return inquiry, nil
 }
 
@@ -314,16 +337,18 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 		// notify Gigamunch if it's a Gigamunch Delivery
 		if inquiry.ExchangeMethod.GigamunchDelivery() {
 			messageC := getMessageClient(c.ctx)
-			err = messageC.SendSMS("9316445311,9316446755,6153975516,6155454989",
-				fmt.Sprintf("Time to do a GigaDelivery bras!\n\nItem:%s\n\nDate and time:%s\n\nPickup Location:%s\n\nDropoff Location:%s\n\nInquiryID:%d",
-					inquiry.Item.Name,
-					inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
-					inquiry.ExchangePlanInfo.CookAddress.String(),
-					inquiry.ExchangePlanInfo.EaterAddress.String(),
-					inquiry.ID,
-				))
-			if err != nil {
-				utils.Criticalf(c.ctx, "failed to notify about GigaDelivery for inquiry(%d). Err: %+v", inquiry.ID, err)
+			for _, v := range squadNumbers {
+				err = messageC.SendSMS(v,
+					fmt.Sprintf("Time to do a GigaDelivery bras!\n\nItem: %s\n\nDate and time: %s\n\nPickup Location: %s\n\nDropoff Location: %s\n\nInquiryID:%d",
+						inquiry.Item.Name,
+						inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+						inquiry.ExchangePlanInfo.CookAddress.String(),
+						inquiry.ExchangePlanInfo.EaterAddress.String(),
+						inquiry.ID,
+					))
+				if err != nil {
+					utils.Criticalf(c.ctx, "failed to notify about GigaDelivery for inquiry(%d). Err: %+v", inquiry.ID, err)
+				}
 			}
 		}
 	}
@@ -402,10 +427,7 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	if !user.IsAdmin() && user.ID != inquiry.EaterID {
 		return nil, errUnauthorized.WithMessage("You are not part of the Inquiry.")
 	}
-	if inquiry.State != State.Pending {
-		return nil, errInvalidParameter.WithMessage("Inquiry is no long in a pending state.")
-	}
-	if inquiry.ExpectedExchangeDateTime.Sub(time.Now()) < time.Duration(12)*time.Hour {
+	if inquiry.ExpectedExchangeDateTime.Sub(time.Now()) < time.Duration(12)*time.Hour && inquiry.State != State.Pending {
 		return nil, errInvalidParameter.WithMessage("The Inquiry can no longer be canceled.")
 	}
 	inquiry.EaterAction = EaterAction.Canceled
@@ -435,14 +457,16 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	// notify Gigamunch if it's a Gigamunch Delivery
 	if inquiry.ExchangeMethod.GigamunchDelivery() {
 		messageC := getMessageClient(c.ctx)
-		err = messageC.SendSMS("9316445311,9316446755,6153975516,6155454989",
-			fmt.Sprintf("GigaDelivery canceled.\n\nItem:%s\n\nDate and time:%s\n\nInquiryID:%d",
-				inquiry.Item.Name,
-				inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
-				inquiry.ID,
-			))
-		if err != nil {
-			utils.Criticalf(c.ctx, "failed to notify about GigaDelivery for inquiry(%d). Err: %+v", inquiry.ID, err)
+		for _, v := range squadNumbers {
+			err = messageC.SendSMS(v,
+				fmt.Sprintf("GigaDelivery canceled.\n\nItem: %s\n\nDate and time: %s\n\nInquiryID: %d",
+					inquiry.Item.Name,
+					inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+					inquiry.ID,
+				))
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to notify about GigaDelivery for inquiry(%d). Err: %+v", inquiry.ID, err)
+			}
 		}
 	}
 	return inquiry, nil
