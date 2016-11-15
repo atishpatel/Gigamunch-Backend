@@ -20,7 +20,10 @@ import (
 )
 
 const (
-	datetimeFormat = "01/02 at 03:04 PM"
+	datetimeFormat     = "01/02 at 03:04 PM"
+	atishNumber        = "9316445311"
+	chrisNumber        = "6155454989"
+	devServerProjectID = "gigamunch-omninexus-dev"
 )
 
 var (
@@ -30,7 +33,8 @@ var (
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There is a problem. Try again in a few minutes."}
 	fixedTimeZone       = time.FixedZone("CDT", -6*3600)
 	domainURL           string
-	squadNumbers        = []string{"9316445311", "9316446755", "6153975516", "6155454989"}
+	squadNumbers        = []string{atishNumber, chrisNumber, "9316446755", "6153975516"}
+	projectID           string
 )
 
 // Client is a client for Inquiry.
@@ -41,6 +45,7 @@ type Client struct {
 // New returns a new Client.
 func New(ctx context.Context) *Client {
 	getDomainString()
+	getProjectIDString()
 	// if fixedTimeZone == nil {
 	// TODO figure out a way to get timezone
 	// var err error
@@ -288,6 +293,9 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		utils.Criticalf(c.ctx, "failed to notify cook(%s ID: %s) about inquiry(%d) err: %+v", cook.Name, cook.ID, inquiry.ID, err)
 	}
 	for _, v := range squadNumbers {
+		if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+			continue
+		}
 		err = messageC.SendSMS(v,
 			fmt.Sprintf("An inquiry was just made bras.\n\nItem:%s\n\nDate and time:%s\n\nInquiryID:%d",
 				inquiry.Item.Name,
@@ -338,6 +346,9 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 		if inquiry.ExchangeMethod.GigamunchDelivery() {
 			messageC := getMessageClient(c.ctx)
 			for _, v := range squadNumbers {
+				if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+					continue
+				}
 				err = messageC.SendSMS(v,
 					fmt.Sprintf("Time to do a GigaDelivery bras!\n\nItem: %s\n\nDate and time: %s\n\nPickup Location: %s\n\nDropoff Location: %s\n\nInquiryID:%d",
 						inquiry.Item.Name,
@@ -458,6 +469,9 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	if inquiry.ExchangeMethod.GigamunchDelivery() {
 		messageC := getMessageClient(c.ctx)
 		for _, v := range squadNumbers {
+			if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+				continue
+			}
 			err = messageC.SendSMS(v,
 				fmt.Sprintf("GigaDelivery canceled.\n\nItem: %s\n\nDate and time: %s\n\nInquiryID: %d",
 					inquiry.Item.Name,
@@ -686,5 +700,11 @@ func toFixed(num float32, precision int) float32 {
 func getDomainString() {
 	if domainURL == "" {
 		domainURL = os.Getenv("DOMAIN_URL")
+	}
+}
+
+func getProjectIDString() {
+	if projectID == "" {
+		projectID = os.Getenv("PROJECTID")
 	}
 }
