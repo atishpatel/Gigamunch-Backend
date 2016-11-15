@@ -174,6 +174,16 @@ func (c *Client) Update(req *UpdateCookReq) (*Cook, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrapf("cannot put cook(%s)", req.User.ID)
 	}
+	messageC := message.New(c.ctx)
+	ui := &message.UserInfo{
+		ID:    cook.ID,
+		Name:  cook.Name,
+		Image: cook.PhotoURL,
+	}
+	err = messageC.UpdateUser(ui)
+	if err != nil {
+		utils.Errorf(c.ctx, "failed to message.UpdateUser for cook(%s). Err: %+v", cook.ID, err)
+	}
 	return cook, nil
 }
 
