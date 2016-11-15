@@ -3,8 +3,6 @@ package message
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -17,7 +15,7 @@ import (
 )
 
 const (
-	channelAttr       = `{"cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
+	channelAttr       = `{"cook_sid":"%s","cook_id":"%s","cook_name":"%s","cook_image":"%s","eater_sid":"%s","eater_id":"%s","eater_name":"%s","eater_image":"%s","inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s"}`
 	userAttr          = `{"id":"%s","name":"%s","image":"%s"}`
 	inquiryAttr       = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","price":"%f","is_delivery":"%t","servings":"%d","exchange_time":"%d"}`
 	inquiryStatusAttr = `{"inquiry_id":"%d","inquiry_state":"%s","cook_action":"%s","eater_action":"%s","item_id":"%d","item_name":"%s","item_image":"%s","title":"%s","message":"%s"}`
@@ -30,7 +28,6 @@ const (
 )
 
 var (
-	onceConfig         = sync.Once{}
 	twilioConfig       config.TwilioConfig
 	from               []string
 	serviceSID         string
@@ -50,11 +47,11 @@ type Client struct {
 
 // New creates a message client.
 func New(ctx context.Context) *Client {
-	onceConfig.Do(func() {
+	if serviceSID == "" {
 		twilioConfig = config.GetTwilioConfig(ctx)
 		serviceSID = twilioConfig.IPMessagingSID
 		from = twilioConfig.PhoneNumbers
-	})
+	}
 	c := &Client{
 		ctx: ctx,
 	}
@@ -121,10 +118,10 @@ func getChannelUniqueName(cookID, eaterID string) string {
 }
 
 // returns friendlyName, uniqueName, attributes
-func getChannelNamesAndAttr(c *UserInfo, e *UserInfo, i *InquiryInfo) (string, string, string) {
+func getChannelNamesAndAttr(cSID string, c *UserInfo, eSID string, e *UserInfo, i *InquiryInfo) (string, string, string) {
 	friendlyName := fmt.Sprintf("%s<;>%s", c.Name, e.Name)
 	uniqueName := getChannelUniqueName(c.ID, e.ID)
-	attr := fmt.Sprintf(channelAttr, c.ID, c.Name, c.Image, e.ID, e.Name, e.Image, i.ID, i.State, i.CookAction, i.EaterAction, i.ItemID, i.ItemName, i.ItemImage)
+	attr := fmt.Sprintf(channelAttr, cSID, c.ID, c.Name, c.Image, eSID, e.ID, e.Name, e.Image, i.ID, i.State, i.CookAction, i.EaterAction, i.ItemID, i.ItemName, i.ItemImage)
 	return friendlyName, uniqueName, attr
 }
 
@@ -142,7 +139,15 @@ func (c *Client) UpdateChannel(cookInfo *UserInfo, eaterInfo *UserInfo, inquiryI
 	if inquiryInfo == nil {
 		inquiryInfo = new(InquiryInfo)
 	}
-	friendlyName, uniqueName, attributes := getChannelNamesAndAttr(cookInfo, eaterInfo, inquiryInfo)
+	eaterTUser, err := createUserIfNotExist(c.twilioIPC, eaterInfo)
+	if err != nil {
+		return errTwilio.WithError(err).Wrap("failed to createUserIfNotExist")
+	}
+	cookTUser, err := createUserIfNotExist(c.twilioIPC, cookInfo)
+	if err != nil {
+		return errTwilio.WithError(err).Wrap("failed to createUserIfNotExist")
+	}
+	friendlyName, uniqueName, attributes := getChannelNamesAndAttr(cookTUser.Sid, cookInfo, eaterTUser.Sid, eaterInfo, inquiryInfo)
 	channel, err := twilio.GetIPChannel(c.twilioIPC, serviceSID, uniqueName)
 	isNew := false
 	if err != nil {
@@ -285,24 +290,24 @@ func getInquiryStatusBodyAndAttributes(c *Client, cookInfo *UserInfo, eaterInfo 
 	switch inqI.State {
 	case "Accepted":
 		if inqI.CookAction == "Accepted" {
-			message = fmt.Sprintf("%s just accepted your request for %s", cookInfo.Name, inqI.ItemName)
+			message = fmt.Sprintf("%s just accepted the request for %s", cookInfo.Name, inqI.ItemName)
 		} else {
-			message = fmt.Sprintf("%s just accepted your request for %s", eaterInfo.Name, inqI.ItemName)
+			message = fmt.Sprintf("%s just accepted the request for %s", eaterInfo.Name, inqI.ItemName)
 		}
 		title = "Request Accepted"
 	case "Declined":
 		if inqI.CookAction == "Declined" {
-			message = fmt.Sprintf("%s just declined your request for %s", cookInfo.Name, inqI.ItemName)
+			message = fmt.Sprintf("%s just declined the request for %s", cookInfo.Name, inqI.ItemName)
 		}
 		title = "Request Declined"
 	case "TimedOut":
-		message = fmt.Sprintf("%s couldn't fulfill your request for %s", cookInfo.Name, inqI.ItemName)
+		message = fmt.Sprintf("%s couldn't fulfill the request for %s", cookInfo.Name, inqI.ItemName)
 		title = "Request Timed Out"
 	case canceled:
 		if inqI.CookAction == canceled {
-			message = fmt.Sprintf("%s just canceled your request for %s", cookInfo.Name, inqI.ItemName)
+			message = fmt.Sprintf("%s just canceled the request for %s", cookInfo.Name, inqI.ItemName)
 		} else if inqI.EaterAction == canceled {
-			message = fmt.Sprintf("%s just canceled their request for %s", eaterInfo.Name, inqI.ItemName)
+			message = fmt.Sprintf("%s just canceled the request for %s", eaterInfo.Name, inqI.ItemName)
 		}
 		title = "Request Canceled"
 	}
@@ -409,8 +414,8 @@ func (c *Client) GetToken(userInfo *UserInfo, deviceID string) (string, error) {
 
 // GetChannelInfoResp is the response for GetChannelInfo.
 type GetChannelInfoResp struct {
-	EaterID string
-	CookID  string
+	EaterID string `json:"eater_id"`
+	CookID  string `json:"cook_id"`
 }
 
 // GetChannelInfo returns the Cook and Eater ids.
@@ -419,13 +424,11 @@ func (c *Client) GetChannelInfo(channelSID string) (*GetChannelInfoResp, error) 
 	if err != nil {
 		return nil, errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
 	}
-	ids := strings.Split(channel.UniqueName, "<;>")
-	if len(ids) != 2 {
-		return nil, errInternal.WithMessage("Channel has invalid name.").Wrapf("Invalid channel uniqueName(%s)", channel.UniqueName)
-	}
 	resp := new(GetChannelInfoResp)
-	resp.CookID = ids[0]
-	resp.EaterID = ids[1]
+	err = json.Unmarshal([]byte(channel.Attributes), resp)
+	if err != nil {
+		return nil, errInternal.WithError(err).Wrapf("failed to json.Unmarshal channel(%s) attributes: %s", channelSID, channel.Attributes)
+	}
 	return resp, nil
 }
 
@@ -453,5 +456,8 @@ func getTwilioClients(ctx context.Context, accountSID, authToken, keySID, apiSec
 }
 
 func getFromNumber(to string) string {
+	if len(from) == 0 {
+		return "14243484448"
+	}
 	return from[0]
 }
