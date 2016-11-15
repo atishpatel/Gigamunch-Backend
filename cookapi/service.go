@@ -109,6 +109,9 @@ func main() {
 	register("GetInquiry", "getInquiry", "GET", "cookservice/getInquiry", "GetInquiry gets a cook's inquiry.")
 	register("AcceptInquiry", "acceptInquiry", "POST", "cookservice/acceptInquiry", "AcceptInquiry accepts an inquiry for a cook.")
 	register("DeclineInquiry", "declineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
+	// Admin stuffffffffffffffff
+	register("AddToProcessInquiryQueue", "addToProcessInquiryQueue", "POST", "cookservice/addToProcessInquiryQueue", "Admin func.")
+	register("CreateFakeGigatoken", "createFakeGigatoken", "POST", "cookservice/createFakeGigatoken", "Admin func.")
 	endpoints.HandleHTTP()
 	appengine.Main()
 }
