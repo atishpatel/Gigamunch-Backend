@@ -7,12 +7,11 @@
 <link rel="import"
       href="channel-list.html">
 
-<dom-module id="messages-page">
+<dom-module id="channels-page">
   <template>
     <style include="shared-styles">
        :host {
         display: block;
-        padding: 0 24px;
         background-color: white;
         min-height: 85vh;
         max-width: var(--max-content-width);
@@ -20,18 +19,24 @@
       }
       
       #spinner {
-        margin: auto;
+        position: fixed;
+        top: 50%;
+        left: 50%;
       }
 
     </style>
     <paper-spinner id="spinner"
-                   hidden></paper-spinner>
+                   hidden="[[hideSpinner]]"
+                   active$="[[!hideSpinner]]">
+    </paper-spinner>
     <channel-list id="channelList"
-                  channels="[[channels]]"></channel-list>
+                  channels="[[channels]]"
+                  user="[[user]]">
+    </channel-list>
   </template>
   <script>
     Polymer({
-      is: 'messages-page',
+      is: 'channels-page',
       properties: {
         channels: {
           type: Array,
@@ -45,33 +50,25 @@
           type: Object,
           notify: true,
         },
-        client: {
-          type: Object,
+        hideSpinner: {
+          type: Boolean,
+          value: false,
         },
       },
       selected: function() {
-        this.getMessageToken();
+        this.getChannels();
       },
       ready: function() {},
-      getMessageToken: function() {
-        this.service.getMessageToken(function(token, err) {
-          if (err.code !== 0) {
-            this.fire('error', err);
-            return;
-          }
-          if (this.client) {
-            this.client.updateToken(token);
-          } else {
-            var accessManager = new Twilio.AccessManager(token);
-            this.client = new Twilio.IPMessaging.Client(accessManager);
-            this.getChannels();
-          }
-        }.bind(this));
-      },
       getChannels: function() {
-        this.client.getChannels().then(function(channels) {
-          this.channels = channels;
-        }.bind(this));
+        if (window.messagingClient) {
+          this.hideSpinner = false;
+          window.messagingClient.getChannels().then(function(channels) {
+            this.channels = channels;
+            this.hideSpinner = true;
+          }.bind(this));
+        } else {
+          setTimeout(this.getChannels.bind(this), 100);
+        }
       },
     });
 

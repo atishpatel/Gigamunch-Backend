@@ -5,15 +5,17 @@
     "src/onboard-steps.html",
     "src/kitchen-page.html",
     "src/inquiries-page.html",
-    "src/messages-page.html",
+    "src/inquiry-page.html",
+    "src/channels-page.html",
+    "src/channel-page.html",
     "src/account-page.html"
   ],
-  "sourceGlobs": [
+  "sources": [
     "src/**/*",
     "js/**/*",
     "bower.json"
   ],
-  "includeDependencies": [
+  "extraDependencies": [
     "manifest.json",
     "bower_components/webcomponentsjs/webcomponents-lite.min.js"
   ]

@@ -2,6 +2,8 @@
       href="../bower_components/polymer/polymer.html">
 <link rel="import"
       href="shared-styles.html">
+<link rel="import"
+      href="channel-card.html">
 
 <dom-module id="channel-list">
   <template>
@@ -12,12 +14,13 @@
       }
 
     </style>
+
     <template is="dom-repeat"
               items="[[channels]]"
-              as="channel">
-      <a href$="channel/[[channel.sid]]">
-        <div>[[channel.uniqueName]]</div>
-      </a>
+              as="channel"
+              filter="filterCookConversations">
+      <channel-card channel="[[channel]]"
+                    user="[[user]]"></channel-card>
     </template>
 
   </template>
@@ -29,18 +32,22 @@
         channels: {
           type: Array,
           notify: true,
+          reflectToAttribute: true,
           value: [],
         },
         user: {
           type: Object,
           notify: true,
         },
-        client: {
-          type: Object,
-        },
       },
       selected: function() {},
-      ready: function() {},
+      filterCookConversations: function(channel) {
+        var names = channel.uniqueName.split('<;>');
+        if (names.length >= 2) {
+          return this.user.id === names[0];
+        }
+        return true;
+      },
     });
 
   </script>

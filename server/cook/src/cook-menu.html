@@ -121,6 +121,7 @@
                       on-tap="cancelEdit">Cancel</paper-button>
         <paper-button id="saveButton"
                       class="button save-button"
+                      style$="background-color:[[selectedColor]]"
                       on-tap="saveEdit">Save</paper-button>
       </div>
       <radio-color-picker colors="[[colors]]"
@@ -182,7 +183,7 @@
       selectedColorChanged: function() {
         this.$.nameInput.style.color = this.selectedColor;
         this.$.cancelButton.style.color = this.selectedColor;
-        this.$.saveButton.style.backgroundColor = this.selectedColor;
+        // this.$.saveButton.style.backgroundColor = this.selectedColor;
       },
       cancelEdit: function() {
         this.name = this.menu.name;

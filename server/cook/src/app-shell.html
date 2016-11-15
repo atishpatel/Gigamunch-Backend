@@ -220,7 +220,7 @@
       #notificationDialog .buttons,
       #errorDialog .buttons {
         margin-top: 20px;
-        min-width: 300px;
+        /*min-width: 300px;*/
       }
 
     </style>
@@ -297,24 +297,32 @@
              href="../kitchen">
             <paper-item>Kitchen</paper-item>
           </a>
+          <a name="inquiries"
+             href="../inquiries">
+            <paper-item>Inquiries</paper-item>
+          </a>
+          <a name="channels"
+             href="../channels">
+            <paper-item>Messages</paper-item>
+          </a>
           <a name="account"
              href="../account">
             <paper-item>Account</paper-item>
           </a>
-          <a href="/signout">
-            <paper-item>Log out</paper-item>
+          <a href="#">
+            <paper-item on-tap="signOut">Log out</paper-item>
           </a>
         </iron-selector>
       </app-drawer>
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
-        <app-header condenses
-                    reveals
+        <app-header fixed
                     effects="waterfall">
           <app-toolbar class="content main-toolbar">
             <paper-icon-button class="drawer-stuff"
                                icon="app:menu"
+                               hidden="[[hideDrawerIcon]]"
                                drawer-toggle>
             </paper-icon-button>
             <div main-title>
@@ -333,10 +341,18 @@
                   <a class="nav-a vertical-align-center"
                      href="../kitchen"><span>Kitchen</span></a>
                 </paper-tab>
-                <paper-tab name="account">
+                <paper-tab name="inquiries">
+                  <a class="nav-a vertical-align-center"
+                     href="../inquiries"><span>Inquiries</span></a>
+                </paper-tab>
+                <paper-tab name="channels">
+                  <a class="nav-a vertical-align-center"
+                     href="../channels"><span>Messages</span></a>
+                </paper-tab>
+                <!--<paper-tab name="account">
                   <a class="nav-a vertical-align-center"
                      href="../account"><span>Account</span></a>
-                </paper-tab>
+                </paper-tab>-->
               </paper-tabs>
               <a class="vertical-align-center"
                  href="../account">
@@ -357,8 +373,9 @@
                     <paper-item class="bold">Account</paper-item>
                   </a>
                   <a class="nav-a"
-                     href="/signout">
-                    <paper-item class="bold">Log out</paper-item>
+                     href="#">
+                    <paper-item on-tap="signOut"
+                                class="bold">Log out</paper-item>
                   </a>
                 </paper-menu>
               </paper-menu-button>
@@ -380,11 +397,22 @@
                           service="[[service]]"
                           user="{{user}}">
           </inquiries-page>
-          <messages-page id="messages"
-                         name="messages"
+          <channel-page id="channel"
+                        name="channel"
+                        service="[[service]]"
+                        user="{{user}}"
+                        title="{{title}}">
+          </channel-page>
+          <channels-page id="channels"
+                         name="channels"
                          service="[[service]]"
                          user="{{user}}">
-          </messages-page>
+          </channels-page>
+          <inquiry-page id="inquiry"
+                        name="inquiry"
+                        service="[[service]]"
+                        user="{{user}}">
+          </inquiry-page>
           <onboard-steps id="onboard"
                          name="onboard"
                          smallScreen="[[smallScreen]]"
@@ -447,6 +475,10 @@
         hideHeaderLogo: {
           type: Boolean,
           value: true,
+        },
+        hideDrawerIcon: {
+          type: Boolean,
+          value: false,
         },
       },
 
@@ -513,9 +545,29 @@
       itemSaved: function() {
         this.$.itemDialog.close();
       },
+      getMessageToken: function() {
+        this.service.getMessageToken(function(token, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.updateMessageClient(token);
+        }.bind(this));
+      },
+      updateMessageClient: function(token) {
+        if (window.messagingClient) {
+          window.messagingClient.accessManager.updateToken(token);
+        } else {
+          var accessManager = new Twilio.AccessManager(token);
+          window.messagingClient = new Twilio.IPMessaging.Client(accessManager);
+        }
+      },
       ready: function() {
         this.addEventListener('userUpdated', function() {
           this.set('user', COOK.User);
+        }.bind(this));
+        this.addEventListener('tokenExpired', function() {
+          this.getMessageToken();
         }.bind(this));
         ga('send', {
           hitType: 'timing',
@@ -524,6 +576,7 @@
           timingValue: window.performance.now(),
         });
         this.loadDate = new Date();
+        this.getMessageToken();
       },
       _routePageChanged: function(page) {
         this.page = page || 'kitchen';
@@ -545,6 +598,7 @@
         }
         this.$.drawer.close(); // close drawer if open
         var hideHeaderLogo = false;
+        var hideDrawerIcon = false;
         // Load page import on demand. Show 404 page if fails
         var resolvedPageURL, element, title;
         switch (page) {
@@ -552,6 +606,7 @@
             resolvedPageURL = this.resolveUrl('onboard-steps.html');
             element = this.$.onboard;
             title = 'Onboard';
+            hideDrawerIcon = true;
             break;
           case 'kitchen':
             resolvedPageURL = this.resolveUrl('kitchen-page.html');
@@ -565,9 +620,21 @@
             title = 'Inquiries';
             hideHeaderLogo = true;
             break;
-          case 'messages':
-            resolvedPageURL = this.resolveUrl('messages-page.html');
-            element = this.$.messages;
+          case 'inquiry':
+            resolvedPageURL = this.resolveUrl('inquiry-page.html');
+            element = this.$.inquiry;
+            title = 'Inquiry';
+            hideHeaderLogo = true;
+            break;
+          case 'channel':
+            resolvedPageURL = this.resolveUrl('channel-page.html');
+            element = this.$.channel;
+            hideHeaderLogo = true;
+            title = 'Message';
+            break;
+          case 'channels':
+            resolvedPageURL = this.resolveUrl('channels-page.html');
+            element = this.$.channels;
             title = 'Messages';
             hideHeaderLogo = true;
             break;
@@ -589,6 +656,7 @@
             console.error(err);
           }
         }.bind(this), this._showPage404, true);
+        this.hideDrawerIcon = hideDrawerIcon;
       },
       _pageOrScreenChanged: function(page, smallScreen) {
         // var backPage = (page === 'edititem' || page === 'postitem'
@@ -653,6 +721,9 @@
           this.$.errorDialogText.innerHTML = text;
           this.$.errorDialog.open();
         }
+      },
+      signOut: function() {
+        window.location = '/signout';
       },
     });
 
