@@ -211,21 +211,16 @@ func addUserToChannel(twilioIPC *twilio.TwilioIPMessagingClient, channelSID stri
 	if userInfo == nil || userInfo.ID == "" {
 		return errInvalidParamter.Wrap("User ID cannot be an empty string")
 	}
-	doesntExist := false
-	_, err := twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, userInfo.ID, "")
+	_, err := createUserIfNotExist(twilioIPC, userInfo)
+	if err != nil {
+		return errTwilio.Wrap("failed to createUserIfNotExist")
+	}
+	_, err = twilio.AddIPMemberToChannel(twilioIPC, serviceSID, channelSID, userInfo.ID, "")
 	if err != nil {
 		tErr, ok := err.(*twilio.TwilioError)
 		if !ok || tErr.Code != twilio.CodeNotFound {
 			return errTwilio.WithError(err).Wrap("failed to twilio.AddIPMemberToChannel")
 		}
-		doesntExist = true
-	}
-	if doesntExist {
-		_, err = createUser(twilioIPC, userInfo)
-		if err != nil {
-			return errTwilio.WithError(err).Wrap("failed to createUser")
-		}
-		return addUserToChannel(twilioIPC, channelSID, userInfo)
 	}
 	return nil
 }
@@ -235,6 +230,15 @@ func createUser(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *UserInfo) (
 	user, err := twilio.NewIPUser(twilioIPC, serviceSID, userInfo.ID, userInfo.Name+":", "", attributes)
 	if err != nil {
 		return nil, errTwilio.WithError(err).Wrap("failed to twilio.NewIPUser")
+	}
+	return user, nil
+}
+
+func updateUser(twilioIPC *twilio.TwilioIPMessagingClient, userSID string, userInfo *UserInfo) (*twilio.IPUser, error) {
+	attributes := getUserAttr(userInfo)
+	user, err := twilio.UpdateIPUser(twilioIPC, serviceSID, userSID, userInfo.ID, userInfo.Name+":", "", attributes)
+	if err != nil {
+		return nil, errTwilio.WithError(err).Wrap("failed to twilio.UpdateIPUser")
 	}
 	return user, nil
 }
@@ -249,6 +253,12 @@ func createUserIfNotExist(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *U
 		user, err = createUser(twilioIPC, userInfo)
 		if err != nil {
 			return nil, errors.Wrap("failed to createUser", err)
+		}
+	}
+	if user.Attributes == "" || len(user.FriendlyName) < 3 {
+		user, err = updateUser(twilioIPC, user.Sid, userInfo)
+		if err != nil {
+			return nil, errors.Wrap("failed to updateUser", err)
 		}
 	}
 	return user, nil
@@ -278,7 +288,7 @@ func (c *Client) SendInquiryBotMessage(cookInfo *UserInfo, eaterInfo *UserInfo, 
 	body, attr := getInquiryBodyAndAttributes(inquiryInfo)
 	msg, err := twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, InquiryBotID, body, attr)
 	if err != nil {
-		return "", errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+		return "", errTwilio.WithError(err).Wrap("failed to twilio.SendIPMessageToChannel")
 	}
 	return msg.Sid, nil
 }
@@ -343,7 +353,7 @@ func (c *Client) UpdateInquiryStatus(messageSID string, cookInfo *UserInfo, eate
 	body, attr := getInquiryStatusBodyAndAttributes(c, cookInfo, eaterInfo, inquiryInfo)
 	_, err = twilio.SendIPMessageToChannel(c.twilioIPC, serviceSID, channel.Sid, InquiryStatusBotID, body, attr)
 	if err != nil {
-		return errTwilio.WithError(err).Wrap("failed to twilio.GetIPChannel")
+		return errTwilio.WithError(err).Wrap("failed to twilio.SendIPMessageToChannel")
 	}
 	// update InquiryBot message
 	body, attr = getInquiryBodyAndAttributes(inquiryInfo)
@@ -364,7 +374,7 @@ func (c *Client) UpdateUser(userInfo *UserInfo) error {
 	if err != nil {
 		tErr, ok := err.(*twilio.TwilioError)
 		if !ok || tErr.Code != twilio.CodeNotFound {
-			return errTwilio.WithError(err).Wrap("failed to AddIPMemberToChannel")
+			return errTwilio.WithError(err).Wrap("failed to twilio.GetIPUser")
 		}
 		doesntExist = true
 	}
@@ -374,10 +384,9 @@ func (c *Client) UpdateUser(userInfo *UserInfo) error {
 			return errTwilio.WithError(err).Wrap("failed to createUser")
 		}
 	} else {
-		attributes := getUserAttr(userInfo)
-		_, err := twilio.UpdateIPUser(c.twilioIPC, serviceSID, user.Sid, userInfo.ID, userInfo.Name+":", "", attributes)
+		_, err := updateUser(c.twilioIPC, user.Sid, userInfo)
 		if err != nil {
-			return errTwilio.WithError(err).Wrap("failed to createUser")
+			return errTwilio.WithError(err).Wrap("failed to updateUser")
 		}
 	}
 	return nil
