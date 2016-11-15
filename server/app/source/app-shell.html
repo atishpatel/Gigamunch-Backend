@@ -1047,7 +1047,7 @@
         }
       },
       pageChanged: function(page) {
-        if (page !== 'home') { // since home is included in this page
+        if (page !== 'home' && page !== 'cook') { // since home is included in this page
           // load page import on demand.
           this.importHref(
             this.resolveUrl(page + '-page' + '.html'), null, null, true);
