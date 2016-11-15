@@ -180,7 +180,7 @@ func (c *Client) GetNumLikesWithMenuID(userID string, items []int64) ([]bool, []
 	defer handleCloser(c.ctx, rows)
 	var tmpMenuID int64
 	var tmpItemID int64
-	var tmpUserID int32
+	var tmpUserID uint8
 	var tmpNumLike int32
 	for rows.Next() {
 		err = rows.Scan(&tmpItemID, &tmpMenuID, &tmpUserID, &numLikes)
@@ -235,7 +235,7 @@ func (c *Client) LikesItems(userID string, items []int64) ([]bool, []int32, erro
 	defer handleCloser(c.ctx, rows)
 
 	var tmpItemID int64
-	var tmpUserID int32
+	var tmpUserID uint8
 	var tmpNumLike int32
 	for rows.Next() {
 		err = rows.Scan(&tmpItemID, &tmpUserID, &tmpNumLike)
