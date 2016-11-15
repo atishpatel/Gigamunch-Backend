@@ -181,7 +181,7 @@
         }
       },
       ready: function() {
-        this.addEventListener('messageAdded', this.getMessages.bind(this));
+        window.addEventListener('messageAdded', this.getMessages.bind(this));
       },
       getChannel: function() {
         this.showSpinner = true;

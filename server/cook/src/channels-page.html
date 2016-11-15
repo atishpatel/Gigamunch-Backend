@@ -58,7 +58,10 @@
       selected: function() {
         this.getChannels();
       },
-      ready: function() {},
+      ready: function() {
+        window.addEventListener('channelAdded', this.getChannels.bind(this));
+        window.addEventListener('channelUpdated', this.getChannels.bind(this));
+      },
       getChannels: function() {
         if (window.messagingClient) {
           this.hideSpinner = false;

@@ -41,6 +41,7 @@
       .user-pic {
         height: 35px;
         width: 35px;
+        background-size: 35px;
         border-radius: 50%;
       }
       
@@ -139,7 +140,7 @@
         },
         inquiryStateIconColor: {
           type: String,
-          value: '#78909C',
+          value: 'white',
         },
         itemName: {
           type: String,
@@ -166,7 +167,7 @@
             var yellow = '#FFEB3B';
             var green = '#57C45B';
             var gray = '#78909C';
-            var color = '#78909C';
+            var color = 'white';
             var inquiryStateString = attr.inquiry_state;
             switch (attr.inquiry_state) {
               case 'Pending':
