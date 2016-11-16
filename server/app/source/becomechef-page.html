@@ -1,16 +1,7 @@
 <link rel="import"
       href="../bower_components/polymer/polymer.html">
 <link rel="import"
-      href="feature-style.html">
-
-<link rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-      crossorigin="anonymous">
-
-<link rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
-      crossorigin="anonymous">
+      href="../bower_components/paper-button/paper-button.html">
 
 <dom-module id="becomechef-page">
 
@@ -19,1509 +10,720 @@
     <style include="feature-style">
        :host {
         display: block;
-      }
-      
-      .affix .container .collapse .navbar-collapse ul {
-        padding: 10px;
-      }
-      
-      html,
-      body {
-        max-width: 100%;
-        overflow-x: hidden;
-      }
-      
-      body {
-        overflow-x: hidden;
-        font-family: "Roboto";
-      }
-      
-      .nexaLigth {
-        font-family: "Roboto";
-        font-weight: normal;
-      }
-      
-      .nexaBold {
-        font-family: "Roboto";
-        font-weight: bold;
-      }
-      
-      .padding-text {
-        padding: 0px 20px;
-      }
-      /*header{
-background-image: url(../img/img1.jpg);
-}*/
-      
-      #imaginary_container {
-        padding: 10px
-      }
-      
-      .stylish-input-group .input-group-addon {
-        background: white !important;
-        border-bottom-right-radius: 20px;
-        border-top-right-radius: 20px;
-      }
-      
-      .stylish-input-group .form-control {
-        border-right: 0;
-        box-shadow: 0 0 0;
-        border-color: #ccc;
-        border-bottom-left-radius: 20px;
-        border-top-left-radius: 20px;
-      }
-      
-      .stylish-input-group button {
-        border: 0;
-        background: transparent;
-      }
-      
-      .not-float {
-        float: none!important
-      }
-      
-      .input-group-addon {
-        padding: 0px 12px;
-        font-size: 14px;
-        font-weight: normal;
-        line-height: 1;
-        color: #555;
-        text-align: center;
-        background-color: #eee;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      
-      .logo {
-        width: 230px;
-      }
-      
-      .text-shadow {
-        text-shadow: 5px 5px 2px #333;
-      }
-      
-      .padding-h4 {
-        padding: 10px 0px;
-        text-transform: none;
-      }
-      
-      .text-transform-none {
-        text-transform: none;
-      }
-      
-      @media (max-width:991px) {
-        .navbar-logo:last-child {
-          width: 140px;
-          /*height: 27px*/
-        }
-        .navbar-toggle {
-          position: relative;
-          float: right;
-          padding: 9px 10px;
-          margin-top: 10px;
-          margin-right: 15px;
-          margin-bottom: 8px;
-          background-color: transparent;
-          background-image: none;
-          border: 1px solid transparent;
-          border-radius: 4px;
-        }
-        .container>.navbar-header,
-        .container-fluid>.navbar-header,
-        .container>.navbar-collapse,
-        .container-fluid>.navbar-collapse {
-          margin-right: -15px;
-          margin-left: -15px;
-          margin-top: 5px;
-          margin-bottom: 5px;
-        }
-      }
-      
-      @media (min-width:992px) {
-        .navbar-logo {
-          margin-top: 20px;
-          margin-bottom: 20px;
-          width: 250px;
-          /*height: 40px;*/
-          /*background-size: 132px 40px*/
-        }
-      }
-      
-      @media only screen and ( max-width: 480px) {
-        .navbar-brand img {
-          padding: 5px 10px;
-        }
-        /* Aquí van los estilos para iPhone horizontal */
-        header {
-          /*background-position: 0px -34.4px;*/
-        }
-        header .intro-text .intro-lead-in {
-          font-family: "Roboto", "NexaBold", "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-          font-weight: bold;
-          /*font-style: italic;*/
-          font-size: 1.4em;
-          line-height: 40px;
-          margin-bottom: 50px;
-        }
-        header .intro-text .intro-heading {
-          font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-          font-weight: bold;
-          text-transform: uppercase;
-          font-weight: 700;
-          font-size: 50px;
-          line-height: 50px;
-          margin-bottom: 25px;
-          width: 100%;
-        }
-      }
-      
-      @media only screen and ( min-width: 320px) {
-        .navbar-collapse.in {
-          width: 100%;
-          text-align: center;
-        }
-        .navbar-collapse {
-          width: 100%;
-          text-align: center;
-        }
-      }
-      
-      .text-muted {
-        color: #777777;
-      }
-      
-      .text-primary {
-        color: #fed136;
+        background-color: white;
+        font-family: 'FontRegular', 'Roboto', sans-serif;
+        letter-spacing: .5px;
       }
       
       p {
-        font-size: 14px;
-        line-height: 1.75;
+        margin: 0;
       }
       
-      p.large {
-        font-size: 16px;
-      }
-      
-      a,
-      a:hover,
-      a:focus,
-      a:active,
-      a.active {
-        outline: none;
-      }
-      
-      a {
-        color: #fed136;
-      }
-      
-      a:hover,
-      a:focus,
-      a:active,
-      a.active {
-        color: #fec503;
-      }
-      
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
-      
-      .img-centered {
-        margin: 0 auto;
-      }
-      
-      .bg-light-gray {
-        background-color: #eeeeee;
-      }
-      
-      .bg-darkest-gray {
-        background-color: #222222;
-      }
-      
-      .btn-primary {
-        color: white;
-        background-color: #fed136;
-        border-color: #fed136;
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
-      
-      .btn-primary:hover,
-      .btn-primary:focus,
-      .btn-primary:active,
-      .btn-primary.active,
-      .open .dropdown-toggle.btn-primary {
-        color: white;
-        background-color: #fec503;
-        border-color: #f6bf01;
-      }
-      
-      .btn-primary:active,
-      .btn-primary.active,
-      .open .dropdown-toggle.btn-primary {
-        background-image: none;
-      }
-      
-      .btn-primary.disabled,
-      .btn-primary[disabled],
-      fieldset[disabled] .btn-primary,
-      .btn-primary.disabled:hover,
-      .btn-primary[disabled]:hover,
-      fieldset[disabled] .btn-primary:hover,
-      .btn-primary.disabled:focus,
-      .btn-primary[disabled]:focus,
-      fieldset[disabled] .btn-primary:focus,
-      .btn-primary.disabled:active,
-      .btn-primary[disabled]:active,
-      fieldset[disabled] .btn-primary:active,
-      .btn-primary.disabled.active,
-      .btn-primary[disabled].active,
-      fieldset[disabled] .btn-primary.active {
-        background-color: #fed136;
-        border-color: #fed136;
-      }
-      
-      .btn-primary .badge {
-        color: #fed136;
-        background-color: white;
-      }
-      
-      .btn-xl {
-        color: white;
-        background-color: #fed136;
-        border-color: #fed136;
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-        border-radius: 3px;
-        font-size: 18px;
-        padding: 20px 40px;
-      }
-      
-      .btn-xl:hover,
-      .btn-xl:focus,
-      .btn-xl:active,
-      .btn-xl.active,
-      .open .dropdown-toggle.btn-xl {
-        color: white;
-        background-color: #fec503;
-        border-color: #f6bf01;
-      }
-      
-      .btn-xl:active,
-      .btn-xl.active,
-      .open .dropdown-toggle.btn-xl {
-        background-image: none;
-      }
-      
-      .btn-xl.disabled,
-      .btn-xl[disabled],
-      fieldset[disabled] .btn-xl,
-      .btn-xl.disabled:hover,
-      .btn-xl[disabled]:hover,
-      fieldset[disabled] .btn-xl:hover,
-      .btn-xl.disabled:focus,
-      .btn-xl[disabled]:focus,
-      fieldset[disabled] .btn-xl:focus,
-      .btn-xl.disabled:active,
-      .btn-xl[disabled]:active,
-      fieldset[disabled] .btn-xl:active,
-      .btn-xl.disabled.active,
-      .btn-xl[disabled].active,
-      fieldset[disabled] .btn-xl.active {
-        background-color: #fed136;
-        border-color: #fed136;
-      }
-      
-      .btn-xl .badge {
-        color: #fed136;
-        background-color: white;
-      }
-      
-      .navbar-custom {
-        background-color: #EE6522;
-        border-bottom-color: #fff;
-      }
-      
-      .navbar-custom .navbar-brand {
-        color: #fed136;
-        font-family: "Kaushan Script", "Helvetica Neue", Helvetica, Arial, cursive;
-      }
-      
-      .navbar-custom .navbar-brand:hover,
-      .navbar-custom .navbar-brand:focus,
-      .navbar-custom .navbar-brand:active,
-      .navbar-custom .navbar-brand.active {
-        color: #fec503;
-      }
-      
-      .navbar-custom .navbar-collapse {
-        border-color: rgba(255, 255, 255, 0.02);
-      }
-      
-      .navbar-custom .navbar-toggle {
-        background-color: #fff;
-        border-color: #fff;
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        color: #f06522;
-        font-size: 12px;
-      }
-      
-      .navbar-custom .navbar-toggle:hover,
-      .navbar-custom .navbar-toggle:focus {
-        background-color: #eee;
-      }
-      
-      .navbar-custom .nav li a {
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        font-weight: 400;
-        letter-spacing: 1px;
-        color: white;
-      }
-      
-      .navbar-custom .nav li a:hover,
-      .navbar-custom .nav li a:focus {
-        color: #fff;
-        outline: none;
-        text-decoration: underline;
-      }
-      
-      .borderWhite {
-        color: #F06522 !important;
-        outline: none;
-        background: #fff;
-        border-radius: 40px;
-      }
-      
-      .borderWhiteLigth {
-        border: 1px solid #fff;
-        border-radius: 40px;
-      }
-      /*.signUp:before{
-    border-bottom 18px solid #0099CC;
-    border-left: 18px solid transparent;
-    border-right: 18px solid transparent;
-    bottom: 0px;
-    content: "";
-    position: absolute;
-    left: 45%;
-    margin-left: -21px;
-    width: 0;
-    height: 0;
-    top:-18px;
-}*/
-      /*@media (min-width: 992px){
-.containerWrapper {
-    width: 970px;
-}
-}*/
-      
-      @media (min-width: 768px) {
-        .containerWrapper {
-          width: 750px;
-        }
-      }
-      
-      @media (min-width: 992px) {
-        .containerWrapper {
-          width: 970px;
-        }
-      }
-      /*@media (min-width: 768px){
-.containerWrapper {
-    width: 750px;
-}
-}*/
-      
-      .containerWrapper {
-        padding-right: 15px;
-        padding-left: 15px;
-        margin-right: auto;
-        margin-left: auto;
-      }
-      
-      a.borderWhite:hover,
-      a.borderWhite:focus {
-        color: #F06522 !important;
-        outline: none;
-        background: #fff !important;
-        border-radius: 40px;
-      }
-      
-      .navbar-custom .navbar-nav>.active>a {
-        border-radius: 0;
-        color: white;
-        background-color: #fed136;
-      }
-      
-      .navbar-custom .navbar-nav>.active>a:hover,
-      .navbar-custom .navbar-nav>.active>a:focus {
-        color: white;
-        background-color: #fec503;
-      }
-      
-      @media (min-width: 768px) {
-        .navbar-custom {
-          /*background-color: transparent;*/
-          padding: 25px 0;
-          -webkit-transition: padding 0.3s;
-          -moz-transition: padding 0.3s;
-          transition: padding 0.3s;
-          /*border: none;*/
-        }
-        .navbar-custom .navbar-brand {
-          font-size: 2em;
-          -webkit-transition: all 0.3s;
-          -moz-transition: all 0.3s;
-          transition: all 0.3s;
-        }
-        .navbar-custom .navbar-nav>.active>a {
-          border-radius: 3px;
-        }
-      }
-      
-      @media (min-width: 768px) {
-        .navbar-custom.affix {
-          background-color: #F06522;
-          padding: 10px 0;
-        }
-        .navbar-custom.affix .navbar-brand {
-          font-size: 1.5em;
-        }
-      }
-      
-      header {
-        text-align: center;
-        color: white;
-        background-image: url(https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/img1.jpg);
-        background-size: cover;
-        background-position: top;
-        background-repeat: no-repeat;
-        margin-bottom: 50px;
-      }
-      
-      .containerBackground {
-        text-align: center;
-        color: white;
-        background-image: url(https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/img2.jpg);
-        background-size: cover;
-        background-position: top;
-        background-repeat: no-repeat;
-        /*margin-bottom: 50px;*/
-      }
-      
-      .box-oragen {
-        background: #F06522;
-        background: -moz-linear-gradient(-45deg, rgb(240, 101, 34) 0%, rgb(232, 153, 54) 100%);
-        /* FF3.6-15 */
-        background: -webkit-linear-gradient(-45deg, rgb(240, 101, 34) 0%, rgb(232, 153, 54) 100%);
-        /* Chrome10-25,Safari5.1-6 */
-        background: linear-gradient(135deg, rgb(240, 101, 34) 0%, rgb(232, 153, 54) 100%);
-        /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-        filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#f06522', endColorstr='#ff8d00', GradientType=1);
-        /* IE6-9 fallback on horizontal gradient */
-      }
-      
-      .containerBackground .intro-text {
-        padding-top: 300px;
-        padding-bottom: 300px;
-      }
-      
-      header .intro-text {
-        padding-top: 100px;
-        padding-bottom: 50px;
-      }
-      
-      .containerWrapper .intro-text-new {
-        padding-top: 100px;
-        padding-bottom: 50px;
-      }
-      
-      .containerWrapper .intro-text-last {
-        padding-top: 100px;
-        padding-bottom: 50px;
-      }
-      
-      .text-padding {
-        padding-top: 150px;
-        padding-bottom: 150px
-      }
-      
-      .text-color-oragen {
-        color: #ED5A29
-      }
-      
-      .text-color-white {
-        color: #fff;
-      }
-      
-      .block {
-        /*border: 1px solid red;*/
-        text-align: center;
-        vertical-align: middle;
-      }
-      
-      .circle {
-        background: #fff;
-        border-radius: 225px;
-        color: white;
-        height: 225px;
-        font-weight: bold;
-        width: 225px;
-        display: table;
-        margin: 20px auto;
-      }
-      
-      .circle-oragen {
-        background: #ED5A29;
-        border-radius: 40px;
-        color: white;
-        height: 40px;
-        font-weight: bold;
-        width: 40px;
-        display: table;
-        margin: 10px auto 0px auto;
-      }
-      
-      .circle h5,
-      .circle p {
-        vertical-align: middle;
-        display: table-cell;
-        text-transform: none;
-        padding: 0px 10px;
-      }
-      
-      .circle-oragen p {
-        vertical-align: middle;
-        display: table-cell;
-        text-transform: none;
-        margin: 0px;
-      }
-      
-      header .intro-text .intro-lead-in {
-        font-family: "Roboto", "NexaBold", "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        /*font-style: italic;*/
-        /*font-size: 22px;*/
-        line-height: 22px;
-        margin-bottom: 25px;
-      }
-      
-      header .intro-text .intro-heading {
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-        font-size: 50px;
-        line-height: 50px;
-        margin-bottom: 25px;
-      }
-      
-      @media (min-width: 768px) {
-        header .intro-text {
-          padding-top: 175px;
-          /*padding-bottom: 200px;*/
-        }
-        .containerWrapper .intro-text-new {
-          padding-top: 100px;
-          padding-bottom: 350px;
-        }
-        .containerWrapper .intro-text-last {
-          padding-top: 100px;
-          padding-bottom: 200px;
-        }
-        header .intro-text .intro-lead-in {
-          font-family: "Roboto", "NexaBold", "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-          font-weight: bold;
-          /*font-style: italic;*/
-          font-size: 3em;
-          line-height: 40px;
-          margin-bottom: 50px;
-        }
-        header .intro-text .intro-heading {
-          font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-          font-weight: bold;
-          text-transform: uppercase;
-          font-weight: 700;
-          font-size: 75px;
-          line-height: 75px;
-          margin-bottom: 50px;
-        }
-      }
-      
-      section {
-        padding: 100px 0;
-      }
-      
-      section h2.section-heading {
-        font-size: 40px;
-        margin-top: 0;
-        margin-bottom: 15px;
-      }
-      
-      section h3.section-subheading {
-        font-size: 16px;
-        font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        text-transform: none;
-        font-style: italic;
-        font-weight: 400;
-        margin-bottom: 75px;
-      }
-      
-      @media (min-width: 768px) {
-        section {
-          padding: 150px 0;
-        }
-      }
-      
-      .service-heading {
-        margin: 15px 0;
-        text-transform: none;
-      }
-      
-      #portfolio .portfolio-item {
-        margin: 0 0 15px;
-        right: 0;
-      }
-      
-      #portfolio .portfolio-item .portfolio-link {
+      .photo-16-9 {
         display: block;
+        width: 100%;
         position: relative;
-        max-width: 400px;
-        margin: 0 auto;
-      }
-      
-      #portfolio .portfolio-item .portfolio-link .portfolio-hover {
-        background: rgba(254, 209, 54, 0.9);
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: all ease 0.5s;
-        -webkit-transition: all ease 0.5s;
-        -moz-transition: all ease 0.5s;
-      }
-      
-      #portfolio .portfolio-item .portfolio-link .portfolio-hover:hover {
-        opacity: 1;
-      }
-      
-      #portfolio .portfolio-item .portfolio-link .portfolio-hover .portfolio-hover-content {
-        position: absolute;
-        width: 100%;
-        height: 20px;
-        font-size: 20px;
-        text-align: center;
-        top: 50%;
-        margin-top: -12px;
-        color: white;
-      }
-      
-      #portfolio .portfolio-item .portfolio-link .portfolio-hover .portfolio-hover-content i {
-        margin-top: -12px;
-      }
-      
-      #portfolio .portfolio-item .portfolio-link .portfolio-hover .portfolio-hover-content h3,
-      #portfolio .portfolio-item .portfolio-link .portfolio-hover .portfolio-hover-content h4 {
-        margin: 0;
-      }
-      
-      #portfolio .portfolio-item .portfolio-caption {
-        max-width: 400px;
-        margin: 0 auto;
+        height: 0;
+        padding: 56.25% 0 0 0;
+        overflow: hidden;
         background-color: white;
-        text-align: center;
-        padding: 25px;
       }
       
-      #portfolio .portfolio-item .portfolio-caption h4 {
-        text-transform: none;
-        margin: 0;
-      }
-      
-      #portfolio .portfolio-item .portfolio-caption p {
-        font-family: "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-style: italic;
-        font-size: 16px;
-        margin: 0;
-      }
-      
-      #portfolio * {
-        z-index: 2;
-      }
-      
-      @media (min-width: 767px) {
-        header {
-          text-align: center;
-          color: white;
-          /*background-image: url(../img/cover.png);
-    background-size: 100%;
-    background-position: 0px -196px;
-    background-repeat: no-repeat;*/
-        }
-        .navbar-custom .nav li a {
-          display: inline-block;
-        }
-        .nav>li {
-          text-align: center;
-          padding: 0px 10px;
-        }
-      }
-      
-      @media (min-width: 767px) {
-        #portfolio .portfolio-item {
-          margin: 0 0 30px;
-        }
-      }
-      
-      .timeline {
-        list-style: none;
-        padding: 0;
-        position: relative;
-      }
-      
-      .timeline:before {
+      .photo-16-9 img {
+        position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
         top: 0;
         bottom: 0;
-        position: absolute;
-        content: "";
-        width: 2px;
-        background-color: #f1f1f1;
-        left: 40px;
-        margin-left: -1.5px;
+        margin: auto;
       }
       
-      .timeline>li {
-        margin-bottom: 50px;
-        position: relative;
-        min-height: 50px;
+      .content {
+        max-width: 1000px;
       }
       
-      .timeline>li:before,
-      .timeline>li:after {
-        content: " ";
-        display: table;
+      .bold {
+        font-weight: bold;
       }
       
-      .timeline>li:after {
-        clear: both;
+      .bottom-cta-section {
+        background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/cooking_at_home.jpg') no-repeat center center;
+        background-size: cover;
       }
       
-      .timeline>li .timeline-panel {
-        width: 100%;
-        float: right;
-        padding: 0 20px 0 100px;
-        position: relative;
-        text-align: left;
-      }
-      
-      .timeline>li .timeline-panel:before {
-        border-left-width: 0;
-        border-right-width: 15px;
-        left: -15px;
-        right: auto;
-      }
-      
-      .timeline>li .timeline-panel:after {
-        border-left-width: 0;
-        border-right-width: 14px;
-        left: -14px;
-        right: auto;
-      }
-      
-      .timeline>li .timeline-image {
-        left: 0;
-        margin-left: 0;
-        width: 80px;
-        height: 80px;
-        position: absolute;
-        z-index: 100;
-        background-color: #fed136;
+      .bottom-cta-container {
         color: white;
-        border-radius: 100%;
-        border: 7px solid #f1f1f1;
-        text-align: center;
-      }
-      
-      .timeline>li .timeline-image h4 {
-        font-size: 10px;
-        margin-top: 12px;
-        line-height: 14px;
-      }
-      
-      .timeline>li.timeline-inverted>.timeline-panel {
-        float: right;
-        text-align: left;
-        padding: 0 20px 0 100px;
-      }
-      
-      .timeline>li.timeline-inverted>.timeline-panel:before {
-        border-left-width: 0;
-        border-right-width: 15px;
-        left: -15px;
-        right: auto;
-      }
-      
-      .timeline>li.timeline-inverted>.timeline-panel:after {
-        border-left-width: 0;
-        border-right-width: 14px;
-        left: -14px;
-        right: auto;
-      }
-      
-      .timeline>li:last-child {
-        margin-bottom: 0;
-      }
-      
-      .timeline .timeline-heading h4 {
-        margin-top: 0;
-        color: inherit;
-      }
-      
-      .timeline .timeline-heading h4.subheading {
-        text-transform: none;
-      }
-      
-      .timeline .timeline-body>p,
-      .timeline .timeline-body>ul {
-        margin-bottom: 0;
-      }
-      
-      @media (min-width: 768px) {
-        .timeline:before {
-          left: 50%;
-        }
-        .timeline>li {
-          margin-bottom: 100px;
-          min-height: 100px;
-        }
-        .timeline>li .timeline-panel {
-          width: 41%;
-          float: left;
-          padding: 0 20px 20px 30px;
-          text-align: right;
-        }
-        .timeline>li .timeline-image {
-          width: 100px;
-          height: 100px;
-          left: 50%;
-          margin-left: -50px;
-        }
-        .timeline>li .timeline-image h4 {
-          font-size: 13px;
-          margin-top: 16px;
-          line-height: 18px;
-        }
-        .timeline>li.timeline-inverted>.timeline-panel {
-          float: right;
-          text-align: left;
-          padding: 0 30px 20px 20px;
-        }
-      }
-      
-      @media (min-width: 992px) {
-        .timeline>li {
-          min-height: 150px;
-        }
-        .timeline>li .timeline-panel {
-          padding: 0 20px 20px;
-        }
-        .timeline>li .timeline-image {
-          width: 150px;
-          height: 150px;
-          margin-left: -75px;
-        }
-        .timeline>li .timeline-image h4 {
-          font-size: 18px;
-          margin-top: 30px;
-          line-height: 26px;
-        }
-        .timeline>li.timeline-inverted>.timeline-panel {
-          padding: 0 20px 20px;
-        }
-      }
-      
-      @media (min-width: 1200px) {
-        .timeline>li {
-          min-height: 170px;
-        }
-        .timeline>li .timeline-panel {
-          padding: 0 20px 20px 100px;
-        }
-        .timeline>li .timeline-image {
-          width: 170px;
-          height: 170px;
-          margin-left: -85px;
-        }
-        .timeline>li .timeline-image h4 {
-          margin-top: 40px;
-        }
-        .timeline>li.timeline-inverted>.timeline-panel {
-          padding: 0 100px 20px 20px;
-        }
-      }
-      
-      .team-member {
-        text-align: center;
-        margin-bottom: 50px;
-      }
-      
-      .team-member img {
-        margin: 0 auto;
-        border: 7px solid white;
-      }
-      
-      .team-member h4 {
-        margin-top: 25px;
-        margin-bottom: 0;
-        text-transform: none;
-      }
-      
-      .team-member p {
-        margin-top: 0;
-      }
-      
-      aside.clients img {
-        margin: 50px auto;
-      }
-      
-      section#contact {
-        background-color: #222222;
-        background-image: url('../img/map-image.png');
-        background-position: center;
-        background-repeat: no-repeat;
-      }
-      
-      section#contact .section-heading {
-        color: white;
-      }
-      
-      section#contact .form-group {
-        margin-bottom: 25px;
-      }
-      
-      section#contact .form-group input,
-      section#contact .form-group textarea {
-        padding: 20px;
-      }
-      
-      section#contact .form-group input.form-control {
-        height: auto;
-      }
-      
-      section#contact .form-group textarea.form-control {
-        height: 236px;
-      }
-      
-      section#contact .form-control:focus {
-        border-color: #fed136;
-        box-shadow: none;
-      }
-      
-      section#contact ::-webkit-input-placeholder {
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #eeeeee;
-      }
-      
-      section#contact :-moz-placeholder {
-        /* Firefox 18- */
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #eeeeee;
-      }
-      
-      section#contact ::-moz-placeholder {
-        /* Firefox 19+ */
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #eeeeee;
-      }
-      
-      section#contact :-ms-input-placeholder {
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #eeeeee;
-      }
-      
-      section#contact .text-danger {
-        color: #e74c3c;
-      }
-      
-      footer {
-        padding: 0;
-        text-align: center;
-        color: #fff;
-      }
-      
-      footer span.copyright {
-        line-height: 40px;
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        text-transform: none;
-      }
-      
-      footer ul.quicklinks {
-        margin-bottom: 0;
-        line-height: 40px;
-        font-family: "Roboto", "NexaBold", "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-weight: bold;
-        text-transform: uppercase;
-        text-transform: none;
-      }
-      
-      ul.social-buttons {
-        margin-bottom: 0;
-      }
-      
-      ul.social-buttons li a {
-        display: block;
-        background-color: #222222;
-        height: 40px;
-        width: 40px;
-        border-radius: 100%;
-        font-size: 20px;
-        line-height: 40px;
-        color: white;
-        outline: none;
-        -webkit-transition: all 0.3s;
-        -moz-transition: all 0.3s;
-        transition: all 0.3s;
-      }
-      
-      ul.social-buttons li a:hover,
-      ul.social-buttons li a:focus,
-      ul.social-buttons li a:active {
-        background-color: #fed136;
-      }
-      
-      .btn:focus,
-      .btn:active,
-      .btn.active,
-      .btn:active:focus {
-        outline: none;
-      }
-      
-      .portfolio-modal .modal-dialog {
-        margin: 0;
-        height: 100%;
-        width: auto;
-      }
-      
-      .portfolio-modal .modal-content {
-        border-radius: 0;
-        background-clip: border-box;
-        -webkit-box-shadow: none;
-        box-shadow: none;
-        border: none;
-        min-height: 100%;
-        padding: 100px 0;
-        text-align: center;
-      }
-      
-      .portfolio-modal .modal-content h2 {
-        margin-bottom: 15px;
-        font-size: 3em;
-      }
-      
-      .portfolio-modal .modal-content p {
-        margin-bottom: 30px;
-      }
-      
-      .portfolio-modal .modal-content p.item-intro {
-        margin: 20px 0 30px;
-        font-family: "Roboto", "Droid Serif", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-style: italic;
-        font-size: 16px;
-      }
-      
-      .portfolio-modal .modal-content ul.list-inline {
-        margin-bottom: 30px;
-        margin-top: 0;
-      }
-      
-      .portfolio-modal .modal-content img {
-        margin-bottom: 30px;
-      }
-      
-      .portfolio-modal .close-modal {
-        position: absolute;
-        width: 75px;
-        height: 75px;
-        background-color: transparent;
-        top: 25px;
-        right: 25px;
-        cursor: pointer;
-      }
-      
-      .portfolio-modal .close-modal:hover {
-        opacity: 0.3;
-      }
-      
-      .portfolio-modal .close-modal .lr {
-        height: 75px;
-        width: 1px;
-        margin-left: 35px;
-        background-color: #222222;
-        transform: rotate(45deg);
-        -ms-transform: rotate(45deg);
-        /* IE 9 */
-        -webkit-transform: rotate(45deg);
-        /* Safari and Chrome */
-        z-index: 1051;
-      }
-      
-      .portfolio-modal .close-modal .lr .rl {
-        height: 75px;
-        width: 1px;
-        background-color: #222222;
-        transform: rotate(90deg);
-        -ms-transform: rotate(90deg);
-        /* IE 9 */
-        -webkit-transform: rotate(90deg);
-        /* Safari and Chrome */
-        z-index: 1052;
-      }
-      
-      .portfolio-modal .modal-backdrop {
-        opacity: 0;
-        display: none;
-      }
-      
-       ::-moz-selection {
-        text-shadow: none;
-        background: #fed136;
-      }
-      
-       ::selection {
-        text-shadow: none;
-        background: #fed136;
-      }
-      
-      img::selection {
-        background: transparent;
-      }
-      
-      img::-moz-selection {
-        background: transparent;
-      }
-      
-      body {
-        webkit-tap-highlight-color: #fed136;
-      }
-      /*
-       * Atish Code
-      */
-      
-      .fa-8x {
-        font-size: 8em;
-        line-height: .9em;
-        height: 1em;
-      }
-      
-      .logo-name {
-        font-family: 'NexaBold', 'FontRegular';
-      }
-      
-      .circle h5 {
-        font-size: 1.1em;
-      }
-      
-      .hiw-list {
+        padding: 24px 12px;
         display: flex;
         flex-direction: column;
-        padding: 0 18px;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.25);
+        min-height: 65vh;
       }
       
-      .hiw-step {
+      .header-section {
+        background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/home/victoria1.jpg') no-repeat center center;
+        background-size: cover;
+      }
+      
+      .header-container {
+        color: white;
+        padding: 24px 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.25);
+        min-height: 60vh;
+      }
+      
+      .header-title {
+        color: white;
+        text-align: center;
+        font-size: 24px;
+        line-height: 25px;
+        letter-spacing: 1px;
+        margin: 24px 0;
+        text-shadow: 2px 2px 10px black;
+      }
+      
+      @media (min-width: 700px) {
+        .header-title {
+          font-size: 48px;
+          line-height: 49px;
+        }
+      }
+      
+      .sign-up-button {
+        color: white;
+        margin: 0 auto;
+        font-size: 18px;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        background: #F06522;
+        background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+        background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+        background: linear-gradient(45deg, #FF5722, #FFB300);
+      }
+      
+      .love-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 24px;
+        min-height: 25vh;
+      }
+      
+      .love-title {
+        font-size: 18px;
+        line-height: 19px;
+        font-weight: bold;
+        text-align: center;
+      }
+      
+      .love-desc-list {
+        margin: auto;
+        height: 100px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+      
+      .love-image {
+        display: flex;
+      }
+      
+      .love-image>img {
+        margin: auto;
+        width: 50px;
+      }
+      
+      .love-desc {
+        padding: 0 24px;
+        font-size: 14px;
+        line-height: 15px;
+        text-align: center;
+        margin: 24px 0;
+      }
+      
+      @media (min-width: 700px) {
+        .love-title {
+          font-size: 24px;
+          line-height: 25px;
+        }
+        .love-desc {
+          font-size: 20px;
+          line-height: 20px;
+        }
+      }
+      
+      .why-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        color: white;
+        padding: 24px 12px;
+        background: #F06522;
+        background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+        background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+        background: linear-gradient(45deg, #FF5722, #FFB300);
+      }
+      
+      .why-title {
+        margin: auto;
+        text-align: center;
+        font-size: 18px;
+        line-height: 19px;
+        font-weight: bold;
         padding: 12px 0;
       }
       
-      .hiw-title-row {
+      .why-point-list {
         display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      
+      .why-point {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        font-size: 16px;
+        line-height: 17px;
+        padding-left: 12px;
+      }
+      
+      .why-image {
+        display: flex;
+        padding: 12px 12px 12px 0;
+        min-width: 100px;
+      }
+      
+      .why-image>img {
+        margin: auto;
+        max-width: 75px;
+        max-height: 55px;
+      }
+      
+      .why-point-text {
+        display: flex;
+        flex-direction: column;
+        padding: 18px 0;
+      }
+      
+      .why-point-title {
+        font-size: 16px;
+        line-height: 16px;
+        margin: 0 0 8px 0;
+      }
+      
+      .why-point-desc {
+        opacity: var(--primary-text-opacity);
+      }
+      
+      @media (min-width: 700px) {
+        .why-point-list {
+          flex-direction: row;
+        }
+        .why-point {
+          flex-direction: column;
+          padding: 0 24px 0 0;
+        }
+        .why-image>img {
+          max-width: 150px;
+        }
+        .why-point-text {
+          text-align: center;
+        }
+      }
+      
+      .hiw-section {
+        padding: 24px 36px;
+      }
+      
+      .hiw-title-section {
+        padding: 12px 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .hiw-title-line {
+        flex: 1;
+        height: 1px;
+        background-color: var(--gray-line-color);
         margin: auto 0;
       }
       
       .hiw-title {
-        font-size: 16px;
+        text-align: center;
+        margin: 0 24px;
+        font-size: 18px;
         font-weight: bold;
-        padding-left: 25px;
-        margin: auto 0;
       }
       
-      .hiw-desc {
-        padding-left: 55px;
+      .step {
+        padding: 12px 0;
+      }
+      
+      .step-header {
+        padding: 6px 0;
+      }
+      
+      .step-number {
+        display: flex;
+        flex-direction: column;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: solid var(--primary-text-color) 1px;
+        font-size: 15px;
+      }
+      
+      .step-number>* {
+        margin: auto;
+      }
+      
+      .step-header-title {
+        font-weight: 600;
+        padding: 4px 0;
+      }
+      
+      .step-header-desc {
+        font-size: 16px;
+        line-height: 17px;
+        opacity: var(--secondary-text-opacity);
+      }
+      
+      .step-detail-list {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .step-detail {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        padding: 6px 0;
+      }
+      
+      @media (min-width: 700px) {
+        .step-detail-list {
+          flex-direction: row;
+        }
+        .step-detail {
+          padding: 6px 18px 6px 0;
+        }
+      }
+      
+      .step-detail-icon {
+        color: #FF7043;
+        margin-left: -2px;
+      }
+      
+      .step-detail-title {
+        font-size: 16px;
+        line-height: 17px;
+        padding: 6px 0;
+      }
+      
+      .step-detail-desc {
+        font-size: 14px;
+        line-height: 15px;
+        opacity: var(--secondary-text-opacity);
+      }
+      
+      .contact-us-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 24px;
+        color: white;
+        min-height: 150px;
+        background: #F06522;
+        background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+        background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+        background: linear-gradient(45deg, #FF5722, #FFB300);
+      }
+      
+      .contact-us-title {
+        font-size: 18px;
+        text-align: center;
+        padding-bottom: 24px;
+      }
+      
+      .contact-us-link-list {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+      
+      .contact-us-link {
+        text-decoration: none;
+        margin: 0 12px;
+        text-align: center;
+        border-radius: 4px;
+      }
+      
+      .contact-us-button {
+        color: var(--app-primary-color);
+        background: white;
+        display: flex;
+        flex-direction: column;
+        width: 125px;
+        padding: 8px;
+      }
+      
+      @media (min-width: 700px) {
+        .contact-us-button {
+          width: 175px;
+        }
+      }
+      
+      .contact-us-button-title {
         font-size: 14px;
       }
       
-      .circle-orange {
-        background: #ED5A29;
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-        color: white;
-        font-weight: bold;
+      .contact-us-button-desc {
+        font-size: 8px;
+        opacity: var(--secondary-text-opacity);
+      }
+      
+      @media (min-width: 1400px) {
+        .header-container {
+          min-height: 75vh;
+        }
+      }
+      
+      .for-who-section {
+        padding: 24px;
         display: flex;
+        flex-direction: column;
       }
       
-      .circle-orange p {
-        text-transform: none;
+      .for-who-title {
+        padding-bottom: 12px;
+        font-size: 18px;
+        line-height: 19px;
+        text-align: center;
+      }
+      
+      .for-who-desc {
+        font-size: 14px;
+        line-height: 15px;
+        text-align: center;
+      }
+      
+      .for-who-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0;
+      }
+      
+      .for-who-image {
+        position: relative;
+        width: 40%;
+        margin: 12px;
+        background-color: #FF7043;
+      }
+      
+      @media (min-width: 1015px) {
+        .for-who-list {
+          margin: 0 auto;
+        }
+        .for-who-image {
+          height: 123px;
+          width: 220px;
+        }
+      }
+      
+      .for-who-image-cover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        background-color: rgba(0, 0, 0, 0.25);
+        color: white;
+        text-align: center;
+      }
+      
+      .for-who-image-cover>* {
         margin: auto;
-        font-size: 16px;
-      }
-      
-      .bold {
-        font-weight: 600;
       }
 
     </style>
 
-    <header>
-      <div class="containerWrapper">
-        <div class="intro-text">
-          <div class="intro-lead-in">
-            <p class="text-shadow"
-               style="font-size: 1.1em;line-height: 1.1em;">
-              Earn money <br>and recognition by sharing <br>your food with the <br>community.
-            </p>
-          </div>
-          <!--<div class="col-xs-4 intro-heading borderWhiteLigth"
-               style="padding: 10px 0px 8px;margin: 25px auto;float:none"
-               on-tap="signUp">
-            <h5 style="padding: 0px 5px;margin: 0px;font-size:0.2em">
-                    <a href="#" style="color:#fff">Don´t have an account?</a>
-                  </h5>
-          </div>-->
-          <div class="col-sm-6 "
-               style="padding: 10px 0px 5px;margin: 25px auto;float: none;"
-               on-tap="signUp">
-            <a href="#"
-               class="borderWhite signUp"
-               style="position: relative;padding: 10px 15px;font-size: 1.5em;font-family: 'Roboto';padding: 10px 40px;">Sign up</a>
-          </div>
-        </div>
+    <header class="header-section">
+      <div class="header-container">
+        <h1 id="headerText"
+            class="header-title">Nashville can't wait to try<br> your homemade food!</h1>
+        <paper-button id="headerButton"
+                      class="sign-up-button"
+                      on-tap="signUp"
+                      raised>Start Cooking
+        </paper-button>
       </div>
     </header>
-    <div class="container"
-         style="margin-bottom:50px">
-      <div class="row text-center">
-        <div class="col-md-4">
-
-          <span class="fa-stack fa-4x"><i><img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/elem1.png" alt="" style="width:100%" /></i></span>
-          <h4 class="padding-h4">Create a name for yourself</h4>
-          <p class="nexaLigth padding-text">Gigamunch is the perfect platform to build a following. Your customers will be able to review and rate your creations, as well as get notifications when you post new meals.</p>
+    <div class="love-section">
+      <div class="love-title content">
+        Make money doing what you love
+      </div>
+      <div class="love-desc-list content">
+        <div class="love-image-right love-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/heart.png"></img>
         </div>
-        <div class="col-md-4">
-
-          <span class="fa-stack fa-8x"><i><img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/elem2.png" alt="" style="width:100%" /></i></span>
-          <h4 class="padding-h4">Earn money on a flexible schedule</h4>
-          <p class="nexaLigth padding-text">Gigamunch gives you freedom to cook whenever you want. Choose your own schedule and be your own boss.</p>
-        </div>
-        <div class="col-md-4">
-
-          <span class="fa-stack fa-4x"><i><img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/elem3.png" alt="" style="width:100%" /></i></span>
-          <h4 class="padding-h4">The easiest way to share your food</h4>
-          <p class="nexaLigth padding-text">Gigamunch will help manage orders, payments, and logistics of selling your food. Let us take care of the boring stuff so you can spend more time actually cooking.</p>
+        <p class="love-desc content">
+          Earn up to <span class="bold">$850 a week</span>
+          <br>selling food from <span class="bold">your home.</span>
+        </p>
+        <div class="love-image-right love-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/money.png"></img>
         </div>
       </div>
     </div>
-    <div class="containerBackground">
-      <div class="containerWrapper">
-        <div class="intro-text row text-center">
-          <div class="col-md-8 box-oragen not-float"
-               style="margin:0 auto">
-            <p class="nexaLigth"
-               style="padding: 10px;font-size: 1.2em;">
-              Culinary students, stay-at-home moms and dads, professional chefs, and anyone with good food can be part of this.
+    <div class="why-section">
+      <h2 class="why-title">Why Join?</h2>
+      <!-- TODO add images -->
+      <div class="why-point-list content">
+        <div class="why-point">
+          <div class="why-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/money_clock.png">
+          </div>
+          <div class="why-point-text">
+            <h3 class="why-point-title">Earn money on a flexible schedule</h3>
+            <p class="why-point-desc">
+              Choose your own schedule and be your own boss. Have the freedom to cook whenever you want.
             </p>
+          </div>
+        </div>
+
+        <div class="why-point">
+          <div class="why-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/chef_hat.png">
+          </div>
+          <div class="why-point-text">
+            <h3 class="why-point-title">Build your brand</h3>
+            <p class="why-point-desc">
+              Create a loyal following of customers who love your food. Find new clients and catering opportunities.
+            </p>
+          </div>
+        </div>
+
+        <div class="why-point">
+          <div class="why-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/high_five.png">
+          </div>
+          <div class="why-point-text">
+            <h3 class="why-point-title">We got your back</h3>
+            <p class="why-point-desc">
+              Expand your side hustle without being a marketing expert. Let us manage the boring part like orders, payments, and logistics.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="hiw-section">
+      <div class="hiw-title-section content">
+        <div class="hiw-title-line"></div>
+        <div class="hiw-title">How it works</div>
+        <div class="hiw-title-line"></div>
+      </div>
+      <div class="step content">
+        <div class="step-header">
+          <div class="step-number"><span>1</span></div>
+          <div class="step-header-title">Open your kitchen</div>
+          <div class="step-header-desc">Let’s get you set up ready to sell your food!</div>
+        </div>
+        <div class="step-detail-list">
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:phone"></iron-icon>
+            </div>
+            <div class="step-detail-title">Quick phone call</div>
+            <div class="step-detail-desc">Let’s have a quick phone call so we can get to know you and answer any questions.</div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:home"></iron-icon>
+            </div>
+            <div class="step-detail-title">Kitchen visit</div>
+            <div class="step-detail-desc">It’s important for us to come over to see your kitchen and taste your food. The visit takes about 30 minutes, and while we’re there we’ll help you setup your profile. </div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:camera"></iron-icon>
+            </div>
+            <div class="step-detail-title">Photoshoot</div>
+            <div class="step-detail-desc">Smile for the camera while we take high-quality photos of your food to start you off nicely. </div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:hot-bowl"></iron-icon>
+            </div>
+            <div class="step-detail-title">Share your creations</div>
+            <div class="step-detail-desc">During the kitchen visit, we’ll help you set up for first few items, giving them a name, description, price, etc. </div>
+          </div>
+        </div>
+      </div>
+      <div class="step content">
+        <div class="step-header">
+          <div class="step-number"><span>2</span></div>
+          <div class="step-header-title">Start getting orders</div>
+          <div class="step-header-desc">You’re live! Respond to customers and get ready to cook!</div>
+        </div>
+        <div class="step-detail-list">
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:request"></iron-icon>
+            </div>
+            <div class="step-detail-title">Receive requests</div>
+            <div class="step-detail-desc">You’ll get a text notification when someone requests an order. You don’t have to cook until after you receive a request, that means no food goes to waste. </div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:thumbs-up-down"></iron-icon>
+            </div>
+            <div class="step-detail-title">Accept or decline requests</div>
+            <div class="step-detail-desc">You have 12 hours to accept a request, otherwise it will automatically be declined. We encourage you to work out the details with your customers and suggest times that work for both of you. </div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:message"></iron-icon>
+            </div>
+            <div class="step-detail-title">Message your customers</div>
+            <div class="step-detail-desc">You will also be able to have a real conversation with your customers through the messaging feature. Just like Facebook messenger or any other chat app.</div>
+          </div>
+          <div class="step-detail">
+          </div>
+        </div>
+      </div>
+      <div class="step content">
+        <div class="step-header">
+          <div class="step-number"><span>3</span></div>
+          <div class="step-header-title">Start earning money!</div>
+          <div class="step-header-desc">The fun part! Make food for people. Make money for you.</div>
+        </div>
+        <div class="step-detail-list">
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:money"></iron-icon>
+            </div>
+            <div class="step-detail-title">Direct deposit</div>
+            <div class="step-detail-desc">You will receive a direct deposit to your bank account within 48 hours of completing a request. Our SSL-encrypted payments platform keeps you and your customers secure.</div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:delivery-car"></iron-icon>
+            </div>
+            <div class="step-detail-title">Pickup or delivery</div>
+            <div class="step-detail-desc">Either the customer or a 3rd party delivery service will come to your house at the scheduled time and pick up the food. You can also offer personal deliveries to get more orders and make extra money.</div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:circle-star"></iron-icon>
+            </div>
+            <div class="step-detail-title">Build your brand</div>
+            <div class="step-detail-desc">If you have ambitions of being a private cook, or starting a small food business, then Gigamunch is the perfect starting place to build a brand, or grow a base of loyal customers.</div>
+          </div>
+          <div class="step-detail">
+            <div class="step-detail-icon">
+              <iron-icon icon="app:feedback"></iron-icon>
+            </div>
+            <div class="step-detail-title">Get real feedback</div>
+            <div class="step-detail-desc">Our rating and review system will help you test out crazy new ideas and see what people really think.</div>
           </div>
         </div>
       </div>
     </div>
-    <div class="container">
-      <div class="text-padding">
-        <div class="col-md-8 not-float text-center"
-             style="margin:0 auto">
-          <h3 class="text-color-oragen text-transform-none"><span class="logo-name">Gigamunch</span> is a place to buy real homemade food. <br>It’s also the best place to sell your homemade food.</h3>
+
+    <div class="contact-us-section">
+      <div class="contact-us-title">Still have questions?</div>
+      <div class="contact-us-link-list">
+        <a class="contact-us-link"
+           href="mailto:enis@gigamunchapp.com">
+          <paper-button raised
+                        class="contact-us-button">
+            <div class="contact-us-button-title">EMAIL US</div>
+            <div class="contact-us-button-desc">enis@gigamunchapp.com</div>
+          </paper-button>
+        </a>
+        <a class="contact-us-link"
+           href="tel:+6153975516">
+          <paper-button raised
+                        class="contact-us-button">
+            <div class="contact-us-button-title">CALL US</div>
+            <div class="contact-us-button-desc">615-397-5516</div>
+          </paper-button>
+        </a>
+      </div>
+    </div>
+    <div class="for-who-section">
+      <div class="for-who-title content">
+        Is this for me?
+      </div>
+      <div class="for-who-desc content">If you love making food, then the answer is <span class="bold">yes!</span></div>
+      <div class="for-who-list content">
+        <div class="for-who-image">
+          <div class="photo-16-9">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/stay_at_home_mom.jpg">
+          </div>
+          <div class="for-who-image-cover">
+            <span>stay-at-home parents</span>
+          </div>
+        </div>
+
+        <div class="for-who-image">
+          <div class="photo-16-9">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/pro_chef.png">
+          </div>
+          <div class="for-who-image-cover">
+            <span>professional chef</span>
+          </div>
+        </div>
+
+        <div class="for-who-image">
+          <div class="photo-16-9">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/culinary_student.jpg">
+          </div>
+          <div class="for-who-image-cover">
+            <span>culinary student</span>
+          </div>
+        </div>
+
+        <div class="for-who-image">
+          <div class="photo-16-9">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/hobbyist.jpg">
+          </div>
+          <div class="for-who-image-cover">
+            <span>hobbyist</span>
+          </div>
         </div>
       </div>
     </div>
-    <div class="box-oragen">
-      <div class="container ">
-        <div class="col-md-8 not-float text-center "
-             style="margin:50px auto">
-          <h4 class="text-color-white text-transform-none">We honestly believe that homemade food is special.<br> It deserves to be shown off. If you are someone who loves to cook, join us!</h4>
-        </div>
-        <div class="row">
-          <div class="col-md-3 block">
-            <div class="circle">
-              <h5 class="text-color-oragen nexaLigth">Earn money by selling your food to the local community. You could make up to $950 per week.</h5>
-            </div>
 
-          </div>
-          <div class="col-md-3 block">
-            <div class="circle">
-              <h5 class="text-color-oragen nexaLigth">Build a following of people who subscribe to your food. They will get notifications when you display new meals.</h5>
-            </div>
-
-          </div>
-          <div class="col-md-3 block">
-            <div class="circle">
-              <h5 class="text-color-oragen nexaLigth">Get real feedback. Your customers will be able to review and rate your food.</h5>
-            </div>
-
-          </div>
-          <div class="col-md-3 block">
-            <div class="circle">
-              <h5 class="text-color-oragen nexaLigth">Choose your own schedule and cook whenever you want.</h5>
-            </div>
-
-          </div>
-        </div>
-        <div class="col-md-12 not-float text-center "
-             style="margin:50px auto">
-          <span class="text-color-white nexaBold"><span class="logo-name">Gigamunch</span> will help manage orders, payments, and logistics of selling your food. We take care of the boring stuff so you can spend more time actually cooking.</span>
-        </div>
+    <div class="bottom-cta-section">
+      <div class="bottom-cta-container">
+        <h1 id="headerText"
+            class="header-title">Get ready to feed your community</h1>
+        <paper-button id="headerButton"
+                      class="sign-up-button"
+                      on-tap="signUp"
+                      raised>Open your kitchen
+        </paper-button>
       </div>
     </div>
-    <div class="container">
-      <div hidden="[[newHowItWorks]]">
-        <div class="col-md-8 not-float text-center "
-             style="margin:50px auto">
-          <h4 class="text-transform-none">If you want to sell food on <span class="logo-name">Gigamunch</span>, there are three steps. </h4>
-        </div>
-        <div class="row text-center">
-          <div class="col-md-4 block">
-            <span class="fa-stack fa-4x"><i><img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/elem4.png" alt="" style="width:100%" /></i></span>
-            <div class="circle-oragen">
-              <p class="nexaBold">1</p>
-            </div>
-            <p class="nexaBold"
-               style="line-height:1.4em">
-              A 30 minute interview over <br> the phone.
-            </p>
-          </div>
-          <div class="col-md-4 block">
-
-            <span class="fa-stack fa-4x"><i><img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/elem5.png" alt="" style="width:100%" /></i></span>
-            <div class="circle-oragen">
-              <p class="nexaBold">2</p>
-            </div>
-            <p class="nexaBold"
-               style="line-height:1.4em">
-              A background <br> check.
-            </p>
-          </div>
-          <div class="col-md-4 block">
-
-            <span class="fa-stack fa-4x"><i><img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/elem6.png" alt="" style="width:100%" /></i></span>
-            <div class="circle-oragen">
-              <p class="nexaBold">3</p>
-            </div>
-            <p class="nexaBold"
-               style="line-height:1.4em">
-              A kitchen <br> visit.
-            </p>
-          </div>
-        </div>
-        <div class="col-md-12 not-float text-center "
-             style="margin:25px auto">
-          <h4 class="nexaLigth text-transform-none">This only takes a few hours, but it helps ensure safety. <br>
-          Once you complete the three steps, you can start displaying your food and receiving requests.
-          </h4>
-        </div>
-      </div>
-      <!-- Atish Code -->
-      <div hidden$="[[!newHowItWorks]]">
-        <div class="col-md-8 not-float text-center "
-             style="margin:50px auto 30px auto">
-          <h3 class="text-transform-none">How It Works</h3>
-        </div>
-        <div class="hiw-list">
-          <div class="hiw-step">
-            <div class="hiw-title-row">
-              <div class="circle-orange">
-                <p class="nexaBold">1</p>
-              </div>
-              <p class="hiw-title">
-                Sign Up
-              </p>
-            </div>
-            <div class="hiw-desc">
-              Selling on <span class="logo-name">Gigamunch</span> starts with a 15 minute phone call so we can get to know you and answer any questions.
-            </div>
-          </div>
-          <div class="hiw-step">
-            <div class="hiw-title-row">
-              <div class="circle-orange">
-                <p class="bold">2</p>
-              </div>
-              <p class="hiw-title">
-                Schedule a Kitchen Visit
-              </p>
-            </div>
-            <div class="hiw-desc">
-              It’s important for us to come over and taste your amazing homemade food. The visit takes 30 minutes, and we will bring a nice camera to take high-quality pictures of your food.
-            </div>
-          </div>
-          <div class="hiw-step">
-            <div class="hiw-title-row">
-              <div class="circle-orange">
-                <p class="bold">3</p>
-              </div>
-              <p class="hiw-title">
-                Add Your Best Creations
-              </p>
-            </div>
-            <div class="hiw-desc">
-              After the visit, you can start displaying your food. Simply choose the best picture, decide the price, and write a short description. Once you display it, anyone with the app will be able to see it and send you requests.
-            </div>
-          </div>
-          <div class="hiw-step">
-            <div class="hiw-title-row">
-              <div class="circle-orange">
-                <p class="bold">4</p>
-              </div>
-              <p class="hiw-title">
-                Start Receiving Requests
-              </p>
-            </div>
-            <div class="hiw-desc">
-              The fun really starts once the requests come in. You will be able to have real conversations with your customers through the app. Once you complete their request, their card will be charged, and you will receive a direct deposit within 48 hours.
-            </div>
-          </div>
-        </div>
-        <!-- End Atish Code-->
-      </div>
-      <div class="col-md-3"
-           style="margin: 50px auto;float: none;text-align:center;"
-           on-tap="signUp">
-        <a href="#"
-           class="box-oragen signUp"
-           style="position: relative;padding: 10px 15px;font-size: 1.5em;font-family: 'Roboto';padding: 10px 40px; color:#fff;border-radius:25px">Sign up</a>
-      </div>
   </template>
 
   <script>
@@ -1532,16 +734,8 @@ background-image: url(../img/img1.jpg);
         user: {
           type: Object,
         },
-        newHowItWorks: {
-          type: Boolean,
-          value: false,
-        },
       },
-      ready: function() {
-        if (location.search.includes('hiw=1')) {
-          this.newHowItWorks = true;
-        }
-      },
+      ready: function() {},
       signUp: function() {
         if (this.user !== undefined && this.user !== null && this.user.id !== undefined) {
           window.location = '/cook/';
