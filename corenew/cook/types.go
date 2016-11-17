@@ -71,6 +71,7 @@ type Cook struct {
 	SubMerchantStatus     string                  `json:"sub_merchant_status" datastore:",noindex"`
 	BTSubMerchantID       string                  `json:"-" datastore:",index"`
 	KitchenPhotoURLs      []string                `json:"kitchen_photo_urls" datastore:",noindex"`
+	PhoneCallScheduled    bool                    `json:"phone_call_scheduled" datastore:",noindex"`
 	KitchenInspection     bool                    `json:"kitchen_inspection" datastore:",noindex"`
 	BackgroundCheck       bool                    `json:"background_check" datastore:",noindex"`
 	FoodHandlerCard       bool                    `json:"food_handler_card" datastore:",noindex"`

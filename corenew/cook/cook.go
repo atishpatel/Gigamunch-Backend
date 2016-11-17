@@ -187,6 +187,48 @@ func (c *Client) Update(req *UpdateCookReq) (*Cook, error) {
 	return cook, nil
 }
 
+// UpdateVerificationsReq is the request for UpdateCookVerifications
+type UpdateVerificationsReq struct {
+	User               *types.User `json:"user"`
+	PhoneCallScheduled bool        `json:"phone_call_scheduled"`
+	KitchenInspection  bool        `json:"kitchen_inspection"`
+	BackgroundCheck    bool        `json:"background_check"`
+	FoodHandlerCard    bool        `json:"food_handler_card"`
+	Verified           bool        `json:"verified"`
+}
+
+// UpdateVerifications updates a cook's verifications.
+func (c *Client) UpdateVerifications(req *UpdateVerificationsReq) (*Cook, error) {
+	if req == nil {
+		return nil, errInvalidParameter.WithMessage("Request cannot be nil.").Wrap("Request cannot be nil for Update")
+	}
+	cook, err := get(c.ctx, req.User.ID)
+	if err != nil && err != datastore.ErrNoSuchEntity {
+		return nil, errDatastore.WithError(err).Wrapf("failed to get cook(%s)", req.User.ID)
+	}
+	if req.PhoneCallScheduled {
+		cook.PhoneCallScheduled = true
+	}
+	if req.KitchenInspection {
+		cook.KitchenInspection = true
+	}
+	if req.BackgroundCheck {
+		cook.BackgroundCheck = true
+	}
+	if req.FoodHandlerCard {
+		cook.FoodHandlerCard = true
+	}
+	if req.Verified {
+		// TODO update
+		cook.Verified = true
+	}
+	err = put(c.ctx, req.User.ID, cook)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrapf("cannot put cook(%s)", req.User.ID)
+	}
+	return cook, nil
+}
+
 // FindBySubMerchantID finds a cook by submerchantID
 func (c *Client) FindBySubMerchantID(submerchantID string) (*Cook, error) {
 	if submerchantID == "" {
