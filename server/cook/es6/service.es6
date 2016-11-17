@@ -34,6 +34,28 @@ class Service {
    * Onboard
    */
 
+  schedulePhoneCall(datetime, callback) {
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.schedulePhoneCall(datetime, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      datetime,
+    };
+    this
+      .service
+      .schedulePhoneCall(request)
+      .execute(
+        (resp) => {
+          this.logError('schedulePhoneCall', resp.err);
+          callback(resp.err);
+        }
+      );
+  }
+
   finishOnboarding(cook, submerchant, callback) {
     if (!this.loaded) {
       this.callQueue.push(() => {
