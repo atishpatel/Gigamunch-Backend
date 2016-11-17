@@ -68,7 +68,8 @@
     <div class="row">
       <div class="flex-1 column">
         <label>From</label>
-        <paper-select>
+        <paper-select id="startWorkTimeSelect"
+                      invalid$="[[invalid]]">
           <select id="startWorkTime"
                   is="select-with-options"
                   option-value="value"
@@ -130,7 +131,8 @@
       </div>
       <div class="flex-1 column">
         <label>To</label>
-        <paper-select>
+        <paper-select id="endWorkTimeSelect"
+                      invalid$="[[invalid]]">
           <select id="endWorkTime"
                   is="select-with-options"
                   option-value="value"
@@ -194,7 +196,9 @@
 
     <div class="input-header">What's your bed time?</div>
     <div class="column">
-      <paper-select class="half-field">
+      <paper-select id="bedTimeSelect"
+                    invalid$="[[invalid]]"
+                    class="half-field">
         <select id="bedTime"
                 is="select-with-options"
                 option-value="value"
@@ -307,6 +311,10 @@
           value: '18:00',
           observer: 'updateSchedule',
         },
+        invalid: {
+          type: Boolean,
+          value: false,
+        }
       },
       behaviors: [
         Polymer.IronFormElementBehavior,
@@ -362,6 +370,7 @@
           }
         }
         this.weekSchedule = newSchedule;
+        this._getValidity();
       },
       newWeekScheduleObject: function(day, startTime, endTime) {
         return {
@@ -374,10 +383,9 @@
         return d.getHours() * 3600 + d.getMinutes() * 60;
       },
       _getValidity: function() {
-        if (this.weekSchedule === undefined || this.weekSchedule === null || this.weekSchedule.length === 0) {
-          return false;
-        }
-        return true;
+        var valid = this.weekSchedule !== undefined && this.weekSchedule !== null && this.weekSchedule.length !== 0;
+        this.invalid = !valid;
+        return valid;
       },
     });
 
