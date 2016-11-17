@@ -344,13 +344,26 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 		}
 		// notify Gigamunch if it's a Gigamunch Delivery
 		if inquiry.ExchangeMethod.GigamunchDelivery() {
+			cookC := getCookClient(c.ctx)
+			var ck *cook.Cook
+			ck, err = cookC.Get(inquiry.CookID)
+			cookName := ""
+			cookNumber := ""
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to get cook(%s) while trying to notify about GigamunchDelivery on inquiry(%d)", inquiry.CookID, inquiry.ID)
+			} else if ck != nil {
+				cookName = ck.Name
+				cookNumber = ck.PhoneNumber
+			}
 			messageC := getMessageClient(c.ctx)
 			for _, v := range squadNumbers {
 				if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
 					continue
 				}
 				err = messageC.SendSMS(v,
-					fmt.Sprintf("Time to do a GigaDelivery bras!\n\nItem: %s\n\nDate and time: %s\n\nPickup Location: %s\n\nDropoff Location: %s\n\nInquiryID:%d",
+					fmt.Sprintf("Time to do a GigaDelivery bras!\nCook Name:%s\n Cook Number:%s\nItem: %s\nDelivery Date and time: %s\nPickup Location: %s \nDropoff Location: %s \n InquiryID:%d",
+						cookName,
+						cookNumber,
 						inquiry.Item.Name,
 						inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
 						inquiry.ExchangePlanInfo.CookAddress.String(),
