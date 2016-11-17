@@ -92,6 +92,7 @@ func main() {
 	// Cook stuff
 	register("GetCook", "getCook", "GET", "cookservice/getCook", "Get the cook info.")
 	register("UpdateCook", "updateCook", "POST", "cookservice/updateCook", "Update cook information.")
+	register("SchedulePhoneCall", "schedulePhoneCall", "POST", "cookservice/schedulePhoneCall", "Schedule a phone call.")
 	// Submerchant stuff
 	register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
 	register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")

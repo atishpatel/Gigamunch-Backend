@@ -6,8 +6,11 @@ import (
 
 	"golang.org/x/net/context"
 
+	"time"
+
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -35,6 +38,51 @@ func (service *Service) GetCook(ctx context.Context, req *GigatokenReq) (*CookRe
 		return resp, nil
 	}
 	resp.Cook = *cook
+	return resp, nil
+}
+
+// SchedulePhoneCallReq is a request for SchedulePhoneCall.
+type SchedulePhoneCallReq struct {
+	GigatokenReq
+	DateTime time.Time `json:"datetime"`
+}
+
+// SchedulePhoneCall is used to schedule a phone call with Gigamunch.
+func (service *Service) SchedulePhoneCall(ctx context.Context, req *SchedulePhoneCallReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "SchedulePhoneCall", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if time.Now().Before(req.DateTime) {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Requested time has to be after now."}.Wrap("failed to validate request")
+		return resp, nil
+	}
+	updateCookVerificationReq := &cook.UpdateVerificationsReq{
+		User:               user,
+		PhoneCallScheduled: true,
+	}
+	cookC := cook.New(ctx)
+	ck, err := cookC.UpdateVerifications(updateCookVerificationReq)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to cook.UpdateCookVerifications", err)
+		return resp, nil
+	}
+	messageC := message.New(ctx)
+	msg := fmt.Sprintf("%s just requested an onboarding phone call for %s. Phone number: %s",
+		ck.Name,
+		req.DateTime.Format("01/02 at 03:04 PM"),
+		ck.PhoneNumber)
+	err = messageC.SendSMS("9316446755", msg)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to notify about onboarding phone call with cook(%s). err: %+v", user.ID, err)
+	}
+	err = messageC.SendSMS("6153975516", msg)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to notify about onboarding phone call with cook(%s). err: %+v", user.ID, err)
+	}
 	return resp, nil
 }
 
