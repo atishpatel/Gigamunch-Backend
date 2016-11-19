@@ -12,6 +12,7 @@ manual_scaling:
 network:
   forwarded_ports:
   - 50051
+  - 80:50051
   instance_tag: grpcserver
   name: default
 
