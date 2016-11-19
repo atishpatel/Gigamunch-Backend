@@ -297,8 +297,10 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 			continue
 		}
 		err = messageC.SendSMS(v,
-			fmt.Sprintf("An inquiry was just made bras.\n\nItem:%s\n\nDate and time:%s\n\nInquiryID:%d",
+			fmt.Sprintf("An inquiry was just made bras.\nItem:%s x %d\nEater Name:%s\nDate and time:%s\n\nInquiryID:%d",
 				inquiry.Item.Name,
+				inquiry.Servings,
+				inquiry.EaterName,
 				inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
 				inquiry.ID,
 			))
@@ -342,6 +344,23 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 		if err != nil {
 			return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
 		}
+		messageC := getMessageClient(c.ctx)
+		for _, v := range squadNumbers {
+			if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+				continue
+			}
+			err = messageC.SendSMS(v,
+				fmt.Sprintf("Inquiry was just Accepted.\nItem:%s x %d\nEater Name:%s\nDate and time:%s\n\nInquiryID:%d",
+					inquiry.Item.Name,
+					inquiry.Servings,
+					inquiry.EaterName,
+					inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+					inquiry.ID,
+				))
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
+			}
+		}
 		// notify Gigamunch if it's a Gigamunch Delivery
 		if inquiry.ExchangeMethod.GigamunchDelivery() {
 			cookC := getCookClient(c.ctx)
@@ -355,7 +374,6 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 				cookName = ck.Name
 				cookNumber = ck.PhoneNumber
 			}
-			messageC := getMessageClient(c.ctx)
 			for _, v := range squadNumbers {
 				if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
 					continue
@@ -410,6 +428,23 @@ func (c *Client) CookDecline(user *types.User, id int64) (*Inquiry, error) {
 		err = sendUpdatedActionMessage(c.ctx, inquiry)
 		if err != nil {
 			return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
+		}
+		messageC := getMessageClient(c.ctx)
+		for _, v := range squadNumbers {
+			if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+				continue
+			}
+			err = messageC.SendSMS(v,
+				fmt.Sprintf("Inquiry was just Declined.\nItem:%s x %d\nEater Name:%s\nDate and time:%s\n\nInquiryID:%d",
+					inquiry.Item.Name,
+					inquiry.Servings,
+					inquiry.EaterName,
+					inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+					inquiry.ID,
+				))
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
+			}
 		}
 	}
 	return inquiry, nil
@@ -496,6 +531,23 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 			}
 		}
 	}
+	messageC := getMessageClient(c.ctx)
+	for _, v := range squadNumbers {
+		if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+			continue
+		}
+		err = messageC.SendSMS(v,
+			fmt.Sprintf("Inquiry was just Canceled by the Eater.\nItem:%s x %d\nEater Name:%s\nDate and time:%s\n\nInquiryID:%d",
+				inquiry.Item.Name,
+				inquiry.Servings,
+				inquiry.EaterName,
+				inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+				inquiry.ID,
+			))
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
+		}
+	}
 	return inquiry, nil
 }
 
@@ -515,8 +567,6 @@ func (c *Client) SetReviewID(id, reviewID int64) error {
 
 // EaterRequestRefund
 // TODO Add request refund feature
-
-// CookAutoDecline
 
 // Process processes the Inquiry.
 func (c *Client) Process(id int64) error {
@@ -600,6 +650,23 @@ func (c *Client) Process(id int64) error {
 		err = sendUpdatedActionMessage(c.ctx, inquiry)
 		if err != nil {
 			return errors.Wrap("failed to sendCookUpdateActionMessage", err)
+		}
+		messageC := getMessageClient(c.ctx)
+		for _, v := range squadNumbers {
+			if projectID == devServerProjectID && v != chrisNumber && v != atishNumber {
+				continue
+			}
+			err = messageC.SendSMS(v,
+				fmt.Sprintf("Inquiry was just Timed Out.\nItem:%s x %d\nEater Name:%s\nDate and time:%s\n\nInquiryID:%d",
+					inquiry.Item.Name,
+					inquiry.Servings,
+					inquiry.EaterName,
+					inquiry.ExpectedExchangeDateTime.In(fixedTimeZone).Format(datetimeFormat),
+					inquiry.ID,
+				))
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
+			}
 		}
 	case State.Declined:
 		fallthrough
