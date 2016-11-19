@@ -78,8 +78,8 @@
       }
       
       .page-header-title {
-        @apply(--font-bold);
         font-size: 24px;
+        @apply(--font-bold);
       }
       
       .toolbar-right {
@@ -334,7 +334,8 @@
                 <span class="page-header-title">[[title]]</span>
               </div>
             </div>
-            <div class="toolbar-right nav-tabs-stuff">
+            <div class="toolbar-right nav-tabs-stuff"
+                 hidden="[[hidePaperTabs]]">
               <paper-tabs class="nav-tabs vertical-align-center"
                           attr-for-selected="name"
                           selected="{{page}}">
@@ -481,6 +482,10 @@
           type: Boolean,
           value: false,
         },
+        hidePaperTabs: {
+          type: Boolean,
+          value: false,
+        },
       },
 
       observers: [
@@ -600,6 +605,7 @@
         this.$.drawer.close(); // close drawer if open
         var hideHeaderLogo = false;
         var hideDrawerIcon = false;
+        var hidePaperTabs = false;
         // Load page import on demand. Show 404 page if fails
         var resolvedPageURL, element, title;
         switch (page) {
@@ -608,6 +614,7 @@
             element = this.$.onboard;
             title = 'Onboard';
             hideDrawerIcon = true;
+            hidePaperTabs = true;
             break;
           case 'kitchen':
             resolvedPageURL = this.resolveUrl('kitchen-page.html');
@@ -658,6 +665,7 @@
           }
         }.bind(this), this._showPage404, true);
         this.hideDrawerIcon = hideDrawerIcon;
+        this.hidePaperTabs = hidePaperTabs;
       },
       _pageOrScreenChanged: function(page, smallScreen) {
         // var backPage = (page === 'edititem' || page === 'postitem'

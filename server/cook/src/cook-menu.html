@@ -198,8 +198,13 @@
         }
         this.set('menu.color', this.selectedColor);
         this.fire('savemenu', this.menu);
-        this.menuUpdated();
         this.editMode = false;
+        this.menu = {
+          id: '0',
+          name: 'New Menu',
+          color: '#4FC3F7',
+        };
+        this.menuUpdated();
       },
       editItem: function(e) {
         // create menu instead of create item if it's a new menu

@@ -36,7 +36,7 @@
     <div class="row">
       <div class="flex-1 column">
         <label>Date</label>
-        <paper-select invalid$="[[invalid]]">
+        <paper-select invalid$="[[invalidDate]]">
           <select id="dates"
                   is="select-with-options"
                   option-value="value"
@@ -51,12 +51,13 @@
       </div>
       <div class="flex-1 column">
         <label>Time</label>
-        <paper-select invalid$="[[invalid]]">
+        <paper-select invalid$="[[invalidTime]]">
           <select id="time"
                   is="select-with-options"
                   option-value="value"
                   value="{{_time::change}}"
                   required>
+          <option disabled selected value> -- select a time -- </option>
           <option value="09:00">09:00 AM</option>
           <option value="09:30">09:30 AM</option>
           <option value="10:00">10:00 AM</option>
@@ -111,7 +112,11 @@
           type: String,
           observer: 'updateDatetime',
         },
-        invalid: {
+        invalidDate: {
+          type: Boolean,
+          value: false,
+        },
+        invalidTime: {
           type: Boolean,
           value: false,
         },
@@ -143,8 +148,11 @@
         this._getValidity();
       },
       _getValidity: function() {
-        var valid = this._date !== undefined && this._time !== undefined && this.datetime && this.datetime !== '';
-        this.invalid = !valid;
+        var validDate = this._date && this._date !== '';
+        var validTime = this._time && this._time !== '';
+        var valid = this.datetime && this.datetime !== '';
+        this.invalidDate = !validDate;
+        this.invalidTime = !validTime;
         return valid;
       },
     });

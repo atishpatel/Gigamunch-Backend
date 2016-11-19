@@ -164,7 +164,7 @@
       },
       addressChanged: function() {
         // set input fields if they aren't updated
-        if (this.address !== undefined && this.address.street !== undefined && this.address.street !== "") {
+        if (this.address && this.address.street !== undefined && this.address.street !== '') {
           var str = this.address.street + ', ' + this.address.city + ', ' + this.address.state + ', ' + this.address.country;
           if (this.$.addressInput.value !== str) {
             this.$.addressInput.value = str;
@@ -173,7 +173,7 @@
         }
       },
       _getValidity: function() {
-        var valid = this.address !== undefined && this.address.street !== undefined && this.address.street !== "";
+        var valid = this.address !== undefined && this.address !== null && this.address.street !== undefined && this.address.street !== '';
         if (!valid) {
           this.$.addressInput.setAttribute('invalid', true);
           this.$.addressInput.setAttribute('aria-invalid', true);
