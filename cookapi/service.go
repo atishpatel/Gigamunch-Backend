@@ -113,6 +113,8 @@ func main() {
 	// Admin stuffffffffffffffff
 	register("AddToProcessInquiryQueue", "addToProcessInquiryQueue", "POST", "cookservice/addToProcessInquiryQueue", "Admin func.")
 	register("CreateFakeGigatoken", "createFakeGigatoken", "POST", "cookservice/createFakeGigatoken", "Admin func.")
+	register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
+	register("SendSMS", "sendSMS", "POST", "cookservice/sendSMS", "Admin func.")
 	endpoints.HandleHTTP()
 	appengine.Main()
 }
