@@ -13,7 +13,7 @@ class Service {
     this.loaded = true;
     this.service = gapi.client.cookservice;
     // remove functions from callQueue after calling them.
-    if (this.callQueue !== undefined || this.callQueue !== null) {
+    if (this.callQueue) {
       for (const fn of this.callQueue) {
         fn();
       }
@@ -494,14 +494,14 @@ class Service {
   }
 
   logError(fnName, err) {
-    if (err !== undefined && (err.code === undefined || err.code !== 0)) {
+    if (err && (err.code === undefined || err.code !== 0)) {
       const desc = `Function: ${fnName} | Message: ${err.message} | Details: ${err.detail}`;
       console.error(desc);
       ga('send', 'exception', {
         exDescription: desc,
         exFatal: false,
       });
-      if (err.code !== undefined && err.code === 452) { // code signout
+      if (err.code && err.code === 452) { // code signout
         window.location = '/signout';
       }
       return true;

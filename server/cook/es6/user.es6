@@ -8,7 +8,7 @@ class User {
     // get cookie
     const token = this.getTokenCookie();
     this.update(token, 0);
-    if (this.token !== undefined && this.token !== '') {
+    if (this.token && this.token !== '') {
       this.isLoggedIn = true;
     }
   }
