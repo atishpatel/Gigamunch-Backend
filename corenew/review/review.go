@@ -60,6 +60,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 	if rating < 1 || rating > 5 {
 		return nil, errInvalidParameter.WithMessage("A rating has to be between 1 star and 5 stars.")
 	}
+	// TODO check inquiry to see if it wasn't canceled and stuff
 	isNewReview := id == 0
 	now := time.Now()
 	review := &Review{
@@ -76,6 +77,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		Text:            getEscapedString(text),
 	}
 	var oldRating int32
+	var notifyCook bool
 	if isNewReview {
 		// insert review
 		st := fmt.Sprintf(insertStatement, cookID, user.ID, user.Name, user.PhotoURL, inquiryID, itemID, itemName, itemPhotoURL, menuID, rating, text)
@@ -93,6 +95,9 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		err = inquiryC.SetReviewID(inquiryID, id)
 		if err != nil {
 			return nil, errors.Wrap("failed to inquiry.SetReviewID", err)
+		}
+		if review.Text != "" {
+			notifyCook = true
 		}
 	} else {
 		oldReview, err := c.Get(id)
@@ -115,12 +120,25 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		}
 		review.IsEdited = true
 		review.EditedDateTime = time.Now()
+		if review.Text != "" && oldReview.Text != review.Text {
+			notifyCook = true
+		}
 	}
 	// update cook rating
 	cookC := cook.New(c.ctx)
-	err := cookC.UpdateAvgRating(cookID, oldRating, rating)
+	err := cookC.UpdateAvgRating(review.CookID, oldRating, rating)
 	if err != nil {
 		return nil, errors.Wrap("faield to cook.UpdateAvgRating", err)
+	}
+	if notifyCook {
+		err = cookC.Notify(review.CookID,
+			"New review - Gigamunch",
+			fmt.Sprintf("%s just posted a %d star review for your '%s':\n%s",
+				review.EaterName, review.Rating, review.ItemName, review.Text),
+		)
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to notify cook(%s) about review. err: %+v", review.CookID, err)
+		}
 	}
 	return review, nil
 }
@@ -196,11 +214,12 @@ func (c *Client) GetByCookID(cookID string, itemID int64, startIndex, endIndex i
 }
 
 func getEscapedString(s string) string {
-	return strings.Replace(s, "'", "\\'", -1)
+	return strings.Replace(s, "'", "''", -1)
 }
 
 func getUnescapedString(s string) string {
-	return strings.Replace(s, "\\'", "'", -1)
+	return s
+	// return strings.Replace(s, "\\'", "'", -1)
 }
 
 func getSelectReviewStatement(ids []int64) (string, error) {
