@@ -1,27 +1,29 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
 
 <dom-module id="placeholder-img">
 
   <template>
 
     <style>
-
-      :host {
+       :host {
         display: block;
         overflow: hidden;
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
       }
-
+      
       iron-icon {
+        display: block;
         width: 100%;
         height: 100%;
         position: relative;
         transition: 0.3s opacity;
       }
-
+      
       img {
         display: hidden;
         width: 0px;
@@ -30,13 +32,17 @@
 
     </style>
 
-    <iron-icon id="icon" icon="[[icon]]" alt$="[[alt]]"></iron-icon>
-    <img id="img" alt$="[[alt]]" on-load="_onImgLoad" on-error="_onImgError">
+    <iron-icon id="icon"
+               icon="[[icon]]"
+               alt$="[[alt]]"></iron-icon>
+    <img id="img"
+         alt$="[[alt]]"
+         on-load="_onImgLoad"
+         on-error="_onImgError">
 
   </template>
 
   <script>
-
     Polymer({
 
       is: 'placeholder-img',
