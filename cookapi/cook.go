@@ -16,6 +16,10 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
+var (
+	fixedTimeZone = time.FixedZone("CDT", -6*3600)
+)
+
 // CookResp is the output response with a Cook and error.
 type CookResp struct {
 	Cook cook.Cook            `json:"cook"`
@@ -56,8 +60,8 @@ func (service *Service) SchedulePhoneCall(ctx context.Context, req *SchedulePhon
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if time.Now().Before(req.DateTime) {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Requested time has to be after now."}.Wrap("failed to validate request")
+	if time.Now().After(req.DateTime) {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "We'll need a time machine to call you before now. Please pick a time after now."}.Wrap("failed to validate request")
 		return resp, nil
 	}
 	updateCookVerificationReq := &cook.UpdateVerificationsReq{
@@ -70,10 +74,11 @@ func (service *Service) SchedulePhoneCall(ctx context.Context, req *SchedulePhon
 		resp.Err = errors.Wrap("failed to cook.UpdateCookVerifications", err)
 		return resp, nil
 	}
+	datetimeString := req.DateTime.In(fixedTimeZone).Format("01/02 at 03:04 PM")
 	messageC := message.New(ctx)
 	msg := fmt.Sprintf("%s just requested an onboarding phone call for %s. Phone number: %s",
 		ck.Name,
-		req.DateTime.Format("01/02 at 03:04 PM"),
+		datetimeString,
 		ck.PhoneNumber)
 	err = messageC.SendSMS("9316446755", msg)
 	if err != nil {
