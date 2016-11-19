@@ -3,6 +3,7 @@ package message
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -121,13 +122,13 @@ func getChannelUniqueName(cookID, eaterID string) string {
 func getChannelNamesAndAttr(cSID string, c *UserInfo, eSID string, e *UserInfo, i *InquiryInfo) (string, string, string) {
 	friendlyName := fmt.Sprintf("%s<;>%s", c.Name, e.Name)
 	uniqueName := getChannelUniqueName(c.ID, e.ID)
-	attr := fmt.Sprintf(channelAttr, cSID, c.ID, c.Name, c.Image, eSID, e.ID, e.Name, e.Image, i.ID, i.State, i.CookAction, i.EaterAction, i.ItemID, i.ItemName, i.ItemImage)
+	attr := fmt.Sprintf(channelAttr, cSID, c.ID, getEscapedString(c.Name), c.Image, eSID, e.ID, getEscapedString(e.Name), e.Image, i.ID, i.State, i.CookAction, i.EaterAction, i.ItemID, getEscapedString(i.ItemName), i.ItemImage)
 	return friendlyName, uniqueName, attr
 }
 
 // returns friendlyName, uniqueName, attributes
 func getUserAttr(u *UserInfo) string {
-	attr := fmt.Sprintf(userAttr, u.ID, u.Name, u.Image)
+	attr := fmt.Sprintf(userAttr, u.ID, getEscapedString(u.Name), u.Image)
 	return attr
 }
 
@@ -266,7 +267,7 @@ func createUserIfNotExist(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *U
 
 func getInquiryBodyAndAttributes(inqI *InquiryInfo) (string, string) {
 	body := fmt.Sprintf("There is an update about your request for %s", inqI.ItemName)
-	attr := fmt.Sprintf(inquiryAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage, inqI.Price, inqI.IsDelivery, inqI.Servings, inqI.ExchangeTime.Unix())
+	attr := fmt.Sprintf(inquiryAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, getEscapedString(inqI.ItemName), inqI.ItemImage, inqI.Price, inqI.IsDelivery, inqI.Servings, inqI.ExchangeTime.Unix())
 	return body, attr
 }
 
@@ -330,7 +331,7 @@ func getInquiryStatusBodyAndAttributes(c *Client, cookInfo *UserInfo, eaterInfo 
 		title = "-"
 	}
 	body := message
-	attr := fmt.Sprintf(inquiryStatusAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, inqI.ItemName, inqI.ItemImage, title, message)
+	attr := fmt.Sprintf(inquiryStatusAttr, inqI.ID, inqI.State, inqI.CookAction, inqI.EaterAction, inqI.ItemID, getEscapedString(inqI.ItemName), inqI.ItemImage, title, getEscapedString(message))
 	return body, attr
 }
 
@@ -469,4 +470,8 @@ func getFromNumber(to string) string {
 		return "14243484448"
 	}
 	return from[0]
+}
+
+func getEscapedString(s string) string {
+	return strings.Replace(s, "\"", "\\\"", -1)
 }
