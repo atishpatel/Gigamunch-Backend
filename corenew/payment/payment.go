@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	errBT               = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with payment processing."}
+	errBT               = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with payment processing. Your card wasn't charged."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was something went wrong."}
 	btConfig            config.BTConfig
