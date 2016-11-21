@@ -182,17 +182,18 @@ func loadGitkitConfig(ctx context.Context) {
 
 func getDatastoreConfig(ctx context.Context) {
 	if config == nil || config.JWTSecret == "" {
-		config = new(Config)
+		configTmp := new(Config)
 		key := datastore.NewKey(ctx, "Config", "", 100, nil)
-		err := datastore.Get(ctx, key, config)
+		err := datastore.Get(ctx, key, configTmp)
 		if err != nil {
 			if err == datastore.ErrNoSuchEntity {
-				config.PhoneNumbers = []string{"14243484448"}
-				_, _ = datastore.Put(ctx, key, config)
+				configTmp.PhoneNumbers = []string{"14243484448"}
+				_, _ = datastore.Put(ctx, key, configTmp)
 			} else {
 				log.Fatalf("Error getting Config from datastore: %+v", err)
 			}
 		}
+		config = configTmp
 	}
 }
 
