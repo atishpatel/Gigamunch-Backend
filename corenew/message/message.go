@@ -56,6 +56,9 @@ func New(ctx context.Context) *Client {
 	c := &Client{
 		ctx: ctx,
 	}
+	if serviceSID == "" {
+		_ = c.SendSMS("9316445311", "serviceSID was empty from get config")
+	}
 	c.twilioC, c.twilioIPC = getTwilioClients(ctx, twilioConfig.AccountSID, twilioConfig.AuthToken, twilioConfig.KeySID, twilioConfig.KeyAuthToken)
 	return c
 }
@@ -249,7 +252,7 @@ func createUserIfNotExist(twilioIPC *twilio.TwilioIPMessagingClient, userInfo *U
 	if err != nil {
 		tErr, ok := err.(*twilio.TwilioError)
 		if !ok || tErr.Code != twilio.CodeNotFound {
-			return nil, errTwilio.WithError(err).Wrap("failed to twilio.AddIPMemberToChannel")
+			return nil, errTwilio.WithError(err).Wrap("failed to twilio.GetIPUser")
 		}
 		user, err = createUser(twilioIPC, userInfo)
 		if err != nil {
