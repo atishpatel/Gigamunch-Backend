@@ -34,7 +34,7 @@ var (
 	serviceSID         string
 	errInvalidParamter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 	errInternal        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Something went wrong with the server."}
-	errTwilio          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio."}
+	errTwilio          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with twilio. Please try again in a few minutes."}
 	// errEmail           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with sending email."}
 	errFakeInput = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Input is invalid."}
 )

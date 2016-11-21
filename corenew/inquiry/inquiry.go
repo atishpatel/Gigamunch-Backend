@@ -256,14 +256,13 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	messageID, err := messageC.SendInquiryBotMessage(cookUI, eaterUI, inquiryI)
 	if err != nil {
 		utils.Criticalf(c.ctx, "failed to messageC.SendInquiryBotMessage err: %v", err)
-		return inquiry, errors.Wrap("failed to message.SendInquiryBotMessage", err)
-	}
-	inquiry.MessageID = messageID
-	// update inquiry with messageID
-	err = put(c.ctx, inquiry.ID, inquiry)
-	if err != nil {
-		utils.Criticalf(c.ctx, "failed to put inquiry(%d) after sending InquiryBotMessage err: %v", inquiry.ID, err)
-		return inquiry, errDatastore.WithError(err).Wrapf("failed to put inquiry(%d) after sending InquiryBotMessage.", inquiry.ID)
+	} else {
+		inquiry.MessageID = messageID
+		// update inquiry with messageID
+		err = put(c.ctx, inquiry.ID, inquiry)
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to put inquiry(%d) after sending InquiryBotMessage err: %v", inquiry.ID, err)
+		}
 	}
 	// add task to timeout inquiry at MIN(exchangeTime, now + 12 hours)
 	at := time.Now().Add(12 * time.Hour)
@@ -451,6 +450,10 @@ func (c *Client) CookDecline(user *types.User, id int64) (*Inquiry, error) {
 }
 
 func sendUpdatedActionMessage(ctx context.Context, inquiry *Inquiry) error {
+	if inquiry.MessageID == "" {
+		utils.Criticalf(ctx, "messageID for inquiry(%d) was empty", inquiry.ID)
+		return nil
+	}
 	cookC := getCookClient(ctx)
 	cookName, cookPhotoURL, err := cookC.GetDisplayInfo(inquiry.CookID)
 	if err != nil {
