@@ -582,7 +582,7 @@
       submitItemsStep: function() {
         if (this.menus === undefined || this.menus === null || this.menus.length <= 0) {
           this.fire('toast', {
-            message: 'You must create at least one item!',
+            text: 'You must create at least one item!',
           });
           return false;
         }
@@ -614,6 +614,9 @@
         if (!this.hasBankingInfo) {
           this.submerchant.account_number = '';
         }
+        this.fire('toast', {
+          text: 'Saving...'
+        });
         // update cook
         this.service.finishOnboarding(this.cook, this.submerchant, function(err) {
           if (err.code !== 0) {
