@@ -695,6 +695,9 @@
       },
       toastEvent: function(e, detail) {
         var text = detail.text;
+        if (text === undefined || text === null || text === '') {
+          text = detail.message;
+        }
         if (text && text !== "") {
           var duration = detail.duration || 3000;
           this.$.toast.show({

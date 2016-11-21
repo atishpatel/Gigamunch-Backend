@@ -824,7 +824,7 @@
            href="/becomechef">
           <paper-item>Become a Cook</paper-item>
         </a>
-        <a class="nav-a"
+        <!--<a class="nav-a"
            name="faq"
            href="/faq">
           <paper-item>FAQ</paper-item>
@@ -833,7 +833,7 @@
            name="about"
            href="/about">
           <paper-item>About</paper-item>
-        </a>
+        </a>-->
       </iron-selector>
     </app-drawer>
 
@@ -873,9 +873,9 @@
                 <paper-tab name="becomechef"
                            tabindex="-1">
                   <a class="nav-a"
-                     href="/becomechef"><span>Become a chef</span></a>
+                     href="/becomechef"><span>Become a Cook</span></a>
                 </paper-tab>
-                <paper-tab name="faq"
+                <!--<paper-tab name="faq"
                            tabindex="-1">
                   <a class="nav-a"
                      href="/faq"><span>FAQ</span></a>
@@ -884,7 +884,7 @@
                            tabindex="-1">
                   <a class="nav-a"
                      href="/about"><span>About</span></a>
-                </paper-tab>
+                </paper-tab>-->
                 <div class="fake-paper-tab">
                   <a class="nav-a"
                      href="[[loginBtnUrl]]"
@@ -1051,7 +1051,7 @@
         }
       },
       pageChanged: function(page) {
-        if (page !== 'home' && page !== 'cook') { // since home is included in this page
+        if (page !== 'home' && page !== 'cook' && page !== 'becomechef') { // since home is included in this page
           // load page import on demand.
           this.importHref(
             this.resolveUrl(page + '-page' + '.html'), null, null, true);
