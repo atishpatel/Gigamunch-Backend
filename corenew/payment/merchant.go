@@ -92,7 +92,15 @@ func (c *Client) CreateFakeSubMerchant(user *types.User, id string) error {
 		}
 	}
 	cookC := cook.New(c.ctx)
-	return updateSubMerchant(c.ctx, c.bt, cookC, user, req)
+	err := updateSubMerchant(c.ctx, c.bt, cookC, user, req)
+	if err != nil {
+		return err
+	}
+	_, err = cookC.UpdateSubMerchantStatus(req.ID, "fake")
+	if err != nil {
+		return errors.Wrap("failed to cook.UpdateSubMerchantStatus", err)
+	}
+	return nil
 }
 
 // SubMerchantInfo is the request to UpdateSubMerchant
