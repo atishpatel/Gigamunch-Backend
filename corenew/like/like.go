@@ -183,7 +183,7 @@ func (c *Client) GetNumLikesWithMenuID(userID string, items []int64) ([]bool, []
 	var tmpUserID uint8
 	var tmpNumLike int32
 	for rows.Next() {
-		err = rows.Scan(&tmpItemID, &tmpMenuID, &tmpUserID, &numLikes)
+		err = rows.Scan(&tmpItemID, &tmpMenuID, &tmpUserID, &tmpNumLike)
 		if err != nil {
 			return likesItem, numLikes, menuIDs, errSQLDB.WithError(err).Wrap("cannot scan rows")
 		}
