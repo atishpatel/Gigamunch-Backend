@@ -44,6 +44,8 @@
       
       .eater-image {
         width: 48px;
+        height: 48px;
+        background-size: 48px;
         border-radius: 50%;
       }
       
@@ -136,7 +138,7 @@
     <div class="bar eater-bar">
       <template is="dom-if"
                 if="[[showeater]]">
-        <placeholder-img placeholder-icon="app:account-circle"
+        <placeholder-img icon="app:account-circle"
                          class="eater-image"
                          src="[[inquiry.eater_photo_url]]">
         </placeholder-img>
@@ -300,6 +302,9 @@
           var tomorrow = new Date();
           tomorrow.setDate(today.getDate() + 1);
           var d = new Date(inquiry.expected_exchange_datetime);
+          if (inquiry.exchange_method !== 1 && inquiry.exchange_method !== 2) {
+            d.setSeconds(d.getSeconds() - inquiry.exchange_plan_info.duration);
+          }
           var dateStringArray = d.toDateString().split(' ');
           var dateString = dateStringArray[1] + ' ' + dateStringArray[2];
           if (dateStringArray[3] !== today.getFullYear().toString()) {
@@ -332,7 +337,11 @@
             // 3rd party delivery
             this.cookDelivery = false;
             this.deliveryIcon = true;
-            this.exchangeText = '3rd Party Delivery';
+            if (inquiry.exchange_method === 4) {
+              this.exchangeText = 'Gigamunch Delivery';
+            } else {
+              this.exchangeText = '3rd Party Delivery';
+            }
           }
           this.cookPriceWithDelivery = cookPriceWithDelivery;
           this.updateActionButtonStates();

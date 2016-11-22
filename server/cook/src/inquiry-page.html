@@ -8,6 +8,8 @@
       href="shared-styles.html">
 
 <link rel="import"
+      href="app-icons.html">
+<link rel="import"
       href="channel-page.html">
 
 <dom-module id="inquiry-page">
@@ -60,6 +62,8 @@
         left: 8px;
         width: 50px;
         height: 50px;
+        background-size: 50px;
+        background-color: white;
         border-radius: 50%;
       }
       
@@ -73,6 +77,7 @@
       .earnings-container {
         display: flex;
         flex-direction: column;
+        justify-content: space-around;
       }
       
       .earnings-text {
@@ -177,7 +182,7 @@
     </paper-spinner>
     <div class="content-container"
          hidden$="[[!hideSpinner]]">
-      <div class="servings-text">[[inquiry.servings]] servings of [[inquiry.item.name]]</div>
+      <div class="servings-text">[[inquiryServingsText]] of [[inquiry.item.name]]</div>
       <div class="image-and-earnings-containers">
         <div class="image-servings-container">
           <div class="item-image-user-container">
@@ -186,7 +191,7 @@
                 <img src="[[itemImage]]"></img>
               </div>
             </div>
-            <placeholder-img placeholder-icon="app:account-circle"
+            <placeholder-img icon="app:account-circle"
                              class="eater-image"
                              src="[[inquiry.eater_photo_url]]">
             </placeholder-img>
@@ -194,7 +199,7 @@
           </div>
         </div>
         <div class="earnings-container">
-          <div class="earnings-text">[[eaterMoneyText]]</div>
+          <div class="earnings-text bold">[[eaterMoneyText]]</div>
           <div class="button-container"
                hidden="[[hideActionButtons]]">
             <paper-button class="action-button"
@@ -268,9 +273,9 @@
         </div>
         <div class="messages-title-line"></div>
       </div>
-      <channel-page class="channel-view"
-                    id="[[messageID]]"
-                    service="[[service]]">
+      <channel-page id="channel"
+                    class="channel-view"
+                    channel-id="[[messageID]]">
       </channel-page>
     </div>
 
@@ -280,10 +285,6 @@
     Polymer({
       is: 'inquiry-page',
       properties: {
-        service: {
-          type: Object,
-          notify: true,
-        },
         user: {
           type: Object,
           notify: true,
@@ -361,7 +362,7 @@
         var tmp = window.location.pathname.split('/inquiry/');
         var id = parseInt(decodeURIComponent(tmp[1]), 36);
         this.hideSpinner = false;
-        this.service.getInquiry(id, function(inquiry, err) {
+        COOK.Service.getInquiry(id, function(inquiry, err) {
           if (err.code !== 0) {
             this.fire('error', err)
             return;
@@ -387,7 +388,7 @@
           var now = new Date();
           var amount = inquiry.servings * inquiry.payment_info.cook_price_per_serving;
           if (inquiry.state === 'Pending' || inquiry.state === 'Accepted' || inquiry.state === 'Fulfilled' || inquiry.state === 'Paid' || inquiry.state === 'RefunedRequested') {
-            if (exchangeTime < now) {
+            if (exchangeTime > now) {
               this.eaterMoneyText = 'You will earn $' + amount.toString() + '!';
             } else {
               this.eaterMoneyText = 'You earned $' + amount.toString() + '!';
@@ -399,6 +400,9 @@
           var tomorrow = new Date();
           tomorrow.setDate(today.getDate() + 1);
           var d = new Date(inquiry.expected_exchange_datetime);
+          if (inquiry.exchange_method !== 1 && inquiry.exchange_method !== 2) {
+            d.setSeconds(d.getSeconds() - inquiry.exchange_plan_info.duration);
+          }
           var dateStringArray = d.toDateString().split(' ');
           var dateString = dateStringArray[1] + ' ' + dateStringArray[2];
           if (dateStringArray[3] !== today.getFullYear().toString()) {
@@ -433,18 +437,20 @@
             // 3rd party delivery
             this.cookDelivery = false;
             this.deliveryIcon = true;
-            this.exchangeText = '3rd Party Delivery';
+            if (inquiry.exchange_method === 4) {
+              this.exchangeText = 'Gigamunch Delivery';
+            } else {
+              this.exchangeText = '3rd Party Delivery';
+            }
           }
           this.cookPriceWithDelivery = cookPriceWithDelivery;
           this.updateActionButtonStates();
           this.messageURL = encodeURIComponent(inquiry.cook_id + '<;>' + inquiry.eater_id);
-
           if (inquiry.servings === 1) {
             this.inquiryServingsText = inquiry.servings.toString() + ' serving';
           } else {
             this.inquiryServingsText = inquiry.servings.toString() + ' servings';
           }
-
           var red = '#FD5C63';
           var yellow = '#FFEB3B';
           var green = '#57C45B';

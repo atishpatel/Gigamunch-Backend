@@ -5,7 +5,7 @@
 <link rel="import"
       href="../bower_components/paper-button/paper-button.html">
 <link rel="import"
-      href="../bower_components/iron-input/iron-input.html">
+      href="../bower_components/iron-autogrow-textarea/iron-autogrow-textarea.html">
 <link rel="import"
       href="shared-styles.html">
 <link rel="import"
@@ -22,11 +22,10 @@
         margin: auto;
       }
       
-      .spinner-container {
+      #spinner {
         display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
+        margin: auto;
+        padding: 50px;
       }
       
       .messages {
@@ -48,15 +47,18 @@
       }
       
       .send-input {
-        outline: none;
         flex: 1;
-        padding: 12px;
-        border: solid var(--gray-line-color) 1px;
-        border-right: none;
-        border-top-left-radius: 3px;
-        border-bottom-left-radius: 3px;
-        font-size: 14px;
-        background-color: #f7f7f7;
+        border: none;
+        --iron-autogrow-textarea: {
+          outline: none;
+          padding: 12px;
+          border: solid var(--gray-line-color) 1px;
+          border-right: none;
+          border-top-left-radius: 3px;
+          border-bottom-left-radius: 3px;
+          font-size: 14px;
+          background-color: #f7f7f7;
+        }
       }
       
       .send-input:focus {
@@ -70,6 +72,8 @@
         margin: 0;
         border: solid var(--gray-line-color) 1px;
         border-left: none;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
       }
       
       @media (min-width: 1000px) {
@@ -79,12 +83,10 @@
       }
 
     </style>
-    <div class="spinner-container">
-      <paper-spinner id="spinner"
-                     hidden$="[[!showSpinner]]"
-                     active="[[showSpinner]]">
-      </paper-spinner>
-    </div>
+    <paper-spinner id="spinner"
+                   hidden$="[[!showSpinner]]"
+                   active="[[showSpinner]]">
+    </paper-spinner>
 
     <div id="messages"
          class="messages">
@@ -102,14 +104,15 @@
     </div>
     <div id="bottomMessages"></div>
     <div class="send-container">
-      <input is="iron-input"
-             disabled="[[sendMessageDisabled]]"
-             class="send-input"
-             placeholder="Type a message"
-             bind-value="{{sendMessageText}}">
-      </input>
+      <iron-autogrow-textarea disabled="[[sendMessageDisabled]]"
+                              class="send-input"
+                              placeholder="Type a message"
+                              bind-value="{{sendMessageText}}">
+      </iron-autogrow-textarea>
       <paper-button class="send-button"
-                    on-tap="sendMessage">Send</paper-button>
+                    on-tap="sendMessage">
+        Send
+      </paper-button>
     </div>
   </template>
 
@@ -120,10 +123,6 @@
         channelSID: {
           type: String,
           value: '',
-        },
-        service: {
-          type: Object,
-          notify: true,
         },
         messages: {
           type: Array,
@@ -157,26 +156,26 @@
           type: Boolean,
           value: false,
         },
-        id: {
+        channelId: {
           type: String,
           notify: true,
           reflectToAttribute: true,
-          observer: 'idChanged',
+          observer: 'channelIdChanged',
           value: '',
         }
       },
       selected: function() {
         this.title = '';
         this.messages = [];
-        this.idChanged();
+        this.channelIdChanged();
       },
-      idChanged: function() {
+      channelIdChanged: function() {
         if (window.location.pathname.includes('/channel/')) {
           var tmp = window.location.pathname.split('/channel/');
           var id = decodeURIComponent(tmp[1]);
-          this.id = id;
+          this.channelId = id;
         }
-        if (this.id !== undefined && this.id !== null && this.id !== '' && this.id !== 'channel') {
+        if (this.channelId !== undefined && this.channelId !== null && this.channelId !== '' && this.channelId !== 'channel') {
           this.getChannel();
         }
       },
@@ -185,9 +184,8 @@
       },
       getChannel: function() {
         this.showSpinner = true;
-        var id = this.id;
-        if (window.messagingClient && id !== undefined && id !== null && id.length > 2 && this.id !== 'channel') {
-          console.log('new id', id);
+        var id = this.channelId;
+        if (window.messagingClient && id !== undefined && id !== null && id.length > 2 && id !== 'channel') {
           window.messagingClient.getChannelByUniqueName(id).then(function(channel) {
             if (channel === null) {
               this.fire('toast', {
@@ -249,10 +247,10 @@
       getInquiry: function(e) {
         var id = e.detail.id;
         var callback = e.detail.callback;
-        this.service.getInquiry(id, callback);
+        COOK.Service.getInquiry(id, callback);
       },
       sendMessage: function() {
-        if (this.sendMessageText === undefined || this.sendMessageText === '') {
+        if (this.sendMessageText === undefined || this.sendMessageText === '' || this.sendMessageDisabled) {
           return;
         }
         var channelSID = this.channelSID;
