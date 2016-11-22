@@ -20,14 +20,19 @@
       }
       
       #spinner {
+        display: flex;
         margin: auto;
+        padding: 50px;
       }
 
     </style>
     <paper-spinner id="spinner"
-                   hidden></paper-spinner>
+                   hidden$="[[!showSpinner]]"
+                   active="[[showSpinner]]">
+    </paper-spinner>
     <inquiry-list id="inquiryList"
-                  inquiries="[[inquiries]]"></inquiry-list>
+                  inquiries="[[inquiries]]">
+    </inquiry-list>
 
   </template>
 
@@ -47,13 +52,19 @@
           type: Object,
           notify: true,
         },
+        showSpinner: {
+          type: Boolean,
+          value: false,
+        },
       },
       selected: function() {
         this.getInquiries();
       },
       ready: function() {},
       getInquiries: function() {
+        this.showSpinner = true;
         this.service.getInquiries(0, 1000, function(inquiries, err) {
+          this.showSpinner = false;
           if (err.code !== 0) {
             this.fire('error', err);
             return;
