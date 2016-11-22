@@ -121,7 +121,8 @@
                            hidden$="[[message.isPreviousAuthorSame]]"></placeholder-img>
         </div>
         <div class="eater-chat-bubble">
-          <div class="body">[[body]]</div>
+          <div id$="[[message.sid]]eaterBody"
+               class="body">[[body]]</div>
         </div>
       </div>
     </template>
@@ -138,7 +139,8 @@
         </div>
 
         <div class="cook-chat-bubble">
-          <div class="body">[[body]]</div>
+          <div id$="[[message.sid]]cookBody"
+               class="body">[[body]]</div>
         </div>
       </div>
     </template>
@@ -153,7 +155,8 @@
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-144.png"></placeholder-img>
         </div>
         <div class="eater-chat-bubble">
-          <div class="body">[[body]]</div>
+          <div id$="[[message.sid]]gigamunchBody"
+               class="body">[[body]]</div>
         </div>
       </div>
     </template>
@@ -244,18 +247,27 @@
           }
           // is eater chat
           if (message.author === this.eaterid) {
-            this.body = message.body;
             this.showEaterCard = true;
+            this.body = message.body;
+            if (message.body.includes('\n')) {
+              this.async(this.updateBody.bind(this), 100);
+            }
           }
           // is cook chat
           if (message.author === this.cookid) {
-            this.body = message.body;
             this.showCookCard = true;
+            this.body = message.body;
+            if (message.body.includes('\n')) {
+              this.async(this.updateBody.bind(this), 100);
+            }
           }
           // is GigamunchBotChat
           if (message.author === 'GigamunchBot') {
-            this.body = message.body;
             this.showGigamunchBotChat = true;
+            this.body = message.body;
+            if (message.body.includes('\n')) {
+              this.async(this.updateBody.bind(this), 100);
+            }
           }
           // is InquiryStatusBot
           if (message.author === 'InquiryStatusBot') {
@@ -264,6 +276,26 @@
             this.showInquiryStatus = true;
           }
         }
+      },
+      updateBody: function() {
+        var el;
+        // is eater chat
+        if (message.author === this.eaterid) {
+          el = this.$$('#' + message.sid + 'eaterBody');
+        }
+        // is cook chat
+        if (message.author === this.cookid) {
+          el = this.$$('#' + message.sid + 'cookBody');
+        }
+        // is GigamunchBotChat
+        if (message.author === 'GigamunchBot') {
+          el = this.$$('#' + message.sid + 'gigamunchBody');
+        }
+        if (el === undefined || el === null) {
+          this.async(this.updateBody.bind(this), 100);
+          return;
+        }
+        el.innerHTML = message.body.replace('\n', '<br/>', -1);
       },
     });
 
