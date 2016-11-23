@@ -203,16 +203,17 @@ func disbursementException(ctx context.Context, signature, payload string, bt *b
 	if err != nil {
 		return nil, err
 	}
-	if notification == nil || notification.MerchantAccount() == nil {
+
+	if notification == nil || notification.Disbursement().MerchantAccount == nil {
 		return nil, errInternal.Wrapf("there was an error with notification (%+v) subject(%+v) MerchantAccount(%+v) Disbursement(%+v)", notification, notification.Subject, notification.MerchantAccount(), notification.Disbursement())
 	}
-	cook, err := cookC.UpdateSubMerchantStatus(notification.MerchantAccount().Id, "disbursement")
+	cook, err := cookC.UpdateSubMerchantStatus(notification.Disbursement().MerchantAccount.Id, "disbursement")
 	if err != nil {
 		return nil, errors.Wrap("failed to update cook by submerchantID", err)
 	}
 	disbursement := notification.Disbursement()
 	message := fmt.Sprintf("A transaction to your account failed because '%s' please take the following action: '%s'", disbursement.ExceptionMessage, disbursement.FollowUpAction)
-	err = cookC.Notify(cook.ID, "There was a problem sending money to you! Please update your banking info. - Gigamunch", message) // TODO add update your info button
+	err = cookC.Notify(cook.ID, "There was a problem sending money to you! Please update your banking info so you can get paid. - Gigamunch", message) // TODO add update your info button
 	if err != nil {
 		return nil, errors.Wrap("failed to notify cook", err)
 	}

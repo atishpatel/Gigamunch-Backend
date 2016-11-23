@@ -172,7 +172,7 @@ func btNotification(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	utils.Infof(ctx, "payload:%#v signature: %s", payload, signature)
 	err = fn(signature, payload)
 	if err != nil {
-		utils.Criticalf(ctx, "Error doing %s: %v", "SubMerchantApproved", err)
+		utils.Criticalf(ctx, "Error doing %s: %v", fnName, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -192,7 +192,7 @@ func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
 	signature := req.FormValue("bt_signature")
 	transactionIDs, err := paymentC.DisbursementException(signature, payload)
 	if err != nil {
-		utils.Criticalf(ctx, "Error doing %s: %v", "SubMerchantApproved", err)
+		utils.Criticalf(ctx, "Error doing %s: %v", "DisbursementException", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
