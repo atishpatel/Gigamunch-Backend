@@ -66,5 +66,5 @@ window.COOK.User = new User();
 
 // redirect if token is empty
 if (!window.COOK.User.isLoggedIn) {
-  window.location = '/becomechef?mode=select';
+  window.location = '/becomechef?gstate=login';
 }

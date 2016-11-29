@@ -16,7 +16,7 @@ var User = function () {
     // get cookie
     var token = this.getTokenCookie();
     this.update(token, 0);
-    if (this.token !== undefined && this.token !== '') {
+    if (this.token && this.token !== '') {
       this.isLoggedIn = true;
     }
   }
@@ -85,5 +85,5 @@ window.COOK.User = new User();
 
 // redirect if token is empty
 if (!window.COOK.User.isLoggedIn) {
-  window.location = '/becomechef?mode=select';
+  window.location = '/becomechef?gstate=login';
 }

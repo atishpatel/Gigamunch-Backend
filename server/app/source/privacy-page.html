@@ -84,7 +84,8 @@
         <li>(a) With vendors, consultants and other service providers who need access to such information to carry out work or perform services on our behalf;</li>
         <li>(b) We may make our postal address list available to certain third parties we believe may offer products or services of interest to you;</li>
         <li>(c) When you participate in the interactive areas of the Sites or interact with us on third party social media sites, certain information that you provide may be displayed publicly, such as your name, photos and other information you choose to
-          provide;</li>
+          provide;
+        </li>
         <li>(d) In response to a request for information if we believe disclosure is in accordance with, or required by, any applicable law, rule, regulation or legal process;</li>
         <li>(e) If we believe your actions are inconsistent with our Terms of Use or other policies, or to protect the rights, property or safety of Gigamunch or others;</li>
         <li>(f) In connection with, or during negotiations of, any merger, acquisition, sale of assets or any business, other change of control transaction or financing;</li>
@@ -139,7 +140,10 @@
   <script>
     Polymer({
 
-      is: 'privacy-page'
+      is: 'privacy-page',
+      ready: function() {
+        ga('send', 'event', 'page', 'privacy');
+      },
 
     });
 
