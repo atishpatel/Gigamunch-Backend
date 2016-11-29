@@ -464,6 +464,7 @@
         }.bind(this));
       },
       selected: function() {
+        ga('send', 'event', 'page', 'onboard');
         this.updateStepsOnMenuLoad = true;
         this.getOnboardVars();
         this.updateStepAttributes();
@@ -591,6 +592,11 @@
       submitPrefStep: function() {
         var valid = this.$.prefForm.validate();
         if (!valid) {
+          if (this.cook.address && this.cook.address.street === '') {
+            this.fire('toast', {
+              text: 'An address must be selected from the drop down.'
+            })
+          }
           return false;
         }
         // update cook

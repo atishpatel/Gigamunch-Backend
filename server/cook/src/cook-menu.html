@@ -186,7 +186,11 @@
         // this.$.saveButton.style.backgroundColor = this.selectedColor;
       },
       cancelEdit: function() {
-        this.name = this.menu.name;
+        if (this.menu.name === '') {
+          this.name = 'Unnamed';
+        } else {
+          this.name = this.menu.name;
+        }
         this.selectedColor = this.menu.color;
         this.editMode = false;
       },
@@ -199,11 +203,13 @@
         this.set('menu.color', this.selectedColor);
         this.fire('savemenu', this.menu);
         this.editMode = false;
-        this.menu = {
-          id: '0',
-          name: 'New Menu',
-          color: '#4FC3F7',
-        };
+        if (this.menu.id === '0') {
+          this.menu = {
+            id: '0',
+            name: 'New Menu',
+            color: '#4FC3F7',
+          };
+        }
         this.menuUpdated();
       },
       editItem: function(e) {

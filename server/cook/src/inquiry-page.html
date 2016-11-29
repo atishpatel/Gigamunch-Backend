@@ -352,6 +352,7 @@
         },
       },
       selected: function() {
+        ga('send', 'event', 'page', 'inquiry');
         this.getInquiry();
         if (window.COOK.isDev) {
           this.inquiryUpdated();

@@ -99,16 +99,6 @@
         margin: auto;
       }
       
-      @font-face {
-        font-family: 'NexaBold';
-        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
-      }
-      
-      @font-face {
-        font-family: 'NexaLight';
-        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_light.otf') format('opentype');
-      }
-      
       .logo {
         font-family: 'NexaBold', sans-serif;
         letter-spacing: .05em;
@@ -904,19 +894,29 @@
                   attr-for-selected="name">
         <home-page id="home"
                    user="[[user]]"
-                   name="home"></home-page>
+                   name="home">
+        </home-page>
         <becomechef-page id="becomechef"
                          name="becomechef"
-                         user="[[user]]"></becomechef-page>
+                         user="[[user]]">
+        </becomechef-page>
+        <feed-page id="feed"
+                   name="feed">
+        </feed-page>
         <faq-page id="faq"
-                  name="faq"></faq-page>
+                  name="faq">
+        </faq-page>
         <terms-page id="terms"
-                    name="terms"></terms-page>
+                    name="terms">
+        </terms-page>
         <privacy-page id="privacy"
-                      name="privacy"></privacy-page>
-        <upgrade-page name="upgrade"></upgrade-page>
+                      name="privacy">
+        </privacy-page>
+        <upgrade-page name="upgrade">
+        </upgrade-page>
         <about-page id="about"
-                    name="about"></about-page>
+                    name="about">
+        </about-page>
       </iron-pages>
 
       <!-- Footer -->
@@ -978,6 +978,7 @@
         return;
       },
       ready: function() {
+        ga('send', 'event', 'loaded', 'appShell');
         this.updateIsUserLoggedIn();
         // setup gitkit stuff 
         if (this.user === undefined || this.user === null || this.user.id === undefined) {
@@ -1003,22 +1004,32 @@
       },
       updateIsUserLoggedIn: function() {
         var token = this.getTokenCookie();
-        if (token !== undefined && token !== '') {
-          this.loginBtnUrl = '/cook/';
-          this.loginBtnText = 'My Dashboard';
-          this.user = {};
-          var userString = token.split('.')[1];
-          var jwt = JSON.parse(window.atob(userString));
-          for (var k in jwt) {
-            if (k !== '__proto__') {
-              this.user[k] = jwt[k];
+        try {
+          if (token !== undefined && token !== null && token !== '') {
+            this.loginBtnUrl = '/cook/';
+            this.loginBtnText = 'My Dashboard';
+            this.user = {};
+            var userString = token.split('.')[1];
+            var jwt = JSON.parse(window.atob(userString));
+            for (var k in jwt) {
+              if (k !== '__proto__') {
+                this.user[k] = jwt[k];
+              }
             }
+            return;
           }
-          return;
+        } catch (e) {
+          var desc = 'error with token: ' + token + '---';
+          desc += JSON.stringify(e);
+          ga('send', 'exception', {
+            exDescription: desc,
+            exFatal: false,
+          });
+        } finally {
+          this.loginBtnUrl = '/becomechef?gstate=login';
+          this.loginBtnText = 'Sign up/Log in';
+          this.user = null;
         }
-        this.loginBtnUrl = '/becomechef?gstate=login';
-        this.loginBtnText = 'Sign up/Log in';
-        this.user = null;
         return;
       },
       routePageChanged: function(page) {
@@ -1028,7 +1039,7 @@
       // If the URL is outside this app, it causes the browser to go to that app.
       routePathChanged: function(path) {
         // ** all pages must be in this list
-        var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell'];
+        var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell', '/feed', '/item'];
         var found = false;
         for (var i = 0; i < pages.length; i++) {
           if (path === pages[i]) {
@@ -1054,12 +1065,12 @@
         if (page !== 'home' && page !== 'cook' && page !== 'becomechef') { // since home is included in this page
           // load page import on demand.
           this.importHref(
-            this.resolveUrl(page + '-page' + '.html'), null, null, true);
+            this.resolveUrl(page + '-page.html'), null, null, true);
         }
         this.drawerOpened = false;
         var title;
         if (page === 'home') {
-          title = 'Gigamunch | Buy homemade food from local cooks';
+          title = 'Buy homemade food from local cooks | Gigamunch';
         } else {
           title = page.charAt(0).toUpperCase() + page.slice(1);
         }

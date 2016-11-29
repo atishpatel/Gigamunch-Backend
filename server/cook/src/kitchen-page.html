@@ -51,6 +51,7 @@
         },
       },
       selected: function() {
+        ga('send', 'event', 'page', 'kitchen');
         this.getMenus();
       },
       ready: function() {

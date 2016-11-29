@@ -148,8 +148,10 @@
   <script>
     Polymer({
 
-      is: 'about-page'
-
+      is: 'about-page',
+      ready: function() {
+        ga('send', 'event', 'page', 'about');
+      },
     });
 
   </script>

@@ -58,7 +58,10 @@
   <script>
     Polymer({
 
-      is: 'upgrade-page'
+      is: 'upgrade-page',
+      ready: function() {
+        ga('send', 'event', 'page', 'upgrade');
+      },
 
     });
 

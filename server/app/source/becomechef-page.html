@@ -747,12 +747,21 @@
           type: Object,
         },
       },
-      ready: function() {},
+      ready: function() {
+        ga('send', 'event', 'page', 'becomechef');
+      },
       signUp: function() {
+        var eventAction = 'login';
+        if (this.user && this.user.id) {
+          eventAction = 'dashboard';
+        }
+        ga('send', 'event', 'signup', eventAction);
+
         if (this.user !== undefined && this.user !== null && this.user.id !== undefined) {
           window.location = '/cook/';
           return;
         }
+        // fire signup
         this.fire('signup');
       },
     });

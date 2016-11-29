@@ -165,6 +165,7 @@
         }
       },
       selected: function() {
+        ga('send', 'event', 'page', 'channel');
         this.title = '';
         this.messages = [];
         this.channelIdChanged();

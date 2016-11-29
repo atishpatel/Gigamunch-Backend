@@ -77,8 +77,10 @@
   <script>
     Polymer({
 
-      is: 'faq-page'
-
+      is: 'faq-page',
+      ready: function() {
+        ga('send', 'event', 'page', 'faq');
+      },
     });
 
   </script>

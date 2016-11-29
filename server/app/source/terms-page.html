@@ -605,7 +605,10 @@
 
   <script>
     Polymer({
-      is: 'terms-page'
+      is: 'terms-page',
+      ready: function() {
+        ga('send', 'event', 'page', 'terms');
+      },
     });
 
   </script>

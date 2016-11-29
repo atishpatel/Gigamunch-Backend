@@ -188,6 +188,7 @@
         },
       },
       selected: function() {
+        ga('send', 'event', 'page', 'account');
         this.getCook();
         this.getSubmerchant();
       },

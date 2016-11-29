@@ -53,6 +53,7 @@
         },
       },
       selected: function() {
+        ga('send', 'event', 'page', 'channels');
         this.getChannels();
       },
       ready: function() {
