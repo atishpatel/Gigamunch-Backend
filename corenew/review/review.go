@@ -61,6 +61,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		return nil, errInvalidParameter.WithMessage("A rating has to be between 1 star and 5 stars.")
 	}
 	// TODO check inquiry to see if it wasn't canceled and stuff
+	userName := getEscapedString(user.Name)
 	isNewReview := id == 0
 	now := time.Now()
 	review := &Review{
@@ -70,7 +71,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		CookID:          cookID,
 		InquiryID:       inquiryID,
 		ItemID:          itemID,
-		ItemName:        itemName,
+		ItemName:        getEscapedString(itemName),
 		ItemPhotoURL:    itemPhotoURL,
 		MenuID:          menuID,
 		Rating:          rating,
@@ -80,7 +81,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 	var notifyCook bool
 	if isNewReview {
 		// insert review
-		st := fmt.Sprintf(insertStatement, cookID, user.ID, user.Name, user.PhotoURL, inquiryID, itemID, itemName, itemPhotoURL, menuID, rating, text)
+		st := fmt.Sprintf(insertStatement, cookID, user.ID, userName, user.PhotoURL, inquiryID, review.ItemID, review.ItemName, review.ItemPhotoURL, menuID, rating, review.Text)
 		results, err := mysqlDB.Exec(st)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrapf("failed execute %s", st)
@@ -106,7 +107,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		}
 		oldRating = oldReview.Rating
 		// update review
-		st := fmt.Sprintf(updateStatement, user.Name, user.PhotoURL, rating, text, id)
+		st := fmt.Sprintf(updateStatement, userName, user.PhotoURL, rating, review.Text, id)
 		results, err := mysqlDB.Exec(st)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrapf("failed execute %s", st)
@@ -134,7 +135,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		err = cookC.Notify(review.CookID,
 			"New review - Gigamunch",
 			fmt.Sprintf("%s just posted a %d star review for your '%s':\n%s",
-				review.EaterName, review.Rating, review.ItemName, review.Text),
+				userName, review.Rating, review.ItemName, review.Text),
 		)
 		if err != nil {
 			utils.Criticalf(c.ctx, "failed to notify cook(%s) about review. err: %+v", review.CookID, err)
