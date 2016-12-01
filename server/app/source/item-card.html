@@ -1,0 +1,92 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="like-icon.html">
+<link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="item-card">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+      }
+      
+      .photo-price {
+        position: relative;
+      }
+      
+      .price {
+        position: absolute;
+        bottom: 24px;
+        min-width: 35px;
+        padding: 8px;
+        text-align: center;
+        color: white;
+        font-size: 16px;
+        background-color: rgba(0, 0, 0, .4);
+      }
+      
+      .photo {
+        background-color: #727272;
+      }
+      
+      .action-bar {
+        padding: 4px 0;
+        display: flex;
+        flex-direction: row;
+        color: #727272;
+      }
+      
+      .title {
+        font-size: 18px;
+        color: var(--primary-text-color);
+        padding-bottom: 12px;
+      }
+
+    </style>
+
+    <div class="photo-price">
+      <div class="photo-16-9">
+        <img class="photo"
+             src='{{getPhoto(item)}}'></img>
+      </div>
+      <div class="price">$[[item.price_per_serving]]</div>
+    </div>
+    <div class="action-bar">
+      <like-icon numlikes="[[item.num_likes]]"
+                 disabled></like-icon>
+    </div>
+    <div class="title">[[item.title]]</div>
+  </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'item-card',
+      properties: {
+        item: {
+          type: Object,
+        },
+        color: {
+          type: String,
+        },
+      },
+      getPhoto: function(item) {
+        if (item.photos === undefined || item.photos === null || item.photos[0] === '') {
+          return '';
+        }
+        return item.photos[0];
+      },
+    });
+
+  </script>
+
+</dom-module>

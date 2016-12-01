@@ -1,0 +1,441 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import"
+      href="like-icon.html">
+<link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="item-page">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: block;
+        min-height: 90vh;
+        background-color: white;
+        color: var(--primary-text-color);
+      }
+      
+      .content {
+        max-width: var(--max-content-width);
+        margin: auto;
+      }
+      
+      .padded-content {
+        padding: 0 24px;
+      }
+      
+      @media (min-width: 1000px) {
+        .padded-content {
+          padding: 0;
+        }
+      }
+      
+      .item-photo-price {
+        position: relative;
+      }
+      
+      .item-price {
+        position: absolute;
+        bottom: 24px;
+        min-width: 35px;
+        padding: 8px;
+        text-align: center;
+        color: white;
+        font-size: 16px;
+        background-color: rgba(0, 0, 0, .4);
+      }
+      
+      @media (min-width: 768px) {
+        .item-price {
+          bottom: 64px;
+          min-width: 50px;
+        }
+      }
+      
+      .photo {
+        background-color: #727272;
+      }
+      
+      .item-action-bar {
+        padding: 4px 0;
+        display: flex;
+        flex-direction: row;
+        color: #727272;
+      }
+      
+      .item-title {
+        font-size: 22px;
+        color: var(--primary-text-color);
+        padding-bottom: 12px;
+        font-weight: 400;
+        margin: 0;
+      }
+      
+      .item-icon-list {
+        display: flex;
+        flex-direction: row;
+        padding: 12px 0;
+        border-top: 1px solid #e8e8e8;
+        border-bottom: 1px solid #e8e8e8;
+      }
+      
+      .item-icon-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-right: 24px;
+        color: #7E9099;
+      }
+      
+      .item-icon-container[disabled] {
+        color: var(--disabled-text-color);
+      }
+      
+      .item-icon-detail {
+        text-align: center;
+        font-size: 14px;
+        line-height: 14px;
+      }
+      
+      .item-icon-distance {
+        text-align: center;
+        font-size: 18px;
+        line-height: 24px;
+      }
+      
+      .item-desc {
+        padding: 24px 0;
+      }
+      
+      .cook {
+        padding-top: 24px;
+        padding-bottom: 24px;
+      }
+      
+      .cook-name-line {
+        display: inline-block;
+      }
+      
+      .cook-name {
+        font-size: 22px;
+        font-weight: 400;
+        margin: 0;
+        padding-bottom: 12px;
+      }
+      
+      .cook-div-line {
+        height: 1px;
+        background-color: var(--gray-line-color);
+        margin: auto 0;
+        width: 50%;
+      }
+      
+      .cook-bio {
+        padding: 12px 0;
+      }
+      
+      .cook-bar {
+        display: flex;
+        flex-direction: row;
+      }
+      
+      .cook-image {
+        height: 50px;
+        width: 50px;
+        background-size: 50px;
+        background-color: #4CAF50;
+        border-radius: 50%;
+      }
+      
+      .cook-image .user-pic {
+        border-radius: 50%;
+        color: white;
+        height: 46px;
+        width: 46px;
+        background-size: 46px;
+        margin: 2px;
+      }
+      
+      .cook-stats {
+        flex: 1;
+        max-width: 225px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0 12px;
+      }
+      
+      .cook-stat {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .reviews {
+        padding: 12px 0;
+      }
+      
+      .action-button {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        z-index: 100;
+      }
+      
+      .action-button-link {
+        text-decoration: none;
+      }
+      
+      .get-app-button {
+        border-radius: 0;
+        width: 100%;
+        margin: 0;
+      }
+
+    </style>
+
+    <div class="item content">
+      <div class="item-photo-price">
+        <div class="photo-16-9">
+          <img class="photo"
+               src='{{getPhoto(item)}}' />
+        </div>
+        <div class="item-price">$[[item.price_per_serving]]</div>
+      </div>
+
+      <div class="padded-content">
+        <div class="item-action-bar">
+          <like-icon numlikes="[[item.num_likes]]"
+                     disabled>
+          </like-icon>
+        </div>
+        <h1 class="item-title">[[item.title]]</h1>
+        <div class="item-icon-list">
+          <div class="item-icon-container"
+               disabled$="[[!hasDelivery]]">
+            <iron-icon class="item-icon"
+                       icon="app:delivery-car"></iron-icon>
+            <div class="item-icon-detail">
+              <span hidden$="[[!hasDelivery]]">Delivery<br>Available</span>
+              <span hidden="[[hasDelivery]]">Delivery<br>Unavailable</span>
+            </div>
+          </div>
+          <div class="item-icon-container"
+               disabled$="[[!hasPickup]]">
+            <iron-icon class="item-icon"
+                       icon="app:home"></iron-icon>
+            <div class="item-icon-detail">
+              <span hidden$="[[!hasPickup]]">Pickup<br>Available</span>
+              <span hidden="[[hasPickup]]">Pickup<br>Unavailable</span>
+            </div>
+          </div>
+          <div class="item-icon-container">
+            <div class="item-icon-distance">[[getDistance(cook.distance)]]
+            </div>
+            <div class="item-icon-detail">
+              <span>Miles<br>Away</span>
+            </div>
+          </div>
+        </div>
+        <div class="item-desc">
+          [[item.description]]
+        </div>
+        <div class="item-detail">
+          <span class="item-detail-label">Ingredients:</span>
+          <span class="item-detail-value secondary-text">[[ingredients]]</span>
+        </div>
+      </div>
+    </div>
+    <div class="cook content padded-content">
+      <div class="cook-name-line">
+        <h1 class="cook-name">
+        [[cook.name]]
+      </h1>
+        <div class="cook-div-line"></div>
+      </div>
+      <div class="cook-kitchen-photo"
+           hidden$="[[!hasKitchenPhoto]]">
+        <div class="photo-16-9">
+          <img src="[[getKitchenPhoto(cook)]]" />
+        </div>
+      </div>
+      <div class="cook-bio secondary-text">
+        [[cook.bio]]
+      </div>
+      <div class="cook-bar">
+        <div class="cook-image"
+             style$="background-color:[[color]]">
+          <placeholder-img class="user-pic"
+                           icon="app:account-circle"
+                           src$="[[cook.photo_url]]">
+          </placeholder-img>
+        </div>
+        <div class="cook-stats">
+          <div class="cook-stat">
+            <div class="cook-stat-number">[[cook.average_rating]]</div>
+            <div class="cook-stat-desc secondary-text">Rating</div>
+          </div>
+          <div class="cook-stat">
+            <div class="cook-stat-number">[[cook.num_ratings]]</div>
+            <div class="cook-stat-desc secondary-text">Reviews</div>
+          </div>
+          <div class="cook-stat">
+            <div class="cook-stat-number">[[cook.likes]]</div>
+            <div class="cook-stat-desc secondary-text">Likes</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="reviews content padded-content">
+
+    </div>
+    <div class="action-button">
+      <a class="action-button-link"
+         href="https://geo.itunes.apple.com/us/app/gigamunch/id1114611940?mt=8"
+         target="_blank">
+        <paper-button class="get-app-button"
+                      style$="background-color:[[color]]"
+                      on-tap="getAppTapped">Get the app</paper-button>
+      </a>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'item-page',
+      properties: {
+        item: {
+          type: Object,
+          value: {},
+          observer: 'itemUpdated',
+        },
+        hasDelivery: {
+          type: Boolean,
+          value: true,
+        },
+        hasPickup: {
+          type: Boolean,
+          value: true,
+        },
+        cook: {
+          type: Object,
+          observer: 'cookUpdated',
+          value: {},
+        },
+        reviews: {
+          type: Array,
+          value: [],
+        },
+        color: {
+          type: String,
+          value: '#4CAF50',
+        },
+        hasKitchenPhoto: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      selected: function() {
+        this.item = {};
+        this.cook = {};
+        this.reviews = [];
+        this.itemUpdated();
+        this.cookUpdated();
+        ga('send', 'event', 'page', 'item');
+        this.getItem();
+      },
+      getItem: function() {
+        var id = '';
+        if (window.location.pathname.includes('/item/')) {
+          var tmp = window.location.pathname.split('/item/');
+          id = decodeURIComponent(tmp[1]);
+        }
+        if (id === null || id === '') {
+          alert('Invalid item id.');
+          return;
+        }
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            var resp = JSON.parse(xmlHttp.response);
+            if (resp.err.code !== 0) {
+              console.error(resp);
+              ga('send', 'event', 'error', 'failed to get-item' + resp);
+              alert('There was an error getting the item: ' + resp.err.message);
+              return;
+            }
+            this.set('item', resp.item);
+            this.set('cook', resp.cook);
+            this.set('reviews', resp.reviews);
+          }
+        }.bind(this)
+        xmlHttp.open("GET", '/get-item?id=' + id, true);
+        xmlHttp.send(null);
+      },
+      cookUpdated: function() {
+        if (this.cook) {
+          var cook = this.cook;
+          var deliveryFound = false;
+          var pickupFound = false;
+          if (this.cook.exchange_options) {
+            for (var i = 0; i < cook.exchange_options.length; i++) {
+              if (cook.exchange_options[i].is_delivery) {
+                deliveryFound = true;
+              } else {
+                pickupFound = true;
+              }
+            }
+            this.hasDelivery = deliveryFound;
+            this.hasPickup = pickupFound;
+          }
+        }
+      },
+      itemUpdated: function() {
+        if (this.item) {
+          var item = this.item;
+          if (item.ingredients) {
+            this.ingredients = item.ingredients.toLocaleString().replace(/,/g, ', ');
+          }
+        }
+      },
+      getPhoto: function(item) {
+        if (item.photos === undefined || item.photos === null || item.photos[0] === '') {
+          return '';
+        }
+        return item.photos[0];
+      },
+      getKitchenPhoto: function(cook) {
+        if (cook.kitchen_photo_urls === undefined || cook.kitchen_photo_urls === null || cook.kitchen_photo_urls[0] === '') {
+          this.hasKitchenPhoto = false;
+          return '';
+        }
+        this.hasKitchenPhoto = true;
+        return cook.kitchen_photo_urls[0];
+      },
+      getDistance: function(distance) {
+        if (distance === undefined || distance === null) {
+          return '-';
+        }
+        if (distance < 1) {
+          return '<1'
+        }
+        return distance.toFixed(0);
+      },
+      getAppTapped: function() {
+        ga('send', 'event', 'button', 'getapp', 'itempage');
+      },
+    });
+
+  </script>
+
+</dom-module>

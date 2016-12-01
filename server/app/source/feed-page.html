@@ -1,0 +1,123 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="menu-bar.html">
+<link rel="import"
+      href="item-card.html">
+
+<dom-module id="feed-page">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: block;
+        min-height: 90vh;
+        background-color: white;
+      }
+      
+      .content {
+        max-width: var(--max-content-width);
+        margin: auto;
+      }
+      
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 12px;
+      }
+      
+      .add-card {
+        cursor: pointer;
+      }
+      
+      .item-card-link {
+        text-decoration: none;
+        width: 100%;
+        flex-basis: 100%;
+        margin: 24px 0 32px 0;
+        border-bottom: 1px solid #e8e8e8;
+        overflow: hidden;
+        min-width: 270px;
+      }
+      
+      .item-card {}
+      
+      .item-card-link:last-of-type {
+        border-bottom: none;
+      }
+      
+      @media (min-width: 640px) {
+        .item-card-link {
+          margin-right: 24px;
+          flex-basis: 30%;
+          border-bottom: none;
+        }
+      }
+
+    </style>
+    <div class="content">
+
+      <template is="dom-repeat"
+                items="[[menus]]"
+                as="menu">
+        <menu-bar class="menu-bar"
+                  name="[[menu.name]]"
+                  cook="[[menu.cook]]"
+                  color="[[menu.color]]">
+        </menu-bar>
+        <div class="grid">
+          <template is="dom-repeat"
+                    items="[[menu.items]]"
+                    as="item">
+            <a href$="item/[[item.id]]"
+               class="item-card-link">
+              <item-card class="item-card"
+                         item="[[item]]">
+              </item-card>
+            </a>
+          </template>
+        </div>
+      </template>
+
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'feed-page',
+      properties: {
+        menus: {
+          type: Array,
+          value: [],
+        },
+      },
+      ready: function() {
+        ga('send', 'event', 'page', 'feed');
+        this.getMenus();
+      },
+      getMenus: function() {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            var resp = JSON.parse(xmlHttp.response);
+            if (resp.err.code !== 0) {
+              console.error(resp);
+              ga('send', 'event', 'error', 'failed to get-feed' + resp);
+              alert('There was an error getting the feed: ' + resp.err.message);
+              return;
+            }
+            this.set('menus', resp.menus);
+          }
+        }.bind(this)
+        xmlHttp.open("GET", '/get-feed', true);
+        xmlHttp.send(null);
+      },
+    });
+
+  </script>
+
+</dom-module>

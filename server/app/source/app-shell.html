@@ -111,6 +111,12 @@
         color: #546E7A;
       }
       
+      .orange-a {
+        text-decoration: none;
+        outline: 0;
+        color: var(--app-primary-color);
+      }
+      
       .drawer-toolbar {
         height: 64px;
         background-color: var(--app-primary-color);
@@ -814,6 +820,11 @@
            href="/becomechef">
           <paper-item>Become a Cook</paper-item>
         </a>
+        <a class="nav-a"
+           name="faq"
+           href="/feed">
+          <paper-item>Feed</paper-item>
+        </a>
         <!--<a class="nav-a"
            name="faq"
            href="/faq">
@@ -835,7 +846,19 @@
                   effects="waterfall"
                   hidden="[[hideNav]]">
         <app-toolbar>
-          <div class="toolbar content">
+          <div class="toolbar content"
+               hidden$="[[!backButtonOnly]]">
+            <div class="toolbar-left">
+              <a class="orange-a"
+                 href="/feed">
+                <paper-icon-button icon="app:arrow-back">
+                </paper-icon-button>
+              </a>
+              <div class="toolbar-title">Item</div>
+            </div>
+          </div>
+          <div class="toolbar content"
+               hidden$="[[backButtonOnly]]">
             <div class="toolbar-left">
               <paper-icon-button id="menuIcon"
                                  class="hide"
@@ -875,6 +898,11 @@
                   <a class="nav-a"
                      href="/about"><span>About</span></a>
                 </paper-tab>-->
+                <paper-tab name="about"
+                           tabindex="-1">
+                  <a class="nav-a"
+                     href="/feed"><span>Feed</span></a>
+                </paper-tab>
                 <div class="fake-paper-tab">
                   <a class="nav-a"
                      href="[[loginBtnUrl]]"
@@ -903,6 +931,9 @@
         <feed-page id="feed"
                    name="feed">
         </feed-page>
+        <item-page id="item"
+                   name="item">
+        </item-page>
         <faq-page id="faq"
                   name="faq">
         </faq-page>
@@ -948,6 +979,10 @@
           notify: true,
         },
         hideNav: {
+          type: Boolean,
+          value: false,
+        },
+        backButtonOnly: {
           type: Boolean,
           value: false,
         },
@@ -1042,7 +1077,7 @@
         var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell', '/feed', '/item'];
         var found = false;
         for (var i = 0; i < pages.length; i++) {
-          if (path === pages[i]) {
+          if (path.includes(pages[i])) {
             found = true;
           }
         }
@@ -1065,7 +1100,12 @@
         if (page !== 'home' && page !== 'cook' && page !== 'becomechef') { // since home is included in this page
           // load page import on demand.
           this.importHref(
-            this.resolveUrl(page + '-page.html'), null, null, true);
+            this.resolveUrl(page + '-page.html'),
+            function() {
+              if (page === 'item') {
+                this.$.item.selected();
+              }
+            }.bind(this), null, true);
         }
         this.drawerOpened = false;
         var title;
@@ -1073,6 +1113,11 @@
           title = 'Buy homemade food from local cooks | Gigamunch';
         } else {
           title = page.charAt(0).toUpperCase() + page.slice(1);
+        }
+        if (page === 'item') {
+          this.backButtonOnly = true;
+        } else {
+          this.backButtonOnly = false;
         }
         document.title = title + ' | Gigamunch';
         app.$.headerLayout.$.contentContainer.scrollTop = 0;

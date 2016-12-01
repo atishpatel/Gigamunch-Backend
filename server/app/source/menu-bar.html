@@ -1,0 +1,245 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="menu-bar">
+
+  <template>
+
+    <style include="shared-styles">
+       :host {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 12px;
+        min-height: 50px;
+        background-color: white;
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12), 0 3px 3px -2px rgba(0, 0, 0, 0.4);
+      }
+      
+      .title {
+        font-size: 16px;
+      }
+      
+      .pic-info {
+        display: flex;
+        flex-direction: row;
+        padding: 8px 0;
+      }
+      
+      .user-pic-container {
+        width: 46px;
+        height: 46px;
+        background-color: white;
+        border-radius: 50%;
+      }
+      
+      .user-pic {
+        margin: 3px;
+        width: 40px;
+        height: 40px;
+        background-size: 40px;
+        border-radius: 50%;
+        color: white;
+      }
+      
+      .info {
+        padding: 0 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        color: var(--secondary-text-color);
+        font-size: 14px;
+      }
+      
+      .star-name {
+        display: flex;
+        flex-direction: row;
+      }
+      
+      .star-name>* {
+        padding: 0 4px;
+      }
+      
+      .stars {
+        padding: 0 4px 0 0;
+      }
+      
+      .star-ratings {
+        unicode-bidi: bidi-override;
+        color: var(--disabled-text-color);
+        font-size: 14px;
+        height: 25px;
+        width: 88px;
+        margin: 0 auto;
+        position: relative;
+        padding: 0;
+      }
+      
+      .star-ratings-top {
+        color: var(--disabled-text-color);
+        padding: 0;
+        position: absolute;
+        z-index: 1;
+        display: block;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      
+      .star-ratings-bottom {
+        padding: 0;
+        display: block;
+        z-index: 0;
+      }
+      
+      .info-exchange {
+        display: flex;
+        flex-direction: row;
+      }
+      
+      .info-exchange>* {
+        padding: 0 4px;
+      }
+      
+      .pickup-icon {
+        padding: 0 4px 0 0;
+      }
+      
+      .icon {
+        width: 20px;
+        height: 20px;
+        color: var(--disabled-text-color);
+      }
+
+    </style>
+
+    <div class="title">[[_name]]</div>
+    <div class="pic-info">
+      <!-- TODO change from cook.image to cook.photo_url -->
+      <div style$="background-color:[[color]]"
+           class="user-pic-container">
+        <placeholder-img class="user-pic"
+                         icon="app:account-circle"
+                         src$="[[cook.photo_url]]">
+        </placeholder-img>
+      </div>
+      <div class="info">
+        <div class="star-name">
+          <div class="stars">
+            <div class="star-ratings">
+              <div class="star-ratings-top"
+                   style$="width: [[_starPercentage]]; color:[[color]]">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+              </div>
+              <div class="star-ratings-bottom">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+              </div>
+            </div>
+          </div>
+          <div>[[cook.num_ratings]]</div>
+          <div>•</div>
+          <div>[[cook.name]]</div>
+        </div>
+        <div class="info-exchange">
+          <iron-icon style$="color:[[_pickupColor]]"
+                     class="icon pickup-icon"
+                     icon="app:home"></iron-icon>
+          <iron-icon style$="color:[[_deliveryColor]]"
+                     class="icon"
+                     icon="app:delivery-car"></iron-icon>
+          <div>•</div>
+          <div>[[_distance]]</div>
+        </div>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'menu-bar',
+      properties: {
+        _name: {
+          type: String,
+        },
+        _distance: {
+          type: String,
+        },
+        _pickupColor: {
+          type: String,
+          value: '#a1a1a1',
+        },
+        _deliveryColor: {
+          type: String,
+          value: '#a1a1a1',
+        },
+        _starPercentage: {
+          type: String,
+        },
+        name: {
+          type: String,
+          observer: 'nameUpdated',
+        },
+        color: {
+          type: String,
+          observer: 'colorUpdated',
+          value: '#ff7043',
+        },
+        cook: {
+          type: Object,
+          observer: 'cookUpdated',
+        },
+      },
+      nameUpdated: function() {
+        if (this.name) {
+          this._name = this.name;
+        }
+      },
+      colorUpdated: function() {
+        if (this.color) {
+          this.updateIconColors();
+        }
+      },
+      cookUpdated: function() {
+        if (this.cook) {
+          if (this._name === undefined || this._name === null || this._name === '') {
+            this._name = this.cook.name;
+          }
+          if (this.cook.distance) {
+            this._distance = this.cook.distance.toFixed(2) + ' miles away';
+          }
+          this._starPercentage = (this.cook.rating / 5 * 100).toString() + '%';
+          this.updateIconColors();
+        }
+      },
+      updateIconColors: function() {
+        if (this.cook && this.color) {
+          for (var i = 0; i < this.cook.exchange_options.length; i++) {
+            if (this.cook.exchange_options[i].is_delivery) {
+              this._deliveryColor = this.color;
+            } else {
+              this._pickupColor = this.color;
+            }
+          }
+        }
+      },
+    });
+
+  </script>
+
+</dom-module>
