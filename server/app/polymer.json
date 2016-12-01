@@ -4,6 +4,8 @@
   "fragments": [
     "source/home-page.html",
     "source/becomechef-page.html",
+    "source/feed-page.html",
+    "source/item-page.html",
     "source/faq-page.html",
     "source/about-page.html",
     "source/terms-page.html",
