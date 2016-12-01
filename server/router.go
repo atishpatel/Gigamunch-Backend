@@ -12,21 +12,20 @@ func init() {
 	r.GET(baseLoginURL, handleLogin)
 	r.GET(signOutURL, handleSignout)
 
-	// r.POST("/upload", handleUpload)
-	// r.GET("/get-upload-url", handleGetUploadURL)
-
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
 	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
 	r.NotFound = http.HandlerFunc(handle404)
 	http.HandleFunc("/get-upload-url", handleGetUploadURL)
 	http.HandleFunc("/upload", handleUpload)
+	http.HandleFunc("/get-feed", handleGetFeed)
+	http.HandleFunc("/get-item", handleGetItem)
 	http.Handle("/", r)
 }
 
 func handle404(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("GIGA 404 page. :()"))
+	_, _ = w.Write([]byte("GIGA 404 page. :()"))
 }
 
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {

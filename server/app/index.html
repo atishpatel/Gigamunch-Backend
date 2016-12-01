@@ -134,13 +134,16 @@
   <link rel="import"
         href="/source/app-shell.html">
   <script type="text/javascript"
-          src="https://www.gstatic.com/authtoolkit/js/gitkit.js"></script>
+          src="https://www.gstatic.com/authtoolkit/js/gitkit.js">
+
+
+  </script>
   <style>
     body {
       margin: 0;
       font-family: 'Roboto', 'Noto', sans-serif;
       line-height: 1.5;
-      min-height: 100vh;
+      /*min-height: 100vh;*/
       background-color: #eee;
     }
 
@@ -160,6 +163,16 @@
     /* Fix issue with font not importing */
     
     @font-face {
+      font-family: 'NexaBold';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+    }
+    
+    @font-face {
+      font-family: 'NexaLight';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_light.otf') format('opentype');
+    }
+    
+    @font-face {
       font-family: 'FontRegular';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
     }
@@ -172,8 +185,11 @@
 
   </style>
   <!-- Twitter universal website tag code -->
-  <script src="//platform.twitter.com/oct.js"
-          type="text/javascript"></script>
+  <script src="https://platform.twitter.com/oct.js"
+          type="text/javascript">
+
+
+  </script>
   <script type="text/javascript">
     twttr.conversion.trackPid('nutpc', {
       tw_sale_amount: 0,
