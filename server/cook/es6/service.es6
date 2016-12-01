@@ -34,16 +34,17 @@ class Service {
    * Onboard
    */
 
-  schedulePhoneCall(datetime, callback) {
+  schedulePhoneCall(phone_number, datetime, callback) {
     if (!this.loaded) {
       this.callQueue.push(() => {
-        this.schedulePhoneCall(datetime, callback);
+        this.schedulePhoneCall(phone_number, datetime, callback);
       });
       return;
     }
     const request = {
       gigatoken: this.getToken(),
       datetime,
+      phone_number,
     };
     this
       .service

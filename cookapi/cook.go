@@ -48,7 +48,8 @@ func (service *Service) GetCook(ctx context.Context, req *GigatokenReq) (*CookRe
 // SchedulePhoneCallReq is a request for SchedulePhoneCall.
 type SchedulePhoneCallReq struct {
 	GigatokenReq
-	DateTime time.Time `json:"datetime"`
+	DateTime    time.Time `json:"datetime"`
+	PhoneNumber string    `json:"phone_number"`
 }
 
 // SchedulePhoneCall is used to schedule a phone call with Gigamunch.
@@ -79,7 +80,7 @@ func (service *Service) SchedulePhoneCall(ctx context.Context, req *SchedulePhon
 	msg := fmt.Sprintf("%s just requested an onboarding phone call for %s. Phone number: %s",
 		ck.Name,
 		datetimeString,
-		ck.PhoneNumber)
+		req.PhoneNumber)
 	err = messageC.SendSMS("9316446755", msg)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to notify about onboarding phone call with cook(%s). err: %+v", user.ID, err)

@@ -79,7 +79,7 @@
       }
       
       .step>*:last-child {
-        padding-bottom: 84px;
+        padding-bottom: 95px;
       }
       /* not smallScreen */
       
@@ -89,6 +89,12 @@
           padding: 0 24px;
           max-width: var(--max-content-width);
           margin: auto;
+        }
+      }
+      
+      @media (max-width: 767px) {
+        .hide-small {
+          display: none;
         }
       }
       
@@ -125,7 +131,7 @@
       }
       
       .label {
-        width: 25%;
+        width: 50%;
         padding: 12px 0;
         display: flex;
         flex-direction: column;
@@ -138,7 +144,7 @@
         display: none;
       }
       
-      .label[saved] paper-ripple,
+      .label[openable] paper-ripple,
       .label[opened] paper-ripple {
         display: initial;
       }
@@ -175,7 +181,7 @@
       }
       
       .label[opened] .label-number,
-      .label[saved] .label-number {
+      .label[openable] .label-number {
         background-color: var(--primary-color);
       }
       
@@ -200,56 +206,32 @@
     </style>
 
     <div class="label-list">
-      <div opened$="[[step1Open]]"
-           saved$="[[step1Saved]]"
+      <div opened$="[[letsTalkStepOpen]]"
+           openable$="[[letsTalkStepOpenable]]"
            class="label first-step"
-           on-tap="step1Tapped">
+           on-tap="letsTalkStepTapped">
+
         <paper-ripple></paper-ripple>
 
         <div class="label-number-wrapper">
           <div class="label-number"><span>1</span></div>
         </div>
-        <div class="label-title">Your Preferences</div>
+        <div class="label-title">Let's Talk</div>
         <div class="label-optional"></div>
       </div>
-      <div opened$="[[step2Open]]"
-           saved$="[[step2Saved]]"
-           class="label"
-           on-tap="step2Tapped">
-
+      <div opened$="[[prefStepOpen]]"
+           openable$="[[prefStepOpenable]]"
+           class="label last-step"
+           on-tap="prefStepTapped">
         <paper-ripple></paper-ripple>
 
         <div class="label-number-wrapper">
           <div class="label-number"><span>2</span></div>
         </div>
-        <div class="label-title">Let's Talk</div>
+        <div class="label-title">Your Preferences</div>
         <div class="label-optional"></div>
       </div>
-      <div class="label"
-           opened$="[[step3Open]]"
-           saved$="[[step3Saved]]"
-           on-tap="step3Tapped">
 
-        <paper-ripple></paper-ripple>
-
-        <div class="label-number-wrapper">
-          <div class="label-number"><span>3</span></div>
-        </div>
-        <div class="label-title">Add Your Creations</div>
-        <div class="label-optional"></div>
-      </div>
-      <div class="label last-step"
-           opened$="[[step4Open]]"
-           saved$="[[step4Saved]]"
-           on-tap="step4Tapped">
-        <paper-ripple></paper-ripple>
-
-        <div class="label-number-wrapper">
-          <div class="label-number"><span>4</span></div>
-        </div>
-        <div class="label-title">Be Prepared</div>
-        <div class="label-optional">Optional</div>
-      </div>
     </div>
     <div class="steps-container">
       <neon-animated-pages class="steps fit"
@@ -258,8 +240,35 @@
                            entry-animation="[[entryAnimation]]"
                            exit-animation="[[exitAnimation]]">
         <!-- Step 1 -->
-        <neon-animatable id="step1"
-                         name="step1"
+        <neon-animatable id="letsTalkStep"
+                         name="letsTalkStep"
+                         class="step">
+          <div class="header">
+            <div class="header-title">Schedule a Phone Call (Required)</div>
+            <div class="header-desc">We have a relationship with all of our cooks. The Phone Call is a great opportunity for us to learn about you and your creations and to answer your questions!</div>
+          </div>
+          <form id="letsTalkForm"
+                is="iron-form"
+                method="post"
+                action="#">
+            <div class="row">
+              <gold-phone-input id="phoneNumber"
+                                class="flex-1"
+                                label="Cell Phone Number*"
+                                value="{{phoneNumber}}"
+                                required
+                                auto-validate>
+              </gold-phone-input>
+              <div class="flex-1 hide-small"></div>
+            </div>
+            <datetime-input id="phoneDatetime"
+                            datetime="{{phoneDatetime}}">
+            </datetime-input>
+          </form>
+        </neon-animatable>
+        <!-- Step 2 -->
+        <neon-animatable id="prefStep"
+                         name="prefStep"
                          class="step">
           <form id="prefForm"
                 is="iron-form"
@@ -291,78 +300,7 @@
             </paper-checkbox>
           </form>
         </neon-animatable>
-        <!-- Step 2 -->
-        <neon-animatable id="step2"
-                         name="step2"
-                         class="step">
-          <div class="header">
-            <div class="header-title">Schedule a Phone Call (Required)</div>
-            <div class="header-desc">We have a relationship with all of our cooks. The Phone Call is a great opportunity for us to learn about you and your creations and to answer your questions!</div>
-          </div>
-          <datetime-input id="phoneDatetime"
-                          datetime="{{phoneDatetime}}"></datetime-input>
-        </neon-animatable>
-        <!-- Step 3 -->
-        <neon-animatable id="step3"
-                         name="step3"
-                         class="step">
-          <div class="header">
-            <div class="header-title">Add Your Creations</div>
-            <div class="header-desc">Menus allow you to group similar items. For example, all your paleo food might be in a "Paleo Palace" menu and desserts in a "Atish's Desserts" menu.<br>Add as many Items as you can. More Items, more changes to be discovered!</div>
-          </div>
-          <menu-list menus="[[menus]]"
-                     user="[[user]]"></menu-list>
-        </neon-animatable>
-        <!-- Step 4 -->
-        <neon-animatable id="step4"
-                         name="step4"
-                         class="step">
-          <form id="optionalForm"
-                is="iron-form"
-                method="post"
-                action="#">
-            <div class="header">
-              <div class="header-title">Gigamunch is built on relationships. Help other people get to know you.</div>
-              <div class="header-desc">
-                <br>Tell them about your creations: How did you learn to cook? Why are you sharing your food?
-                <br>Tell them about a cooking memory: How did you get started cooking?
-                <br>Tell them about you.
-              </div>
-            </div>
-            <profile-social-fields bio="{{cook.bio}}"
-                                   instagram-id="{{cook.instagram_id}}"
-                                   twitter-id="{{cook.twitter_id}}">
-            </profile-social-fields>
-            <div class="header">
-              <div class="header-title">Delivery</div>
-              <div class="header-desc">
-                Set how far you are willing to deliver your food, and how much you will charge for each delivery.
-                <br><span class="secondary-text">Setting range to 0 will disable delivery.</span>
-              </div>
-            </div>
-            <delivery-fields id="deliveryFields"
-                             price="{{cook.delivery_price}}"
-                             range="{{cook.delivery_range}}">
-            </delivery-fields>
-            <div class="header">
-              <div class="header-title">Optional Banking Info</div>
-              <div class="header-desc">If you have your banking info handy, tell us how you want to get paid.</div>
-            </div>
-            <paper-checkbox id="haveBankingInfoCheckbox"
-                            checked="{{hasBankingInfo}}">I have my banking info.</paper-checkbox>
-            <submerchant-fields hidden$="[[!hasBankingInfo]]"
-                                first-name="{{submerchant.first_name}}"
-                                last-name="{{submerchant.last_name}}"
-                                routing-number="{{submerchant.routing_number}}"
-                                account-number="{{submerchant.account_number}}"
-                                dob="{{submerchant.date_of_birth}}"
-                                address="{{submerchant.address}}">
-            </submerchant-fields>
-            <div id="step4Bottom">
-              <!-- For padding when submerchant-fields are hidden and scrollIntoView when hasBankingInfo is checked-->
-            </div>
-          </form>
-        </neon-animatable>
+
       </neon-animated-pages>
     </div>
     <div class="continue-bar">
@@ -378,8 +316,11 @@
         page: {
           type: String,
           notify: true,
-          value: 'step1',
+          value: 'letsTalkStep',
           observer: 'pageUpdated',
+        },
+        phoneNumber: {
+          type: String,
         },
         smallScreen: {
           type: Boolean,
@@ -395,77 +336,38 @@
           notify: true,
           value: {},
         },
-        menus: {
-          type: Array,
-          notify: true,
-          value: [],
-        },
-        submerchant: {
-          type: Object,
-          notify: true,
-          value: {},
-        },
-        hasBankingInfo: {
-          type: Boolean,
-          value: false,
-          notify: true,
-          observer: 'hasBankingInfoUpdated',
-        },
         finishOnboarding: {
           type: Boolean,
           value: false,
         },
-        step1Saved: {
+        prefStepOpenable: {
           type: Boolean,
           value: false,
         },
-        step1Open: {
+        prefStepOpen: {
           type: Boolean,
           value: true,
         },
-        step2Saved: {
+        letsTalkStepOpenable: {
           type: Boolean,
           value: false,
         },
-        step2Open: {
-          type: Boolean,
-          value: false,
-        },
-        step3Saved: {
-          type: Boolean,
-          value: false,
-        },
-        step3Open: {
-          type: Boolean,
-          value: false,
-        },
-        step4Saved: {
-          type: Boolean,
-          value: false,
-        },
-        step4Open: {
+        letsTalkStepOpen: {
           type: Boolean,
           value: false,
         },
         entryAnimation: {
           type: String,
-          value: 'slide-from-right-animation',
+          value: '',
         },
         exitAnimation: {
           type: String,
           value: 'slide-left-animation',
         },
       },
-      ready: function() {
-        document.addEventListener('itemChangedOrAdded', function(e) {
-          var item = e.detail.item;
-          // TODO add logic to edit or add item to menu if it exist 
-          this.getMenus();
-        }.bind(this));
-      },
+      ready: function() {},
       selected: function() {
         ga('send', 'event', 'page', 'onboard');
-        this.updateStepsOnMenuLoad = true;
         this.getOnboardVars();
         this.updateStepAttributes();
       },
@@ -474,43 +376,24 @@
         // hack to prevent glitchy input fields
       },
       updateStepAttributes: function() {
+        this.letsTalkStepOpen = false;
+        this.prefStepOpen = false;
         switch (this.page) {
-          case 'step4':
-            this.step4Open = true;
+          case 'letsTalkStep':
+            this.letsTalkStepOpen = true;
+            this.letsTalkStepOpenable = true;
             break;
-          case 'step3':
-            this.step3Open = true;
+          case 'prefStep':
+            this.prefStepOpen = true;
+            this.prefStepOpenable = true;
             break;
-          case 'step2':
-            this.step2Open = true;
-            break;
-          case 'step1':
-            this.step1Open = true;
-            break;
-        }
-        if (this.cook && this.cook.week_schedule !== undefined && this.cook.week_schedule !== null && this.cook.week_schedule.length > 0) {
-          this.step1Saved = true;
-          this.step2Open = true;
         }
         if (this.cook && this.cook.phone_call_scheduled) {
-          this.step2Saved = true;
-          this.step3Open = true;
-        }
-        if (this.menus && this.menus.length > 0) {
-          var hasItems = false;
-          for (var i = 0; i < this.menus.length; i++) {
-            if (this.menus[i].items && this.menus[i].items.length > 0) {
-              hasItems = true;
-            }
-          }
-          this.step3Saved = hasItems;
-          this.step4Open = hasItems;
+          this.prefStepOpenable = true;
         }
       },
       getOnboardVars: function() {
         this.getCook();
-        this.getMenus();
-        this.getSubmerchant();
       },
       getCook: function() {
         this.service.getCook(function(cook, err) {
@@ -525,53 +408,23 @@
           }
         }.bind(this));
       },
-      getMenus: function() {
-        this.service.getMenus(function(menus, err) {
-          if (err.code !== 0) {
-            this.fire('error', err);
-            return;
-          }
-          this.set('menus', menus);
-
-          this.updateStepAttributes();
-        }.bind(this));
-      },
-      getSubmerchant: function() {
-        this.service.getSubMerchant(function(submerchant, err) {
-          if (err.code !== 0) {
-            this.fire('error', err);
-            return;
-          }
-          this.set('submerchant', submerchant);
-        }.bind(this));
-      },
       progress: function() {
         var success = false;
         var nextStep = function() {};
         switch (this.page) {
-          case 'step1':
-            // submit step1
+          case 'prefStep':
+            // submit prefStep
             success = this.submitPrefStep();
-            this.step1Saved = true;
-            nextStep = this.step2Tapped.bind(this);
+            this.prefStepOpen = true;
             break;
-          case 'step2':
-            // submit step2
+          case 'letsTalkStep':
+            // submit letsTalkStep
             success = this.submitScheduleStep();
-            this.step2Saved = true;
-            nextStep = this.step3Tapped.bind(this);
-            break;
-          case 'step3':
-            // submit step3
-            success = this.submitItemsStep();
-            this.step3Saved = true;
-            nextStep = this.step4Tapped.bind(this);
-            break;
-          case 'step4':
-            // submit step4
-            success = this.submitPrepStep();
-            this.step4Saved = true;
-            nextStep = this.step4Tapped.bind(this);
+            this.letsTalkStepOpenable = true;
+            nextStep = this.prefStepTapped.bind(this);
+            if (success) {
+              this.prefStepOpenable = true;
+            }
             break;
           default:
             success = true;
@@ -580,78 +433,49 @@
           nextStep();
         }
       },
-      submitItemsStep: function() {
-        if (this.menus === undefined || this.menus === null || this.menus.length <= 0) {
-          this.fire('toast', {
-            text: 'You must create at least one item!',
-          });
-          return false;
-        }
-        return true;
-      },
       submitPrefStep: function() {
         var valid = this.$.prefForm.validate();
         if (!valid) {
-          if (this.cook.address && this.cook.address.street === '') {
+          if (this.cook.address === undefined || this.cook.address === null || this.cook.address.street === '') {
             this.fire('toast', {
-              text: 'An address must be selected from the drop down.'
+              text: 'An address must be selected from the drop down.',
+              duration: 8000,
             })
           }
           return false;
         }
-        // update cook
-        this.service.updateCook(this.cook, function(cook, err) {
-          if (err.code !== 0) {
-            this.fire('error', err);
-            return;
-          }
-          this.set('cook', cook);
-          this.getSubmerchant();
-        }.bind(this));
-        return true;
-      },
-      submitPrepStep: function() {
-        if (this.finishOnboarding) {
-          this.hideSpinner();
-          this.fire('onboardfinished');
-          return true;
-        }
-        this.showSpinner();
-        if (!this.hasBankingInfo) {
-          this.submerchant.account_number = '';
-        }
         this.fire('toast', {
-          text: 'Saving...'
+          text: 'Saving...',
         });
+        var submerchant = {};
         // update cook
-        this.service.finishOnboarding(this.cook, this.submerchant, function(err) {
+        this.service.finishOnboarding(this.cook, submerchant, function(err) {
           if (err.code !== 0) {
             this.fire('error', err);
             return;
           }
           this.user.isOnboard = true;
-          this.finishOnboarding = true;
-          this.submitPrepStep();
+          this.fire('onboardfinished');
         }.bind(this));
         return false;
       },
       submitScheduleStep: function() {
-        var valid = this.$.phoneDatetime._getValidity();
+        var valid = this.$.letsTalkForm.validate();
         if (!valid) {
           return false;
         }
         // schedule phone call 
-        this.service.schedulePhoneCall(this.phoneDatetime, function(err) {
+        this.service.schedulePhoneCall(this.phoneNumber, this.phoneDatetime, function(err) {
           if (err.code !== 0) {
             this.fire('error', err);
-            this.step2Saved = false;
-            this.step3Opened = false;
-            this.page = 'step2';
+            this.prefStepOpenable = false;
+            this.letsTalkStepTapped();
             return;
           }
           this.cook.phone_call_scheduled = true;
           // go back to this screen if failure
         }.bind(this));
+        this.set('cook.phone_number', this.phoneNumber);
         return true;
       },
       showSpinner: function() {
@@ -660,50 +484,20 @@
       hideSpinner: function() {
 
       },
-      step1Tapped: function() {
-        if (this.step1Saved) {
+      prefStepTapped: function() {
+        if (this.prefStepOpenable) {
+          this.entryAnimation = 'slide-from-right-animation';
+          this.exitAnimation = 'slide-left-animation';
+          this.page = 'prefStep';
+        }
+      },
+      letsTalkStepTapped: function() {
+        if (this.letsTalkStepOpenable) {
           this.entryAnimation = 'slide-from-left-animation';
           this.exitAnimation = 'slide-right-animation';
-          this.page = 'step1';
+          this.page = 'letsTalkStep';
         }
       },
-      step2Tapped: function() {
-        if (this.step1Saved) {
-          if (this.page === 'step1') {
-            this.entryAnimation = 'slide-from-right-animation';
-            this.exitAnimation = 'slide-left-animation';
-          } else {
-            this.entryAnimation = 'slide-from-left-animation';
-            this.exitAnimation = 'slide-right-animation';
-          }
-          this.page = 'step2';
-        }
-      },
-      step3Tapped: function() {
-        if (this.step2Saved) {
-          if (this.page === 'step1' || this.page === 'step2') {
-            this.entryAnimation = 'slide-from-right-animation';
-            this.exitAnimation = 'slide-left-animation';
-          } else {
-            this.entryAnimation = 'slide-from-left-animation';
-            this.exitAnimation = 'slide-right-animation';
-          }
-          this.page = 'step3';
-        }
-      },
-      step4Tapped: function() {
-        if (this.step3Saved) {
-          this.entryAnimation = 'fade-in-animation';
-          this.exitAnimation = 'slide-left-animation';
-          this.page = 'step4';
-        }
-      },
-      hasBankingInfoUpdated: function() {
-        if (this.hasBankingInfo) {
-          this.$.step4Bottom.scrollIntoView();
-        }
-      }
-
     });
 
   </script>

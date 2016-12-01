@@ -25,7 +25,7 @@ var Service = function () {
       this.loaded = true;
       this.service = gapi.client.cookservice;
       // remove functions from callQueue after calling them.
-      if (this.callQueue !== undefined || this.callQueue !== null) {
+      if (this.callQueue) {
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
@@ -70,18 +70,19 @@ var Service = function () {
 
   }, {
     key: 'schedulePhoneCall',
-    value: function schedulePhoneCall(datetime, callback) {
+    value: function schedulePhoneCall(phone_number, datetime, callback) {
       var _this2 = this;
 
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this2.schedulePhoneCall(datetime, callback);
+          _this2.schedulePhoneCall(phone_number, datetime, callback);
         });
         return;
       }
       var request = {
         gigatoken: this.getToken(),
-        datetime: datetime
+        datetime: datetime,
+        phone_number: phone_number
       };
       this.service.schedulePhoneCall(request).execute(function (resp) {
         _this2.logError('schedulePhoneCall', resp.err);
@@ -501,14 +502,14 @@ var Service = function () {
   }, {
     key: 'logError',
     value: function logError(fnName, err) {
-      if (err !== undefined && (err.code === undefined || err.code !== 0)) {
+      if (err && (err.code === undefined || err.code !== 0)) {
         var desc = 'Function: ' + fnName + ' | Message: ' + err.message + ' | Details: ' + err.detail;
         console.error(desc);
         ga('send', 'exception', {
           exDescription: desc,
           exFatal: false
         });
-        if (err.code !== undefined && err.code === 452) {
+        if (err.code && err.code === 452) {
           // code signout
           window.location = '/signout';
         }
