@@ -49,36 +49,12 @@ handlers:
   upload: cook_SERVEPATH_/index.html
   secure: always
 
-
-# Gigachef app
-- url: /gigachef/bower_components
-  static_dir: gigachef_SERVEPATH_/bower_components
-  secure: always
-
-- url: /gigachef/service-worker.js
-  static_files: gigachef_SERVEPATH_/service-worker.js
-  upload: gigachef_SERVEPATH_/service-worker.js
-  secure: always
-
-- url: /gigachef/js
-  static_dir: gigachef_SERVEPATH_/js
-  secure: always
-
-- url: /gigachef/src
-  static_dir: gigachef_SERVEPATH_/src
-  secure: always
-
-- url: /gigachef.*
-  static_files: gigachef_SERVEPATH_/index.html
-  upload: gigachef_SERVEPATH_/index.html
-  secure: always
-
 # Website app
 - url: /source
   static_dir: app_SERVEPATH_/source
   secure: always
 
-- url: /(|home|becomechef|faq|terms|privacy|upgrade|about)$
+- url: /(|home|becomechef|faq|terms|privacy|upgrade|about|feed|item.*)$
   static_files: app_SERVEPATH_/index.html
   upload: app_SERVEPATH_/index.html
   secure: always
