@@ -20,3 +20,9 @@ indexes:
   properties:
   - name: CookID
   - name: MenuID
+
+- kind: Inquiry
+  properties:
+  - name: EaterID
+  - name: CreatedDateTime
+    direction: desc
