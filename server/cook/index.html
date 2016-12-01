@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport"
-        content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+        content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=no">
 
   <title>Cook | Gigamunch</title>
 
@@ -204,12 +204,18 @@
         href="src/app-shell.html">
 
   <style>
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
     body {
       margin: 0;
       font-family: 'FontRegular', 'Roboto', sans-serif;
       line-height: 1.5;
-      min-height: 100vh;
-      /*background-color: #eee;*/
       background-color: white;
     }
 

@@ -668,11 +668,11 @@
         this.set('title', title);
         this.set('hideHeaderLogo', hideHeaderLogo);
         // exit if element is already imported
-        // TODO breaks pages for Safari
-        // if (document.createElement(elementName).constructor !== HTMLElement) {
-        //   el.selected();
-        //   return;
-        // }
+        if (document.createElement(elementName).constructor !== HTMLElement) {
+          ga('send', 'pageview', location.pathname);
+          // TODO breaks pages for Safari
+          // el.selected();
+        }
         // import element
         this.importHref(resolvedPageURL, function() {
           el.selected();

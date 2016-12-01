@@ -33,8 +33,10 @@
         min-height: 20vh;
         max-height: 80vh;
         overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
         flex-direction: column;
-        padding-bottom: 60px;
+        padding-bottom: 12px;
+        margin-bottom: 48px;
       }
       
       .send-container {
@@ -49,6 +51,7 @@
       .send-input {
         flex: 1;
         border: none;
+        background-color: white;
         --iron-autogrow-textarea: {
           outline: none;
           padding: 12px;
@@ -243,6 +246,12 @@
           this.async(function() {
             this.$.messages.scrollTop = this.$.messages.scrollHeight;
           }.bind(this), 300);
+          this.async(function() {
+            this.$.messages.scrollTop = this.$.messages.scrollHeight;
+          }.bind(this), 600);
+          this.async(function() {
+            this.$.messages.scrollTop = this.$.messages.scrollHeight;
+          }.bind(this), 1000);
         }.bind(this));
       },
       getInquiry: function(e) {
