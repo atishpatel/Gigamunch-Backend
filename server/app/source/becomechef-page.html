@@ -82,6 +82,16 @@
         min-height: 60vh;
       }
       
+      .watch-video-button {
+        max-width: 200px;
+        background: transparent;
+        margin: 0 auto;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 24px;
+      }
+      
       .header-title {
         color: white;
         text-align: center;
@@ -477,17 +487,38 @@
     </style>
 
     <header class="header-section">
-      <div class="header-container">
+      <div hidden$="[[showPromoVideo]]"
+           class="header-container">
         <h1 id="headerText"
             class="header-title">Nashville can't wait to try<br> your homemade food!</h1>
+        <paper-button class="watch-video-button"
+                      on-tap="watchVideoTapped">
+          <img style="width:50px;height:50px;"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/home/play-video-button.png" />Watch Video
+        </paper-button>
         <paper-button id="headerButton"
                       class="sign-up-button"
                       on-tap="signUp"
                       raised>Start Cooking
         </paper-button>
       </div>
+      <div id="video"
+           hidden$="[[!showPromoVideo]]"
+           style="width: 100%; height:100%; z-index:100; display:flex;">
+        <iframe src$="[[promoVideoURL]]"
+                style="width:100%;height:100%; min-height: 60vh"
+                frameborder="0"
+                allowfullscreen>
+        </iframe>
+      </div>
     </header>
     <div class="love-section">
+      <paper-button hidden$="[[!showPromoVideo]]"
+                    class="sign-up-button"
+                    on-tap="signUp"
+                    style="margin-bottom: 24px;"
+                    raised>Start Cooking
+      </paper-button>
       <div class="love-title content">
         Make money doing what you love
       </div>
@@ -731,8 +762,7 @@
       <div class="bottom-cta-container">
         <h1 id="headerText"
             class="header-title">Get ready to feed your community</h1>
-        <paper-button id="headerButton"
-                      class="sign-up-button"
+        <paper-button class="sign-up-button"
                       on-tap="signUp"
                       raised>Open your kitchen
         </paper-button>
@@ -748,16 +778,28 @@
         user: {
           type: Object,
         },
+        showPromoVideo: {
+          type: Boolean,
+          value: false,
+        },
+        promoVideoURL: {
+          type: String,
+          value: '',
+        },
       },
       ready: function() {
         ga('send', 'event', 'page', 'becomechef');
       },
       signUp: function() {
+        var eventLabel = '';
+        if (this.showPromoVideo) {
+          eventLabel = 'videowatched';
+        }
         var eventAction = 'login';
         if (this.user && this.user.id) {
           eventAction = 'dashboard';
         }
-        ga('send', 'event', 'signup', eventAction);
+        ga('send', 'event', 'signup', eventAction, eventLabel);
 
         if (this.user !== undefined && this.user !== null && this.user.id !== undefined) {
           window.location = '/cook/';
@@ -765,6 +807,10 @@
         }
         // fire signup
         this.fire('signup');
+      },
+      watchVideoTapped: function() {
+        this.showPromoVideo = true;
+        this.promoVideoURL = 'https://www.youtube.com/embed/vnMbIiRZnDU?rel=0&showinfo=0&autoplay=1';
       },
     });
 

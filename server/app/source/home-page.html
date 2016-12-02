@@ -61,12 +61,14 @@
         width: 100%;
         height: 100%;
         display: flex;
+        flex-direction: column;
+        justify-content: center;
         z-index: 2;
       }
       
       .gigamunch-desc-text {
         text-align: center;
-        margin: auto;
+        margin: 24px auto;
         font-size: 40px;
         line-height: 45px;
         font-weight: 500;
@@ -82,6 +84,15 @@
         top: 0;
         left: 0;
         z-index: 1;
+      }
+      
+      .gigamunch-desc-watch-video-button {
+        max-width: 200px;
+        background: transparent;
+        margin: 0 auto;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
       }
       
       .active {
@@ -295,8 +306,14 @@
     </style>
     <paper-material elevation="2"
                     class="gigamunch-desc bg-primary-color sixteen-nine">
-      <div class="gigamunch-desc-cover">
-        <h1 class="gigamunch-desc-text">People cook delicious homemade food all the time. <br>Now you can buy it.</h1>
+      <div class="gigamunch-desc-cover"
+           hidden$="[[showPromoVideo]]">
+        <h1 class="gigamunch-desc-text">Welcome to the hidden world of <br>homemade food</h1>
+        <paper-button class="gigamunch-desc-watch-video-button"
+                      on-tap="watchVideoTapped">
+          <img style="width:50px;height:50px;"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/home/play-video-button.png" />Watch Video
+        </paper-button>
       </div>
       <template is="dom-if"
                 if="[[showVideo]]"
@@ -306,10 +323,19 @@
                loop
                autoplay
                muted>
-            <source src="https://storage.googleapis.com/gigamunch-omninexus-website/home/promo-video.webm" type="video/webm">
-            <source src="https://storage.googleapis.com/gigamunch-omninexus-website/home/promo-video.mp4" type="video/mp4">
-        </video>
+              <source src="https://storage.googleapis.com/gigamunch-omninexus-website/home/promo-video.webm" type="video/webm">
+              <source src="https://storage.googleapis.com/gigamunch-omninexus-website/home/promo-video.mp4" type="video/mp4">
+          </video>
       </template>
+      <div id="video"
+           hidden$="[[!showPromoVideo]]"
+           style="width: 100%; height:100%; z-index:100">
+        <iframe src$="[[promoVideoURL]]"
+                style="width:100%;height:100%"
+                frameborder="0"
+                allowfullscreen>
+        </iframe>
+      </div>
     </paper-material>
 
     <div class="active">
@@ -321,7 +347,7 @@
           <div class="features-image">
             <div>
               <img alt="a picture of the Gigamunch App"
-                   src="https://storage.googleapis.com/gigamunch-omninexus-website/home/food-feed-iphone.png" />
+                   src="https://storage.googleapis.com/gigamunch-omninexus-website/home/feed_screen.png" />
             </div>
           </div>
           <ul class="features-list">
@@ -444,6 +470,14 @@
           notify: true,
           value: false,
         },
+        showPromoVideo: {
+          type: Boolean,
+          value: false,
+        },
+        promoVideoURL: {
+          type: String,
+          value: '',
+        },
       },
       ready: function() {
         ga('send', 'event', 'page', 'home');
@@ -460,6 +494,10 @@
         if (u !== undefined && u !== null && u.id !== undefined) {
           this.$.becomeGigachef.hidden = true;
         }
+      },
+      watchVideoTapped: function() {
+        this.showPromoVideo = true;
+        this.promoVideoURL = 'https://www.youtube.com/embed/vnMbIiRZnDU?rel=0&showinfo=0&autoplay=1';
       },
     });
 
