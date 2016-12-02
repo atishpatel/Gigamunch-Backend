@@ -72,7 +72,7 @@ func (c *Client) Post(user *types.User, id int64, cookID string, inquiryID, item
 		InquiryID:       inquiryID,
 		ItemID:          itemID,
 		ItemName:        getEscapedString(itemName),
-		ItemPhotoURL:    itemPhotoURL,
+		ItemPhotoURL:    getEscapedString(itemPhotoURL),
 		MenuID:          menuID,
 		Rating:          rating,
 		Text:            getEscapedString(text),
