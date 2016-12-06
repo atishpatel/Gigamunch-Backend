@@ -59,6 +59,11 @@ handlers:
   upload: app_SERVEPATH_/index.html
   secure: always
 
+- url: /becomecook
+  static_files: becomecook.html
+  upload: becomecook.html
+  secure: always
+
 - url: /bower_components
   static_dir: app_SERVEPATH_/bower_components
   secure: always
