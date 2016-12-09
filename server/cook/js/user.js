@@ -29,9 +29,13 @@ var User = function () {
       if (token === '') {
         return;
       }
-      this.token = token;
+      this.token = token.replace(/[+\/]/g, function (m0) {
+        return m0 === '+' ? '-' : '_';
+      }).replace(/=/g, '');
       var userString = token.split('.')[1].replace(/\s/g, '');
-      var jwt = JSON.parse(window.atob(userString));
+      var jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, function (m0) {
+        return m0 === '-' ? '+' : '/';
+      }).replace(/[^A-Za-z0-9\+\/]/g, '')));
       for (var k in jwt) {
         if (k !== '__proto__') {
           this[k] = jwt[k];

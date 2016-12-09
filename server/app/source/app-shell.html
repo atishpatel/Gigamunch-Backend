@@ -808,7 +808,7 @@
                      role="navigation">
         <a class="nav-a"
            href="[[loginBtnUrl]]">
-          <paper-item>[[loginBtnText]]</paper-item>
+          <paper-item on-tap="signUp">[[loginBtnText]]</paper-item>
         </a>
         <a class="nav-a"
            name="home"
@@ -1039,19 +1039,24 @@
       },
       updateIsUserLoggedIn: function() {
         var token = this.getTokenCookie();
+        var user = null;
+        var loginBtnUrl = '/becomechef?gstate=login';
+        var loginBtnText = 'Sign up/Log in';
         try {
           if (token !== undefined && token !== null && token !== '') {
-            this.loginBtnUrl = '/cook/';
-            this.loginBtnText = 'My Dashboard';
-            this.user = {};
+            loginBtnUrl = '/cook/';
+            loginBtnText = 'My Dashboard';
+            user = {};
             var userString = token.split('.')[1];
-            var jwt = JSON.parse(window.atob(userString));
+            var jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, function(m0) {
+                return m0 == '-' ? '+' : '/'
+              })
+              .replace(/[^A-Za-z0-9\+\/]/g, '')));
             for (var k in jwt) {
               if (k !== '__proto__') {
-                this.user[k] = jwt[k];
+                user[k] = jwt[k];
               }
             }
-            return;
           }
         } catch (e) {
           var desc = 'error with token: ' + token + '---';
@@ -1061,9 +1066,9 @@
             exFatal: false,
           });
         } finally {
-          this.loginBtnUrl = '/becomechef?gstate=login';
-          this.loginBtnText = 'Sign up/Log in';
-          this.user = null;
+          this.user = user;
+          this.loginBtnUrl = loginBtnUrl;
+          this.loginBtnText = loginBtnText;
         }
         return;
       },
@@ -1074,8 +1079,8 @@
       // If the URL is outside this app, it causes the browser to go to that app.
       routePathChanged: function(path) {
         // ** all pages must be in this list
-        var pages = ['/', '/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell', '/feed', '/item'];
-        var found = false;
+        var pages = ['/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell', '/feed', '/item'];
+        var found = path === '/';
         for (var i = 0; i < pages.length; i++) {
           if (path.includes(pages[i])) {
             found = true;

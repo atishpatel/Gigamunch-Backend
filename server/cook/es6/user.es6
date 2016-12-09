@@ -17,9 +17,13 @@ class User {
     if (token === '') {
       return;
     }
-    this.token = token;
+    this.token = token.replace(/[+\/]/g, (m0) => {
+      return m0 === '+' ? '-' : '_';
+    }).replace(/=/g, '');
     const userString = token.split('.')[1].replace(/\s/g, '');
-    const jwt = JSON.parse(window.atob(userString));
+    const jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
+      return m0 === '-' ? '+' : '/';
+    }).replace(/[^A-Za-z0-9\+\/]/g, '')));
     for (const k in jwt) {
       if (k !== '__proto__') {
         this[k] = jwt[k];
