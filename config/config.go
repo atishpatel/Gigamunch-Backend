@@ -19,22 +19,26 @@ import (
 
 // Config is the configuration loaded from datastore
 type Config struct {
-	JWTSecret               string   `json:"jwt_secret" datastore:",noindex"`
-	ClientID                string   `json:"client_id" datastore:",noindex"`
-	ServerKey               string   `json:"server_key" datastore:",noindex"`
-	BTEnvironment           string   `json:"bt_environment" datastore:",noindex"`
-	BTMerchantID            string   `json:"bt_merchant_id" datastore:",noindex"`
-	BTPublicKey             string   `json:"bt_public_key" datastore:",noindex"`
-	BTPrivateKey            string   `json:"bt_private_key" datastore:",noindex"`
-	TwilioAccountSID        string   `json:"twilio_account_sid" datastore:",noindex"`
-	TwilioKeySID            string   `json:"twilio_key_sid" datastore:",noindex"`
-	TwilioAuthToken         string   `json:"twilio_auth_token" datastore:",noindex"`
-	TwilioKeyAuthToken      string   `json:"twilio_key_auth_token" datastore:",noindex"`
-	TwilioIPMessagingSID    string   `json:"twilio_ip_messaging_sid" datastore:",noindex"`
-	TwilioPushCredentialSID string   `json:"push_credential_sid" datastore:",noindex"`
-	PhoneNumbers            []string `json:"phone_numbers" datastore:",noindex"`
-	BucketName              string   `json:"bucket_name" datastore:",noindex"`
-	ProjectID               string   `json:"project_id" datastore:",noindex"`
+	JWTSecret                 string   `json:"jwt_secret" datastore:",noindex"`
+	ClientID                  string   `json:"client_id" datastore:",noindex"`
+	ServerKey                 string   `json:"server_key" datastore:",noindex"`
+	BTEnvironment             string   `json:"bt_environment" datastore:",noindex"`
+	BTMerchantID              string   `json:"bt_merchant_id" datastore:",noindex"`
+	BTPublicKey               string   `json:"bt_public_key" datastore:",noindex"`
+	BTPrivateKey              string   `json:"bt_private_key" datastore:",noindex"`
+	TwilioAccountSID          string   `json:"twilio_account_sid" datastore:",noindex"`
+	TwilioKeySID              string   `json:"twilio_key_sid" datastore:",noindex"`
+	TwilioAuthToken           string   `json:"twilio_auth_token" datastore:",noindex"`
+	TwilioKeyAuthToken        string   `json:"twilio_key_auth_token" datastore:",noindex"`
+	TwilioIPMessagingSID      string   `json:"twilio_ip_messaging_sid" datastore:",noindex"`
+	TwilioPushCredentialSID   string   `json:"push_credential_sid" datastore:",noindex"`
+	PhoneNumbers              []string `json:"phone_numbers" datastore:",noindex"`
+	BucketName                string   `json:"bucket_name" datastore:",noindex"`
+	ProjectID                 string   `json:"project_id" datastore:",noindex"`
+	CompanyCardCardholderName string   `json:"company_card_cardholder_name" datastore:",noindex"`
+	CompanyCardNumber         string   `json:"company_card_number" datastore:",noindex"`
+	CompanyCardExpirationDate string   `json:"company_card_expiration_date" datastore:",noindex"`
+	CompanyCardCVV            string   `json:"company_card_cvv" datastore:",noindex"`
 }
 
 // BTEnvironment is the environment type for braintree
@@ -50,10 +54,11 @@ const (
 
 // BTConfig has all the config needed for Braintree
 type BTConfig struct {
-	BTEnvironment string `json:"bt_environment"`
-	BTMerchantID  string `json:"bt_merchant_id"`
-	BTPublicKey   string `json:"bt_public_key"`
-	BTPrivateKey  string `json:"bt_private_key"`
+	BTEnvironment string     `json:"bt_environment"`
+	BTMerchantID  string     `json:"bt_merchant_id"`
+	BTPublicKey   string     `json:"bt_public_key"`
+	BTPrivateKey  string     `json:"bt_private_key"`
+	CompanyCard   CreditCard `json:"company_card"`
 }
 
 // GitkitConfig is used to load different configurations
@@ -75,6 +80,14 @@ type TwilioConfig struct {
 	IPMessagingSID    string   `json:"ip_messaging_sid"`
 	PushCredentialSID string   `json:"push_credential_sid"`
 	PhoneNumbers      []string `json:"phone_numbers"`
+}
+
+// CreditCard holds data related to a credit card.
+type CreditCard struct {
+	CardholderName string `json:"cardholder_name"`
+	Number         string `json:"number"`
+	ExpirationDate string `json:"expiration_date"`
+	CVV            string `json:"cvv"`
 }
 
 var (
@@ -121,6 +134,10 @@ func GetBTConfig(ctx context.Context) BTConfig {
 		btConfig.BTMerchantID = config.BTMerchantID
 		btConfig.BTPublicKey = config.BTPublicKey
 		btConfig.BTPrivateKey = config.BTPrivateKey
+		btConfig.CompanyCard.CardholderName = config.CompanyCardCardholderName
+		btConfig.CompanyCard.Number = config.CompanyCardNumber
+		btConfig.CompanyCard.CVV = config.CompanyCardCVV
+		btConfig.CompanyCard.ExpirationDate = config.CompanyCardExpirationDate
 	}
 	return btConfig
 }
