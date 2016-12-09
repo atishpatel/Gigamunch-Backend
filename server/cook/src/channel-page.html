@@ -31,12 +31,16 @@
       .messages {
         padding: 0 12px;
         min-height: 20vh;
-        max-height: 80vh;
+        max-height: 85vh;
         overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
         flex-direction: column;
         padding-bottom: 12px;
         margin-bottom: 48px;
+      }
+      
+      .messages::-webkit-scrollbar {
+        display: none;
       }
       
       .send-container {
