@@ -130,6 +130,30 @@ func (c *Client) SubmitForSettlement(id string) error {
 	return nil
 }
 
+// GigamunchToSubmerchant sends money form Gigamunch to a submerchant
+func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (string, error) {
+	t := &braintree.Transaction{
+		Type:              "sale",
+		MerchantAccountId: subMerchantID,
+		CreditCard: &braintree.CreditCard{
+			CardholderName: btConfig.CompanyCard.CardholderName,
+			Number:         btConfig.CompanyCard.Number,
+			ExpirationDate: btConfig.CompanyCard.ExpirationDate,
+			CVV:            btConfig.CompanyCard.CVV,
+		},
+		Amount:           getBTDecimal(amount),
+		ServiceFeeAmount: getBTDecimal(0),
+		Options: &braintree.TransactionOptions{
+			SubmitForSettlement: true,
+		},
+	}
+	t, err := c.bt.Transaction().Create(t)
+	if err != nil {
+		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
+	}
+	return t.Id, nil
+}
+
 // StartSale makes an escrow sale
 func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {
 	t := &braintree.Transaction{
