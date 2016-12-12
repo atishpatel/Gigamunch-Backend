@@ -73,8 +73,13 @@ func GetExchangeMethods(cookPoint GeoPoint, cookDeliveryRange int32, cookDeliver
 	if cookPoint.GreatCircleDistance(eaterPoint) < float32(cookDeliveryRange) {
 		ems = append(ems, ExchangeMethodWithPrice{ExchangeMethod: EMCookDelivery, Price: cookDeliveryPrice})
 	}
-	if gigamunchPoint.GreatCircleDistance(cookPoint) < 10 && gigamunchPoint.GreatCircleDistance(eaterPoint) < 10 {
+	if InGigadeliveryRange(cookPoint, eaterPoint) {
 		ems = append(ems, ExchangeMethodWithPrice{ExchangeMethod: EMGigamunchDelivery, Price: 5.0})
 	}
 	return ems
+}
+
+// InGigadeliveryRange return if the cook and eater are in Gigamunch Delivery Range.
+func InGigadeliveryRange(cookPoint GeoPoint, eaterPoint GeoPoint) bool {
+	return gigamunchPoint.GreatCircleDistance(cookPoint) < 60 && gigamunchPoint.GreatCircleDistance(eaterPoint) < 30
 }
