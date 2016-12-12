@@ -2,6 +2,7 @@ package errors
 
 const (
 	CodeInvalidParameter           = 400
+	CodeInvalidPromoCode           = 402
 	CodeUnauthorizedAccess         = 401
 	CodeSignOut                    = 452
 	CodeForbidden                  = 403
