@@ -13,6 +13,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -144,7 +145,7 @@ func validateMakeParams(itemID int64, nonce string, eaterID string, eaterAddress
 }
 
 // Make makes a new Inquiry.
-func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *types.Address, numServings int32, exchangeMethod types.ExchangeMethod, expectedExchangeTime time.Time) (*Inquiry, error) {
+func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *types.Address, numServings int32, exchangeMethod types.ExchangeMethod, expectedExchangeTime time.Time, promoCode string) (*Inquiry, error) {
 	if err := validateMakeParams(itemID, nonce, eaterID, eaterAddress, numServings, exchangeMethod); err != nil {
 		return nil, err
 	}
@@ -178,6 +179,17 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	if !found {
 		return nil, errInvalidParameter.WithMessage("The selected exchange method is not available.")
 	}
+	// get promo code info
+	var promoCodeInfo *promo.Code
+	if promoCode != "" {
+		promoC := promo.New(c.ctx)
+		promoCodeInfo, err = promoC.GetUsableCodeForUser(promoCode, eaterID, eaterAddress.GeoPoint, cook.Address.GeoPoint)
+		if err != nil {
+			return nil, errors.Wrap("failed to promo.GetUsuableCodeForUser", err)
+		}
+	} else {
+		promoCodeInfo = new(promo.Code)
+	}
 	// calculate pricing
 	pricePerServing := payment.GetPricePerServing(item.CookPricePerServing)
 	totalPricePerServing := toFixed(pricePerServing*float32(numServings), 2)
@@ -186,18 +198,109 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	totalTaxPrice := totalPrice - (totalPricePerServing + exchangePrice)
 	totalCookPrice := item.CookPricePerServing * float32(numServings)
 	totalGigaFee := totalPricePerServing - totalCookPrice
-	gigaFeeWithDeliveryAndTax := totalGigaFee + totalTaxPrice
+	gigaFeeWithDelivery := totalGigaFee
 	cookPriceWithDelivery := totalCookPrice
 	if !exchangeMethod.Pickup() && !exchangeMethod.CookDelivery() {
-		gigaFeeWithDeliveryAndTax += exchangePrice
+		gigaFeeWithDelivery += exchangePrice
 	} else {
 		cookPriceWithDelivery += exchangePrice
 	}
+	var gigamunchToCook float32
+	var amountSavedOnDelivery float32
+	var totalAmountSaved float32
+	totalPriceWithDiscount := totalPrice
+	/*
+	 * Promo code stuff
+	 */
+	// free delivery
+	if promoCodeInfo.FreeDelivery {
+		if exchangeMethod.GigamunchDelivery() {
+			gigaFeeWithDelivery -= exchangePrice
+			amountSavedOnDelivery = exchangePrice
+		} else if exchangeMethod.CookDelivery() {
+			amountSavedOnDelivery = exchangePrice
+			if amountSavedOnDelivery > 10 {
+				amountSavedOnDelivery = 10
+			}
+			gigamunchToCook += amountSavedOnDelivery
+		} else if exchangeMethod.Pickup() {
+			// woo hoo
+		} else {
+			// unknown exchange method
+		}
+		totalAmountSaved += amountSavedOnDelivery
+		totalPriceWithDiscount -= amountSavedOnDelivery
+	}
+	// free dish
+	if promoCodeInfo.FreeDish {
+		amountSaved := pricePerServing
+		if promoCodeInfo.DiscountCap < pricePerServing {
+			amountSaved = promoCodeInfo.DiscountCap
+		}
+		gigamunchToCook += amountSaved
+		totalPriceWithDiscount -= amountSaved
+		totalAmountSaved += amountSaved
+	}
+	// Amount Off
+	if promoCodeInfo.AmountOff > .001 {
+		amountSaved := promoCodeInfo.AmountOff
+		if amountSaved > totalPriceWithDiscount-(totalTaxPrice+(exchangePrice-amountSavedOnDelivery)) {
+			amountSaved = totalPriceWithDiscount - (totalTaxPrice + (exchangePrice - amountSavedOnDelivery))
+		}
+		if gigaFeeWithDelivery > amountSaved {
+			gigaFeeWithDelivery -= amountSaved
+		} else {
+			gigamunchToCook += amountSaved
+		}
+		totalPriceWithDiscount -= amountSaved
+		totalAmountSaved += amountSaved
+	}
+	// Buy 1 Get 1 Free
+	if promoCodeInfo.BuyOneGetOneFree {
+		if numServings < 2 {
+			return nil, errInvalidParameter.WithMessage("You must order at least two dishes to use the Buy 1 Get 1 Free promo code.")
+		}
+		amountSaved := pricePerServing
+		if promoCodeInfo.DiscountCap < pricePerServing {
+			amountSaved = promoCodeInfo.DiscountCap
+		}
+		gigamunchToCook += amountSaved
+		totalPriceWithDiscount -= amountSaved
+		totalAmountSaved += amountSaved
+	}
+	// precent discount
+	if promoCodeInfo.PercentOff > 0 {
+		amountSaved := totalPricePerServing * (float32(promoCodeInfo.PercentOff) / 100)
+		if amountSaved > promoCodeInfo.DiscountCap {
+			amountSaved = promoCodeInfo.DiscountCap
+		}
+		// if amountsaved is less than the amount gigamunch (master merchant) takes, don't create another transaction
+		if amountSaved < (gigaFeeWithDelivery - totalTaxPrice) {
+			gigaFeeWithDelivery -= amountSaved
+		} else {
+			gigamunchToCook += amountSaved
+			cookPriceWithDelivery -= amountSaved
+		}
+		totalAmountSaved += amountSaved
+		totalPriceWithDiscount -= amountSaved
+	}
+	if gigamunchToCook > .001 {
+		if totalGigaFee > gigamunchToCook {
+			gigaFeeWithDelivery -= gigamunchToCook
+			gigamunchToCook = 0
+		} else {
+			gigamunchToCook -= totalGigaFee
+			gigaFeeWithDelivery -= totalGigaFee
+		}
+	}
+	if totalPriceWithDiscount < totalTaxPrice {
+		totalPriceWithDiscount = totalTaxPrice
+	}
 	// Create Transaction
 	paymentC := getPaymentClient(c.ctx)
-	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, totalPrice, gigaFeeWithDeliveryAndTax)
+	transactionID, err := paymentC.StartSale(cook.BTSubMerchantID, nonce, totalPriceWithDiscount, gigaFeeWithDelivery+totalTaxPrice)
 	if err != nil {
-		return nil, errors.Wrap("failed to paymentC.StartSale", err)
+		return nil, errors.Wrap("failed to paymentC.StartSale", err).Wrapf("totalPriceWithDiscount: %d; gigaFeeWithDelivery: %d; totalTaxPrice: %d", totalPriceWithDiscount, gigaFeeWithDelivery, totalTaxPrice)
 	}
 	// get cheap estimate for distance and duration
 	distance := eaterAddress.GreatCircleDistance(cook.Address.GeoPoint)
@@ -205,6 +308,8 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 	inquiry := &Inquiry{
 		CreatedDateTime: time.Now(),
 		CookID:          item.CookID,
+		CookName:        cook.Name,
+		CookEmail:       cook.Email,
 		EaterID:         eaterID,
 		EaterPhotoURL:   eater.PhotoURL,
 		EaterName:       eater.Name,
@@ -223,14 +328,27 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 		ExpectedExchangeDateTime: expectedExchangeTime,
 		Servings:                 numServings,
 		BTTransactionID:          transactionID,
+		Promo: Promo{
+			Code:             promoCode,
+			FreeDelivery:     promoCodeInfo.FreeDelivery,
+			FreeDish:         promoCodeInfo.FreeDish,
+			PercentOff:       promoCodeInfo.PercentOff,
+			AmountOff:        promoCodeInfo.AmountOff,
+			BuyOneGetOneFree: promoCodeInfo.BuyOneGetOneFree,
+			DiscountCap:      promoCodeInfo.DiscountCap,
+		},
 		PaymentInfo: PaymentInfo{
-			CookPricePerServing: item.CookPricePerServing,
-			PricePerServing:     pricePerServing,
-			CookPrice:           totalCookPrice,
-			ExchangePrice:       exchangePrice,
-			TaxPrice:            totalTaxPrice,
-			ServiceFee:          totalGigaFee,
-			TotalPrice:          totalPrice,
+			CookPricePerServing:     item.CookPricePerServing,
+			PricePerServing:         pricePerServing,
+			CookPrice:               totalCookPrice,
+			ExchangePrice:           exchangePrice,
+			TaxPrice:                totalTaxPrice,
+			ServiceFee:              totalGigaFee,
+			GigamunchToCook:         gigamunchToCook,
+			AmountOff:               totalAmountSaved - amountSavedOnDelivery,
+			AmountOffDelivery:       amountSavedOnDelivery,
+			TotalPrice:              totalPrice,
+			TotalPriceWithAmountOff: totalPrice - totalAmountSaved,
 		},
 		ExchangeMethod: exchangeMethod,
 		ExchangePlanInfo: ExchangePlanInfo{
@@ -305,6 +423,14 @@ func (c *Client) Make(itemID int64, nonce string, eaterID string, eaterAddress *
 			))
 		if err != nil {
 			utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
+		}
+	}
+
+	if promoCode != "" {
+		promoC := promo.New(c.ctx)
+		err = promoC.InsertUsedCode(promoCode, inquiry.EaterID, inquiry.ID, promo.Pending)
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to insert used promo code for inquiry(%d)", inquiry.ID)
 		}
 	}
 
@@ -392,6 +518,7 @@ func (c *Client) CookAccept(user *types.User, id int64) (*Inquiry, error) {
 				}
 			}
 		}
+
 	}
 	return inquiry, nil
 }
@@ -427,6 +554,14 @@ func (c *Client) CookDecline(user *types.User, id int64) (*Inquiry, error) {
 		err = sendUpdatedActionMessage(c.ctx, inquiry)
 		if err != nil {
 			return inquiry, errors.Wrap("failed to sendCookUpdateActionMessage", err)
+		}
+		// invalidate use of promo code
+		if inquiry.Promo.Code != "" {
+			promoC := promo.New(c.ctx)
+			err = promoC.UpdateUsedCodeState(inquiry.EaterID, inquiry.ID, promo.Invalid)
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to update used promo code for inquiry(%d)", inquiry.ID)
+			}
 		}
 		messageC := getMessageClient(c.ctx)
 		for _, v := range squadNumbers {
@@ -515,6 +650,14 @@ func (c *Client) EaterCancel(user *types.User, id int64) (*Inquiry, error) {
 	err = cookC.Notify(inquiry.CookID, "Order Canceled", msg)
 	if err != nil {
 		utils.Criticalf(c.ctx, "Failed to notify cook(%d) about inquiry(%d) cancel. Err: %+v", inquiry.CookID, inquiry.ID, err)
+	}
+	// invalidate promo code usage
+	if inquiry.Promo.Code != "" {
+		promoC := promo.New(c.ctx)
+		err = promoC.UpdateUsedCodeState(inquiry.EaterID, inquiry.ID, promo.Invalid)
+		if err != nil {
+			utils.Criticalf(c.ctx, "failed to update used promo code for inquiry(%d)", inquiry.ID)
+		}
 	}
 	// notify Gigamunch if it's a Gigamunch Delivery
 	if inquiry.ExchangeMethod.GigamunchDelivery() {
@@ -608,10 +751,34 @@ func (c *Client) Process(id int64) error {
 		if err != nil {
 			return errors.Wrap(fmt.Sprintf("failed to payment.ReleaseSale for inquiry(%d)", id), err)
 		}
+		// pay cook for discount stuff
+		if inquiry.PaymentInfo.GigamunchToCook > .001 {
+			// TODO pay cook
+			var ck *cook.Cook
+			ck, err = cookC.Get(inquiry.CookID)
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to get cook to pay cook for inquiry(%d). Err: %v", inquiry.ID, err)
+			} else {
+				var btTransactionID string
+				btTransactionID, err = paymentC.GigamunchToSubmerchant(ck.BTSubMerchantID, inquiry.PaymentInfo.GigamunchToCook)
+				if err != nil {
+					utils.Criticalf(c.ctx, "failed to payment.GigamunchToSubmerchant for inquiry(%d). Err: %v", inquiry.ID, err)
+				}
+				inquiry.BTGigamunchToCookTransactionID = btTransactionID
+			}
+		}
 		inquiry.State = State.Paid
 		err = put(c.ctx, id, inquiry)
 		if err != nil {
 			return errDatastore.WithError(err).Wrapf("failed to put inquiry(%d)", id)
+		}
+		// update promo code usage
+		if inquiry.Promo.Code != "" {
+			promoC := promo.New(c.ctx)
+			err = promoC.UpdateUsedCodeState(inquiry.EaterID, inquiry.ID, promo.Used)
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to update used promo code for inquiry(%d)", inquiry.ID)
+			}
 		}
 	case State.Accepted:
 		// If after ExchangeTime, set to Fulfilled state.
@@ -671,6 +838,14 @@ func (c *Client) Process(id int64) error {
 				utils.Criticalf(c.ctx, "failed to notify about new inquiry(%d). Err: %+v", inquiry.ID, err)
 			}
 		}
+		// update promo code usage
+		if inquiry.Promo.Code != "" {
+			promoC := promo.New(c.ctx)
+			err = promoC.UpdateUsedCodeState(inquiry.EaterID, inquiry.ID, promo.Invalid)
+			if err != nil {
+				utils.Criticalf(c.ctx, "failed to update used promo code for inquiry(%d)", inquiry.ID)
+			}
+		}
 	case State.Declined:
 		fallthrough
 	case State.TimedOut:
@@ -708,6 +883,7 @@ type paymentClient interface {
 	ReleaseSale(string) error
 	RefundSale(string) (string, error)
 	CancelRelease(string) (string, error)
+	GigamunchToSubmerchant(string, float32) (string, error)
 }
 
 var getItemClient = func(ctx context.Context) itemClient {
@@ -756,6 +932,10 @@ func getInquiryInfo(inquiry *Inquiry) *message.InquiryInfo {
 	if len(inquiry.Item.Photos) > 0 {
 		photoURL = inquiry.Item.Photos[0]
 	}
+	price := inquiry.PaymentInfo.TotalPriceWithAmountOff
+	if price < .001 {
+		price = inquiry.PaymentInfo.TotalPrice
+	}
 	return &message.InquiryInfo{
 		ID:           inquiry.ID,
 		State:        inquiry.State,
@@ -764,7 +944,7 @@ func getInquiryInfo(inquiry *Inquiry) *message.InquiryInfo {
 		ItemID:       inquiry.ItemID,
 		ItemName:     inquiry.Item.Name,
 		ItemImage:    photoURL,
-		Price:        inquiry.PaymentInfo.TotalPrice,
+		Price:        price,
 		IsDelivery:   inquiry.ExchangeMethod.Delivery(),
 		Servings:     inquiry.Servings,
 		ExchangeTime: inquiry.ExpectedExchangeDateTime,

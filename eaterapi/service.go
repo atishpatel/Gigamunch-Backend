@@ -38,6 +38,7 @@ func getGRPCError(err error, detail string) *pb.Error {
 }
 
 func handleResp(ctx context.Context, fnName string, err *pb.Error) {
+	utils.Infof(ctx, "%s function called at %s", fnName, time.Now().Format("01/02 at 03:04 PM"))
 	if err == nil { // there was no error
 		return
 	}

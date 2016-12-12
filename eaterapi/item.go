@@ -11,7 +11,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/like"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/menu"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
@@ -24,6 +26,14 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 		resp.Error = validateErr
 		return resp, nil
 	}
+	// get userID
+	var userID string
+	if req.Gigatoken != "" {
+		user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
+		if user != nil {
+			userID = user.ID
+		}
+	}
 	likeC := like.New(ctx)
 	// get item
 	itemC := item.New(ctx)
@@ -32,6 +42,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 		resp.Error = getGRPCError(err, "failed to item.Get")
 		return resp, nil
 	}
+
 	// get cook
 	var c *cook.Cook
 	cooksErrChan := make(chan error, 1)
@@ -56,13 +67,7 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 	likeErrChan := make(chan error, 1)
 	go func() {
 		// get user if there
-		var userID string
-		if req.Gigatoken != "" {
-			user, _ := auth.GetUserFromToken(ctx, req.Gigatoken)
-			if user != nil {
-				userID = user.ID
-			}
-		}
+
 		var goErr error
 		likes, numLikes, goErr = likeC.LikesItems(userID, []int64{item.ID})
 		likeErrChan <- goErr
@@ -92,6 +97,21 @@ func (s *service) GetItem(ctx context.Context, req *pb.GetItemRequest) (*pb.GetI
 	// get exchangeoptions
 	ems := types.GetExchangeMethods(cookPoint, c.DeliveryRange, c.DeliveryPrice, eaterPoint)
 	resp.Item = getPBItem(item, numLikes[0], likes[0], c, distance, ems, cookLikes, reviews)
+	if req.PromoCode != "" {
+		promoC := promo.New(ctx)
+		code, err := promoC.GetUsableCodeForUser(req.PromoCode, userID, eaterPoint, cookPoint)
+		if err != nil {
+			errCode := errors.GetErrorWithCode(err)
+			if errCode.Code == errors.CodeInvalidPromoCode {
+				resp.Item.Promo = &pb.Promo{PromoText: errCode.Message}
+			}
+			resp.PromoError = getGRPCError(err, "")
+		} else {
+			resp.Item.Promo = getPBPromo(code)
+		}
+	} else {
+		resp.PromoError = &pb.Error{Code: errors.CodeInvalidParameter, Message: "Promo code is empty"}
+	}
 	return resp, nil
 }
 

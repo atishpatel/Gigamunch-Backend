@@ -56,6 +56,30 @@ CREATE TABLE IF NOT EXISTS `review` (
   INDEX(`item_id`),
   INDEX(`created_datetime`)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
+-- create promo_codes table
+CREATE TABLE IF NOT EXISTS `promo_code` (
+  `code` VARCHAR(45) NOT NULL PRIMARY KEY,
+  `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
+  `free_delivery` BOOLEAN NOT NULL DEFAULT 0,
+  `percent_off` TINYINT NOT NULL DEFAULT 0,
+  `amount_off` FLOAT( 6, 2 ) NOT NULL DEFAULT 0,
+  `discount_cap` FLOAT(6,2) NOT NULL DEFAULT 0,
+  `free_dish` BOOLEAN NOT NULL DEFAULT 0,
+  `buy_one_get_one_free` BOOLEAN NOT NULL DEFAULT 0,
+  `start_datetime` DATETIME NOT NULL DEFAULT NOW(),
+  `end_datetime` DATETIME NOT NULL DEFAULT NOW(),
+  `num_uses` INT NOT NULL DEFAULT 0
+) ENGINE = InnoDB CHARACTER SET utf8mb4;
+-- create used_promo_code table 
+CREATE TABLE IF NOT EXISTS `used_promo_code` (
+  `eater_id` VARCHAR(45) NOT NULL,
+  `eater_name` VARCHAR(100) NOT NULL,
+  `inquiry_id` BIGINT NOT NULL,
+  `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
+  `code` VARCHAR(45) NOT NULL,
+  `state` TINYINT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`eater_id`, `inquiry_id`)
+) ENGINE = InnoDB CHARACTER SET utf8mb4;
 -- create completed_inquries table 
 -- CREATE TABLE IF NOT EXISTS `completed_inquiries` (
 --   `id` BIGINT NOT NULL PRIMARY KEY,

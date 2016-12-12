@@ -10,8 +10,20 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/review"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	"github.com/golang/protobuf/ptypes"
 )
+
+func getPBPromo(code *promo.Code) *pb.Promo {
+	return &pb.Promo{
+		FreeDelivery:     code.FreeDelivery,
+		FreeDish:         code.FreeDish,
+		PercentOff:       code.PercentOff,
+		AmountOff:        code.AmountOff,
+		BuyOneGetOneFree: code.BuyOneGetOneFree,
+		DiscountCap:      code.DiscountCap,
+	}
+}
 
 func getPBMenu(menu *menu.Menu, cook *cook.Cook, cookDistance float32, ems []types.ExchangeMethodWithPrice) *pb.Menu {
 	return &pb.Menu{
@@ -184,6 +196,14 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string, menuID int64
 			NumLikes:        numLikes,
 			HasLiked:        hasLiked,
 		},
+		Promo: &pb.Promo{
+			FreeDelivery:     inq.Promo.FreeDelivery,
+			FreeDish:         inq.Promo.FreeDish,
+			PercentOff:       inq.Promo.PercentOff,
+			AmountOff:        inq.Promo.AmountOff,
+			BuyOneGetOneFree: inq.Promo.BuyOneGetOneFree,
+			DiscountCap:      inq.Promo.DiscountCap,
+		},
 		ExpectedExchangeDatetime: expectedExchangeDatetime,
 		EaterImage:               inq.EaterPhotoURL,
 		EaterName:                inq.EaterName,
@@ -191,13 +211,16 @@ func getPBInquiry(inq *inquiry.Inquiry, cookName, cookImage string, menuID int64
 		CookImage:                cookImage,
 		Servings:                 inq.Servings,
 		TotalPriceInfo: &pb.TotalPriceInfo{
-			CookPricePerServing: inq.PaymentInfo.CookPricePerServing,
-			PricePerServing:     inq.PaymentInfo.PricePerServing,
-			TotalCookPrice:      inq.PaymentInfo.CookPrice,
-			ExchangePrice:       inq.PaymentInfo.ExchangePrice,
-			TaxPrice:            inq.PaymentInfo.TaxPrice,
-			ServiceFeePrice:     inq.PaymentInfo.ServiceFee,
-			TotalPrice:          inq.PaymentInfo.TotalPrice,
+			CookPricePerServing:     inq.PaymentInfo.CookPricePerServing,
+			PricePerServing:         inq.PaymentInfo.PricePerServing,
+			TotalCookPrice:          inq.PaymentInfo.CookPrice,
+			ExchangePrice:           inq.PaymentInfo.ExchangePrice,
+			TaxPrice:                inq.PaymentInfo.TaxPrice,
+			ServiceFeePrice:         inq.PaymentInfo.ServiceFee,
+			AmountOff:               inq.PaymentInfo.AmountOff,
+			AmountOffDelivery:       inq.PaymentInfo.AmountOffDelivery,
+			TotalPrice:              inq.PaymentInfo.TotalPrice,
+			TotalPriceWithAmountOff: inq.PaymentInfo.TotalPriceWithAmountOff,
 		},
 		ExchangePlanInfo: &pb.ExchangePlanInfo{
 			MethodName:   inq.ExchangeMethod.String(),

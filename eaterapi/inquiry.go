@@ -26,7 +26,7 @@ func (s *service) MakeInquiry(ctx context.Context, req *pb.MakeInquiryRequest) (
 	}
 	exchangeMethod := types.ExchangeMethod(req.ExchangeId)
 	inquiryC := inquiry.New(ctx)
-	inq, err := inquiryC.Make(req.ItemId, req.BraintreeNonce, user.ID, getAddress(req.Address), req.Servings, exchangeMethod, exchangeTime)
+	inq, err := inquiryC.Make(req.ItemId, req.BraintreeNonce, user.ID, getAddress(req.Address), req.Servings, exchangeMethod, exchangeTime, req.PromoCode)
 	if err != nil {
 		resp.Error = getGRPCError(err, "failed to inquiry.Make")
 		return resp, nil
@@ -88,7 +88,7 @@ func (s *service) GetInquiries(ctx context.Context, req *pb.GetInquiriesRequest)
 	if err != nil {
 		utils.Errorf(ctx, "failed to likeC.GetNumLikesWithMenuID. Err: %v", err)
 	}
-	resp.Inquiry = getPBInquiries(inqs, names, photos, menuIDs, numLikes, hasLiked)
+	resp.Inquiries = getPBInquiries(inqs, names, photos, menuIDs, numLikes, hasLiked)
 	return resp, nil
 }
 

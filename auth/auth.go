@@ -173,7 +173,7 @@ func getAuthTokenFromString(ctx context.Context, JWTString string) (*Token, erro
 		return jwtKey, nil
 	})
 	if err != nil || !jwtToken.Valid {
-		utils.Criticalf(ctx, "invalid jwtToken: err: %s key: %s \n\n %v", err, jwtKey, jwtKey)
+		utils.Criticalf(ctx, "invalid jwtToken: err: %s ", err)
 		// Token is invalid
 		return nil, errInvalidToken.Wrapf("jwtToken is not valid. err: %+v", err)
 	}
