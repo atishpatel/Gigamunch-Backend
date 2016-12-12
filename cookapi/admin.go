@@ -9,6 +9,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -141,6 +142,34 @@ func (service *Service) SendSMS(ctx context.Context, req *SendSMSReq) (*ErrorOnl
 	err = messageC.SendSMS(req.Number, req.Message)
 	if err != nil {
 		resp.Err = errors.Wrap("failed to message.SendSMS", err)
+		return resp, nil
+	}
+	return resp, nil
+}
+
+// CreatePromoCodeReq is the request for CreatePromoCode.
+type CreatePromoCodeReq struct {
+	GigatokenReq
+	promo.Code
+}
+
+// CreatePromoCode creates a Promo Code.
+func (service *Service) CreatePromoCode(ctx context.Context, req *CreatePromoCodeReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "CreatePromoCode", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	promoC := promo.New(ctx)
+	err = promoC.InsertCode(user, &req.Code)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to promo.InsertCode", err)
 		return resp, nil
 	}
 	return resp, nil

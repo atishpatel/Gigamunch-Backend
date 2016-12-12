@@ -115,6 +115,7 @@ func main() {
 	register("CreateFakeGigatoken", "createFakeGigatoken", "POST", "cookservice/createFakeGigatoken", "Admin func.")
 	register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
 	register("SendSMS", "sendSMS", "POST", "cookservice/sendSMS", "Admin func.")
+	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
 	endpoints.HandleHTTP()
 	appengine.Main()
 }
@@ -190,20 +191,21 @@ func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
 	paymentC := payment.New(ctx)
 	payload := req.FormValue("bt_payload")
 	signature := req.FormValue("bt_signature")
-	transactionIDs, err := paymentC.DisbursementException(signature, payload)
+	_, err = paymentC.DisbursementException(signature, payload)
 	if err != nil {
 		utils.Criticalf(ctx, "Error doing %s: %v", "DisbursementException", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	// set inquiries to fulfilled
-	inquiryC := inquiry.New(ctx)
-	_, err = inquiryC.SetToFulfilledByTransactionIDs(transactionIDs)
-	if err != nil {
-		utils.Criticalf(ctx, "Error doing %s: %v", "inquiry.SetToFulfilledByTransactionIDs", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// TODO Braintree auto release when a submerchant updates their banking info?
+	// inquiryC := inquiry.New(ctx)
+	// _, err = inquiryC.SetToFulfilledByTransactionIDs(transactionIDs)
+	// if err != nil {
+	// 	utils.Criticalf(ctx, "Error doing %s: %v", "inquiry.SetToFulfilledByTransactionIDs", err)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 	w.WriteHeader(http.StatusOK)
 }
 
