@@ -147,7 +147,6 @@
       align-items: center;
       color: white;
       cursor: pointer;
-      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
     }
     
     a {
@@ -160,6 +159,47 @@
     
     g {
       fill: currentcolor;
+    }
+    
+    input {
+      padding: 12px;
+      border: solid #CFD8DC 1px;
+      border-right: none;
+      border-radius: 3px;
+      font-size: 14px;
+      background-color: #f7f7f7;
+      outline: none;
+      opacity: .7;
+      transition: all .5s ease;
+    }
+    
+    input:focus {
+      background-color: white;
+      opacity: 1;
+    }
+    
+    input:placeholder {
+      color: white;
+    }
+    
+    .signup-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      align-self: center;
+    }
+    
+    .signup-container>* {
+      margin: 12px;
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    @media (min-width: 900px) {
+      .signup-container {
+        flex-direction: row;
+      }
     }
     
     .photo-16-9 {
@@ -255,12 +295,13 @@
       font-size: 18px;
       border: none;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 10px;
       background: #F06522;
       background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
       background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
       background: linear-gradient(45deg, #FF5722, #FFB300);
       width: 200px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
     }
     
     .love-section {
@@ -311,6 +352,17 @@
       .love-desc {
         font-size: 20px;
         line-height: 20px;
+      }
+    }
+    
+    @media (min-width: 1000px) {
+      .love-title {
+        font-size: 32px;
+        line-height: 33px;
+      }
+      .love-desc {
+        font-size: 28px;
+        line-height: 29px;
       }
     }
     
@@ -385,7 +437,7 @@
       }
       .why-point {
         flex-direction: column;
-        padding: 0 24px 0 0;
+        padding: 0 12px;
       }
       .why-image>img {
         max-width: 150px;
@@ -668,14 +720,24 @@
           <img style="width:50px;height:50px;"
                src="https://storage.googleapis.com/gigamunch-omninexus-website/home/play-video-button.png" />Watch Video
         </button>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSdaIVaChqqQ9nVzHT2Ae5BxhmT2ozz1HulwVBFE_Y5RfsYaGw/viewform"
-         target="_blank">
-        <button id="headerButton"
-                class="sign-up-button"
+      <form action="/cooksignup"
+            method="post"
+            class="signup-container">
+        <input type="text"
+               name="name"
+               id="name"
+               class="signup-name"
+               placeholder="Name">
+        <input type="text"
+               name="email"
+               id="email"
+               class="signup-email"
+               placeholder="Email">
+        <button class="sign-up-button"
                 onclick="signUp()"
-                raised>Join Now
+                raised>Learn more
         </button>
-      </a>
+      </form>
     </div>
     <div id="videoHeader"
          hidden
@@ -695,7 +757,7 @@
               class="sign-up-button"
               on-tap="signUp"
               style="margin-bottom: 24px;"
-              raised>Join Now
+              raised>Learn more
       </button>
     </a>
     <div class="love-title content">
@@ -767,119 +829,14 @@
       <div class="step-header">
         <div class="step-number"><span>1</span></div>
         <div class="step-header-title">Open your kitchen</div>
-        <div class="step-header-desc">Let’s get you set up ready to sell your food!</div>
-      </div>
-      <div class="step-detail-list">
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24"><g id="phone "><path d="M0 0h24v24H0z " fill="none " /><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z "/></g></svg>
-          </div>
-          <div class="step-detail-title">Quick phone call</div>
-          <div class="step-detail-desc">Let’s have a quick phone call so we can get to know you and answer any questions.</div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-                 <g id="home">
-    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    <path d="M0 0h24v24H0z"
-          fill="none" />
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Kitchen visit</div>
-          <div class="step-detail-desc">It’s important for us to come over to see your kitchen and taste your food. The visit takes about 30 minutes, and while we’re there we’ll help you setup your profile. </div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-<g id="camera">
-    <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
-    <path d="M0 0h24v24H0V0z"
-          fill="none" />
-    <path d="M12 17l1.25-2.75L16 13l-2.75-1.25L12 9l-1.25 2.75L8 13l2.75 1.25z" />
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Photoshoot</div>
-          <div class="step-detail-desc">Smile for the camera while we take high-quality photos of your food to start you off nicely. </div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-                 <g id="hot-bowl">
-	<path d="M21.7746613,6.85620472 C21.632864,6.69550656 21.2163893,6.48249344 21.0521227,6.62136483 C21.0507733,6.62338583 21.049424,6.62471391 21.0480747,6.62673491 L21.0467253,6.62673491 L16.3837227,10.5631759 C16.3837227,10.5631759 15.9618507,11.158273 15.1533653,11.9216903 C13.640176,11.7244987 11.854304,11.6131129 9.971984,11.5990236 L9.971984,11.5963097 C9.913376,11.5963097 9.855472,11.5976378 9.795456,11.5976378 C9.736848,11.5976378 9.67888533,11.5963097 9.61957333,11.5963097 L9.61957333,11.5990236 C7.215472,11.6158268 4.96232,11.792231 3.24326933,12.1028871 C0.978208,12.5121102 0.0116746667,13.0481365 0.0116746667,13.8941837 C0.0116746667,13.9504829 0.0164853333,14.0055118 0.0256373333,14.0591549 C-0.117509333,16.8473806 2.335344,21.9837743 6.170208,21.9837743 L9.62027733,21.9837743 L9.972688,21.9837743 L13.4227573,21.9837743 C17.2569173,21.9837743 19.7094187,16.8473806 19.56768,14.0591549 C19.5758347,14.0054541 19.5806453,13.9504252 19.5806453,13.8941837 C19.5806453,13.0487717 18.613408,12.5120525 16.3477013,12.1042152 C16.3122667,12.0975171 16.2720213,12.0908189 16.2358827,12.0861417 C16.8302933,11.7030184 17.225648,11.5419738 17.225648,11.5419738 L21.8948107,7.60085564 L21.8948107,7.60085564 C21.89616,7.59819948 21.8975093,7.59750656 21.9002667,7.59617848 C22.0650027,7.45603675 21.9137013,7.01823097 21.7746613,6.85620472 L21.7746613,6.85620472 Z M1.302928,13.8942992 C2.06770667,13.4615748 4.94554133,12.8113911 9.795984,12.7940105 C11.3647893,12.8000157 12.723216,12.8718478 13.8745493,12.98179 C13.5343413,13.2273701 13.164272,13.4729501 12.7593547,13.7050184 C12.762112,13.7084252 12.7634027,13.7110814 12.767568,13.7144304 C11.689216,12.9254908 10.063856,13.0167244 8.885712,14.0123255 C8.55647467,14.2907034 8.29405867,14.6148136 8.098464,14.9609239 C4.27140267,14.8207244 1.973664,14.2740157 1.302928,13.8942992 L1.302928,13.8942992 Z M18.2901547,13.8942992 C17.753648,14.1975066 16.179152,14.6060367 13.6196427,14.8301365 C13.587552,14.7495853 13.56168,14.6671864 13.5214347,14.5892913 C13.9876587,13.9921732 14.4641493,13.4998005 14.9147093,13.0959475 C16.7155413,13.3280157 17.8512107,13.6466404 18.2901547,13.8942992 L18.2901547,13.8942992 Z" id="Shape"></path>
-    <path d="M5.319072,6.56772178 C5.41552,6.7448189 5.48093333,6.79511286 5.565472,6.91458268 L5.78259733,7.17286614 C5.82384,7.25872966 5.888608,7.32686614 5.91653333,7.42144882 C5.98775467,7.60091339 6.065136,7.7904252 6.08895467,7.99876115 C6.158768,8.40833071 6.15301867,8.83470341 6.13494933,9.20835696 C6.084848,9.95543307 6.01157333,10.5015066 6.01157333,10.5015066 C6.01157333,10.5015066 6.41784,10.1147454 6.739568,9.34855643 C6.819648,9.15835171 6.89943467,8.94470341 6.949536,8.70553281 C7.00133867,8.46867192 7.05144,8.20906037 7.040176,7.92727559 C7.039472,7.65016798 7.00609067,7.34459318 6.89292267,7.04704462 C6.84892267,6.89546982 6.75488,6.7552126 6.68160533,6.60825722 C6.63965867,6.5368294 6.58445333,6.47273491 6.535056,6.4056378 L6.45732267,6.30672441 L6.41842667,6.2583937 L6.40857067,6.245979 C6.41332267,6.25233071 6.421888,6.25972178 6.436496,6.27617848 L6.43238933,6.27144357 L6.41842667,6.25302362 C6.350608,6.16213648 6.21602667,6.03094488 6.20136,5.97325984 C6.168976,5.90754856 6.12298133,5.85251969 6.09229867,5.74950656 C6.01837867,5.57137008 5.96112,5.36875066 5.93108267,5.16278215 C5.869072,4.7491706 5.87658133,4.31979528 5.894944,3.94544882 C5.94504533,3.19640945 6.01151467,2.64895013 6.01151467,2.64895013 C6.01151467,2.64895013 5.60935467,3.04038845 5.28762667,3.80386352 C5.12576533,4.18427297 4.983264,4.65926509 4.97610667,5.21740682 C4.983264,5.49312861 4.98737067,5.79674016 5.10394133,6.09492388 C5.141136,6.23933858 5.227728,6.40569554 5.319072,6.56772178 L5.319072,6.56772178 Z" id="Shape"></path>
-    <path d="M7.70885867,3.91669291 C7.80601067,4.09511811 7.87077867,4.1447769 7.95525867,4.26424672 L8.172384,4.5212021 C8.21362667,4.60706562 8.278688,4.67716535 8.30632,4.77111286 C8.37754133,4.94988451 8.45527467,5.13876115 8.47874133,5.34709711 C8.54861333,5.75632021 8.54315733,6.18436745 8.525792,6.55738583 C8.47533867,7.30475066 8.402064,7.85018898 8.402064,7.85018898 C8.402064,7.85018898 8.80762667,7.46377428 9.13005867,6.69827822 C9.21049067,6.50674541 9.28922133,6.29303937 9.34032,6.05386877 C9.39177067,5.81671916 9.442928,5.55774278 9.431664,5.27630446 C9.431664,4.99988976 9.39828267,4.69229396 9.28446933,4.39607349 C9.24046933,4.24415223 9.14607467,4.1036063 9.073504,3.95630446 C9.031616,3.88516535 8.97570667,3.82245669 8.92625067,3.75432021 L8.84957333,3.65471391 L8.80968,3.60672966 L8.79912,3.59431496 C8.80287467,3.6000315 8.81173333,3.60875066 8.82229333,3.61977953 L8.80762667,3.60135958 C8.74045333,3.50977953 8.605872,3.38130184 8.591264,3.3236168 C8.55987733,3.2572126 8.51317867,3.20218373 8.48149867,3.09818898 C8.408224,2.92109186 8.35032,2.71847244 8.321632,2.51250394 C8.258976,2.09721785 8.26677867,1.66951706 8.284848,1.29413123 C8.33494933,0.54543832 8.40141867,0 8.40141867,0 C8.40141867,0 7.99931733,0.389475066 7.67682667,1.15260367 C7.51631467,1.53335958 7.372464,2.00933333 7.36565867,2.56649344 C7.372464,2.84221522 7.37657067,3.14646194 7.49349333,3.44470341 C7.53098133,3.58894488 7.61751467,3.75570604 7.70885867,3.91669291 L7.70885867,3.91669291 Z" id="Shape"></path>
-    <path d="M10.6626667,6.31983202 C10.7584693,6.49762205 10.8242347,6.54791601 10.907776,6.66732808 L11.1255467,6.92428346 C11.16544,7.00951181 11.2312053,7.07955381 11.259776,7.17419423 C11.33,7.35296588 11.4076747,7.54247769 11.4316107,7.75017848 C11.501776,8.15940157 11.4956747,8.58814173 11.4772533,8.95977428 C11.4274453,9.70783202 11.3545227,10.2532703 11.3545227,10.2532703 C11.3545227,10.2532703 11.7600853,9.86650919 12.0825173,9.10066667 C12.1635947,8.91115486 12.241328,8.69612073 12.2931307,8.45695013 C12.344288,8.21980052 12.3946827,7.96082415 12.3831253,7.67903937 C12.3831253,7.40297113 12.349744,7.09670341 12.23728,6.79915486 C12.192928,6.64654068 12.0981813,6.50564829 12.0253173,6.36071391 C11.9837227,6.28859318 11.9278133,6.22617323 11.878768,6.15809449 L11.8010347,6.05912336 L11.7614933,6.01050394 L11.7519307,5.99739633 C11.7567413,6.00374803 11.7642507,6.01183202 11.7792107,6.02892388 L11.776512,6.02355381 L11.7607893,6.00444094 C11.6933227,5.91355381 11.5583893,5.7843832 11.54472,5.72669816 C11.5119253,5.66029396 11.4663413,5.60457218 11.4349547,5.50127034 C11.362032,5.32417323 11.3047733,5.12086089 11.2747947,4.9155853 C11.2121387,4.50029921 11.2202347,4.07155906 11.2373067,3.6972126 C11.287056,2.94846194 11.3538187,2.40238845 11.3538187,2.40238845 C11.3538187,2.40238845 10.9517173,2.7931916 10.6299307,3.55701312 C10.4687733,3.93771129 10.3249227,4.41304987 10.3187627,4.9695748 C10.3242187,5.24564304 10.3293227,5.54954331 10.4451893,5.84674541 C10.484144,5.99208399 10.5706773,6.15948031 10.6626667,6.31983202 L10.6626667,6.31983202 Z" id="Shape"></path>
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Share your creations</div>
-          <div class="step-detail-desc">During the kitchen visit, we’ll help you set up for first few items, giving them a name, description, price, etc. </div>
-        </div>
+        <div class="step-header-desc">Let’s get you set up with a quick phone call and photoshoot!</div>
       </div>
     </div>
     <div class="step content">
       <div class="step-header">
         <div class="step-number"><span>2</span></div>
         <div class="step-header-title">Start getting orders</div>
-        <div class="step-header-desc">You’re live! Respond to customers and get ready to cook!</div>
-      </div>
-      <div class="step-detail-list">
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-                 <g id="request">
-      <path d="M17.1898123,12.9826266 L19.1979139,12.9826266 L19.1979139,20.5621319 C19.1979139,21.6737927 18.2942682,22.5833333 17.1898123,22.5833333 L3.12306103,22.5833333 C2.00856468,22.5833333 1.125,21.6737927 1.125,20.5621319 L1.13504051,6.41372203 C1.13504051,5.29195524 2.00856468,4.39252061 3.12306103,4.39252061 L10.1614569,4.39252061 L10.1614569,6.41372203 L3.12306103,6.41372203 L3.12306103,16.5197291 L7.14930462,16.5197291 C7.14930462,18.1973263 8.50477316,19.5515312 10.1614569,19.5515312 C11.8181407,19.5515312 13.1736092,18.1973263 13.1736092,16.5197291 L17.1898123,16.5197291 L17.1898123,12.9826266 Z M23.125,6.22834556 L18.9186808,6.22834556 L18.9186808,10.4621047 L17.5165744,10.4621047 L17.5165744,6.22834556 L13.3102552,6.22834556 L13.3102552,4.81709251 L17.5165744,4.81709251 L17.5165744,0.583333333 L18.9186808,0.583333333 L18.9186808,4.81709251 L23.125,4.81709251 L23.125,6.22834556 Z"></path>
-      <path d="M0 0h24v24H0z" fill="none"/>
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Receive requests</div>
-          <div class="step-detail-desc">You’ll get a text notification when someone requests an order. You don’t have to cook until after you receive a request, that means no food goes to waste. </div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-<g id="thumbs-up-down">
-	<path d="M12 6c0-.55-.45-1-1-1H5.82l.66-3.18.02-.23c0-.31-.13-.59-.33-.8L5.38 0 .44 4.94C.17 5.21 0 5.59 0 6v6.5c0 .83.67 1.5 1.5 1.5h6.75c.62 0 1.15-.38 1.38-.91l2.26-5.29c.07-.17.11-.36.11-.55V6zm10.5 4h-6.75c-.62 0-1.15.38-1.38.91l-2.26 5.29c-.07.17-.11.36-.11.55V18c0 .55.45 1 1 1h5.18l-.66 3.18-.02.24c0 .31.13.59.33.8l.79.78 4.94-4.94c.27-.27.44-.65.44-1.06v-6.5c0-.83-.67-1.5-1.5-1.5z"/>
-    <path d="M0 0h24v24H0z" fill="none"/>
-</g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Accept or decline requests</div>
-          <div class="step-detail-desc">You have 12 hours to accept a request, otherwise it will automatically be declined. We encourage you to work out the details with your customers and suggest times that work for both of you. </div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-  <g id="message">
-    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" />
-    <path d="M0 0h24v24H0z"
-          fill="none" />
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Message your customers</div>
-          <div class="step-detail-desc">You will also be able to have a real conversation with your customers through the messaging feature. Just like Facebook messenger or any other chat app.</div>
-        </div>
-        <div class="step-detail">
-        </div>
+        <div class="step-header-desc">You’re live! Respond to customers requests and get ready to cook!</div>
       </div>
     </div>
     <div class="step content">
@@ -887,68 +844,6 @@
         <div class="step-number"><span>3</span></div>
         <div class="step-header-title">Start earning money!</div>
         <div class="step-header-desc">The fun part! Make food for people. Make money for you.</div>
-      </div>
-      <div class="step-detail-list">
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-  <g id="money">
-    <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"
-    />
-    <path d="M0 0h24v24H0z"
-          fill="none" />
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Direct deposit</div>
-          <div class="step-detail-desc">You will receive a direct deposit to your bank account within 48 hours of completing a request. Our SSL-encrypted payments platform keeps you and your customers secure.</div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-<g id="delivery-car">
-    <path d="M0 0h24v24H0z"
-          fill="none" />
-    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H15V3H9v2H6.5c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"
-    />
-  </g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Pickup or delivery</div>
-          <div class="step-detail-desc">Either the customer or a 3rd party delivery service will come to your house at the scheduled time and pick up the food. You can also offer personal deliveries to get more orders and make extra money.</div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-<g id="circle-star">
-	<path d="M0 0h24v24H0z" fill="none"/>
-    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/>
-</g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Build your brand</div>
-          <div class="step-detail-desc">If you have ambitions of being a private cook, or starting a small food business, then Gigamunch is the perfect starting place to build a brand, or grow a base of loyal customers.</div>
-        </div>
-        <div class="step-detail">
-          <div class="step-detail-icon">
-            <svg width="24"
-                 height="24 "
-                 viewBox="0 0 24 24">
-<g id="feedback">
-	<path d="M0 0h24v24H0z" fill="none"/>
-    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
-</g>
-            </svg>
-          </div>
-          <div class="step-detail-title">Get real feedback</div>
-          <div class="step-detail-desc">Our rating and review system will help you test out crazy new ideas and see what people really think.</div>
-        </div>
       </div>
     </div>
   </div>
@@ -1031,7 +926,6 @@
       </a>
     </div>
   </div>
-
   <style>
     /* Fix issue with font not importing */
     
