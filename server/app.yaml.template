@@ -54,6 +54,10 @@ handlers:
   static_dir: app_SERVEPATH_/source
   secure: always
 
+- url: /cooksignup
+  script: _go_app
+  secure: always
+
 - url: /(|home|becomechef|faq|terms|privacy|upgrade|about|feed|item.*)$
   static_files: app_SERVEPATH_/index.html
   upload: app_SERVEPATH_/index.html

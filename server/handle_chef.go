@@ -115,21 +115,6 @@ func handleGetUploadURL(w http.ResponseWriter, req *http.Request) {
 	resp.URL = uploadURL.String()
 }
 
-func handleGetFeedResp(ctx context.Context, w http.ResponseWriter, funcName string, resp *getFeedResp) {
-	// encode json resp and log errors
-	if projectID == "" {
-		projectID = os.Getenv("PROJECTID")
-	}
-	if resp.Err.Code != 0 && resp.Err.Code != errors.CodeInvalidParameter {
-		utils.Criticalf(ctx, "%s SERVER: Error %s: %+v", funcName, resp.Err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	err := json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		utils.Criticalf(ctx, "SERVER: Error encoding json: %+v", err)
-	}
-}
-
 type getFeedResp struct {
 	Menus []MenuWithItems      `json:"menus"`
 	Err   errors.ErrorWithCode `json:"err"`

@@ -24,10 +24,7 @@ func VerifyCook(ctx context.Context, user *types.User, userID string) error {
 	}
 	userSessions.User.SetVerifiedChef(true)
 	err = putUserSessions(ctx, userID, userSessions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // GetGigatokenViaAdmin returns a valid Gigatoken for a user if user is an admin.s

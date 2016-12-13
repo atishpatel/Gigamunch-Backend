@@ -110,33 +110,19 @@
   src="https://www.facebook.com/tr?id=1118457214861493&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Facebook Pixel Code -->
-
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Roboto', 'Noto', sans-serif;
-      line-height: 1.5;
-      /*min-height: 100vh;*/
-      background-color: #eee;
-    }
-
-  </style>
-
 </head>
 
 <body>
-
-  <link rel="import"
-        href="../bower_components/paper-button/paper-button.html">
-
   <style>
     body {
       display: block;
       background-color: white;
       font-family: 'FontRegular', 'Roboto', sans-serif;
+      line-height: 1.5;
       letter-spacing: .5px;
       font-smoothing: antialiased;
       -webkit-font-smoothing: antialiased;
+      margin: 0;
     }
     
     button {
@@ -169,7 +155,7 @@
       font-size: 14px;
       background-color: #f7f7f7;
       outline: none;
-      opacity: .7;
+      opacity: .95;
       transition: all .5s ease;
     }
     
@@ -182,6 +168,50 @@
       color: white;
     }
     
+     ::-webkit-input-placeholder {
+      /* Chrome */
+      color: black;
+    }
+    
+     :-ms-input-placeholder {
+      /* IE 10+ */
+      color: black;
+    }
+    
+     ::-moz-placeholder {
+      /* Firefox 19+ */
+      color: black;
+      opacity: 1;
+    }
+    
+     :-moz-placeholder {
+      /* Firefox 4 - 18 */
+      color: black;
+      opacity: 1;
+    }
+    
+    input:focus::-webkit-input-placeholder {
+      /* Chrome */
+      color: #626262;
+    }
+    
+    input:focus:-ms-input-placeholder {
+      /* IE 10+ */
+      color: #626262;
+    }
+    
+    input:focus::-moz-placeholder {
+      /* Firefox 19+ */
+      color: #626262;
+      opacity: 1;
+    }
+    
+    input:focus:-moz-placeholder {
+      /* Firefox 4 - 18 */
+      color: #626262;
+      opacity: 1;
+    }
+    
     .signup-container {
       display: flex;
       flex-direction: column;
@@ -191,7 +221,7 @@
     }
     
     .signup-container>* {
-      margin: 12px;
+      margin: 6px;
       flex: 1;
       min-width: 250px;
     }
@@ -233,7 +263,7 @@
     }
     
     .bottom-cta-section {
-      background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/cooking_at_home.jpg') no-repeat center center;
+      background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/home/victoria1.jpg') no-repeat center center;
       background-size: cover;
     }
     
@@ -245,10 +275,11 @@
       justify-content: center;
       background-color: rgba(0, 0, 0, 0.25);
       min-height: 65vh;
+      transition: height 9999s;
     }
     
     .header-section {
-      background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/home/victoria1.jpg') no-repeat center center;
+      background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/cooking_at_home.jpg') no-repeat center center;
       background-size: cover;
     }
     
@@ -259,7 +290,8 @@
       flex-direction: column;
       justify-content: center;
       background-color: rgba(0, 0, 0, 0.25);
-      min-height: 60vh;
+      min-height: 62vh;
+      transition: height 9999s;
     }
     
     .watch-video-button {
@@ -291,7 +323,6 @@
     
     .sign-up-button {
       color: white;
-      margin: 0 auto;
       font-size: 18px;
       border: none;
       border-radius: 4px;
@@ -302,6 +333,8 @@
       background: linear-gradient(45deg, #FF5722, #FFB300);
       width: 200px;
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      margin: 6px;
+      min-width: 275px;
     }
     
     .love-section {
@@ -337,9 +370,9 @@
     }
     
     .love-desc {
-      padding: 0 24px;
-      font-size: 14px;
-      line-height: 15px;
+      padding: 0 12px;
+      font-size: 16px;
+      line-height: 17px;
       text-align: center;
       margin: 24px 0;
     }
@@ -350,8 +383,9 @@
         line-height: 25px;
       }
       .love-desc {
+        padding: 0 24px;
         font-size: 20px;
-        line-height: 20px;
+        line-height: 21px;
       }
     }
     
@@ -590,6 +624,7 @@
       flex-direction: column;
       width: 135px;
       padding: 8px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
     }
     
     @media (min-width: 700px) {
@@ -676,8 +711,14 @@
       margin: auto;
     }
     
-    *[hidden='true'] {
-      display: none;
+    .floating-logo {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      font-family: 'NexaBold', 'FontRegular', sans-serif;
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
     }
 
   </style>
@@ -686,26 +727,25 @@
     var showPromoVideo = false;
     var promoVideoURL = '';
 
-    function signUp() {
-      var eventLabel = '';
-      if (showPromoVideo) {
-        eventLabel = 'videowatched';
-      }
-      var eventAction = 'login';
-      ga('send', 'event', 'cooksignup', eventAction, eventLabel); // fire signup this.fire('signup');
-    }
-
     function watchVideoTapped() {
       var topHeaderEl = document.getElementById('topHeader');
       var videoHeaderEl = document.getElementById('videoHeader');
-      var videoSignUpButton = document.getElementById('videoSignUpButton');
-      topHeaderEl.setAttribute('hidden', true);
-      videoHeaderEl.removeAttribute('hidden');
-      videoSignUpButton.removeAttribute('hidden');
+      var videoSignUpForm = document.getElementById('videoSignUpForm');
+      topHeaderEl.style.display = 'none';
+      videoHeaderEl.style.display = 'flex';
+      videoSignUpForm.style.display = 'flex';
       showPromoVideo = true;
       var video = document.getElementById('video');
       video.src = 'https://www.youtube.com/embed/vnMbIiRZnDU?rel=0&showinfo=0&autoplay=1';
       ga('send', 'event', 'cookwatchvideo', 'clicked');
+    }
+
+    function callUsTapped() {
+      ga('send', 'event', 'callus', 'clicked');
+    }
+
+    function emailUsTapped() {
+      ga('send', 'event', 'emailus', 'clicked');
     }
 
   </script>
@@ -713,35 +753,36 @@
   <header class="header-section">
     <div id="topHeader"
          class="header-container">
+      <div class="floating-logo">Gigamunch</div>
       <h1 id="headerText"
-          class="header-title">Nashville can't wait to try<br> your homemade food!</h1>
-      <button class="watch-video-button"
-              onclick="watchVideoTapped()">
-          <img style="width:50px;height:50px;"
-               src="https://storage.googleapis.com/gigamunch-omninexus-website/home/play-video-button.png" />Watch Video
-        </button>
-      <form action="/cooksignup"
+          class="header-title">Sell your homemade food!</h1>
+      <form action="/signedup"
             method="post"
-            class="signup-container">
+            class="signup-container"
+            id="headerSignUpForm">
         <input type="text"
                name="name"
                id="name"
                class="signup-name"
-               placeholder="Name">
+               placeholder="Name"
+               required>
         <input type="text"
                name="email"
                id="email"
                class="signup-email"
-               placeholder="Email">
+               placeholder="Email"
+               pattern="\S+@\S+\.\S+"
+               required>
+        <input type="text"
+               name="terp"
+               style="display:none">
         <button class="sign-up-button"
-                onclick="signUp()"
                 raised>Learn more
         </button>
       </form>
     </div>
     <div id="videoHeader"
-         hidden
-         style="width: 100%; height:100%; z-index:100; display:flex;">
+         style="width: 100%; height:100%; z-index:100; display:none;">
       <iframe id="video"
               style="width:100%;height:100%; min-height: 60vh"
               frameborder="0"
@@ -750,16 +791,31 @@
     </div>
   </header>
   <div class="love-section">
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdaIVaChqqQ9nVzHT2Ae5BxhmT2ozz1HulwVBFE_Y5RfsYaGw/viewform"
-       target="_blank">
-      <button id="videoSignUpButton"
-              hidden
-              class="sign-up-button"
-              on-tap="signUp"
-              style="margin-bottom: 24px;"
+    <form action="/signedup"
+          method="post"
+          style="display:none"
+          class="signup-container"
+          id="videoSignUpForm">
+      <input type="text"
+             name="name"
+             id="name"
+             class="signup-name"
+             placeholder="Name"
+             required>
+      <input type="text"
+             name="email"
+             id="email"
+             class="signup-email"
+             placeholder="Email"
+             pattern="\S+@\S+\.\S+"
+             required>
+      <input type="text"
+             name="terp"
+             style="display:none">
+      <button class="sign-up-button"
               raised>Learn more
-      </button>
-    </a>
+        </button>
+    </form>
     <div class="love-title content">
       Make money doing what you love
     </div>
@@ -786,9 +842,9 @@
         </div>
         <div class="why-point-text">
           <h3 class="why-point-title">Earn money on a flexible schedule</h3>
-          <p class="why-point-desc">
+          <!--<p class="why-point-desc">
             Choose your own schedule and be your own boss. Have the freedom to cook whenever you want.
-          </p>
+          </p>-->
         </div>
       </div>
 
@@ -798,9 +854,9 @@
         </div>
         <div class="why-point-text">
           <h3 class="why-point-title">Build your brand</h3>
-          <p class="why-point-desc">
+          <!--<p class="why-point-desc">
             Create a loyal following of customers who love your food. Find new clients and catering opportunities.
-          </p>
+          </p>-->
         </div>
       </div>
 
@@ -809,10 +865,10 @@
           <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/high_five.png">
         </div>
         <div class="why-point-text">
-          <h3 class="why-point-title">We got your back</h3>
-          <p class="why-point-desc">
+          <h3 class="why-point-title">No hassle with payments</h3>
+          <!--<p class="why-point-desc">
             Expand your side hustle without being a marketing expert. Let us manage the boring part like orders, payments, and logistics.
-          </p>
+          </p>-->
         </div>
       </div>
     </div>
@@ -852,7 +908,8 @@
     <div class="contact-us-title">Still have questions?</div>
     <div class="contact-us-link-list">
       <a class="contact-us-link"
-         href="mailto:enis@gigamunchapp.com">
+         href="mailto:enis@gigamunchapp.com"
+         onclick="emailUsTapped()">
         <button raised
                 class="contact-us-button">
           <div class="contact-us-button-title">EMAIL US</div>
@@ -860,7 +917,8 @@
         </button>
       </a>
       <a class="contact-us-link"
-         href="tel:+6153975516">
+         href="tel:+6153975516"
+         onclick="callUsTapped()">
         <button raised
                 class="contact-us-button">
           <div class="contact-us-button-title">CALL US</div>
@@ -916,14 +974,30 @@
   <div class="bottom-cta-section">
     <div class="bottom-cta-container">
       <h1 id="headerText"
-          class="header-title">Get ready to feed your community</h1>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSdaIVaChqqQ9nVzHT2Ae5BxhmT2ozz1HulwVBFE_Y5RfsYaGw/viewform"
-         target="_blank">
+          class="header-title">Get ready to feed the Nashville community!</h1>
+      <form action="/signedup"
+            method="post"
+            class="signup-container">
+        <input type="text"
+               name="name"
+               id="name"
+               class="signup-name"
+               placeholder="Name"
+               required>
+        <input type="text"
+               name="email"
+               id="email"
+               class="signup-email"
+               placeholder="Email"
+               pattern="\S+@\S+\.\S+"
+               required>
+        <input type="text"
+               name="terp"
+               style="display:none">
         <button class="sign-up-button"
-                onclick="signUp()"
-                raised>Learn More
-      </button>
-      </a>
+                raised>Learn more
+        </button>
+      </form>
     </div>
   </div>
   <style>
@@ -932,11 +1006,6 @@
     @font-face {
       font-family: 'NexaBold';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
-    }
-    
-    @font-face {
-      font-family: 'NexaLight';
-      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_light.otf') format('opentype');
     }
     
     @font-face {
