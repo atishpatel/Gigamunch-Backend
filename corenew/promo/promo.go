@@ -63,7 +63,7 @@ func (c *Client) InsertCode(user *types.User, code *Code) error {
 		return errInvalidParameter.WithMessage("Code cannot contain '.")
 	}
 	code.Code = strings.ToUpper(code.Code)
-	if code.PercentOff > 0 || code.AmountOff > 0 || code.BuyOneGetOneFree || code.FreeDish && code.DiscountCap < .001 {
+	if (code.PercentOff > 0 || code.AmountOff > 0 || code.BuyOneGetOneFree || code.FreeDish) && code.DiscountCap < .001 {
 		return errInvalidParameter.WithMessage("Discount Cap cannot be 0.")
 	}
 	st := fmt.Sprintf(insertPromoCodeStatement, code.Code, code.FreeDelivery, code.PercentOff, code.AmountOff, code.DiscountCap, code.FreeDish, code.BuyOneGetOneFree, code.StartDatetime.Format(datetimeFormat), code.EndDatetime.Format(datetimeFormat), code.NumUses)
