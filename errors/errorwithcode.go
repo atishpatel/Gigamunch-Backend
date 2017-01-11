@@ -29,6 +29,9 @@ func (err ErrorWithCode) WithMessage(msg string) ErrorWithCode {
 
 // WithError sets Details to error.Error()
 func (err ErrorWithCode) WithError(e error) ErrorWithCode {
+	if e == nil {
+		return err
+	}
 	return err.Wrap(e.Error())
 }
 
