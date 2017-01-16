@@ -806,10 +806,10 @@
                      attr-for-selected="name"
                      class="drawer-list"
                      role="navigation">
-        <a class="nav-a"
+        <!--<a class="nav-a"
            href="[[loginBtnUrl]]">
           <paper-item on-tap="signUp">[[loginBtnText]]</paper-item>
-        </a>
+        </a>-->
         <a class="nav-a"
            name="home"
            href="/">
@@ -903,13 +903,13 @@
                   <a class="nav-a"
                      href="/feed"><span>Feed</span></a>
                 </paper-tab>
-                <div class="fake-paper-tab">
+                <!--<div class="fake-paper-tab">
                   <a class="nav-a"
                      href="[[loginBtnUrl]]"
                      on-tap="login">
                     <span>[[loginBtnText]]</span>
                   </a>
-                </div>
+                </div>-->
                 </a>
               </paper-tabs>
             </div>
@@ -1018,7 +1018,7 @@
         // setup gitkit stuff 
         if (this.user === undefined || this.user === null || this.user.id === undefined) {
           var apiKey;
-          if (location.hostname.includes('gigamunch-omninexus-dev.appspot.com') || location.hostname === 'localhost') {
+          if (location.hostname === 'gigamunch-omninexus-dev.appspot.com' || location.hostname === 'localhost') {
             apiKey = 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g';
           } else {
             apiKey = 'AIzaSyCB8i30D0GkFPW6_mKf9ph8voFFMQoarO0';
@@ -1082,7 +1082,7 @@
         var pages = ['/home', '/becomechef', '/faq', '/terms', '/privacy', '/upgrade', '/about', '/sell', '/feed', '/item'];
         var found = path === '/';
         for (var i = 0; i < pages.length; i++) {
-          if (path.includes(pages[i])) {
+          if (path.indexOf(pages[i]) !== -1) {
             found = true;
           }
         }
@@ -1090,13 +1090,13 @@
           // force page reload
           window.location = path;
         }
-        if (location.search.includes('nav=f')) {
+        if (location.search.indexOf('nav=f') !== -1) {
           this.hideNav = true;
         }
         if (path === '/becomechef' || path === '/sell' && this.user !== null) {
-          if (location.search.includes('gstate=login')) {
+          if (location.search.indexOf('gstate=login') !== -1) {
             this.login();
-          } else if (location.search.includes('gstate=signup')) {
+          } else if (location.search.indexOf('gstate=signup') !== -1) {
             this.signup();
           }
         }
