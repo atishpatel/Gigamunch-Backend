@@ -44,6 +44,8 @@ func handleResp(ctx context.Context, w http.ResponseWriter, funcName string, res
 	if respErr.Code != 0 && respErr.Code != errors.CodeInvalidParameter {
 		utils.Criticalf(ctx, "%s SERVER: Error %s: %+v", projectID, funcName, respErr)
 		w.WriteHeader(http.StatusInternalServerError)
+	} else if respErr.Code != 0 {
+		utils.Infof(ctx, "CodeInvalidParameter(%d) Error %s: %+v", respErr.Code, funcName, respErr)
 	}
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {

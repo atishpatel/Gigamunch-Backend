@@ -2,6 +2,8 @@ package payment
 
 import (
 	"math"
+	"math/rand"
+	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -9,14 +11,17 @@ import (
 	"github.com/atishpatel/braintree-go"
 	"golang.org/x/net/context"
 
+	"strings"
+
 	"google.golang.org/appengine/urlfetch"
 )
 
 var (
-	errBT               = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with payment processing. Your card wasn't charged."}
-	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was something went wrong."}
-	btConfig            config.BTConfig
+	errBT                  = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with payment processing. Your card wasn't charged."}
+	errInvalidParameter    = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errInternal            = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "There was something went wrong."}
+	btConfig               config.BTConfig
+	replaceCharactersArray = [...]string{"!", "#", "$", "%", "&", "'", "*", "+", "/", "=", "?", "^", "`", "{", "|", "}", "~", ".", "@"}
 )
 
 // GetPricePerServing returns the price per serving from cook price per serving.
@@ -130,7 +135,7 @@ func (c *Client) SubmitForSettlement(id string) error {
 	return nil
 }
 
-// GigamunchToSubmerchant sends money form Gigamunch to a submerchant
+// GigamunchToSubmerchant sends money form Gigamunch to a submerchant.
 func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (string, error) {
 	t := &braintree.Transaction{
 		Type:              "sale",
@@ -152,6 +157,51 @@ func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (s
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
 	return t.Id, nil
+}
+
+// StartSubscriptionReq is the reqest for StartSubscription.
+type StartSubscriptionReq struct {
+	CustomerID string
+	Nonce      string
+	PlanID     string
+	StartDate  time.Time
+}
+
+func (s *StartSubscriptionReq) valid() error {
+	if len(s.CustomerID) < 32 {
+		return errInvalidParameter.WithMessage("Invalid CustomerID")
+	}
+	if s.Nonce == "" {
+		return errInvalidParameter.WithMessage("Invalid Payment Info.").Wrap("Payment Nonce cannot be empty.")
+	}
+	if s.PlanID == "" {
+		return errInvalidParameter.WithMessage("Invalid Box Plan.").Wrap("PlanID cannot be empty")
+	}
+	return nil
+}
+
+// StartSubscription creates a subscription with a nonce from a customer.
+func (c *Client) StartSubscription(req *StartSubscriptionReq) (string, error) {
+	if req == nil {
+		return "", errInvalidParameter.Wrap("StarySubscription is nil.")
+	}
+	err := req.valid()
+	if err != nil {
+		return "", err
+	}
+	s := &braintree.Subscription{
+		Id:                 req.CustomerID[:25] + randStringBytes(7) + "_sub",
+		PlanId:             req.PlanID,
+		PaymentMethodNonce: req.Nonce,
+	}
+	if !req.StartDate.IsZero() {
+		s.FirstBillingDate = req.StartDate.Format("2006-01-02")
+	}
+	s, err = c.bt.Subscription().Create(s)
+	if err != nil {
+		return "", errBT.WithError(err).Wrapf("cannot create subscription(%#v)", s)
+	}
+	return s.Id, nil
 }
 
 // StartSale makes an escrow sale
@@ -217,4 +267,29 @@ func getBTClient(ctx context.Context) *braintree.Braintree {
 
 func getBTDecimal(v float32) *braintree.Decimal {
 	return braintree.NewDecimal(int64(v*100), 2)
+}
+
+func GetIDFromEmail(email string) string {
+	s := email
+	for _, v := range replaceCharactersArray {
+		s = strings.Replace(s, v, "", -1)
+	}
+	for len(s) < 36 {
+		s += s
+	}
+	return s[:36]
+}
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func randStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }

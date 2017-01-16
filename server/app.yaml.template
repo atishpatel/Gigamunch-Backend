@@ -68,6 +68,11 @@ handlers:
   upload: becomecook.html
   secure: always
 
+- url: /schedule
+  static_files: schedule.html
+  upload: schedule.html
+  secure: always
+
 - url: /bower_components
   static_dir: app_SERVEPATH_/bower_components
   secure: always
