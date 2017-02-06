@@ -67,6 +67,7 @@
     ga.l = +new Date;
     var ua = isProd ? 'UA-71567908-1' : 'UA-71567908-4';
     ga('create', ua, 'auto');
+    ga('set', 'userId', '{{.Email}}');
     ga('send', 'pageview');
     // Setup error tracking before anything else runs.
     window.onerror = function(message, file, lineNumber, columnNumber, error) {
@@ -334,6 +335,36 @@
       background: #dfdfdf;
     }
     
+    .no-commitment {
+      margin-top: 12px;
+      background-color: #28a971;
+      color: white;
+      border-radius: 3px;
+      padding: 12px;
+      display: flex;
+      font-size: 14px;
+    }
+    
+    .no-commitment-checkmark {
+      font-size: 64px;
+      padding: 0 12px;
+      margin: auto;
+    }
+
+    .no-commitment-text {
+      padding-left: 12px;
+    }
+
+    .no-commitment-title {
+      border-bottom: solid white 2px;
+      font-weight: bold;
+      padding: 8px 0;
+    }
+
+    .no-commitment-desc {
+      padding-top: 8px;
+    }
+
     .checkout-payment-lock {
       color: #1f8458;
     }
@@ -381,7 +412,7 @@
     }
     
     .item-image>img {
-      padding-right: 12px;
+      margin-right: 12px;
       width: 200px;
       border-radius: 3px;
     }
@@ -537,12 +568,103 @@
   </style>
 
   <script type="text/javascript">
-    function callUsTapped() {
-      ga('send', 'event', 'callus', 'clicked');
+    var nameInputFocusedLogged = false;
+
+    function nameInputFocused() {
+      if (!nameInputFocusedLogged) {
+        ga('send', 'event', 'schedule_name_tapped', 'focus');
+        nameInputFocusedLogged = true;
+      }
     }
 
-    function emailUsTapped() {
-      ga('send', 'event', 'emailus', 'clicked');
+    var addressInputFocusedLogged = false;
+
+    function addressInputFocused() {
+      if (!addressInputFocusedLogged) {
+        ga('send', 'event', 'schedule_address_tapped', 'focus');
+        addressInputFocusedLogged = true;
+      }
+    }
+
+    var addressInputSelectedLogged = false;
+
+    function addressInputSelected() {
+      if (!addressInputSelectedLogged) {
+        ga('send', 'event', 'schedule_address_selected', 'autocomplete');
+        addressInputSelectedLogged = true;
+      }
+    }
+
+    var meal1InputClickLogged = false;
+
+    function meal1InputClick() {
+      if (!meal1InputClickLogged) {
+        ga('send', 'event', 'schedule_meal_tapped', 'one');
+        meal1InputClickLogged = true;
+      }
+    }
+
+    var meal2InputClickLogged = false;
+
+    function meal2InputClick() {
+      if (!meal2InputClickLogged) {
+        ga('send', 'event', 'schedule_meal_tapped', 'two');
+        meal2InputClickLogged = true;
+      }
+    }
+
+    var meal4InputClickLogged = false;
+
+    function meal4InputClick() {
+      if (!meal4InputClickLogged) {
+        ga('send', 'event', 'schedule_meal_tapped', 'four');
+        meal4InputClickLogged = true;
+      }
+    }
+
+    var timeInputClickLogged = false;
+
+    function timeInputClick() {
+      if (!timeInputClickLogged) {
+        ga('send', 'event', 'schedule_time_tapped', 'click');
+        timeInputClickLogged = true;
+      }
+    }
+
+    var numberInputFocusedLogged = false;
+
+    function numberInputFocused() {
+      if (!numberInputFocusedLogged) {
+        ga('send', 'event', 'schedule_number_tapped', 'focus');
+        numberInputFocusedLogged = true;
+      }
+    }
+
+    var cvvInputFocusedLogged = false;
+
+    function cvvInputFocused() {
+      if (!cvvInputFocusedLogged) {
+        ga('send', 'event', 'schedule_cvv_tapped', 'focus');
+        cvvInputFocusedLogged = true;
+      }
+    }
+
+    var expirationDateInputFocusedLogged = false;
+
+    function expirationDateInputFocused() {
+      if (!expirationDateInputFocusedLogged) {
+        ga('send', 'event', 'schedule_expiration_date_tapped', 'focus');
+        expirationDateInputFocusedLogged = true;
+      }
+    }
+
+    var subscribeClickLogged = false;
+
+    function subscribeClick() {
+      if (!subscribeClickLogged) {
+        ga('send', 'event', 'schedule_button_tapped', 'click');
+        subscribeClickLogged = true;
+      }
     }
 
   </script>
@@ -580,6 +702,7 @@
               <input type="text"
                      name="name"
                      id="name"
+                     onfocus="nameInputFocused()"
                      placeholder="Mr. Excited"
                      required />
             </div>
@@ -595,26 +718,28 @@
                 <input type="text"
                        name="address-input"
                        id="address-input"
+                       onfocus="addressInputFocused()"
                        placeholder="Street, City"
                        required/>
               </div>
             </div>
           </div>
           <div class="form-section-title">
-            <h2>Choose your plan</h2>
+            <h2>Choose your box</h2>
           </div>
           <div class="form-section-desc">
             Every Monday you'll get a box that'll take you on a new journey! How do you want your journey to be?
           </div>
           <div class="select-package-container">
             <ul>
-              <li>
+              <!--<li>
                 <div class="select-package-container-button"
                      for="meal-option-1">
                   <input type="radio"
                          id="meal-option-1"
                          value="1"
-                         name="servings">
+                         name="servings"
+                         onclick="meal1InputClick()">
                   <label class="most-popular-label"
                          for="meal-option-1"> </label>
                   <label class="num-meals-label"
@@ -622,7 +747,7 @@
                   <label class="price-per-meal-label"
                          for="meal-option-1">$13 PER MEAL</label>
                 </div>
-              </li>
+              </li>-->
 
               <li>
                 <div class="select-package-container-button"
@@ -631,13 +756,14 @@
                          id="meal-option-2"
                          value="2"
                          name="servings"
+                         onclick="meal2InputClick()"
                          checked>
                   <label class="most-popular-label"
                          for="meal-option-2">*Most Popular!*</label>
                   <label class="num-meals-label"
                          for="meal-option-2">2 MEAL BOX</label>
                   <label class="price-per-meal-label"
-                         for="meal-option-2">$12 PER MEAL</label>
+                         for="meal-option-2">$15 PER MEAL</label>
                 </div>
               </li>
 
@@ -647,13 +773,14 @@
                   <input type="radio"
                          id="meal-option-3"
                          value="4"
+                         onclick="meal4InputClick()"
                          name="servings">
                   <label class="most-popular-label"
                          for="meal-option-3"> </label>
                   <label class="num-meals-label"
                          for="meal-option-3">4 MEAL BOX</label>
                   <label class="price-per-meal-label"
-                         for="meal-option-3">$11 PER MEAL</label>
+                         for="meal-option-3">$14 PER MEAL</label>
                 </div>
               </li>
             </ul>
@@ -664,6 +791,7 @@
                     id="delivery-time"
                     option-value="value"
                     form="checkout-form"
+                    onclick="timeInputClick()"
                     required>
               <option disabled selected value> -- select a time -- </option>
               <option value="6">6-7 PM</option>
@@ -672,6 +800,13 @@
             </select>
           </div>
           <div class="form-section-note">*Deliverys are only offered on Monday nights. If you want it on some other day, <a href="mailto:enis@gigamunchapp.com">let us know!</a></div>
+          <div class="no-commitment">
+            <div class="no-commitment-checkmark"><i class="fa fa-check" aria-hidden="true"></i></div>
+            <div class="no-commitment-text">
+            <div class="no-commitment-title">No commitment. No, really.</div>
+            <div class="no-commitment-desc">Your first box is on us because we know you'll love it! If you don't want to continue, you'll have 4 days to cancel without getting charged a dime.</div>
+            </div>
+          </div>
           <div class="form-section-title">
             <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
           </div>
@@ -715,11 +850,11 @@
               </div>
               <div class="order-summary-section">
                 <div class="order-summary-section-name">Delivery<span class="multiplier">(x4)</span></div>
-                <div class="order-summary-section-price"><span class="old_price">$<span id="delivery_total">20</span></span> FREE</div>
+                <div class="order-summary-section-price">FREE</div>
               </div>
               <div class="order-summary-section">
                 <div class="order-summary-section-name">Tax</div>
-                <div class="order-summary-section-price"><span class="old_price">$<span id="tax_total"></span></span> FREE</div>
+                <div class="order-summary-section-price">FREE</div>
               </div>
               <div class="order-summary-section">
                 <div class="order-summary-section-name">Total</div>
@@ -735,6 +870,7 @@
           <input class="checkout-button"
                  type="submit"
                  value="Subscribe"
+                 onclick="subscribeClick()"
                  disabled/>
         </form>
       </div>
@@ -830,6 +966,7 @@
           latitude: latitude,
           longitude: longitude,
         };
+        addressInputSelected()
       });
     }
 
@@ -889,6 +1026,9 @@
         submit.removeAttribute('disabled');
         form.addEventListener('submit', function(event) {
           event.preventDefault();
+          if (!validateFields()) {
+            return
+          }
           submit.setAttribute('disabled', true);
           hostedFieldsInstance.tokenize({
             vault: true
@@ -896,6 +1036,13 @@
             if (tokenizeErr) {
               // Handle error in Hosted Fields tokenization
               console.error('failed to tokenize fields', tokenizeErr)
+              logError(JSON.stringify(tokenizeErr));
+              if (tokenizeErr.type === 'CUSTOMER') {
+                alert('Invalid credit card information.');
+              } else {
+                alert('An unknown error occured while verifying your credit card. Please try a different card or contact enis@gigamunchapp.com.');
+              }
+              submit.removeAttribute('disabled');
               return;
             }
 
@@ -955,8 +1102,30 @@
             xhr.send(JSON.stringify(req));
           });
         }, false);
+        // add listeners to log events 
+        hostedFieldsInstance.on('focus', function(e) {
+          switch (e.emittedBy) {
+            case 'number':
+              numberInputFocused()
+              break;
+            case 'cvv':
+              cvvInputFocused()
+              break;
+            case 'expirationDate':
+              expirationDateInputFocused()
+              break;
+          }
+        })
       });
+
     });
+
+    function validateFields() {
+      // if (address === null || address.street === undefined || address.street === '' ) {
+
+      // }
+      return true
+    }
 
     function updateOrderInfo() {
       var d = new Date();
@@ -998,36 +1167,37 @@
       var boxForTitleText;
       switch (val) {
         case '1':
-          oneBoxPrice = 13;
+          oneBoxPrice = 17;
           servingsPerBox = 1;
           boxForTitleText = 'Box for One';
           break;
         case '2':
-          oneBoxPrice = 12;
+          oneBoxPrice = 15;
           servingsPerBox = 2;
           boxForTitleText = 'Box for Two';
           break;
         case '4':
-          oneBoxPrice = 11;
+          oneBoxPrice = 14;
           servingsPerBox = 4;
           boxForTitleText = 'Box for Four';
           break;
       }
       var boxTotal = oneBoxPrice * servingsPerBox * 4;
-      var deliveryTotal = 20;
-      var taxTotal = (boxTotal + deliveryTotal) * .05;
-      var total = boxTotal + deliveryTotal + taxTotal;
+      // var deliveryTotal = 20;
+      // var taxTotal = (boxTotal + deliveryTotal) * .05;
+      // var total = boxTotal + deliveryTotal + taxTotal;
+      var total = boxTotal;
 
 
 
       document.getElementById('boxForTitle').innerHTML = boxForTitleText;
       document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
-      document.getElementById('delivery_total').innerHTML = deliveryTotal.toFixed(0);
-      document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
+      // document.getElementById('delivery_total').innerHTML = deliveryTotal.toFixed(0);
+      // document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
       document.getElementById('total').innerHTML = total.toFixed(2);
     }
 
-    document.getElementById('meal-option-1').addEventListener('change', updateOrderInfo);
+    // document.getElementById('meal-option-1').addEventListener('change', updateOrderInfo);
     document.getElementById('meal-option-2').addEventListener('change', updateOrderInfo);
     document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
 
