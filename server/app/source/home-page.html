@@ -204,19 +204,36 @@
       }
       
       .in-the-box-title {
-        margin: auto;
-        text-align: center;
-        font-size: 18px;
-        line-height: 19px;
-        font-weight: bold;
-        padding: 12px 0;
+      margin: auto;
+      text-align: center;
+      font-size: 18px;
+      line-height: 19px;
+      font-weight: bold;
+      padding: 12px 0;
+    }
+
+    .in-the-box-img {
+      max-width: 1000px;
+      margin: auto;
+      width: 100%;
+      min-height: 400px;
+      background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_desktop.jpg') no-repeat center center;
+      /*background: white url('/cook/src/box_desktop.png') no-repeat center center;*/
+      background-size: contain;
+    }
+
+    @media (max-width:700px) {
+      .in-the-box-title {
+        font-size: 24px;
       }
-      
-      @media (max-width:700px) {
-        .in-the-box-title {
-          font-size: 24px;
-        }
+
+      .in-the-box-img {
+        min-height: 550px;
+        background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_mobile.jpg') no-repeat center center;
+        /*background: white url('/cook/src/box_mobile.png') no-repeat center center;*/
+        background-size: contain;
       }
+    }
       
       .in-the-box-point-list {
         display: flex;
@@ -550,243 +567,227 @@
     </script>
 
     <div class="header">
-      <a href="/"
-         class="floating-logo">Gigamunch</a>
-      <!--<div class="sign-up-holder"></div>-->
-      <div class="header-title">DISCOVER <br><span>THE WORLD</span></div>
-    </div>
-    <div class="sign-up-section content">
-      <div class="sign-up-content">
-        <h1 class="sign-up-title">Get a new international meal <br>delivered to you every Monday!</h1>
-        <form action="/scheduleform"
-              method="get"
-              class="sign-up-form"
-              style="max-width: 340px;">
-          <input type="text"
-                 name="email"
-                 id="email"
-                 class="sign-up-email"
-                 placeholder="Email"
-                 pattern="\S+@\S+\.\S+"
-                 onfocus="learnMoreInputTapped()"
-                 required/>
-          <input type="text"
-                 name="terp"
-                 style="display:none">
-          <button class="sign-up-button"
-                  on-tap="learnMoreTapped()"
-                  raised>Learn more
+    <a href="/"
+       class="floating-logo">Gigamunch</a>
+    <!--<div class="sign-up-holder"></div>-->
+    <div class="header-title">DISCOVER <br><span>THE WORLD</span></div>
+  </div>
+  <div class="sign-up-section content">
+    <div class="sign-up-content">
+      <h1 class="sign-up-title">Get a new international meal <br>delivered to you every week!</h1>
+      <form action="/scheduleform"
+            method="get"
+            class="sign-up-form"
+            style="max-width: 340px;">
+        <input type="text"
+               name="email"
+               id="email"
+               class="sign-up-email"
+               placeholder="Email"
+               pattern="\S+@\S+\.\S+"
+               onfocus="learnMoreInputTapped()"
+               required/>
+        <input type="text"
+               name="terp"
+               style="display:none">
+        <button class="sign-up-button"
+                on-tap="learnMoreTapped()"
+                raised>Get Started
               </button>
-        </form>
+      </form>
+    </div>
+  </div>
+  <div class="in-the-box-section content">
+    <h2 class="in-the-box-title"> What's inside each box?</h2>
+    <div class="in-the-box-img"></div>
+    <!--<div class="in-the-box-point-list content">
+      <div class="in-the-box-point">
+        <div class="in-the-box-point-text">
+          <h3 class="in-the-box-point-title">Authentic Meal</h3>
+          <p class="in-the-box-point-desc">
+            Eat up! Ready-to-eat international meals made by local international cooks.
+          </p>
+        </div>
+        <div class="in-the-box-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/asian_meal.jpg">
+        </div>
+      </div>
+
+      <div class="in-the-box-point-reverse">
+        <div class="in-the-box-point-text">
+          <h3 class="in-the-box-point-title">Cultural Info Guide</h3>
+          <p class="in-the-box-point-desc">
+            Learn about the dish you're eating and the story behind it. There is even traditional music to immerse yourself in the culture!
+          </p>
+        </div>
+        <div class="in-the-box-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/info_guide.jpg">
+        </div>
+      </div>
+
+      <div class="in-the-box-point">
+        <div class="in-the-box-point-text">
+          <h3 class="in-the-box-point-title">Connection to the Cook</h3>
+          <p class="in-the-box-point-desc">
+            Get to know the cook behind the food. Gain private access to this cook and request food from them anytime.
+          </p>
+        </div>
+        <div class="in-the-box-image">
+          <img class="circle"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/soup_lady.jpg">
+        </div>
+      </div>
+    </div>-->
+  </div>
+  <div class="pick-a-plan-section">
+    <h2 class="pick-a-plan-title">CHOOSE YOUR BOX</h2>
+    <!-- TODO add images -->
+    <div class="pick-a-plan-option-list content">
+      <!--<div class="pick-a-plan-option">
+        <div class="pick-a-plan-option-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/solo.png">
+        </div>
+        <div class="pick-a-plan-option-text">
+          <h3 class="pick-a-plan-option-title">GO SOLO</h3>
+          <p class="pick-a-plan-option-price">
+            $13 PER MEAL
+          </p>
+        </div>
+      </div>-->
+
+      <div class="pick-a-plan-option">
+        <div class="pick-a-plan-option-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/couple.png">
+        </div>
+        <div class="pick-a-plan-option-text">
+          <h3 class="pick-a-plan-option-title">DINNER FOR TWO</h3>
+          <p class="pick-a-plan-option-price">
+            $15 PER MEAL
+          </p>
+        </div>
+
+      </div>
+
+      <div class="pick-a-plan-option">
+        <div class="pick-a-plan-option-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/family.png">
+        </div>
+        <div class="pick-a-plan-option-text">
+          <h3 class="pick-a-plan-option-title">FAMILY DINNER</h3>
+          <p class="pick-a-plan-option-price">
+            $14 PER MEAL
+          </p>
+        </div>
       </div>
     </div>
-    <div class="in-the-box-section content">
-      <h2 class="in-the-box-title"> What's inside each box?</h2>
-      <div class="in-the-box-point-list content">
-        <div class="in-the-box-point">
-          <div class="in-the-box-point-text">
-            <h3 class="in-the-box-point-title">Authentic Meal</h3>
-            <p class="in-the-box-point-desc">
-              Eat up! Ready-to-eat international meals made by local international cooks.
-            </p>
-          </div>
-          <div class="in-the-box-image">
-            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/asian_meal.jpg">
-          </div>
-        </div>
-
-        <div class="in-the-box-point-reverse">
-          <div class="in-the-box-point-text">
-            <h3 class="in-the-box-point-title">Cultural Info Guide</h3>
-            <p class="in-the-box-point-desc">
-              Learn about the dish you're eating and the story behind it. There is even traditional music to immerse yourself in the culture!
-            </p>
-          </div>
-          <div class="in-the-box-image">
-            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/info_guide.jpg">
-          </div>
-        </div>
-
-        <div class="in-the-box-point">
-          <div class="in-the-box-point-text">
-            <h3 class="in-the-box-point-title">Connection to the Cook</h3>
-            <p class="in-the-box-point-desc">
-              Get to know the cook behind the food. Gain private access to this cook and request food from them anytime.
-            </p>
-          </div>
-          <div class="in-the-box-image">
-            <img class="circle"
-                 src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/soup_lady.jpg">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="pick-a-plan-section">
-      <h2 class="pick-a-plan-title">CHOOSE YOUR BOX</h2>
-      <!-- TODO add images -->
-      <div class="pick-a-plan-option-list content">
-        <div class="pick-a-plan-option">
-          <div class="pick-a-plan-option-image">
-            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/solo.png">
-          </div>
-          <div class="pick-a-plan-option-text">
-            <h3 class="pick-a-plan-option-title">GO SOLO</h3>
-            <p class="pick-a-plan-option-price">
-              $13 PER MEAL
-            </p>
-          </div>
-
-        </div>
-
-        <div class="pick-a-plan-option">
-          <div class="pick-a-plan-option-image">
-            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/couple.png">
-          </div>
-          <div class="pick-a-plan-option-text">
-            <h3 class="pick-a-plan-option-title">DINNER FOR TWO</h3>
-            <p class="pick-a-plan-option-price">
-              $12 PER MEAL
-            </p>
-          </div>
-
-        </div>
-
-        <div class="pick-a-plan-option">
-          <div class="pick-a-plan-option-image">
-            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/family.png">
-          </div>
-          <div class="pick-a-plan-option-text">
-            <h3 class="pick-a-plan-option-title">FAMILY DINNER</h3>
-            <p class="pick-a-plan-option-price">
-              $11 PER MEAL
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="sign-up-card"
-           style="margin: 24px auto">
-        <h1 class="sign-up-title"
-            style="color: #424242">Get your first week FREE!</h1>
-        <form action="/scheduleform"
-              method="get"
-              class="sign-up-form">
-          <input type="text"
-                 name="email"
-                 id="email"
-                 class="sign-up-email"
-                 placeholder="Email"
-                 pattern="\S+@\S+\.\S+"
-                 onfocus="choosePlanInputTapped()"
-                 required/>
-          <input type="text"
-                 name="terp"
-                 style="display:none">
-          <button class="sign-up-button"
-                  raised
-                  on-tap="choosePlanTapped()">Choose a Box
+    <div class="sign-up-card"
+         style="margin: 24px auto">
+      <h1 class="sign-up-title"
+          style="color: #424242">Get your first week FREE!</h1>
+      <form action="/scheduleform"
+            method="get"
+            class="sign-up-form">
+        <input type="text"
+               name="email"
+               id="email"
+               class="sign-up-email"
+               placeholder="Email"
+               pattern="\S+@\S+\.\S+"
+               onfocus="choosePlanInputTapped()"
+               required/>
+        <input type="text"
+               name="terp"
+               style="display:none">
+        <button class="sign-up-button"
+                raised
+                on-tap="choosePlanTapped()">Choose a Box
                </button>
-        </form>
+      </form>
 
 
-      </div>
     </div>
+  </div>
 
-    <div class="made-by-section content">
-      <h1 class="made-by-title">Homemade meals by real international cooks!</h1>
-      <div class="made-by-cook">
-        <div class="cook-image-flag">
-          <img class="cook-image"
-               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/laura_square.jpg">
-          <!--<img class="cook-flag"
+  <div class="made-by-section content">
+    <h1 class="made-by-title">Homemade meals by real international cooks!</h1>
+    <div class="made-by-cook">
+      <div class="cook-image-flag">
+        <img class="cook-image"
+             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/laura_square.jpg">
+        <!--<img class="cook-flag"
              src="https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg">-->
-          <img class="cook-flag"
-               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/Flag_of_Italy.svg">
+        <img class="cook-flag"
+             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/Flag_of_Italy.svg">
 
-        </div>
-        <div class="cook-info">
-          <h2 class="cook-title">Laura Rodriguez</h2>
-          <p class="cook-desc">
-            I'm a self-taught chef who learned to cook in Italy and studied Asian cuisine when I lived in South Korea. I worked in restaurants in Chicago before I started my own catering company. I'm currently the Executive Chef Instructor of Meals 4 Health and Healing,
-            a non profit that delivers free organic meals to cancer patients. I live on an organic micro farm where I raise my own chickens for eggs and meat, and all of the vegetables and fruit we need to sustain ourselves. In addition to that, I teach
-            cooking classes to a cancer survivors' in Nashville. I'm sharing my food because I think everyone should have access to affordable healthful organic meals delivered right to their door!
-          </p>
-        </div>
       </div>
-      <div class="made-by-cook hide-mobile">
-        <div class="cook-image-flag">
-          <img class="cook-image"
-               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/shawn_square.jpg">
-          <img class="cook-flag"
-               src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Jamaica.svg">
-        </div>
-        <div class="cook-info">
-          <h2 class="cook-title">Tremaine Wright</h2>
-          <p class="cook-desc">
-            Cooking has always been my passion. Growing up as a kid in Jamaica, I was always in the kitchen with my mom and grandmother. When I got older, I moved to New York and worked as a chef in a Jamaican restaurant for 5 years. I've catered a lot of baby showers,
-            parties, and other events. I make all kinds of authentic Jamaican dishes along with juices and porridges. I believe everyone should have access to an authentic cultural experience, and I look forward to sharing my real Jamaican food with all
-            of you.
-          </p>
-        </div>
-      </div>
-      <div class="made-by-cook">
-        <div class="cook-image-flag">
-          <img class="cook-image"
-               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/dulzida_square.jpg">
-          <img class="cook-flag"
-               src="https://upload.wikimedia.org/wikipedia/commons/b/bf/Flag_of_Bosnia_and_Herzegovina.svg">
-
-        </div>
-        <div class="cook-info">
-          <h2 class="cook-title">Dulzida Cirak</h2>
-          <p class="cook-desc">
-            I am a mother of two and have been cooking all my life. When I was young I lived in a very full house. We had big family dinners every night. I would cook with my mom and sisters. I moved to Tennessee 15 years ago, and I continue to cook dinners for my
-            family every night. I am excited to see people actually love Bosnian food. I love sharing stories about my culture and tradition. I love cooking because community is very important in Bosnia, and I believe food brings family together.
-          </p>
-        </div>
+      <div class="cook-info">
+        <h2 class="cook-title">Laura Rodriguez</h2>
+        <p class="cook-desc">
+          I'm a self-taught chef who learned to cook in Italy and studied Asian cuisine when I lived in South Korea. I worked in restaurants in Chicago before I started my own catering company. I'm currently the Executive Chef Instructor of Meals 4 Health and Healing,
+          a non profit that delivers free organic meals to cancer patients. I live on an organic micro farm where I raise my own chickens for eggs and meat, and all of the vegetables and fruit we need to sustain ourselves. In addition to that, I teach
+          cooking classes to a cancer survivors' in Nashville. I'm sharing my food because I think everyone should have access to affordable healthful organic meals delivered right to their door!
+        </p>
       </div>
     </div>
-    <div class="bottom">
-      <!--<div class="sign-up-holder"></div>-->
-      <div class="sign-up-card"
-           style="margin-top: 100px">
-        <h1 class="sign-up-title">Experience a new culture <br>every week!</h1>
-        <form action="/scheduleform"
-              method="get"
-              class="sign-up-form">
-          <input type="text"
-                 name="email"
-                 id="email"
-                 class="sign-up-email"
-                 placeholder="Email"
-                 pattern="\S+@\S+\.\S+"
-                 onfocus="getStartedInputTapped()"
-                 required/>
-          <input type="text"
-                 name="terp"
-                 style="display:none">
-          <button class="sign-up-button"
-                  raised
-                  on-tap="getStartedTapped()">Get Started
+    <div class="made-by-cook hide-mobile">
+      <div class="cook-image-flag">
+        <img class="cook-image"
+             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/shawn_square.jpg">
+        <img class="cook-flag"
+             src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Jamaica.svg">
+      </div>
+      <div class="cook-info">
+        <h2 class="cook-title">Tremaine Wright</h2>
+        <p class="cook-desc">
+          Cooking has always been my passion. Growing up as a kid in Jamaica, I was always in the kitchen with my mom and grandmother. When I got older, I moved to New York and worked as a chef in a Jamaican restaurant for 5 years. I've catered a lot of baby showers,
+          parties, and other events. I make all kinds of authentic Jamaican dishes along with juices and porridges. I believe everyone should have access to an authentic cultural experience, and I look forward to sharing my real Jamaican food with all
+          of you.
+        </p>
+      </div>
+    </div>
+    <div class="made-by-cook">
+      <div class="cook-image-flag">
+        <img class="cook-image"
+             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/dulzida_square.jpg">
+        <img class="cook-flag"
+             src="https://upload.wikimedia.org/wikipedia/commons/b/bf/Flag_of_Bosnia_and_Herzegovina.svg">
+
+      </div>
+      <div class="cook-info">
+        <h2 class="cook-title">Dulzida Cirak</h2>
+        <p class="cook-desc">
+          I am a mother of two and have been cooking all my life. When I was young I lived in a very full house. We had big family dinners every night. I would cook with my mom and sisters. I moved to Tennessee 15 years ago, and I continue to cook dinners for my
+          family every night. I am excited to see people actually love Bosnian food. I love sharing stories about my culture and tradition. I love cooking because community is very important in Bosnia, and I believe food brings family together.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="bottom">
+    <!--<div class="sign-up-holder"></div>-->
+    <div class="sign-up-card sign-up-card-ie-fix"
+         style="margin-top: 100px">
+      <h1 class="sign-up-title">Experience a new culture <br>every week!</h1>
+      <form action="/scheduleform"
+            method="get"
+            class="sign-up-form">
+        <input type="text"
+               name="email"
+               id="email"
+               class="sign-up-email"
+               placeholder="Email"
+               pattern="\S+@\S+\.\S+"
+               onfocus="getStartedInputTapped()"
+               required/>
+        <input type="text"
+               name="terp"
+               style="display:none">
+        <button class="sign-up-button"
+                raised
+                on-tap="getStartedTapped()">Get Started
                </button>
-        </form>
-      </div>
+      </form>
     </div>
-    <script>
-      if (/MSIE/i.test(navigator.userAgent)) {
-        // This is internet explorer
-        // .made-by-cook {
-        //       display: inline-block;
-        //   }
-        //   .in-the-box-point-list {
-        //     display: inline-block;
-        //   }
-        //   .sign-up-card {
-        //     margin: 0;
-        //   }
-
-      }
-
-    </script>
+  </div>
 
     <script src="https://use.fontawesome.com/ea31cf9b69.js"
             async

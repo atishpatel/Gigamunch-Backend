@@ -299,7 +299,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-around;
-      padding: 32px 24px;
+      padding: 32px 12px 0 12px;
       background: #fff;
       /*background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
         background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
@@ -315,10 +315,27 @@
       font-weight: bold;
       padding: 12px 0;
     }
-    
+
+    .in-the-box-img {
+      max-width: 1000px;
+      margin: auto;
+      width: 100%;
+      min-height: 400px;
+      background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_desktop.jpg') no-repeat center center;
+      /*background: white url('/cook/src/box_desktop.png') no-repeat center center;*/
+      background-size: contain;
+    }
+
     @media (max-width:700px) {
       .in-the-box-title {
         font-size: 24px;
+      }
+
+      .in-the-box-img {
+        min-height: 550px;
+        background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_mobile.jpg') no-repeat center center;
+        /*background: white url('/cook/src/box_mobile.png') no-repeat center center;*/
+        background-size: contain;
       }
     }
     
@@ -647,7 +664,7 @@
   </div>
   <div class="sign-up-section content">
     <div class="sign-up-content">
-      <h1 class="sign-up-title">Get a new international meal <br>delivered to you every Monday!</h1>
+      <h1 class="sign-up-title">Get a new international meal <br>delivered to you every week!</h1>
       <form action="/scheduleform"
             method="get"
             class="sign-up-form"
@@ -665,14 +682,15 @@
                style="display:none">
         <button class="sign-up-button"
                 on-tap="learnMoreTapped()"
-                raised>Learn more
+                raised>Get Started
               </button>
       </form>
     </div>
   </div>
   <div class="in-the-box-section content">
     <h2 class="in-the-box-title"> What's inside each box?</h2>
-    <div class="in-the-box-point-list content">
+    <div class="in-the-box-img"></div>
+    <!--<div class="in-the-box-point-list content">
       <div class="in-the-box-point">
         <div class="in-the-box-point-text">
           <h3 class="in-the-box-point-title">Authentic Meal</h3>
@@ -709,13 +727,13 @@
                src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/soup_lady.jpg">
         </div>
       </div>
-    </div>
+    </div>-->
   </div>
   <div class="pick-a-plan-section">
     <h2 class="pick-a-plan-title">CHOOSE YOUR BOX</h2>
     <!-- TODO add images -->
     <div class="pick-a-plan-option-list content">
-      <div class="pick-a-plan-option">
+      <!--<div class="pick-a-plan-option">
         <div class="pick-a-plan-option-image">
           <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/solo.png">
         </div>
@@ -725,8 +743,7 @@
             $13 PER MEAL
           </p>
         </div>
-
-      </div>
+      </div>-->
 
       <div class="pick-a-plan-option">
         <div class="pick-a-plan-option-image">
@@ -735,7 +752,7 @@
         <div class="pick-a-plan-option-text">
           <h3 class="pick-a-plan-option-title">DINNER FOR TWO</h3>
           <p class="pick-a-plan-option-price">
-            $12 PER MEAL
+            $15 PER MEAL
           </p>
         </div>
 
@@ -748,7 +765,7 @@
         <div class="pick-a-plan-option-text">
           <h3 class="pick-a-plan-option-title">FAMILY DINNER</h3>
           <p class="pick-a-plan-option-price">
-            $11 PER MEAL
+            $14 PER MEAL
           </p>
         </div>
       </div>
