@@ -368,6 +368,10 @@
     .checkout-payment-lock {
       color: #1f8458;
     }
+
+    .card-number > i {
+      padding: 0 2px;
+    }
     
     .input-container {
       display: flex;
@@ -714,7 +718,7 @@
                 <input type="text"
                        name="apt"
                        id="apt"
-                       placeholder="APT" />
+                       placeholder="APT/Unit" />
                 <input type="text"
                        name="address-input"
                        id="address-input"
@@ -811,7 +815,7 @@
             <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
           </div>
           <div>
-            <label for="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i><i class="fa fa-cc-mastercard" aria-hidden="true"></i><i class="fa fa-cc-discover" aria-hidden="true"></i></label>
+            <label for="card-number" class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i><i class="fa fa-cc-mastercard" aria-hidden="true"></i><i class="fa fa-cc-discover" aria-hidden="true"></i></label>
             <div class="hosted-field"
                  id="card-number"></div>
           </div>
@@ -1065,6 +1069,8 @@
                 break; // and break out of for loop
               }
             }
+            var aptEl = document.getElementById('apt');
+            address.apt = aptEl.value;
             var req = {
               'email': email,
               'address': address,
@@ -1129,7 +1135,8 @@
 
     function updateOrderInfo() {
       var d = new Date();
-      d.setDate(d.getDate() + 3);
+      // d.setDate(d.getDate() + 2);
+      d.setTime(d.getTime() + 48 * 3600 * 1000); // add 48 hours
       while (d.getDay() !== 1) {
         d.setDate(d.getDate() + 1);
       }
