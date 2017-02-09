@@ -510,63 +510,54 @@
         border-radius: 50%;
       }
 
-    </style>
+    .free-delivery {
+      font-size: 12px;
+      line-height: 22px;
+    }
 
-    <!--[if IE]>
-  <style>
-      .made-by-cook {
-          display: inline-block;
-      }
-      .in-the-box-point-list {
-        display: inline-block;
-      }
-      .sign-up-card {
-        margin: 0;
-      }
   </style>
-  <![endif]-->
 
-    <script type="text/javascript">
-      var learnMoreInputLogged = false;
-      var getStartedInputLogged = false;
-      var choosePlanInputLogged = false;
+  <script type="text/javascript">
+    var learnMoreInputLogged = false;
+    var getStartedInputLogged = false;
+    var choosePlanInputLogged = false;
 
-      function learnMoreTapped() {
-        ga('send', 'event', 'schedule_email_signup', 'learnmore');
+    function learnMoreTapped() {
+      ga('send', 'event', 'schedule_email_signup', 'learnmore');
+    }
+
+    function learnMoreInputTapped() {
+      if (!learnMoreInputLogged) {
+        ga('send', 'event', 'schedule_email_signup_input_tap', 'learnmore');
+        learnMoreInputLogged = true;
       }
+    }
 
-      function learnMoreInputTapped() {
-        if (!learnMoreInputLogged) {
-          ga('send', 'event', 'schedule_email_signup_input_tap', 'learnmore');
-          learnMoreInputLogged = true;
-        }
+    function getStartedTapped() {
+      ga('send', 'event', 'schedule_email_signup', 'getstarted');
+    }
+
+    function getStartedInputTapped() {
+      if (!getStartedInputLogged) {
+        ga('send', 'event', 'schedule_email_signup_input_tap', 'getstarted');
+        getStartedInputLogged = true;
       }
+    }
 
-      function getStartedTapped() {
-        ga('send', 'event', 'schedule_email_signup', 'getstarted');
+    function choosePlanTapped() {
+      ga('send', 'event', 'schedule_email_signup', 'chooseplan');
+    }
+
+    function choosePlanInputTapped() {
+      if (!choosePlanInputLogged) {
+        ga('send', 'event', 'schedule_email_signup_input_tap', 'chooseplan');
+        choosePlanInputLogged = true;
       }
+    }
 
-      function getStartedInputTapped() {
-        if (!getStartedInputLogged) {
-          ga('send', 'event', 'schedule_email_signup_input_tap', 'getstarted');
-          getStartedInputLogged = true;
-        }
-      }
+  </script>
 
-      function choosePlanTapped() {
-        ga('send', 'event', 'schedule_email_signup', 'chooseplan');
-      }
-
-      function choosePlanInputTapped() {
-        if (!choosePlanInputLogged) {
-          ga('send', 'event', 'schedule_email_signup_input_tap', 'chooseplan');
-          choosePlanInputLogged = true;
-        }
-      }
-
-    </script>
-
-    <div class="header">
+  <div class="header">
     <a href="/"
        class="floating-logo">Gigamunch</a>
     <!--<div class="sign-up-holder"></div>-->
@@ -662,7 +653,10 @@
         <div class="pick-a-plan-option-text">
           <h3 class="pick-a-plan-option-title">DINNER FOR TWO</h3>
           <p class="pick-a-plan-option-price">
+            <span>
             $15 PER MEAL
+            </span>
+          <br><span class="free-delivery">+ Free Delivery</span>
           </p>
         </div>
 
@@ -675,7 +669,10 @@
         <div class="pick-a-plan-option-text">
           <h3 class="pick-a-plan-option-title">FAMILY DINNER</h3>
           <p class="pick-a-plan-option-price">
+            <span>
             $14 PER MEAL
+            </span>
+            <br><span class="free-delivery">+ Free Delivery</span>
           </p>
         </div>
       </div>
