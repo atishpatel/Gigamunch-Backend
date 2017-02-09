@@ -427,8 +427,10 @@ func (c *Client) GetToken(userInfo *UserInfo, deviceID string) (string, error) {
 
 // GetChannelInfoResp is the response for GetChannelInfo.
 type GetChannelInfoResp struct {
-	EaterID string `json:"eater_id"`
-	CookID  string `json:"cook_id"`
+	EaterID   string `json:"eater_id"`
+	EaterName string `json:"eater_name"`
+	CookID    string `json:"cook_id"`
+	CookName  string `json:"cook_name"`
 }
 
 // GetChannelInfo returns the Cook and Eater ids.
