@@ -37,6 +37,9 @@ var (
 func DeleteSessionToken(ctx context.Context, JWTString string) error {
 	token, err := getAuthTokenFromString(ctx, JWTString)
 	if err != nil {
+		if errors.GetErrorWithCode(err).Code == errors.CodeSignOut {
+			return nil
+		}
 		return err
 	}
 	userSessions := &UserSessions{}
