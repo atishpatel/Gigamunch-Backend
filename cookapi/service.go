@@ -242,6 +242,16 @@ func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	shouldNotifyCook := resp.CookID != userInfo.ID // isn't cook
+	gigamessage := ""
+	if shouldNotifyCook {
+		gigamessage = fmt.Sprintf("From: %s\nTo: %s\n Message:%s", userInfo.Name, resp.EaterName, body)
+	} else {
+		gigamessage = fmt.Sprintf("From: %s\nTo: %s\n Message:%s", userInfo.Name, resp.CookName, body)
+	}
+	err = messageC.SendSMS("6153975516", gigamessage)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to notify enis about message on app. err: %s", err)
+	}
 	if shouldNotifyCook {
 		cookC := cook.New(ctx)
 		encodedChannelName := resp.CookID + "%3C%3B%3E" + resp.EaterID
