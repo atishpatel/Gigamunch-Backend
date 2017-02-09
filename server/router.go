@@ -178,6 +178,7 @@ type SubscriptionSignUp struct {
 	SubscriptionDate time.Time     `json:"subscription_date"`
 	FirstPaymentDate time.Time     `json:"first_payment_date"`
 	FirstBoxDate     time.Time     `json:"first_box_date"`
+	Servings         int           `json:"servings"`
 	DeliveryTime     int8          `json:"delivery_time"`
 }
 
@@ -251,17 +252,21 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	var planID string
+	var servings int
 	switch sReq.Servings {
 	case "2":
 		planID = "basic_2"
+		servings = 2
 	case "4":
 		planID = "basic_4"
+		servings = 4
 	default:
 		planID = "basic_1"
+		servings = 1
 	}
 	paymentC := payment.New(ctx)
 	customerID := payment.GetIDFromEmail(sReq.Email)
-	firstBoxDate := time.Now().Add(72 * time.Hour)
+	firstBoxDate := time.Now().Add(48 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
@@ -291,6 +296,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	entry.FirstPaymentDate = paymentDate
 	entry.FirstBoxDate = firstBoxDate
 	entry.DeliveryTime = sReq.DeliveryTime
+	entry.Servings = servings
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
 		resp.Err = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", sReq.Email)
