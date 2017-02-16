@@ -16,8 +16,10 @@ import (
 const (
 	// NotifyEaterQueue    = "notify-eater"
 	// NotifyEaterURL      = "/notify-eater"
-	ProcessInquiryQueue = "process-inquiry"
-	ProcessInquiryURL   = "/process-inquiry"
+	ProcessInquiryQueue      = "process-inquiry"
+	ProcessInquiryURL        = "/process-inquiry"
+	ProcessSubscriptionQueue = "process-subscription"
+	ProcessSubscriptionURL   = "/process-subscription"
 )
 
 var (
@@ -34,6 +36,59 @@ type Client struct {
 // New returns a new Client
 func New(ctx context.Context) *Client {
 	return &Client{ctx: ctx}
+}
+
+// ProcessSubscriptionParams are the parms for ProcessSubscription.
+type ProcessSubscriptionParams struct {
+	SubEmail string
+	Date     time.Time
+}
+
+// AddProcessSubscription adds a process subscription at specified time.
+func (c *Client) AddProcessSubscription(at time.Time, req *ProcessSubscriptionParams) error {
+	if req.SubEmail == "" || req.Date.IsZero() {
+		return errInvalidParameter.Wrapf("expected(recieved): email(%s) date(%s)", req.SubEmail, req.Date.String())
+	}
+	h := make(http.Header)
+	h.Set("Content-Type", "application/x-www-form-urlencoded")
+	v := url.Values{}
+	v.Set("sub_email", req.SubEmail)
+	d, err := req.Date.MarshalText()
+	if err != nil {
+		return errInvalidParameter.WithError(err).Wrap("failed to req.Date.MarshalText")
+	}
+	v.Set("date", string(d))
+	task := &taskqueue.Task{
+		Path:    ProcessSubscriptionURL,
+		Payload: []byte(v.Encode()),
+		Header:  h,
+		Method:  "POST",
+		ETA:     at,
+	}
+	_, err = taskqueue.Add(c.ctx, task, ProcessSubscriptionQueue)
+	if err != nil {
+		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
+	}
+	return nil
+}
+
+// ParseProcessSubscriptionRequest parses an ProcessSubscriptionRequest from a task request.
+func ParseProcessSubscriptionRequest(req *http.Request) (*ProcessSubscriptionParams, error) {
+	err := req.ParseForm()
+	if err != nil {
+		return nil, errParse.WithError(err).Wrap("failed to parse from from request")
+	}
+	parms := new(ProcessSubscriptionParams)
+	parms.SubEmail = req.FormValue("sub_email")
+	if parms.SubEmail == "" {
+		return nil, errParse.Wrapf("Invalid task for ProcessSubscription. SubEmail: %s", parms.SubEmail)
+	}
+	dateString := req.FormValue("date")
+	err = parms.Date.UnmarshalText([]byte(dateString))
+	if err != nil {
+		return nil, errParse.WithError(err).Wrap("failed to parse date")
+	}
+	return parms, nil
 }
 
 // AddProcessInquiry adds a process inquiry at specified time.
