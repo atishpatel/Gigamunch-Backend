@@ -1,0 +1,3 @@
+queue:
+- name: process-subscription
+  rate: 40/s
