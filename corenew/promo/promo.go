@@ -38,12 +38,12 @@ var (
 	errInvalidPromoCode = errors.ErrorWithCode{Code: errors.CodeInvalidPromoCode, Message: "Invalid promo code."}
 )
 
-// Client is the client for likes
+// Client is the client fro this package.
 type Client struct {
 	ctx context.Context
 }
 
-// New returns a new Client for user likes
+// New returns a new Client.
 func New(ctx context.Context) *Client {
 	connectOnce.Do(func() {
 		connectSQL(ctx)
