@@ -732,7 +732,7 @@
             <h2>Choose your box</h2>
           </div>
           <div class="form-section-desc">
-            Every Monday you'll get a box that'll take you on a new journey! How do you want your journey to be?
+            Every Monday, you'll get a box that'll take you on a new journey! How do you want your journey to be?
           </div>
           <div class="select-package-container">
             <ul>
@@ -839,9 +839,9 @@
               </div>
               <div class="item-detail">
                 <div class="item-text">
-                  <div class="item-title"><span id="boxForTitle">Box for Two</span><span class="multiplier">(x4)</span></div>
+                  <div class="item-title"><span id="boxForTitle">Box for Two</span></div>
                   <div class="item-desc">
-                    Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> will charged on the <span id="day_of_month">__day_of_month__</span> of every month. Cancel
+                    Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> will charged every week. Skip a week or cancel
                     your subscription anytime with a 4 day notice.
                   </div>
                 </div>
@@ -849,11 +849,11 @@
             </div>
             <div class="order-summary">
               <div class="order-summary-section">
-                <div class="order-summary-section-name">Box<span class="multiplier">(x4)</span></div>
+                <div class="order-summary-section-name">Meals <span id="meal_multiplier" class="multiplier">x2</span></div>
                 <div class="order-summary-section-price"><span class="old_price">$<span id="box_total"></span></span> FREE</div>
               </div>
               <div class="order-summary-section">
-                <div class="order-summary-section-name">Delivery<span class="multiplier">(x4)</span></div>
+                <div class="order-summary-section-name">Delivery</div>
                 <div class="order-summary-section-price">FREE</div>
               </div>
               <div class="order-summary-section">
@@ -1142,23 +1142,23 @@
       }
       d.setDate(d.getDate() + 4);
       var date = d.getDate();
-      var dateString = '';
-      switch (date) {
-        case 1:
-          dateString = date + 'st';
-          break;
-        case 2:
-          dateString = date + 'nd';
-          break;
-        case 3:
-          dateString = date + 'rd';
-          break;
-        default:
-          dateString = date + 'th';
-      }
+      // var dateString = '';
+      // switch (date) {
+      //   case 1:
+      //     dateString = date + 'st';
+      //     break;
+      //   case 2:
+      //     dateString = date + 'nd';
+      //     break;
+      //   case 3:
+      //     dateString = date + 'rd';
+      //     break;
+      //   default:
+      //     dateString = date + 'th';
+      // }
       // set payment date info
       document.getElementById('first_date').innerHTML = d.toLocaleDateString();
-      document.getElementById('day_of_month').innerHTML = dateString;
+      // document.getElementById('day_of_month').innerHTML = dateString;
       var oneBoxPrice = 0.0;
       var servingsPerBox = 0;
 
@@ -1189,14 +1189,14 @@
           boxForTitleText = 'Box for Four';
           break;
       }
-      var boxTotal = oneBoxPrice * servingsPerBox * 4;
+      var boxTotal = oneBoxPrice * servingsPerBox;
       // var deliveryTotal = 20;
       // var taxTotal = (boxTotal + deliveryTotal) * .05;
       // var total = boxTotal + deliveryTotal + taxTotal;
       var total = boxTotal;
 
 
-
+      document.getElementById('meal_multiplier').innerHTML = 'x' + servingsPerBox;
       document.getElementById('boxForTitle').innerHTML = boxForTitleText;
       document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
       // document.getElementById('delivery_total').innerHTML = deliveryTotal.toFixed(0);
@@ -1217,6 +1217,17 @@
   <script src="https://use.fontawesome.com/ea31cf9b69.js"
           async
           defer></script>
+  <!-- Hotjar Tracking Code for https://gigamunchapp.com/ -->
+<script>
+    (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:267744,hjsv:5};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+    })(window,document,'//static.hotjar.com/c/hotjar-','.js?sv=');
+</script>
   <style>
     .logo {
       font-family: 'NexaBold', sans-serif;

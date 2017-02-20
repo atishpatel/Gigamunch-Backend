@@ -15,6 +15,8 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -47,6 +49,9 @@ func init() {
 
 	r.GET("/scheduleform/:email", handleScheduleForm)
 	r.GET("/scheduleform", handleScheduleForm)
+
+	r.POST("/process-subscription", handelProcessSubscription)
+	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
 
 	http.HandleFunc("/startsubscription", handleScheduleSubscription)
 	// // admin stuff
@@ -167,21 +172,6 @@ func handleScheduleSignup(w http.ResponseWriter, req *http.Request) {
 	// handleScheduleForm(w, req, []httprouter.Param{param})
 }
 
-type SubscriptionSignUp struct {
-	Email            string        `json:"email"`
-	Date             time.Time     `json:"date"`
-	Name             string        `json:"name"`
-	Address          types.Address `json:"address"`
-	CustomerID       string        `json:"customer_id"`
-	SubscriptionIDs  []string      `json:"subscription_id"`
-	IsSubscribed     bool          `json:"is_subscribed"`
-	SubscriptionDate time.Time     `json:"subscription_date"`
-	FirstPaymentDate time.Time     `json:"first_payment_date"`
-	FirstBoxDate     time.Time     `json:"first_box_date"`
-	Servings         int           `json:"servings"`
-	DeliveryTime     int8          `json:"delivery_time"`
-}
-
 type scheduleSubscriptionResp struct {
 	Err errors.ErrorWithCode `json:"err"`
 }
@@ -234,13 +224,17 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	}
 	if sReq.Address.GreatCircleDistance(types.GeoPoint{Latitude: 36.1513632, Longitude: -86.7255927}) > 35 {
 		// out of delivery range
+		if sReq.Address.Street == "" {
+			resp.Err = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!")
+			return
+		}
 		// TODO add to some datastore to save address and stuff
 		resp.Err = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!")
 		return
 	}
 
 	key := datastore.NewKey(ctx, "ScheduleSignUp", sReq.Email, 0, nil)
-	entry := &SubscriptionSignUp{}
+	entry := &sub.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		resp.Err = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", sReq.Email)
@@ -251,52 +245,67 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		resp.Err = errInvalidParameter.WithMessage("You already have a subscription! :)")
 		return
 	}
-	var planID string
-	var servings int
+	// var planID string
+	var servings int8
+	var weeklyAmount float32
 	switch sReq.Servings {
-	case "2":
-		planID = "basic_2"
-		servings = 2
-	case "4":
-		planID = "basic_4"
-		servings = 4
-	default:
-		planID = "basic_1"
+	case "1":
+		// planID = "basic_1"
 		servings = 1
+		weeklyAmount = 17
+	case "2":
+		// planID = "basic_2"
+		servings = 2
+		weeklyAmount = float32(servings * 15)
+	default:
+		// planID = "basic_4"
+		servings = 4
+		weeklyAmount = float32(servings * 14)
 	}
-	paymentC := payment.New(ctx)
 	customerID := payment.GetIDFromEmail(sReq.Email)
 	firstBoxDate := time.Now().Add(48 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
-	paymentDate := firstBoxDate.Add(time.Hour * 96)
-	paymentSubReq := &payment.StartSubscriptionReq{
+	// paymentDate := firstBoxDate.Add(time.Hour * 96)
+	paymentC := payment.New(ctx)
+	paymentTokenReq := &payment.GetDefaultPaymentTokenReq{
 		CustomerID: customerID,
-		Nonce:      sReq.PaymentMethodNonce,
-		PlanID:     planID,
-		StartDate:  paymentDate,
 	}
-	subID, err := paymentC.StartSubscription(paymentSubReq)
+	paymenttkn, err := paymentC.GetDefaultPaymentToken(paymentTokenReq)
 	if err != nil {
-		resp.Err = errors.Wrap("failed to payment.StartSubscription", err)
+		resp.Err = errors.Wrap("failed to payment.GetDefaultPaymentToken", err)
 		return
 	}
-	utils.Infof(ctx, "Subscription started for %s subID(%s)", sReq.Email, subID)
+	// paymentSubReq := &payment.StartSubscriptionReq{
+	// 	CustomerID: customerID,
+	// 	Nonce:      sReq.PaymentMethodNonce,
+	// 	PlanID:     planID,
+	// 	StartDate:  paymentDate,
+	// }
+	// subID, err := paymentC.StartSubscription(paymentSubReq)
+	// if err != nil {
+	// 	resp.Err = errors.Wrap("failed to payment.StartSubscription", err)
+	// 	return
+	// }
+	// utils.Infof(ctx, "Subscription started for %s subID(%s)", sReq.Email, subID)
 	entry.Email = sReq.Email
 	entry.Name = sReq.Name
 	entry.Address = sReq.Address
 	if entry.Date.IsZero() {
 		entry.Date = time.Now()
 	}
-	entry.SubscriptionIDs = append(entry.SubscriptionIDs, subID)
+	// entry.SubscriptionIDs = append(entry.SubscriptionIDs, subID)
 	entry.IsSubscribed = true
 	entry.CustomerID = customerID
 	entry.SubscriptionDate = time.Now()
-	entry.FirstPaymentDate = paymentDate
+	// entry.FirstPaymentDate = paymentDate
 	entry.FirstBoxDate = firstBoxDate
 	entry.DeliveryTime = sReq.DeliveryTime
 	entry.Servings = servings
+	entry.SubscriptionDay = time.Monday.String()
+	entry.PaymentMethodToken = paymenttkn
+	entry.WeeklyAmount = weeklyAmount
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
 		resp.Err = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", sReq.Email)
@@ -308,6 +317,13 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 		}
+		_ = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nEmail: %s", entry.Email))
+		_ = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nEmail: %s", entry.Email))
+	}
+	subC := sub.New(ctx)
+	err = subC.Free(firstBoxDate, sReq.Email)
+	if err != nil {
+		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", sReq.Email, firstBoxDate, err)
 	}
 	return
 }
@@ -331,7 +347,7 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 		return
 	}
 	key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-	entry := &SubscriptionSignUp{}
+	entry := &sub.SubscriptionSignUp{}
 	err := datastore.Get(ctx, key, entry)
 	if err == datastore.ErrNoSuchEntity {
 		entry.Date = time.Now()
@@ -375,4 +391,31 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 type scheduleFormFields struct {
 	Email   string
 	BTToken string
+}
+
+func handelProcessSubscription(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	parms, err := tasks.ParseProcessSubscriptionRequest(req)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
+		return
+	}
+	subC := sub.New(ctx)
+	err = subC.Process(parms.Date, parms.SubEmail)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		// TODO schedule for later?
+		return
+	}
+}
+
+func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	in2days := time.Now().Add(48 * time.Hour)
+	subC := sub.New(ctx)
+	err := subC.SetupSubLogs(in2days)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)
+		return
+	}
 }
