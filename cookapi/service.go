@@ -17,6 +17,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -72,6 +73,9 @@ func main() {
 	http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
 	http.HandleFunc("/sub-merchant-disbursement-exception", handleDisbursementException)
 	http.HandleFunc("/on-message-sent", handleOnMessageSent)
+
+	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
+	http.HandleFunc("/process-subscription", handelProcessSubscription)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
 	if err != nil {
 		log.Fatalf("Failed to register service: %#v", err)
@@ -116,6 +120,11 @@ func main() {
 	register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
 	register("SendSMS", "sendSMS", "POST", "cookservice/sendSMS", "Admin func.")
 	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
+	register("SetupSubLogs", "setupSubLogs", "POST", "cookservice/setupSubLogs", "Admin func.")
+	register("ProcessSubLog", "processSubLog", "POST", "cookservice/processSubLog", "Admin func.")
+	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
+	register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Admin func.")
+	register("AddToProcessSubscriptionQueue", "addToProcessSubscriptionQueue", "POST", "cookservice/addToProcessSubscriptionQueue", "Admin func.")
 	endpoints.HandleHTTP()
 	appengine.Main()
 }
@@ -264,4 +273,31 @@ func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	parms, err := tasks.ParseProcessSubscriptionRequest(req)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
+		return
+	}
+	subC := sub.New(ctx)
+	err = subC.Process(parms.Date, parms.SubEmail)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		// TODO schedule for later?
+		return
+	}
+}
+
+func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	in2days := time.Now().Add(48 * time.Hour)
+	subC := sub.New(ctx)
+	err := subC.SetupSubLogs(in2days)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)
+		return
+	}
 }

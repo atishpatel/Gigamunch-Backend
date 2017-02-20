@@ -16,13 +16,13 @@ indexes:
   - name: CreatedDateTime
     direction: desc
 
-- kind: MenuItem
-  properties:
-  - name: CookID
-  - name: MenuID
-
 - kind: Inquiry
   properties:
   - name: EaterID
   - name: CreatedDateTime
     direction: desc
+
+- kind: MenuItem
+  properties:
+  - name: CookID
+  - name: MenuID

@@ -10,6 +10,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -172,5 +173,138 @@ func (service *Service) CreatePromoCode(ctx context.Context, req *CreatePromoCod
 		resp.Err = errors.Wrap("failed to promo.InsertCode", err)
 		return resp, nil
 	}
+	return resp, nil
+}
+
+// SubLogReq is the request for SubLogStuff.
+type SubLogReq struct {
+	GigatokenReq
+	SubEmail string    `json:"sub_email"`
+	Date     time.Time `json:"date"`
+}
+
+// SetupSubLogs runs sub.SetupSubLogs.
+func (service *Service) SetupSubLogs(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "SetupSubLogs", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.SetupSubLogs(req.Date)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.SetupSubLogs")
+		return resp, nil
+	}
+	return resp, nil
+}
+
+// ProcessSubLog runs sub.Process.
+func (service *Service) ProcessSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "ProcessSubLog", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.Process(req.Date, req.SubEmail)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Process")
+		return resp, nil
+	}
+	return resp, nil
+}
+
+// SkipSubLog runs sub.Skip.
+func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "SkipSubLog", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.Skip(req.Date, req.SubEmail)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Skip")
+		return resp, nil
+	}
+	return resp, nil
+}
+
+// FreeSubLog runs sub.Free.
+func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "FreeSubLog", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.Free(req.Date, req.SubEmail)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Free")
+		return resp, nil
+	}
+	return resp, nil
+}
+
+type AddToProcessSubscriptionQueueReq struct {
+	SubLogReq
+	Hours int `json:"hours"`
+}
+
+// AddToProcessSubscriptionQueue adds a process to the subscription queue.
+func (service *Service) AddToProcessSubscriptionQueue(ctx context.Context, req *AddToProcessSubscriptionQueueReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "AddToProcessSubscriptionQueue", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subR := &tasks.ProcessSubscriptionParams{
+		SubEmail: req.SubEmail,
+		Date:     req.Date,
+	}
+	at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+	tasksC := tasks.New(ctx)
+	err = tasksC.AddProcessSubscription(at, subR)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
+		return resp, nil
+	}
+
 	return resp, nil
 }

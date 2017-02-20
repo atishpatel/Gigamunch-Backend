@@ -1,3 +1,5 @@
 queue:
 - name: process-inquiry
   rate: 40/s
+- name: process-subscription
+  rate: 40/s

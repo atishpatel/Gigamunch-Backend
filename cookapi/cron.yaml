@@ -1,0 +1,7 @@
+
+cron:
+- description: "Process Subscribers"
+  url: /process-subscribers
+  schedule: every day 00:00
+
+
