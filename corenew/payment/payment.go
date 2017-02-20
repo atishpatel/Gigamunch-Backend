@@ -159,6 +159,74 @@ func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (s
 	return t.Id, nil
 }
 
+// SaleReq is the reqest for Sale
+type SaleReq struct {
+	CustomerID         string
+	Amount             float32
+	PaymentMethodToken string
+	OrderID            string
+}
+
+// Sale creates a transaction that is immediately sent for settlement.
+func (c *Client) Sale(req *SaleReq) (string, error) {
+	t := &braintree.Transaction{
+		Type:               "sale",
+		CustomerID:         req.CustomerID,
+		PaymentMethodToken: req.PaymentMethodToken,
+		OrderId:            req.OrderID,
+		Amount:             getBTDecimal(req.Amount),
+		Options: &braintree.TransactionOptions{
+			SubmitForSettlement: true,
+		},
+	}
+	t, err := c.bt.Transaction().Create(t)
+	if err != nil {
+		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
+	}
+	return t.Id, nil
+}
+
+// // CreatePaymentMethodReq is the reqest for CreatePaymentMethod.
+// type CreatePaymentMethodReq struct {
+// 	CustomerID string
+// 	Nonce      string
+// }
+
+// func (c *Client) CreatePaymentMethod(req *CreatePaymentMethodReq) (string, error) {
+// 	if req == nil {
+// 		return "", errInvalidParameter.Wrap("CreatePaymentMethodReq is nil.")
+// 	}
+// 	braintree.Pa
+// }
+
+// GetDefaultPaymentTokenReq is the reqest for GetDefaultPaymentToken.
+type GetDefaultPaymentTokenReq struct {
+	CustomerID string
+}
+
+// GetDefaultPaymentToken gets the default payment token for the customer.
+func (c *Client) GetDefaultPaymentToken(req *GetDefaultPaymentTokenReq) (string, error) {
+	if req == nil {
+		return "", errInvalidParameter.Wrap("GetDefaultPaymentTokenReq is nil.")
+	}
+	cst, err := c.bt.Customer().Find(req.CustomerID)
+	if err != nil {
+		return "", errBT.WithError(err).Wrap("failed to bt.Customer.Find")
+	}
+	var latestCardToken string
+	var latestCardDate time.Time
+	for _, card := range cst.CreditCards.CreditCard {
+		if card.CreatedAt.After(latestCardDate) {
+			latestCardDate = *card.CreatedAt
+			latestCardToken = card.Token
+		}
+	}
+	if latestCardToken == "" {
+		return "", errInternal.Wrapf("Customer(%s) does not have a default credit card.", req.CustomerID)
+	}
+	return latestCardToken, nil
+}
+
 // StartSubscriptionReq is the reqest for StartSubscription.
 type StartSubscriptionReq struct {
 	CustomerID string
@@ -204,7 +272,7 @@ func (c *Client) StartSubscription(req *StartSubscriptionReq) (string, error) {
 	return s.Id, nil
 }
 
-// StartSale makes an escrow sale
+// StartSale starts a sale that will be held in escrow once it's submitted for settlement.
 func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {
 	t := &braintree.Transaction{
 		Type:               "sale",
