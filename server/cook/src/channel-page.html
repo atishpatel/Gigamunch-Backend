@@ -13,83 +13,85 @@
 
 <dom-module id="channel-page">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: flex;
-        flex-direction: column;
-        background-color: white;
-        max-width: var(--max-content-width);
-        margin: auto;
-      }
-      
-      #spinner {
-        display: flex;
-        margin: auto;
-        padding: 50px;
-      }
-      
-      .messages {
-        padding: 0 12px;
-        min-height: 20vh;
-        max-height: 85vh;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
-        flex-direction: column;
-        padding-bottom: 12px;
-        margin-bottom: 48px;
-      }
-      
-      .messages::-webkit-scrollbar {
-        display: none;
-      }
-      
-      .send-container {
-        position: fixed;
-        bottom: 0px;
-        display: flex;
-        flex-direction: row;
-        padding: 2px;
-        width: 99%;
-      }
-      
-      .send-input {
-        flex: 1;
-        border: none;
-        background-color: white;
-        --iron-autogrow-textarea: {
-          outline: none;
-          padding: 12px;
-          border: solid var(--gray-line-color) 1px;
-          border-right: none;
-          border-top-left-radius: 3px;
-          border-bottom-left-radius: 3px;
-          font-size: 14px;
-          background-color: #f7f7f7;
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: column;
+          background-color: white;
+          max-width: var(--max-content-width);
+          margin: auto;
         }
-      }
-      
-      .send-input:focus {
-        background-color: white;
-      }
-      
-      .send-button {
-        background-color: white;
-        color: var(--primary-text-color);
-        text-decoration: none;
-        margin: 0;
-        border: solid var(--gray-line-color) 1px;
-        border-left: none;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-      }
-      
-      @media (min-width: 1000px) {
+        
+        #spinner {
+          display: flex;
+          margin: auto;
+          padding: 50px;
+        }
+        
+        .messages {
+          padding: 0 12px;
+          min-height: 20vh;
+          max-height: 85vh;
+          overflow-y: scroll;
+          -webkit-overflow-scrolling: touch;
+          flex-direction: column;
+          padding-bottom: 12px;
+          margin-bottom: 48px;
+        }
+        
+        .messages::-webkit-scrollbar {
+          display: none;
+        }
+        
         .send-container {
-          width: 1000px;
+          position: fixed;
+          bottom: 0px;
+          display: flex;
+          flex-direction: row;
+          padding: 2px;
+          width: 99%;
         }
-      }
+        
+        .send-input {
+          flex: 1;
+          border: none;
+          background-color: white;
+          --iron-autogrow-textarea: {
+            outline: none;
+            padding: 12px;
+            border: solid var(--gray-line-color) 1px;
+            border-right: none;
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+            font-size: 14px;
+            background-color: #f7f7f7;
+          }
+        }
+        
+        .send-input:focus {
+          background-color: white;
+        }
+        
+        .send-button {
+          background-color: white;
+          color: var(--primary-text-color);
+          text-decoration: none;
+          margin: 0;
+          border: solid var(--gray-line-color) 1px;
+          border-left: none;
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+        }
+        
+        @media (min-width: 1000px) {
+          .send-container {
+            width: 1000px;
+          }
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <paper-spinner id="spinner"
                    hidden$="[[!showSpinner]]"
                    active="[[showSpinner]]">
@@ -97,17 +99,18 @@
 
     <div id="messages"
          class="messages">
-      <template is="dom-repeat"
-                items="[[messages]]"
-                as="message">
-        <message-card message="[[message]]"
-                      eaterid="[[eaterID]]"
-                      eaterimage="[[eaterImage]]"
-                      cookid="[[cookID]]"
-                      cookimage="[[cookImage]]"
-                      on-getinquiry="getInquiry">
-        </message-card>
-      </template>
+      <dom-repeat items="[[messages]]"
+                  as="message">
+        <template>
+          <message-card message="[[message]]"
+                        eaterid="[[eaterID]]"
+                        eaterimage="[[eaterImage]]"
+                        cookid="[[cookID]]"
+                        cookimage="[[cookImage]]"
+                        on-getinquiry="getInquiry">
+          </message-card>
+        </template>
+      </dom-repeat>
     </div>
     <div id="bottomMessages"></div>
     <div class="send-container">

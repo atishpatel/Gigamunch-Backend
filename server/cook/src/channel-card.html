@@ -7,84 +7,86 @@
 
 <dom-module id="channel-card">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: flex;
-        flex-direction: row;
-        border-bottom: solid var(--gray-line-color) 1px;
-      }
-      
-      .row {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-      }
-      
-      .column {
-        display: flex;
-        flex-direction: column;
-      }
-      
-      a,
-      a:link,
-      a:visited {
-        color: var(--primary-text-color);
-      }
-      
-      .channel-container {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        padding: 12px 24px;
-      }
-      
-      .user-pic {
-        height: 35px;
-        width: 35px;
-        background-size: 35px;
-        border-radius: 50%;
-      }
-      
-      .eater-name {
-        font-size: 16px;
-        line-height: 16px;
-      }
-      
-      .last-message {
-        font-size: 12px;
-      }
-      
-      .divider-line {
-        margin: 6px 0;
-        width: 43px;
-        height: 1px;
-        background-color: var(--gray-line-color);
-      }
-      
-      .item-image {
-        width: 35px;
-        border-radius: 5%;
-        overflow: hidden;
-      }
-      
-      .item-name {
-        font-size: 16px;
-        line-height: 16px;
-      }
-      
-      .inquiry-state {
-        font-size: 12px;
-        min-width: 55px;
-      }
-      
-      .inquiry-state-icon {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        margin: auto;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: row;
+          border-bottom: solid var(--gray-line-color) 1px;
+        }
+        
+        .row {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+        }
+        
+        .column {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        a,
+        a:link,
+        a:visited {
+          color: var(--primary-text-color);
+        }
+        
+        .channel-container {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          padding: 12px 24px;
+        }
+        
+        .user-pic {
+          height: 35px;
+          width: 35px;
+          background-size: 35px;
+          border-radius: 50%;
+        }
+        
+        .eater-name {
+          font-size: 16px;
+          line-height: 16px;
+        }
+        
+        .last-message {
+          font-size: 12px;
+        }
+        
+        .divider-line {
+          margin: 6px 0;
+          width: 43px;
+          height: 1px;
+          background-color: var(--gray-line-color);
+        }
+        
+        .item-image {
+          width: 35px;
+          border-radius: 5%;
+          overflow: hidden;
+        }
+        
+        .item-name {
+          font-size: 16px;
+          line-height: 16px;
+        }
+        
+        .inquiry-state {
+          font-size: 12px;
+          min-width: 55px;
+        }
+        
+        .inquiry-state-icon {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          margin: auto;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <a class="channel-container"
        href$="channel/[[channelEncodedName]]">
       <div class="row message-container">

@@ -31,187 +31,188 @@
 
 <dom-module id="item-form">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-        background-color: white;
-        color: var(--primary-text-color);
-      }
-      
-      .header {
-        font-size: 14px;
-        margin: 11px 0;
-        font-weight: bold;
-      }
-      
-      .form {
-        display: flex;
-        flex-direction: column;
-      }
-      
-      .half-field {
-        width: 48.5%;
-      }
-      
-      .submit-button {
-        align-self: flex-end;
-        width: 250px;
-        margin-top: 32px;
-      }
-      
-      paper-input,
-      paper-textarea {
-        padding: 4px 0;
-      }
-      
-      .add-image {
-        text-align: center;
-        border-style: dashed;
-        border-color: black;
-        cursor: pointer;
-      }
-      /* TODO Remove */
-      
-      .photo-16-9 {
-        margin: 12px 0;
-      }
-      
-      .photo-16-9 paper-icon-button {
-        z-index: 1;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 50%;
-      }
-      
-      paper-progress {
-        width: 100%;
-        padding: 10px 0;
-      }
-      
-      .photoRequired {
-        color: #dd2c00;
-        white-space: normal;
-      }
-      
-      @media (max-width: 767px) {
-        .submit-button {
-          width: 100%;
-          margin: auto;
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          background-color: white;
+          color: var(--primary-text-color);
         }
-      }
+        
+        .header {
+          font-size: 14px;
+          margin: 11px 0;
+          font-weight: bold;
+        }
+        
+        .form {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .half-field {
+          width: 48.5%;
+        }
+        
+        .submit-button {
+          align-self: flex-end;
+          width: 250px;
+          margin-top: 32px;
+        }
+        
+        paper-input,
+        paper-textarea {
+          padding: 4px 0;
+        }
+        
+        .add-image {
+          text-align: center;
+          border-style: dashed;
+          border-color: black;
+          cursor: pointer;
+        }
+        /* TODO Remove */
+        
+        .photo-16-9 {
+          margin: 12px 0;
+        }
+        
+        .photo-16-9 paper-icon-button {
+          z-index: 1;
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          background-color: var(--primary-color);
+          color: white;
+          border-radius: 50%;
+        }
+        
+        paper-progress {
+          width: 100%;
+          padding: 10px 0;
+        }
+        
+        .photoRequired {
+          color: #dd2c00;
+          white-space: normal;
+        }
+        
+        @media (max-width: 767px) {
+          .submit-button {
+            width: 100%;
+            margin: auto;
+          }
+        }
 
-    </style>
+      </style>
+    </shared-styles>
+    <!-- TODO figure out which fires the on-change -->
+    <iron-form id="form"
+               on-change="updateSubmitButtonState">
+      <form class="form"
+            action="#"
+            on-change="updateSubmitButtonState">
+        <paper-collapse-item header="Item"
+                             opened>
+          <dom-repeat id="photos"
+                      items="{{item.photos}}"
+                      as="photo">
+            <template>
+              <div class="photo-16-9">
+                <paper-icon-button icon="app:close"
+                                   on-tap="removePhoto"></paper-icon-button>
+                <img src="{{photo}}"
+                     alt="food photo" />
+              </div>
+            </template>
+            <p hidden$="[[!showPhotoRequired]]"
+               class="photoRequired">*A photo is required. Note: Please, use your camera in <strong>landscape</strong> orientation because all photos will be cropped to a 16 x 9 ratio from the center.</p>
+            <div id="progressBar"
+                 hidden>
+              <paper-progress value="[[progress]]"></paper-progress>
+            </div>
+            <file-input id="fileInput"
+                        photos="{{item.photos}}"
+                        url-postfix="=s1080"
+                        on-photoschanged="photosChanged"
+                        on-progressstart="progressStart"
+                        on-progressend="progressEnd"
+                        progress="{{progress}}">
+              <div class="add-image">
+                <paper-icon-button icon="app:add-a-photo"></paper-icon-button>
+                Add Image
+              </div>
+            </file-input>
 
-    <form is="iron-form"
-          id="form"
-          class="form"
-          class="form"
-          action="#"
-          on-change="updateSubmitButtonState">
-      <paper-collapse-item header="Item"
-                           opened>
-        <template id="photos"
-                  is="dom-repeat"
-                  items="{{item.photos}}"
-                  as="photo">
-          <div class="photo-16-9">
-            <paper-icon-button icon="app:close"
-                               on-tap="removePhoto"></paper-icon-button>
-            <img src="{{photo}}"
-                 alt="food photo" />
-          </div>
-        </template>
-        <p hidden$="[[!showPhotoRequired]]"
-           class="photoRequired">*A photo is required. Note: Please, use your camera in <strong>landscape</strong> orientation because all photos will be cropped to a 16 x 9 ratio from the center.</p>
-        <div id="progressBar"
-             hidden>
-          <paper-progress value="[[progress]]"></paper-progress>
-        </div>
-        <file-input id="fileInput"
-                    photos="{{item.photos}}"
-                    url-postfix="=s1080"
-                    on-photoschanged="photosChanged"
-                    on-progressstart="progressStart"
-                    on-progressend="progressEnd"
-                    progress="{{progress}}">
-          <div class="add-image">
-            <paper-icon-button icon="app:add-a-photo"></paper-icon-button>
-            Add Image
-          </div>
-        </file-input>
-
-        <paper-input label="Title*"
-                     value="{{item.title}}"
-                     placeholder="Pasta with sweet potato and goat cheese"
-                     errorMessage="A title is required"
-                     required
-                     auto-validate>
-        </paper-input>
-        <paper-textarea label="Description*"
-                        value="{{item.description}}"
-                        placeholder="Fresh Pasta with sweet potato, goat cheese, roasted vegetables, and nutty almonds transform plain fettuccine noodles into a dinner worth craving!"
-                        errorMessage="A description is required"
-                        required
-                        auto-validate>
-        </paper-textarea>
-        <paper-textarea label="Ingredients*"
-                        placeholder="sweet potato, mushrooms, fettuccine noodles, almonds, goat cheese, salt, black pepper"
-                        errorMessage="Ingredients are required"
-                        value="{{_ingredients}}"
-                        required
-                        auto-validate>
-        </paper-textarea>
-        <!-- TODO: switch to a checklist for dietary needs -->
-        <dietary-concerns-input dietary-concerns="{{item.dietary_concerns}}"></dietary-concerns-input>
-        <div>
-          <paper-input class="half-field"
-                       label="Price per serving*"
-                       value="{{item.cook_price_per_serving}}"
-                       type="number"
-                       step="0.01"
-                       min="0.50"
-                       required
-                       auto-validate>
-          </paper-input>
-          <!-- TODO: add price after Service Fee -->
-        </div>
-      </paper-collapse-item>
-      <paper-collapse-item header="Advanced">
-        <div>
+            <paper-input label="Title*"
+                         value="{{item.title}}"
+                         placeholder="Pasta with sweet potato and goat cheese"
+                         errorMessage="A title is required"
+                         required
+                         auto-validate>
+            </paper-input>
+            <paper-textarea label="Description*"
+                            value="{{item.description}}"
+                            placeholder="Fresh Pasta with sweet potato, goat cheese, roasted vegetables, and nutty almonds transform plain fettuccine noodles into a dinner worth craving!"
+                            errorMessage="A description is required"
+                            required
+                            auto-validate>
+            </paper-textarea>
+            <paper-textarea label="Ingredients*"
+                            placeholder="sweet potato, mushrooms, fettuccine noodles, almonds, goat cheese, salt, black pepper"
+                            errorMessage="Ingredients are required"
+                            value="{{_ingredients}}"
+                            required
+                            auto-validate>
+            </paper-textarea>
+            <!-- TODO: switch to a checklist for dietary needs -->
+            <dietary-concerns-input dietary-concerns="{{item.dietary_concerns}}"></dietary-concerns-input>
+            <div>
+              <paper-input class="half-field"
+                           label="Price per serving*"
+                           value="{{item.cook_price_per_serving}}"
+                           type="number"
+                           step="0.01"
+                           min="0.50"
+                           required
+                           auto-validate>
+              </paper-input>
+              <!-- TODO: add price after Service Fee -->
+            </div>
+        </paper-collapse-item>
+        <paper-collapse-item header="Advanced">
           <div>
-            <span class="header">Number of Servings</span>
-            <p>Set how many people you are willing to serve. Questions you should consider: Is it worth it for you to cook for 1 person, 2 people, etc.? Do you have supplies to present your food for a party?</p>
+            <div>
+              <span class="header">Number of Servings</span>
+              <p>Set how many people you are willing to serve. Questions you should consider: Is it worth it for you to cook for 1 person, 2 people, etc.? Do you have supplies to present your food for a party?</p>
+            </div>
+            <paper-input label="Min servings*"
+                         value="{{item.min_servings}}"
+                         type="number"
+                         min="1"
+                         required
+                         auto-validate>
+            </paper-input>
+            <paper-input label="Max servings*"
+                         value="{{item.max_servings}}"
+                         type="number"
+                         min="4"
+                         max="50"
+                         required
+                         auto-validate>
+            </paper-input>
           </div>
-          <paper-input label="Min servings*"
-                       value="{{item.min_servings}}"
-                       type="number"
-                       min="1"
-                       required
-                       auto-validate>
-          </paper-input>
-          <paper-input label="Max servings*"
-                       value="{{item.max_servings}}"
-                       type="number"
-                       min="4"
-                       max="50"
-                       required
-                       auto-validate>
-          </paper-input>
-        </div>
-      </paper-collapse-item>
-      <paper-button id="submitButton"
-                    class="submit-button"
-                    on-tap="submit"
-                    raised
-                    disabled>
-        <paper-spinner id="spinner"
-                       hidden></paper-spinner>Save Item
-      </paper-button>
-    </form>
-
+        </paper-collapse-item>
+        <paper-button id="submitButton"
+                      class="submit-button"
+                      on-tap="submit"
+                      raised
+                      disabled>
+          <paper-spinner id="spinner"
+                         hidden></paper-spinner>Save Item
+        </paper-button>
+      </form>
+    </iron-form>
   </template>
   <script>
     'use strict';
@@ -316,11 +317,15 @@
         }.bind(this));
       },
       updateSubmitButtonState: function() {
-        var form = this.$.form;
-        var submitButton = this.$.submitButton;
-        // Validate the entire form to see if we should enable the `Submit` button.
-        var hasPhoto = this.item !== undefined && this.item.photos !== undefined && this.item.photos !== null && this.item.photos.length > 0;
-        submitButton.disabled = !form.validate() || !hasPhoto;
+        try {
+          var form = this.$.form;
+          var submitButton = this.$.submitButton;
+          // Validate the entire form to see if we should enable the `Submit` button.
+          var hasPhoto = this.item !== undefined && this.item.photos !== undefined && this.item.photos !== null && this.item.photos.length > 0;
+          submitButton.disabled = !form.validate() || !hasPhoto;
+        } catch (e) {
+          console.error("failed to updateSubmitButtonState in item-form", e);
+        }
       },
       itemPhotosChanged: function(p) {
         this.updateSubmitButtonState();

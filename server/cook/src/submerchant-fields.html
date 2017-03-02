@@ -15,26 +15,28 @@
 
 <dom-module id="submerchant-fields">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-      }
-      
-      label {
-        line-height: 20px;
-      }
-      
-      .check-image {
-        width: 50%;
-      }
-      
-      @media (max-width: 500px) {
-        .check-image {
-          width: 100%;
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
         }
-      }
+        
+        label {
+          line-height: 20px;
+        }
+        
+        .check-image {
+          width: 50%;
+        }
+        
+        @media (max-width: 500px) {
+          .check-image {
+            width: 100%;
+          }
+        }
 
-    </style>
+      </style>
+    </shared-styles>
 
     <div class="row">
       <paper-input class="flex-1"

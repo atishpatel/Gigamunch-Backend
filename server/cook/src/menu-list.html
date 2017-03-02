@@ -15,13 +15,13 @@
       }
 
     </style>
-
-    <template is="dom-repeat"
-              items="[[menus]]"
-              as="menu">
-      <cook-menu menu="[[menu]]"
-                 allow-activating="[[allowActivating]]"></cook-menu>
-    </template>
+    <dom-repeat items="[[menus]]"
+                as="menu">
+      <template>
+        <cook-menu menu="[[menu]]"
+                   allow-activating="[[allowActivating]]"></cook-menu>
+      </template>
+    </dom-repeat>
 
     <cook-menu></cook-menu>
   </template>

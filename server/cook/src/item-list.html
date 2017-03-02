@@ -39,12 +39,13 @@
     </style>
 
     <div class="grid">
-      <template is="dom-repeat"
-                items="[[items]]">
-        <cook-item item="[[item]]"
-                   menu-color="[[menuColor]]"
-                   allow-activating="[[allowActivating]]"></cook-item>
-      </template>
+      <dom-repeat items="[[items]]">
+        <template>
+          <cook-item item="[[item]]"
+                     menu-color="[[menuColor]]"
+                     allow-activating="[[allowActivating]]"></cook-item>
+        </template>
+      </dom-repeat>
       <cook-item class="add-card"
                  on-tap="addItem"
                  menu-color="[[menuColor]]"></cook-item>

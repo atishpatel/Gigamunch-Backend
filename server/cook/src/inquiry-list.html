@@ -28,12 +28,12 @@
       }
 
     </style>
-
-    <template is="dom-repeat"
-              items="[[inquiries]]"
-              as="inquiry">
-      <inquiry-card inquiry="[[inquiry]]"></inquiry-card>
-    </template>
+    <dom-repeat items="[[inquiries]]"
+                as="inquiry">
+      <template>
+        <inquiry-card inquiry="[[inquiry]]"></inquiry-card>
+      </template>
+    </dom-repeat>
 
   </template>
 

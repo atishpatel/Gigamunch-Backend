@@ -9,23 +9,25 @@
 
 <dom-module id="inquiries-page">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-        padding: 0 24px;
-        background-color: white;
-        min-height: 85vh;
-        max-width: var(--max-content-width);
-        margin: auto;
-      }
-      
-      #spinner {
-        display: flex;
-        margin: auto;
-        padding: 50px;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          padding: 0 24px;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        #spinner {
+          display: flex;
+          margin: auto;
+          padding: 50px;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <paper-spinner id="spinner"
                    hidden$="[[!showSpinner]]"
                    active="[[showSpinner]]">

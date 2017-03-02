@@ -9,21 +9,23 @@
 
 <dom-module id="kitchen-page">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-        padding: 0 24px;
-        background-color: white;
-        min-height: 85vh;
-        max-width: var(--max-content-width);
-        margin: auto;
-      }
-      
-      #spinner {
-        margin: auto;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          padding: 0 24px;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        #spinner {
+          margin: auto;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <div class="page-desc">Menus allow you to group similar items. For example, all your paleo food might be in a "Paleo Palace" menu and desserts in a "Atish's Desserts" menu. Add as many Items as you can. More Items, more changes to be discovered!</div>
     <paper-spinner id="spinner"
                    hidden></paper-spinner>

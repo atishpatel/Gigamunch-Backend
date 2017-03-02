@@ -8,27 +8,29 @@
 
 <dom-module id="dietary-concerns-input">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-      }
-      
-      .list {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-      
-      .list>* {
-        margin: 10px 10px 10px 0;
-        width: 125px
-      }
-      
-      label {
-        font-size: 12px;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        .list {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        
+        .list>* {
+          margin: 10px 10px 10px 0;
+          width: 125px
+        }
+        
+        label {
+          font-size: 12px;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <label>Dietary Tags</label>
     <div class="list">
       <paper-checkbox checked="{{vegan}}">Vegan</paper-checkbox>

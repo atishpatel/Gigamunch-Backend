@@ -12,169 +12,171 @@
 
 <dom-module id="inquiry-page">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: flex;
-        flex-direction: column;
-        background-color: white;
-        min-height: 85vh;
-        max-width: var(--max-content-width);
-        margin: auto;
-        --left-indent: 33px;
-      }
-      
-      #spinner {
-        margin: auto;
-      }
-      
-      .content-container {
-        display: flex;
-        flex-direction: column;
-      }
-      
-      .servings-text {
-        text-align: center;
-        font-size: 18px;
-      }
-      
-      .image-servings-container {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        padding-bottom: 12px;
-      }
-      
-      .item-image-user-container {
-        padding: 8px 8px 8px 0;
-      }
-      
-      .item-image {
-        border-radius: 3px;
-        overflow: hidden;
-        margin-left: var(--left-indent);
-      }
-      
-      .eater-image {
-        position: absolute;
-        bottom: 25px;
-        left: 8px;
-        width: 50px;
-        height: 50px;
-        background-size: 50px;
-        background-color: white;
-        border-radius: 50%;
-      }
-      
-      .requested-by-text {
-        position: relative;
-        left: 62px;
-        right: 0;
-        display: inline-block;
-      }
-      
-      .earnings-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-      }
-      
-      .earnings-text {
-        text-align: center;
-        font-size: 18px;
-        padding-bottom: 12px;
-        margin-top: 24px;
-      }
-      
-      .button-container {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-        padding-bottom: 35px;
-        margin-top: auto;
-      }
-      
-      .action-button {
-        min-width: 30%
-      }
-      
-      .image-and-earnings-containers {
-        display: flex;
-        flex-direction: column;
-      }
-      
-      @media (min-width: 700px) {
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: column;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+          --left-indent: 33px;
+        }
+        
+        #spinner {
+          margin: auto;
+        }
+        
+        .content-container {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .servings-text {
+          text-align: center;
+          font-size: 18px;
+        }
+        
+        .image-servings-container {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 12px;
+        }
+        
+        .item-image-user-container {
+          padding: 8px 8px 8px 0;
+        }
+        
+        .item-image {
+          border-radius: 3px;
+          overflow: hidden;
+          margin-left: var(--left-indent);
+        }
+        
+        .eater-image {
+          position: absolute;
+          bottom: 25px;
+          left: 8px;
+          width: 50px;
+          height: 50px;
+          background-size: 50px;
+          background-color: white;
+          border-radius: 50%;
+        }
+        
+        .requested-by-text {
+          position: relative;
+          left: 62px;
+          right: 0;
+          display: inline-block;
+        }
+        
+        .earnings-container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-around;
+        }
+        
+        .earnings-text {
+          text-align: center;
+          font-size: 18px;
+          padding-bottom: 12px;
+          margin-top: 24px;
+        }
+        
+        .button-container {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          padding-bottom: 35px;
+          margin-top: auto;
+        }
+        
+        .action-button {
+          min-width: 30%
+        }
+        
         .image-and-earnings-containers {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        @media (min-width: 700px) {
+          .image-and-earnings-containers {
+            flex-direction: row;
+          }
+          .image-and-earnings-containers>* {
+            flex: 1;
+          }
+        }
+        
+        .detail-list {
+          /* --left-indent - 4px */
+          margin-left: var(--left-indent);
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .detail {
+          display: flex;
+          flex-direction: row;
+          padding: 4px 0;
+        }
+        
+        .detail-info {
+          display: flex;
+          flex-direction: column;
+          padding-left: 8px;
+        }
+        
+        .circle-icon-container {
+          margin: 4px;
+        }
+        
+        .circle-icon {
+          background-color: #4F4F4F;
+          border-radius: 50%;
+          width: 16px;
+          height: 16px;
+        }
+        
+        .eater-address {
+          font-size: 12px;
+          line-height: 12px;
+          text-transform: capitalize;
+        }
+        
+        .messages-title-container {
+          padding-top: 12px;
+          flex: 1;
+          display: flex;
           flex-direction: row;
         }
-        .image-and-earnings-containers>* {
+        
+        .messages-title-line {
           flex: 1;
+          height: 1px;
+          background-color: var(--gray-line-color);
+          margin: auto 0;
         }
-      }
-      
-      .detail-list {
-        /* --left-indent - 4px */
-        margin-left: var(--left-indent);
-        display: flex;
-        flex-direction: column;
-      }
-      
-      .detail {
-        display: flex;
-        flex-direction: row;
-        padding: 4px 0;
-      }
-      
-      .detail-info {
-        display: flex;
-        flex-direction: column;
-        padding-left: 8px;
-      }
-      
-      .circle-icon-container {
-        margin: 4px;
-      }
-      
-      .circle-icon {
-        background-color: #4F4F4F;
-        border-radius: 50%;
-        width: 16px;
-        height: 16px;
-      }
-      
-      .eater-address {
-        font-size: 12px;
-        line-height: 12px;
-        text-transform: capitalize;
-      }
-      
-      .messages-title-container {
-        padding-top: 12px;
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-      }
-      
-      .messages-title-line {
-        flex: 1;
-        height: 1px;
-        background-color: var(--gray-line-color);
-        margin: auto 0;
-      }
-      
-      .messages-title {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        text-align: center;
-        padding: 8px;
-      }
-      
-      .channel-view {
-        margin: 0;
-        max-height: 70vh;
-      }
+        
+        .messages-title {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          text-align: center;
+          padding: 8px;
+        }
+        
+        .channel-view {
+          margin: 0;
+          max-height: 70vh;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <paper-spinner id="spinner"
                    hidden="[[hideSpinner]]"
                    active$="[[!hideSpinner]]">

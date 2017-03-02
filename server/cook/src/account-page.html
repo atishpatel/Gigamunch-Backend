@@ -17,68 +17,70 @@
 
 <dom-module id="account-page">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-        background-color: white;
-        min-height: 85vh;
-        max-width: var(--max-content-width);
-        margin: auto;
-      }
-      
-      #spinner {
-        margin: auto;
-      }
-      
-      .card {
-        border: 1px solid #dce0e0;
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 24px;
-      }
-      
-      .card-header {
-        background-color: #edefed;
-        font-size: 16px;
-        padding: 12px 24px;
-        border-bottom: 1px solid #dce0e0;
-        font-weight: bold;
-      }
-      
-      .sub-header {
-        font-size: 16px;
-        padding-top: 12px;
-      }
-      
-      .card-body {
-        font-size: 14px;
-        padding: 24px;
-      }
-      
-      .save-button-container {
-        display: flex;
-      }
-      
-      .save-button {
-        text-transform: none;
-        min-width: 200px;
-        margin: 24px 0 0 auto;
-      }
-      
-      @media (max-width: 1000px) {
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        #spinner {
+          margin: auto;
+        }
+        
         .card {
-          border-radius: 0;
-          border-bottom: none;
+          border: 1px solid #dce0e0;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 24px;
         }
-      }
-      
-      @media (max-width: 700px) {
+        
+        .card-header {
+          background-color: #edefed;
+          font-size: 16px;
+          padding: 12px 24px;
+          border-bottom: 1px solid #dce0e0;
+          font-weight: bold;
+        }
+        
+        .sub-header {
+          font-size: 16px;
+          padding-top: 12px;
+        }
+        
+        .card-body {
+          font-size: 14px;
+          padding: 24px;
+        }
+        
+        .save-button-container {
+          display: flex;
+        }
+        
         .save-button {
-          width: 100%;
+          text-transform: none;
+          min-width: 200px;
+          margin: 24px 0 0 auto;
         }
-      }
+        
+        @media (max-width: 1000px) {
+          .card {
+            border-radius: 0;
+            border-bottom: none;
+          }
+        }
+        
+        @media (max-width: 700px) {
+          .save-button {
+            width: 100%;
+          }
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <div class="card">
       <div class="card-header">
         <span class="sub-header-title">Profile</span>

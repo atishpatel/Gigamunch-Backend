@@ -14,56 +14,163 @@
 
 <dom-module id="work-schedule">
   <template>
-    <style include="shared-styles paper-select">
-       :host {
-        display: block;
-      }
-      
-      label {
-        font-size: 12px;
-        color: #727272;
-        -webkit-font-smoothing: antialiased;
-      }
-      
-      .input-header {
-        font-size: 14px;
-        padding: 8px 0;
-        opacity: .7;
-      }
-      
-      .week-days {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        padding-bottom: 12px;
-      }
-      
-      .week-day {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-      
-      @media (max-width: 767px) {
-        .week-day {
-          flex-direction: column;
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
         }
-      }
+        
+        label {
+          font-size: 12px;
+          color: #727272;
+          -webkit-font-smoothing: antialiased;
+        }
+        
+        .input-header {
+          font-size: 14px;
+          padding: 8px 0;
+          opacity: .7;
+        }
+        
+        .week-days {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          padding-bottom: 12px;
+        }
+        
+        .week-day {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+        
+        @media (max-width: 767px) {
+          .week-day {
+            flex-direction: column;
+          }
+        }
+        /* TODO move into shared style*/
+        
+        paper-select {
+          font-family: 'FontRegular', 'Roboto';
+          letter-spacing: .5px;
+          display: inline-block;
+          position: relative;
+          /* create a layer to avoid invalidation from other controls*/
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+          padding-bottom: 6px;
+        }
+        
+        paper-select>label {
+          line-height: 20px;
+        }
+        
+        paper-select>paper-md-decorator {
+          display: block;
+          border-top: 1px solid #727272;
+          height: 1px;
+          speak: none;
+        }
+        
+        paper-select>paper-md-decorator::after {
+          content: '\25BC';
+          display: block;
+          position: absolute;
+          bottom: calc(50% - 0.75em);
+          right: 8px;
+          speak: none;
+          -webkit-transform: scaleY(.6);
+          transform: scaleY(.6);
+          color: var(--secondary-text-color);
+          pointer-events: none;
+        }
+        
+        paper-select>select {
+          font-family: 'FontRegular', 'Roboto';
+          letter-spacing: .5px;
+          width: 100%;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          padding: 8px 24px 8px 0;
+          border: none;
+          background-color: transparent;
+          border-radius: 0;
+          font-size: 16px;
+          color: var(--primary-text-color);
+          overflow: hidden;
+          margin: 0;
+          outline: none;
+        }
+        
+        paper-select>select::-ms-expand {
+          display: none;
+        }
+        
+        paper-select>paper-md-decorator>paper-underline {
+          display: block;
+          background-color: var(--primary-color);
+          height: 2px;
+          position: relative;
+          top: -1px;
+          width: 100%;
+          margin: auto;
+          -webkit-transform: scale3d(0, 1, 1);
+          transform: scale3d(0, 1, 1);
+          transition: -webkit-transform 0.2s ease-in;
+          transition: transform 0.2s ease-in;
+        }
+        
+        paper-select>select:focus+paper-md-decorator>paper-underline {
+          -webkit-transform: scale3d(1, 1, 1);
+          transform: scale3d(1, 1, 1);
+          transition: -webkit-transform 0.2s ease-out;
+          transition: transform 0.2s ease-out;
+        }
+        
+        paper-select>select:focus+paper-md-decorator::before,
+        paper-select>select:focus+paper-md-decorator::after,
+        paper-select>select:focus {
+          color: black;
+        }
+        /* hide the focus ring in firefox */
+        
+        paper-select>select:focus:-moz-focusring {
+          color: transparent;
+          text-shadow: 0 0 0 #000;
+        }
+        
+        paper-select>[prefix] {
+          position: absolute;
+          left: 0px;
+          top: calc(50% - 8px);
+          line-height: 16px;
+          color: var(--primary-text-color);
+          pointer-events: none;
+        }
+        
+        paper-select[invalid]>paper-md-decorator {
+          border-top: 2px solid #dd2c00;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
 
     <div class="input-header">When do you work?</div>
     <div class="week-days">
-      <template is="dom-repeat"
-                items="[[weekDays]]"
-                as="day"
-                class="week-days">
-        <div class="week-day">
-          <paper-checkbox on-tap="updateSchedule"
-                          checked="{{day.checked}}"></paper-checkbox>
-          <span>[[day.name]]</span>
-        </div>
-      </template>
+      <dom-repeat items="[[weekDays]]"
+                  as="day"
+                  class="week-days">
+        <template>
+          <div class="week-day">
+            <paper-checkbox on-tap="updateSchedule"
+                            checked="{{day.checked}}"></paper-checkbox>
+            <span>[[day.name]]</span>
+          </div>
+        </template>
+      </dom-repeat>
     </div>
     <div class="row">
       <div class="flex-1 column">

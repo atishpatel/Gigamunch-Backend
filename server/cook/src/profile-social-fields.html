@@ -11,16 +11,18 @@
 
 <dom-module id="profile-social-fields">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-      }
-      
-      label {
-        line-height: 20px;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        label {
+          line-height: 20px;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <paper-textarea label="Describe Yourself"
                     value="{{bio}}"
                     autocorrect>

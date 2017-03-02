@@ -17,124 +17,125 @@
 
 <dom-module id="inquiry-card">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: flex;
-        flex-direction: column;
-        border: solid var(--gray-line-color) 1px;
-        border-radius: 10px;
-        overflow: hidden;
-        min-height: 275px;
-      }
-      
-      iron-icon {
-        color: var(--primary-text-color);
-      }
-      
-      .bar {
-        display: flex;
-        align-items: center;
-        padding: 12px;
-      }
-      
-      .eater-bar {
-        padding-bottom: 12px;
-        border-bottom: solid var(--gray-line-color) 1px;
-      }
-      
-      .eater-image {
-        width: 48px;
-        height: 48px;
-        background-size: 48px;
-        border-radius: 50%;
-      }
-      
-      .eater-name-message {
-        padding-left: 24px;
-        display: flex;
-        flex-direction: column;
-      }
-      
-      .inquiry-status {
-        margin-left: auto;
-        display: flex;
-        flex-direction: column;
-        min-width: 70px;
-        border-bottom-width: 2px;
-        border-bottom-style: solid;
-      }
-      
-      .inquiry-id {
-        margin-left: 8px;
-        display: flex;
-        flex-direction: column;
-      }
-      
-      @media (max-width: 400px) {
-        .inquiry-id {
-          display: none;
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: column;
+          border: solid var(--gray-line-color) 1px;
+          border-radius: 10px;
+          overflow: hidden;
+          min-height: 275px;
         }
-      }
-      
-      .item-bar {
-        height: 50px;
-      }
-      
-      .item-image {
-        width: 48px;
-        border-radius: 5%;
-        overflow: hidden;
-      }
-      
-      .item-name {
-        padding-left: 24px;
-      }
-      
-      .time-servings-bar>*,
-      .exchange-total-bar>* {
-        flex: 1;
-      }
-      
-      .icon-detail {
-        display: flex;
-        flex-direction: row;
-      }
-      
-      .icon-detail-text {
-        padding-left: 8px;
-      }
-      
-      .button-bar>* {
-        flex: 1;
-        margin: 0;
-        border-radius: 0;
-      }
-      
-      .left-1px-margin {
-        margin-left: 1px;
-      }
-      
-      .button-bar {
-        padding: 0;
-        margin-top: 12px;
-      }
-      
-      paper-button {
-        margin: 0;
-      }
-      
-      .spinner-container {
-        min-height: 46px;
-        display: flex;
-        background-color: var(--primary-color);
-      }
-      
-      .spinner-container>* {
-        margin: auto;
-      }
+        
+        iron-icon {
+          color: var(--primary-text-color);
+        }
+        
+        .bar {
+          display: flex;
+          align-items: center;
+          padding: 12px;
+        }
+        
+        .eater-bar {
+          padding-bottom: 12px;
+          border-bottom: solid var(--gray-line-color) 1px;
+        }
+        
+        .eater-image {
+          width: 48px;
+          height: 48px;
+          background-size: 48px;
+          border-radius: 50%;
+        }
+        
+        .eater-name-message {
+          padding-left: 24px;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .inquiry-status {
+          margin-left: auto;
+          display: flex;
+          flex-direction: column;
+          min-width: 70px;
+          border-bottom-width: 2px;
+          border-bottom-style: solid;
+        }
+        
+        .inquiry-id {
+          margin-left: 8px;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        @media (max-width: 400px) {
+          .inquiry-id {
+            display: none;
+          }
+        }
+        
+        .item-bar {
+          height: 50px;
+        }
+        
+        .item-image {
+          width: 48px;
+          border-radius: 5%;
+          overflow: hidden;
+        }
+        
+        .item-name {
+          padding-left: 24px;
+        }
+        
+        .time-servings-bar>*,
+        .exchange-total-bar>* {
+          flex: 1;
+        }
+        
+        .icon-detail {
+          display: flex;
+          flex-direction: row;
+        }
+        
+        .icon-detail-text {
+          padding-left: 8px;
+        }
+        
+        .button-bar>* {
+          flex: 1;
+          margin: 0;
+          border-radius: 0;
+        }
+        
+        .left-1px-margin {
+          margin-left: 1px;
+        }
+        
+        .button-bar {
+          padding: 0;
+          margin-top: 12px;
+        }
+        
+        paper-button {
+          margin: 0;
+        }
+        
+        .spinner-container {
+          min-height: 46px;
+          display: flex;
+          background-color: var(--primary-color);
+        }
+        
+        .spinner-container>* {
+          margin: auto;
+        }
 
-    </style>
-
+      </style>
+    </shared-styles>
     <div class="bar eater-bar">
       <template is="dom-if"
                 if="[[showeater]]">

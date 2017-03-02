@@ -9,104 +9,106 @@
 
 <dom-module id="message-card">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: flex;
-        padding: 6px 0;
-      }
-      
-      .inquiry-card {
-        max-width: 400px;
-        width: 100%;
-        margin: auto;
-      }
-      
-      @media (max-width: 400px) {
-        .inquiry-card {
-          max-width: 300px;
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          padding: 6px 0;
         }
-      }
-      
-      .user-pic-container {
-        min-width: 35px;
-      }
-      
-      .user-pic {
-        height: 35px;
-        width: 35px;
-        background-size: 35px;
-        border-radius: 50%;
-      }
-      
-      .eater-chat {
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-      }
-      
-      .eater-chat-bubble {
-        margin: 0 47px 0 12px;
-        border-radius: 12px;
-        background-color: #CFD8DC;
-      }
-      
-      .cook-chat {
-        flex: 1;
-        display: flex;
-        flex-direction: row-reverse;
-        align-items: flex-end;
-      }
-      
-      .cook-chat-bubble {
-        margin: 0 12px 0 47px;
-        border-radius: 12px;
-        background-color: var(--primary-color);
-        color: white;
-      }
-      
-      .body {
-        padding: 6px;
-      }
-      
-      .status-container {
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-      }
-      
-      .status-line {
-        flex: 1;
-        height: 1px;
-        background-color: var(--gray-line-color);
-        margin: auto 0;
-      }
-      
-      .status {
-        flex: 2;
-        display: flex;
-        flex-direction: column;
-        padding: 8px;
-      }
-      
-      .status-title {
-        text-align: center;
-      }
-      
-      .status-body {
-        text-align: center;
-        font-size: 12px;
-        max-width: 300px;
-        margin: auto;
-      }
-      
-      @media (min-width: 700px) {
+        
+        .inquiry-card {
+          max-width: 400px;
+          width: 100%;
+          margin: auto;
+        }
+        
+        @media (max-width: 400px) {
+          .inquiry-card {
+            max-width: 300px;
+          }
+        }
+        
+        .user-pic-container {
+          min-width: 35px;
+        }
+        
+        .user-pic {
+          height: 35px;
+          width: 35px;
+          background-size: 35px;
+          border-radius: 50%;
+        }
+        
+        .eater-chat {
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+        }
+        
+        .eater-chat-bubble {
+          margin: 0 47px 0 12px;
+          border-radius: 12px;
+          background-color: #CFD8DC;
+        }
+        
+        .cook-chat {
+          flex: 1;
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: flex-end;
+        }
+        
+        .cook-chat-bubble {
+          margin: 0 12px 0 47px;
+          border-radius: 12px;
+          background-color: var(--primary-color);
+          color: white;
+        }
+        
+        .body {
+          padding: 6px;
+        }
+        
+        .status-container {
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+        }
+        
+        .status-line {
+          flex: 1;
+          height: 1px;
+          background-color: var(--gray-line-color);
+          margin: auto 0;
+        }
+        
         .status {
           flex: 2;
+          display: flex;
+          flex-direction: column;
+          padding: 8px;
         }
-      }
+        
+        .status-title {
+          text-align: center;
+        }
+        
+        .status-body {
+          text-align: center;
+          font-size: 12px;
+          max-width: 300px;
+          margin: auto;
+        }
+        
+        @media (min-width: 700px) {
+          .status {
+            flex: 2;
+          }
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <!-- InquiryBot Chat -->
     <template is="dom-if"
               if="[[showInquiryCard]]">

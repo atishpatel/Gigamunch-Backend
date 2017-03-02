@@ -2,21 +2,31 @@
 
 -->
 
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 <dom-module id="file-input">
   <template>
     <style>
-      :host {
+       :host {
         display: block;
       }
+
     </style>
     <div on-tap="selectFile">
-      <content></content>
+      <slot></slot>
     </div>
-    <form hidden action="{{action}}" method="POST" enctype="multipart/form-data">
-      <input id="file" type="file" name="file" accept="image/*;capture=camera" on-change="_uploadFile">
+    <form hidden
+          action="{{action}}"
+          method="POST"
+          enctype="multipart/form-data">
+      <input id="file"
+             type="file"
+             name="file"
+             accept="image/*;capture=camera"
+             on-change="_uploadFile">
     </form>
   </template>
   <script>
@@ -107,7 +117,7 @@
         xhr.onload = function() {
           try {
             var resp = JSON.parse(this.response);
-            if(resp.err === undefined || resp.err.code === undefined || resp.err.code !== 0) {
+            if (resp.err === undefined || resp.err.code === undefined || resp.err.code !== 0) {
               alert('There was an error upload your file:', resp.err);
               return;
             }
@@ -126,5 +136,6 @@
         this.getActionURL();
       },
     });
+
   </script>
 </dom-module>

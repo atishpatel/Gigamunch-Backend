@@ -14,41 +14,42 @@
 
 <dom-module id="cook-item">
   <template>
-    <style include="shared-styles">
-       :host {
-        /*display: flex; TODO fix Edge bug */
-        flex-direction: column;
-      }
-      
-      #photo {
-        background-color: #4FC3F7;
-      }
-      
-      .action-bar {
-        padding: 4px 0;
-        display: flex;
-        flex-direction: row;
-        color: #727272;
-      }
-      
-      .edit-item {
-        margin: 0 -8px 0 auto;
-      }
-      
-      .title {
-        font-size: 18px;
-        color: var(--primary-text-color);
-        padding-bottom: 12px;
-      }
-      
-      .activate-toggle {
-        width: 100%;
-        margin: auto 0 0 0;
-        border-radius: 0;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          /*display: flex; TODO fix Edge bug */
+          flex-direction: column;
+        }
+        
+        #photo {
+          background-color: #4FC3F7;
+        }
+        
+        .action-bar {
+          padding: 4px 0;
+          display: flex;
+          flex-direction: row;
+          color: #727272;
+        }
+        
+        .edit-item {
+          margin: 0 -8px 0 auto;
+        }
+        
+        .title {
+          font-size: 18px;
+          color: var(--primary-text-color);
+          padding-bottom: 12px;
+        }
+        
+        .activate-toggle {
+          width: 100%;
+          margin: auto 0 0 0;
+          border-radius: 0;
+        }
 
-    </style>
-
+      </style>
+    </shared-styles>
     <div class="photo-16-9">
       <img id="photo"
            src='{{getPhoto(item)}}'></img>

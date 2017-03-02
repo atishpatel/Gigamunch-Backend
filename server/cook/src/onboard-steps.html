@@ -32,179 +32,180 @@
 
 <dom-module id="onboard-steps">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-        background: white;
-        --disabled-step-color: #bdbdbd;
-        max-width: var(--max-content-width);
-        margin: 0 auto;
-      }
-      
-      .step .header:not(:first-child) {
-        padding-top: 24px;
-      }
-      
-      .header {
-        padding-bottom: 24px;
-      }
-      
-      .header-title {
-        font-size: 20px;
-        font-weight: bold;
-      }
-      
-      .header-desc {
-        font-size: 14px;
-        line-height: 16px;
-        color: var(--secondary-text-color);
-      }
-      
-      #agreeCheckbox {
-        padding: 12px 0;
-      }
-      
-      .steps-container {
-        position: relative;
-      }
-      
-      .steps>* {
-        display: block;
-        padding: 0 24px;
-        margin: auto;
-      }
-      
-      .step {
-        display: block;
-      }
-      
-      .step>*:last-child {
-        padding-bottom: 95px;
-      }
-      /* not smallScreen */
-      
-      @media (min-width: 767px) {
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          background: white;
+          --disabled-step-color: #bdbdbd;
+          max-width: var(--max-content-width);
+          margin: 0 auto;
+        }
+        
+        .step .header:not(:first-child) {
+          padding-top: 24px;
+        }
+        
+        .header {
+          padding-bottom: 24px;
+        }
+        
+        .header-title {
+          font-size: 20px;
+          font-weight: bold;
+        }
+        
+        .header-desc {
+          font-size: 14px;
+          line-height: 16px;
+          color: var(--secondary-text-color);
+        }
+        
+        #agreeCheckbox {
+          padding: 12px 0;
+        }
+        
+        .steps-container {
+          position: relative;
+        }
+        
         .steps>* {
           display: block;
           padding: 0 24px;
-          max-width: var(--max-content-width);
           margin: auto;
         }
-      }
-      
-      @media (max-width: 767px) {
-        .hide-small {
+        
+        .step {
+          display: block;
+        }
+        
+        .step>*:last-child {
+          padding-bottom: 95px;
+        }
+        /* not smallScreen */
+        
+        @media (min-width: 767px) {
+          .steps>* {
+            display: block;
+            padding: 0 24px;
+            max-width: var(--max-content-width);
+            margin: auto;
+          }
+        }
+        
+        @media (max-width: 767px) {
+          .hide-small {
+            display: none;
+          }
+        }
+        
+        .continue-bar {
+          display: flex;
+          position: fixed;
+          width: 100%;
+          height: 55px;
+          bottom: 0;
+          background-color: white;
+          box-shadow: 0 -4px 8px 0 rgba(0, 0, 0, 0.2);
+          padding: 8px 0;
+        }
+        
+        .continue-button {
+          color: white;
+          background-color: var(--primary-color);
+          min-width: 200px;
+          margin: 0 32px 0 auto;
+          border-radius: 0;
+        }
+        
+        @media (min-width: 1000px) {
+          .continue-bar {
+            width: 1000px;
+            box-shadow: 0px -12px 16px -12px rgba(0, 0, 0, 0.2);
+          }
+        }
+        
+        .label-list {
+          display: flex;
+          flex-direction: row;
+          /*justify-content: space-between;*/
+        }
+        
+        .label {
+          width: 50%;
+          padding: 12px 0;
+          display: flex;
+          flex-direction: column;
+          align-self: stretch;
+          text-align: center;
+          position: relative;
+        }
+        
+        .label paper-ripple {
           display: none;
         }
-      }
-      
-      .continue-bar {
-        display: flex;
-        position: fixed;
-        width: 100%;
-        height: 55px;
-        bottom: 0;
-        background-color: white;
-        box-shadow: 0 -4px 8px 0 rgba(0, 0, 0, 0.2);
-        padding: 8px 0;
-      }
-      
-      .continue-button {
-        color: white;
-        background-color: var(--primary-color);
-        min-width: 200px;
-        margin: 0 32px 0 auto;
-        border-radius: 0;
-      }
-      
-      @media (min-width: 1000px) {
-        .continue-bar {
-          width: 1000px;
-          box-shadow: 0px -12px 16px -12px rgba(0, 0, 0, 0.2);
+        
+        .label[openable] paper-ripple,
+        .label[opened] paper-ripple {
+          display: initial;
         }
-      }
-      
-      .label-list {
-        display: flex;
-        flex-direction: row;
-        /*justify-content: space-between;*/
-      }
-      
-      .label {
-        width: 50%;
-        padding: 12px 0;
-        display: flex;
-        flex-direction: column;
-        align-self: stretch;
-        text-align: center;
-        position: relative;
-      }
-      
-      .label paper-ripple {
-        display: none;
-      }
-      
-      .label[openable] paper-ripple,
-      .label[opened] paper-ripple {
-        display: initial;
-      }
-      
-      .label-number-wrapper {
-        display: flex;
-        flex-direction: row;
-        padding-bottom: 12px;
-        align-items: center;
-      }
-      
-      .label-number-wrapper::after,
-      .label-number-wrapper::before {
-        content: '';
-        height: 1px;
-        background-color: var(--disabled-step-color);
-        flex: 1;
-      }
-      
-      .first-step .label-number-wrapper::before,
-      .last-step .label-number-wrapper::after {
-        visibility: hidden;
-      }
-      
-      .label-number {
-        margin: 0 8px;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background-color: var(--disabled-step-color);
-        display: flex;
-        flex-direction: column;
-        color: white;
-      }
-      
-      .label[opened] .label-number,
-      .label[openable] .label-number {
-        background-color: var(--primary-color);
-      }
-      
-      .label-number>span {
-        margin: auto;
-      }
-      
-      .label-title {
-        color: var(--disabled-step-color);
-      }
-      
-      .label[opened] .label-title {
-        color: var(--primary-text-color);
-        font-weight: bold;
-      }
-      
-      .label-optional {
-        color: var(--disabled-step-color);
-        font-size: 12px;
-      }
+        
+        .label-number-wrapper {
+          display: flex;
+          flex-direction: row;
+          padding-bottom: 12px;
+          align-items: center;
+        }
+        
+        .label-number-wrapper::after,
+        .label-number-wrapper::before {
+          content: '';
+          height: 1px;
+          background-color: var(--disabled-step-color);
+          flex: 1;
+        }
+        
+        .first-step .label-number-wrapper::before,
+        .last-step .label-number-wrapper::after {
+          visibility: hidden;
+        }
+        
+        .label-number {
+          margin: 0 8px;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background-color: var(--disabled-step-color);
+          display: flex;
+          flex-direction: column;
+          color: white;
+        }
+        
+        .label[opened] .label-number,
+        .label[openable] .label-number {
+          background-color: var(--primary-color);
+        }
+        
+        .label-number>span {
+          margin: auto;
+        }
+        
+        .label-title {
+          color: var(--disabled-step-color);
+        }
+        
+        .label[opened] .label-title {
+          color: var(--primary-text-color);
+          font-weight: bold;
+        }
+        
+        .label-optional {
+          color: var(--disabled-step-color);
+          font-size: 12px;
+        }
 
-    </style>
-
+      </style>
+    </shared-styles>
     <div class="label-list">
       <div opened$="[[letsTalkStepOpen]]"
            openable$="[[letsTalkStepOpenable]]"
@@ -247,58 +248,58 @@
             <div class="header-title">Schedule a Phone Call (Required)</div>
             <div class="header-desc">We have a relationship with all of our cooks. The Phone Call is a great opportunity for us to learn about you and your creations and to answer your questions!</div>
           </div>
-          <form id="letsTalkForm"
-                is="iron-form"
-                method="post"
-                action="#">
-            <div class="row">
-              <gold-phone-input id="phoneNumber"
-                                class="flex-1"
-                                label="Cell Phone Number*"
-                                value="{{phoneNumber}}"
-                                required
-                                auto-validate>
-              </gold-phone-input>
-              <div class="flex-1 hide-small"></div>
-            </div>
-            <datetime-input id="phoneDatetime"
-                            datetime="{{phoneDatetime}}">
-            </datetime-input>
-          </form>
+          <iron-form id="letsTalkForm">
+            <form method="post"
+                  action="#">
+              <div class="row">
+                <gold-phone-input id="phoneNumber"
+                                  class="flex-1"
+                                  label="Cell Phone Number*"
+                                  value="{{phoneNumber}}"
+                                  required
+                                  auto-validate>
+                </gold-phone-input>
+                <div class="flex-1 hide-small"></div>
+              </div>
+              <datetime-input id="phoneDatetime"
+                              datetime="{{phoneDatetime}}">
+              </datetime-input>
+            </form>
+          </iron-form>
         </neon-animatable>
         <!-- Step 2 -->
         <neon-animatable id="prefStep"
                          name="prefStep"
                          class="step">
-          <form id="prefForm"
-                is="iron-form"
-                method="post"
-                action="#">
-            <div class="header">
-              <div class="header-title">Your Preferences</div>
-              <div class="header-desc">Let's get started! Tell us a bit about yourself.</div>
-            </div>
-            <profile-fields id="profileFields"
-                            photo-url="{{cook.photo_url}}"
-                            name="{{cook.name}}"
-                            email="{{cook.email}}"
-                            phone-number="{{cook.phone_number}}"
-                            address="{{cook.address}}">
-            </profile-fields>
-            <div class="header">
-              <div class="header-title">Schedule</div>
-              <div class="header-desc">Let's figure out when you <span class="bold">absolutely can't</span> make food for someone. This allows us to tell your customers when you aren't likely to accept their request.</div>
-            </div>
-            <work-schedule id="workSchedule"
-                           week-schedule="{{cook.week_schedule}}">
-            </work-schedule>
-            <paper-checkbox id="agreeCheckbox"
-                            required>
-              I agree to the <a href="/terms"
-                 target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
-                 target="_blank">Privacy Policy</a>
-            </paper-checkbox>
-          </form>
+          <iron-form id="prefForm">
+            <form method="post"
+                  action="#">
+              <div class="header">
+                <div class="header-title">Your Preferences</div>
+                <div class="header-desc">Let's get started! Tell us a bit about yourself.</div>
+              </div>
+              <profile-fields id="profileFields"
+                              photo-url="{{cook.photo_url}}"
+                              name="{{cook.name}}"
+                              email="{{cook.email}}"
+                              phone-number="{{cook.phone_number}}"
+                              address="{{cook.address}}">
+              </profile-fields>
+              <div class="header">
+                <div class="header-title">Schedule</div>
+                <div class="header-desc">Let's figure out when you <span class="bold">absolutely can't</span> make food for someone. This allows us to tell your customers when you aren't likely to accept their request.</div>
+              </div>
+              <work-schedule id="workSchedule"
+                             week-schedule="{{cook.week_schedule}}">
+              </work-schedule>
+              <paper-checkbox id="agreeCheckbox"
+                              required>
+                I agree to the <a href="/terms"
+                   target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
+                   target="_blank">Privacy Policy</a>
+              </paper-checkbox>
+            </form>
+          </iron-form>
         </neon-animatable>
 
       </neon-animated-pages>

@@ -21,86 +21,88 @@
 
 <dom-module id="profile-fields">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-      }
-      
-      .row {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-      }
-      
-      .row>*:not(:first-child) {
-        margin-left: 8px;
-      }
-      
-      .flex-1 {
-        flex: 1;
-      }
-      
-      .flex-2 {
-        flex: 2;
-      }
-      
-      .flex-3 {
-        flex: 3;
-      }
-      
-      label {
-        line-height: 20px;
-      }
-      
-      .profile-pic {
-        position: relative;
-        height: 150px;
-        width: 150px;
-        border-radius: 50%;
-        margin: auto;
-        cursor: pointer;
-        overflow: hidden;
-        z-index: 3;
-      }
-      
-      placeholder-img {
-        height: 150px;
-        width: 150px;
-        border-radius: 50%;
-        transition: all .3s ease-in-out;
-        z-index: 1;
-      }
-      
-      placeholder-img:hover {
-        transform: scale(1.1);
-      }
-      
-      .change-photo-text {
-        width: 150px;
-        position: absolute;
-        bottom: 0;
-        color: white;
-        text-align: center;
-        pointer-events: none;
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 8px 0;
-        z-index: 2;
-      }
-      
-      paper-progress {
-        width: 100%;
-        padding-top: 20px;
-      }
-      
-      .file-input-container {
-        display: flex;
-      }
-      
-      file-input {
-        margin: auto;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        .row {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+        }
+        
+        .row>*:not(:first-child) {
+          margin-left: 8px;
+        }
+        
+        .flex-1 {
+          flex: 1;
+        }
+        
+        .flex-2 {
+          flex: 2;
+        }
+        
+        .flex-3 {
+          flex: 3;
+        }
+        
+        label {
+          line-height: 20px;
+        }
+        
+        .profile-pic {
+          position: relative;
+          height: 150px;
+          width: 150px;
+          border-radius: 50%;
+          margin: auto;
+          cursor: pointer;
+          overflow: hidden;
+          z-index: 3;
+        }
+        
+        placeholder-img {
+          height: 150px;
+          width: 150px;
+          border-radius: 50%;
+          transition: all .3s ease-in-out;
+          z-index: 1;
+        }
+        
+        placeholder-img:hover {
+          transform: scale(1.1);
+        }
+        
+        .change-photo-text {
+          width: 150px;
+          position: absolute;
+          bottom: 0;
+          color: white;
+          text-align: center;
+          pointer-events: none;
+          background-color: rgba(0, 0, 0, 0.5);
+          padding: 8px 0;
+          z-index: 2;
+        }
+        
+        paper-progress {
+          width: 100%;
+          padding-top: 20px;
+        }
+        
+        .file-input-container {
+          display: flex;
+        }
+        
+        file-input {
+          margin: auto;
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <div class="file-input-container">
       <file-input id="fileInput"
                   photos="{{photos}}"

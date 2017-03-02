@@ -55,181 +55,183 @@
 
 <dom-module id="app-shell">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: block;
-        color: var(--primary-text-color);
-        --paper-tabs-selection-bar-color: #546E7A;
-        --paper-tab-ink: #546E7A;
-      }
-      
-      .content {
-        max-width: var(--max-content-width);
-        margin: auto;
-      }
-      
-      app-header {
-        color: var(--primary-text-color);
-        background-color: #fff;
-      }
-      
-      app-header .logo {
-        color: var(--primary-color);
-      }
-      
-      app-header paper-icon-button {
-        --paper-icon-button-ink-color: white;
-      }
-      
-      .page-header-title {
-        font-size: 24px;
-        @apply(--font-bold);
-      }
-      
-      .toolbar-right {
-        display: flex;
-        flex-direction: row;
-        height: 100%;
-      }
-      
-      .nav-a,
-      .nav-a:link,
-      .nav-a:visited {
-        text-decoration: none;
-        outline: 0;
-        color: #546E7A;
-      }
-      
-      .nav-tabs {
-        height: 100%;
-        margin-right: 12px;
-        font-size: 16px;
-      }
-      
-      .nav-tabs a {
-        padding: 0 15px;
-        text-decoration: none;
-        outline: 0;
-        color: #546E7A;
-      }
-      
-      .user-pic {
-        height: 30px;
-        width: 30px;
-        background-size: 30px;
-        border-radius: 50%;
-        background-color: white;
-        color: var(--secondary-text-color);
-      }
-      
-      .main-toolbar {
-        z-index: 10;
-        padding: 0 24px;
-      }
-      
-      .drawer-toolbar {
-        height: 100px;
-        justify-content: space-around;
-        align-items: flex-start;
-        flex-direction: column;
-        background-color: var(--primary-color);
-        color: white;
-      }
-      
-      .drawer-user-info {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-      
-      .drawer-user-info .user-pic {
-        margin-right: 12px;
-      }
-      
-      .drawer-user-name {
-        font-size: 16px;
-      }
-      
-      .drawer-user-email {
-        font-size: 12px;
-      }
-      
-      .drawer-list {
-        padding-top: 8px;
-      }
-      
-      .drawer-list paper-item {
-        font-size: 16px;
-        outline: none;
-      }
-      
-      .drawer-list a {
-        display: block;
-        text-decoration: none;
-        color: var(--link-color);
-        line-height: 40px;
-        outline: none;
-      }
-      
-      .drawer-list a.iron-selected {
-        color: #5d686d;
-        background-color: #ECEFF1;
-        font-weight: bold;
-      }
-      
-      .drawer-stuff {
-        display: none;
-      }
-      
-      @media (max-width: 767px) {
-        .nav-tabs-stuff {
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          color: var(--primary-text-color);
+          --paper-tabs-selection-bar-color: #546E7A;
+          --paper-tab-ink: #546E7A;
+        }
+        
+        .content {
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        app-header {
+          color: var(--primary-text-color);
+          background-color: #fff;
+        }
+        
+        app-header .logo {
+          color: var(--primary-color);
+        }
+        
+        app-header paper-icon-button {
+          --paper-icon-button-ink-color: white;
+        }
+        
+        .page-header-title {
+          font-size: 24px;
+          @apply --font-bold;
+        }
+        
+        .toolbar-right {
+          display: flex;
+          flex-direction: row;
+          height: 100%;
+        }
+        
+        .nav-a,
+        .nav-a:link,
+        .nav-a:visited {
+          text-decoration: none;
+          outline: 0;
+          color: #546E7A;
+        }
+        
+        .nav-tabs {
+          height: 100%;
+          margin-right: 12px;
+          font-size: 16px;
+        }
+        
+        .nav-tabs a {
+          padding: 0 15px;
+          text-decoration: none;
+          outline: 0;
+          color: #546E7A;
+        }
+        
+        .user-pic {
+          height: 30px;
+          width: 30px;
+          background-size: 30px;
+          border-radius: 50%;
+          background-color: white;
+          color: var(--secondary-text-color);
+        }
+        
+        .main-toolbar {
+          z-index: 10;
+          padding: 0 24px;
+        }
+        
+        .drawer-toolbar {
+          height: 100px;
+          justify-content: space-around;
+          align-items: flex-start;
+          flex-direction: column;
+          background-color: var(--primary-color);
+          color: white;
+        }
+        
+        .drawer-user-info {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+        
+        .drawer-user-info .user-pic {
+          margin-right: 12px;
+        }
+        
+        .drawer-user-name {
+          font-size: 16px;
+        }
+        
+        .drawer-user-email {
+          font-size: 12px;
+        }
+        
+        .drawer-list {
+          padding-top: 8px;
+        }
+        
+        .drawer-list paper-item {
+          font-size: 16px;
+          outline: none;
+        }
+        
+        .drawer-list a {
+          display: block;
+          text-decoration: none;
+          color: var(--link-color);
+          line-height: 40px;
+          outline: none;
+        }
+        
+        .drawer-list a.iron-selected {
+          color: #5d686d;
+          background-color: #ECEFF1;
+          font-weight: bold;
+        }
+        
+        .drawer-stuff {
           display: none;
         }
-        .drawer-stuff {
-          display: initial;
+        
+        @media (max-width: 767px) {
+          .nav-tabs-stuff {
+            display: none;
+          }
+          .drawer-stuff {
+            display: initial;
+          }
         }
-      }
-      
-      .full-screen-dialog {
-        position: fixed;
-        overflow-x: hidden;
-        top: 0;
-        left: 0;
-        z-index: 100;
-        margin: 0;
-        width: 100%;
-        height: 100%;
-      }
-      
-      .full-screen-dialog>paper-dialog-scrollable {
-        padding: 0;
-      }
-      
-      .full-screen-dialog-close-icon {
-        margin: 16px 0 0 16px;
-      }
-      
-      .full-screen-dialog-content {
-        padding: 24px;
-      }
-      
-      #errorDialogDetails {
-        color: var(--secondary-text-color);
-      }
-      
-      #notificationDialog paper-button,
-      #errorDialog paper-button {
-        color: var(--primary-color);
-        background-color: white;
-      }
-      
-      #notificationDialog .buttons,
-      #errorDialog .buttons {
-        margin-top: 20px;
-        /*min-width: 300px;*/
-      }
+        
+        .full-screen-dialog {
+          position: fixed;
+          overflow-x: hidden;
+          top: 0;
+          left: 0;
+          z-index: 100;
+          margin: 0;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .full-screen-dialog>paper-dialog-scrollable {
+          padding: 0;
+        }
+        
+        .full-screen-dialog-close-icon {
+          margin: 16px 0 0 16px;
+        }
+        
+        .full-screen-dialog-content {
+          padding: 24px;
+        }
+        
+        #errorDialogDetails {
+          color: var(--secondary-text-color);
+        }
+        
+        #notificationDialog paper-button,
+        #errorDialog paper-button {
+          color: var(--primary-color);
+          background-color: white;
+        }
+        
+        #notificationDialog .buttons,
+        #errorDialog .buttons {
+          margin-top: 20px;
+          /*min-width: 300px;*/
+        }
 
-    </style>
+      </style>
+    </shared-styles>
     <app-location route="{{route}}"></app-location>
     <app-route route="{{route}}"
                pattern="[[baseurl]]/:page"

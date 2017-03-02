@@ -12,43 +12,45 @@
 
 <dom-module id="address-input">
   <template>
-    <style include="app-input">
-       :host {
-        display: block;
-      }
-      
-      .row {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-      }
-      
-      .row>*:not(:first-child) {
-        margin-left: 8px;
-      }
-      
-      .flex-1 {
-        flex: 1;
-      }
-      
-      .flex-2 {
-        flex: 2;
-      }
-      
-      .flex-3 {
-        flex: 3;
-      }
-      
-      label {
-        line-height: 20px;
-      }
-      
-      paper-progress {
-        width: 100%;
-        padding-top: 20px;
-      }
+    <app-input>
+      <style>
+         :host {
+          display: block;
+        }
+        
+        .row {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+        }
+        
+        .row>*:not(:first-child) {
+          margin-left: 8px;
+        }
+        
+        .flex-1 {
+          flex: 1;
+        }
+        
+        .flex-2 {
+          flex: 2;
+        }
+        
+        .flex-3 {
+          flex: 3;
+        }
+        
+        label {
+          line-height: 20px;
+        }
+        
+        paper-progress {
+          width: 100%;
+          padding-top: 20px;
+        }
 
-    </style>
+      </style>
+    </app-input>
     <google-maps-api id="mapsapi"
                      api-key="AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y"
                      on-api-load="mapsLoaded">

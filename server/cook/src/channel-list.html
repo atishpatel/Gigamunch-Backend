@@ -7,21 +7,23 @@
 
 <dom-module id="channel-list">
   <template>
-    <style include="shared-styles">
-       :host {
-        display: flex;
-        flex-direction: column;
-      }
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: column;
+        }
 
-    </style>
-
-    <template is="dom-repeat"
-              items="[[channels]]"
-              as="channel"
-              filter="filterCookConversations">
-      <channel-card channel="[[channel]]"
-                    user="[[user]]"></channel-card>
-    </template>
+      </style>
+    </shared-styles>
+    <dom-repeart items="[[channels]]"
+                 as="channel"
+                 filter="filterCookConversations">
+      <template>
+        <channel-card channel="[[channel]]"
+                      user="[[user]]"></channel-card>
+      </template>
+    </dom-repeart>
 
   </template>
 
