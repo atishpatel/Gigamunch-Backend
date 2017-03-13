@@ -22,23 +22,25 @@ type SubscriptionSignUp struct {
 	SubscriptionDay    string        `json:"subscription_day"`
 	WeeklyAmount       float32       `json:"weekly_amount"`
 	PaymentMethodToken string        `json:"payment_method_token"`
+	Reference          string        `json:"reference" datastore:",noindex"`
+	PhoneNumber        string        `json:"phone_number"`
 }
 
 type SubscriptionLog struct {
-	Date               time.Time // Primary Key
-	SubEmail           string    // Primary Key
-	CreatedDatetime    time.Time
-	Skip               bool
-	Servings           int8
-	Amount             float32
-	AmountPaid         float32
-	Paid               bool
-	PaidDatetime       time.Time
-	DeliveryTime       int8
-	PaymentMethodToken string
-	TransactionID      string
-	Free               bool
-	DiscountAmount     float32
-	DiscountPercent    int8
-	CustomerID         string
+	Date               time.Time `json:"date"`      // Primary Key
+	SubEmail           string    `json:"sub_email"` // Primary Key
+	CreatedDatetime    time.Time `json:"created_datetime"`
+	Skip               bool      `json:"skip"`
+	Servings           int8      `json:"servings"`
+	Amount             float32   `json:"amount"`
+	AmountPaid         float32   `json:"amount_paid"`
+	Paid               bool      `json:"paid"`
+	PaidDatetime       time.Time `json:"paid_datetime"`
+	DeliveryTime       int8      `json:"delivery_time"`
+	PaymentMethodToken string    `json:"payment_method_token"`
+	TransactionID      string    `json:"transaction_id"`
+	Free               bool      `json:"free"`
+	DiscountAmount     float32   `json:"discount_amount"`
+	DiscountPercent    int8      `json:"discount_percent"`
+	CustomerID         string    `json:"customer_id"`
 }
