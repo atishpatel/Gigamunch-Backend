@@ -184,6 +184,7 @@ type scheduleSubscriptionReq struct {
 	Servings           string        `json:"servings"`
 	Terp               string        `json:"terp"`
 	DeliveryTime       int8          `json:"delivery_time"`
+	Reference          string        `json:"reference"`
 }
 
 func (s *scheduleSubscriptionReq) valid() error {
@@ -222,7 +223,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		resp.Err = errors.Wrap("failed to validate request", err)
 		return
 	}
-	if sReq.Address.GreatCircleDistance(types.GeoPoint{Latitude: 36.1513632, Longitude: -86.7255927}) > 35 {
+	if sReq.Address.GreatCircleDistance(types.GeoPoint{Latitude: 36.1513632, Longitude: -86.7255927}) > 30 {
 		// out of delivery range
 		if sReq.Address.Street == "" {
 			resp.Err = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!")
@@ -306,6 +307,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	entry.SubscriptionDay = time.Monday.String()
 	entry.PaymentMethodToken = paymenttkn
 	entry.WeeklyAmount = weeklyAmount
+	entry.Reference = sReq.Reference
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
 		resp.Err = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", sReq.Email)
@@ -313,12 +315,13 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	}
 	if !appengine.IsDevAppServer() {
 		messageC := message.New(ctx)
-		err = messageC.SendSMS("6153975516", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nEmail: %s", entry.Email))
+		err = messageC.SendSMS("6153975516", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 		}
-		_ = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nEmail: %s", entry.Email))
-		_ = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nEmail: %s", entry.Email))
+		_ = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		_ = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		_ = messageC.SendSMS("8607485603", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 	}
 	subC := sub.New(ctx)
 	err = subC.Free(firstBoxDate, sReq.Email)
