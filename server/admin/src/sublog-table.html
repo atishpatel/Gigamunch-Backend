@@ -1,0 +1,230 @@
+<!--<link rel="import" href="../bower_components/polymer/polymer.html">-->
+<!--<link rel="import"
+      href="../../cook/bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import"
+      href="../../cook/bower_components/vaadin-grid/vaadin-grid-column.html">
+<link rel="import"
+      href="../../cook/bower_components/vaadin-grid/vaadin-grid-sorter.html">-->
+
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+
+<dom-module id="sublog-table">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        vaadin-grid {
+          font-family: Roboto, sans-serif;
+          --divider-color: rgba(0, 0, 0, .58);
+          --vaadin-grid-cell: {
+            padding: 0;
+          }
+          ;
+          --vaadin-grid-header-cell: {
+            height: 64px;
+            color: rgba(0, 0, 0, var(--dark-secondary-opacity));
+            font-size: 12px;
+          }
+          ;
+          --vaadin-grid-body-cell: {
+            height: 48px;
+            color: rgba(0, 0, 0, var(--dark-primary-opacity));
+            font-size: 13px;
+          }
+          ;
+          --vaadin-grid-body-row-hover-cell: {
+            background-color: var(--paper-grey-200);
+          }
+          ;
+          --vaadin-grid-body-row-selected-cell: {
+            background-color: var(--paper-grey-100);
+          }
+          ;
+          --vaadin-grid-focused-cell: {
+            box-shadow: none;
+            font-weight: bold;
+          }
+          ;
+        }
+        
+        vaadin-grid .cell {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          padding-right: 56px;
+        }
+        
+        vaadin-grid .cell.last {
+          padding-right: 24px;
+        }
+        
+        vaadin-grid .cell.numeric {
+          text-align: right;
+        }
+        
+        vaadin-grid vaadin-grid-sorter {
+          --vaadin-grid-sorter-arrow: {
+            display: none !important;
+          }
+          ;
+        }
+        
+        vaadin-grid vaadin-grid-sorter .cell {
+          flex: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        vaadin-grid vaadin-grid-sorter iron-icon {
+          transform: scale(0.8);
+        }
+        
+        vaadin-grid vaadin-grid-sorter:not([direction]) iron-icon {
+          color: rgba(0, 0, 0, var(--dark-disabled-opacity));
+        }
+        
+        vaadin-grid vaadin-grid-sorter[direction] {
+          color: rgba(0, 0, 0, var(--dark-primary-opacity));
+        }
+        
+        vaadin-grid vaadin-grid-sorter[direction=desc] iron-icon {
+          transform: scale(0.8) rotate(180deg);
+        }
+        
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+        
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+        
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+        
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .table-body {
+          display: table-row-group;
+        }
+
+      </style>
+    </shared-styles>
+
+    <!--<vaadin-grid items="[[sublogs]]">
+      <vaadin-grid-column>
+        <template class="header">
+          <vaadin-grid-sorter path="sub_email">Email</vaadin-grid-sorter>
+        </template>
+        <template>[[item.sub_email]]</template>
+      </vaadin-grid-column>
+      <vaadin-grid-column>
+        <template class="header">
+          <vaadin-grid-sorter path="servings">Servings</vaadin-grid-sorter>
+        </template>
+        <template>[[item.servings]]</template>
+      </vaadin-grid-column>
+      <vaadin-grid-column>
+        <template class="header">
+          <vaadin-grid-sorter path="delivery_time">DeliveryTime</vaadin-grid-sorter>
+        </template>
+        <template>[[item.delivery_time]]</template>
+      </vaadin-grid-column>
+    </vaadin-grid>-->
+
+    <div class="table">
+      <div class="table-row table-header-row">
+        <div class="table-cell">Email</div>
+        <div class="table-cell">Servings</div>
+        <div class="table-cell">Delivery Time</div>
+        <div class="table-cell">Status</div>
+        <div class="table-cell">APT</div>
+        <div class="table-cell">Address</div>
+      </div>
+      <dom-repeat items="[[sublogs]]"
+                  as="sublog">
+        <template>
+          <div class="table-row">
+            <div class="table-cell">[[sublog.sub_email]]</div>
+            <div class="table-cell">[[sublog.servings]]</div>
+            <div class="table-cell">[[sublog.delivery_time]]</div>
+            <div class="table-cell">[[getStatus(sublog)]]</div>
+            <div class="table-cell">[[sublog.address.apt]]</div>
+            <div class="table-cell"><a href="[[getAddressLink(sublog.address)]]">[[getAddress(sublog.address)]]</a></div>
+          </div>
+        </template>
+      </dom-repeat>
+    </div>
+  </template>
+
+  <script>
+    class SublogTable extends Polymer.Element {
+      static get is() {
+        return 'sublog-table';
+      }
+
+      static get properties() {
+        return {
+          sublogs: {
+            type: Array,
+            notify: true,
+          },
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      getStatus(sublog) {
+        if (sublog.skip) {
+          return 'Skipped';
+        }
+        if (sublog.free) {
+          return 'Free';
+        }
+        if (sublog.paid) {
+          return 'Paid';
+        }
+        return 'Unpaid';
+      }
+
+      getAddress(a) {
+        return a.street + ', ' + a.city;
+      }
+
+      getAddressLink(a) {
+        return 'https://maps.google.com/?q=' + encodeURIComponent(a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+      }
+
+    }
+
+    customElements.define(SublogTable.is, SublogTable);
+
+  </script>
+</dom-module>

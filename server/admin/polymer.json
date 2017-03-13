@@ -1,0 +1,11 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/app-shell.html",
+  "fragments": [
+    "src/sublog-page.html",
+    "src/my-view404.html"
+  ],
+  "sourceGlobs": [
+    "src/**/*"
+  ]
+}

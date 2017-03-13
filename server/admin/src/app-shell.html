@@ -1,0 +1,451 @@
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../../cook/bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import"
+      href="../../cook/bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import"
+      href="../../cook/bower_components/app-layout/app-header/app-header.html">
+<link rel="import"
+      href="../../cook/bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import"
+      href="../../cook/bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import"
+      href="../../cook/bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import"
+      href="../../cook/bower_components/app-route/app-location.html">
+<link rel="import"
+      href="../../cook/bower_components/app-route/app-route.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../../cook/bower_components/iron-selector/iron-selector.html">
+<link rel="import"
+      href="../../cook/bower_components/iron-pages/iron-pages.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-dialog/paper-dialog.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-toast/paper-toast.html">
+
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+<link rel="import"
+      href="../../cook/src/app-icons.html">
+
+<dom-module id="app-shell">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          color: var(--primary-text-color);
+        }
+        
+        .content {
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        app-header {
+          color: var(--primary-text-color);
+          background-color: #fff;
+        }
+        
+        app-header .logo {
+          color: var(--primary-color);
+        }
+        
+        app-header paper-icon-button {
+          --paper-icon-button-ink-color: white;
+        }
+        
+        .page-header-title {
+          font-size: 24px;
+          @apply --font-bold;
+        }
+        
+        .toolbar-right {
+          display: flex;
+          flex-direction: row;
+          height: 100%;
+        }
+        
+        .nav-a,
+        .nav-a:link,
+        .nav-a:visited {
+          text-decoration: none;
+          outline: 0;
+          color: #546E7A;
+        }
+        
+        .nav-tabs {
+          height: 100%;
+          margin-right: 12px;
+          font-size: 16px;
+        }
+        
+        .nav-tabs a {
+          padding: 0 15px;
+          text-decoration: none;
+          outline: 0;
+          color: #546E7A;
+        }
+        
+        .user-pic {
+          height: 30px;
+          width: 30px;
+          background-size: 30px;
+          border-radius: 50%;
+          background-color: white;
+          color: var(--secondary-text-color);
+        }
+        
+        .main-toolbar {
+          z-index: 10;
+          padding: 0 24px;
+        }
+        
+        .drawer-toolbar {
+          height: 100px;
+          justify-content: space-around;
+          align-items: flex-start;
+          flex-direction: column;
+          background-color: var(--primary-color);
+          color: white;
+        }
+        
+        .drawer-user-info {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+        
+        .drawer-user-info .user-pic {
+          margin-right: 12px;
+        }
+        
+        .drawer-user-name {
+          font-size: 16px;
+        }
+        
+        .drawer-user-email {
+          font-size: 12px;
+        }
+        
+        .drawer-list {
+          padding-top: 8px;
+        }
+        
+        .drawer-list paper-item {
+          font-size: 16px;
+          outline: none;
+        }
+        
+        .drawer-list a {
+          display: block;
+          text-decoration: none;
+          color: var(--link-color);
+          line-height: 40px;
+          outline: none;
+        }
+        
+        .drawer-list a.iron-selected {
+          color: #5d686d;
+          background-color: #ECEFF1;
+          font-weight: bold;
+        }
+        
+        .drawer-stuff {
+          display: none;
+        }
+        
+        @media (max-width: 767px) {
+          .nav-tabs-stuff {
+            display: none;
+          }
+          .drawer-stuff {
+            display: initial;
+          }
+        }
+        
+        .full-screen-dialog {
+          position: fixed;
+          overflow-x: hidden;
+          top: 0;
+          left: 0;
+          z-index: 100;
+          margin: 0;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .full-screen-dialog>paper-dialog-scrollable {
+          padding: 0;
+        }
+        
+        .full-screen-dialog-close-icon {
+          margin: 16px 0 0 16px;
+        }
+        
+        .full-screen-dialog-content {
+          padding: 24px;
+        }
+        
+        #errorDialogDetails {
+          color: var(--secondary-text-color);
+        }
+        
+        #notificationDialog paper-button,
+        #errorDialog paper-button {
+          color: var(--primary-color);
+          background-color: white;
+        }
+        
+        #notificationDialog .buttons,
+        #errorDialog .buttons {
+          margin-top: 20px;
+          /*min-width: 300px;*/
+        }
+
+      </style>
+    </shared-styles>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}"
+               pattern="/admin/:page"
+               data="{{routeData}}"
+               tail="{{subroute}}"></app-route>
+    <paper-dialog id="notificationDialog"
+                  modal>
+      <div id="notificationDialogText"></div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="errorDialog"
+                  modal>
+      <h1 id="errorDialogTitle">Woops! Something went wrong! :(</h1>
+      <div>We're sorry for the inconvenience. Refresh the page and try again in a few minutes. If the issue persist, please send a screen shot of this to atish@gigamunchapp.com. Our developer, Atish, will work on fixing it ASAP! </div>
+      <div id="errorDialogText"></div>
+      <div id="errorDialogDetails"></div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-toast id="toast"></paper-toast>
+    <app-drawer-layout fullbleed>
+      <!-- Drawer content -->
+      <app-drawer id="drawer">
+        <app-toolbar>Menu</app-toolbar>
+        <iron-selector selected="[[page]]"
+                       attr-for-selected="name"
+                       class="drawer-list"
+                       role="navigation">
+          <a name="sublog"
+             href="/sublog">Sublogs</a>
+          <!--<a name="view2" href="/view2">View Two</a>
+          <a name="view3" href="/view3">View Three</a>-->
+        </iron-selector>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+
+        <app-header condenses
+                    reveals
+                    effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="app:menu"
+                               drawer-toggle>
+            </paper-icon-button>
+            <div main-title>Gigamunch Admin</div>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages selected="[[page]]"
+                    attr-for-selected="name"
+                    fallback-selection="view404"
+                    role="main">
+          <sublog-page name="sublog"
+                       id="sublog"
+                       service="[[service]]"
+                       user="{{user}}">
+          </sublog-page>
+          <my-view404 name="view404">
+          </my-view404>
+        </iron-pages>
+        <span id="gigatokenElement"
+              style="display:none">[[user.token]]
+        </span>
+        <paper-button class="copy-gigatoken"
+                      raised
+                      on-tap="copyGigatoken">Copy Gigatoken
+        </paper-button>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'app-shell',
+
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged',
+        },
+        service: {
+          type: Object,
+          value: function() {
+            return COOK.Service;
+          }
+        },
+        user: {
+          type: Object,
+          notify: true,
+          value: function() {
+            if (!COOK.User.isAdmin) {
+              window.location = '/cook';
+              // TODO redirect
+            }
+            return COOK.User;
+          }
+        },
+      },
+      observers: [
+        '_routePageChanged(routeData.page)',
+      ],
+      ready: function() {
+        this.addEventListener('toast', this.toastEvent.bind(this));
+        this.addEventListener('error', this.errorEvent.bind(this));
+      },
+      _routePageChanged: function(page) {
+        this.page = page || 'sublog';
+
+        if (!this.$.drawer.persistent) {
+          this.$.drawer.close();
+        }
+      },
+      _pageChanged: function(page) {
+        this.$.drawer.close(); // close drawer if open
+        // Load page import on demand. Show 404 page if fails
+        var el;
+        var resolvedPageURL, elementName, title;
+        switch (page) {
+          case 'sublog':
+            elementName = 'sublog-page';
+            resolvedPageURL = this.resolveUrl('sublog-page.html');
+            el = this.$.sublog;
+            title = 'Sublog';
+            break;
+          case 'inquiries':
+            elementName = 'inquiries-page';
+            resolvedPageURL = this.resolveUrl('inquiries-page.html');
+            el = this.$.inquiries;
+            title = 'Inquiries';
+            break;
+          case 'account':
+            elementName = 'account-page';
+            resolvedPageURL = this.resolveUrl('account-page.html');
+            el = this.$.account;
+            title = 'Account';
+            break;
+          default:
+            elementName = page + '-page';
+            resolvedPageURL = this.resolveUrl('my-' + page + '.html');
+        }
+        this.set('title', title);
+        // exit if element is already imported
+        if (document.createElement(elementName).constructor !== HTMLElement) {
+          ga('send', 'pageview', location.pathname);
+          // TODO breaks pages for Safari
+          if (el !== undefined && el !== null) {
+            // el.selected();
+          }
+        }
+        // import element
+        this.importHref(resolvedPageURL, function() {
+          el.selected();
+        }, this._showPage404, true);
+      },
+
+      _showPage404: function() {
+        this.page = 'view404';
+      },
+      toastEvent: function(e, detail) {
+        var text = detail.text;
+        if (text === undefined || text === null || text === '') {
+          text = detail.message;
+        }
+        if (text && text !== "") {
+          var duration = detail.duration || 3000;
+          this.$.toast.show({
+            text: text,
+            duration: duration
+          });
+        }
+      },
+      errorEvent: function(e, error) {
+        var text;
+        var details;
+        switch (typeof(error)) {
+          case 'object':
+            if (typeof(error) === 'string') {
+              text = error;
+            } else {
+              text = error.message;
+              if (error.detail !== undefined && error.detail !== '') {
+                details += error.detail;
+              }
+            }
+            break;
+          default:
+            text = error.toString();
+        }
+        if (error.notification === true || (error !== undefined && error.code !== undefined && error.code === 400)) {
+          this.$.notificationDialogText.innerHTML = text;
+          this.$.notificationDialog.open();
+        } else {
+          if (details !== '') {
+            this.$.errorDialogDetails.innerHTML = 'Detailed gibberish:' + details;
+          }
+          this.$.errorDialogText.innerHTML = text;
+          this.$.errorDialog.open();
+        }
+      },
+      signOut: function() {
+        window.location = '/signout';
+      },
+      copyGigatoken: function() {
+        // Select the email link anchor text  
+        var emailLink = this.$.gigatokenElement;
+        var range = document.createRange();
+        range.selectNode(emailLink);
+        window.getSelection().addRange(range);
+
+        try {
+          // Now that we've selected the anchor text, execute the copy command  
+          var successful = document.execCommand('copy');
+          if (successful) {
+            this.toastEvent({}, {
+              text: 'Gigatoken coppied.'
+            });
+          } else {
+            this.toastEvent({}, {
+              text: 'Failed to copy Gigatoken.'
+            });
+          }
+        } catch (err) {
+          console.log('Oops, unable to copy', err);
+        }
+
+        // Remove the selections - NOTE: Should use
+        // removeRange(range) when it is supported  
+        window.getSelection().removeAllRanges();
+      },
+    });
+
+  </script>
+</dom-module>
