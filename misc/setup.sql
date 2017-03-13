@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `active_items` (
   INDEX(`longitude`),
   INDEX(`created_datetime`),
   INDEX(`menu_id`)
-) ENGINE = MYISAM CHARACTER SET utf8mb4;
+) ENGINE = InnoDB CHARACTER SET utf8mb4;
 -- create like table
 CREATE TABLE IF NOT EXISTS `likes` (
   `user_id` VARCHAR(45) NOT NULL,
@@ -92,3 +92,23 @@ CREATE TABLE IF NOT EXISTS `used_promo_code` (
 --   `cook_revenue` FLOAT(10,2) NOT NULL,
 --   INDEX(`cook_id`)
 -- ) ENGINE = InnoDB;
+-- create sub
+CREATE TABLE IF NOT EXISTS `sub`(
+  `date` DATE NOT NULL,
+  `sub_email` VARCHAR(175) NOT NULL,
+  `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
+  `skip` BOOLEAN NOT NULL DEFAULT 0,
+  `servings` TINYINT NOT NULL,
+  `amount` FLOAT(6,2) NOT NULL,
+  `amount_paid` FLOAT(6,2) NOT NULL DEFAULT 0,
+  `paid` BOOLEAN NOT NULL DEFAULT 0,
+  `paid_datetime` DATETIME,
+  `delivery_time` TINYINT NOT NULL,
+  `payment_method_token` VARCHAR(37) NOT NULL DEFAULT '',
+  `transaction_id` VARCHAR(37) NOT NULL DEFAULT '',
+  `free` BOOLEAN NOT NULL DEFAULT 0,
+  `discount_amount` FLOAT(6,2) NOT NULL DEFAULT 0,
+  `discount_percent` TINYINT NOT NULL DEFAULT 0,
+  `customer_id` VARCHAR(37) NOT NULL,
+   PRIMARY KEY (`date`, `sub_email`)
+) ENGINE = InnoDB;
