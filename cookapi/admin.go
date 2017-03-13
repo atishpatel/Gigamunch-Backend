@@ -275,6 +275,36 @@ func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	return resp, nil
 }
 
+// GetSubLogsResp is a resp for GetSubLogs.
+type GetSubLogsResp struct {
+	SubLogs []*sub.SubscriptionLog `json:"sublogs"`
+	ErrorOnlyResp
+}
+
+// GetSubLogs gets all the SubLogs.
+func (service *Service) GetSubLogs(ctx context.Context, req *GigatokenReq) (*GetSubLogsResp, error) {
+	resp := new(GetSubLogsResp)
+	defer handleResp(ctx, "GetSubLogs", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetAll(1000)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetAll")
+		return resp, nil
+	}
+	resp.SubLogs = subLogs
+	return resp, nil
+}
+
+// AddToProcessSubscriptionQueueReq is a request for AddToProcessSubscriptionQueue.
 type AddToProcessSubscriptionQueueReq struct {
 	SubLogReq
 	Hours int `json:"hours"`
