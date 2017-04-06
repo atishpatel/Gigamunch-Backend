@@ -13,14 +13,14 @@ class User {
     }
   }
 
-  update(token, setCookie = 1) {
-    if (token === '') {
+  update(tkn, setCookie = 1) {
+    if (tkn === '') {
       return;
     }
-    this.token = token.replace(/[+\/]/g, (m0) => {
+    this.token = tkn.replace(/[+\/]/g, (m0) => {
       return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');
-    const userString = token.split('.')[1].replace(/\s/g, '');
+    const userString = tkn.split('.')[1].replace(/\s/g, '');
     const jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
       return m0 === '-' ? '+' : '/';
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
@@ -32,12 +32,13 @@ class User {
     // set permissions
     this.isCook = this.getKthBit(jwt.perm, 0);
     this.isVerifiedCook = this.getKthBit(jwt.perm, 1);
+    this.isAdmin = this.getKthBit(jwt.perm, 2);
     this.hasAddress = this.getKthBit(jwt.perm, 4);
     this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
     this.isOnboard = this.getKthBit(jwt.perm, 6);
     // update coookie to new token
     if (setCookie) {
-      this.setTokenCookie(token, jwt.exp);
+      this.setTokenCookie(tkn, jwt.exp);
     }
     document.dispatchEvent(new Event('userUpdated', {
       bubbles: true

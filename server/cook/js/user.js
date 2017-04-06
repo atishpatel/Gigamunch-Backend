@@ -23,16 +23,16 @@ var User = function () {
 
   _createClass(User, [{
     key: 'update',
-    value: function update(token) {
+    value: function update(tkn) {
       var setCookie = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
 
-      if (token === '') {
+      if (tkn === '') {
         return;
       }
-      this.token = token.replace(/[+\/]/g, function (m0) {
+      this.token = tkn.replace(/[+\/]/g, function (m0) {
         return m0 === '+' ? '-' : '_';
       }).replace(/=/g, '');
-      var userString = token.split('.')[1].replace(/\s/g, '');
+      var userString = tkn.split('.')[1].replace(/\s/g, '');
       var jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, function (m0) {
         return m0 === '-' ? '+' : '/';
       }).replace(/[^A-Za-z0-9\+\/]/g, '')));
@@ -44,12 +44,13 @@ var User = function () {
       // set permissions
       this.isCook = this.getKthBit(jwt.perm, 0);
       this.isVerifiedCook = this.getKthBit(jwt.perm, 1);
+      this.isAdmin = this.getKthBit(jwt.perm, 2);
       this.hasAddress = this.getKthBit(jwt.perm, 4);
       this.hasSubMerchantID = this.getKthBit(jwt.perm, 5);
       this.isOnboard = this.getKthBit(jwt.perm, 6);
       // update coookie to new token
       if (setCookie) {
-        this.setTokenCookie(token, jwt.exp);
+        this.setTokenCookie(tkn, jwt.exp);
       }
       document.dispatchEvent(new Event('userUpdated', {
         bubbles: true

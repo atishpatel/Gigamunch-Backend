@@ -70,19 +70,19 @@ var Service = function () {
 
   }, {
     key: 'schedulePhoneCall',
-    value: function schedulePhoneCall(phone_number, datetime, callback) {
+    value: function schedulePhoneCall(phoneNumber, datetime, callback) {
       var _this2 = this;
 
       if (!this.loaded) {
         this.callQueue.push(function () {
-          _this2.schedulePhoneCall(phone_number, datetime, callback);
+          _this2.schedulePhoneCall(phoneNumber, datetime, callback);
         });
         return;
       }
       var request = {
         gigatoken: this.getToken(),
         datetime: datetime,
-        phone_number: phone_number
+        phone_number: phoneNumber
       };
       this.service.schedulePhoneCall(request).execute(function (resp) {
         _this2.logError('schedulePhoneCall', resp.err);
@@ -470,10 +470,35 @@ var Service = function () {
         callback(resp.err);
       });
     }
+
+    /*
+     * Admin
+     */
+
+  }, {
+    key: 'getSubLogs',
+    value: function getSubLogs(callback) {
+      var _this19 = this;
+
+      // if api is not loaded, add to _callQueue
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this19.getSubLogs(callback);
+        });
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken()
+      };
+      this.service.getSubLogs(request).execute(function (resp) {
+        _this19.logError('getSubLogs', resp.err);
+        callback(resp.sublogs, resp.err);
+      });
+    }
   }, {
     key: 'refreshToken',
     value: function refreshToken() {
-      var _this19 = this;
+      var _this20 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
@@ -484,7 +509,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this19.logError('refreshToken', resp.err)) {
+        if (!_this20.logError('refreshToken', resp.err)) {
           COOK.User.update(resp.gigatoken);
         }
       });

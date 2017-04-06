@@ -34,17 +34,17 @@ class Service {
    * Onboard
    */
 
-  schedulePhoneCall(phone_number, datetime, callback) {
+  schedulePhoneCall(phoneNumber, datetime, callback) {
     if (!this.loaded) {
       this.callQueue.push(() => {
-        this.schedulePhoneCall(phone_number, datetime, callback);
+        this.schedulePhoneCall(phoneNumber, datetime, callback);
       });
       return;
     }
     const request = {
       gigatoken: this.getToken(),
       datetime,
-      phone_number,
+      phone_number: phoneNumber,
     };
     this
       .service
@@ -461,6 +461,32 @@ class Service {
         (resp) => {
           this.logError('deactivateItem', resp.err);
           callback(resp.err);
+        }
+      );
+  }
+
+  /*
+   * Admin
+   */
+
+  getSubLogs(callback) {
+    // if api is not loaded, add to _callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getSubLogs(callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+    };
+    this
+      .service
+      .getSubLogs(request)
+      .execute(
+        (resp) => {
+          this.logError('getSubLogs', resp.err);
+          callback(resp.sublogs, resp.err);
         }
       );
   }
