@@ -122,6 +122,7 @@ func main() {
 	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
 	register("SetupSubLogs", "setupSubLogs", "POST", "cookservice/setupSubLogs", "Admin func.")
 	register("ProcessSubLog", "processSubLog", "POST", "cookservice/processSubLog", "Admin func.")
+	register("CancelSub", "cancelSub", "POST", "cookservice/cancelSub", "Admin func.")
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Admin func.")
@@ -294,11 +295,11 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
 
 func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
-	in2days := time.Now().Add(48 * time.Hour)
+	in6days := time.Now().Add(144 * time.Hour)
 	subC := sub.New(ctx)
-	err := subC.SetupSubLogs(in2days)
+	err := subC.SetupSubLogs(in6days)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)
+		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in6days, err)
 		return
 	}
 }

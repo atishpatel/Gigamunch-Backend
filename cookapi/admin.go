@@ -275,6 +275,35 @@ func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	return resp, nil
 }
 
+// SubReq is the request for Sub stuff.
+type SubReq struct {
+	GigatokenReq
+	SubEmail string `json:"sub_email"`
+}
+
+// CancelSub cancels a subscriber's subscription.
+func (service *Service) CancelSub(ctx context.Context, req *SubReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "CancelSub", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.Cancel(req.SubEmail)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // GetSubLogsResp is a resp for GetSubLogs.
 type GetSubLogsResp struct {
 	SubLogs []*sub.SubscriptionLog `json:"sublogs"`
