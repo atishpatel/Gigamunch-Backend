@@ -49,6 +49,20 @@ handlers:
   upload: cook_SERVEPATH_/index.html
   secure: always
 
+# Admin
+- url: /admin/bower_components
+  static_dir: admin/bower_components
+  secure: always
+
+- url: /admin/src
+  static_dir: admin/src
+  secure: always
+
+- url: /admin.*
+  static_files: admin/index.html
+  upload: admin/index.html
+  secure: always
+
 # Website app
 - url: /source
   static_dir: app_SERVEPATH_/source
