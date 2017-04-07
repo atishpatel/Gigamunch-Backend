@@ -12,10 +12,11 @@ type SubscriptionSignUp struct {
 	Name               string        `json:"name"`
 	Address            types.Address `json:"address"`
 	CustomerID         string        `json:"customer_id"`
-	SubscriptionIDs    []string      `json:"subscription_id"` // depecrated
+	SubscriptionIDs    []string      `json:"subscription_id"`    // depecrated
+	FirstPaymentDate   time.Time     `json:"first_payment_date"` // depecrated
 	IsSubscribed       bool          `json:"is_subscribed"`
 	SubscriptionDate   time.Time     `json:"subscription_date"`
-	FirstPaymentDate   time.Time     `json:"first_payment_date"` // depecrated
+	UnSubscribedDate   time.Time     `json:"unsubscribed_date"`
 	FirstBoxDate       time.Time     `json:"first_box_date"`
 	Servings           int8          `json:"servings"`
 	DeliveryTime       int8          `json:"delivery_time"`
@@ -24,6 +25,7 @@ type SubscriptionSignUp struct {
 	PaymentMethodToken string        `json:"payment_method_token"`
 	Reference          string        `json:"reference" datastore:",noindex"`
 	PhoneNumber        string        `json:"phone_number"`
+	DeliveryTips       string        `json:"delivery_tips"`
 }
 
 type SubscriptionLog struct {
@@ -43,4 +45,5 @@ type SubscriptionLog struct {
 	DiscountAmount     float32   `json:"discount_amount"`
 	DiscountPercent    int8      `json:"discount_percent"`
 	CustomerID         string    `json:"customer_id"`
+	Refunded           bool      `json:"refunded"`
 }
