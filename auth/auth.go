@@ -331,7 +331,7 @@ func getConfig(ctx context.Context) {
 		c.GoogleAppCredentialsPath = config.GoogleAppCredentialsPath
 	}
 	var err error
-	gitkitClient, err = firegitkit.New(context.Background(), c)
+	gitkitClient, err = firegitkit.New(ctx, c)
 	if err != nil {
 		log.Fatal(err)
 	}
