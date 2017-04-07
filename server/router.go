@@ -322,6 +322,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		_ = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 		_ = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 		_ = messageC.SendSMS("8607485603", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		_ = messageC.SendSMS("9316445311", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 	}
 	subC := sub.New(ctx)
 	err = subC.Free(firstBoxDate, sReq.Email)
@@ -365,6 +366,7 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 			if err != nil {
 				utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 			}
+			_ = messageC.SendSMS("9316446755", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
 		}
 	} else {
 		utils.Warningf(ctx, "Warning: email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
