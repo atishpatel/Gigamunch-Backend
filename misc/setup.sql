@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS `sub`(
   `amount_paid` FLOAT(6,2) NOT NULL DEFAULT 0,
   `paid` BOOLEAN NOT NULL DEFAULT 0,
   `paid_datetime` DATETIME,
+  `refunded` BOOLEAN NOT NULL DEFAULT 0,
   `delivery_time` TINYINT NOT NULL,
   `payment_method_token` VARCHAR(37) NOT NULL DEFAULT '',
   `transaction_id` VARCHAR(37) NOT NULL DEFAULT '',
