@@ -368,17 +368,18 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 		// TODO instead of inserting all in this task, split it into many tasks?
 		// insert into subLog
 		amt := v.WeeklyAmount
+		servings := v.Servings + v.VegetarianServings
 		if amt < .01 {
-			switch v.Servings {
+			switch servings {
 			case 1:
 				amt = 17
 			case 2:
 				amt = 15 * 2
 			default:
-				amt = 14 * float32(v.Servings)
+				amt = 14 * float32(servings)
 			}
 		}
-		err = c.Setup(date, v.Email, v.Servings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID)
+		err = c.Setup(date, v.Email, servings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID)
 		if err != nil {
 			if errors.GetErrorWithCode(err).Code == errDuplicateEntry.Code {
 				continue

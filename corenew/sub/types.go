@@ -19,6 +19,7 @@ type SubscriptionSignUp struct {
 	UnSubscribedDate   time.Time     `json:"unsubscribed_date"`
 	FirstBoxDate       time.Time     `json:"first_box_date"`
 	Servings           int8          `json:"servings"`
+	VegetarianServings int8          `json:"vegetarian_servings"`
 	DeliveryTime       int8          `json:"delivery_time"`
 	SubscriptionDay    string        `json:"subscription_day"`
 	WeeklyAmount       float32       `json:"weekly_amount"`
