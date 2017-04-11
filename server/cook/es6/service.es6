@@ -491,6 +491,29 @@ class Service {
       );
   }
 
+  getSubLogsForDate(date, callback) {
+    // if api is not loaded, add to _callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getSubLogsForDate(date, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      date: date.toISOString(),
+    };
+    this
+      .service
+      .getSubLogsForDate(request)
+      .execute(
+        (resp) => {
+          this.logError('getSubLogsForDate', resp.err);
+          callback(resp.sublogs, resp.err);
+        }
+      );
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {

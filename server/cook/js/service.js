@@ -496,9 +496,30 @@ var Service = function () {
       });
     }
   }, {
+    key: 'getSubLogsForDate',
+    value: function getSubLogsForDate(date, callback) {
+      var _this20 = this;
+
+      // if api is not loaded, add to _callQueue
+      if (!this.loaded) {
+        this.callQueue.push(function () {
+          _this20.getSubLogsForDate(date, callback);
+        });
+        return;
+      }
+      var request = {
+        gigatoken: this.getToken(),
+        date: date.toISOString()
+      };
+      this.service.getSubLogsForDate(request).execute(function (resp) {
+        _this20.logError('getSubLogsForDate', resp.err);
+        callback(resp.sublogs, resp.err);
+      });
+    }
+  }, {
     key: 'refreshToken',
     value: function refreshToken() {
-      var _this20 = this;
+      var _this21 = this;
 
       // if api is not loaded, add to _callQueue
       if (!this.loaded) {
@@ -509,7 +530,7 @@ var Service = function () {
         gigatoken: this.getToken()
       };
       this.service.refreshToken(request).execute(function (resp) {
-        if (!_this20.logError('refreshToken', resp.err)) {
+        if (!_this21.logError('refreshToken', resp.err)) {
           COOK.User.update(resp.gigatoken);
         }
       });
