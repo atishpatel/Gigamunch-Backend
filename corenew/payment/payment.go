@@ -249,28 +249,28 @@ func (s *StartSubscriptionReq) valid() error {
 }
 
 // StartSubscription creates a subscription with a nonce from a customer.
-func (c *Client) StartSubscription(req *StartSubscriptionReq) (string, error) {
-	if req == nil {
-		return "", errInvalidParameter.Wrap("StarySubscription is nil.")
-	}
-	err := req.valid()
-	if err != nil {
-		return "", err
-	}
-	s := &braintree.Subscription{
-		Id:                 req.CustomerID[:25] + randStringBytes(7) + "_sub",
-		PlanId:             req.PlanID,
-		PaymentMethodNonce: req.Nonce,
-	}
-	if !req.StartDate.IsZero() {
-		s.FirstBillingDate = req.StartDate.Format("2006-01-02")
-	}
-	s, err = c.bt.Subscription().Create(s)
-	if err != nil {
-		return "", errBT.WithError(err).Wrapf("cannot create subscription(%#v)", s)
-	}
-	return s.Id, nil
-}
+// func (c *Client) StartSubscription(req *StartSubscriptionReq) (string, error) {
+// 	if req == nil {
+// 		return "", errInvalidParameter.Wrap("StarySubscription is nil.")
+// 	}
+// 	err := req.valid()
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	s := &braintree.Subscription{
+// 		Id:                 req.CustomerID[:25] + randStringBytes(7) + "_sub",
+// 		PlanId:             req.PlanID,
+// 		PaymentMethodNonce: req.Nonce,
+// 	}
+// 	if !req.StartDate.IsZero() {
+// 		s.FirstBillingDate = req.StartDate.Format("2006-01-02")
+// 	}
+// 	s, err = c.bt.Subscription().Create(s)
+// 	if err != nil {
+// 		return "", errBT.WithError(err).Wrapf("cannot create subscription(%#v)", s)
+// 	}
+// 	return s.Id, nil
+// }
 
 // StartSale starts a sale that will be held in escrow once it's submitted for settlement.
 func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {

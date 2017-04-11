@@ -13,11 +13,11 @@ const (
 	// loginURL is the url for chefs to login
 	loginURL = baseLoginURL + "?gstate=login"
 	// sendEmailURL sends emails for forgot password for gitkit
-	sendEmailURL = "/sendemail"
+	// sendEmailURL = "/sendemail"
 	// signOutURL is the url for signing out users
 	signOutURL = "/signout"
 	// admin stuff
-	adminHomeURL = baseAdminURL
+	// adminHomeURL = baseAdminURL
 	/*****************************************************************************
 	*	Cookies
 	*****************************************************************************/
