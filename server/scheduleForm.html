@@ -350,26 +350,26 @@
       padding: 0 12px;
       margin: auto;
     }
-
+    
     .no-commitment-text {
       padding-left: 12px;
     }
-
+    
     .no-commitment-title {
       border-bottom: solid white 2px;
       font-weight: bold;
       padding: 8px 0;
     }
-
+    
     .no-commitment-desc {
       padding-top: 8px;
     }
-
+    
     .checkout-payment-lock {
       color: #1f8458;
     }
-
-    .card-number > i {
+    
+    .card-number>i {
       padding: 0 2px;
     }
     
@@ -723,9 +723,18 @@
                        name="address-input"
                        id="address-input"
                        onfocus="addressInputFocused()"
-                       placeholder="Street, City"
+                       placeholder="123 Street Name, City"
                        required/>
               </div>
+            </div>
+          </div>
+          <div>
+            <label for="reference">How did you hear about us?</label>
+            <div class="input-container">
+              <input type="text"
+                     name="reference"
+                     id="reference"
+                     placeholder="My friend Joe Shmoe." />
             </div>
           </div>
           <div class="form-section-title">
@@ -805,17 +814,19 @@
           </div>
           <div class="form-section-note">*Deliveries are only offered on Monday nights. If you want it on some other day, <a href="mailto:enis@gigamunchapp.com">let us know!</a></div>
           <div class="no-commitment">
-            <div class="no-commitment-checkmark"><i class="fa fa-check" aria-hidden="true"></i></div>
+            <div class="no-commitment-checkmark"><i class="fa fa-check"
+                 aria-hidden="true"></i></div>
             <div class="no-commitment-text">
-            <div class="no-commitment-title">No commitment. No, really.</div>
-            <div class="no-commitment-desc">Your first box is on us because we know you'll love it! If you don't want to continue, you'll have 4 days to cancel without getting charged a dime.</div>
+              <div class="no-commitment-title">No commitment. No, really.</div>
+              <div class="no-commitment-desc">Your first box is on us because we know you'll love it! If you don't want to continue, you'll have 4 days to cancel without getting charged a dime.</div>
             </div>
           </div>
           <div class="form-section-title">
             <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
           </div>
           <div>
-            <label for="card-number" class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i><i class="fa fa-cc-mastercard" aria-hidden="true"></i><i class="fa fa-cc-discover" aria-hidden="true"></i></label>
+            <label for="card-number"
+                   class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i><i class="fa fa-cc-mastercard" aria-hidden="true"></i><i class="fa fa-cc-discover" aria-hidden="true"></i></label>
             <div class="hosted-field"
                  id="card-number"></div>
           </div>
@@ -841,15 +852,15 @@
                 <div class="item-text">
                   <div class="item-title"><span id="boxForTitle">Box for Two</span></div>
                   <div class="item-desc">
-                    Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> will charged every week. Skip a week or cancel
-                    your subscription anytime with a 4 day notice.
+                    Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> will charged every week. Skip a week or cancel your subscription anytime with a 3 day notice.
                   </div>
                 </div>
               </div>
             </div>
             <div class="order-summary">
               <div class="order-summary-section">
-                <div class="order-summary-section-name">Meals <span id="meal_multiplier" class="multiplier">x2</span></div>
+                <div class="order-summary-section-name">Meals <span id="meal_multiplier"
+                        class="multiplier">x2</span></div>
                 <div class="order-summary-section-price"><span class="old_price">$<span id="box_total"></span></span> FREE</div>
               </div>
               <div class="order-summary-section">
@@ -881,6 +892,7 @@
     </div>
   </div>
   <style>
+
     /* Fix issue with font not importing */
     
     @font-face {
@@ -1059,6 +1071,7 @@
             var delivery_time = document.getElementById('delivery-time').selectedIndex + 5;
             var name = form.elements['name'].value;
             var email = form.elements['email'].value;
+            var reference = form.elements['reference'].value;
             var paymentNonce = form.elements['payment-method-nonce'].value;
             // get value of checked radio button
             var servings;
@@ -1078,6 +1091,7 @@
               'payment-method-nonce': paymentNonce,
               'servings': servings,
               'delivery_time': delivery_time,
+              'reference': reference,
             };
 
             var xhr = new XMLHttpRequest();
@@ -1218,16 +1232,23 @@
           async
           defer></script>
   <!-- Hotjar Tracking Code for https://gigamunchapp.com/ -->
-<script>
-    (function(h,o,t,j,a,r){
-        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-        h._hjSettings={hjid:267744,hjsv:5};
-        a=o.getElementsByTagName('head')[0];
-        r=o.createElement('script');r.async=1;
-        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-        a.appendChild(r);
-    })(window,document,'//static.hotjar.com/c/hotjar-','.js?sv=');
-</script>
+  <script>
+    (function(h, o, t, j, a, r) {
+      h.hj = h.hj || function() {
+        (h.hj.q = h.hj.q || []).push(arguments)
+      };
+      h._hjSettings = {
+        hjid: 267744,
+        hjsv: 5
+      };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script');
+      r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
+
+  </script>
   <style>
     .logo {
       font-family: 'NexaBold', sans-serif;
@@ -1440,8 +1461,12 @@
     </div>
   </footer>
   <!-- Start of HubSpot Embed Code -->
- <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/2890024.js"></script>
-<!-- End of HubSpot Embed Code -->
+  <script type="text/javascript"
+          id="hs-script-loader"
+          async
+          defer
+          src="//js.hs-scripts.com/2890024.js"></script>
+  <!-- End of HubSpot Embed Code -->
 </body>
 
 </html>
