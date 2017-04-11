@@ -60,7 +60,7 @@
         document.addEventListener('itemChangedOrAdded', function(e) {
           var item = e.detail.item;
           // TODO add logic to edit or add item to menu if it exist 
-          this.getMenus();
+          this.getMenus().bind(this);
         }.bind(this));
       },
       getMenus: function() {

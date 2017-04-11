@@ -5,7 +5,10 @@
     "src/sublog-page.html",
     "src/my-view404.html"
   ],
-  "sourceGlobs": [
+  "sources": [
     "src/**/*"
-  ]
+  ],
+  "lint": {
+    "rules": ["polymer-2"]
+  }
 }
