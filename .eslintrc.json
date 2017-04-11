@@ -1,12 +1,23 @@
 {
-    "env": {
-        "node": false,
-        "browser": true,
-        "es6": true
-    },
-    "plugins": [ "html" ],
-    "extends": "airbnb/base",
-    "parserOptions": {
-        "sourceType": "module"
-    }
+  "env": {
+    "node": false,
+    "browser": true,
+    "es6": true
+  },
+  "plugins": ["html"],
+  "rules": {
+    "no-var": "off",
+    "new-cap": ["error", {
+      "capIsNewExceptions": ["Polymer"]
+    }]
+  },
+  "globals": {
+    "Polymer": true,
+    "ga": true
+  },
+  "extends": "airbnb/base",
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 6
+  }
 }

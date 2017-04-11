@@ -66,7 +66,7 @@ if [[ $1 == "deploy" ]]; then
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
-    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/bundled/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
+    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
     goapp deploy server/app.yaml
   fi
   exit 0
