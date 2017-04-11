@@ -1,11 +1,10 @@
-<!--<link rel="import" href="../bower_components/polymer/polymer.html">-->
 <link rel="import"
       href="../../cook/src/shared-styles.html">
 
 <link rel="import"
-      href="sublog-table.html">
+      href="sublog-sortable-table.html">
 
-<dom-module id="sublog-page">
+<dom-module id="sublog-detail-page">
   <template>
     <shared-styles>
       <style include="shared-styles">
@@ -25,36 +24,29 @@
       </style>
     </shared-styles>
 
-    <h1 class="">Sublogs</h1>
-    <dom-repeat items="[[sublogsByDates]]">
-      <template>
-        <div class="table-container">
-          <h2 class="table-date">
-            <a href="sublogdetail/[[getDateLink(item.date)]]">
-            [[getDateString(item.date)]]
-            </a>
-          </h2>
-          <div class="table-title">
-            Skipped
-          </div>
-          <sublog-table class="table"
-                        sublogs="[[item.skippedSublogs]]">
-          </sublog-table>
-          <div class="table-title">
-            Unskipped
-          </div>
-          <sublog-table class="table"
-                        sublogs="[[item.unskippedSublogs]]">
-          </sublog-table>
-        </div>
-      </template>
-    </dom-repeat>
+    <h1 class="">[[sublogsByDate.dateString]]</h1>
+    <div class="table-container">
+      <div class="table-title">
+        Skipped
+      </div>
+      <sublog-sortable-table id="skipped"
+                             class="table"
+                             sublogs="[[sublogsByDate.skippedSublogs]]">
+      </sublog-sortable-table>
+      <div class="table-title">
+        Unskipped
+      </div>
+      <sublog-sortable-table id="unskipped"
+                             class="table"
+                             sublogs="[[sublogsByDate.unskippedSublogs]]">
+      </sublog-sortable-table>
+    </div>
   </template>
 
   <script>
-    class SublogPage extends Polymer.Element {
+    class SublogDetailPage extends Polymer.Element {
       static get is() {
-        return 'sublog-page';
+        return 'sublog-detail-page';
       }
 
       static get properties() {
@@ -66,7 +58,7 @@
             type: Object,
             notify: true,
           },
-          sublogsByDates: {
+          sublogsByDate: {
             type: Array,
             notify: true,
           },
@@ -86,32 +78,25 @@
       }
 
       selected() {
-        this.getSubLogs();
+        const tmp = window.location.pathname.split('/sublogdetail/');
+        const dateString = decodeURIComponent(tmp[1]);
+        const d = new Date(dateString);
+        this.getSubLogsForDate(d);
       }
 
-      getSubLogs() {
-        this.service.getSubLogs(function(slogs, err) {
+      getSubLogsForDate(d) {
+        this.service.getSubLogsForDate(d, function(slogs, err) {
           if (err.code !== 0) {
             return;
           }
-          let sublogs = [];
           let sublogDay = {
             date: slogs[0].date,
+            dateString: this.getDateString(slogs[0].date),
             sublogs: [],
             skippedSublogs: [],
             unskippedSublogs: [],
           };
           for (let i = 0; i < slogs.length; i++) {
-            if (sublogDay.date !== slogs[i].date) {
-              sublogs.push(sublogDay);
-              sublogDay = {
-                date: slogs[i].date,
-                sublogs: [],
-                skippedSublogs: [],
-                unskippedSublogs: [],
-              };
-            }
-
             sublogDay.sublogs.push(slogs[i]);
             if (slogs[i].skip) {
               sublogDay.skippedSublogs.push(slogs[i]);
@@ -119,7 +104,7 @@
               sublogDay.unskippedSublogs.push(slogs[i]);
             }
           }
-          this.sublogsByDates = sublogs;
+          this.sublogsByDate = sublogDay;
         }.bind(this));
       }
 
@@ -127,14 +112,9 @@
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
       }
-
-      getDateLink(dateString) {
-        const d = new Date(dateString);
-        return encodeURIComponent(d.toISOString().substr(0, 10))
-      }
     }
 
-    customElements.define(SublogPage.is, SublogPage);
+    customElements.define(SublogDetailPage.is, SublogDetailPage);
 
   </script>
 </dom-module>

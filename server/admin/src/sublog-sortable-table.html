@@ -1,0 +1,322 @@
+<!--<link rel="import" href="../bower_components/polymer/polymer.html">-->
+<link rel="import"
+      href="../../cook/bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import"
+      href="../../cook/bower_components/vaadin-grid/vaadin-grid-column.html">
+<link rel="import"
+      href="../../cook/bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import"
+      href="../../cook/bower_components/iron-icon/iron-icon.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-styles/color.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+<link rel="import"
+      href="../../cook/src/app-icons.html">
+
+<dom-module id="sublog-sortable-table">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+
+        vaadin-grid#material {
+          font-family: Roboto, sans-serif;
+          --divider-color: rgba(0, 0, 0, .54);
+          --vaadin-grid-cell: {
+            padding: 0;
+          }
+          ;
+          --vaadin-grid-header-cell: {
+            height: 64px;
+            color: rgba(0, 0, 0, var(--secondary-text-opacity));
+            font-size: 12px;
+          }
+          ;
+          --vaadin-grid-body-cell: {
+            height: 48px;
+            color: rgba(0, 0, 0, var(--primary-text-opacity));
+            font-size: 13px;
+          }
+          ;
+          --vaadin-grid-body-row-hover-cell: {
+            background-color: var(--paper-grey-200);
+          }
+          ;
+          --vaadin-grid-body-row-selected-cell: {
+            background-color: var(--paper-grey-100);
+          }
+          ;
+          --vaadin-grid-focused-cell: {
+            box-shadow: none;
+            font-weight: bold;
+          }
+          ;
+        }
+
+        vaadin-grid#material .cell {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          padding-right: 24px;
+          text-align: center;
+        }
+
+        vaadin-grid#material .cell.numeric {
+          text-align: right;
+        }
+
+        vaadin-grid#material paper-checkbox {
+          --primary-color: var(--paper-indigo-500);
+          margin: 0 24px;
+        }
+
+        vaadin-grid#material vaadin-grid-sorter {
+          --vaadin-grid-sorter-arrow: {
+            display: none !important;
+          }
+          ;
+        }
+
+        vaadin-grid#material vaadin-grid-sorter .cell {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        vaadin-grid#material vaadin-grid-sorter iron-icon {
+          transform: scale(0.8);
+        }
+
+        vaadin-grid#material vaadin-grid-sorter:not([direction]) iron-icon {
+          color: rgba(0, 0, 0, var(--dark-disabled-opacity));
+        }
+
+        vaadin-grid#material vaadin-grid-sorter[direction] {
+          color: rgba(0, 0, 0, var(--primary-text-opacity));
+        }
+
+        vaadin-grid#material vaadin-grid-sorter[direction=desc] iron-icon {
+          transform: scale(0.8) rotate(180deg);
+        }
+
+      </style>
+    </shared-styles>
+
+    <paper-checkbox checked="{{detailed}}"
+                    style="margin: 20px 0px">Transactions Mode</paper-checkbox>
+
+    <vaadin-grid id="material"
+                 items="[[sublogs]]">
+
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-sorter path="name">
+            <div class="cell">Name
+              <iron-icon icon="app:arrow-upward"></iron-icon>
+            </div>
+          </vaadin-grid-sorter>
+        </template>
+        <template>
+          <div class="cell">[[item.name]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-sorter path="sub_email">
+            <div class="cell">Email
+              <iron-icon icon="app:arrow-upward"></iron-icon>
+            </div>
+          </vaadin-grid-sorter>
+        </template>
+        <template>
+          <div class="cell">[[item.sub_email]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column resizable
+                          width="60px">
+        <template class="header">
+          <vaadin-grid-sorter path="servings">
+            <div class="cell">Servings
+              <iron-icon icon="app:arrow-upward"></iron-icon>
+            </div>
+          </vaadin-grid-sorter>
+        </template>
+        <template>
+          <div class="cell numeric">[[item.servings]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column resizable
+                          width="60px">
+        <template class="header">
+          <vaadin-grid-sorter path="vegetarian_servings">
+            <div class="cell">Veg<br>Servings
+              <iron-icon icon="app:arrow-upward"></iron-icon>
+            </div>
+          </vaadin-grid-sorter>
+        </template>
+        <template>
+          <div class="cell numeric">[[item.vegetarian_servings]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column resizable
+                          width="60px">
+        <template class="header">
+          <vaadin-grid-sorter path="delivery_time">
+            <div class="cell">Delivery<br>Time
+              <iron-icon icon="app:arrow-upward"></iron-icon>
+            </div>
+          </vaadin-grid-sorter>
+        </template>
+        <template>
+          <div class="cell numeric">[[item.delivery_time]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column resizable>
+        <template class="header">
+          <vaadin-grid-sorter path="status">
+            <div class="cell">Status
+              <iron-icon icon="app:arrow-upward"></iron-icon>
+            </div>
+          </vaadin-grid-sorter>
+        </template>
+        <template>
+          <div class="cell">[[item.status]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden=[[detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Address
+          </div>
+        </template>
+        <template>
+          <div class="cell"><a href="[[item.addressLink]]">[[item.addressString]]</a></div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden=[[detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Phone<br>Number
+          </div>
+        </template>
+        <template>
+          <div class="cell">[[item.phone_number]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden$=[[!detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            TransactionID
+          </div>
+        </template>
+        <template>
+          <div class="cell">[[item.transaction_id]]</div>
+        </template>
+      </vaadin-grid-column>
+    </vaadin-grid>
+    <div>Total Non Veg servings: <strong>[[totalNoVegServings]]</strong></div>
+    <div>Total Veg servings: <strong>[[totalVegServings]]</strong></div>
+  </template>
+
+  <script>
+    class SublogSortableTable extends Polymer.Element {
+      static get is() {
+        return 'sublog-sortable-table';
+      }
+
+      static get properties() {
+        return {
+          sublogs: {
+            type: Array,
+            notify: true,
+            observer: 'sublogsObserver',
+          },
+          totalNoVegServings: {
+            type: Number,
+            notify: true,
+          },
+          totalVegServings: {
+            type: Number,
+            notify: true,
+          },
+          detailed: {
+            type: Boolean,
+            notify: true,
+            value: false,
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      getStatus(sublog) {
+        if (sublog.skip) {
+          return 'Skipped';
+        } else if (sublog.free) {
+          return 'Free';
+        } else if (sublog.refunded) {
+          return 'Refunded';
+        } else if (sublog.paid) {
+          return 'Paid';
+        }
+        return 'Unpaid';
+      }
+
+      getAddress(a) {
+        if (a && a.street) {
+          let apt = '';
+          if (a.apt !== undefined && a.apt !== '') {
+            apt = '#' + a.apt + ' ';
+          }
+          return apt + a.street + ', ' + a.city;
+        }
+        return '';
+      }
+
+      getAddressLink(a) {
+        if (a && a.street) {
+          return 'https://maps.google.com/?q=' + encodeURIComponent(a.apt + ' ' + a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+        }
+        return '';
+      }
+
+      sublogsObserver() {
+        if (this.sublogs) {
+          const sublogs = this.sublogs;
+          let totalNoVegServings = 0;
+          let totalVegServings = 0;
+          for (var i = 0; i < sublogs.length; i++) {
+            totalNoVegServings += sublogs[i].servings;
+            totalVegServings += sublogs[i].vegetarian_servings;
+            sublogs[i].status = this.getStatus(sublogs[i]);
+            sublogs[i].addressString = this.getAddress(sublogs[i].address);
+            sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
+          }
+          this.totalNoVegServings = totalNoVegServings;
+          this.totalVegServings = totalVegServings;
+        }
+      }
+
+    }
+
+    customElements.define(SublogSortableTable.is, SublogSortableTable);
+
+  </script>
+</dom-module>
