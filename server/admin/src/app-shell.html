@@ -42,36 +42,36 @@
           display: block;
           color: var(--primary-text-color);
         }
-        
+
         .content {
           max-width: var(--max-content-width);
           margin: auto;
         }
-        
+
         app-header {
           color: var(--primary-text-color);
           background-color: #fff;
         }
-        
+
         app-header .logo {
           color: var(--primary-color);
         }
-        
+
         app-header paper-icon-button {
           --paper-icon-button-ink-color: white;
         }
-        
+
         .page-header-title {
           font-size: 24px;
           @apply --font-bold;
         }
-        
+
         .toolbar-right {
           display: flex;
           flex-direction: row;
           height: 100%;
         }
-        
+
         .nav-a,
         .nav-a:link,
         .nav-a:visited {
@@ -79,20 +79,20 @@
           outline: 0;
           color: #546E7A;
         }
-        
+
         .nav-tabs {
           height: 100%;
           margin-right: 12px;
           font-size: 16px;
         }
-        
+
         .nav-tabs a {
           padding: 0 15px;
           text-decoration: none;
           outline: 0;
           color: #546E7A;
         }
-        
+
         .user-pic {
           height: 30px;
           width: 30px;
@@ -101,12 +101,12 @@
           background-color: white;
           color: var(--secondary-text-color);
         }
-        
+
         .main-toolbar {
           z-index: 10;
           padding: 0 24px;
         }
-        
+
         .drawer-toolbar {
           height: 100px;
           justify-content: space-around;
@@ -115,34 +115,34 @@
           background-color: var(--primary-color);
           color: white;
         }
-        
+
         .drawer-user-info {
           display: flex;
           flex-direction: row;
           align-items: center;
         }
-        
+
         .drawer-user-info .user-pic {
           margin-right: 12px;
         }
-        
+
         .drawer-user-name {
           font-size: 16px;
         }
-        
+
         .drawer-user-email {
           font-size: 12px;
         }
-        
+
         .drawer-list {
           padding-top: 8px;
         }
-        
+
         .drawer-list paper-item {
           font-size: 16px;
           outline: none;
         }
-        
+
         .drawer-list a {
           display: block;
           text-decoration: none;
@@ -150,17 +150,17 @@
           line-height: 40px;
           outline: none;
         }
-        
+
         .drawer-list a.iron-selected {
           color: #5d686d;
           background-color: #ECEFF1;
           font-weight: bold;
         }
-        
+
         .drawer-stuff {
           display: none;
         }
-        
+
         @media (max-width: 767px) {
           .nav-tabs-stuff {
             display: none;
@@ -169,7 +169,7 @@
             display: initial;
           }
         }
-        
+
         .full-screen-dialog {
           position: fixed;
           overflow-x: hidden;
@@ -180,29 +180,29 @@
           width: 100%;
           height: 100%;
         }
-        
+
         .full-screen-dialog>paper-dialog-scrollable {
           padding: 0;
         }
-        
+
         .full-screen-dialog-close-icon {
           margin: 16px 0 0 16px;
         }
-        
+
         .full-screen-dialog-content {
           padding: 24px;
         }
-        
+
         #errorDialogDetails {
           color: var(--secondary-text-color);
         }
-        
+
         #notificationDialog paper-button,
         #errorDialog paper-button {
           color: var(--primary-color);
           background-color: white;
         }
-        
+
         #notificationDialog .buttons,
         #errorDialog .buttons {
           margin-top: 20px;
@@ -234,16 +234,18 @@
       </div>
     </paper-dialog>
     <paper-toast id="toast"></paper-toast>
-    <app-drawer-layout fullbleed>
+    <app-drawer-layout fullbleed
+                       force-narrow>
       <!-- Drawer content -->
-      <app-drawer id="drawer">
+      <app-drawer id="drawer"
+                  slot="drawer">
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]"
                        attr-for-selected="name"
                        class="drawer-list"
                        role="navigation">
           <a name="sublog"
-             href="/sublog">Sublogs</a>
+             href="sublog">Sublogs</a>
           <!--<a name="view2" href="/view2">View Two</a>
           <a name="view3" href="/view3">View Three</a>-->
         </iron-selector>
@@ -252,7 +254,8 @@
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
 
-        <app-header condenses
+        <app-header slot="header"
+                    condenses
                     reveals
                     effects="waterfall">
           <app-toolbar>
@@ -272,12 +275,16 @@
                        service="[[service]]"
                        user="{{user}}">
           </sublog-page>
+          <sublog-detail-page name="sublogdetail"
+                              id="sublogdetail"
+                              service="[[service]]"
+                              user="{{user}}"
+                              route="[[subroute]]">
+          </sublog-detail-page>
           <my-view404 name="view404">
           </my-view404>
         </iron-pages>
-        <span id="gigatokenElement"
-              style="display:none">[[user.token]]
-        </span>
+
         <paper-button class="copy-gigatoken"
                       raised
                       on-tap="copyGigatoken">Copy Gigatoken
@@ -287,48 +294,66 @@
   </template>
 
   <script>
-    Polymer({
-      is: 'app-shell',
+    class AppShell extends Polymer.Element {
+      static get is() {
+        return 'app-shell';
+      }
 
-      properties: {
-        page: {
-          type: String,
-          reflectToAttribute: true,
-          observer: '_pageChanged',
-        },
-        service: {
-          type: Object,
-          value: function() {
-            return COOK.Service;
-          }
-        },
-        user: {
-          type: Object,
-          notify: true,
-          value: function() {
-            if (!COOK.User.isAdmin) {
-              window.location = '/cook';
-              // TODO redirect
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          service: {
+            type: Object,
+            value: function() {
+              return COOK.Service;
             }
-            return COOK.User;
-          }
-        },
-      },
-      observers: [
-        '_routePageChanged(routeData.page)',
-      ],
-      ready: function() {
+          },
+          user: {
+            type: Object,
+            notify: true,
+            value: function() {
+              if (!COOK.User.isAdmin) {
+                window.location = '/cook';
+                // TODO redirect
+              }
+              return COOK.User;
+            }
+          },
+        }
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      constructor() {
+        super();
         this.addEventListener('toast', this.toastEvent.bind(this));
         this.addEventListener('error', this.errorEvent.bind(this));
-      },
-      _routePageChanged: function(page) {
-        this.page = page || 'sublog';
+        if (this.page === undefined) {
+          this.page = 'sublog';
+        }
+      }
 
+      _routePageChanged(page) {
+        if (page === undefined) {
+          return;
+        }
+        this.page = page || 'sublog';
+        // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
         }
-      },
-      _pageChanged: function(page) {
+      }
+
+      _pageChanged(page) {
         this.$.drawer.close(); // close drawer if open
         // Load page import on demand. Show 404 page if fails
         var el;
@@ -340,17 +365,11 @@
             el = this.$.sublog;
             title = 'Sublog';
             break;
-          case 'inquiries':
-            elementName = 'inquiries-page';
-            resolvedPageURL = this.resolveUrl('inquiries-page.html');
-            el = this.$.inquiries;
-            title = 'Inquiries';
-            break;
-          case 'account':
-            elementName = 'account-page';
-            resolvedPageURL = this.resolveUrl('account-page.html');
-            el = this.$.account;
-            title = 'Account';
+          case 'sublogdetail':
+            elementName = 'sublog-detail-page';
+            resolvedPageURL = this.resolveUrl('sublog-detail-page.html');
+            el = this.$.sublogdetail;
+            title = 'Sublog detailed';
             break;
           default:
             elementName = page + '-page';
@@ -362,19 +381,21 @@
           ga('send', 'pageview', location.pathname);
           // TODO breaks pages for Safari
           if (el !== undefined && el !== null) {
+            console.log('element is already imported');
             // el.selected();
           }
         }
         // import element
-        this.importHref(resolvedPageURL, function() {
+        Polymer.importHref(resolvedPageURL, () => {
           el.selected();
         }, this._showPage404, true);
-      },
+      }
 
-      _showPage404: function() {
+      _showPage404() {
         this.page = 'view404';
-      },
-      toastEvent: function(e, detail) {
+      }
+
+      toastEvent(e, detail) {
         var text = detail.text;
         if (text === undefined || text === null || text === '') {
           text = detail.message;
@@ -386,8 +407,9 @@
             duration: duration
           });
         }
-      },
-      errorEvent: function(e, error) {
+      }
+
+      errorEvent(e, error) {
         var text;
         var details;
         switch (typeof(error)) {
@@ -414,13 +436,17 @@
           this.$.errorDialogText.innerHTML = text;
           this.$.errorDialog.open();
         }
-      },
-      signOut: function() {
+      }
+
+      signOut() {
         window.location = '/signout';
-      },
-      copyGigatoken: function() {
+      }
+
+      copyGigatoken() {
         // Select the email link anchor text  
-        var emailLink = this.$.gigatokenElement;
+        var emailLink = document.querySelector('#copyElement');
+        emailLink.innerHTML = this.user.token;
+        window.getSelection().removeAllRanges();
         var range = document.createRange();
         range.selectNode(emailLink);
         window.getSelection().addRange(range);
@@ -430,7 +456,7 @@
           var successful = document.execCommand('copy');
           if (successful) {
             this.toastEvent({}, {
-              text: 'Gigatoken coppied.'
+              text: 'Gigatoken copied.'
             });
           } else {
             this.toastEvent({}, {
@@ -444,8 +470,10 @@
         // Remove the selections - NOTE: Should use
         // removeRange(range) when it is supported  
         window.getSelection().removeAllRanges();
-      },
-    });
+      }
+    }
+
+    window.customElements.define(AppShell.is, AppShell);
 
   </script>
 </dom-module>

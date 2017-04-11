@@ -124,24 +124,26 @@
   <script src="../cook/js/service.js"></script>
   <script src="https://apis.google.com/js/client.js?onload=initService"></script>
   <app-shell id="app"></app-shell>
+  <!-- For copying to clipboard with button. -->
+  <span id="copyElement"
+        style="font-size:1px"></span>
   <script>
     var app = document.querySelector('#app');
 
   </script>
   <style>
-
     /* Fix issue with font not importing */
-    
+
     @font-face {
       font-family: 'NexaBold';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
     }
-    
+
     @font-face {
       font-family: 'FontRegular';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
     }
-    
+
     @font-face {
       font-family: 'FontRegular';
       font-weight: bold;
