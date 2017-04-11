@@ -333,6 +333,66 @@ func (service *Service) GetSubLogs(ctx context.Context, req *GigatokenReq) (*Get
 	return resp, nil
 }
 
+// SubLog is the sublog with subscriber's name and address.
+type SubLog struct {
+	Date         time.Time `json:"date"`
+	Servings     int8      `json:"servings"`
+	DeliveryTime int8      `json:"delivery_time"`
+	sub.SubscriptionLog
+	sub.SubscriptionSignUp
+}
+
+// GetSubLogsForDateResp is a resp for GetSubLogsForDate.
+type GetSubLogsForDateResp struct {
+	SubLogs []SubLog `json:"sublogs"`
+	ErrorOnlyResp
+}
+
+// GetSubLogsForDate gets all the SubLogs for a date.
+func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*GetSubLogsForDateResp, error) {
+	resp := new(GetSubLogsForDateResp)
+	defer handleResp(ctx, "GetSubLogsForDate", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(req.Date)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetForDate")
+		return resp, nil
+	}
+	if len(subLogs) != 0 {
+		subEmails := make([]string, len(subLogs))
+		for i := range subLogs {
+			subEmails[i] = subLogs[i].SubEmail
+		}
+		subs, err := subC.GetSubscribers(subEmails)
+		if err != nil {
+			resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetSubscribers")
+			return resp, nil
+		}
+		resp.SubLogs = make([]SubLog, len(subLogs))
+		for i := range subLogs {
+			for j := range subs {
+				if subLogs[i].SubEmail == subs[j].Email {
+					resp.SubLogs[i].SubscriptionLog = *subLogs[i]
+					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
+					resp.SubLogs[i].Date = subLogs[i].Date
+					resp.SubLogs[i].Servings = subs[i].Servings
+					resp.SubLogs[i].DeliveryTime = subs[i].DeliveryTime
+				}
+			}
+		}
+	}
+	return resp, nil
+}
+
 // AddToProcessSubscriptionQueueReq is a request for AddToProcessSubscriptionQueue.
 type AddToProcessSubscriptionQueueReq struct {
 	SubLogReq

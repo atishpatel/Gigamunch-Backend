@@ -126,6 +126,7 @@ func main() {
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Admin func.")
+	register("GetSubLogsForDate", "getSubLogsForDate", "POST", "cookservice/getSubLogsForDate", "Admin func.")
 	register("AddToProcessSubscriptionQueue", "addToProcessSubscriptionQueue", "POST", "cookservice/addToProcessSubscriptionQueue", "Admin func.")
 	endpoints.HandleHTTP()
 	appengine.Main()

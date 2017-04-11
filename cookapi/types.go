@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/item"
@@ -55,10 +56,23 @@ func (req *GigatokenReq) valid() error {
 	return nil
 }
 
-// IDReq is for request with only and ID and Gigatoken
+// IDReq is for request with only an ID and Gigatoken.
 type IDReq struct {
 	ID int64 `json:"id,string"`
 	GigatokenReq
+}
+
+// DateReq is for request wtih only a Date and Gigatoken.
+type DateReq struct {
+	Date time.Time `json:"date"`
+	GigatokenReq
+}
+
+func (req *DateReq) valid() error {
+	if req.Date.IsZero() {
+		return fmt.Errorf("Date cannot be zero.")
+	}
+	return req.GigatokenReq.valid()
 }
 
 // ErrorOnlyResp is a response with only an error with code
