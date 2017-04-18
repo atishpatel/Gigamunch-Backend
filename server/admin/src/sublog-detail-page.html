@@ -27,18 +27,18 @@
     <h1 class="">[[sublogsByDate.dateString]]</h1>
     <div class="table-container">
       <div class="table-title">
-        Skipped
-      </div>
-      <sublog-sortable-table id="skipped"
-                             class="table"
-                             sublogs="[[sublogsByDate.skippedSublogs]]">
-      </sublog-sortable-table>
-      <div class="table-title">
         Unskipped
       </div>
       <sublog-sortable-table id="unskipped"
                              class="table"
                              sublogs="[[sublogsByDate.unskippedSublogs]]">
+      </sublog-sortable-table>
+      <div class="table-title">
+        Skipped
+      </div>
+      <sublog-sortable-table id="skipped"
+                             class="table"
+                             sublogs="[[sublogsByDate.skippedSublogs]]">
       </sublog-sortable-table>
     </div>
   </template>

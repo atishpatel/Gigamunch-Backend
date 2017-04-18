@@ -197,7 +197,10 @@
           </div>
         </template>
         <template>
-          <div class="cell"><a href="[[item.addressLink]]">[[item.addressString]]</a></div>
+          <div class="cell">
+            <a target="_blank"
+               href="[[item.addressLink]]">[[item.addressString]]</a>
+          </div>
         </template>
       </vaadin-grid-column>
       <vaadin-grid-column hidden=[[detailed]]
@@ -209,6 +212,17 @@
         </template>
         <template>
           <div class="cell">[[item.phone_number]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden=[[detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Delivery<br>Tip
+          </div>
+        </template>
+        <template>
+          <div class="cell">[[item.delivery_tips]]</div>
         </template>
       </vaadin-grid-column>
       <vaadin-grid-column hidden$=[[!detailed]]
@@ -309,6 +323,7 @@
             sublogs[i].addressString = this.getAddress(sublogs[i].address);
             sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
           }
+          this.sublogs = sublogs;
           this.totalNoVegServings = totalNoVegServings;
           this.totalVegServings = totalVegServings;
         }
