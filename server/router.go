@@ -182,9 +182,11 @@ type scheduleSubscriptionReq struct {
 	Name               string        `json:"name"`
 	PaymentMethodNonce string        `json:"payment-method-nonce"`
 	Servings           string        `json:"servings"`
+	VegetarianServings string        `json:"vegetarian_servings"`
 	Terp               string        `json:"terp"`
 	DeliveryTime       int8          `json:"delivery_time"`
 	Reference          string        `json:"reference"`
+	PhoneNumber        string        `json:"phone_number"`
 }
 
 func (s *scheduleSubscriptionReq) valid() error {
@@ -248,27 +250,43 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	}
 	// var planID string
 	var servings int8
+	var vegetarianServings int8
 	var weeklyAmount float32
 	switch sReq.Servings {
+	case "":
+		fallthrough
+	case "0":
+		servings = 0
 	case "1":
-		// planID = "basic_1"
 		servings = 1
-		weeklyAmount = 17
+		weeklyAmount += 17
 	case "2":
-		// planID = "basic_2"
 		servings = 2
-		weeklyAmount = float32(servings * 15)
+		weeklyAmount += float32(servings * 15)
 	default:
-		// planID = "basic_4"
 		servings = 4
-		weeklyAmount = float32(servings * 14)
+		weeklyAmount += float32(servings * 14)
+	}
+	switch sReq.VegetarianServings {
+	case "":
+		fallthrough
+	case "0":
+		vegetarianServings = 0
+	case "1":
+		vegetarianServings = 1
+		weeklyAmount += 17
+	case "2":
+		vegetarianServings = 2
+		weeklyAmount += float32(vegetarianServings * 15)
+	default:
+		vegetarianServings = 4
+		weeklyAmount += float32(vegetarianServings * 14)
 	}
 	customerID := payment.GetIDFromEmail(sReq.Email)
 	firstBoxDate := time.Now().Add(48 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
-	// paymentDate := firstBoxDate.Add(time.Hour * 96)
 	paymentC := payment.New(ctx)
 	paymentTokenReq := &payment.GetDefaultPaymentTokenReq{
 		CustomerID: customerID,
@@ -278,18 +296,6 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		resp.Err = errors.Wrap("failed to payment.GetDefaultPaymentToken", err)
 		return
 	}
-	// paymentSubReq := &payment.StartSubscriptionReq{
-	// 	CustomerID: customerID,
-	// 	Nonce:      sReq.PaymentMethodNonce,
-	// 	PlanID:     planID,
-	// 	StartDate:  paymentDate,
-	// }
-	// subID, err := paymentC.StartSubscription(paymentSubReq)
-	// if err != nil {
-	// 	resp.Err = errors.Wrap("failed to payment.StartSubscription", err)
-	// 	return
-	// }
-	// utils.Infof(ctx, "Subscription started for %s subID(%s)", sReq.Email, subID)
 	entry.Email = sReq.Email
 	entry.Name = sReq.Name
 	entry.Address = sReq.Address
@@ -304,6 +310,8 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	entry.FirstBoxDate = firstBoxDate
 	entry.DeliveryTime = sReq.DeliveryTime
 	entry.Servings = servings
+	entry.VegetarianServings = vegetarianServings
+	entry.PhoneNumber = sReq.PhoneNumber
 	entry.SubscriptionDay = time.Monday.String()
 	entry.PaymentMethodToken = paymenttkn
 	entry.WeeklyAmount = weeklyAmount

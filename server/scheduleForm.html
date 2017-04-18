@@ -128,7 +128,7 @@
       margin: 0;
       color: #424242;
     }
-    
+
     button {
       border: none;
       outline: none;
@@ -139,19 +139,19 @@
       color: white;
       cursor: pointer;
     }
-    
+
     a {
       text-decoration: none;
     }
-    
+
     p {
       margin: 0;
     }
-    
+
     g {
       fill: currentcolor;
     }
-    
+
     select {
       font-family: 'Roboto';
       letter-spacing: .5px;
@@ -160,7 +160,11 @@
       outline: none;
       height: 43px;
     }
-    
+
+    .checkout-email-title {
+      padding: 8px 0;
+    }
+
     input,
     select,
     .hosted-field {
@@ -173,38 +177,38 @@
       /*opacity: .95;*/
       transition: all .3s ease;
     }
-    
+
     input:focus,
     .braintree-hosted-fields-focused {
       background-color: white;
       opacity: 1;
       border-color: #FF7043;
     }
-    
+
     .hosted-field {
       height: 22px;
     }
-    
+
     .form-section-title {
       border-bottom: solid #e1e1e1 1px;
       margin: 12px 0;
     }
-    
+
     .form-section-title>* {
       font-size: 16px;
       margin: 8px 0;
     }
-    
+
     .form-section-desc {
       color: #797c82;
       font-size: 14px;
     }
-    
+
     .form-section-note {
       font-size: 14px;
       color: #797c82;
     }
-    
+
     .photo-16-9 {
       display: block;
       width: 100%;
@@ -214,7 +218,7 @@
       overflow: hidden;
       background-color: white;
     }
-    
+
     .photo-16-9 img {
       position: absolute;
       display: block;
@@ -225,16 +229,16 @@
       bottom: 0;
       margin: auto;
     }
-    
+
     .content {
       max-width: 1000px;
       margin: auto;
     }
-    
+
     .bold {
       font-weight: bold;
     }
-    
+
     .floating-logo {
       position: absolute;
       top: 24px;
@@ -244,7 +248,7 @@
       font-size: 18px;
       color: white;
     }
-    
+
     .header {
       height: 50vh;
       display: flex;
@@ -253,27 +257,27 @@
       background: #64656a url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/whats_next_box_cut.jpg') no-repeat center center;
       background-size: cover;
     }
-    
+
     .header-title {
       font-size: 35px;
       color: white;
       padding: 12px;
       text-align: center;
     }
-    
+
     @media (max-width: 700px) {
       .header-title {
         font-size: 26px;
       }
     }
-    
+
     .checkout-section {
       /*background: #dfdfdf url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/wood_background.jpg') no-repeat center center;*/
       background-color: #f7f7f7;
       background-size: cover;
       padding: 50px 0;
     }
-    
+
     .checkout-card {
       background-color: white;
       max-width: 600px;
@@ -281,7 +285,7 @@
       border-radius: 4px;
       overflow: hidden;
     }
-    
+
     .checkout-title-container {
       background: #F06522;
       background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
@@ -289,7 +293,7 @@
       background: linear-gradient(45deg, #FF5722, #FFB300);
       padding: 16px;
     }
-    
+
     .checkout-title {
       font-size: 24px;
       margin: 12px 0;
@@ -298,24 +302,24 @@
       font-weight: 400;
       color: white;
     }
-    
+
     @media (max-width: 700px) {
       .checkout-title {
         font-size: 20px;
       }
     }
-    
+
     .checkout-form-container {
       padding: 16px;
     }
-    
+
     .checkout-form {
       display: flex;
       flex-direction: column;
     }
-    
+
     .checkout-email {}
-    
+
     .checkout-button {
       color: white;
       font-size: 16px;
@@ -330,11 +334,11 @@
       margin: 12px 0 6px 0;
       /*min-width: 275px;*/
     }
-    
+
     .checkout-button:disabled {
       background: #dfdfdf;
     }
-    
+
     .no-commitment {
       margin-top: 12px;
       background-color: #28a971;
@@ -344,130 +348,130 @@
       display: flex;
       font-size: 14px;
     }
-    
+
     .no-commitment-checkmark {
       font-size: 64px;
       padding: 0 12px;
       margin: auto;
     }
-    
+
     .no-commitment-text {
       padding-left: 12px;
     }
-    
+
     .no-commitment-title {
       border-bottom: solid white 2px;
       font-weight: bold;
       padding: 8px 0;
     }
-    
+
     .no-commitment-desc {
       padding-top: 8px;
     }
-    
+
     .checkout-payment-lock {
       color: #1f8458;
     }
-    
+
     .card-number>i {
       padding: 0 2px;
     }
-    
+
     .input-container {
       display: flex;
     }
-    
+
     .hosted-field,
     .input-container>*,
     select {
       margin: 8px 0 12px;
     }
-    
+
     .input-container>* {
       flex: 1;
     }
-    
+
     .input-container>*:not(:first-child) {
       flex: 2;
       margin-left: 12px;
     }
-    
+
     label {
       font-size: 14px;
     }
     /* Review section */
-    
+
     .review-order {
       background-color: #fafafa;
       padding: 24px;
       font-size: 14px;
     }
-    
+
     .item {
       display: flex;
       flex-direction: row;
       padding-bottom: 12px;
     }
-    
+
     @media (max-width:700px) {
       .item {
         flex-direction: column;
       }
     }
-    
+
     .item-image>img {
       margin-right: 12px;
       width: 200px;
       border-radius: 3px;
     }
-    
+
     .item-detail {
       display: flex;
       flex-direction: row;
     }
-    
+
     .item-title {
       font-weight: 500;
       font-size: 18px;
     }
-    
+
     .item-desc {
       opacity: .87;
       font-size: 12px;
     }
-    
+
     .order-summary {
       border-top: solid #d3d3d3 1px;
       padding: 12px 0;
     }
-    
+
     .order-summary-section {
       padding-top: 8px;
       display: flex;
       flex-direction: row;
     }
-    
+
     .order-summary-section-name {
       font-weight: 700;
       margin-right: auto;
     }
-    
+
     .multiplier {
       opacity: .56;
     }
-    
+
     .old_price {
       opacity: .56;
       text-decoration: line-through;
     }
-    
+
     @media (max-width: 600px) {}
     /* Selector */
-    
+
     .select-package-container {
       padding: 12px 0;
     }
-    
+
     .select-package-container ul {
       list-style: none;
       height: 100%;
@@ -475,7 +479,7 @@
       margin: 0px;
       padding: 0px;
     }
-    
+
     .select-package-container ul li {
       color: #000000;
       opacity: 0.87;
@@ -483,12 +487,12 @@
       position: relative;
       float: left;
     }
-    
+
     .select-package-container ul li input[type=radio] {
       position: absolute;
       visibility: hidden;
     }
-    
+
     .select-package-container-button {
       display: flex;
       flex-direction: column;
@@ -501,19 +505,19 @@
       cursor: pointer;
       -webkit-transition: all 0.15s linear;
     }
-    
+
     .select-package-container ul li:first-child .select-package-container-button {
       border-top-left-radius: 6px;
       border-bottom-left-radius: 6px;
       border-right: 0;
     }
-    
+
     .select-package-container ul li:last-child .select-package-container-button {
       border-top-right-radius: 6px;
       border-bottom-right-radius: 6px;
       border-left: 0;
     }
-    
+
     .select-package-container-button label {
       display: flex;
       align-items: center;
@@ -523,7 +527,7 @@
       width: 100%;
       -webkit-transition: all 0.15s linear;
     }
-    
+
     .most-popular-label {
       font-weight: 300;
       font-size: 12px;
@@ -531,14 +535,14 @@
       z-index: 2;
       flex: 3;
     }
-    
+
     .num-meals-label {
       font-weight: 300;
       font-size: 14px;
       color: rgba(0, 0, 0, 0.87);
       flex: 6;
     }
-    
+
     .price-per-meal-label {
       font-weight: 300;
       font-size: 12px;
@@ -546,11 +550,11 @@
       color: rgba(0, 0, 0, 0.54);
       flex: 4;
     }
-    
+
     ul li:hover .select-package-container-button {
       background-color: rgba(255, 112, 67, 0.1);
     }
-    
+
     input[type=radio]:checked~.num-meals-label,
     input[type=radio]:checked~.price-per-meal-label,
     input[type=radio]:checked~.most-popular-label {
@@ -558,7 +562,7 @@
       opcaity: 1.0;
       background-color: #ff7043;
     }
-    
+
     @media (max-width: 500px) {
       .select-package-container-button,
       .select-package-container ul li:last-child .select-package-container-button,
@@ -567,6 +571,70 @@
         border: 2px solid #cfd8dc;
         border-radius: 0px;
       }
+    }
+
+    .vegetarian-section {
+      padding: 12px 0;
+    }
+
+    .vegetarian-label {
+      font-weight: 500;
+    }
+
+    .checkbox {
+      display: inline-block;
+      display: inline-flex;
+      width: 20px;
+      position: relative;
+      margin: 4px;
+    }
+
+    .checkbox label {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #f7f7f7;
+      /*background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);*/
+      border-radius: 4px;
+      border: solid #CFD8DC 1px;
+      transition: all .3s ease;
+      /*box-shadow: inset 0px 1px 1px white, 0px 1px 3px rgba(0, 0, 0, 0.5);*/
+    }
+
+    .checkbox label:after {
+      content: '';
+      width: 9px;
+      height: 5px;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      border: 3px solid #FF7043;
+      border-top: none;
+      border-right: none;
+      background: transparent;
+      opacity: 0;
+      transform: rotate(-45deg);
+    }
+
+    .checkbox label:hover::after {
+      opacity: 0.3;
+    }
+
+    input[type=checkbox] {
+      visibility: hidden;
+    }
+
+    input[type=checkbox]:checked+label:after {
+      opacity: 1;
+    }
+
+    .terms-and-conditions {
+      opacity: .87;
+      font-size: 12px;
+      padding: 8px 0;
     }
 
   </style>
@@ -697,7 +765,7 @@
                  placeholder="Email"
                  style="display:none"
                  value="{{.Email}}" />
-          <div>
+          <div class="checkout-email-title">
             <strong>Checkout for {{.Email}}</strong>
           </div>
           <div>
@@ -726,6 +794,15 @@
                        placeholder="123 Street Name, City"
                        required/>
               </div>
+            </div>
+          </div>
+          <div>
+            <label for="phone_number">Phone Number (for delivery)</label>
+            <div class="input-container">
+              <input type="tel"
+                     name="phone_number"
+                     id="phone_number"
+                     placeholder="615-123-1234" />
             </div>
           </div>
           <div>
@@ -797,6 +874,16 @@
                 </div>
               </li>
             </ul>
+          </div>
+          <div class="vegetarian-section">
+            <div class="checkbox">
+              <input type="checkbox"
+                     value="None"
+                     id="vegetarian"
+                     name="vegetarian" />
+              <label for="vegetarian"></label>
+            </div>
+            <label class="vegetarian-label">I'm a vegetarian! 🌱</label>
           </div>
           <div>
             <label>Delivery time for dinner</label>
@@ -882,6 +969,9 @@
                  style="display:none">
           <input type="hidden"
                  name="payment-method-nonce">
+          <div class="terms-and-conditions">By subscribing, I agree to the <a href="/terms"
+               target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
+               target="_blank">Privacy Policy</a>.</div>
           <input class="checkout-button"
                  type="submit"
                  value="Subscribe"
@@ -892,9 +982,8 @@
     </div>
   </div>
   <style>
-
     /* Fix issue with font not importing */
-    
+
     @font-face {
       font-family: 'NexaBold';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
@@ -1072,6 +1161,7 @@
             var name = form.elements['name'].value;
             var email = form.elements['email'].value;
             var reference = form.elements['reference'].value;
+            var phoneNumber = form.elements['phone_number'].value;
             var paymentNonce = form.elements['payment-method-nonce'].value;
             // get value of checked radio button
             var servings;
@@ -1082,6 +1172,12 @@
                 break; // and break out of for loop
               }
             }
+            // check if servings should be vegetarian
+            var vegetarian = form.elements['vegetarian'].checked;
+            if (vegetarian) {
+              var vegServings = servings;
+              servings = "0";
+            }
             var aptEl = document.getElementById('apt');
             address.apt = aptEl.value;
             var req = {
@@ -1090,8 +1186,10 @@
               'name': name,
               'payment-method-nonce': paymentNonce,
               'servings': servings,
+              'vegetarian_servings': vegServings,
               'delivery_time': delivery_time,
               'reference': reference,
+              'phone_number': phoneNumber,
             };
 
             var xhr = new XMLHttpRequest();
@@ -1255,7 +1353,7 @@
       letter-spacing: .05em;
       text-decoration: none;
     }
-    
+
     footer {
       background-color: #797c82;
       color: #fff;
@@ -1263,30 +1361,30 @@
       position: relative;
       font-size: 14px;
     }
-    
+
     footer .container {
       max-width: 1000px;
       margin: 0 auto;
       padding: 0 32px;
     }
-    
+
     footer .join-us {
       background: #FF7043;
       padding: 20px;
       color: white;
     }
-    
+
     footer .join-us-title {
       font-size: 1em;
       text-align: center;
     }
-    
+
     footer .join-us-links {
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    
+
     footer .join-us-links a {
       display: inline-block;
       padding: 3px 7px;
@@ -1298,65 +1396,65 @@
       min-width: 100px;
       color: white;
     }
-    
+
     footer .join-us-links span {
       display: none;
     }
-    
+
     footer .logo {
       font-size: 1.5em;
       color: white;
       margin: 25px 0;
     }
-    
+
     footer .love .logo {
       font-size: 1em;
     }
-    
+
     footer .nav {
       display: flex;
       flex-direction: column;
       letter-spacing: 0.35px;
     }
-    
+
     footer section {
       padding: 10px 0;
     }
-    
+
     footer .nav section:last-child {
       margin-right: auto;
     }
-    
+
     footer .title {
       color: #fff;
       font-weight: bold;
       margin: 5px 0;
     }
-    
+
     footer ul {
       list-style: none;
       margin: 0;
       padding: 0
     }
-    
+
     footer ul li {
       font-size: 14px;
       font-weight: 400;
       line-height: 26px
     }
-    
+
     footer a {
       text-decoration: none;
     }
-    
+
     footer .nav a {
       color: #c6c7ca;
     }
-    
+
     footer .nav a:hover {
       color: #fff;
     }
-    
+
     @media (min-width: 767px) {
       footer {
         padding-bottom: 60px;

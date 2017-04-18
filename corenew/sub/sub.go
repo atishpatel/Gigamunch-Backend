@@ -203,7 +203,8 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		err = c.Setup(date, subEmail, s.Servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		servings := s.Servings + s.VegetarianServings
+		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -231,7 +232,8 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		err = c.Setup(date, subEmail, s.Servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		servings := s.Servings + s.VegetarianServings
+		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -258,7 +260,8 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		err = c.Setup(date, subEmail, s.Servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		servings := s.Servings + s.VegetarianServings
+		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -369,7 +372,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 		// insert into subLog
 		amt := v.WeeklyAmount
 		servings := v.Servings + v.VegetarianServings
-		if amt < .01 {
+		if amt < .01 { // TODO remove and just give error?
 			switch servings {
 			case 1:
 				amt = 17
