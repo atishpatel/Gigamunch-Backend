@@ -19,7 +19,11 @@
 <link rel="import"
       href="../../cook/bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import"
+      href="../../cook/bower_components/iron-icon/iron-icon.html">
+<link rel="import"
       href="../../cook/bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-item/paper-item.html">
 <link rel="import"
       href="../../cook/bower_components/iron-selector/iron-selector.html">
 <link rel="import"
@@ -245,9 +249,30 @@
                        class="drawer-list"
                        role="navigation">
           <a name="sublog"
-             href="sublog">Sublogs</a>
-          <!--<a name="view2" href="/view2">View Two</a>
-          <a name="view3" href="/view3">View Three</a>-->
+             href="sublog">
+            <paper-item>Sublogs</paper-item>
+          </a>
+          <a target="_blank"
+             href="[[cookAPIURL]]">
+            <paper-item>Cookapi
+              <iron-icon icon="app-icons:open-in-new">
+              </iron-icon>
+            </paper-item>
+          </a>
+          <a href="#"
+             on-tap="copyAPIDate">
+            <paper-item>Copy API Date
+              <iron-icon icon="app-icons:content-copy">
+              </iron-icon>
+            </paper-item>
+          </a>
+          <a href="#"
+             on-tap="copyGigatoken">
+            <paper-item>Copy Gigatoken
+              <iron-icon icon="app-icons:content-copy">
+              </iron-icon>
+            </paper-item>
+          </a>
         </iron-selector>
       </app-drawer>
 
@@ -259,7 +284,7 @@
                     reveals
                     effects="waterfall">
           <app-toolbar>
-            <paper-icon-button icon="app:menu"
+            <paper-icon-button icon="app-icons:menu"
                                drawer-toggle>
             </paper-icon-button>
             <div main-title>Gigamunch Admin</div>
@@ -284,11 +309,6 @@
           <my-view404 name="view404">
           </my-view404>
         </iron-pages>
-
-        <paper-button class="copy-gigatoken"
-                      raised
-                      on-tap="copyGigatoken">Copy Gigatoken
-        </paper-button>
       </app-header-layout>
     </app-drawer-layout>
   </template>
@@ -322,6 +342,15 @@
                 // TODO redirect
               }
               return COOK.User;
+            }
+          },
+          cookAPIURL: {
+            type: String,
+            value: function() {
+              if (COOK.isDev) {
+                return 'localhost:8080/_ah/api/explorer';
+              }
+              return COOK.isProd ? 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api/explorer' : 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api/explorer';
             }
           },
         }
@@ -442,25 +471,34 @@
         window.location = '/signout';
       }
 
+      copyAPIDate() {
+        const d = new Date();
+        this.copyToClipboard(d.toISOString().substr(0, 10) + 'T01:01:01.000Z');
+      }
+
       copyGigatoken() {
+        this.copyToClipboard(this.user.token);
+      }
+
+      copyToClipboard(s) {
+        this.$.drawer.close(); // close drawer if open
         // Select the email link anchor text  
-        var emailLink = document.querySelector('#copyElement');
-        emailLink.innerHTML = this.user.token;
+        var copyEl = document.querySelector('#copyElement');
+        copyEl.innerHTML = s;
         window.getSelection().removeAllRanges();
         var range = document.createRange();
-        range.selectNode(emailLink);
+        range.selectNode(copyEl);
         window.getSelection().addRange(range);
-
         try {
           // Now that we've selected the anchor text, execute the copy command  
           var successful = document.execCommand('copy');
           if (successful) {
             this.toastEvent({}, {
-              text: 'Gigatoken copied.'
+              text: 'Succesfully copied.'
             });
           } else {
             this.toastEvent({}, {
-              text: 'Failed to copy Gigatoken.'
+              text: 'Failed to copy.'
             });
           }
         } catch (err) {
