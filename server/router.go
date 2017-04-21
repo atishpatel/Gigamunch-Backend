@@ -98,7 +98,7 @@ func handleCookSignup(w http.ResponseWriter, req *http.Request) {
 	emailAddress := req.FormValue("email")
 	name := req.FormValue("name")
 	terp := req.FormValue("terp")
-	utils.Infof(c, "email: %s, name: %s, terp: %s ", emailAddress, name, terp)
+	utils.Infof(c, "email or phone: %s, name: %s, terp: %s ", emailAddress, name, terp)
 	if terp != "" {
 		return
 	}
@@ -119,10 +119,11 @@ func handleCookSignup(w http.ResponseWriter, req *http.Request) {
 			utils.Criticalf(c, "Error putting CookSignupEmail in datastore ", err)
 		}
 		messageC := message.New(c)
-		err = messageC.SendSMS("6153975516", fmt.Sprintf("%s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
+		err = messageC.SendSMS("6153975516", fmt.Sprintf("Cook %s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
 		if err != nil {
 			utils.Criticalf(c, "failed to send sms to Enis. Err: %+v", err)
 		}
+		_ = messageC.SendSMS("6155454989", fmt.Sprintf("Cook %s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
 		_, _ = w.Write(cookSignupPage)
 		return
 	}

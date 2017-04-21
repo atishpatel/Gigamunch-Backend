@@ -485,6 +485,100 @@
         margin: auto;
       }
 
+      button {
+        border: none;
+        outline: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        cursor: pointer;
+      }
+
+      input {
+        padding: 12px;
+        border: solid #CFD8DC 1px;
+        border-radius: 3px;
+        font-size: 14px;
+        background-color: #f7f7f7;
+        outline: none;
+        opacity: .95;
+        transition: all .5s ease;
+      }
+
+      input:focus {
+        background-color: white;
+        opacity: 1;
+      }
+
+      input:placeholder {
+        color: white;
+      }
+
+       ::-webkit-input-placeholder {
+        /* Chrome */
+        color: black;
+      }
+
+       :-ms-input-placeholder {
+        /* IE 10+ */
+        color: black;
+      }
+
+       ::-moz-placeholder {
+        /* Firefox 19+ */
+        color: black;
+        opacity: 1;
+      }
+
+       :-moz-placeholder {
+        /* Firefox 4 - 18 */
+        color: black;
+        opacity: 1;
+      }
+
+      input:focus::-webkit-input-placeholder {
+        /* Chrome */
+        color: #626262;
+      }
+
+      input:focus:-ms-input-placeholder {
+        /* IE 10+ */
+        color: #626262;
+      }
+
+      input:focus::-moz-placeholder {
+        /* Firefox 19+ */
+        color: #626262;
+        opacity: 1;
+      }
+
+      input:focus:-moz-placeholder {
+        /* Firefox 4 - 18 */
+        color: #626262;
+        opacity: 1;
+      }
+
+      .signup-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+        align-self: center;
+      }
+
+      .signup-container>* {
+        margin: 6px;
+        flex: 1;
+        min-width: 250px;
+      }
+
+      @media (min-width: 900px) {
+        .signup-container {
+          flex-direction: row;
+        }
+      }
+
     </style>
 
     <header class="header-section">
@@ -492,13 +586,37 @@
            class="header-container">
         <h1 id="headerText"
             class="header-title">Nashville can't wait to try<br> your homemade food!</h1>
-        <paper-button class="watch-video-button"
+        <!--<paper-button class="watch-video-button"
                       on-tap="watchVideoTapped">
           <img style="width:50px;height:50px;"
                src="https://storage.googleapis.com/gigamunch-omninexus-website/home/play-video-button.png" />Watch Video
-        </paper-button>
+        </paper-button>-->
+        <form action="/signedup"
+              method="post"
+              style="margin-bottom:24px;"
+              class="signup-container"
+              id="videoSignUpForm">
+          <input type="text"
+                 name="name"
+                 id="name"
+                 class="signup-name"
+                 placeholder="Name"
+                 required>
+          <input type="text"
+                 name="email"
+                 id="email"
+                 class="signup-email"
+                 placeholder="Phone Number"
+                 required>
+          <input type="text"
+                 name="terp"
+                 style="display:none">
+          <button class="sign-up-button"
+                  raised>Learn more
+        </button>
+        </form>
       </div>
-      <div id="video"
+      <!--<div id="video"
            hidden$="[[!showPromoVideo]]"
            style="width: 100%; height:100%; z-index:100; display:flex;">
         <iframe src$="[[promoVideoURL]]"
@@ -506,7 +624,7 @@
                 frameborder="0"
                 allowfullscreen>
         </iframe>
-      </div>
+      </div>-->
     </header>
     <div class="love-section">
       <!--<paper-button 
@@ -765,9 +883,7 @@
         </paper-button>-->
         <form action="/signedup"
               method="post"
-              style="display:none; margin-bottom:24px;"
-              class="signup-container"
-              id="videoSignUpForm">
+              class="signup-container">
           <input type="text"
                  name="name"
                  id="name"
@@ -778,8 +894,7 @@
                  name="email"
                  id="email"
                  class="signup-email"
-                 placeholder="Email"
-                 pattern="\S+@\S+\.\S+"
+                 placeholder="Phone Number"
                  required>
           <input type="text"
                  name="terp"
