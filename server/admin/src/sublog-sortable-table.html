@@ -281,12 +281,12 @@
       }
 
       getStatus(sublog) {
-        if (sublog.skip) {
-          return 'Skipped';
+        if (sublog.refunded) {
+          return 'Refunded';
         } else if (sublog.free) {
           return 'Free';
-        } else if (sublog.refunded) {
-          return 'Refunded';
+        } else if (sublog.skip) {
+          return 'Skipped';
         } else if (sublog.paid) {
           return 'Paid';
         }
