@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -95,7 +96,7 @@ type SignUp struct {
 
 func handleCookSignup(w http.ResponseWriter, req *http.Request) {
 	c := appengine.NewContext(req)
-	emailAddress := req.FormValue("email")
+	emailAddress := strings.Replace(strings.ToLower(req.FormValue("email")), " ", "", -1)
 	name := req.FormValue("name")
 	terp := req.FormValue("terp")
 	utils.Infof(c, "email or phone: %s, name: %s, terp: %s ", emailAddress, name, terp)
@@ -133,44 +134,6 @@ func handleCookSignup(w http.ResponseWriter, req *http.Request) {
 
 func handleScheduleSignup(w http.ResponseWriter, req *http.Request) {
 	_, _ = w.Write(scheduleSignupPage)
-	// c := appengine.NewContext(req)
-	// emailAddress := req.FormValue("email")
-	// terp := req.FormValue("terp")
-	// utils.Infof(c, "email: %s,  terp: %s ", emailAddress, terp)
-	// if terp != "" {
-	// 	return
-	// }
-	// if emailAddress == "" {
-	// 	utils.Infof(c, "No email address. ")
-	// 	// _, _ = w.Write(cookSignupPage)
-	// 	// TODO redirect?
-	// 	return
-	// }
-	// key := datastore.NewKey(c, "ScheduleSignUp", emailAddress, 0, nil)
-	// entry := &SubscriptionSignUp{}
-	// err := datastore.Get(c, key, entry)
-	// if err == datastore.ErrNoSuchEntity {
-	// 	entry.Date = time.Now()
-	// 	entry.Email = emailAddress
-	// 	_, err = datastore.Put(c, key, entry)
-	// 	if err != nil {
-	// 		utils.Criticalf(c, "Error putting ScheduleSignupEmail in datastore ", err)
-	// 	}
-	// 	if !appengine.IsDevAppServer() {
-	// 		messageC := message.New(c)
-	// 		err = messageC.SendSMS("6153975516", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", emailAddress))
-	// 		if err != nil {
-	// 			utils.Criticalf(c, "failed to send sms to Enis. Err: %+v", err)
-	// 		}
-	// 	}
-	// } else {
-	// 	utils.Errorf(c, "Error email already registered ScheduleSignUp: emailaddress - %s, err - %#v", emailAddress, err)
-	// }
-	// param := httprouter.Param{
-	// 	Key:   "email",
-	// 	Value: emailAddress,
-	// }
-	// handleScheduleForm(w, req, []httprouter.Param{param})
 }
 
 type scheduleSubscriptionResp struct {
@@ -220,6 +183,8 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer req.Body.Close()
+	sReq.Email = strings.Replace(strings.ToLower(sReq.Email), " ", "", -1)
+	sReq.PhoneNumber = strings.Replace(sReq.PhoneNumber, " ", "", -1)
 	utils.Infof(ctx, "Request struct: %+v", sReq)
 	err = sReq.valid()
 	if err != nil {
