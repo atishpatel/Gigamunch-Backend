@@ -1,7 +1,0 @@
-queue:
-- name: close-post
-  rate: 20/s
-- name: notify-muncher
-  rate: 40/s
-- name: process-order
-  rate: 40/s

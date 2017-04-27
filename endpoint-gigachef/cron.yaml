@@ -1,5 +1,0 @@
-cron:
-- description: "remove closed posts"
-  url: /remove-closed-posts
-  target: endpoint-gigachef
-  schedule: every 1 mins
