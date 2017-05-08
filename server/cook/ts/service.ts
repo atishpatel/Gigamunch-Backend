@@ -1,9 +1,15 @@
 /* exported initService */
 /* global COOK gapi ga initService */
 
-window.COOK = window.COOK || {};
+declare var COOK: any;
+declare var gapi: any;
+
+COOK = COOK || {};
 
 class Service {
+  loaded: boolean;
+  callQueue: Function[];
+  service: any;
   constructor() {
     this.loaded = false;
     this.callQueue = [];
@@ -34,7 +40,7 @@ class Service {
    * Onboard
    */
 
-  schedulePhoneCall(phoneNumber, datetime, callback) {
+  schedulePhoneCall(phoneNumber: string, datetime: string, callback: (err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.schedulePhoneCall(phoneNumber, datetime, callback);
@@ -50,14 +56,13 @@ class Service {
       .service
       .schedulePhoneCall(request)
       .execute(
-        (resp) => {
-          this.logError('schedulePhoneCall', resp.err);
-          callback(resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('schedulePhoneCall', resp.err);
+        callback(resp.err);
+      });
   }
 
-  finishOnboarding(cook, submerchant, callback) {
+  finishOnboarding(cook: Cook, submerchant: SubMerchant, callback: (err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.finishOnboarding(cook, submerchant, callback);
@@ -73,19 +78,18 @@ class Service {
       .service
       .finishOnboarding(request)
       .execute(
-        (resp) => {
-          this.logError('finishOnboarding', resp.err);
-          COOK.User.update(resp.gigatoken);
-          callback(resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('finishOnboarding', resp.err);
+        COOK.User.update(resp.gigatoken);
+        callback(resp.err);
+      });
   }
 
   /*
    * Cook
    */
 
-  getCook(callback) {
+  getCook(callback: (cook: Cook, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getCook(callback);
@@ -99,14 +103,13 @@ class Service {
       .service
       .getCook(request)
       .execute(
-        (resp) => {
-          this.logError('getCook', resp.err);
-          callback(resp.cook, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getCook', resp.err);
+        callback(resp.cook, resp.err);
+      });
   }
 
-  updateCook(cook, callback) {
+  updateCook(cook: Cook, callback: (cook: Cook, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.updateCook(cook, callback);
@@ -122,21 +125,20 @@ class Service {
       .service
       .updateCook(request)
       .execute(
-        (resp) => {
-          this.logError('updateCook', resp.err);
-          callback(resp.cook, resp.err);
-          setTimeout(() => {
-            this.refreshToken();
-          }, 1);
-        }
-      );
+      (resp: Response) => {
+        this.logError('updateCook', resp.err);
+        callback(resp.cook, resp.err);
+        setTimeout(() => {
+          this.refreshToken();
+        }, 1);
+      });
   }
 
   /*
    * Payout Method
    */
 
-  getSubMerchant(callback) {
+  getSubMerchant(callback: (sub_merchant: SubMerchant, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getSubMerchant(callback);
@@ -150,14 +152,13 @@ class Service {
       .service
       .getSubMerchant(request)
       .execute(
-        (resp) => {
-          this.logError('getSubMerchant', resp.err);
-          callback(resp.sub_merchant, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getSubMerchant', resp.err);
+        callback(resp.sub_merchant, resp.err);
+      });
   }
 
-  updateSubMerchant(submerchant, callback) {
+  updateSubMerchant(submerchant: SubMerchant, callback: (cook: any, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.updateSubMerchant(submerchant, callback);
@@ -172,21 +173,20 @@ class Service {
       .service
       .updateSubMerchant(request)
       .execute(
-        (resp) => {
-          this.logError('updateSubMerchant', resp.err);
-          callback(resp.cook, resp.err);
-          setTimeout(() => {
-            this.refreshToken();
-          }, 1);
-        }
-      );
+      (resp: Response) => {
+        this.logError('updateSubMerchant', resp.err);
+        callback(resp.cook, resp.err);
+        setTimeout(() => {
+          this.refreshToken();
+        }, 1);
+      });
   }
 
   /*
    * Message
    */
 
-  getMessageToken(callback) {
+  getMessageToken(callback: (token: any, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getMessageToken(callback);
@@ -202,18 +202,17 @@ class Service {
       .service
       .getMessageToken(request)
       .execute(
-        (resp) => {
-          this.logError('getMessageToken', resp.err);
-          callback(resp.token, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getMessageToken', resp.err);
+        callback(resp.token, resp.err);
+      });
   }
 
   /*
    * Inquiry
    */
 
-  getInquiry(id, callback) {
+  getInquiry(id: number, callback: (inquiry: any, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getInquiry(id, callback);
@@ -229,14 +228,13 @@ class Service {
       .service
       .getInquiry(request)
       .execute(
-        (resp) => {
-          this.logError('getInquiry', resp.err);
-          callback(resp.inquiry, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getInquiry', resp.err);
+        callback(resp.inquiry, resp.err);
+      });
   }
 
-  getInquiries(startIndex, endIndex, callback) {
+  getInquiries(startIndex: number, endIndex: number, callback: (inquiries: any, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getInquiries(startIndex, endIndex, callback);
@@ -253,18 +251,17 @@ class Service {
       .service
       .getInquiries(request)
       .execute(
-        (resp) => {
-          this.logError('getInquiries', resp.err);
-          // if (window.COOK.isDev) {
-          //   callback(this.getFakeInquiries(), resp.err);
-          //   return;
-          // }
-          callback(resp.inquiries, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getInquiries', resp.err);
+        // if (window.COOK.isDev) {
+        //   callback(this.getFakeInquiries(), resp.err);
+        //   return;
+        // }
+        callback(resp.inquiries, resp.err);
+      });
   }
 
-  acceptInquiry(id, callback) {
+  acceptInquiry(id: string, callback: (inquiry: any, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.acceptInquiry(id, callback);
@@ -280,14 +277,13 @@ class Service {
       .service
       .acceptInquiry(request)
       .execute(
-        (resp) => {
-          this.logError('acceptInquiry', resp.err);
-          callback(resp.inquiry, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('acceptInquiry', resp.err);
+        callback(resp.inquiry, resp.err);
+      });
   }
 
-  declineInquiry(id, callback) {
+  declineInquiry(id: string, callback: (inquiries: any, err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.declineInquiry(id, callback);
@@ -303,11 +299,10 @@ class Service {
       .service
       .declineInquiry(request)
       .execute(
-        (resp) => {
-          this.logError('declineInquiry', resp.err);
-          callback(resp.inquiry, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('declineInquiry', resp.err);
+        callback(resp.inquiry, resp.err);
+      });
   }
 
 
@@ -315,7 +310,7 @@ class Service {
    * Menu
    */
 
-  getMenus(callback) {
+  getMenus(callback: (menus: Menu[], err: ErrorWithCode) => void) {
     if (!this.loaded) {
       this.callQueue.push(() => {
         this.getMenus(callback);
@@ -330,14 +325,13 @@ class Service {
       .service
       .getMenus(request)
       .execute(
-        (resp) => {
-          this.logError('getMenus', resp.err);
-          callback(resp.menus, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getMenus', resp.err);
+        callback(resp.menus, resp.err);
+      });
   }
 
-  saveMenu(menu, callback) {
+  saveMenu(menu: Menu, callback: (cook: any, err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -355,18 +349,17 @@ class Service {
       .service
       .saveMenu(request)
       .execute(
-        (resp) => {
-          this.logError('saveMenu', resp.err);
-          callback(resp.menu, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('saveMenu', resp.err);
+        callback(resp.menu, resp.err);
+      });
   }
 
   /*
    * Item
    */
 
-  getItem(id, callback) {
+  getItem(id: string, callback: (cook: any, err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -383,14 +376,13 @@ class Service {
       .service
       .getItem(request)
       .execute(
-        (resp) => {
-          this.logError('getItem', resp.err);
-          callback(resp.item, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getItem', resp.err);
+        callback(resp.item, resp.err);
+      });
   }
 
-  saveItem(item, callback) {
+  saveItem(item: Item, callback: (item: Item, err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -410,14 +402,13 @@ class Service {
       .service
       .saveItem(request)
       .execute(
-        (resp) => {
-          this.logError('saveItem', resp.err);
-          callback(resp.item, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('saveItem', resp.err);
+        callback(resp.item, resp.err);
+      });
   }
 
-  activateItem(id, callback) {
+  activateItem(id: string, callback: (err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -434,14 +425,13 @@ class Service {
       .service
       .activateItem(request)
       .execute(
-        (resp) => {
-          this.logError('activateItem', resp.err);
-          callback(resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('activateItem', resp.err);
+        callback(resp.err);
+      });
   }
 
-  deactivateItem(id, callback) {
+  deactivateItem(id: string, callback: (err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -458,18 +448,17 @@ class Service {
       .service
       .deactivateItem(request)
       .execute(
-        (resp) => {
-          this.logError('deactivateItem', resp.err);
-          callback(resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('deactivateItem', resp.err);
+        callback(resp.err);
+      });
   }
 
   /*
    * Admin
    */
 
-  getSubLogs(callback) {
+  getSubLogs(callback: (sublogs: SubLogs[], err: ErrorWithCode) => void) {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -484,14 +473,13 @@ class Service {
       .service
       .getSubLogs(request)
       .execute(
-        (resp) => {
-          this.logError('getSubLogs', resp.err);
-          callback(resp.sublogs, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getSubLogs', resp.err);
+        callback(resp.sublogs, resp.err);
+      });
   }
 
-  getSubLogsForDate(date, callback) {
+  getSubLogsForDate(date: Date, callback: (sublogs: SubLogs, err: ErrorWithCode) => void) {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
@@ -507,11 +495,10 @@ class Service {
       .service
       .getSubLogsForDate(request)
       .execute(
-        (resp) => {
-          this.logError('getSubLogsForDate', resp.err);
-          callback(resp.sublogs, resp.err);
-        }
-      );
+      (resp: Response) => {
+        this.logError('getSubLogsForDate', resp.err);
+        callback(resp.sublogs, resp.err);
+      });
   }
 
   refreshToken() {
@@ -527,12 +514,11 @@ class Service {
       .service
       .refreshToken(request)
       .execute(
-        (resp) => {
-          if (!this.logError('refreshToken', resp.err)) {
-            COOK.User.update(resp.gigatoken);
-          }
+      (resp: Response) => {
+        if (!this.logError('refreshToken', resp.err)) {
+          COOK.User.update(resp.gigatoken);
         }
-      );
+      });
   }
 
   /*
@@ -543,7 +529,7 @@ class Service {
     return COOK.User.token;
   }
 
-  logError(fnName, err) {
+  logError(fnName: string, err: ErrorWithCode) {
     if (err && (err.code === undefined || err.code !== 0)) {
       const desc = `Function: ${fnName} | Message: ${err.message} | Details: ${err.detail}`;
       console.error(desc);
@@ -552,7 +538,7 @@ class Service {
         exFatal: false,
       });
       if (err.code && err.code === 452) { // code signout
-        window.location = '/signout';
+        window.location.href = '/signout';
       }
       return true;
     }
@@ -560,7 +546,7 @@ class Service {
   }
 }
 
-window.COOK.Service = new Service();
+COOK.Service = new Service();
 
 function initService() {
   let apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
@@ -578,4 +564,47 @@ function initService() {
     timingVar: 'init',
     timingValue: window.performance.now(),
   });
+}
+
+interface ErrorWithCode {
+  code: number;
+  message: string;
+  detail: string;
+}
+
+interface Cook {
+  delivery_price: string;
+}
+
+interface SubMerchant {
+
+}
+
+interface Response {
+  gigatoken: string;
+  token: string;
+  cook: Cook;
+  menu: Menu;
+  menus: Menu[];
+  item: Item;
+  items: Item[];
+  inquiries: any;
+  inquiry: any;
+  sublogs: SubLogs[];
+  sub_merchant: SubMerchant;
+  err: ErrorWithCode;
+}
+
+interface Menu {
+  items: Item[];
+}
+
+interface Item {
+  min_servings: number;
+  max_servings: number;
+  cook_price_per_serving: number;
+}
+
+interface SubLogs {
+
 }

@@ -2,14 +2,15 @@
   "name": "gigamunch-backend",
   "version": "1.0.0",
   "devDependencies": {
-    "babel-core": "^6.9.0",
-    "babel-plugin-syntax-flow": "^6.8.0",
-    "babel-preset-es2015": "^6.9.0",
-    "eslint": "^3.6.0",
-    "eslint-config-airbnb": "^12.0.0",
-    "eslint-plugin-html": "^1.5.1",
-    "eslint-plugin-import": "^1.8.0",
-    "eslint-plugin-jsx-a11y": "^2.2.2",
-    "eslint-plugin-react": "^6.3.0"
+    "@types/google.analytics": "^0.0.33",
+    "@types/polymer": "^1.1.31",
+    "tslint-config-airbnb": "^1.1.1",
+    "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-html": "^2.0.1",
+    "eslint-plugin-import": "^2.2.0"
   }
 }

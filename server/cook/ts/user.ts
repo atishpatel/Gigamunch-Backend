@@ -1,8 +1,23 @@
-/* exported user */
-/* global COOK */
-window.COOK = window.COOK || {};
+declare var COOK: any;
+
+COOK = COOK || {};
 
 class User {
+  isLoggedIn: boolean;
+  token: string;
+  isCook: boolean;
+  isVerifiedCook: boolean;
+  isAdmin: boolean;
+  hasAddress: boolean;
+  hasSubMerchantID: boolean;
+  isOnboard: boolean;
+  id: string;
+  email: string;
+  name: string;
+  perm: number;
+  photo_url: string;
+  photoURL: string;
+
   constructor() {
     this.isLoggedIn = false;
     // get cookie
@@ -13,7 +28,7 @@ class User {
     }
   }
 
-  update(tkn, setCookie = 1) {
+  update(tkn: string, setCookie = 1) {
     if (tkn === '') {
       return;
     }
@@ -24,11 +39,12 @@ class User {
     const jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
       return m0 === '-' ? '+' : '/';
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
-    for (const k in jwt) {
-      if (k !== '__proto__') {
-        this[k] = jwt[k];
-      }
-    }
+
+    this.id = jwt.id;
+    this.email = jwt.email;
+    this.name = jwt.name;
+    this.perm = jwt.perm;
+    this.photo_url = jwt.photo_url;
     // set permissions
     this.isCook = this.getKthBit(jwt.perm, 0);
     this.isVerifiedCook = this.getKthBit(jwt.perm, 1);
@@ -41,7 +57,7 @@ class User {
       this.setTokenCookie(tkn, jwt.exp);
     }
     document.dispatchEvent(new Event('userUpdated', {
-      bubbles: true
+      bubbles: true,
     }));
   }
 
@@ -50,26 +66,26 @@ class User {
     const ca = document.cookie.split(';');
     for (let i = 0; i < ca.length; i++) {
       let c = ca[i];
-      while (c.charAt(0) === ' ') c = c.substring(1);
-      if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+      while (c.charAt(0) === ' ') { c = c.substring(1); }
+      if (c.indexOf(name) === 0) { return c.substring(name.length, c.length); }
     }
     return '';
   }
 
-  setTokenCookie(cvalue, exptime) {
+  setTokenCookie(cvalue: string, exptime: number) {
     const d = new Date(0);
     d.setUTCSeconds(exptime);
     document.cookie = `GIGATKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
   }
 
-  getKthBit(x, k) {
+  getKthBit(x: number, k: number) {
     return (((x >> k) & 1) === 1);
   }
 }
 
-window.COOK.User = new User();
+COOK.User = new User();
 
 // redirect if token is empty
-if (!window.COOK.User.isLoggedIn) {
-  window.location = '/becomechef?gstate=login';
+if (!COOK.User.isLoggedIn) {
+  window.location.href = '/becomechef?gstate=login';
 }
