@@ -114,7 +114,7 @@
             }
 
             sublogDay.sublogs.push(slogs[i]);
-            if (slogs[i].skip) {
+            if (slogs[i].skip || slogs[i].refunded) {
               sublogDay.skippedSublogs.push(slogs[i]);
             } else {
               sublogDay.unskippedSublogs.push(slogs[i]);

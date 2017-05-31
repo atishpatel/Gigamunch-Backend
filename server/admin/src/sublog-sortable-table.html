@@ -285,10 +285,10 @@
           return 'Refunded';
         } else if (sublog.free) {
           return 'Free';
-        } else if (sublog.skip) {
-          return 'Skipped';
         } else if (sublog.paid) {
           return 'Paid';
+        } else if (sublog.skip) {
+          return 'Skipped';
         }
         return 'Unpaid';
       }
