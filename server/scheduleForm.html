@@ -939,7 +939,8 @@
                 <div class="item-text">
                   <div class="item-title"><span id="boxForTitle">Box for Two</span></div>
                   <div class="item-desc">
-                    Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> will charged every week. Skip a week or cancel your subscription anytime with a 3 day notice.
+                    Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime with a
+                    3 day notice.
                   </div>
                 </div>
               </div>
@@ -956,7 +957,7 @@
               </div>
               <div class="order-summary-section">
                 <div class="order-summary-section-name">Tax</div>
-                <div class="order-summary-section-price">FREE</div>
+                <div class="order-summary-section-price"><span class="old_price">$<span id="tax_total"></span></span> FREE</div>
               </div>
               <div class="order-summary-section">
                 <div class="order-summary-section-name">Total</div>
@@ -1284,6 +1285,7 @@
         }
       }
       var boxForTitleText;
+      var taxTotal;
       switch (val) {
         case '1':
           oneBoxPrice = 17;
@@ -1294,25 +1296,24 @@
           oneBoxPrice = 15;
           servingsPerBox = 2;
           boxForTitleText = 'Box for Two';
+          taxTotal = 2.93;
           break;
         case '4':
           oneBoxPrice = 14;
           servingsPerBox = 4;
           boxForTitleText = 'Box for Four';
+          taxTotal = 5.46;
           break;
       }
       var boxTotal = oneBoxPrice * servingsPerBox;
-      // var deliveryTotal = 20;
-      // var taxTotal = (boxTotal + deliveryTotal) * .05;
       // var total = boxTotal + deliveryTotal + taxTotal;
       var total = boxTotal;
-
 
       document.getElementById('meal_multiplier').innerHTML = 'x' + servingsPerBox;
       document.getElementById('boxForTitle').innerHTML = boxForTitleText;
       document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
       // document.getElementById('delivery_total').innerHTML = deliveryTotal.toFixed(0);
-      // document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
+      document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
       document.getElementById('total').innerHTML = total.toFixed(2);
     }
 

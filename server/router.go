@@ -228,10 +228,10 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		weeklyAmount += 17
 	case "2":
 		servings = 2
-		weeklyAmount += float32(servings * 15)
+		weeklyAmount += float32(servings*15) + 2.93
 	default:
 		servings = 4
-		weeklyAmount += float32(servings * 14)
+		weeklyAmount += float32(servings*14) + 5.46
 	}
 	switch sReq.VegetarianServings {
 	case "":
