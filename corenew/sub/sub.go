@@ -366,7 +366,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 	}
 	utils.Infof(c.ctx, "adding %d subscribers to SubLog", len(subs))
 	taskC := tasks.New(c.ctx)
-	dayBeforeBox := date.Add(-24 * time.Hour)
+	dayBeforeBox := date.Add(-2 * time.Hour)
 	for _, v := range subs {
 		// TODO instead of inserting all in this task, split it into many tasks?
 		// insert into subLog
