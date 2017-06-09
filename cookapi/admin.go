@@ -229,6 +229,37 @@ func (service *Service) ProcessSubLog(ctx context.Context, req *SubLogReq) (*Err
 	return resp, nil
 }
 
+// GetSubEmailsResp is a resp for GetSubEmails.
+type GetSubEmailsResp struct {
+	SubEmails []string `json:"sub_emails"`
+	ErrorOnlyResp
+}
+
+// GetSubEmails returns a list of SubEmails that can be skipped from the last month.
+func (service *Service) GetSubEmails(ctx context.Context, req *GigatokenReq) (*GetSubEmailsResp, error) {
+	resp := new(GetSubEmailsResp)
+	defer handleResp(ctx, "GetSubEmails", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	from := time.Now().Add(-14 * 24 * time.Hour)
+	to := time.Now().Add(14 * 24 * time.Hour)
+	subC := sub.New(ctx)
+	resp.SubEmails, err = subC.GetSubEmails(from, to)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetSubEmails")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // SkipSubLog runs sub.Skip.
 func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)

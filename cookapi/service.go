@@ -123,6 +123,7 @@ func main() {
 	register("SetupSubLogs", "setupSubLogs", "POST", "cookservice/setupSubLogs", "Admin func.")
 	register("ProcessSubLog", "processSubLog", "POST", "cookservice/processSubLog", "Admin func.")
 	register("CancelSub", "cancelSub", "POST", "cookservice/cancelSub", "Admin func.")
+	register("GetSubEmails", "getSubEmails", "GET", "cookservice/getSubEmails", "Admin func.")
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Admin func.")
