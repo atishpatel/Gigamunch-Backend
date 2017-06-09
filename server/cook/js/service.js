@@ -26,7 +26,7 @@ var Service = (function () {
             hitType: 'timing',
             timingCategory: 'endpoint',
             timingVar: 'load',
-            timingValue: window.performance.now()
+            timingValue: window.performance.now(),
         });
     };
     /*
@@ -43,7 +43,7 @@ var Service = (function () {
         var request = {
             gigatoken: this.getToken(),
             datetime: datetime,
-            phone_number: phoneNumber
+            phone_number: phoneNumber,
         };
         this
             .service
@@ -64,7 +64,7 @@ var Service = (function () {
         var request = {
             gigatoken: this.getToken(),
             cook: cook,
-            sub_merchant: submerchant
+            sub_merchant: submerchant,
         };
         this
             .service
@@ -87,7 +87,7 @@ var Service = (function () {
             return;
         }
         var request = {
-            gigatoken: this.getToken()
+            gigatoken: this.getToken(),
         };
         this
             .service
@@ -108,7 +108,7 @@ var Service = (function () {
         cook.delivery_price = String(cook.delivery_price);
         var request = {
             gigatoken: this.getToken(),
-            cook: cook
+            cook: cook,
         };
         this
             .service
@@ -133,7 +133,7 @@ var Service = (function () {
             return;
         }
         var request = {
-            gigatoken: this.getToken()
+            gigatoken: this.getToken(),
         };
         this
             .service
@@ -153,7 +153,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            sub_merchant: submerchant
+            sub_merchant: submerchant,
         };
         this
             .service
@@ -179,7 +179,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            device_id: 'browser'
+            device_id: 'browser',
         };
         this
             .service
@@ -202,7 +202,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            id: id
+            id: id,
         };
         this
             .service
@@ -223,7 +223,7 @@ var Service = (function () {
         var request = {
             gigatoken: this.getToken(),
             start_index: startIndex,
-            end_index: endIndex
+            end_index: endIndex,
         };
         this
             .service
@@ -247,7 +247,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            id: id
+            id: id,
         };
         this
             .service
@@ -267,7 +267,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            id: id
+            id: id,
         };
         this
             .service
@@ -289,7 +289,7 @@ var Service = (function () {
             return;
         }
         var request = {
-            gigatoken: this.getToken()
+            gigatoken: this.getToken(),
         };
         this
             .service
@@ -311,7 +311,7 @@ var Service = (function () {
         delete menu.items;
         var request = {
             gigatoken: this.getToken(),
-            menu: menu
+            menu: menu,
         };
         this
             .service
@@ -335,7 +335,7 @@ var Service = (function () {
         }
         var request = {
             id: id,
-            gigatoken: this.getToken()
+            gigatoken: this.getToken(),
         };
         this
             .service
@@ -359,7 +359,7 @@ var Service = (function () {
         item.cook_price_per_serving = Number(item.cook_price_per_serving);
         var request = {
             gigatoken: this.getToken(),
-            item: item
+            item: item,
         };
         this
             .service
@@ -380,7 +380,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            id: id
+            id: id,
         };
         this
             .service
@@ -401,7 +401,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            id: id
+            id: id,
         };
         this
             .service
@@ -424,7 +424,7 @@ var Service = (function () {
             return;
         }
         var request = {
-            gigatoken: this.getToken()
+            gigatoken: this.getToken(),
         };
         this
             .service
@@ -445,7 +445,7 @@ var Service = (function () {
         }
         var request = {
             gigatoken: this.getToken(),
-            date: date.toISOString()
+            date: date.toISOString(),
         };
         this
             .service
@@ -453,6 +453,48 @@ var Service = (function () {
             .execute(function (resp) {
             _this.logError('getSubLogsForDate', resp.err);
             callback(resp.sublogs, resp.err);
+        });
+    };
+    Service.prototype.getSubEmails = function (callback) {
+        var _this = this;
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.getSubEmails(callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+        };
+        this
+            .service
+            .getSubEmails(request)
+            .execute(function (resp) {
+            _this.logError('getSubEmails', resp.err);
+            callback(resp.sub_emails, resp.err);
+        });
+    };
+    Service.prototype.skipSubLog = function (date, subEmail, callback) {
+        var _this = this;
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.skipSubLog(date, subEmail, callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+            date: date.toISOString(),
+            sub_email: subEmail,
+        };
+        this
+            .service
+            .skipSubLog(request)
+            .execute(function (resp) {
+            _this.logError('skipSubLog', resp.err);
+            callback(resp.err);
         });
     };
     Service.prototype.refreshToken = function () {
@@ -463,7 +505,7 @@ var Service = (function () {
             return;
         }
         var request = {
-            gigatoken: this.getToken()
+            gigatoken: this.getToken(),
         };
         this
             .service
@@ -486,7 +528,7 @@ var Service = (function () {
             console.error(desc);
             ga('send', 'exception', {
                 exDescription: desc,
-                exFatal: false
+                exFatal: false,
             });
             if (err.code && err.code === 452) {
                 window.location.href = '/signout';
@@ -513,6 +555,6 @@ function initService() {
         hitType: 'timing',
         timingCategory: 'endpoint',
         timingVar: 'init',
-        timingValue: window.performance.now()
+        timingValue: window.performance.now(),
     });
 }

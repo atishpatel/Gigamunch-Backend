@@ -39,7 +39,7 @@ var User = (function () {
             this.setTokenCookie(tkn, jwt.exp);
         }
         document.dispatchEvent(new Event('userUpdated', {
-            bubbles: true
+            bubbles: true,
         }));
     };
     User.prototype.getTokenCookie = function () {

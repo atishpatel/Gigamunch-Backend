@@ -501,6 +501,52 @@ class Service {
       });
   }
 
+  getSubEmails(callback: (subEmails: String[], err: ErrorWithCode) => void) {
+    // if api is not loaded, add to _callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.getSubEmails(callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+    };
+
+    this
+      .service
+      .getSubEmails(request)
+      .execute(
+      (resp: Response) => {
+        this.logError('getSubEmails', resp.err);
+        callback(resp.sub_emails, resp.err);
+      });
+  }
+
+  skipSubLog(date: Date, subEmail: string, callback: (err: ErrorWithCode) => void) {
+    // if api is not loaded, add to _callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.skipSubLog(date, subEmail, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      date: date.toISOString(),
+      sub_email: subEmail,
+    };
+
+    this
+      .service
+      .skipSubLog(request)
+      .execute(
+      (resp: Response) => {
+        this.logError('skipSubLog', resp.err);
+        callback(resp.err);
+      });
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
@@ -592,6 +638,7 @@ interface Response {
   inquiry: any;
   sublogs: SubLogs[];
   sub_merchant: SubMerchant;
+  sub_emails: String[];
   err: ErrorWithCode;
 }
 
