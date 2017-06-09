@@ -1,4 +1,5 @@
-<!--<link rel="import" href="../bower_components/polymer/polymer.html">-->
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer-element.html">
 
 <link rel="import"
       href="../../cook/src/shared-styles.html">
@@ -98,18 +99,17 @@
       }
 
       getStatus(sublog) {
-        if (sublog.skip) {
-          return 'Skipped';
+        if (sublog.refunded) {
+          return 'Refunded';
         } else if (sublog.free) {
           return 'Free';
-        } else if (sublog.refunded) {
-          return 'Refunded';
         } else if (sublog.paid) {
           return 'Paid';
+        } else if (sublog.skip) {
+          return 'Skipped';
         }
         return 'Unpaid';
       }
-
 
       sublogsObserver() {
         if (this.sublogs) {
