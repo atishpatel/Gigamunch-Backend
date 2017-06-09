@@ -1,5 +1,5 @@
 <link rel="import"
-      href="../../cook/bower_components/polymer/polymer.html">
+      href="../../cook/bower_components/polymer/polymer-element.html">
 <link rel="import"
       href="../../cook/bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import"
@@ -147,6 +147,10 @@
           outline: none;
         }
 
+        .drawer-list iron-icon {
+          margin-left: auto;
+        }
+
         .drawer-list a {
           display: block;
           text-decoration: none;
@@ -252,6 +256,10 @@
              href="sublog">
             <paper-item>Sublogs</paper-item>
           </a>
+          <a name="skip"
+             href="skip">
+            <paper-item>Skip</paper-item>
+          </a>
           <a target="_blank"
              href="[[cookAPIURL]]">
             <paper-item>Cookapi
@@ -295,13 +303,18 @@
                     attr-for-selected="name"
                     fallback-selection="view404"
                     role="main">
+          <skip-page name="skip"
+                     id="skipPage"
+                     service="[[service]]"
+                     user="{{user}}">
+          </skip-page>
           <sublog-page name="sublog"
-                       id="sublog"
+                       id="sublogPage"
                        service="[[service]]"
                        user="{{user}}">
           </sublog-page>
           <sublog-detail-page name="sublogdetail"
-                              id="sublogdetail"
+                              id="sublogdetailPage"
                               service="[[service]]"
                               user="{{user}}"
                               route="[[subroute]]">
@@ -385,19 +398,25 @@
       _pageChanged(page) {
         this.$.drawer.close(); // close drawer if open
         // Load page import on demand. Show 404 page if fails
-        var el;
-        var resolvedPageURL, elementName, title;
+        let el;
+        let resolvedPageURL, elementName, title;
         switch (page) {
+          case 'skip':
+            elementName = 'skip-page';
+            resolvedPageURL = this.resolveUrl('skip-page.html');
+            el = this.$.skipPage;
+            title = 'Skip';
+            break;
           case 'sublog':
             elementName = 'sublog-page';
             resolvedPageURL = this.resolveUrl('sublog-page.html');
-            el = this.$.sublog;
+            el = this.$.sublogPage;
             title = 'Sublog';
             break;
           case 'sublogdetail':
             elementName = 'sublog-detail-page';
             resolvedPageURL = this.resolveUrl('sublog-detail-page.html');
-            el = this.$.sublogdetail;
+            el = this.$.sublogdetailPage;
             title = 'Sublog detailed';
             break;
           default:
@@ -424,13 +443,14 @@
         this.page = 'view404';
       }
 
-      toastEvent(e, detail) {
-        var text = detail.text;
+      toastEvent(e) {
+        const detail = e.detail;
+        let text = detail.text;
         if (text === undefined || text === null || text === '') {
           text = detail.message;
         }
         if (text && text !== "") {
-          var duration = detail.duration || 3000;
+          const duration = detail.duration || 3000;
           this.$.toast.show({
             text: text,
             duration: duration
@@ -439,8 +459,8 @@
       }
 
       errorEvent(e, error) {
-        var text;
-        var details;
+        let text;
+        let details;
         switch (typeof(error)) {
           case 'object':
             if (typeof(error) === 'string') {
@@ -483,22 +503,26 @@
       copyToClipboard(s) {
         this.$.drawer.close(); // close drawer if open
         // Select the email link anchor text  
-        var copyEl = document.querySelector('#copyElement');
+        const copyEl = document.querySelector('#copyElement');
         copyEl.innerHTML = s;
         window.getSelection().removeAllRanges();
-        var range = document.createRange();
+        const range = document.createRange();
         range.selectNode(copyEl);
         window.getSelection().addRange(range);
         try {
           // Now that we've selected the anchor text, execute the copy command  
-          var successful = document.execCommand('copy');
+          const successful = document.execCommand('copy');
           if (successful) {
-            this.toastEvent({}, {
-              text: 'Succesfully copied.'
+            this.toastEvent({
+              detail: {
+                text: 'Succesfully copied.'
+              }
             });
           } else {
-            this.toastEvent({}, {
-              text: 'Failed to copy.'
+            this.toastEvent({
+              detail: {
+                text: 'Failed to copy.'
+              }
             });
           }
         } catch (err) {
