@@ -18,6 +18,12 @@
   "extraDependencies": [
     "manifest.json",
     "bower_components/webcomponentsjs/webcomponents-lite.min.js",
-    "bower_components/vaadin-grid/*.html"
+    "bower_components/vaadin-grid/*.html",
+    "bower_components/vaadin-date-picker/*.html",
+    "bower_components/vaadin-button/*.html",
+    "bower_components/vaadin-text-field/*.html",
+    "bower_components/vaadin-themable-mixin/*.html",
+    "bower_components/paper-dropdown-menu/*.html",
+    "bower_components/paper-listbox/*.html"
   ]
 }

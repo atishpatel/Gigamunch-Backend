@@ -29,6 +29,7 @@
     "google-apis": "GoogleWebComponents/google-apis#^1.1.6",
     "neon-animation": "PolymerElements/neon-animation#^2.0.0",
     "paper-dialog": "PolymerElements/paper-dialog#^2.0.0",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
     "paper-item": "PolymerElements/paper-item#^2.0.0",
     "radio-color-picker": "^1.0.2",
     "paper-toast": "PolymerElements/paper-toast#^2.0.0",
@@ -36,6 +37,11 @@
     "paper-menu": "PolymerElements/paper-menu#^1.2.2",
     "paper-slider": "PolymerElements/paper-slider#^2.0.0",
     "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^2.0.0",
-    "vaadin-grid": "^2.1.0"
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
+    "vaadin-grid": "^2.1.0",
+    "vaadin-date-picker": "^2.0.0",
+    "vaadin-button": "^1.0.0",
+    "vaadin-text-field": "^1.0.0",
+    "vaadin-themable-mixin": "vaadin/vaadin-themable-mixin#^1.1.0"
   }
 }
