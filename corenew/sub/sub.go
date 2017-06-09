@@ -24,6 +24,7 @@ const (
 	datetimeFormat                = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	dateFormat                    = "2006-01-02"          // "Jan 2, 2006"
 	insertSubLogStatement         = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
+	selectSubLogEmails            = "SELECT DISTINCT sub_email from sub where date>? and date<?"
 	selectSubLogStatement         = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` WHERE date='%s' AND sub_email='%s'"
 	selectAllSubLogStatement      = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` ORDER BY date DESC LIMIT %d"
 	selectSubLogFromDateStatement = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
@@ -57,6 +58,24 @@ func New(ctx context.Context) *Client {
 		connectSQL(ctx)
 	})
 	return &Client{ctx: ctx}
+}
+
+// GetSubEmails gets a list of unique subscriber emails within the date range.
+func (c *Client) GetSubEmails(from, to time.Time) ([]string, error) {
+	rows, err := mysqlDB.Query(selectSubLogEmails, from.Format(dateFormat), to.Format(dateFormat))
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrap("failed to run GetSubEmails")
+	}
+	var emails []string
+	for rows.Next() {
+		var email string
+		err = rows.Scan(&email)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
+		}
+		emails = append(emails, email)
+	}
+	return emails, nil
 }
 
 // GetSubscribers returns a list of SubscriptionSignUp.
@@ -221,7 +240,7 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 // Skip skips that subscription for that day.
 func (c *Client) Skip(date time.Time, subEmail string) error {
 	// insert or update
-	_, err := c.Get(date, subEmail)
+	sl, err := c.Get(date, subEmail)
 	if err != nil {
 		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
 			return errors.Wrap("failed to sub.Get", err)
@@ -236,6 +255,10 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
+		}
+	} else {
+		if sl.Paid {
+			return errInvalidParameter.WithMessage("Subscriber has already paid. Must refund instead.")
 		}
 	}
 	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), subEmail)
