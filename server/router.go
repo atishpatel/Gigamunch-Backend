@@ -191,7 +191,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		resp.Err = errors.Wrap("failed to validate request", err)
 		return
 	}
-	if sReq.Address.GreatCircleDistance(types.GeoPoint{Latitude: 36.1513632, Longitude: -86.7255927}) > 25 {
+	if sReq.Address.GreatCircleDistance(types.GeoPoint{Latitude: 36.045565, Longitude: -86.784328}) > 25 {
 		// out of delivery range
 		if sReq.Address.Street == "" {
 			resp.Err = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!")
