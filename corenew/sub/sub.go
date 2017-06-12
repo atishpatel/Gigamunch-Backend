@@ -21,17 +21,18 @@ import (
 )
 
 const (
-	datetimeFormat                = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
-	dateFormat                    = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement         = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
-	selectSubLogEmails            = "SELECT DISTINCT sub_email from sub where date>? and date<?"
-	selectSubLogStatement         = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` WHERE date='%s' AND sub_email='%s'"
-	selectAllSubLogStatement      = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` ORDER BY date DESC LIMIT %d"
-	selectSubLogFromDateStatement = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
-	updatePaidSubLogStatement     = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
-	updateSkipSubLogStatement     = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
-	updateFreeSubLogStatment      = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
-	deleteSubLogStatment          = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
+	datetimeFormat                       = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
+	dateFormat                           = "2006-01-02"          // "Jan 2, 2006"
+	insertSubLogStatement                = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
+	selectSubLogEmails                   = "SELECT DISTINCT sub_email from sub where date>? and date<?"
+	selectSubLogStatement                = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` WHERE date='%s' AND sub_email='%s'"
+	selectAllSubLogStatement             = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` ORDER BY date DESC LIMIT %d"
+	selectSubLogFromDateStatement        = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
+	updatePaidSubLogStatement            = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
+	updateSkipSubLogStatement            = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
+	updateRefundedAndSkipSubLogStatement = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
+	updateFreeSubLogStatment             = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
+	deleteSubLogStatment                 = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
 )
@@ -265,6 +266,33 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
+	}
+	return nil
+}
+
+// RefundAndSkip refunds and skips that subscription for that day.
+func (c *Client) RefundAndSkip(date time.Time, subEmail string) error {
+	// insert or update
+	sl, err := c.Get(date, subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.Get", err)
+	}
+	paymentC := payment.New(c.ctx)
+	rID, err := paymentC.RefundSale(sl.TransactionID)
+	if err != nil {
+		return errors.Wrap("failed to payment.RefundSale", err)
+	}
+	utils.Infof(c.ctx, "Refunding Customer(%s) on transaction(%s): refundID(%s)", sl.CustomerID, sl.TransactionID, rID)
+	r, err := mysqlDB.Exec(updateRefundedAndSkipSubLogStatement, date.Format(dateFormat), subEmail)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateRefundedAndSkipSubLogStatement")
+	}
+	numEffectedRows, err := r.RowsAffected()
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed get RowsAffected")
+	}
+	if numEffectedRows != 1 {
+		return errSQLDB.WithError(err).Wrapf("num effected rows is not 1: %s", numEffectedRows)
 	}
 	return nil
 }
