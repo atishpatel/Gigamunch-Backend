@@ -283,6 +283,29 @@ func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	return resp, nil
 }
 
+// RefundAndSkipSubLog runs sub.RefundAndSkip.
+func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "RefundAndSkipSubLog", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.RefundAndSkip(req.Date, req.SubEmail)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.RefundAndSkip")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // FreeSubLog runs sub.Free.
 func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
