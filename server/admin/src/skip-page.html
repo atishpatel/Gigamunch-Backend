@@ -110,6 +110,9 @@
           if (err.code !== 0) {
             return;
           }
+          emails.sort(function(a, b) {
+            return a.localeCompare(b);
+          });
           this.subEmails = emails;
         });
       }
