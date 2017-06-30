@@ -300,17 +300,17 @@
       flex-direction: column;
       justify-content: space-around;
       padding: 32px 12px 0 12px;
-      background: #fff;
+      background-color: #201115;
       /*background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
         background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
         background: linear-gradient(45deg, #FF5722, #FFB300);*/
-      border-bottom: solid #e1e1e1 1px;
     }
 
     .in-the-box-title {
+      color: white;
       margin: auto;
       text-align: center;
-      font-size: 18px;
+      font-size: 20px;
       line-height: 19px;
       font-weight: bold;
       padding: 12px 0;
@@ -320,20 +320,23 @@
       max-width: 1000px;
       margin: auto;
       width: 100%;
-      min-height: 400px;
-      background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_desktop.jpg') no-repeat center center;
+      min-height: 455px;
+      background: #201115 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/in_bag_desktop.jpg') no-repeat center center;
       /*background: white url('/cook/src/box_desktop.png') no-repeat center center;*/
       background-size: contain;
     }
 
     @media (max-width:700px) {
+      .in-the-box-section {
+        background-color: #27120d;
+      }
       .in-the-box-title {
         font-size: 24px;
       }
       .in-the-box-img {
         min-height: 550px;
-        background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_mobile.jpg') no-repeat center center;
-        /*background: white url('/cook/src/box_mobile.png') no-repeat center center;*/
+        background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/in_bag_mobile.jpg') no-repeat center center;
+        /*background: #27120d url('/in_bag_mobile.jpg') no-repeat center center;*/
         background-size: contain;
       }
     }
@@ -618,6 +621,70 @@
       line-height: 22px;
     }
 
+    .hiw-section {
+      padding: 0 10px 24px 10px;
+      background-color: #F5F5F5;
+    }
+
+    .hiw-title {
+      color: #FF7043;
+      text-align: center;
+      padding: 24px 0;
+    }
+
+    .hiw-card {
+      background-color: white;
+    }
+
+    .hiw-step {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hiw-step-image {
+      min-height: 320px;
+      background-size: cover;
+    }
+
+    .hiw-img-step1 {
+      background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/product_african_lady_person.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .hiw-img-step2 {
+      background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/bag_door.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .hiw-img-step3 {
+      background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/product_multi_culture_guide.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .hiw-step-text {
+      margin: 24px auto 32px auto;
+    }
+
+    .hiw-step-text>* {
+      padding: 0 24px;
+    }
+
+    @media (min-width: 650px) {
+      .hiw-card .hiw-step:nth-child(2) {
+        flex-direction: row-reverse;
+      }
+      .hiw-step {
+        flex-direction: row;
+      }
+      .hiw-step-image {
+        width: 50%;
+      }
+      .hiw-step-text {
+        margin: 50px auto 12px auto;
+        width: 50%;
+      }
+    }
+
   </style>
 
   <script type="text/javascript">
@@ -691,12 +758,12 @@
       </form>
     </div>
   </div>
-  <div class="in-the-box-section content">
-    <h2 class="in-the-box-title"> What's inside each box?</h2>
+  <div class="in-the-box-section">
+    <h2 class="in-the-box-title"> What's inside each bag?</h2>
     <div class="in-the-box-img"></div>
   </div>
   <div class="pick-a-plan-section">
-    <h2 class="pick-a-plan-title">CHOOSE YOUR BOX</h2>
+    <h2 class="pick-a-plan-title">CHOOSE YOUR BAG</h2>
     <div class="pick-a-plan-option-list content">
       <div class="pick-a-plan-option">
         <div class="pick-a-plan-option-image">
@@ -749,14 +816,41 @@
                style="display:none">
         <button class="sign-up-button"
                 raised
-                on-tap="choosePlanTapped()">Choose a Box
+                on-tap="choosePlanTapped()">Choose a Bag
                </button>
       </form>
-
-
     </div>
   </div>
-
+  <div id="hiw"
+       class="hiw-section">
+    <h2 class="hiw-title content">How it works</h2>
+    <div class="hiw-card content">
+      <div class="hiw-step">
+        <div class="hiw-step-image hiw-img-step1">
+        </div>
+        <div class="hiw-step-text">
+          <h3 class="hiw-step-text-title">Sign up</h3>
+          <p class="hiw-step-text-desc">Subscribe to Gigamunch to receive a dinner from different cultures every week. If you are out of town, you can skip that week’s dinner without any charge.</p>
+        </div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-step-image hiw-img-step2">
+        </div>
+        <div class="hiw-step-text">
+          <h3 class="hiw-step-text-title">Get the Gigamunch Bag</h3>
+          <p class="hiw-step-text-desc">We work with international cooks from around the world to create an authentic cultural dinner, and deliver the cultural experience in an insulated bag right to your home.</p>
+        </div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-step-image hiw-img-step3">
+        </div>
+        <div class="hiw-step-text">
+          <h3 class="hiw-step-text-title">Enjoy the culture</h3>
+          <p class="hiw-step-text-desc">Play the music, eat the food, learn the culture, explore the world! 🎵 🍽️ 📜 🌏 </p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="made-by-section content">
     <h1 class="made-by-title">Homemade meals by real international cooks!</h1>
     <div class="made-by-cook">
