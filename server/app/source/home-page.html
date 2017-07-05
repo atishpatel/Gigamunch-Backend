@@ -195,7 +195,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-around;
-        padding: 32px 12px 0 12px;
+        padding: 32px 12px 32px 12px;
         background-color: #201115;
         /*background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
         background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
@@ -597,6 +597,24 @@
         max-width: 900px;
       }
 
+      .review-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 600px) {
+        .review-title {
+          font-size: 22px;
+        }
+        .review-person {
+          flex-direction: column-reverse;
+        }
+        .review-person-image {
+          margin: auto 32px auto auto;
+        }
+      }
+
       .review-quote {}
 
       .review-quote-left {
@@ -827,6 +845,7 @@
     </div>
     <div class="review-section">
       <div class="review-content content">
+        <h2 class="review-title">Our Community of Explorers</h2>
         <div class="review-quote">
           <i class="fa fa-quote-left review-quote-left"
              aria-hidden="true"></i>
@@ -841,7 +860,7 @@
             <div class="review-person-fb"><a href="https://www.facebook.com/ckholmes/activity/10211995340495048"
                  target="_blank">5 Star Facebook Review</a></div>
           </div>
-          <div class="review-person-image"><img src="https://scontent.fbna1-2.fna.fbcdn.net/v/t31.0-8/18623246_10212153417766881_3426588536318919225_o.jpg?oh=6180d0fb46f914af75846e0043be5bb3&oe=5A05E8FF"></div>
+          <div class="review-person-image"><img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/christie_holmes.jpg"></div>
         </div>
       </div>
     </div>
