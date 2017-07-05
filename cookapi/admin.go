@@ -438,7 +438,11 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].SubscriptionLog = *subLogs[i]
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
 					resp.SubLogs[i].Date = subLogs[i].Date
-					resp.SubLogs[i].Servings = subLogs[i].Servings
+					if subs[j].VegetarianServings > 0 {
+						resp.SubLogs[i].VegetarianServings = subLogs[i].Servings
+					} else {
+						resp.SubLogs[i].Servings = subLogs[i].Servings
+					}
 					resp.SubLogs[i].DeliveryTime = subLogs[i].DeliveryTime
 				}
 			}
