@@ -310,8 +310,8 @@
       color: white;
       margin: auto;
       text-align: center;
-      font-size: 20px;
-      line-height: 19px;
+      font-size: 32px;
+      line-height: 34px;
       font-weight: bold;
       padding: 12px 0;
     }
@@ -332,10 +332,11 @@
       }
       .in-the-box-title {
         font-size: 24px;
+        line-height: 26px;
       }
       .in-the-box-img {
-        min-height: 550px;
-        background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/in_bag_mobile.jpg') no-repeat center center;
+        min-height: 590px;
+        background: #27120d url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/in_bag_mobile.jpg') no-repeat center center;
         /*background: #27120d url('/in_bag_mobile.jpg') no-repeat center center;*/
         background-size: contain;
       }
@@ -424,7 +425,7 @@
 
     .made-by-title {
       margin: 24px auto;
-      font-size: 24px;
+      font-size: 32px;
       text-align: center;
     }
 
@@ -542,8 +543,8 @@
     .pick-a-plan-title {
       margin: auto;
       text-align: center;
-      font-size: 18px;
-      line-height: 19px;
+      font-size: 24px;
+      line-height: 26px;
       font-weight: bold;
       padding: 24px 24px 42px 24px;
     }
@@ -595,6 +596,10 @@
     }
 
     @media (min-width: 650px) {
+      .pick-a-plan-title {
+        font-size: 32px;
+        line-height: 34px;
+      }
       .pick-a-plan-option-list {
         flex-direction: row;
         min-width: 550px;
@@ -627,6 +632,7 @@
     }
 
     .hiw-title {
+      font-size: 36px;
       color: #FF7043;
       text-align: center;
       padding: 24px 0;
@@ -647,7 +653,7 @@
     }
 
     .hiw-img-step1 {
-      background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/product_african_lady_person.jpg') no-repeat center center;
+      background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/product_african_lady.jpg') no-repeat center center;
       background-size: cover;
     }
 
@@ -683,6 +689,62 @@
         margin: 50px auto 12px auto;
         width: 50%;
       }
+    }
+
+    .review-section {
+      background: linear-gradient(45deg, #ff3d00, #f3aa00);
+      color: white;
+    }
+
+    .review-content {
+      padding: 32px 24px;
+      max-width: 900px;
+    }
+
+    .review-quote {}
+
+    .review-quote-left {
+      font-size: 32px;
+    }
+
+    .review-quote-text {
+      font-size: 20px;
+      line-height: 25px;
+      padding: 8px 24px;
+    }
+
+    .review-quote-right {}
+
+    .review-person {
+      display: flex;
+    }
+
+    .review-person-text {
+      display: flex;
+      flex-direction: column;
+      font-size: 20px;
+      font-weight: 600;
+      margin: auto 12px auto auto;
+    }
+
+    .review-person-fb {
+      font-size: 12px;
+    }
+
+    .review-person-image {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 110px;
+      height: 110px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .review-person-image img {
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
     }
 
   </style>
@@ -725,6 +787,18 @@
       }
     }
 
+    function meal2Tapped() {
+      ga('send', 'event', 'choose_plan', '2_meal');
+      document.getElementById('planButton').click();
+      document.getElementById('planEmail').focus();
+    }
+
+    function meal4Tapped() {
+      ga('send', 'event', 'choose_plan', '4_meal');
+      document.getElementById('planForm').click();
+      document.getElementById('planEmail').focus();
+    }
+
   </script>
 
   <div class="header">
@@ -765,7 +839,8 @@
   <div class="pick-a-plan-section">
     <h2 class="pick-a-plan-title">CHOOSE YOUR BAG</h2>
     <div class="pick-a-plan-option-list content">
-      <div class="pick-a-plan-option">
+      <div class="pick-a-plan-option"
+           onclick="meal2Tapped()">
         <div class="pick-a-plan-option-image">
           <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/couple.png">
         </div>
@@ -781,7 +856,8 @@
 
       </div>
 
-      <div class="pick-a-plan-option">
+      <div class="pick-a-plan-option"
+           onclick="meal4Tapped()">
         <div class="pick-a-plan-option-image">
           <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/family.png">
         </div>
@@ -800,12 +876,13 @@
          style="margin: 24px auto">
       <h1 class="sign-up-title"
           style="color: #424242">Get your first week FREE!</h1>
-      <form action="/scheduleform"
+      <form id="planForm"
+            action="/scheduleform"
             method="get"
             class="sign-up-form">
         <input type="text"
                name="email"
-               id="email"
+               id="planEmail"
                class="sign-up-email"
                placeholder="Email"
                pattern="\S+@\S+\.\S+"
@@ -814,7 +891,8 @@
         <input type="text"
                name="terp"
                style="display:none">
-        <button class="sign-up-button"
+        <button id="planButton"
+                class="sign-up-button"
                 raised
                 on-tap="choosePlanTapped()">Choose a Bag
                </button>
@@ -851,8 +929,28 @@
       </div>
     </div>
   </div>
+  <div class="review-section">
+    <div class="review-content content">
+      <div class="review-quote">
+        <i class="fa fa-quote-left review-quote-left"
+           aria-hidden="true"></i>
+        <p class="review-quote-text">We love our International Mondays! It is a great way to start the week and we all (kids included) have loved the unique way to try new foods, learn about new cultures, and expose ourselves to new music. The food has been consistently good.
+          <strong>It has become a night we look forward to as a family.</strong></p>
+        <!--<i class="fa fa-quote-right review-quote-right"
+           aria-hidden="true"></i>-->
+      </div>
+      <div class="review-person">
+        <div class="review-person-text">
+          <div class="review-person-name">Christie Holmes</div>
+          <div class="review-person-fb"><a href="https://www.facebook.com/ckholmes/activity/10211995340495048"
+               target="_blank">5 Star Facebook Review</a></div>
+        </div>
+        <div class="review-person-image"><img src="https://scontent.fbna1-2.fna.fbcdn.net/v/t31.0-8/18623246_10212153417766881_3426588536318919225_o.jpg?oh=6180d0fb46f914af75846e0043be5bb3&oe=5A05E8FF"></div>
+      </div>
+    </div>
+  </div>
   <div class="made-by-section content">
-    <h1 class="made-by-title">Homemade meals by real international cooks!</h1>
+    <h1 class="made-by-title">Authentic meals by real international cooks!</h1>
     <div class="made-by-cook">
       <div class="cook-image-flag">
         <img class="cook-image"
@@ -870,7 +968,7 @@
         </p>
       </div>
     </div>
-    <div class="made-by-cook hide-mobile">
+    <!--<div class="made-by-cook hide-mobile">
       <div class="cook-image-flag">
         <img class="cook-image"
              src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/shawn_square.jpg">
@@ -885,7 +983,7 @@
           of you.
         </p>
       </div>
-    </div>
+    </div>-->
     <div class="made-by-cook">
       <div class="cook-image-flag">
         <img class="cook-image"
