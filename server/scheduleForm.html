@@ -637,6 +637,10 @@
       padding: 8px 0;
     }
 
+    .address-input-container .apt {
+      max-width: 75px;
+    }
+
   </style>
 
   <script type="text/javascript">
@@ -781,19 +785,18 @@
           </div>
           <div>
             <label for="address-input">Address</label>
-            <div class="address-input-container">
-              <div class="input-container">
-                <input type="text"
-                       name="apt"
-                       id="apt"
-                       placeholder="APT/Unit" />
-                <input type="text"
-                       name="address-input"
-                       id="address-input"
-                       onfocus="addressInputFocused()"
-                       placeholder="123 Street Name, City"
-                       required/>
-              </div>
+            <div class="input-container address-input-container">
+              <input type="text"
+                     name="address-input"
+                     id="address-input"
+                     onfocus="addressInputFocused()"
+                     placeholder="123 Street Name, City"
+                     required/>
+              <input type="text"
+                     name="apt"
+                     class="apt"
+                     id="apt"
+                     placeholder="APT/Unit" />
             </div>
           </div>
           <div>
