@@ -23,7 +23,7 @@
         margin: 0;
         color: #424242;
       }
-      
+
       button {
         border: none;
         outline: none;
@@ -34,19 +34,19 @@
         color: white;
         cursor: pointer;
       }
-      
+
       a {
         text-decoration: none;
       }
-      
+
       p {
         margin: 0;
       }
-      
+
       g {
         fill: currentcolor;
       }
-      
+
       input {
         padding: 12px;
         border: solid #CFD8DC 1px;
@@ -57,13 +57,13 @@
         /*opacity: .95;*/
         transition: all .3s ease;
       }
-      
+
       input:focus {
         background-color: white;
         opacity: 1;
         border-color: #FF7043;
       }
-      
+
       .photo-16-9 {
         display: block;
         width: 100%;
@@ -73,7 +73,7 @@
         overflow: hidden;
         background-color: white;
       }
-      
+
       .photo-16-9 img {
         position: absolute;
         display: block;
@@ -84,16 +84,16 @@
         bottom: 0;
         margin: auto;
       }
-      
+
       .content {
         max-width: 1000px;
         margin: auto;
       }
-      
+
       .bold {
         font-weight: bold;
       }
-      
+
       .floating-logo {
         position: absolute;
         top: 24px;
@@ -103,20 +103,20 @@
         font-size: 18px;
         color: white;
       }
-      
+
       .header,
       .bottom {
         display: flex;
         align-items: center;
         justify-content: center;
       }
-      
+
       .header {
         background: #64656a url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/top_down_box_left_clean.jpg') no-repeat center center;
         background-size: cover;
         height: 50vh;
       }
-      
+
       .header-title {
         color: white;
         text-align: center;
@@ -125,33 +125,33 @@
         font-size: 44px;
         font-weight: 400;
       }
-      
+
       .header-title>span {
         font-weight: 600;
         font-style: italic;
       }
-      
+
       .bottom {
         height: 75vh;
         background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/asian_top_down_80.jpg') no-repeat center center;
         background-size: cover;
       }
-      
+
       .sign-up-holder {
         width: 41%;
       }
-      
+
       .sign-up-section {
         background-color: white;
         border-bottom: solid #e1e1e1 1px;
         margin: auto;
       }
-      
+
       .sign-up-content {
         margin: auto;
         padding: 32px 24px;
       }
-      
+
       .sign-up-title {
         font-size: 26px;
         margin: 12px 0;
@@ -159,21 +159,21 @@
         font-style: italic;
         font-weight: 400;
       }
-      
+
       @media (max-width:700px) {
         .sign-up-title {
           font-size: 24px;
         }
       }
-      
+
       .sign-up-form {
         display: flex;
         flex-direction: column;
         margin: auto;
       }
-      
+
       .sign-up-email {}
-      
+
       .sign-up-button {
         color: white;
         font-size: 16px;
@@ -190,57 +190,60 @@
         margin: 12px 0 6px 0;
         /*min-width: 275px;*/
       }
-      
+
       .in-the-box-section {
         display: flex;
         flex-direction: column;
         justify-content: space-around;
-        padding: 32px 24px;
-        background: #fff;
+        padding: 32px 12px 0 12px;
+        background-color: #201115;
         /*background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
         background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
         background: linear-gradient(45deg, #FF5722, #FFB300);*/
-        border-bottom: solid #e1e1e1 1px;
       }
-      
-      .in-the-box-title {
-      margin: auto;
-      text-align: center;
-      font-size: 18px;
-      line-height: 19px;
-      font-weight: bold;
-      padding: 12px 0;
-    }
 
-    .in-the-box-img {
-      max-width: 1000px;
-      margin: auto;
-      width: 100%;
-      min-height: 400px;
-      background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_desktop.jpg') no-repeat center center;
-      /*background: white url('/cook/src/box_desktop.png') no-repeat center center;*/
-      background-size: contain;
-    }
-
-    @media (max-width:700px) {
       .in-the-box-title {
-        font-size: 24px;
+        color: white;
+        margin: auto;
+        text-align: center;
+        font-size: 32px;
+        line-height: 34px;
+        font-weight: bold;
+        padding: 12px 0;
       }
 
       .in-the-box-img {
-        min-height: 550px;
-        background: white url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/box_mobile.jpg') no-repeat center center;
-        /*background: white url('/cook/src/box_mobile.png') no-repeat center center;*/
+        max-width: 1000px;
+        margin: auto;
+        width: 100%;
+        min-height: 455px;
+        background: #201115 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/in_bag_desktop.jpg') no-repeat center center;
+        /*background: white url('/cook/src/box_desktop.png') no-repeat center center;*/
         background-size: contain;
       }
-    }
-      
+
+      @media (max-width:700px) {
+        .in-the-box-section {
+          background-color: #27120d;
+        }
+        .in-the-box-title {
+          font-size: 24px;
+          line-height: 26px;
+        }
+        .in-the-box-img {
+          min-height: 590px;
+          background: #27120d url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/in_bag_mobile.jpg') no-repeat center center;
+          /*background: #27120d url('/in_bag_mobile.jpg') no-repeat center center;*/
+          background-size: contain;
+        }
+      }
+
       .in-the-box-point-list {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
       }
-      
+
       .in-the-box-point {
         flex: 1;
         display: flex;
@@ -251,7 +254,7 @@
         padding-left: 12px;
         justify-content: flex-end;
       }
-      
+
       .in-the-box-point-reverse {
         flex: 1;
         display: flex;
@@ -261,36 +264,36 @@
         line-height: 17px;
         padding-left: 12px;
       }
-      
+
       .in-the-box-image {
         display: flex;
         padding: 12px;
       }
-      
+
       .in-the-box-image>img {
         min-width: 120px;
         max-width: 125px;
         max-height: 125px;
         margin: 12px 12px;
       }
-      
+
       .in-the-box-point-text {
         display: flex;
         flex-direction: column;
         padding: 18px 0;
       }
-      
+
       .in-the-box-point-title {
         font-size: 16px;
         line-height: 16px;
         margin: 0 0 8px 0;
       }
-      
+
       .in-the-box-point-desc {
         /*opacity: var(--primary-text-opacity);*/
         font-weight: 300;
       }
-      
+
       @media (min-width: 850px) {
         .in-the-box-point-list {
           flex-direction: row;
@@ -311,23 +314,23 @@
           text-align: center;
         }
       }
-      
+
       .made-by-section {
         padding: 12px;
       }
-      
+
       .made-by-title {
         margin: 24px auto;
-        font-size: 24px;
+        font-size: 32px;
         text-align: center;
       }
-      
+
       .made-by-cook {
         display: flex;
         flex-direction: row;
         padding: 12px 12px 24px 12px;
       }
-      
+
       .cook-image-flag {
         position: relative;
         padding-right: 50px;
@@ -335,13 +338,13 @@
         height: 200px;
         width: 200px;
       }
-      
+
       .cook-image {
         width: 200px;
         height: 200px;
         border-radius: 4px;
       }
-      
+
       .cook-flag {
         position: absolute;
         bottom: 0;
@@ -349,22 +352,22 @@
         width: 100px;
         border-radius: 4px;
       }
-      
+
       .cook-info {
         padding-left: 24px;
         font-size: 16px;
       }
-      
+
       .cook-title {
         font-size: 16px;
         margin: 0 0 12px 0;
         font-weight: 500;
       }
-      
+
       .cook-desc {
         font-weight: 300;
       }
-      
+
       .sign-up-card {
         background-color: white;
         padding: 16px;
@@ -372,7 +375,7 @@
         max-width: 400px;
         margin: 0 auto;
       }
-      
+
       @media (max-width: 600px) {
         .made-by-title {
           font-size: 22px;
@@ -405,7 +408,7 @@
           display: none;
         }
       }
-      
+
       @media (max-width: 900px) {
         .header {
           align-items: flex-end;
@@ -421,7 +424,7 @@
         }
       }
       /* pick-a-plan */
-      
+
       .pick-a-plan-section {
         display: flex;
         flex-direction: column;
@@ -432,23 +435,23 @@
         background-size: cover;
         /* max-width: 500px; */
       }
-      
+
       .pick-a-plan-title {
         margin: auto;
         text-align: center;
-        font-size: 18px;
-        line-height: 19px;
+        font-size: 24px;
+        line-height: 26px;
         font-weight: bold;
         padding: 24px 24px 42px 24px;
       }
-      
+
       .pick-a-plan-option-list {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         /* max-width: 300px; */
       }
-      
+
       .pick-a-plan-option {
         flex: 1 1 100px;
         display: flex;
@@ -458,37 +461,41 @@
         line-height: 17px;
         padding: 6px 12px;
       }
-      
+
       .pick-a-plan-option-image {
         display: flex;
         padding: 6px;
       }
-      
+
       .pick-a-plan-option-image>img {
         margin: auto;
         max-width: 75px;
         max-height: 75px;
         padding: 6px;
       }
-      
+
       .pick-a-plan-option-text {
         display: flex;
         flex-direction: column;
         padding: 2px;
       }
-      
+
       .pick-a-plan-option-title {
         font-size: 16px;
         line-height: 16px;
         margin: 2px;
       }
-      
+
       .pick-a-plan-option-price {
         opacity: .87;
         margin: 8px auto;
       }
-      
+
       @media (min-width: 650px) {
+        .pick-a-plan-title {
+          font-size: 32px;
+          line-height: 34px;
+        }
         .pick-a-plan-option-list {
           flex-direction: row;
           min-width: 550px;
@@ -505,286 +512,419 @@
           text-align: center;
         }
       }
-      
+
       .circle {
         border-radius: 50%;
       }
 
-    .free-delivery {
-      font-size: 12px;
-      line-height: 22px;
-    }
-
-  </style>
-
-  <script type="text/javascript">
-    var learnMoreInputLogged = false;
-    var getStartedInputLogged = false;
-    var choosePlanInputLogged = false;
-
-    function learnMoreTapped() {
-      ga('send', 'event', 'schedule_email_signup', 'learnmore');
-    }
-
-    function learnMoreInputTapped() {
-      if (!learnMoreInputLogged) {
-        ga('send', 'event', 'schedule_email_signup_input_tap', 'learnmore');
-        learnMoreInputLogged = true;
+      .free-delivery {
+        font-size: 12px;
+        line-height: 22px;
       }
-    }
 
-    function getStartedTapped() {
-      ga('send', 'event', 'schedule_email_signup', 'getstarted');
-    }
-
-    function getStartedInputTapped() {
-      if (!getStartedInputLogged) {
-        ga('send', 'event', 'schedule_email_signup_input_tap', 'getstarted');
-        getStartedInputLogged = true;
+      .hiw-section {
+        padding: 0 10px 24px 10px;
+        background-color: #F5F5F5;
       }
-    }
 
-    function choosePlanTapped() {
-      ga('send', 'event', 'schedule_email_signup', 'chooseplan');
-    }
-
-    function choosePlanInputTapped() {
-      if (!choosePlanInputLogged) {
-        ga('send', 'event', 'schedule_email_signup_input_tap', 'chooseplan');
-        choosePlanInputLogged = true;
+      .hiw-title {
+        font-size: 36px;
+        color: #FF7043;
+        text-align: center;
+        padding: 24px 0;
       }
-    }
 
-  </script>
+      .hiw-card {
+        background-color: white;
+      }
 
-  <div class="header">
-    <a href="/"
-       class="floating-logo">Gigamunch</a>
-    <!--<div class="sign-up-holder"></div>-->
-    <div class="header-title">DISCOVER <br><span>THE WORLD</span></div>
-  </div>
-  <div class="sign-up-section content">
-    <div class="sign-up-content">
-      <h1 class="sign-up-title">Get a new international meal <br>delivered to you every week!</h1>
-      <form action="/scheduleform"
-            method="get"
-            class="sign-up-form"
-            style="max-width: 340px;">
-        <input type="text"
-               name="email"
-               id="email"
-               class="sign-up-email"
-               placeholder="Email"
-               pattern="\S+@\S+\.\S+"
-               onfocus="learnMoreInputTapped()"
-               required/>
-        <input type="text"
-               name="terp"
-               style="display:none">
-        <button class="sign-up-button"
-                on-tap="learnMoreTapped()"
-                raised>Get Started
-              </button>
-      </form>
+      .hiw-step {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hiw-step-image {
+        min-height: 320px;
+        background-size: cover;
+      }
+
+      .hiw-img-step1 {
+        background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/product_african_lady.jpg') no-repeat center center;
+        background-size: cover;
+      }
+
+      .hiw-img-step2 {
+        background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/bag_door.jpg') no-repeat center center;
+        background-size: cover;
+      }
+
+      .hiw-img-step3 {
+        background: #acaaa6 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/product_multi_culture_guide.jpg') no-repeat center center;
+        background-size: cover;
+      }
+
+      .hiw-step-text {
+        margin: 24px auto 32px auto;
+      }
+
+      .hiw-step-text>* {
+        padding: 0 24px;
+      }
+
+      @media (min-width: 650px) {
+        .hiw-card .hiw-step:nth-child(2) {
+          flex-direction: row-reverse;
+        }
+        .hiw-step {
+          flex-direction: row;
+        }
+        .hiw-step-image {
+          width: 50%;
+        }
+        .hiw-step-text {
+          margin: 50px auto 12px auto;
+          width: 50%;
+        }
+      }
+
+      .review-section {
+        background: linear-gradient(45deg, #ff3d00, #f3aa00);
+        color: white;
+      }
+
+      .review-content {
+        padding: 32px 24px;
+        max-width: 900px;
+      }
+
+      .review-quote {}
+
+      .review-quote-left {
+        font-size: 32px;
+      }
+
+      .review-quote-text {
+        font-size: 20px;
+        line-height: 25px;
+        padding: 8px 24px;
+      }
+
+      .review-quote-right {}
+
+      .review-person {
+        display: flex;
+      }
+
+      .review-person-text {
+        display: flex;
+        flex-direction: column;
+        font-size: 20px;
+        font-weight: 600;
+        margin: auto 12px auto auto;
+      }
+
+      .review-person-fb {
+        font-size: 12px;
+      }
+
+      .review-person-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 110px;
+        height: 110px;
+        background-color: white;
+        border-radius: 50%;
+      }
+
+      .review-person-image img {
+        border-radius: 50%;
+        width: 100px;
+        height: 100px;
+      }
+
+    </style>
+
+    <script type="text/javascript">
+      var learnMoreInputLogged = false;
+      var getStartedInputLogged = false;
+      var choosePlanInputLogged = false;
+
+      function learnMoreTapped() {
+        ga('send', 'event', 'schedule_email_signup', 'learnmore');
+      }
+
+      function learnMoreInputTapped() {
+        if (!learnMoreInputLogged) {
+          ga('send', 'event', 'schedule_email_signup_input_tap', 'learnmore');
+          learnMoreInputLogged = true;
+        }
+      }
+
+      function getStartedTapped() {
+        ga('send', 'event', 'schedule_email_signup', 'getstarted');
+      }
+
+      function getStartedInputTapped() {
+        if (!getStartedInputLogged) {
+          ga('send', 'event', 'schedule_email_signup_input_tap', 'getstarted');
+          getStartedInputLogged = true;
+        }
+      }
+
+      function choosePlanTapped() {
+        ga('send', 'event', 'schedule_email_signup', 'chooseplan');
+      }
+
+      function choosePlanInputTapped() {
+        if (!choosePlanInputLogged) {
+          ga('send', 'event', 'schedule_email_signup_input_tap', 'chooseplan');
+          choosePlanInputLogged = true;
+        }
+      }
+
+      function meal2Tapped() {
+        ga('send', 'event', 'choose_plan', '2_meal');
+        document.getElementById('planButton').click();
+        document.getElementById('planEmail').focus();
+      }
+
+      function meal4Tapped() {
+        ga('send', 'event', 'choose_plan', '4_meal');
+        document.getElementById('planForm').click();
+        document.getElementById('planEmail').focus();
+      }
+
+    </script>
+
+    <div class="header">
+      <a href="/"
+         class="floating-logo">Gigamunch</a>
+      <!--<div class="sign-up-holder"></div>-->
+      <div class="header-title">DISCOVER <br><span>THE WORLD</span></div>
     </div>
-  </div>
-  <div class="in-the-box-section content">
-    <h2 class="in-the-box-title"> What's inside each box?</h2>
-    <div class="in-the-box-img"></div>
-    <!--<div class="in-the-box-point-list content">
-      <div class="in-the-box-point">
-        <div class="in-the-box-point-text">
-          <h3 class="in-the-box-point-title">Authentic Meal</h3>
-          <p class="in-the-box-point-desc">
-            Eat up! Ready-to-eat international meals made by local international cooks.
-          </p>
-        </div>
-        <div class="in-the-box-image">
-          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/asian_meal.jpg">
-        </div>
+    <div class="sign-up-section content">
+      <div class="sign-up-content">
+        <h1 class="sign-up-title">Get a new international meal <br>delivered to you every week!</h1>
+        <form action="/scheduleform"
+              method="get"
+              class="sign-up-form"
+              style="max-width: 340px;">
+          <input type="text"
+                 name="email"
+                 id="email"
+                 class="sign-up-email"
+                 placeholder="Email"
+                 pattern="\S+@\S+\.\S+"
+                 onfocus="learnMoreInputTapped()"
+                 required/>
+          <input type="text"
+                 name="terp"
+                 style="display:none">
+          <button class="sign-up-button"
+                  on-tap="learnMoreTapped()"
+                  raised>Get Started
+              </button>
+        </form>
       </div>
+    </div>
+    <div class="in-the-box-section">
+      <h2 class="in-the-box-title"> What's inside each bag?</h2>
+      <div class="in-the-box-img"></div>
+    </div>
+    <div class="pick-a-plan-section">
+      <h2 class="pick-a-plan-title">CHOOSE YOUR BAG</h2>
+      <div class="pick-a-plan-option-list content">
+        <div class="pick-a-plan-option"
+             onclick="meal2Tapped()">
+          <div class="pick-a-plan-option-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/couple.png">
+          </div>
+          <div class="pick-a-plan-option-text">
+            <h3 class="pick-a-plan-option-title">DINNER FOR TWO</h3>
+            <p class="pick-a-plan-option-price">
+              <span>
+            $15 PER MEAL
+            </span>
+              <br><span class="free-delivery">+ Free Delivery</span>
+            </p>
+          </div>
 
-      <div class="in-the-box-point-reverse">
-        <div class="in-the-box-point-text">
-          <h3 class="in-the-box-point-title">Cultural Info Guide</h3>
-          <p class="in-the-box-point-desc">
-            Learn about the dish you're eating and the story behind it. There is even traditional music to immerse yourself in the culture!
-          </p>
         </div>
-        <div class="in-the-box-image">
-          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/info_guide.jpg">
-        </div>
-      </div>
 
-      <div class="in-the-box-point">
-        <div class="in-the-box-point-text">
-          <h3 class="in-the-box-point-title">Connection to the Cook</h3>
-          <p class="in-the-box-point-desc">
-            Get to know the cook behind the food. Gain private access to this cook and request food from them anytime.
-          </p>
-        </div>
-        <div class="in-the-box-image">
-          <img class="circle"
-               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/soup_lady.jpg">
+        <div class="pick-a-plan-option"
+             onclick="meal4Tapped()">
+          <div class="pick-a-plan-option-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/family.png">
+          </div>
+          <div class="pick-a-plan-option-text">
+            <h3 class="pick-a-plan-option-title">FAMILY DINNER</h3>
+            <p class="pick-a-plan-option-price">
+              <span>
+            $14 PER MEAL
+            </span>
+              <br><span class="free-delivery">+ Free Delivery</span>
+            </p>
+          </div>
         </div>
       </div>
-    </div>-->
-  </div>
-  <div class="pick-a-plan-section">
-    <h2 class="pick-a-plan-title">CHOOSE YOUR BOX</h2>
-    <!-- TODO add images -->
-    <div class="pick-a-plan-option-list content">
-      <!--<div class="pick-a-plan-option">
-        <div class="pick-a-plan-option-image">
-          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/solo.png">
+      <div class="sign-up-card"
+           style="margin: 24px auto">
+        <h1 class="sign-up-title"
+            style="color: #424242">Get your first week FREE!</h1>
+        <form id="planForm"
+              action="/scheduleform"
+              method="get"
+              class="sign-up-form">
+          <input type="text"
+                 name="email"
+                 id="planEmail"
+                 class="sign-up-email"
+                 placeholder="Email"
+                 pattern="\S+@\S+\.\S+"
+                 onfocus="choosePlanInputTapped()"
+                 required/>
+          <input type="text"
+                 name="terp"
+                 style="display:none">
+          <button id="planButton"
+                  class="sign-up-button"
+                  raised
+                  on-tap="choosePlanTapped()">Choose a Bag
+               </button>
+        </form>
+      </div>
+    </div>
+    <div id="hiw"
+         class="hiw-section">
+      <h2 class="hiw-title content">How it works</h2>
+      <div class="hiw-card content">
+        <div class="hiw-step">
+          <div class="hiw-step-image hiw-img-step1">
+          </div>
+          <div class="hiw-step-text">
+            <h3 class="hiw-step-text-title">Sign up</h3>
+            <p class="hiw-step-text-desc">Subscribe to Gigamunch to receive a dinner from different cultures every week. If you are out of town, you can skip that week’s dinner without any charge.</p>
+          </div>
         </div>
-        <div class="pick-a-plan-option-text">
-          <h3 class="pick-a-plan-option-title">GO SOLO</h3>
-          <p class="pick-a-plan-option-price">
-            $13 PER MEAL
+        <div class="hiw-step">
+          <div class="hiw-step-image hiw-img-step2">
+          </div>
+          <div class="hiw-step-text">
+            <h3 class="hiw-step-text-title">Get the Gigamunch Bag</h3>
+            <p class="hiw-step-text-desc">We work with international cooks from around the world to create an authentic cultural dinner, and deliver the cultural experience in an insulated bag right to your home.</p>
+          </div>
+        </div>
+        <div class="hiw-step">
+          <div class="hiw-step-image hiw-img-step3">
+          </div>
+          <div class="hiw-step-text">
+            <h3 class="hiw-step-text-title">Enjoy the culture</h3>
+            <p class="hiw-step-text-desc">Play the music, eat the food, learn the culture, explore the world! 🎵 🍽️ 📜 🌏 </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="review-section">
+      <div class="review-content content">
+        <div class="review-quote">
+          <i class="fa fa-quote-left review-quote-left"
+             aria-hidden="true"></i>
+          <p class="review-quote-text">We love our International Mondays! It is a great way to start the week and we all (kids included) have loved the unique way to try new foods, learn about new cultures, and expose ourselves to new music. The food has been consistently good.
+            <strong>It has become a night we look forward to as a family.</strong></p>
+          <!--<i class="fa fa-quote-right review-quote-right"
+           aria-hidden="true"></i>-->
+        </div>
+        <div class="review-person">
+          <div class="review-person-text">
+            <div class="review-person-name">Christie Holmes</div>
+            <div class="review-person-fb"><a href="https://www.facebook.com/ckholmes/activity/10211995340495048"
+                 target="_blank">5 Star Facebook Review</a></div>
+          </div>
+          <div class="review-person-image"><img src="https://scontent.fbna1-2.fna.fbcdn.net/v/t31.0-8/18623246_10212153417766881_3426588536318919225_o.jpg?oh=6180d0fb46f914af75846e0043be5bb3&oe=5A05E8FF"></div>
+        </div>
+      </div>
+    </div>
+    <div class="made-by-section content">
+      <h1 class="made-by-title">Authentic meals by real international cooks!</h1>
+      <div class="made-by-cook">
+        <div class="cook-image-flag">
+          <img class="cook-image"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/laura_square.jpg">
+          <!--<img class="cook-flag"
+             src="https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg">-->
+          <img class="cook-flag"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/Flag_of_Italy.svg">
+
+        </div>
+        <div class="cook-info">
+          <h2 class="cook-title">Laura Rodriguez</h2>
+          <p class="cook-desc">
+            I'm a self-taught chef who learned to cook in Italy and studied Asian cuisine when I lived in South Korea. I worked in restaurants in Chicago before I started my own catering company. I'm currently the Executive Chef Instructor of Meals 4 Health and Healing,
+            a non profit that delivers free organic meals to cancer patients. I live on an organic micro farm where I raise my own chickens for eggs and meat, and all of the vegetables and fruit we need to sustain ourselves. In addition to that, I teach
+            cooking classes to a cancer survivors' in Nashville. I'm sharing my food because I think everyone should have access to affordable healthful organic meals delivered right to their door!
+          </p>
+        </div>
+      </div>
+      <!--<div class="made-by-cook hide-mobile">
+        <div class="cook-image-flag">
+          <img class="cook-image"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/shawn_square.jpg">
+          <img class="cook-flag"
+               src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Jamaica.svg">
+        </div>
+        <div class="cook-info">
+          <h2 class="cook-title">Tremaine Wright</h2>
+          <p class="cook-desc">
+            Cooking has always been my passion. Growing up as a kid in Jamaica, I was always in the kitchen with my mom and grandmother. When I got older, I moved to New York and worked as a chef in a Jamaican restaurant for 5 years. I've catered a lot of baby showers,
+            parties, and other events. I make all kinds of authentic Jamaican dishes along with juices and porridges. I believe everyone should have access to an authentic cultural experience, and I look forward to sharing my real Jamaican food with all
+            of you.
           </p>
         </div>
       </div>-->
+      <div class="made-by-cook">
+        <div class="cook-image-flag">
+          <img class="cook-image"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/dulzida_square.jpg">
+          <img class="cook-flag"
+               src="https://upload.wikimedia.org/wikipedia/commons/b/bf/Flag_of_Bosnia_and_Herzegovina.svg">
 
-      <div class="pick-a-plan-option">
-        <div class="pick-a-plan-option-image">
-          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/couple.png">
         </div>
-        <div class="pick-a-plan-option-text">
-          <h3 class="pick-a-plan-option-title">DINNER FOR TWO</h3>
-          <p class="pick-a-plan-option-price">
-            <span>
-            $15 PER MEAL
-            </span>
-          <br><span class="free-delivery">+ Free Delivery</span>
-          </p>
-        </div>
-
-      </div>
-
-      <div class="pick-a-plan-option">
-        <div class="pick-a-plan-option-image">
-          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/family.png">
-        </div>
-        <div class="pick-a-plan-option-text">
-          <h3 class="pick-a-plan-option-title">FAMILY DINNER</h3>
-          <p class="pick-a-plan-option-price">
-            <span>
-            $14 PER MEAL
-            </span>
-            <br><span class="free-delivery">+ Free Delivery</span>
+        <div class="cook-info">
+          <h2 class="cook-title">Dulzida Cirak</h2>
+          <p class="cook-desc">
+            I am a mother of two and have been cooking all my life. When I was young I lived in a very full house. We had big family dinners every night. I would cook with my mom and sisters. I moved to Tennessee 15 years ago, and I continue to cook dinners for my
+            family every night. I am excited to see people actually love Bosnian food. I love sharing stories about my culture and tradition. I love cooking because community is very important in Bosnia, and I believe food brings family together.
           </p>
         </div>
       </div>
     </div>
-    <div class="sign-up-card"
-         style="margin: 24px auto">
-      <h1 class="sign-up-title"
-          style="color: #424242">Get your first week FREE!</h1>
-      <form action="/scheduleform"
-            method="get"
-            class="sign-up-form">
-        <input type="text"
-               name="email"
-               id="email"
-               class="sign-up-email"
-               placeholder="Email"
-               pattern="\S+@\S+\.\S+"
-               onfocus="choosePlanInputTapped()"
-               required/>
-        <input type="text"
-               name="terp"
-               style="display:none">
-        <button class="sign-up-button"
-                raised
-                on-tap="choosePlanTapped()">Choose a Box
+    <div class="bottom">
+      <!--<div class="sign-up-holder"></div>-->
+      <div class="sign-up-card sign-up-card-ie-fix"
+           style="margin-top: 100px">
+        <h1 class="sign-up-title">Experience a new culture <br>every week!</h1>
+        <form action="/scheduleform"
+              method="get"
+              class="sign-up-form">
+          <input type="text"
+                 name="email"
+                 id="email"
+                 class="sign-up-email"
+                 placeholder="Email"
+                 pattern="\S+@\S+\.\S+"
+                 onfocus="getStartedInputTapped()"
+                 required/>
+          <input type="text"
+                 name="terp"
+                 style="display:none">
+          <button class="sign-up-button"
+                  raised
+                  on-tap="getStartedTapped()">Get Started
                </button>
-      </form>
-
-
-    </div>
-  </div>
-
-  <div class="made-by-section content">
-    <h1 class="made-by-title">Homemade meals by real international cooks!</h1>
-    <div class="made-by-cook">
-      <div class="cook-image-flag">
-        <img class="cook-image"
-             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/laura_square.jpg">
-        <!--<img class="cook-flag"
-             src="https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg">-->
-        <img class="cook-flag"
-             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/Flag_of_Italy.svg">
-
-      </div>
-      <div class="cook-info">
-        <h2 class="cook-title">Laura Rodriguez</h2>
-        <p class="cook-desc">
-          I'm a self-taught chef who learned to cook in Italy and studied Asian cuisine when I lived in South Korea. I worked in restaurants in Chicago before I started my own catering company. I'm currently the Executive Chef Instructor of Meals 4 Health and Healing,
-          a non profit that delivers free organic meals to cancer patients. I live on an organic micro farm where I raise my own chickens for eggs and meat, and all of the vegetables and fruit we need to sustain ourselves. In addition to that, I teach
-          cooking classes to a cancer survivors' in Nashville. I'm sharing my food because I think everyone should have access to affordable healthful organic meals delivered right to their door!
-        </p>
+        </form>
       </div>
     </div>
-    <div class="made-by-cook hide-mobile">
-      <div class="cook-image-flag">
-        <img class="cook-image"
-             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/shawn_square.jpg">
-        <img class="cook-flag"
-             src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Flag_of_Jamaica.svg">
-      </div>
-      <div class="cook-info">
-        <h2 class="cook-title">Tremaine Wright</h2>
-        <p class="cook-desc">
-          Cooking has always been my passion. Growing up as a kid in Jamaica, I was always in the kitchen with my mom and grandmother. When I got older, I moved to New York and worked as a chef in a Jamaican restaurant for 5 years. I've catered a lot of baby showers,
-          parties, and other events. I make all kinds of authentic Jamaican dishes along with juices and porridges. I believe everyone should have access to an authentic cultural experience, and I look forward to sharing my real Jamaican food with all
-          of you.
-        </p>
-      </div>
-    </div>
-    <div class="made-by-cook">
-      <div class="cook-image-flag">
-        <img class="cook-image"
-             src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/dulzida_square.jpg">
-        <img class="cook-flag"
-             src="https://upload.wikimedia.org/wikipedia/commons/b/bf/Flag_of_Bosnia_and_Herzegovina.svg">
-
-      </div>
-      <div class="cook-info">
-        <h2 class="cook-title">Dulzida Cirak</h2>
-        <p class="cook-desc">
-          I am a mother of two and have been cooking all my life. When I was young I lived in a very full house. We had big family dinners every night. I would cook with my mom and sisters. I moved to Tennessee 15 years ago, and I continue to cook dinners for my
-          family every night. I am excited to see people actually love Bosnian food. I love sharing stories about my culture and tradition. I love cooking because community is very important in Bosnia, and I believe food brings family together.
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="bottom">
-    <!--<div class="sign-up-holder"></div>-->
-    <div class="sign-up-card sign-up-card-ie-fix"
-         style="margin-top: 100px">
-      <h1 class="sign-up-title">Experience a new culture <br>every week!</h1>
-      <form action="/scheduleform"
-            method="get"
-            class="sign-up-form">
-        <input type="text"
-               name="email"
-               id="email"
-               class="sign-up-email"
-               placeholder="Email"
-               pattern="\S+@\S+\.\S+"
-               onfocus="getStartedInputTapped()"
-               required/>
-        <input type="text"
-               name="terp"
-               style="display:none">
-        <button class="sign-up-button"
-                raised
-                on-tap="getStartedTapped()">Get Started
-               </button>
-      </form>
-    </div>
-  </div>
 
     <script src="https://use.fontawesome.com/ea31cf9b69.js"
             async
