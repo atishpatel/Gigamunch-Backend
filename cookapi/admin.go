@@ -7,6 +7,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
@@ -480,6 +481,73 @@ func (service *Service) AddToProcessSubscriptionQueue(ctx context.Context, req *
 	err = tasksC.AddProcessSubscription(at, subR)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
+		return resp, nil
+	}
+
+	return resp, nil
+}
+
+// EmailReq is a request for Email.
+type EmailReq struct {
+	GigatokenReq
+	Email           string    `json:"email"`
+	Name            string    `json:"name"`
+	FirstDinnerDate time.Time `json:"first_dinner_date"`
+}
+
+// GetName returns the name.
+func (e *EmailReq) GetName() string {
+	return e.Name
+}
+
+// GetEmail returns the email.
+func (e *EmailReq) GetEmail() string {
+	return e.Email
+}
+
+// GetFirstDinnerDate returns the first dinner for the subscriber.
+func (e *EmailReq) GetFirstDinnerDate() time.Time {
+	return e.FirstDinnerDate
+}
+
+func (service *Service) SendWelcomeEmail(ctx context.Context, req *EmailReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "SendWelcomeEmail", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	mailC := mail.New(ctx)
+	err = mailC.SendWelcomeEmail(req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to mail.SendWelcomeEmail")
+		return resp, nil
+	}
+
+	return resp, nil
+}
+
+func (service *Service) SendIntroEmail(ctx context.Context, req *EmailReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "SendWelcomeEmail", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	mailC := mail.New(ctx)
+	err = mailC.SendIntroEmail(req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to mail.SendIntroEmail")
 		return resp, nil
 	}
 

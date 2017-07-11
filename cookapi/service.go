@@ -120,7 +120,7 @@ func main() {
 	register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
 	register("SendSMS", "sendSMS", "POST", "cookservice/sendSMS", "Admin func.")
 	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
-	register("SetupSubLogs", "setupSubLogs", "POST", "cookservice/setupSubLogs", "Admin func.")
+	register("SetupSubLogs", "setupSubLogs", "POST", "cookservice/setupSubLogs", "Admin func. Do this one Chris.")
 	register("ProcessSubLog", "processSubLog", "POST", "cookservice/processSubLog", "Admin func.")
 	register("CancelSub", "cancelSub", "POST", "cookservice/cancelSub", "Admin func.")
 	register("GetSubEmails", "getSubEmails", "GET", "cookservice/getSubEmails", "Admin func.")
@@ -130,6 +130,8 @@ func main() {
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Admin func.")
 	register("GetSubLogsForDate", "getSubLogsForDate", "POST", "cookservice/getSubLogsForDate", "Admin func.")
 	register("AddToProcessSubscriptionQueue", "addToProcessSubscriptionQueue", "POST", "cookservice/addToProcessSubscriptionQueue", "Admin func.")
+	register("SendWelcomeEmail", "SendWelcomeEmail", "POST", "cookservice/SendWelcomeEmail", "Admin func. Sends welcome email.")
+	register("SendIntroEmail", "SendIntroEmail", "POST", "cookservice/SendIntroEmail", "Admin func. Sends email for people who just left email.")
 	endpoints.HandleHTTP()
 	appengine.Main()
 }
