@@ -39,6 +39,7 @@ type Config struct {
 	CompanyCardNumber         string   `json:"company_card_number" datastore:",noindex"`
 	CompanyCardExpirationDate string   `json:"company_card_expiration_date" datastore:",noindex"`
 	CompanyCardCVV            string   `json:"company_card_cvv" datastore:",noindex"`
+	SendGridKey               string   `json:"send_grid_key" datastore:",noindex"`
 }
 
 // BTEnvironment is the environment type for braintree
@@ -90,10 +91,30 @@ type CreditCard struct {
 	CVV            string `json:"cvv"`
 }
 
+type MailConfig struct {
+	SendGridKey string `json:"send_grid_key"`
+}
+
 var (
 	gitkitConfig *GitkitConfig
 	config       *Config
 )
+
+func GetMailConfig(ctx context.Context) MailConfig {
+	var mailConfig MailConfig
+	if appengine.IsDevAppServer() {
+		filedata := readFile("mail_config.json")
+		err := json.Unmarshal(filedata, &mailConfig)
+		if err != nil {
+			log.Println("Failed to unmarshal mail_config file.")
+			log.Fatal(err)
+		}
+	} else {
+		config := getDatastoreConfig(ctx)
+		mailConfig.SendGridKey = config.SendGridKey
+	}
+	return mailConfig
+}
 
 // GetTwilioConfig returns the twilio configs
 func GetTwilioConfig(ctx context.Context) TwilioConfig {
@@ -197,7 +218,7 @@ func loadGitkitConfig(ctx context.Context) {
 	}
 }
 
-func getDatastoreConfig(ctx context.Context) {
+func getDatastoreConfig(ctx context.Context) *Config {
 	if config == nil || config.JWTSecret == "" {
 		configTmp := new(Config)
 		key := datastore.NewKey(ctx, "Config", "", 100, nil)
@@ -212,6 +233,7 @@ func getDatastoreConfig(ctx context.Context) {
 		}
 		config = configTmp
 	}
+	return config
 }
 
 func readFile(fileName string) []byte {
