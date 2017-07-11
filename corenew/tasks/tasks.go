@@ -20,6 +20,8 @@ const (
 	ProcessInquiryURL        = "/process-inquiry"
 	ProcessSubscriptionQueue = "process-subscription"
 	ProcessSubscriptionURL   = "/process-subscription"
+	SendEmailQueue           = "send-email"
+	SendEmailURL             = "/send-email"
 )
 
 var (
@@ -81,12 +83,57 @@ func ParseProcessSubscriptionRequest(req *http.Request) (*ProcessSubscriptionPar
 	parms := new(ProcessSubscriptionParams)
 	parms.SubEmail = req.FormValue("sub_email")
 	if parms.SubEmail == "" {
-		return nil, errParse.Wrapf("Invalid task for ProcessSubscription. SubEmail: %s", parms.SubEmail)
+		return nil, errParse.Wrapf("Invalid request for ProcessSubscription. SubEmail: %s", parms.SubEmail)
 	}
 	dateString := req.FormValue("date")
 	err = parms.Date.UnmarshalText([]byte(dateString))
 	if err != nil {
 		return nil, errParse.WithError(err).Wrap("failed to parse date")
+	}
+	return parms, nil
+}
+
+// SendEmailParams are the parms for SendEmail.
+type SendEmailParams struct {
+	Email string
+	Type  string
+}
+
+// AddSendEmail adds a email to send at specified time.
+func (c *Client) AddSendEmail(at time.Time, req *SendEmailParams) error {
+	if req.Email == "" {
+		return errInvalidParameter.Wrapf("expected(recieved): email(%s)", req.Email)
+	}
+	h := make(http.Header)
+	h.Set("Content-Type", "application/x-www-form-urlencoded")
+	v := url.Values{}
+	v.Set("email", req.Email)
+	v.Set("type", req.Type)
+	task := &taskqueue.Task{
+		Path:    SendEmailURL,
+		Payload: []byte(v.Encode()),
+		Header:  h,
+		Method:  "POST",
+		ETA:     at,
+	}
+	_, err := taskqueue.Add(c.ctx, task, SendEmailQueue)
+	if err != nil {
+		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
+	}
+	return nil
+}
+
+// ParseSendEmailRequest parses an SendEmailRequest from a task request.
+func ParseSendEmailRequest(req *http.Request) (*SendEmailParams, error) {
+	err := req.ParseForm()
+	if err != nil {
+		return nil, errParse.WithError(err).Wrap("failed to parse from from request")
+	}
+	parms := new(SendEmailParams)
+	parms.Email = req.FormValue("email")
+	parms.Type = req.FormValue("type")
+	if parms.Email == "" {
+		return nil, errParse.Wrapf("Invalid request for SendEmail. Email: %s", parms.Email)
 	}
 	return parms, nil
 }
