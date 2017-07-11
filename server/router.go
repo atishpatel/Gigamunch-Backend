@@ -14,6 +14,7 @@ import (
 
 	"html/template"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -53,6 +54,7 @@ func init() {
 
 	r.POST("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
+	http.HandleFunc(tasks.SendEmailURL, handleSendEmail)
 
 	http.HandleFunc("/startsubscription", handleScheduleSubscription)
 	// // admin stuff
@@ -303,7 +305,11 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", sReq.Email, firstBoxDate, err)
 	}
-	return
+	mailC := mail.New(ctx)
+	err = mailC.SendWelcomeEmail(entry)
+	if err != nil {
+		utils.Criticalf(ctx, "Failed to send welcome email for new sign up(%s). Err:%v", sReq.Email, err)
+	}
 }
 
 func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprouter.Params) {
@@ -341,6 +347,16 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 				utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 			}
 			_ = messageC.SendSMS("9316446755", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
+		}
+		hourFromNow := time.Now().Add(time.Hour)
+		sendEmailReq := &tasks.SendEmailParams{
+			Email: entry.Email,
+			Type:  "welcome",
+		}
+		tasksC := tasks.New(ctx)
+		err = tasksC.AddSendEmail(hourFromNow, sendEmailReq)
+		if err != nil {
+			utils.Criticalf(ctx, "Error added sendemail to queue for email(%s). Err: %+v", entry.Email, err)
 		}
 	} else {
 		utils.Warningf(ctx, "Warning: email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
@@ -396,5 +412,28 @@ func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)
 		return
+	}
+}
+
+func handleSendEmail(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	parms, err := tasks.ParseSendEmailRequest(req)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to tasks.ParseSendEmailRequest. Err:%+v", err)
+		return
+	}
+	subC := sub.New(ctx)
+	s, err := subC.GetSubscriber(parms.Email)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.GetSubscriber. Err:%+v", err)
+		return
+	}
+	if !s.IsSubscribed {
+		mailC := mail.New(ctx)
+		err = mailC.SendIntroEmail(s)
+		if err != nil {
+			utils.Criticalf(ctx, "failed to mail.SendIntroEmail. Err:%+v", err)
+			return
+		}
 	}
 }
