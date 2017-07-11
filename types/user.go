@@ -21,6 +21,16 @@ type User struct {
 	Permissions int32 `json:"permissions"`
 }
 
+// GetName returns the user's name.
+func (user *User) GetName() string {
+	return user.Name
+}
+
+// GetEmail returns the user's email.
+func (user *User) GetEmail() string {
+	return user.Email
+}
+
 // IsCook returns true if a user is a Cook
 func (user *User) IsCook() bool {
 	return getKthBit(user.Permissions, 0)
