@@ -1,6 +1,4 @@
-application: PROJECT_ID
-module: MODULE
-version: 2
+service: MODULE
 runtime: go
 api_version: go1
 
@@ -13,13 +11,13 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
-- url: /.well-known/acme-challenge/yVZ7hSSdqR98zTNZ_Amq8wX3LTknX1m0Wi8xPw3U2iQ
-  static_files: tmp.txt
-  upload: tmp.txt
+- url: /.well-known/acme-challenge/j8dhA26CZlfmmOaG7HInznKnx5NcP8tNYoPL0w1Mof0
+  static_files: tmp.tmp
+  upload: tmp.tmp
 
-- url: /.well-known/acme-challenge/HcdpOpNtSFU3rjhPAeFFULyocTiJAypb1BGwNA2jlE4 
-  static_files: tmp2.txt
-  upload: tmp2.txt
+- url: /.well-known/acme-challenge/MrlN_GJ_9hMD0InQi09hINpgsM79dRx0SqXoVwWOp5c 
+  static_files: tmp2.tmp
+  upload: tmp2.tmp
 
 # Cook app
 - url: /cook/bower_components

@@ -1,8 +1,6 @@
-application: PROJECT_ID
-module: cookapi
-version: 1
+service: cookapi
 runtime: go
-api_version: go1
+api_version: go1.8
 
 handlers:
   - url: /process-order

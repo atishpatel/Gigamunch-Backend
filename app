@@ -62,12 +62,12 @@ if [[ $1 == "deploy" ]]; then
   if [[ $* == *cook* ]]; then
     echo "Deploying cook:"
     cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
-    goapp deploy cookapi/app.yaml
+    gcloud app deploy cookapi/app.yaml --project=$project --version=1 --quiet
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
-    goapp deploy server/app.yaml
+    gcloud app deploy server/app.yaml  --project=$project --version=2 --quiet
   fi
   exit 0
 fi
