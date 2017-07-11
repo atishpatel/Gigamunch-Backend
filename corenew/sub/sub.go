@@ -79,6 +79,18 @@ func (c *Client) GetSubEmails(from, to time.Time) ([]string, error) {
 	return emails, nil
 }
 
+// GetSubscriber returns a SubscriptionSignUp.
+func (c *Client) GetSubscriber(email string) (*SubscriptionSignUp, error) {
+	if email == "" {
+		return nil, errInvalidParameter.Wrap("emails cannot be empty.")
+	}
+	subs, err := c.GetSubscribers([]string{email})
+	if err != nil || len(subs) != 1 {
+		return nil, errors.Wrap("failed to c.GetSubscribers", err)
+	}
+	return subs[0], nil
+}
+
 // GetSubscribers returns a list of SubscriptionSignUp.
 func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) {
 	if len(emails) == 0 {
