@@ -29,6 +29,21 @@ type SubscriptionSignUp struct {
 	DeliveryTips       string        `json:"delivery_tips"`
 }
 
+// GetName returns the name of subscriber.
+func (s *SubscriptionSignUp) GetName() string {
+	return s.Name
+}
+
+// GetEmail returns the email of subscriber.
+func (s *SubscriptionSignUp) GetEmail() string {
+	return s.Email
+}
+
+// GetFirstDinnerDate returns the first dinner for the subscriber.
+func (s *SubscriptionSignUp) GetFirstDinnerDate() time.Time {
+	return s.FirstBoxDate
+}
+
 type SubscriptionLog struct {
 	Date               time.Time `json:"date"`      // Primary Key
 	SubEmail           string    `json:"sub_email"` // Primary Key
