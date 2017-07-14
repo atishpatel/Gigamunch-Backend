@@ -139,7 +139,8 @@
           <div class="cell">[[item.sub_email]]</div>
         </template>
       </vaadin-grid-column>
-      <vaadin-grid-column resizable
+      <vaadin-grid-column hidden=[[detailed]]
+                          resizable
                           width="60px">
         <template class="header">
           <vaadin-grid-sorter path="servings">
@@ -152,7 +153,8 @@
           <div class="cell numeric">[[item.servings]]</div>
         </template>
       </vaadin-grid-column>
-      <vaadin-grid-column resizable
+      <vaadin-grid-column hidden=[[detailed]]
+                          resizable
                           width="60px">
         <template class="header">
           <vaadin-grid-sorter path="vegetarian_servings">
@@ -165,7 +167,8 @@
           <div class="cell numeric">[[item.vegetarian_servings]]</div>
         </template>
       </vaadin-grid-column>
-      <vaadin-grid-column resizable
+      <vaadin-grid-column hidden=[[detailed]]
+                          resizable
                           width="60px">
         <template class="header">
           <vaadin-grid-sorter path="delivery_time">
@@ -235,6 +238,50 @@
         </template>
         <template>
           <div class="cell">[[item.transaction_id]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden$=[[!detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Refunded
+          </div>
+        </template>
+        <template>
+          <div class="cell">[[item.refunded]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden$=[[!detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Discount <br>Amount|Percent
+          </div>
+        </template>
+        <template>
+          <div class="cell">$[[item.discount_amount]] | [[item.discount_percent]]%</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden$=[[!detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Amount
+          </div>
+        </template>
+        <template>
+          <div class="cell">$[[item.amount]]</div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden$=[[!detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
+            Amount Paid
+          </div>
+        </template>
+        <template>
+          <div class="cell">$[[item.amount_paid]]</div>
         </template>
       </vaadin-grid-column>
     </vaadin-grid>
