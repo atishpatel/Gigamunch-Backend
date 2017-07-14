@@ -27,6 +27,7 @@ type SubscriptionSignUp struct {
 	Reference          string        `json:"reference" datastore:",noindex"`
 	PhoneNumber        string        `json:"phone_number"`
 	DeliveryTips       string        `json:"delivery_tips"`
+	BagReminderSMS     bool          `json:"bag_reminder_sms" datastore:",noindex"`
 }
 
 // GetName returns the name of subscriber.

@@ -76,6 +76,7 @@ func main() {
 
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/process-subscription", handelProcessSubscription)
+	http.HandleFunc("/send-bag-reminder", handleSendBagReminder)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
 	if err != nil {
 		log.Fatalf("Failed to register service: %#v", err)
@@ -127,6 +128,7 @@ func main() {
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("RefundAndSkipSubLog", "refundAndSkipSubLog", "POST", "cookservice/refundAndSkipSubLog", "Admin func.")
 	register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Admin func.")
+	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Admin func.")
 	register("GetSubLogsForDate", "getSubLogsForDate", "POST", "cookservice/getSubLogsForDate", "Admin func.")
 	register("AddToProcessSubscriptionQueue", "addToProcessSubscriptionQueue", "POST", "cookservice/addToProcessSubscriptionQueue", "Admin func.")
@@ -307,4 +309,39 @@ func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in6days, err)
 		return
 	}
+}
+
+func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	tomorrow := time.Now().Add(24 * time.Hour)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(tomorrow)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to SendBagReminder: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+
+	subs, err := subC.GetSubscribers(nonSkippers)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to SendBagReminder: failed to sub.GetSubscribers: %s", err)
+		return
+	}
+	messageC := message.New(ctx)
+	for _, sub := range subs {
+		if sub.PhoneNumber != "" && sub.BagReminderSMS {
+			err := messageC.SendSMS(sub.PhoneNumber, fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName()))
+			if err != nil {
+				utils.Criticalf(ctx, "error in SendBagReminder: failed to message.SendSMS: %s", err)
+				continue
+			}
+			utils.Infof(ctx, "notifed %s(%s)")
+		}
+	}
+
 }
