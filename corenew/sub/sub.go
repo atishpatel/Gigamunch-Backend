@@ -32,6 +32,7 @@ const (
 	updateSkipSubLogStatement            = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
 	updateRefundedAndSkipSubLogStatement = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
 	updateFreeSubLogStatment             = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
+	updateDiscountSubLogStatment         = "UPDATE `sub` SET discount_amount=%f, discount_percent=%d WHERE date='%s' AND sub_email='%s'"
 	deleteSubLogStatment                 = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
@@ -44,6 +45,7 @@ var (
 	// errBuffer           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "An unknown error occured."}
 	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errEntrySkipped     = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
 	errNoSuchEntry      = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
 	errDuplicateEntry   = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
 )
@@ -246,7 +248,6 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
 	}
-	// TODO add insert if not in table
 	return nil
 }
 
@@ -272,6 +273,21 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 	} else {
 		if sl.Paid {
 			return errInvalidParameter.WithMessage("Subscriber has already paid. Must refund instead.")
+		}
+		// if there is a discount, move it to next week unskipped week.
+		if sl.DiscountAmount > .01 || sl.DiscountPercent != 0 {
+			nextWeek := date.Add(7 * 24 * time.Hour)
+			for {
+				err = c.Discount(nextWeek, subEmail, sl.DiscountAmount, sl.DiscountPercent)
+				if err == nil {
+					break
+				}
+				if errors.GetErrorWithCode(err).Code != errEntrySkipped.Code {
+					return errors.Wrap("failed to Discount", err)
+				}
+				nextWeek = nextWeek.Add(7 * 24 * time.Hour)
+			}
+
 		}
 	}
 	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), subEmail)
@@ -305,6 +321,41 @@ func (c *Client) RefundAndSkip(date time.Time, subEmail string) error {
 	}
 	if numEffectedRows != 1 {
 		return errSQLDB.WithError(err).Wrapf("num effected rows is not 1: %s", numEffectedRows)
+	}
+	return nil
+}
+
+// Discount inserts or updates a SubLog with a discount.
+func (c *Client) Discount(date time.Time, subEmail string, discountAmount float32, discountPercent int8) error {
+	// insert or update
+	if date.IsZero() || subEmail == "" || (discountAmount < .01 && discountPercent != 0) {
+		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) discountAmount(%f) discountPercent(%s)", date, subEmail, discountAmount, discountPercent)
+	}
+	sl, err := c.Get(date, subEmail)
+	if err != nil {
+		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
+			return errors.Wrap("failed to sub.Get", err)
+		}
+		// insert
+		var s *SubscriptionSignUp
+		s, err = get(c.ctx, subEmail)
+		if err != nil {
+			return errDatastore.WithError(err).Wrap("failed to get")
+		}
+		servings := s.Servings + s.VegetarianServings
+		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		if err != nil {
+			return errors.Wrap("failed to sub.Setup", err)
+		}
+	} else {
+		if sl.Skip {
+			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
+		}
+	}
+	st := fmt.Sprintf(updateDiscountSubLogStatment, discountAmount, discountPercent, date.Format(dateFormat), subEmail)
+	_, err = mysqlDB.Exec(st)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
 	}
 	return nil
 }
