@@ -121,7 +121,7 @@ func main() {
 	register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
 	register("SendSMS", "sendSMS", "POST", "cookservice/sendSMS", "Admin func.")
 	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
-	register("SetupSubLogs", "setupSubLogs", "POST", "cookservice/setupSubLogs", "Admin func. Do this one Chris.")
+	register("SetupSubLogs", "SetupSubLogs", "POST", "cookservice/SetupSubLogs", "Admin func. Do this one Chris.")
 	register("ProcessSubLog", "processSubLog", "POST", "cookservice/processSubLog", "Admin func.")
 	register("CancelSub", "cancelSub", "POST", "cookservice/cancelSub", "Admin func.")
 	register("GetSubEmails", "getSubEmails", "GET", "cookservice/getSubEmails", "Admin func.")

@@ -330,6 +330,35 @@ func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	return resp, nil
 }
 
+type DiscountSubLogReq struct {
+	SubLogReq
+	DiscountAmount  float32 `json:"discount_amount"`
+	DiscountPercent int8    `json:"discount_percent"`
+}
+
+// DiscountSubLog gives a discount to a user for a specific week.
+func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "DiscountSubLog", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.Discount(req.Date, req.SubEmail, req.DiscountAmount, req.DiscountPercent)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Discount")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // SubReq is the request for Sub stuff.
 type SubReq struct {
 	GigatokenReq
