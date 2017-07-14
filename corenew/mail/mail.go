@@ -40,20 +40,20 @@ You will get your first dinner package delivered %s! And guess what? It's totall
 See you soon!
 - The Gigamunch Team`
 	introEmailSubject = "Hey thanks for the interest"
-	introEmailText    = `Hello! Welcome to GIGAMUNCH! I’m Enis, and I’m the CEO and a co-founder of Gigamunch. I want to personally thank you for checking us out and seeing what we’re about.
+	introEmailText    = `Hello! Welcome to GIGAMUNCH! 🎉 I’m Enis, and I’m the CEO and a co-founder of Gigamunch. I want to personally thank you for checking us out and seeing what we’re about.
  
-We’re all about great international food with great people. We came together from all different walks of life and made a company to reflect that. Our grassroots movement is catching on so fast that we’re about to hit our capacity. 
+We’re all about great international food with great people. We came together from all different walks of life and made a company to reflect that. Our grassroots movement is catching on so fast that we’re about to hit our capacity. 🙌
  
-While there’s still a seat at the dinner table, I’d like to personally invite you to join in the Gigamunch family. We’re so confident you’ll love this experience, I’d like to send you a code to try it for free. You have 1 week to use this code. You have nothing to lose, just a great experience to gain! Welcome to Gigamunch! 😊
+While there’s still a seat at the dinner table, I’d like to personally invite you to join in the Gigamunch family. We’re so confident you’ll love this experience, I’d like to send you a offer to try it for free. 🤑 You have nothing to lose, just a great experience to gain! Welcome to Gigamunch! 😊
 
 Warm Regards,
 Enis
 https://gigamunchapp.com/`
-	introEmailHTML = `Hello! Welcome to GIGAMUNCH! I’m Enis, and I’m the CEO and a co-founder of Gigamunch. I want to personally thank you for checking us out and seeing what we’re about.
+	introEmailHTML = `Hello! Welcome to GIGAMUNCH! 🎉 I’m Enis, and I’m the CEO and a co-founder of Gigamunch. I want to personally thank you for checking us out and seeing what we’re about.
  
-We’re all about great international food with great people. We came together from all different walks of life and made a company to reflect that. Our grassroots movement is catching on so fast that we’re about to hit our capacity. 
+We’re all about great international food with great people. We came together from all different walks of life and made a company to reflect that. Our grassroots movement is catching on so fast that we’re about to hit our capacity. 🙌
  
-While there’s still a seat at the dinner table, I’d like to personally invite you to join in the Gigamunch family. We’re so confident you’ll love this experience, I’d like to send you a code to try it for free. You have 1 week to use this code. You have nothing to lose, just a great experience to gain! Welcome to Gigamunch! 😊
+While there’s still a seat at the dinner table, I’d like to personally invite you to join in the Gigamunch family. We’re so confident you’ll love this experience, I’d like to send you a offer to try it for free. 🤑 You have nothing to lose, just a great experience to gain! Welcome to Gigamunch! 😊
 
 Warm Regards,
 Enis
@@ -66,7 +66,7 @@ var (
 	sendGridKey   string
 )
 
-// Client is the client fro this package.
+// Client is the client for this package.
 type Client struct {
 	ctx      context.Context
 	sgClient *sendgrid.Client
