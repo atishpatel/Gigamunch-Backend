@@ -32,7 +32,7 @@ const (
 	updateSkipSubLogStatement            = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
 	updateRefundedAndSkipSubLogStatement = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
 	updateFreeSubLogStatment             = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
-	updateDiscountSubLogStatment         = "UPDATE `sub` SET discount_amount=%f, discount_percent=%d WHERE date='%s' AND sub_email='%s'"
+	updateDiscountSubLogStatment         = "UPDATE `sub` SET discount_amount=?, discount_percent=? WHERE date=? AND sub_email=?"
 	deleteSubLogStatment                 = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
@@ -352,10 +352,9 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
 		}
 	}
-	st := fmt.Sprintf(updateDiscountSubLogStatment, discountAmount, discountPercent, date.Format(dateFormat), subEmail)
-	_, err = mysqlDB.Exec(st)
+	_, err = mysqlDB.Exec(updateDiscountSubLogStatment, discountAmount, discountPercent, date.Format(dateFormat), subEmail)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
+		return errSQLDB.WithError(err).Wrap("failed to execute updateDiscountSubLogStatment statement")
 	}
 	return nil
 }
