@@ -7,6 +7,10 @@ handlers:
     script: _go_app
     login: admin
 
+  - url: /send-bag-reminder
+    script: _go_app
+    login: admin
+
   - url: /.*
     script: _go_app
     secure: always
