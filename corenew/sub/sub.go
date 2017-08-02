@@ -305,6 +305,9 @@ func (c *Client) RefundAndSkip(date time.Time, subEmail string) error {
 	if err != nil {
 		return errors.Wrap("failed to sub.Get", err)
 	}
+	if sl.Paid {
+		return errInvalidParameter.WithMessage("Subscriber has not paid. Use skip instead.")
+	}
 	paymentC := payment.New(c.ctx)
 	rID, err := paymentC.RefundSale(sl.TransactionID)
 	if err != nil {
