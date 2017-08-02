@@ -113,6 +113,24 @@
   src="https://www.facebook.com/tr?id=1118457214861493&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Facebook Pixel Code -->
+  <!-- Hotjar Tracking Code for www.gigamunchapp.com -->
+  <script>
+    (function(h, o, t, j, a, r) {
+      h.hj = h.hj || function() {
+        (h.hj.q = h.hj.q || []).push(arguments)
+      };
+      h._hjSettings = {
+        hjid: 569991,
+        hjsv: 5
+      };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script');
+      r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
+
+  </script>
 </head>
 
 <body>
@@ -818,10 +836,10 @@
             </div>
           </div>
           <div class="form-section-title">
-            <h2>Choose your box</h2>
+            <h2>Choose your bag</h2>
           </div>
           <div class="form-section-desc">
-            Every Monday, you'll get a box that'll take you on a new journey! How do you want your journey to be?
+            Every Monday, you'll get a bag that'll take you on a new journey! How do you want your journey to be?
           </div>
           <div class="select-package-container">
             <ul>
@@ -836,7 +854,7 @@
                   <label class="most-popular-label"
                          for="meal-option-1"> </label>
                   <label class="num-meals-label"
-                         for="meal-option-1">1 MEAL BOX</label>
+                         for="meal-option-1">1 MEAL BAG</label>
                   <label class="price-per-meal-label"
                          for="meal-option-1">$13 PER MEAL</label>
                 </div>
@@ -854,7 +872,7 @@
                   <label class="most-popular-label"
                          for="meal-option-2">*Most Popular!*</label>
                   <label class="num-meals-label"
-                         for="meal-option-2">2 MEAL BOX</label>
+                         for="meal-option-2">2 MEAL BAG</label>
                   <label class="price-per-meal-label"
                          for="meal-option-2">$15 PER MEAL</label>
                 </div>
@@ -871,7 +889,7 @@
                   <label class="most-popular-label"
                          for="meal-option-3"> </label>
                   <label class="num-meals-label"
-                         for="meal-option-3">4 MEAL BOX</label>
+                         for="meal-option-3">4 MEAL BAG</label>
                   <label class="price-per-meal-label"
                          for="meal-option-3">$14 PER MEAL</label>
                 </div>
@@ -908,7 +926,7 @@
                  aria-hidden="true"></i></div>
             <div class="no-commitment-text">
               <div class="no-commitment-title">No commitment. No, really.</div>
-              <div class="no-commitment-desc">Your first box is on us because we know you'll love it! If you don't want to continue, you'll have 4 days to cancel without getting charged a dime.</div>
+              <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 4 days to cancel without getting charged a dime.</div>
             </div>
           </div>
           <div class="form-section-title">
@@ -936,11 +954,11 @@
             <div class="item">
               <div class="item-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/final_box.jpg"
-                     alt="A box with an international meal.">
+                     alt="A bag with an international meal.">
               </div>
               <div class="item-detail">
                 <div class="item-text">
-                  <div class="item-title"><span id="boxForTitle">Box for Two</span></div>
+                  <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
                   <div class="item-desc">
                     Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime with a
                     3 day notice.
@@ -1252,7 +1270,7 @@
     function updateOrderInfo() {
       var d = new Date();
       // d.setDate(d.getDate() + 2);
-      d.setTime(d.getTime() + 48 * 3600 * 1000); // add 48 hours
+      d.setTime(d.getTime() + 72 * 3600 * 1000); // add 72 hours
       while (d.getDay() !== 1) {
         d.setDate(d.getDate() + 1);
       }
@@ -1293,18 +1311,18 @@
         case '1':
           oneBoxPrice = 17;
           servingsPerBox = 1;
-          boxForTitleText = 'Box for One';
+          boxForTitleText = 'Bag for One';
           break;
         case '2':
           oneBoxPrice = 15;
           servingsPerBox = 2;
-          boxForTitleText = 'Box for Two';
+          boxForTitleText = 'Bag for Two';
           taxTotal = 2.93;
           break;
         case '4':
           oneBoxPrice = 14;
           servingsPerBox = 4;
-          boxForTitleText = 'Box for Four';
+          boxForTitleText = 'Bag for Four';
           taxTotal = 5.46;
           break;
       }
@@ -1333,24 +1351,6 @@
   <script src="https://use.fontawesome.com/ea31cf9b69.js"
           async
           defer></script>
-  <!-- Hotjar Tracking Code for https://gigamunchapp.com/ -->
-  <script>
-    (function(h, o, t, j, a, r) {
-      h.hj = h.hj || function() {
-        (h.hj.q = h.hj.q || []).push(arguments)
-      };
-      h._hjSettings = {
-        hjid: 267744,
-        hjsv: 5
-      };
-      a = o.getElementsByTagName('head')[0];
-      r = o.createElement('script');
-      r.async = 1;
-      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
-      a.appendChild(r);
-    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
-
-  </script>
   <style>
     .logo {
       font-family: 'NexaBold', sans-serif;

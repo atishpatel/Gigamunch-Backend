@@ -251,7 +251,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		weeklyAmount += float32(vegetarianServings * 14)
 	}
 	customerID := payment.GetIDFromEmail(sReq.Email)
-	firstBoxDate := time.Now().Add(48 * time.Hour)
+	firstBoxDate := time.Now().Add(72 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
