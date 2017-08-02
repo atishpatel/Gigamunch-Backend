@@ -16,7 +16,6 @@
     "iron-selector": "PolymerElements/iron-selector#^2.0.0",
     "paper-icon-button": "PolymerElements/paper-icon-button#^2.0.0",
     "polymer": "Polymer/polymer#^2.0.0",
-    "webcomponentsjs": "#^1.0.0",
     "paper-tabs": "PolymerElements/paper-tabs#^2.0.0",
     "gold-phone-input": "PolymerElements/gold-phone-input#^1.1.0",
     "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.0",
@@ -38,8 +37,7 @@
     "paper-slider": "PolymerElements/paper-slider#^2.0.0",
     "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^2.0.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
-    "vaadin-grid": "^2.1.0",
-    "vaadin-date-picker": "^2.0.0",
+    "vaadin-grid": "^3.0.0",
     "vaadin-button": "^1.0.0",
     "vaadin-text-field": "^1.0.0",
     "vaadin-themable-mixin": "vaadin/vaadin-themable-mixin#^1.1.0"

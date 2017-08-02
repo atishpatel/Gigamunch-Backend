@@ -64,39 +64,6 @@
       lazyRegister: true
     };
 
-    // Load webcomponentsjs polyfill if browser does not support native Web Components
-    (function() {
-      'use strict';
-
-      var onload = function() {
-        // For native Imports, manually fire WebComponentsReady so user code
-        // can use the same code path for native and polyfill'd imports.
-        if (!window.HTMLImports) {
-          document.dispatchEvent(
-            new CustomEvent('WebComponentsReady', {
-              bubbles: true
-            })
-          );
-        }
-      };
-
-      var webComponentsSupported = (
-        'registerElement' in document &&
-        'import' in document.createElement('link') &&
-        'content' in document.createElement('template')
-      );
-
-      if (!webComponentsSupported) {
-        var script = document.createElement('script');
-        script.async = true;
-        script.src = '../bower_components/webcomponentsjs/webcomponents-lite.min.js';
-        script.onload = onload;
-        document.head.appendChild(script);
-      } else {
-        onload();
-      }
-    })();
-
     // Load pre-caching Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -200,6 +167,9 @@
 
   </script>
 
+  <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
+  <script src="../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
   <link rel="import"
         href="src/app-shell.html">
 
@@ -211,7 +181,7 @@
       overflow: auto;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     body {
       margin: 0;
       font-family: 'FontRegular', 'Roboto', sans-serif;
@@ -238,17 +208,17 @@
   </script>
   <style>
     /* Fix issue with font not importing */
-    
+
     @font-face {
       font-family: 'NexaBold';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
     }
-    
+
     @font-face {
       font-family: 'FontRegular';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
     }
-    
+
     @font-face {
       font-family: 'FontRegular';
       font-weight: bold;
