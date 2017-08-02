@@ -313,7 +313,7 @@ func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 
 func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
-	tomorrow := time.Now().Add(24 * time.Hour)
+	tomorrow := time.Now().Add(10 * time.Hour) // cron job runs at 8 PM
 	subC := sub.New(ctx)
 	subLogs, err := subC.GetForDate(tomorrow)
 	if err != nil {
@@ -326,21 +326,22 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
 		}
 	}
-
-	subs, err := subC.GetSubscribers(nonSkippers)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to SendBagReminder: failed to sub.GetSubscribers: %s", err)
-		return
-	}
-	messageC := message.New(ctx)
-	for _, sub := range subs {
-		if sub.PhoneNumber != "" && sub.BagReminderSMS {
-			err := messageC.SendSMS(sub.PhoneNumber, fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName()))
-			if err != nil {
-				utils.Criticalf(ctx, "error in SendBagReminder: failed to message.SendSMS: %s", err)
-				continue
+	if len(nonSkippers) != 0 {
+		subs, err := subC.GetSubscribers(nonSkippers)
+		if err != nil {
+			utils.Criticalf(ctx, "failed to SendBagReminder: failed to sub.GetSubscribers: %s", err)
+			return
+		}
+		messageC := message.New(ctx)
+		for _, sub := range subs {
+			if sub.PhoneNumber != "" && sub.BagReminderSMS {
+				err := messageC.SendSMS(sub.PhoneNumber, fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName()))
+				if err != nil {
+					utils.Criticalf(ctx, "error in SendBagReminder: failed to message.SendSMS to %s: %s", sub.PhoneNumber, err)
+					continue
+				}
+				utils.Infof(ctx, "notifed %s(%s)", sub.Name, sub.PhoneNumber)
 			}
-			utils.Infof(ctx, "notifed %s(%s)")
 		}
 	}
 
