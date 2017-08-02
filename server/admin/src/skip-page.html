@@ -34,13 +34,14 @@
     </shared-styles>
 
     <div>
+      <h1 class="page-title">Skip</h1>
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
       <select id="email"
               value="{{email::change}}"
               required>
-          <option disabled selected value> -- select a time -- </option>
+          <option disabled selected value> -- select an email -- </option>
           <template is="dom-repeat"
                     items="[[subEmails]]"
                     as="email">
@@ -130,6 +131,7 @@
               composed: true,
               detail: {
                 message: `Failed to skip. ${err.message}.`,
+                error: true,
               }
             });
             this.dispatchEvent(event);

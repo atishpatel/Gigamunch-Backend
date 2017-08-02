@@ -101,10 +101,10 @@
             type: String,
           },
           amount: {
-            type: Number,
+            type: String,
           },
           percent: {
-            type: Number,
+            type: String,
           },
           loading: {
             type: Boolean
@@ -138,8 +138,8 @@
         this.loading = true;
         const email = this.email;
         const date = new Date(this.$.date.value);
-        const amount = this.amount;
-        const percent = this.percent;
+        const amount = Number(this.amount);
+        const percent = Number(this.percent);
         this.service.discountSubLog(date, email, amount, percent, (err) => {
           this.loading = false;
           let event;

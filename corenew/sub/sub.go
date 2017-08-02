@@ -331,7 +331,7 @@ func (c *Client) RefundAndSkip(date time.Time, subEmail string) error {
 // Discount inserts or updates a SubLog with a discount.
 func (c *Client) Discount(date time.Time, subEmail string, discountAmount float32, discountPercent int8) error {
 	// insert or update
-	if date.IsZero() || subEmail == "" || (discountAmount < .01 && discountPercent != 0) {
+	if date.IsZero() || subEmail == "" || discountAmount < 0 || discountPercent < 0 || discountPercent > 100 {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) discountAmount(%f) discountPercent(%s)", date, subEmail, discountAmount, discountPercent)
 	}
 	sl, err := c.Get(date, subEmail)

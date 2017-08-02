@@ -37,7 +37,7 @@
     "paper-slider": "PolymerElements/paper-slider#^2.0.0",
     "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^2.0.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
-    "vaadin-grid": "^3.0.0",
+    "vaadin-grid": "vaadin/vaadin-grid#^3.0.0",
     "vaadin-button": "^1.0.0",
     "vaadin-text-field": "^1.0.0",
     "vaadin-themable-mixin": "vaadin/vaadin-themable-mixin#^1.1.0"
