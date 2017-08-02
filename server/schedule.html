@@ -112,6 +112,24 @@
   src="https://www.facebook.com/tr?id=1118457214861493&ev=PageView&noscript=1"
   /></noscript>
   <!-- End Facebook Pixel Code -->
+  <!-- Hotjar Tracking Code for www.gigamunchapp.com -->
+  <script>
+    (function(h, o, t, j, a, r) {
+      h.hj = h.hj || function() {
+        (h.hj.q = h.hj.q || []).push(arguments)
+      };
+      h._hjSettings = {
+        hjid: 569991,
+        hjsv: 5
+      };
+      a = o.getElementsByTagName('head')[0];
+      r = o.createElement('script');
+      r.async = 1;
+      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
+
+  </script>
 </head>
 
 <body>
@@ -771,6 +789,8 @@
     var learnMoreInputLogged = false;
     var getStartedInputLogged = false;
     var choosePlanInputLogged = false;
+    var meal2Logged = false;
+    var meal4Logged = false;
 
     function learnMoreTapped() {
       ga('send', 'event', 'schedule_email_signup', 'learnmore');
@@ -806,13 +826,20 @@
     }
 
     function meal2Tapped() {
-      ga('send', 'event', 'choose_plan', '2_meal');
+      if (!meal2Logged) {
+        ga('send', 'event', 'choose_plan', '2_meal');
+        meal2Logged = true;
+      }
       document.getElementById('planButton').click();
       document.getElementById('planEmail').focus();
+
     }
 
     function meal4Tapped() {
-      ga('send', 'event', 'choose_plan', '4_meal');
+      if (!meal4Logged) {
+        ga('send', 'event', 'choose_plan', '4_meal');
+        meal4Logged = true;
+      }
       document.getElementById('planForm').click();
       document.getElementById('planEmail').focus();
     }
@@ -1305,24 +1332,7 @@
           defer
           src="//js.hs-scripts.com/2890024.js"></script>
   <!-- End of HubSpot Embed Code -->
-  <!-- Hotjar Tracking Code for https://gigamunchapp.com/ -->
-  <script>
-    (function(h, o, t, j, a, r) {
-      h.hj = h.hj || function() {
-        (h.hj.q = h.hj.q || []).push(arguments)
-      };
-      h._hjSettings = {
-        hjid: 267744,
-        hjsv: 5
-      };
-      a = o.getElementsByTagName('head')[0];
-      r = o.createElement('script');
-      r.async = 1;
-      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
-      a.appendChild(r);
-    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
 
-  </script>
 </body>
 
 </html>
