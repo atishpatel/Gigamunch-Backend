@@ -4,13 +4,13 @@
   "devDependencies": {
     "@types/google.analytics": "^0.0.33",
     "@types/polymer": "^1.1.31",
-    "tslint-config-airbnb": "^5.0.1",
-    "typescript": "^2.3.4"
+    "tslint-config-airbnb": "^5.2.1",
+    "typescript": "^2.4.1"
   },
   "dependencies": {
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb": "^15.0.1",
-    "eslint-plugin-html": "^2.0.3",
-    "eslint-plugin-import": "^2.3.0"
+    "eslint": "^4.1.1",
+    "eslint-config-airbnb": "^15.0.2",
+    "eslint-plugin-html": "^3.0.0",
+    "eslint-plugin-import": "^2.6.1"
   }
 }
