@@ -260,6 +260,10 @@
              href="skip">
             <paper-item>Skip</paper-item>
           </a>
+          <a name="discount"
+             href="discount">
+            <paper-item>Discount</paper-item>
+          </a>
           <a target="_blank"
              href="[[cookAPIURL]]">
             <paper-item>Cookapi
@@ -308,6 +312,11 @@
                      service="[[service]]"
                      user="{{user}}">
           </skip-page>
+          <discount-page name="discount"
+                         id="discountPage"
+                         service="[[service]]"
+                         user="{{user}}">
+          </discount-page>
           <sublog-page name="sublog"
                        id="sublogPage"
                        service="[[service]]"
@@ -407,6 +416,12 @@
             el = this.$.skipPage;
             title = 'Skip';
             break;
+          case 'discount':
+            elementName = 'discount-page';
+            resolvedPageURL = this.resolveUrl('discount-page.html');
+            el = this.$.discountPage;
+            title = 'Discount';
+            break;
           case 'sublog':
             elementName = 'sublog-page';
             resolvedPageURL = this.resolveUrl('sublog-page.html');
@@ -449,7 +464,14 @@
         if (text === undefined || text === null || text === '') {
           text = detail.message;
         }
-        if (text && text !== "") {
+        let color = '#323232';
+        if (detail.error) {
+          color = '#B71C1C';
+        }
+        if (text && text !== '') {
+          this.updateStyles({
+            '--paper-toast-background-color': color
+          });
           const duration = detail.duration || 3000;
           this.$.toast.show({
             text: text,

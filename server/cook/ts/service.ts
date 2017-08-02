@@ -547,6 +547,32 @@ class Service {
       });
   }
 
+  discountSubLog(date: Date, subEmail: string, amount: number, percent: number, callback: (err: ErrorWithCode) => void) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.discountSubLog(date, subEmail, amount, percent, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      date: date.toISOString(),
+      sub_email: subEmail,
+      amount: amount,
+      percent: percent,
+    };
+
+    this
+      .service
+      .DiscountSubLog(request)
+      .execute(
+      (resp: Response) => {
+        this.logError('DiscountSubLog', resp.err);
+        callback(resp.err);
+      });
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {

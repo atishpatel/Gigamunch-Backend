@@ -332,8 +332,8 @@ func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 
 type DiscountSubLogReq struct {
 	SubLogReq
-	DiscountAmount  float32 `json:"discount_amount"`
-	DiscountPercent int8    `json:"discount_percent"`
+	Amount  float32 `json:"amount"`
+	Percent int8    `json:"percent"`
 }
 
 // DiscountSubLog gives a discount to a user for a specific week.
@@ -351,7 +351,7 @@ func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogR
 	}
 
 	subC := sub.New(ctx)
-	err = subC.Discount(req.Date, req.SubEmail, req.DiscountAmount, req.DiscountPercent)
+	err = subC.Discount(req.Date, req.SubEmail, req.Amount, req.Percent)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Discount")
 		return resp, nil

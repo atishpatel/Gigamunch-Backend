@@ -497,6 +497,30 @@ var Service = (function () {
             callback(resp.err);
         });
     };
+    Service.prototype.discountSubLog = function (date, subEmail, amount, percent, callback) {
+        var _this = this;
+        // if api is not loaded, add to callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.discountSubLog(date, subEmail, amount, percent, callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+            date: date.toISOString(),
+            sub_email: subEmail,
+            amount: amount,
+            percent: percent,
+        };
+        this
+            .service
+            .DiscountSubLog(request)
+            .execute(function (resp) {
+            _this.logError('discountSubLog', resp.err);
+            callback(resp.err);
+        });
+    };
     Service.prototype.refreshToken = function () {
         var _this = this;
         // if api is not loaded, add to _callQueue

@@ -1,0 +1,173 @@
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-spinner/paper-spinner.html">
+
+
+<link rel="import"
+      href="../../cook/src/paper-select.html">
+<link rel="import"
+      href="../../cook/src/select-with-options.html">
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+
+<dom-module id="discount-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .input-row {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .input-row>* {
+          flex: 1;
+          padding-right: 12px;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Discount</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+      <select id="email"
+              value="{{email::change}}"
+              required>
+          <option disabled selected value> -- select an email -- </option>
+          <template is="dom-repeat"
+                    items="[[subEmails]]"
+                    as="email">
+            <option value="[[email]]">[[email]]</option>
+          </template>
+        </select>
+      <input id="date"
+             type="date"
+             placeholder="Skip date" />
+      <div class="input-row">
+        <paper-input id="amount"
+                     type="number"
+                     min="0"
+                     step=".25"
+                     value="{{amount}}"
+                     label="Discount amount">
+          <div slot="prefix">$&nbsp;</div>
+        </paper-input>
+        <paper-input id="percent"
+                     type="number"
+                     min="0"
+                     max="100"
+                     step="1"
+                     value="{{percent}}"
+                     label="Discount percent">
+          <div slot="suffix">&nbsp;%</div>
+        </paper-input>
+      </div>
+      <paper-button on-tap="submitDiscount">Submit Discount</paper-button>
+    </div>
+  </template>
+
+  <script>
+    class DiscountPage extends Polymer.Element {
+      static get is() {
+        return 'discount-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          subEmails: {
+            type: Array,
+            notify: true,
+          },
+          email: {
+            type: String,
+          },
+          amount: {
+            type: Number,
+          },
+          percent: {
+            type: Number,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        this.getSubEmails();
+      }
+
+      getSubEmails() {
+        this.loading = true;
+        this.service.getSubEmails((emails, err) => {
+          this.loading = false;
+          if (err.code !== 0) {
+            return;
+          }
+          emails.sort(function(a, b) {
+            return a.localeCompare(b);
+          });
+          this.subEmails = emails;
+        });
+      }
+
+      submitDiscount() {
+        this.loading = true;
+        const email = this.email;
+        const date = new Date(this.$.date.value);
+        const amount = this.amount;
+        const percent = this.percent;
+        this.service.discountSubLog(date, email, amount, percent, (err) => {
+          this.loading = false;
+          let event;
+          if (err.code !== 0) {
+            event = new CustomEvent('toast', {
+              bubbles: true,
+              composed: true,
+              detail: {
+                message: `Failed to discount. ${err.message}.`,
+                error: true,
+              }
+            });
+            this.dispatchEvent(event);
+            return;
+          }
+          event = new CustomEvent('toast', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              message: `${email} just got a discount for ${date.toUTCString().substring(0,11)}`,
+            }
+          });
+          this.dispatchEvent(event);
+        });
+      }
+
+    }
+    window.customElements.define(DiscountPage.is, DiscountPage);
+
+  </script>
+</dom-module>

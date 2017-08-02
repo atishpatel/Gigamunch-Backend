@@ -351,8 +351,14 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 			return errors.Wrap("failed to sub.Setup", err)
 		}
 	} else {
+		if sl.Paid {
+			return errEntrySkipped.Wrap("cannot give discount to a week that is already paid")
+		}
 		if sl.Skip {
 			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
+		}
+		if sl.DiscountAmount < .1 && sl.DiscountPercent != 0 {
+			return errInvalidParameter.WithMessage("Cannot give discount because entry already has a discount!")
 		}
 	}
 	_, err = mysqlDB.Exec(updateDiscountSubLogStatment, discountAmount, discountPercent, date.Format(dateFormat), subEmail)
