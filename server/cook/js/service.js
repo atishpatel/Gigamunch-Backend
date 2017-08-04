@@ -517,7 +517,30 @@ var Service = (function () {
             .service
             .DiscountSubLog(request)
             .execute(function (resp) {
-            _this.logError('discountSubLog', resp.err);
+            _this.logError('DiscountSubLog', resp.err);
+            callback(resp.err);
+        });
+    };
+    Service.prototype.ChangeServingsForDate = function (date, subEmail, servings, callback) {
+        var _this = this;
+        // if api is not loaded, add to callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.ChangeServingsForDate(date, subEmail, servings, callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+            date: date.toISOString(),
+            sub_email: subEmail,
+            servings: servings,
+        };
+        this
+            .service
+            .ChangeServingsForDate(request)
+            .execute(function (resp) {
+            _this.logError('ChangeServingForDate', resp.err);
             callback(resp.err);
         });
     };

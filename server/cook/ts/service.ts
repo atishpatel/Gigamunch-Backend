@@ -573,6 +573,31 @@ class Service {
       });
   }
 
+  ChangeServingsForDate(date: Date, subEmail: string, servings: number, callback: (err: ErrorWithCode) => void) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.ChangeServingsForDate(date, subEmail, servings, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      date: date.toISOString(),
+      sub_email: subEmail,
+      servings: servings,
+    };
+
+    this
+      .service
+      .ChangeServingsForDate(request)
+      .execute(
+      (resp: Response) => {
+        this.logError('ChangeServingForDate', resp.err);
+        callback(resp.err);
+      });
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {
