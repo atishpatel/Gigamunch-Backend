@@ -359,6 +359,35 @@ func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogR
 	return resp, nil
 }
 
+// ChangeServingForDateReq is a request for ChangeServingForDate.
+type ChangeServingsForDateReq struct {
+	SubLogReq
+	Servings int8 `json:"servings"`
+}
+
+// ChangeServingForDate gives a changes the serving count for a user for a specific week.
+func (service *Service) ChangeServingsForDate(ctx context.Context, req *ChangeServingsForDateReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "ChangeServingsForDateSubLogReq", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.ChangeServings(req.Date, req.SubEmail, req.Servings, sub.DerivePrice(req.Servings))
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.ChangeServings")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // SubReq is the request for Sub stuff.
 type SubReq struct {
 	GigatokenReq
