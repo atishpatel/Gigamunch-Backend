@@ -33,6 +33,7 @@ const (
 	updateRefundedAndSkipSubLogStatement = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
 	updateFreeSubLogStatment             = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
 	updateDiscountSubLogStatment         = "UPDATE `sub` SET discount_amount=?, discount_percent=? WHERE date=? AND sub_email=?"
+	updateServingsSubLogStatement        = "UPDATE sub SET servings=?, amount=? WHERE date=? AND sub_email=?"
 	deleteSubLogStatment                 = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
@@ -220,6 +221,43 @@ func (c *Client) Setup(date time.Time, subEmail string, servings int8, amount fl
 	return nil
 }
 
+// ChangeServings inserts or updates a SubLog with a different serving amount.
+func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, amount float32) error {
+	// insert or update
+	if date.IsZero() || subEmail == "" || servings < 1 || amount < 0.1 {
+		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) servings(%f) amount(%s)", date, subEmail, servings, amount)
+	}
+	sl, err := c.Get(date, subEmail)
+	if err != nil {
+		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
+			return errors.Wrap("failed to sub.Get", err)
+		}
+		// insert
+		var s *SubscriptionSignUp
+		s, err = get(c.ctx, subEmail)
+		if err != nil {
+			return errDatastore.WithError(err).Wrap("failed to get")
+		}
+		serv := s.Servings + s.VegetarianServings
+		err = c.Setup(date, subEmail, serv, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		if err != nil {
+			return errors.Wrap("failed to sub.Setup", err)
+		}
+	} else {
+		if sl.Paid {
+			return errEntrySkipped.Wrap("cannot give discount to a week that is already paid")
+		}
+		if sl.Skip {
+			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
+		}
+	}
+	_, err = mysqlDB.Exec(updateServingsSubLogStatement, servings, amount, date.Format(dateFormat), subEmail)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsSubLogStatement statement")
+	}
+	return nil
+}
+
 // Paid inserts or updates a SubLog to paid.
 func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, transactionID string) error {
 	// insert or update
@@ -357,7 +395,7 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 		if sl.Skip {
 			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
 		}
-		if sl.DiscountAmount < .1 && sl.DiscountPercent != 0 {
+		if sl.DiscountAmount > .1 || sl.DiscountPercent != 0 {
 			return errInvalidParameter.WithMessage("Cannot give discount because entry already has a discount!")
 		}
 	}
@@ -547,5 +585,19 @@ func handleCloser(ctx context.Context, c closer) {
 	err := c.Close()
 	if err != nil {
 		utils.Errorf(ctx, "Error closing rows: %v", err)
+	}
+}
+
+// DerivePrice returns the price for a set number of servings.
+func DerivePrice(servings int8) float32 {
+	switch servings {
+	case 1:
+		return 17 + 1.66
+	case 2:
+		return 30 + 2.93
+	case 3:
+		return 45 + 4.39
+	default: // 4+ meals is $14/meal + tax
+		return 14 * float32(servings) * 1.0975
 	}
 }
