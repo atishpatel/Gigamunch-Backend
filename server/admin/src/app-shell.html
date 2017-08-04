@@ -264,6 +264,10 @@
              href="discount">
             <paper-item>Discount</paper-item>
           </a>
+          <a name="change-servings"
+             href="change-servings">
+            <paper-item>Change Servings For Day</paper-item>
+          </a>
           <a target="_blank"
              href="[[cookAPIURL]]">
             <paper-item>Cookapi
@@ -317,6 +321,11 @@
                          service="[[service]]"
                          user="{{user}}">
           </discount-page>
+          <change-servings-page name="change-servings"
+                                id="changeServingsPage"
+                                service="[[service]]"
+                                user="{{user}}">
+          </change-servings-page>
           <sublog-page name="sublog"
                        id="sublogPage"
                        service="[[service]]"
@@ -359,7 +368,7 @@
             type: Object,
             notify: true,
             value: function() {
-              if (!COOK.User.isAdmin) {
+              if (!COOK.User.isAdmin && !COOK.isDev) {
                 window.location = '/cook';
                 // TODO redirect
               }
@@ -422,6 +431,12 @@
             el = this.$.discountPage;
             title = 'Discount';
             break;
+          case 'change-servings':
+            elementName = 'change-servings-page';
+            resolvedPageURL = this.resolveUrl('change-servings-page.html');
+            el = this.$.changeServingsPage;
+            title = 'Change Servings For Date';
+            break;
           case 'sublog':
             elementName = 'sublog-page';
             resolvedPageURL = this.resolveUrl('sublog-page.html');
@@ -439,15 +454,6 @@
             resolvedPageURL = this.resolveUrl('my-' + page + '.html');
         }
         this.set('title', title);
-        // exit if element is already imported
-        if (document.createElement(elementName).constructor !== HTMLElement) {
-          ga('send', 'pageview', location.pathname);
-          // TODO breaks pages for Safari
-          if (el !== undefined && el !== null) {
-            console.log('element is already imported');
-            // el.selected();
-          }
-        }
         // import element
         Polymer.importHref(resolvedPageURL, () => {
           el.selected();
