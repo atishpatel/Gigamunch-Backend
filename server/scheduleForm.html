@@ -1271,8 +1271,12 @@
       var d = new Date();
       // d.setDate(d.getDate() + 2);
       d.setTime(d.getTime() + 72 * 3600 * 1000); // add 72 hours
-      while (d.getDay() !== 1) {
+      while (d.getDay() !== 1) { // while not Monday
         d.setDate(d.getDate() + 1);
+      }
+      // TODO remove after Aug 21, 2017
+      if (d.getMonth() === 7 && d.getDay() === 21) {
+        d.setDate(d.getDate() + 7)
       }
       d.setDate(d.getDate() + 4);
       var date = d.getDate();

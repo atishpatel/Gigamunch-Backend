@@ -255,6 +255,10 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
+	// TODO remove after Aug 21, 2017
+	if firstBoxDate.Month() == time.August && firstBoxDate.Day() == 21 {
+		firstBoxDate = firstBoxDate.Add(time.Hour * 24 * 7)
+	}
 	paymentC := payment.New(ctx)
 	paymentTokenReq := &payment.GetDefaultPaymentTokenReq{
 		CustomerID: customerID,
