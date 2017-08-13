@@ -308,27 +308,27 @@ func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq)
 }
 
 // FreeSubLog runs sub.Free.
-func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "FreeSubLog", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.IsAdmin() {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
+// func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+// 	resp := new(ErrorOnlyResp)
+// 	defer handleResp(ctx, "FreeSubLog", resp.Err)
+// 	user, err := validateRequestAndGetUser(ctx, req)
+// 	if err != nil {
+// 		resp.Err = errors.GetErrorWithCode(err)
+// 		return resp, nil
+// 	}
+// 	if !user.IsAdmin() {
+// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+// 		return resp, nil
+// 	}
 
-	subC := sub.New(ctx)
-	err = subC.Free(req.Date, req.SubEmail)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Free")
-		return resp, nil
-	}
-	return resp, nil
-}
+// 	subC := sub.New(ctx)
+// 	err = subC.Free(req.Date, req.SubEmail)
+// 	if err != nil {
+// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Free")
+// 		return resp, nil
+// 	}
+// 	return resp, nil
+// }
 
 type DiscountSubLogReq struct {
 	SubLogReq
