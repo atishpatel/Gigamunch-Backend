@@ -140,15 +140,16 @@ func sendEmail(sgClient *sendgrid.Client, from, to UserInterface, subject, email
 
 func dateString(t time.Time) string {
 	var numString string
-	switch t.Day() {
-	case 1:
-		numString = "1st"
-	case 2:
-		numString = "2nd"
-	case 3:
-		numString = "3rd"
-	default:
-		numString = fmt.Sprintf("%dth", t.Day())
+	var suffix string
+	if t.Day() == 1 || t.Day() == 21 || t.Day() == 31 {
+		suffix = "st"
+	} else if t.Day() == 2 || t.Day() == 22 {
+		suffix = "nd"
+	} else if t.Day() == 3 || t.Day() == 23 {
+		suffix = "rd"
+	} else {
+		suffix = "th"
 	}
+	numString = fmt.Sprintf("%d%s", t.Day(), suffix)
 	return fmt.Sprintf("%s, %s %s", t.Weekday().String(), t.Month().String(), numString)
 }
