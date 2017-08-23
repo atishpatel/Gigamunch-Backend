@@ -1,0 +1,139 @@
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer-element.html">
+
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+
+<dom-module id="email-table">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
+      </style>
+    </shared-styles>
+    <p><strong>Emails:</strong>
+      <dom-repeat items="[[sublogs]]"
+                  as="sublog">
+        <template>
+          [[sublog.sub_email]],
+        </template>
+      </dom-repeat>
+    </p>
+    <p><strong>Names:</strong>
+      <dom-repeat items="[[sublogs]]"
+                  as="sublog">
+        <template>
+          [[sublog.name]],
+        </template>
+      </dom-repeat>
+    </p>
+    <div class="table">
+      <div class="table-row table-header-row">
+        <div class="table-cell">Email</div>
+        <div class="table-cell">Name</div>
+        <div class="table-cell">Delivery Time</div>
+        <div class="table-cell">Status</div>
+      </div>
+      <dom-repeat items="[[sublogs]]"
+                  as="sublog">
+        <template>
+          <div class="table-row">
+            <div class="table-cell">[[sublog.sub_email]]</div>
+            <div class="table-cell">[[sublog.name]]</div>
+            <div class="table-cell">[[sublog.delivery_time]]</div>
+            <div class="table-cell">[[sublog.status]]</div>
+          </div>
+        </template>
+      </dom-repeat>
+    </div>
+  </template>
+
+  <script>
+    class EmailTable extends Polymer.Element {
+      static get is() {
+        return 'email-table';
+      }
+
+      static get properties() {
+        return {
+          sublogs: {
+            type: Array,
+            notify: true,
+            observer: 'sublogsObserver',
+          },
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      getStatus(sublog) {
+        if (sublog.refunded) {
+          return 'Refunded';
+        } else if (sublog.free) {
+          return 'Free';
+        } else if (sublog.paid) {
+          return 'Paid';
+        } else if (sublog.skip) {
+          return 'Skipped';
+        }
+        return 'Unpaid';
+      }
+
+      sublogsObserver() {
+        if (this.sublogs) {
+          const sublogs = this.sublogs;
+          for (var i = 0; i < sublogs.length; i++) {
+            sublogs[i].status = this.getStatus(sublogs[i]);
+          }
+        }
+      }
+
+    }
+
+    customElements.define(EmailTable.is, EmailTable);
+
+  </script>
+</dom-module>

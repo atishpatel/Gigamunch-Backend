@@ -268,6 +268,10 @@
              href="change-servings">
             <paper-item>Change Servings For Day</paper-item>
           </a>
+          <a name="email-list"
+             href="email-list">
+            <paper-item>Email List</paper-item>
+          </a>
           <a target="_blank"
              href="[[cookAPIURL]]">
             <paper-item>Cookapi
@@ -326,6 +330,11 @@
                                 service="[[service]]"
                                 user="{{user}}">
           </change-servings-page>
+          <email-list-page name="email-list"
+                           id="emailList"
+                           service="[[service]]"
+                           user="{{user}}">
+          </email-list-page>
           <sublog-page name="sublog"
                        id="sublogPage"
                        service="[[service]]"
@@ -378,9 +387,9 @@
           cookAPIURL: {
             type: String,
             value: function() {
-              if (COOK.isDev) {
-                return 'localhost:8080/_ah/api/explorer';
-              }
+              // if (COOK.isDev) {
+              //   return 'localhost:8080/_ah/api/explorer';
+              // }
               return COOK.isProd ? 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api/explorer' : 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api/explorer';
             }
           },
@@ -437,6 +446,12 @@
             el = this.$.changeServingsPage;
             title = 'Change Servings For Date';
             break;
+          case 'email-list':
+            elementName = 'email-list-page';
+            resolvedPageURL = this.resolveUrl('email-list-page.html');
+            el = this.$.emailList;
+            title = 'Email list';
+            break;
           case 'sublog':
             elementName = 'sublog-page';
             resolvedPageURL = this.resolveUrl('sublog-page.html');
@@ -451,7 +466,7 @@
             break;
           default:
             elementName = page + '-page';
-            resolvedPageURL = this.resolveUrl('my-' + page + '.html');
+            resolvedPageURL = this.resolveUrl(page + '-page.html');
         }
         this.set('title', title);
         // import element

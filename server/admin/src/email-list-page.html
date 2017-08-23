@@ -1,0 +1,294 @@
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="../../cook/src/paper-select.html">
+<link rel="import"
+      href="../../cook/src/select-with-options.html">
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+<link rel="import"
+      href="email-table.html">
+
+<dom-module id="email-list-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .input-row {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .input-row>* {
+          flex: 1;
+          padding-right: 12px;
+        }
+
+        .numeric {
+          max-width: 200px;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Email list</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <p>
+        Compare <input id="dateFrom"
+               type="date"
+               placeholder="Date" /> to
+        <input id="dateTo"
+               type="date"
+               placeholder="Date" />
+
+      </p>
+      <paper-button on-tap="getComparison">Get Comparison</paper-button>
+
+      <h2>General - For Mondays</h2>
+      <h3>Non-veg subs for [[dateToString]]</h3>
+      <email-table id="nonVegTable"
+                   sublogs="[[nonVegSubs]]"></email-table>
+
+      <h3>Veg subs for [[dateToString]]</h3>
+      <email-table id="vegTable"
+                   sublogs="[[vegSubs]]"></email-table>
+      <hr>
+      <h2>Special - For Wednesdays</h2>
+      <h3 class="table-title">New People “how was it? / -”</h3>
+      <p class="table-desc">New && not skipped on [[dateFromString]] && skipped on [[dateToString]]</p>
+      <email-table sublogs="[[noskipXskipXnew]]"></email-table>
+
+      <h3 class="table-title">New People “how was it? / next culture...”</h3>
+      <p class="table-desc">New && not skipped on [[dateFromString]] && not skipped on [[dateToString]]</p>
+      <email-table sublogs="[[noskipXnoskipXnew]]"></email-table>
+
+      <h3 class="table-title">Normal People “how was it? / -”</h3>
+      <p class="table-desc">Normal && not skipped on [[dateFromString]] && skipped on [[dateToString]]</p>
+      <email-table sublogs="[[noskipXskipXnormal]]"></email-table>
+
+      <h3 class="table-title">Normal People “how was it? / next culture...”</h3>
+      <p class="table-desc">Normal && not skipped on [[dateFromString]] && not skipped on [[dateToString]]</p>
+      <email-table sublogs="[[noskipXnoskipXnormal]]"></email-table>
+
+      <h3 class="table-title">Normal People “ - / next culture...”</h3>
+      <p class="table-desc">Normal && skipped on [[dateFromString]] && not skipped on [[dateToString]]</p>
+      <email-table sublogs="[[skipXnoskipXnormal]]"></email-table>
+
+
+    </div>
+  </template>
+
+  <script>
+    class EmailListPage extends Polymer.Element {
+      static get is() {
+        return 'email-list-page';
+      }
+
+      static get properties() {
+        return {
+          loading: {
+            type: Boolean
+          },
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          dateFromString: {
+            type: String,
+          },
+          dateToString: {
+            type: String,
+          },
+          nonVegSubs: {
+            type: Array,
+          },
+          vegSubs: {
+            type: Array,
+          },
+          noskipXskipXnew: {
+            type: Array,
+          },
+          noskipXnoskipXnew: {
+            type: Array,
+          },
+          noskipXskipXnormal: {
+            type: Array,
+          },
+          noskipXnoskipXnormal: {
+            type: Array,
+          },
+          skipXnoskipXnormal: {
+            type: Array,
+          },
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {}
+
+      getComparison() {
+        const dateFrom = new Date(this.$.dateFrom.value);
+        const dateTo = new Date(this.$.dateTo.value);
+        this.dateFromString = dateFrom.toUTCString().substring(0, 16);
+        this.dateToString = dateTo.toUTCString().substring(0, 16);
+
+        // make sure dates are in proper order
+        if (dateFrom > dateTo) {
+          const event = new CustomEvent('toast', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              message: `From date has to be before to date you f*ckn' noob.`,
+              error: true,
+            }
+          });
+          this.dispatchEvent(event);
+          return;
+        }
+
+        let sublogFrom = [],
+          sublogTo = [];
+
+        const errorCallback = (err) => {
+          if (err.code !== 0) {
+            const event = new CustomEvent('toast', {
+              bubbles: true,
+              composed: true,
+              detail: {
+                message: `Failed to getSubLogsForDate. ${err.message}.`,
+                error: true,
+              }
+            });
+            this.dispatchEvent(event);
+            this.loading = false;
+            return;
+          };
+        }
+
+        this.loading = true;
+        this.service.getSubLogsForDate(dateFrom, (slogs, err) => {
+          sublogFrom = slogs;
+          errorCallback(err);
+          if (sublogFrom.length > 0 && sublogTo.length > 0) {
+            this.deriveTables(sublogFrom, sublogTo);
+            this.loading = false;
+          }
+        });
+        this.service.getSubLogsForDate(dateTo, (slogs, err) => {
+          sublogTo = slogs;
+          errorCallback(err);
+          if (sublogFrom.length > 0 && sublogTo.length > 0) {
+            this.deriveTables(sublogFrom, sublogTo);
+            this.loading = false;
+          }
+        });
+      }
+
+      // 
+      deriveTables(sublogFrom, sublogTo) {
+        if (sublogFrom === undefined || sublogTo === undefined) {
+          return
+        }
+        let nonVegSubs = [],
+          vegSubs = [],
+          noskipXskipXnew = [],
+          noskipXnoskipXnew = [],
+          noskipXskipXnormal = [],
+          noskipXnoskipXnormal = [],
+          skipXnoskipXnormal = [];
+
+        sublogTo.forEach((slTo) => {
+          // if not subscribed
+          if (!slTo.is_subscribed) {
+            return
+          }
+          // add to veg or non veg
+          if (slTo.vegetarian_servings > 0) {
+            vegSubs.push(slTo);
+          } else {
+            nonVegSubs.push(slTo);
+          }
+
+          // iterate through each 
+          sublogFrom.forEach((slFrom) => {
+            // if not subscriber in question or is no longer subscribed
+            if (slFrom.email !== slTo.email || !slFrom.is_subscribed) {
+              return
+            }
+            // check if new or normal
+
+            if (slTo.free) { // TODO change to 'new' instead of free
+              // new 
+              if (slFrom.skip) {
+                return
+              }
+              // slFrom is no skip
+              if (slTo.skip) {
+                noskipXskipXnew.push(slTo);
+              } else {
+                noskipXnoskipXnew.push(slTo);
+              }
+              return
+            }
+
+            // normal
+            if (slFrom.skip) {
+              if (slTo.skip) {
+                return
+              }
+              skipXnoskipXnormal.push(slTo);
+              return
+            }
+
+            // slFrom is no skip
+            if (slTo.skip) {
+              noskipXskipXnormal.push(slTo);
+            } else {
+              noskipXnoskipXnew.push(slTo);
+            }
+          });
+        });
+        const sublogSorter = function(a, b) {
+          return a.email.localeCompare(b.email);
+        }
+        nonVegSubs.sort(sublogSorter);
+        vegSubs.sort(sublogSorter);
+        noskipXskipXnew.sort(sublogSorter);
+        noskipXnoskipXnew.sort(sublogSorter);
+        noskipXskipXnormal.sort(sublogSorter);
+        noskipXnoskipXnormal.sort(sublogSorter);
+        skipXnoskipXnormal.sort(sublogSorter);
+        this.nonVegSubs = nonVegSubs;
+        this.vegSubs = vegSubs;
+        this.noskipXskipXnew = noskipXskipXnew;
+        this.noskipXnoskipXnew = noskipXnoskipXnew;
+        this.noskipXskipXnormal = noskipXskipXnormal;
+        this.noskipXnoskipXnormal = noskipXnoskipXnormal;
+        this.skipXnoskipXnormal = skipXnoskipXnormal;
+      }
+    }
+    window.customElements.define(EmailListPage.is, EmailListPage);
+
+  </script>
+</dom-module>
