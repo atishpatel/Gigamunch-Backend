@@ -336,8 +336,6 @@
       flex-direction: column;
     }
 
-    .checkout-email {}
-
     .checkout-button {
       color: white;
       font-size: 16px;
@@ -521,6 +519,7 @@
       height: 115px;
       border: 2px solid #cfd8dc;
       cursor: pointer;
+      transition: all 0.15s linear;
       -webkit-transition: all 0.15s linear;
     }
 
@@ -543,6 +542,7 @@
       flex-direction: row;
       text-align: center;
       width: 100%;
+      transition: all 0.15s linear;
       -webkit-transition: all 0.15s linear;
     }
 
@@ -577,7 +577,7 @@
     input[type=radio]:checked~.price-per-meal-label,
     input[type=radio]:checked~.most-popular-label {
       color: #ffffff;
-      opcaity: 1.0;
+      opacity: 1.0;
       background-color: #ff7043;
     }
 
@@ -1013,10 +1013,10 @@
 
   </style>
   <!-- Load the Client component. -->
-  <script src="https://js.braintreegateway.com/web/3.6.3/js/client.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.22.1/js/client.min.js"></script>
 
   <!-- Load the Hosted Fields component. -->
-  <script src="https://js.braintreegateway.com/web/3.6.3/js/hosted-fields.min.js"></script>
+  <script src="https://js.braintreegateway.com/web/3.22.1/js/hosted-fields.min.js"></script>
   <script>
     function logError(desc) {
       ga('send', 'event', 'schedule_checkout_error');
