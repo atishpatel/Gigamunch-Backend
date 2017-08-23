@@ -316,7 +316,7 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 		if sl.DiscountAmount > .01 || sl.DiscountPercent != 0 {
 			nextWeek := date.Add(7 * 24 * time.Hour)
 			for {
-				err = c.Discount(nextWeek, subEmail, sl.DiscountAmount, sl.DiscountPercent)
+				err = c.Discount(nextWeek, subEmail, sl.DiscountAmount, sl.DiscountPercent, false)
 				if err == nil {
 					break
 				}
@@ -367,7 +367,7 @@ func (c *Client) RefundAndSkip(date time.Time, subEmail string) error {
 }
 
 // Discount inserts or updates a SubLog with a discount.
-func (c *Client) Discount(date time.Time, subEmail string, discountAmount float32, discountPercent int8) error {
+func (c *Client) Discount(date time.Time, subEmail string, discountAmount float32, discountPercent int8, overrideDiscounts bool) error {
 	// insert or update
 	if date.IsZero() || subEmail == "" || discountAmount < 0 || discountPercent < 0 || discountPercent > 100 {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) discountAmount(%f) discountPercent(%s)", date, subEmail, discountAmount, discountPercent)
@@ -395,7 +395,7 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 		if sl.Skip {
 			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
 		}
-		if sl.DiscountAmount > .1 || sl.DiscountPercent != 0 {
+		if !overrideDiscounts && (sl.DiscountAmount > .1 || sl.DiscountPercent != 0) {
 			return errInvalidParameter.WithMessage("Cannot give discount because entry already has a discount!")
 		}
 	}

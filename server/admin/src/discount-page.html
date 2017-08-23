@@ -5,6 +5,8 @@
 <link rel="import"
       href="../../cook/bower_components/paper-input/paper-input.html">
 <link rel="import"
+      href="../../cook/bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import"
       href="../../cook/bower_components/paper-spinner/paper-spinner.html">
 
 
@@ -36,6 +38,10 @@
 
         .numeric {
           max-width: 200px;
+        }
+
+        .override {
+          padding: 18px 0;
         }
 
       </style>
@@ -80,6 +86,11 @@
           <div slot="suffix">&nbsp;%</div>
         </paper-input>
       </div>
+      <paper-checkbox id="override"
+                      class="override"
+                      checked="{{overrideDiscount}}">Override other discounts
+      </paper-checkbox>
+      <br>
       <paper-button on-tap="submitDiscount">Submit Discount</paper-button>
     </div>
   </template>
@@ -111,6 +122,10 @@
           },
           percent: {
             type: String,
+          },
+          overrideDiscount: {
+            type: Boolean,
+            value: false,
           },
           loading: {
             type: Boolean
@@ -146,7 +161,8 @@
         const date = new Date(this.$.date.value);
         const amount = Number(this.amount);
         const percent = Number(this.percent);
-        this.service.discountSubLog(date, email, amount, percent, (err) => {
+        const overrideDiscount = this.overrideDiscount;
+        this.service.discountSubLog(date, email, amount, percent, overrideDiscount, (err) => {
           this.loading = false;
           let event;
           if (err.code !== 0) {

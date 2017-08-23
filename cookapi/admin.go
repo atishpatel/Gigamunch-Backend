@@ -332,8 +332,9 @@ func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq)
 
 type DiscountSubLogReq struct {
 	SubLogReq
-	Amount  float32 `json:"amount"`
-	Percent int8    `json:"percent"`
+	Amount           float32 `json:"amount"`
+	Percent          int8    `json:"percent"`
+	OverrideDiscount bool    `json:"override_discount"`
 }
 
 // DiscountSubLog gives a discount to a user for a specific week.
@@ -351,7 +352,7 @@ func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogR
 	}
 
 	subC := sub.New(ctx)
-	err = subC.Discount(req.Date, req.SubEmail, req.Amount, req.Percent)
+	err = subC.Discount(req.Date, req.SubEmail, req.Amount, req.Percent, req.OverrideDiscount)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Discount")
 		return resp, nil

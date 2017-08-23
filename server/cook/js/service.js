@@ -497,12 +497,12 @@ var Service = (function () {
             callback(resp.err);
         });
     };
-    Service.prototype.discountSubLog = function (date, subEmail, amount, percent, callback) {
+    Service.prototype.discountSubLog = function (date, subEmail, amount, percent, overrideDiscount, callback) {
         var _this = this;
         // if api is not loaded, add to callQueue
         if (!this.loaded) {
             this.callQueue.push(function () {
-                _this.discountSubLog(date, subEmail, amount, percent, callback);
+                _this.discountSubLog(date, subEmail, amount, percent, overrideDiscount, callback);
             });
             return;
         }
@@ -512,6 +512,7 @@ var Service = (function () {
             sub_email: subEmail,
             amount: amount,
             percent: percent,
+            override_discount: overrideDiscount,
         };
         this
             .service
@@ -590,7 +591,8 @@ COOK.Service = new Service();
 function initService() {
     var apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
     if (COOK.isDev) {
-        apiRoot = 'http://localhost:8080/_ah/api';
+        //apiRoot = 'http://localhost:8080/_ah/api';
+        apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
     }
     else if (COOK.isStage) {
         apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';

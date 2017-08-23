@@ -547,11 +547,11 @@ class Service {
       });
   }
 
-  discountSubLog(date: Date, subEmail: string, amount: number, percent: number, callback: (err: ErrorWithCode) => void) {
+  discountSubLog(date: Date, subEmail: string, amount: number, percent: number, overrideDiscount: boolean, callback: (err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {
       this.callQueue.push(() => {
-        this.discountSubLog(date, subEmail, amount, percent, callback);
+        this.discountSubLog(date, subEmail, amount, percent, overrideDiscount, callback);
       });
       return;
     }
@@ -561,6 +561,7 @@ class Service {
       sub_email: subEmail,
       amount: amount,
       percent: percent,
+      override_discount: overrideDiscount,
     };
 
     this
@@ -648,7 +649,8 @@ COOK.Service = new Service();
 function initService() {
   let apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
   if (COOK.isDev) {
-    apiRoot = 'http://localhost:8080/_ah/api';
+    //apiRoot = 'http://localhost:8080/_ah/api';
+    apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
   } else if (COOK.isStage) {
     apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
   }
