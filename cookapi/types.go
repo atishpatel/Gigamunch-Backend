@@ -62,10 +62,16 @@ type IDReq struct {
 	GigatokenReq
 }
 
-// DateReq is for request wtih only a Date and Gigatoken.
-type DateReq struct {
-	Date time.Time `json:"date"`
+// EmailReq is for request with only an Email and Gigatoken.
+type EmailReq struct {
+	Email string `json:"email"`
 	GigatokenReq
+}
+
+// DateReq is for request with only a Date and Gigatoken.
+type DateReq struct {
+	GigatokenReq
+	Date time.Time `json:"date"`
 }
 
 func (req *DateReq) valid() error {

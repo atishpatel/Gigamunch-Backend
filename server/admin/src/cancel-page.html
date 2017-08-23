@@ -1,0 +1,129 @@
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="../../cook/src/paper-select.html">
+<link rel="import"
+      href="../../cook/src/select-with-options.html">
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+
+<dom-module id="cancel-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          padding: 10px;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Cancel</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+      <select id="email"
+              value="{{email::change}}"
+              required>
+          <option disabled selected value> -- select an email -- </option>
+          <template is="dom-repeat"
+                    items="[[subEmails]]"
+                    as="email">
+            <option value="[[email]]">[[email]]</option>
+          </template>
+        </select>
+      <paper-button on-tap="submitCancel">Submit Cancel</paper-button>
+    </div>
+  </template>
+
+  <script>
+    class CancelPage extends Polymer.Element {
+      static get is() {
+        return 'cancel-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          subEmails: {
+            type: Array,
+            notify: true,
+          },
+          email: {
+            type: String,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        this.getSubEmails();
+      }
+
+      getSubEmails() {
+        this.loading = true;
+        this.service.getSubEmails((emails, err) => {
+          this.loading = false;
+          if (err.code !== 0) {
+            return;
+          }
+          emails.sort(function(a, b) {
+            return a.localeCompare(b);
+          });
+          this.subEmails = emails;
+        });
+      }
+
+      submitCancel() {
+        this.loading = true;
+        const email = this.email;
+        this.service.CancelSub(email, (err) => {
+          this.loading = false;
+          let event;
+          if (err.code !== 0) {
+            event = new CustomEvent('toast', {
+              bubbles: true,
+              composed: true,
+              detail: {
+                message: `Failed to cancel. ${err.message}.`,
+                error: true,
+              }
+            });
+            this.dispatchEvent(event);
+            return;
+          }
+          event = new CustomEvent('toast', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              message: `${email} just got canceled.`,
+            }
+          });
+          this.dispatchEvent(event);
+        });
+      }
+
+    }
+    window.customElements.define(CancelPage.is, CancelPage);
+
+  </script>
+</dom-module>

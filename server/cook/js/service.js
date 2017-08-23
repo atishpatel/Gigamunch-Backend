@@ -497,6 +497,27 @@ var Service = (function () {
             callback(resp.err);
         });
     };
+    Service.prototype.CancelSub = function (email, callback) {
+        var _this = this;
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.CancelSub(email, callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+            email: email,
+        };
+        this
+            .service
+            .CancelSub(request)
+            .execute(function (resp) {
+            _this.logError('CancelSub', resp.err);
+            callback(resp.err);
+        });
+    };
     Service.prototype.discountSubLog = function (date, subEmail, amount, percent, overrideDiscount, callback) {
         var _this = this;
         // if api is not loaded, add to callQueue

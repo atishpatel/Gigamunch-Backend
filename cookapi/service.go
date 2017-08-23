@@ -123,7 +123,7 @@ func main() {
 	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
 	register("SetupSubLogs", "SetupSubLogs", "POST", "cookservice/SetupSubLogs", "Setup subscription activty for a date. Admin func. Do this one Chris.")
 	register("ProcessSubLog", "processSubLog", "POST", "cookservice/processSubLog", "Admin func.")
-	register("CancelSub", "cancelSub", "POST", "cookservice/cancelSub", "Admin func.")
+	register("CancelSub", "CancelSub", "POST", "cookservice/CancelSub", "Admin func.")
 	register("GetSubEmails", "getSubEmails", "GET", "cookservice/getSubEmails", "Admin func.")
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("RefundAndSkipSubLog", "refundAndSkipSubLog", "POST", "cookservice/refundAndSkipSubLog", "Refund and skip a customer for date. Admin func.")

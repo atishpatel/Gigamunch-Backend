@@ -547,6 +547,29 @@ class Service {
       });
   }
 
+  CancelSub(email: string, callback: (err: ErrorWithCode) => void) {
+    // if api is not loaded, add to _callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.CancelSub(email, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      email: email,
+    };
+
+    this
+      .service
+      .CancelSub(request)
+      .execute(
+      (resp: Response) => {
+        this.logError('CancelSub', resp.err);
+        callback(resp.err);
+      });
+  }
+
   discountSubLog(date: Date, subEmail: string, amount: number, percent: number, overrideDiscount: boolean, callback: (err: ErrorWithCode) => void) {
     // if api is not loaded, add to callQueue
     if (!this.loaded) {

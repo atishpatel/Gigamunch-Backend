@@ -185,7 +185,7 @@ type SubLogReq struct {
 }
 
 // SetupSubLogs runs sub.SetupSubLogs.
-func (service *Service) SetupSubLogs(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
+func (service *Service) SetupSubLogs(ctx context.Context, req *DateReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SetupSubLogs", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
@@ -250,7 +250,7 @@ func (service *Service) GetSubEmails(ctx context.Context, req *GigatokenReq) (*G
 		return resp, nil
 	}
 
-	from := time.Now().Add(-14 * 24 * time.Hour)
+	from := time.Now().Add(-7 * 24 * time.Hour)
 	to := time.Now().Add(14 * 24 * time.Hour)
 	subC := sub.New(ctx)
 	resp.SubEmails, err = subC.GetSubEmails(from, to)
@@ -306,29 +306,6 @@ func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq)
 	}
 	return resp, nil
 }
-
-// FreeSubLog runs sub.Free.
-// func (service *Service) FreeSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
-// 	resp := new(ErrorOnlyResp)
-// 	defer handleResp(ctx, "FreeSubLog", resp.Err)
-// 	user, err := validateRequestAndGetUser(ctx, req)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err)
-// 		return resp, nil
-// 	}
-// 	if !user.IsAdmin() {
-// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-// 		return resp, nil
-// 	}
-
-// 	subC := sub.New(ctx)
-// 	err = subC.Free(req.Date, req.SubEmail)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Free")
-// 		return resp, nil
-// 	}
-// 	return resp, nil
-// }
 
 type DiscountSubLogReq struct {
 	SubLogReq
@@ -396,7 +373,7 @@ type SubReq struct {
 }
 
 // CancelSub cancels a subscriber's subscription.
-func (service *Service) CancelSub(ctx context.Context, req *SubReq) (*ErrorOnlyResp, error) {
+func (service *Service) CancelSub(ctx context.Context, req *EmailReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "CancelSub", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
@@ -410,7 +387,7 @@ func (service *Service) CancelSub(ctx context.Context, req *SubReq) (*ErrorOnlyR
 	}
 
 	subC := sub.New(ctx)
-	err = subC.Cancel(req.SubEmail)
+	err = subC.Cancel(req.Email)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
 		return resp, nil
@@ -546,8 +523,8 @@ func (service *Service) AddToProcessSubscriptionQueue(ctx context.Context, req *
 	return resp, nil
 }
 
-// EmailReq is a request for Email.
-type EmailReq struct {
+// SendEmailReq is a request for Email.
+type SendEmailReq struct {
 	GigatokenReq
 	Email           string    `json:"email"`
 	Name            string    `json:"name"`
@@ -555,21 +532,21 @@ type EmailReq struct {
 }
 
 // GetName returns the name.
-func (e *EmailReq) GetName() string {
+func (e *SendEmailReq) GetName() string {
 	return e.Name
 }
 
 // GetEmail returns the email.
-func (e *EmailReq) GetEmail() string {
+func (e *SendEmailReq) GetEmail() string {
 	return e.Email
 }
 
 // GetFirstDinnerDate returns the first dinner for the subscriber.
-func (e *EmailReq) GetFirstDinnerDate() time.Time {
+func (e *SendEmailReq) GetFirstDinnerDate() time.Time {
 	return e.FirstDinnerDate
 }
 
-func (service *Service) SendWelcomeEmail(ctx context.Context, req *EmailReq) (*ErrorOnlyResp, error) {
+func (service *Service) SendWelcomeEmail(ctx context.Context, req *SendEmailReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SendWelcomeEmail", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
@@ -591,7 +568,7 @@ func (service *Service) SendWelcomeEmail(ctx context.Context, req *EmailReq) (*E
 	return resp, nil
 }
 
-func (service *Service) SendIntroEmail(ctx context.Context, req *EmailReq) (*ErrorOnlyResp, error) {
+func (service *Service) SendIntroEmail(ctx context.Context, req *SendEmailReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SendWelcomeEmail", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)

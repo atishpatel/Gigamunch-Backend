@@ -260,6 +260,10 @@
              href="skip">
             <paper-item>Skip</paper-item>
           </a>
+          <a name="cancel"
+             href="cancel">
+            <paper-item>Cancel</paper-item>
+          </a>
           <a name="discount"
              href="discount">
             <paper-item>Discount</paper-item>
@@ -320,6 +324,11 @@
                      service="[[service]]"
                      user="{{user}}">
           </skip-page>
+          <cancel-page name="cancel"
+                       id="cancelPage"
+                       service="[[service]]"
+                       user="{{user}}">
+          </cancel-page>
           <discount-page name="discount"
                          id="discountPage"
                          service="[[service]]"
@@ -434,6 +443,12 @@
             el = this.$.skipPage;
             title = 'Skip';
             break;
+          case 'cancel':
+            elementName = 'cancel-page';
+            resolvedPageURL = this.resolveUrl('cancel-page.html');
+            el = this.$.cancelPage;
+            title = 'Cancel';
+            break
           case 'discount':
             elementName = 'discount-page';
             resolvedPageURL = this.resolveUrl('discount-page.html');
