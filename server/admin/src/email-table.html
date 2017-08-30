@@ -46,19 +46,35 @@
 
       </style>
     </shared-styles>
-    <p><strong>Emails:</strong>
-      <dom-repeat items="[[sublogs]]"
-                  as="sublog">
+    <p><strong>Non-Veg Emails:</strong>
+      <dom-repeat items="[[nonVegEmails]]"
+                  as="email">
         <template>
-          [[sublog.sub_email]],
+          [[email]],
         </template>
       </dom-repeat>
     </p>
-    <p><strong>Names:</strong>
-      <dom-repeat items="[[sublogs]]"
-                  as="sublog">
+    <p><strong>Non-veg Names:</strong>
+      <dom-repeat items="[[nonVegNames]]"
+                  as="name">
         <template>
-          [[sublog.name]],
+          [[name]],
+        </template>
+      </dom-repeat>
+    </p>
+    <p><strong>Veg Emails:</strong>
+      <dom-repeat items="[[vegEmails]]"
+                  as="email">
+        <template>
+          [[email]],
+        </template>
+      </dom-repeat>
+    </p>
+    <p><strong>Veg Names:</strong>
+      <dom-repeat items="[[vegNames]]"
+                  as="name">
+        <template>
+          [[name]],
         </template>
       </dom-repeat>
     </p>
@@ -96,6 +112,18 @@
             notify: true,
             observer: 'sublogsObserver',
           },
+          nonVegEmails: {
+            type: Array,
+          },
+          nonVegNames: {
+            type: Array,
+          },
+          vegEmails: {
+            type: Array,
+          },
+          vegNames: {
+            type: Array,
+          },
         }
       }
 
@@ -125,9 +153,24 @@
       sublogsObserver() {
         if (this.sublogs) {
           const sublogs = this.sublogs;
+          let nonVegEmails = [];
+          let nonVegNames = [];
+          let vegEmails = [];
+          let vegNames = [];
           for (var i = 0; i < sublogs.length; i++) {
+            if (sublogs[i].vegetarian_servings > 0) {
+              vegEmails.push(sublogs[i].sub_email);
+              vegNames.push(sublogs[i].name);
+            } else {
+              nonVegEmails.push(sublogs[i].sub_email);
+              nonVegNames.push(sublogs[i].name);
+            }
             sublogs[i].status = this.getStatus(sublogs[i]);
           }
+          this.nonVegEmails = nonVegEmails;
+          this.nonVegNames = nonVegNames;
+          this.vegEmails = vegEmails;
+          this.vegNames = vegNames;
         }
       }
 

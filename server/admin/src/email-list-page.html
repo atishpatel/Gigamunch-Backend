@@ -224,10 +224,12 @@
             return
           }
           // add to veg or non veg
-          if (slTo.vegetarian_servings > 0) {
-            vegSubs.push(slTo);
-          } else {
-            nonVegSubs.push(slTo);
+          if (!slTo.skip) {
+            if (slTo.vegetarian_servings > 0) {
+              vegSubs.push(slTo);
+            } else {
+              nonVegSubs.push(slTo);
+            }
           }
 
           // iterate through each 
@@ -238,7 +240,7 @@
             }
             // check if new or normal
 
-            if (slTo.free) { // TODO change to 'new' instead of free
+            if (slFrom.free) { // TODO change to 'new' instead of free
               // new 
               if (slFrom.skip) {
                 return
@@ -265,7 +267,7 @@
             if (slTo.skip) {
               noskipXskipXnormal.push(slTo);
             } else {
-              noskipXnoskipXnew.push(slTo);
+              noskipXnoskipXnormal.push(slTo);
             }
           });
         });
