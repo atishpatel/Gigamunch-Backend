@@ -50,6 +50,7 @@
     APP.isStage = false;
     APP.isProd = false;
     switch (location.hostname) {
+      case '127.0.0.1':
       case 'localhost':
         APP.isDev = true;
         break;

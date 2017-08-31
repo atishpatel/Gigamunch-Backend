@@ -77,6 +77,7 @@
     COOK.isStage = false;
     COOK.isProd = false;
     switch (location.hostname) {
+      case '127.0.0.1':
       case 'localhost':
         COOK.isDev = true;
         break;
