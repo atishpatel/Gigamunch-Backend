@@ -68,6 +68,7 @@
     var isStage = false;
     var isProd = false;
     switch (location.hostname) {
+      case '127.0.0.1':
       case 'localhost':
         isDev = true;
         break;
@@ -229,7 +230,23 @@
   <img height="1" width="1" style="display:none;" alt="" src="//t.co/i/adsct?txn_id=nutpc&p_id=Twitter&tw_sale_amount=0&tw_order_quantity=0" />
   </noscript>
   <!-- End Twitter universal website tag code -->
+  <!-- Drip -->
+  <script type="text/javascript">
+    var _dcq = _dcq || [];
+    var _dcs = _dcs || {};
+    _dcs.account = '6519387';
 
+    (function() {
+      var dc = document.createElement('script');
+      dc.type = 'text/javascript';
+      dc.async = true;
+      dc.src = '//tag.getdrip.com/6519387.js';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(dc, s);
+    })();
+
+  </script>
+  <!-- End Drip -->
 </body>
 
 </html>
