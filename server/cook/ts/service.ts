@@ -622,6 +622,31 @@ class Service {
       });
   }
 
+  ChangeServingsPermanently(email: string, servings: number, vegetarian: boolean, callback: (err: ErrorWithCode) => void) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.ChangeServingsPermanently(email, servings, vegetarian, callback);
+      });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+      email: email,
+      servings: servings,
+      vegetarian: vegetarian,
+    };
+
+    this
+      .service
+      .ChangeServingsPermanently(request)
+      .execute(
+      (resp: Response) => {
+        this.logError('ChangeServingsPermanently', resp.err);
+        callback(resp.err);
+      });
+  }
+
   refreshToken() {
     // if api is not loaded, add to _callQueue
     if (!this.loaded) {

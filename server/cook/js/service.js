@@ -566,6 +566,29 @@ var Service = (function () {
             callback(resp.err);
         });
     };
+    Service.prototype.ChangeServingsPermanently = function (email, servings, vegetarian, callback) {
+        var _this = this;
+        // if api is not loaded, add to callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.ChangeServingsPermanently(email, servings, vegetarian, callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+            email: email,
+            servings: servings,
+            vegetarian: vegetarian,
+        };
+        this
+            .service
+            .ChangeServingsPermanently(request)
+            .execute(function (resp) {
+            _this.logError('ChangeServingsPermanently', resp.err);
+            callback(resp.err);
+        });
+    };
     Service.prototype.refreshToken = function () {
         var _this = this;
         // if api is not loaded, add to _callQueue
