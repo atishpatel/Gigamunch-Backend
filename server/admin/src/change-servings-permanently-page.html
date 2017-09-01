@@ -1,0 +1,175 @@
+<link rel="import"
+      href="../../cook/bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import"
+      href="../../cook/bower_components/paper-spinner/paper-spinner.html">
+
+
+<link rel="import"
+      href="../../cook/src/paper-select.html">
+<link rel="import"
+      href="../../cook/src/select-with-options.html">
+<link rel="import"
+      href="../../cook/src/shared-styles.html">
+
+<dom-module id="change-servings-permanently-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .input-row {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .input-row>* {
+          flex: 1;
+          padding-right: 12px;
+        }
+
+        .numeric {
+          max-width: 200px;
+        }
+
+        paper-checkbox {
+          padding: 18px 0;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Permanently Change Servings from now on</h1>
+      <paper-spinner active="[[loading]]">
+      </paper-spinner>
+      <select id="email"
+              value="{{email::change}}"
+              required>
+          <option disabled selected value> -- select an email -- </option>
+          <template is="dom-repeat"
+                    items="[[subEmails]]"
+                    as="email">
+            <option value="[[email]]">[[email]]</option>
+          </template>
+        </select>
+      <br>
+      <paper-input id="servings"
+                   class="numeric"
+                   type="number"
+                   min="1"
+                   step="1"
+                   value="{{servings}}"
+                   label="New serving count">
+      </paper-input>
+      <br>
+      <paper-checkbox id="vegetarian"
+                      class="vegetarian"
+                      checked="{{vegetarian}}">Vegetarian 🌱
+      </paper-checkbox>
+      <br>
+      <paper-button on-tap="changeServingsPermanently">Permanently Change Servings</paper-button>
+    </div>
+  </template>
+
+  <script>
+    class ChangeServingsPermanentlyPage extends Polymer.Element {
+      static get is() {
+        return 'change-servings-permanently-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          subEmails: {
+            type: Array,
+            notify: true,
+          },
+          email: {
+            type: String,
+          },
+          servings: {
+            type: String,
+          },
+          vegetarian: {
+            type: Boolean,
+            value: false,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        this.getSubEmails();
+      }
+
+      getSubEmails() {
+        this.loading = true;
+        this.service.getSubEmails((emails, err) => {
+          this.loading = false;
+          if (err.code !== 0) {
+            return;
+          }
+          emails.sort(function(a, b) {
+            return a.localeCompare(b);
+          });
+          this.subEmails = emails;
+        });
+      }
+
+      changeServingsPermanently() {
+        this.loading = true;
+        const email = this.email;
+        const servings = Number(this.servings);
+        const vegetarian = this.vegetarian;
+        this.service.ChangeServingsPermanently(email, servings, vegetarian, (err) => {
+          this.loading = false;
+          let event;
+          if (err.code !== 0) {
+            event = new CustomEvent('toast', {
+              bubbles: true,
+              composed: true,
+              detail: {
+                message: `Failed to change servings. ${err.message}.`,
+                error: true,
+              }
+            });
+            this.dispatchEvent(event);
+            return;
+          }
+          event = new CustomEvent('toast', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              message: `${email} change servings to servings(${servings}) and veg(${vegetarian})`,
+            }
+          });
+          this.dispatchEvent(event);
+        });
+      }
+
+    }
+    window.customElements.define(ChangeServingsPermanentlyPage.is, ChangeServingsPermanentlyPage);
+
+  </script>
+</dom-module>

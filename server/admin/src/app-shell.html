@@ -272,6 +272,10 @@
              href="change-servings">
             <paper-item>Change Servings For Day</paper-item>
           </a>
+          <a name="change-servings-permanently"
+             href="change-servings-permanently">
+            <paper-item>Change Servings Permanently</paper-item>
+          </a>
           <a name="email-list"
              href="email-list">
             <paper-item>Email List</paper-item>
@@ -339,6 +343,12 @@
                                 service="[[service]]"
                                 user="{{user}}">
           </change-servings-page>
+          <change-servings-permanently-page name="change-servings-permanently"
+                                            id="changeServingsPermanentlyPage"
+                                            service="[[service]]"
+                                            user="{{user}}">
+          </change-servings-permanently-page>
+
           <email-list-page name="email-list"
                            id="emailList"
                            service="[[service]]"
@@ -460,6 +470,12 @@
             resolvedPageURL = this.resolveUrl('change-servings-page.html');
             el = this.$.changeServingsPage;
             title = 'Change Servings For Date';
+            break;
+          case 'change-servings-permanently':
+            elementName = 'change-servings-permanently-page';
+            resolvedPageURL = this.resolveUrl('change-servings-permanently-page.html');
+            el = this.$.changeServingsPermanentlyPage;
+            title = 'Change Servings Permanently';
             break;
           case 'email-list':
             elementName = 'email-list-page';
