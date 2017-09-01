@@ -21,20 +21,21 @@ import (
 )
 
 const (
-	datetimeFormat                       = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
-	dateFormat                           = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement                = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
-	selectSubLogEmails                   = "SELECT DISTINCT sub_email from sub where date>? and date<?"
-	selectSubLogStatement                = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` WHERE date='%s' AND sub_email='%s'"
-	selectAllSubLogStatement             = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` ORDER BY date DESC LIMIT %d"
-	selectSubLogFromDateStatement        = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
-	updatePaidSubLogStatement            = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
-	updateSkipSubLogStatement            = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
-	updateRefundedAndSkipSubLogStatement = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
-	updateFreeSubLogStatment             = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
-	updateDiscountSubLogStatment         = "UPDATE `sub` SET discount_amount=?, discount_percent=? WHERE date=? AND sub_email=?"
-	updateServingsSubLogStatement        = "UPDATE sub SET servings=?, amount=? WHERE date=? AND sub_email=?"
-	deleteSubLogStatment                 = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
+	datetimeFormat                           = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
+	dateFormat                               = "2006-01-02"          // "Jan 2, 2006"
+	insertSubLogStatement                    = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
+	selectSubLogEmails                       = "SELECT DISTINCT sub_email from sub where date>? and date<?"
+	selectSubLogStatement                    = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` WHERE date='%s' AND sub_email='%s'"
+	selectAllSubLogStatement                 = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` ORDER BY date DESC LIMIT %d"
+	selectSubLogFromDateStatement            = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
+	updatePaidSubLogStatement                = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
+	updateSkipSubLogStatement                = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
+	updateRefundedAndSkipSubLogStatement     = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
+	updateFreeSubLogStatment                 = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
+	updateDiscountSubLogStatment             = "UPDATE `sub` SET discount_amount=?, discount_percent=? WHERE date=? AND sub_email=?"
+	updateServingsSubLogStatement            = "UPDATE sub SET servings=?, amount=? WHERE date=? AND sub_email=?"
+	updateServingsPermanentlySubLogStatement = "UPDATE sub SET servings=?, amount=? WHERE date>? AND sub_email=? AND servings=?"
+	deleteSubLogStatment                     = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
 )
@@ -114,7 +115,7 @@ func (c *Client) GetAll(limit int32) ([]*SubscriptionLog, error) {
 	st := fmt.Sprintf(selectAllSubLogStatement, limit)
 	rows, err := mysqlDB.Query(st)
 	if err != nil {
-		return nil, errSQLDB.WithError(err).Wrap("failed to query statement:" + st)
+		return nil, errSQLDB.WithError(err).Wrap("failed to query selectAllSubLogStatement statement:")
 	}
 	defer handleCloser(c.ctx, rows)
 	var subLogs []*SubscriptionLog
@@ -180,7 +181,7 @@ func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) 
 	st := fmt.Sprintf(selectSubLogStatement, date.Format(dateFormat), subEmail)
 	rows, err := mysqlDB.Query(st)
 	if err != nil {
-		return nil, errSQLDB.WithError(err).Wrap("failed to query statement:" + st)
+		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSubLogStatement statement.")
 	}
 	defer handleCloser(c.ctx, rows)
 	if !rows.Next() {
@@ -214,9 +215,9 @@ func (c *Client) Setup(date time.Time, subEmail string, servings int8, amount fl
 	_, err := mysqlDB.Exec(st)
 	if merr, ok := err.(*mysql.MySQLError); ok {
 		if merr.Number == 1062 {
-			return errDuplicateEntry.WithError(err).Wrap("failed to execute statement: " + st)
+			return errDuplicateEntry.WithError(err).Wrap("failed to execute insertSubLogStatement statement.")
 		}
-		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
+		return errSQLDB.WithError(err).Wrap("failed to execute insertSubLogStatement statement.")
 	}
 	return nil
 }
@@ -245,15 +246,53 @@ func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, 
 		}
 	} else {
 		if sl.Paid {
-			return errEntrySkipped.Wrap("cannot give discount to a week that is already paid")
+			return errEntrySkipped.Wrap("cannot give change servings to a week that is already paid")
 		}
 		if sl.Skip {
-			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
+			return errEntrySkipped.Wrap("cannot give change servings to a week that is already skipped")
 		}
 	}
 	_, err = mysqlDB.Exec(updateServingsSubLogStatement, servings, amount, date.Format(dateFormat), subEmail)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsSubLogStatement statement")
+	}
+	return nil
+}
+
+// ChangeServingsPermanently changes a subscriber's servings permanently for all bags from now onwards.
+func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, vegetarian bool) error {
+	// insert or update
+	if subEmail == "" || servings < 1 {
+		return errInvalidParameter.Wrapf("expected(actual): subEmail(%s) servings(%f)", subEmail, servings)
+	}
+	s, err := c.GetSubscriber(subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.GetSubscriber", err)
+	}
+	oldWeeklyAmount := s.WeeklyAmount
+	oldServings := s.Servings
+	oldVegServings := s.VegetarianServings
+	weeklyAmount := DerivePrice(servings)
+	var vegServings int8
+	var nonvegServings int8
+	if vegetarian {
+		vegServings = servings
+	} else {
+		nonvegServings = servings
+	}
+	utils.Infof(c.ctx, "changing sub(%s)'s servings from nonveg(%d) veg(%d) amount(%2f) to nonveg(%d) veg(%d) amount(%2f)", subEmail, oldServings, oldServings, oldWeeklyAmount, nonvegServings, vegServings, weeklyAmount)
+	s.WeeklyAmount = weeklyAmount
+	s.Servings = nonvegServings
+	s.VegetarianServings = vegServings
+	err = put(c.ctx, subEmail, s)
+	if err != nil {
+		return errors.Wrap("failed to put", err)
+	}
+
+	// TODO don't update if past deadline date for Serving count
+	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, servings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail, oldServings+oldVegServings)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}
 	return nil
 }
@@ -284,7 +323,7 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 	st := fmt.Sprintf(updatePaidSubLogStatement, amountPaid, time.Now().Format(datetimeFormat), transactionID, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
+		return errSQLDB.WithError(err).Wrap("failed to execute updatePaidSubLogStatement statement.")
 	}
 	return nil
 }
@@ -331,7 +370,7 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
+		return errSQLDB.WithError(err).Wrap("failed to execute updateSkipSubLogStatement statement.")
 	}
 	return nil
 }
@@ -429,7 +468,7 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 	st := fmt.Sprintf(updateFreeSubLogStatment, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute statement: " + st)
+		return errSQLDB.WithError(err).Wrap("failed to execute updateFreeSubLogStatment statement: ")
 	}
 	return nil
 }
