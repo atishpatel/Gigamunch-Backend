@@ -337,6 +337,36 @@ func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogR
 	return resp, nil
 }
 
+// ChangeServingsPermanentlyReq is a request for ChangeServingsPermanently.
+type ChangeServingsPermanentlyReq struct {
+	EmailReq
+	Servings   int8 `json:"servings"`
+	Vegetarian bool `json:"vegetarian"`
+}
+
+// ChangeServingForDate gives a changes the serving count for a user permanently.
+func (service *Service) ChangeServingsPermanently(ctx context.Context, req *ChangeServingsPermanentlyReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "ChangeServingsPermanently", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.ChangeServingsPermanently")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // ChangeServingForDateReq is a request for ChangeServingForDate.
 type ChangeServingsForDateReq struct {
 	SubLogReq
@@ -346,7 +376,7 @@ type ChangeServingsForDateReq struct {
 // ChangeServingForDate gives a changes the serving count for a user for a specific week.
 func (service *Service) ChangeServingsForDate(ctx context.Context, req *ChangeServingsForDateReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "ChangeServingsForDateSubLogReq", resp.Err)
+	defer handleResp(ctx, "ChangeServingsForDateSubLog", resp.Err)
 	user, err := validateRequestAndGetUser(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
