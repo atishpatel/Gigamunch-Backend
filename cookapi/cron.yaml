@@ -3,6 +3,7 @@ cron:
 - description: "Process Subscribers"
   url: /process-subscribers
   schedule: every day 00:00
+  target: cookapi
 - description: "Bag reminder"
   url: /send-bag-reminder
   schedule: every day 01:00
