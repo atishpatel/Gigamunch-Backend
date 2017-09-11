@@ -300,7 +300,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 // Paid inserts or updates a SubLog to paid.
 func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, transactionID string) error {
 	// insert or update
-	if date.IsZero() || subEmail == "" || amountPaid < .01 || transactionID == "" {
+	if date.IsZero() || subEmail == "" {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) amountPaid(%f) transactionID(%s)", date, subEmail, amountPaid, transactionID)
 	}
 	_, err := c.Get(date, subEmail)
@@ -364,7 +364,13 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 				}
 				nextWeek = nextWeek.Add(7 * 24 * time.Hour)
 			}
-
+		}
+		// if first
+		if sl.Free {
+			err = c.Free(date.Add(7*24*time.Hour), subEmail)
+			if err != nil {
+				return errors.Wrap("failed to Free", err)
+			}
 		}
 	}
 	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), subEmail)
@@ -533,18 +539,21 @@ func (c *Client) Process(date time.Time, subEmail string) error {
 	amount -= subLog.DiscountAmount
 	amount -= (float32(subLog.DiscountPercent) / 100) * amount
 	orderID := fmt.Sprintf("Gigamunch box for %s.", date.Format("01/02/2006"))
-	paymentC := payment.New(c.ctx)
-	saleReq := &payment.SaleReq{
-		CustomerID:         subLog.CustomerID,
-		Amount:             amount,
-		PaymentMethodToken: subLog.PaymentMethodToken,
-		OrderID:            orderID,
-	}
-	utils.Infof(c.ctx, "Charging Customer(%s) %f on card(%s)", subLog.CustomerID, amount, subLog.PaymentMethodToken)
-	tID, err := paymentC.Sale(saleReq)
-	if err != nil {
-		// TODO
-		return errors.Wrap("failed to payment.Sale", err)
+	var tID string
+	if amount > 0.0 {
+		paymentC := payment.New(c.ctx)
+		saleReq := &payment.SaleReq{
+			CustomerID:         subLog.CustomerID,
+			Amount:             amount,
+			PaymentMethodToken: subLog.PaymentMethodToken,
+			OrderID:            orderID,
+		}
+		utils.Infof(c.ctx, "Charging Customer(%s) %f on card(%s)", subLog.CustomerID, amount, subLog.PaymentMethodToken)
+		tID, err = paymentC.Sale(saleReq)
+		if err != nil {
+			// TODO
+			return errors.Wrap("failed to payment.Sale", err)
+		}
 	}
 	// update TransactionID
 	err = c.Paid(subLog.Date, subLog.SubEmail, amount, tID)
