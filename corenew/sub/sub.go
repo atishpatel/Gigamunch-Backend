@@ -440,6 +440,9 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 		if sl.Skip {
 			return errEntrySkipped.Wrap("cannot give discount to a week that is already skipped")
 		}
+		if sl.Free {
+			return errEntrySkipped.Wrap("cannot give discount to a week that is already free (first meal)")
+		}
 		if !overrideDiscounts && (sl.DiscountAmount > .1 || sl.DiscountPercent != 0) {
 			return errInvalidParameter.WithMessage("Cannot give discount because entry already has a discount!")
 		}
