@@ -12,7 +12,16 @@ type nameAndAddresses struct {
 }
 
 var (
-	input = []nameAndAddresses{
+	docSheet = ""
+	input    = []nameAndAddresses{
+		nameAndAddresses{
+			Name:      "Ali",
+			Addresses: ``,
+		},
+		nameAndAddresses{
+			Name:      "Haseen",
+			Addresses: ``,
+		},
 		nameAndAddresses{
 			Name:      "Atish",
 			Addresses: ``,
@@ -29,14 +38,11 @@ var (
 			Name:      "Piyush",
 			Addresses: ``,
 		},
-		nameAndAddresses{
-			Name:      "Mubarak",
-			Addresses: ``,
-		},
 	}
 )
 
 func main() {
+	fmt.Printf("Doc link:\n%s\n----------\n", docSheet)
 	startAddress := []string{"166 Chesapeake Harbor Blvd, Hendersonville"}
 	del := "\n"
 	for _, i := range input {
@@ -67,7 +73,7 @@ func printMapLinks(driverName string, addresses []string) {
 	}
 	fmt.Printf("%s:\n", driverName)
 	for _, u := range urls {
-		fmt.Println(u)
+		fmt.Printf("%s\n\n", u)
 	}
-	fmt.Print("\n\n")
+	fmt.Print("\n----------\n")
 }
