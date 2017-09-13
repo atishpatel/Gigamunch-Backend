@@ -1,6 +1,10 @@
 <link rel="import"
       href="../../cook/bower_components/polymer/polymer-element.html">
 <link rel="import"
+      href="../../cook/bower_components/google-map/google-map.html">
+<link rel="import"
+      href="../../cook/bower_components/google-map/google-map-marker.html">
+<link rel="import"
       href="../../cook/src/shared-styles.html">
 
 <link rel="import"
@@ -23,25 +27,110 @@
           font-size: 14px;
         }
 
+        google-map {
+          height: 600px;
+        }
+
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
       </style>
     </shared-styles>
 
     <h1 class="">[[sublogsByDate.dateString]]</h1>
     <div class="table-container">
-      <div class="table-title">
+      <h2 class="table-title">
         Unskipped
-      </div>
+      </h2>
       <sublog-sortable-table id="unskipped"
-                             class="table"
                              sublogs="[[sublogsByDate.unskippedSublogs]]">
       </sublog-sortable-table>
-      <div class="table-title">
+      <h2 class="table-title">
         Skipped
-      </div>
+      </h2>
       <sublog-sortable-table id="skipped"
-                             class="table"
                              sublogs="[[sublogsByDate.skippedSublogs]]">
       </sublog-sortable-table>
+      <h2>Delivery Tools</h2>
+      <div>
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell">Name</div>
+            <div class="table-cell">Servings</div>
+            <div class="table-cell">Veg Servings</div>
+            <div class="table-cell">APT</div>
+            <div class="table-cell">Address</div>
+            <div class="table-cell">Phone Number</div>
+            <div class="table-cell">Delivery Tip</div>
+            <div class="table-cell">Delivery Time</div>
+            <div class="table-cell">Status</div>
+            <div class="table-cell">Email</div>
+          </div>
+          <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
+                      as="sublog">
+            <template>
+              <div class="table-row">
+                <div class="table-cell">[[sublog.name]]</div>
+                <div class="table-cell">[[sublog.servings]]</div>
+                <div class="table-cell">[[sublog.vegetarian_servings]]</div>
+                <div class="table-cell">[[sublog.apt]]</div>
+                <div class="table-cell">[[sublog.addressString]]</div>
+                <div class="table-cell">[[sublog.phone_number]]</div>
+                <div class="table-cell">[[sublog.delivery_tips]]</div>
+                <div class="table-cell">[[sublog.delivery_time]]</div>
+                <div class="table-cell">[[sublog.status]]</div>
+                <div class="table-cell">[[sublog.sub_email]]</div>
+              </div>
+            </template>
+          </dom-repeat>
+        </div>
+        <br>
+        <google-map fit-to-marker
+                    disable-street-view-control
+                    latitude="36.16"
+                    longitude="-86.78"
+                    api-key="[[apiKey]]">
+          <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
+                      as="sublog">
+            <template>
+              <google-map-marker label="[[sublog.name]]"
+                                 latitude="[[sublog.address.latitude]]"
+                                 longitude="[[sublog.address.longitude]]"
+                                 draggable></google-map-marker>
+            </template>
+          </dom-repeat>
+
+        </google-map>
+      </div>
     </div>
   </template>
 
@@ -59,6 +148,12 @@
           user: {
             type: Object,
             notify: true,
+          },
+          apiKey: {
+            type: String,
+            value: () => {
+              return COOK.isProd ? 'AIzaSyApF3OWhumB5GeD20vQn_9NmToR0glkkOA' : 'AIzaSyAQOn9gsSWBu9nImfATaPKkSFp2I5MxbuU';
+            },
           },
           sublogsByDate: {
             type: Array,
@@ -103,9 +198,13 @@
             if (slogs[i].skip || slogs[i].refunded) {
               sublogDay.skippedSublogs.push(slogs[i]);
             } else {
+              slogs[i].apt = slogs[i].address.apt;
+              slogs[i].addressString = this.$.skipped.getAddress(slogs[i].address);
+              slogs[i].status = this.$.skipped.getStatus(slogs[i]);
               sublogDay.unskippedSublogs.push(slogs[i]);
             }
           }
+
           this.sublogsByDate = sublogDay;
         });
       }
@@ -114,6 +213,7 @@
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
       }
+
     }
 
     customElements.define(SublogDetailPage.is, SublogDetailPage);
