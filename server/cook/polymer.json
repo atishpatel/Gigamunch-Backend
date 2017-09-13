@@ -21,6 +21,8 @@
     "bower_components/vaadin-grid/*.html",
     "bower_components/vaadin-button/*.html",
     "bower_components/vaadin-text-field/*.html",
-    "bower_components/vaadin-themable-mixin/*.html"
+    "bower_components/vaadin-themable-mixin/*.html",
+    "bower_components/google-apis/*.html",
+    "bower_components/google-map/*.html"
   ]
 }

@@ -20,7 +20,7 @@
         font-weight: bold;
         src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
       }*/
-      
+
        :host {
         font-family: 'FontRegular', 'Roboto';
         font-smoothing: antialiased;
@@ -85,57 +85,65 @@
         --paper-slider-knob-color: var(--dark-primary-color);
         --paper-slider-pin-color: var(--dark-primary-color);
       }
-      
+
       paper-checkbox,
       paper-input,
       paper-button {
         @apply --font;
       }
-      
+
       paper-tab {
         @apply --font-bold;
       }
-      
+
       paper-item {
         @apply --font;
       }
-      
+
       paper-menu {
         min-width: 175px;
       }
-      
+
+      paper-spinner[active] {
+        display: block;
+      }
+
+      paper-spinner {
+        display: none;
+      }
+
       .logo {
         font-family: 'NexaBold';
       }
-      
+
       .font-bold {
         @apply --font-bold;
       }
-      
+
       a {
         text-decoration: none;
       }
-      
+
       a:link,
       a:visited {
         color: var(--primary-color);
       }
-      
+
       a:hover {
         color: var(--light-primary-color);
       }
-      
+
       h1 {
         margin: 16px 0;
         color: #212121;
         font-size: 22px;
       }
-      
+
       paper-icon-button {
         color: var(--link-color);
         /* --link-color */
       }
-      
+
       .photo-16-9 {
         display: block;
         width: 100%;
@@ -145,7 +153,7 @@
         overflow: hidden;
         background-color: white;
       }
-      
+
       .photo-16-9 img {
         position: absolute;
         display: block;
@@ -156,51 +164,51 @@
         bottom: 0;
         margin: auto;
       }
-      
+
       .column {
         display: flex;
         flex-direction: column;
       }
-      
+
       .row {
         display: flex;
         flex-direction: row;
         align-items: flex-end;
       }
-      
+
       .row>*:not(:first-child) {
         margin-left: 8px;
       }
-      
+
       .flex-1 {
         flex: 1;
       }
-      
+
       .flex-2 {
         flex: 2;
       }
-      
+
       .flex-3 {
         flex: 3;
       }
-      
+
       .half-field {
         max-width: 49.5%;
       }
-      
+
       .secondary-text {
         color: var(--secondary-text-color);
       }
-      
+
       .bold {
         font-weight: bold;
       }
-      
+
       .vertical-align-center {
         display: flex;
         align-items: center;
       }
-      
+
       .page-desc {
         color: var(--secondary-text-color);
         font-size: 14px;

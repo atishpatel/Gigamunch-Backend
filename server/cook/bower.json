@@ -40,6 +40,7 @@
     "vaadin-grid": "vaadin/vaadin-grid#^3.0.0",
     "vaadin-button": "^1.0.0",
     "vaadin-text-field": "^1.0.0",
-    "vaadin-themable-mixin": "vaadin/vaadin-themable-mixin#^1.1.0"
+    "vaadin-themable-mixin": "vaadin/vaadin-themable-mixin#^1.1.0",
+    "google-map": "GoogleWebComponents/google-map#^2.0.2"
   }
 }
