@@ -287,6 +287,17 @@
     </vaadin-grid>
     <div>Total Non Veg servings: <strong>[[totalNoVegServings]]</strong></div>
     <div>Total Veg servings: <strong>[[totalVegServings]]</strong></div>
+    <br>
+    <div>Number of Customers: <strong>[[numCustomers]]</strong></div>
+    <div>Number of 2 Serving Customers: <strong>[[num2Customers]]</strong></div>
+    <div>Number of 4 Serving Customers: <strong>[[num4Customers]]</strong></div>
+    <div>Number of 4+ Serving Customers: <strong>[[num4PlusCustomers]]</strong></div>
+    <br>
+    <div>Predicted Revenue: <strong>$[[predictedRevenue]]</strong></div>
+    <div>Total Revenue: <strong>$[[totalRevenue]]</strong></div>
+    <div>Total Tax: <strong>$[[totalTax]]</strong></div>
+    <div>Total Processing Cost: <strong>$[[totalProcessingCost]]</strong></div>
+    <div>Total Free + Discount Cost: <strong>$[[totalCost]]</strong></div>
   </template>
 
   <script>
@@ -308,6 +319,38 @@
           },
           totalVegServings: {
             type: Number,
+            notify: true,
+          },
+          numCustomers: {
+            type: Number,
+          },
+          num2Customers: {
+            type: Number,
+          },
+          num4Customers: {
+            type: Number,
+          },
+          num4PlusCustomers: {
+            type: Number,
+          },
+          predictedRevenue: {
+            type: String,
+            notify: true,
+          },
+          totalRevenue: {
+            type: String,
+            notify: true,
+          },
+          totalCost: {
+            type: String,
+            notify: true,
+          },
+          totalTax: {
+            type: String,
+            notify: true,
+          },
+          totalProcessingCost: {
+            type: String,
             notify: true,
           },
           detailed: {
@@ -362,18 +405,57 @@
       sublogsObserver() {
         if (this.sublogs) {
           const sublogs = this.sublogs;
+          let numCustomers = 0;
+          let num2Customers = 0;
+          let num4Customers = 0;
+          let num4PlusCustomers = 0;
           let totalNoVegServings = 0;
           let totalVegServings = 0;
+          let predictedRevenue = 0.0;
+          let totalRevenue = 0.0;
+          let totalCost = 0.0;
+          let totalTax = 0.0;
+          let totalProcessingCost = 0.0;
           for (var i = 0; i < sublogs.length; i++) {
             totalNoVegServings += sublogs[i].servings;
             totalVegServings += sublogs[i].vegetarian_servings;
             sublogs[i].status = this.getStatus(sublogs[i]);
             sublogs[i].addressString = this.getAddress(sublogs[i].address);
             sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
+            // calculate revenue 
+            if (sublogs[i].free) {
+              totalCost += sublogs[i].amount;
+            } else {
+              predictedRevenue += sublogs[i].amount;
+            }
+            if (sublogs[i].paid) {
+              totalCost += sublogs[i].amount_paid - sublogs[i].amount;
+            }
+            totalRevenue += sublogs[i].amount_paid;
+            // calculate number customers
+            numCustomers++;
+            if (sublogs[i].servings === 2 || sublogs[i].vegetarian_servings === 2) {
+              num2Customers++;
+            } else if (sublogs[i].servings === 4 || sublogs[i].vegetarian_servings === 4) {
+              num4Customers++;
+            } else {
+              num4PlusCustomers++;
+            }
+            totalTax += sublogs[i].amount_paid * .0975;
+            totalProcessingCost += sublogs[i].amount_paid * .029 + .3;
           }
           this.sublogs = sublogs;
           this.totalNoVegServings = totalNoVegServings;
           this.totalVegServings = totalVegServings;
+          this.predictedRevenue = predictedRevenue.toFixed(2);
+          this.totalRevenue = totalRevenue.toFixed(2);
+          this.totalCost = totalCost.toFixed(2);
+          this.numCustomers = numCustomers;
+          this.num2Customers = num2Customers;
+          this.num4Customers = num4Customers;
+          this.num4PlusCustomers = num4PlusCustomers;
+          this.totalTax = totalTax.toFixed(2);
+          this.totalProcessingCost = totalProcessingCost.toFixed(2);
         }
       }
 
