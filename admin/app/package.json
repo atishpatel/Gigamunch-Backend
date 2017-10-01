@@ -1,0 +1,22 @@
+{
+  "name": "admin-app",
+  "flat": true,
+  "version": "1.0.0",
+  "author": "Atish Patel <atishpatel2012@gmail.com>",
+  "license": "No licence",
+  "private": true,
+  "devDependencies": {
+    "@types/google.analytics": "^0.0.35",
+    "@types/polymer": "^1.2.1"
+  },
+  "dependencies": {
+    "@polymer/app-layout": "^3.0.0-pre.1",
+    "@polymer/app-route": "^3.0.0-pre.1",
+    "@polymer/iron-pages": "^3.0.0-pre.1",
+    "@polymer/polymer": "^3.0.0-pre.1",
+    "@webcomponents/webcomponentsjs": "^1.0.12",
+    "firebaseui": "^2.3.0",
+    "swagger-ui-dist": "^3.2.1",
+    "whatwg-fetch": "^2.0.3"
+  }
+}

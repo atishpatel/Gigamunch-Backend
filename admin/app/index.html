@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <base href="/admin/">
+
+  <title>Gigamunch Admin</title>
+  <meta name="description"
+        content="Gigamunch Admin description">
+
+  <link rel="icon"
+        href="/favicon.ico">
+  <meta name="theme-color"
+        content="#00796B">
+
+  <meta name="mobile-web-app-capable"
+        content="yes">
+  <meta name="application-name"
+        content="Gigamunch Admin">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable"
+        content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent">
+  <meta name="apple-mobile-web-app-title"
+        content="Gigamunch Admin">
+
+  <!-- Homescreen icons -->
+  <link rel="apple-touch-icon"
+        href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-circle.svg">
+  <link rel="apple-touch-icon"
+        sizes="144x144"
+        href="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-144.png">
+  <script async
+          src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    // Set Environment
+    var APP = APP || {};
+    APP.isDev = false;
+    APP.isStage = false;
+    APP.isProd = false;
+    switch (location.hostname) {
+      case '127.0.0.1':
+      case 'localhost':
+        APP.isDev = true;
+        break;
+      case 'gigamunch-omninexus-dev.appspot.com':
+        APP.isStage = true;
+        break;
+      default:
+        APP.isProd = true;
+    }
+
+    // Google Analytics
+    window.ga = window.ga || function() {
+      (ga.q = ga.q || []).push(arguments)
+    };
+    ga.l = +new Date;
+    var ua = APP.isProd ? 'UA-71567908-1' : 'UA-71567908-4';
+
+  </script>
+
+  <!-- Load polyfills -->
+  <script>
+    (function() {
+      if (!('fetch' in window)) {
+        var e = document.createElement('script');
+        e.src = '/node_modules/whatwg-fetch/fetch.js';
+        document.head.appendChild(e);
+      }
+    })();
+
+  </script>
+  <script src="/admin/node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js">
+
+
+  </script>
+  <!-- End Load polyfills  -->
+  <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
+  <script>
+    let config;
+    if (APP.isProd) {
+      config = {
+        apiKey: 'AIzaSyC-1vqT4YIKXVmrGkaoVSj1BJnm48NxlT0',
+        authDomain: 'gigamunch-omninexus.firebaseapp.com',
+        databaseURL: 'https://gigamunch-omninexus.firebaseio.com',
+        projectId: 'gigamunch-omninexus',
+        storageBucket: 'gigamunch-omninexus.appspot.com',
+        messagingSenderId: '837147123677',
+      };
+    } else {
+      config = {
+        apiKey: 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g',
+        authDomain: 'gigamunch-omninexus-dev.firebaseapp.com',
+        databaseURL: 'https://gigamunch-omninexus-dev.firebaseio.com',
+        projectId: 'gigamunch-omninexus-dev',
+        storageBucket: 'gigamunch-omninexus-dev.appspot.com',
+        messagingSenderId: '108585202286',
+      };
+    }
+    firebase.initializeApp(config);
+
+  </script>
+
+  <script src="node_modules/firebaseui/dist/firebaseui.js"></script>
+  <link type="text/css"
+        rel="stylesheet"
+        href="node_modules/firebaseui/dist/firebaseui.css" />
+
+  <!-- Import the app-shell element's module. -->
+  <script type="module"
+          src="build/app-shell.js"></script>
+
+</head>
+
+<body>
+  <app-shell id="app"></app-shell>
+  <div id="firebaseui-auth-container"></div>
+  <script>
+    var app = document.querySelector('#app');
+
+  </script>
+</body>
+
+</html>

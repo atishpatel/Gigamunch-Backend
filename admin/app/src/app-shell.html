@@ -1,0 +1,289 @@
+<h1>App Shell</h1>
+<script type="module"
+        src="node_modules/@polymer/app-layout/app-drawer-layout/app-drawer-layout.js"></script>
+<script type="module"
+        src="node_modules/@polymer/app-layout/app-drawer/app-drawer.js"></script>
+<script type="module"
+        src="node_modules/@polymer/app-layout/app-header-layout/app-header-layout.js"></script>
+<script type="module"
+        src="node_modules/@polymer/app-layout/app-header/app-header.js"></script>
+<script type="module"
+        src="node_modules/@polymer/app-layout/app-toolbar/app-toolbar.js"></script>
+<script type="module"
+        src="node_modules/@polymer/app-route/app-location.js"></script>
+<script type="module"
+        src="node_modules/@polymer/app-route/app-route.js"></script>
+<script type="module"
+        src="node_modules/@polymer/iron-pages/iron-pages.js"></script>
+<!-- <style>
+   :host {
+    /* TODO: remove */
+    --dark-primary-color: #00796B;
+    --default-primary-color: #009688;
+    --light-primary-color: #B2DFDB;
+    --text-primary-color: #FFFFFF;
+    --accent-color: #FF5722;
+    --primary-background-color: #B2DFDB;
+    --primary-text-color: #212121;
+    --secondary-text-color: #757575;
+    --disabled-text-color: #BDBDBD;
+    --divider-color: #BDBDBD;
+    /* Components */
+    /* paper-drawer-panel */
+    --drawer-menu-color: #ffffff;
+    --drawer-border-color: 1px solid #ccc;
+    --drawer-toolbar-border-color: 1px solid rgba(0, 0, 0, 0.22);
+    /* paper-menu */
+    --paper-menu-background-color: #fff;
+    --menu-link-color: #111111;
+    /* paper-input */
+    --paper-input-container-color: rgba(255, 255, 255, 0.64);
+    --paper-input-container-focus-color: rgba(255, 255, 255, 1);
+    --paper-input-container-input-color: #fff;
+    --max-content-width: 1000px;
+  }
+
+   :host {
+    display: block;
+    color: var(--primary-text-color);
+  }
+
+  .content {
+    max-width: var(--max-content-width);
+    margin: auto;
+  }
+
+  app-header {
+    color: var(--primary-text-color);
+    background-color: #fff;
+  }
+
+  app-header .logo {
+    color: var(--default-primary-color);
+  }
+
+  app-header paper-icon-button {
+    --paper-icon-button-ink-color: white;
+  }
+
+  .page-header-title {
+    font-size: 24px;
+    @apply --font-bold;
+  }
+
+  .toolbar-right {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  }
+
+  .nav-a,
+  .nav-a:link,
+  .nav-a:visited {
+    text-decoration: none;
+    outline: 0;
+    color: #546E7A;
+  }
+
+  .nav-tabs {
+    height: 100%;
+    margin-right: 12px;
+    font-size: 16px;
+  }
+
+  .nav-tabs a {
+    padding: 0 15px;
+    text-decoration: none;
+    outline: 0;
+    color: #546E7A;
+  }
+
+  .user-pic {
+    height: 30px;
+    width: 30px;
+    background-size: 30px;
+    border-radius: 50%;
+    background-color: white;
+    color: var(--secondary-text-color);
+  }
+
+  .main-toolbar {
+    z-index: 10;
+    padding: 0 24px;
+  }
+
+  .drawer-toolbar {
+    height: 100px;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-direction: column;
+    background-color: var(--default-primary-color);
+    color: white;
+  }
+
+  .drawer-user-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .drawer-user-info .user-pic {
+    margin-right: 12px;
+  }
+
+  .drawer-user-name {
+    font-size: 16px;
+  }
+
+  .drawer-user-email {
+    font-size: 12px;
+  }
+
+  .drawer-list {
+    padding-top: 8px;
+  }
+
+  .drawer-list paper-item {
+    font-size: 16px;
+    outline: none;
+  }
+
+  .drawer-list iron-icon {
+    margin-left: auto;
+  }
+
+  .drawer-list a {
+    display: block;
+    text-decoration: none;
+    color: var(--link-color);
+    line-height: 40px;
+    outline: none;
+  }
+
+  .drawer-list a.iron-selected {
+    color: #5d686d;
+    background-color: #ECEFF1;
+    font-weight: bold;
+  }
+
+  .drawer-stuff {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .nav-tabs-stuff {
+      display: none;
+    }
+    .drawer-stuff {
+      display: initial;
+    }
+  }
+
+  .full-screen-dialog {
+    position: fixed;
+    overflow-x: hidden;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .full-screen-dialog>paper-dialog-scrollable {
+    padding: 0;
+  }
+
+  .full-screen-dialog-close-icon {
+    margin: 16px 0 0 16px;
+  }
+
+  .full-screen-dialog-content {
+    padding: 24px;
+  }
+
+  #errorDialogDetails {
+    color: var(--secondary-text-color);
+  }
+
+  #notificationDialog paper-button,
+  #errorDialog paper-button {
+    color: var(--default-primary-color);
+    background-color: white;
+  }
+
+  #notificationDialog .buttons,
+  #errorDialog .buttons {
+    margin-top: 20px;
+    /*min-width: 300px;*/
+  }
+
+</style> -->
+<!-- <app-location route="{{route}}"></app-location>
+<app-route route="{{route}}"
+           pattern="/admin/:page"
+           data="{{routeData}}"
+           tail="{{subroute}}"></app-route>
+
+<paper-toast id="toast"></paper-toast>
+<app-drawer-layout fullbleed
+                   force-narrow>
+  <app-drawer id="drawer"
+              slot="drawer">
+    <app-toolbar>Menu</app-toolbar>
+    <iron-selector selected="[[page]]"
+                   attr-for-selected="name"
+                   class="drawer-list"
+                   role="navigation">
+      <a name="subscribers"
+         href="subscribers">
+        <paper-item>Subscribers</paper-item>
+      </a>
+      <a name="logs"
+         href="logs">
+        <paper-item>Logs</paper-item>
+      </a>
+      <a name="login"
+         href="login">
+        <paper-item>Login</paper-item>
+      </a>
+    </iron-selector>
+  </app-drawer> -->
+
+<!-- Main content -->
+<!-- <app-header-layout has-scrolling-region>
+
+    <app-header slot="header"
+                condenses
+                reveals
+                effects="waterfall">
+      <app-toolbar>
+        <paper-icon-button icon="app-icons:menu"
+                           drawer-toggle>
+        </paper-icon-button>
+        <div main-title><a href="/admin">Admin</a></div>
+      </app-toolbar>
+    </app-header>
+     <iron-pages selected="[[page]]"
+                attr-for-selected="name"
+                fallback-selection="view404"
+                role="main">
+    <login-page name="login"
+                id="loginPage">
+    </login-page>
+    <my-view404 name="view404">
+      </my-view404>
+    </iron-pages>
+  </app-header-layout>
+</app-drawer-layout> -->
+
+<iron-pages selected="[[page]]"
+            attr-for-selected="name"
+            role="main">
+  <login-page name="login"
+              id="loginPage">
+  </login-page>
+  <logs-page name="logs"
+             id="logsPage">
+  </logs-page>
+</iron-pages>
