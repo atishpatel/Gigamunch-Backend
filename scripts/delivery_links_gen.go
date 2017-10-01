@@ -23,6 +23,10 @@ var (
 			Addresses: ``,
 		},
 		nameAndAddresses{
+			Name:      "Katherine",
+			Addresses: ``,
+		},
+		nameAndAddresses{
 			Name:      "Atish",
 			Addresses: ``,
 		},
@@ -46,9 +50,11 @@ func main() {
 	startAddress := []string{"166 Chesapeake Harbor Blvd, Hendersonville"}
 	del := "\n"
 	for _, i := range input {
-		addresses := strings.Split(strings.Replace(i.Addresses, "\t", "", -1), del)
-		addresses = append(startAddress, addresses...)
-		printMapLinks(i.Name, addresses)
+		if len(i.Addresses) > 0 {
+			addresses := strings.Split(strings.Replace(i.Addresses, "\t", "", -1), del)
+			addresses = append(startAddress, addresses...)
+			printMapLinks(i.Name, addresses)
+		}
 	}
 
 }
