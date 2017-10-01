@@ -1,0 +1,45 @@
+service: admin
+runtime: go
+api_version: go1.8
+
+handlers:
+  - url: /admin/api/.*
+    script: _go_app
+
+  - url: /admin/build
+    static_dir: app/build
+    secure: always
+  
+  - url: /admin/node_modules
+    static_dir: app/node_modules
+    secure: always
+
+  # TODO: set meta data on server side
+  - url: /admin.*
+    static_files: app/index.html
+    upload: app/index.html
+    secure: always
+
+  - url: /swagger.json
+    static_files: app/AdminAPI.swagger.json
+    upload: app/AdminAPI.swagger.json
+
+  - url: /.*
+    script: _go_app
+
+env_variables:
+  MYSQL_CONNECTION: server:gigamunch@CONNECTIONSTRING/gigamunch?collation=utf8mb4_general_ci
+  PROJECT_ID: PROJECTID
+
+skip_files:
+  - ^(.*/)?.*/test/.*$
+  - ^(.*/)?.*/tests/.*$
+  - ^(.*/)?.*\.DS_Store$
+  - ^(.*/)?.*\.md$
+  - ^(.*/)?.*\.yml$
+  - ^(.*/)?.*\.gitignore$
+  - ^(.*/)?.*\.lock$
+  - ^(.*/)?.*/LICENSE$
+  - ^(app/src/.*)
+  - ^(app/types/.*)
+  - ^(app/node_modules/@types/.*)
