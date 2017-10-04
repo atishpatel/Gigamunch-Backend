@@ -81,18 +81,16 @@
     <div class="table">
       <div class="table-row table-header-row">
         <div class="table-cell">Email</div>
-        <div class="table-cell">Name</div>
-        <div class="table-cell">Delivery Time</div>
-        <div class="table-cell">Status</div>
+        <div class="table-cell">First Name</div>
+        <div class="table-cell">Last Name</div>
       </div>
       <dom-repeat items="[[sublogs]]"
                   as="sublog">
         <template>
           <div class="table-row">
             <div class="table-cell">[[sublog.sub_email]]</div>
-            <div class="table-cell">[[sublog.name]]</div>
-            <div class="table-cell">[[sublog.delivery_time]]</div>
-            <div class="table-cell">[[sublog.status]]</div>
+            <div class="table-cell">[[sublog.firstName]]</div>
+            <div class="table-cell">[[sublog.lastName]]</div>
           </div>
         </template>
       </dom-repeat>
@@ -166,11 +164,31 @@
               nonVegNames.push(sublogs[i].name);
             }
             sublogs[i].status = this.getStatus(sublogs[i]);
+            var fullName = this.slitName(sublogs[i].name);
+            sublogs[i].firstName = fullName.first;
+            sublogs[i].lastName = fullName.last;
           }
           this.nonVegEmails = nonVegEmails;
           this.nonVegNames = nonVegNames;
           this.vegEmails = vegEmails;
           this.vegNames = vegNames;
+        }
+      }
+
+      slitName(name) {
+        var first = '';
+        var last = '';
+
+        var nameArray = name.trim().split(' ');
+        if (nameArray.length >= 2) {
+          last = nameArray[nameArray.length - 1];
+        }
+        if (nameArray.length >= 1) {
+          first = nameArray[0];
+        }
+        return {
+          first,
+          last,
         }
       }
 
