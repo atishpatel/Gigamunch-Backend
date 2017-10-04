@@ -645,10 +645,10 @@ func DerivePrice(servings int8) float32 {
 	case 1:
 		return 17 + 1.66
 	case 2:
-		return 30 + 2.93
-	case 3:
-		return 45 + 4.39
-	default: // 4+ meals is $14/meal + tax
-		return 14 * float32(servings) * 1.0975
+		return (16 * 2) + 3.12
+	case 4:
+		return (15 * 4) + 5.85
+	default:
+		return 15 * float32(servings) * 1.0975
 	}
 }
