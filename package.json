@@ -1,16 +1,30 @@
 {
   "name": "gigamunch-backend",
+  "repository": "https://github.com/atishpatel/Gigamunch-Backend.git",
+  "author": "Atish Patel <atishpatel2012@gmail.com>",
+  "license": "No licence",
+  "private": true,
   "version": "1.0.0",
   "devDependencies": {
+    "@types/google-protobuf": "^3.2.7",
     "@types/google.analytics": "^0.0.33",
     "@types/polymer": "^1.1.31",
-    "tslint-config-airbnb": "^5.2.1",
-    "typescript": "^2.4.1"
-  },
-  "dependencies": {
+    "del": "^3.0.0",
     "eslint": "^4.1.1",
     "eslint-config-airbnb": "^15.0.2",
     "eslint-plugin-html": "^3.0.0",
-    "eslint-plugin-import": "^2.6.1"
+    "eslint-plugin-import": "^2.6.1",
+    "gulp": "gulpjs/gulp#4.0",
+    "gulp-better-rollup": "^1.1.1",
+    "gulp-if": "^2.0.2",
+    "gulp-js-text-imports": "^0.0.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-typescript": "^3.2.2",
+    "gulp-uglify-es": "^0.1.3",
+    "gulp-watch": "^4.3.11",
+    "html-minifier": "^3.5.5",
+    "ts-protoc-gen": "^0.4.0",
+    "tslint-config-airbnb": "^5.2.1",
+    "typescript": "^2.4.1"
   }
 }
