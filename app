@@ -22,6 +22,12 @@ if [[ $1 == "build" ]]; then
     rm -rf build/unbundled
     cd ../..
   fi
+  if [[ $* == *admin* ]]; then
+    echo "Building admin/app:"
+    cd admin/app
+    gulp build
+    cd ../..
+  fi
   if [[ $* == *cook* ]]; then
     echo "Building server/cook:"
     cd server/cook
@@ -32,8 +38,17 @@ if [[ $1 == "build" ]]; then
   fi
   if [[ $* == *proto* ]]; then
     # build protobuf and grpc
-    echo "Building Gigamunch-Proto eater api."
+    echo "Building Gigamunch-Proto apis."
+    # Eater
     protoc -I Gigamunch-Proto/common/ -I Gigamunch-Proto/eater/ Gigamunch-Proto/common/*.proto Gigamunch-Proto/eater/*.proto --go_out=plugins=grpc:Gigamunch-Proto/eater
+    # Shared
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/shared/ Gigamunch-Proto/shared/*.proto --go_out=plugins=grpc:Gigamunch-Proto/shared
+    # Admin
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
+    mv Gigamunch-Proto/shared/github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared/*.go Gigamunch-Proto/shared/
+    rm -fR Gigamunch-Proto/shared/github.com
+    # Typescript
+    guild build
   fi
   exit 0
 fi
@@ -49,7 +64,7 @@ if [[ $1 == "deploy" ]]; then
   if [[ $* == *--prod* ]] || [[ $* == *-p* ]]; then
     project="gigamunch-omninexus"
     sqlip="104.154.236.200"
-    domain="gigamunchapp"
+    domain="eatgigamunch"
   fi
   echo "Deploying the following to $project" 
   if [[ $* == *eater* ]]; then
@@ -63,6 +78,10 @@ if [[ $1 == "deploy" ]]; then
     echo "Deploying cook:"
     cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
     gcloud app deploy cookapi/app.yaml --project=$project --version=1 --quiet
+  fi
+  if [[ $* == *admin* ]]; then
+    echo "Deploying admin:"
+    gcloud app deploy admin/app.yaml --project=$project --version=1 --quiet
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
@@ -80,23 +99,33 @@ if [[ $1 == "serve" ]]; then
   # setup mysql
   /usr/local/opt/mysql56/bin/mysql.server start
   # create gigamunch database
-  cat misc/setup.sql | mysql -uroot
+  cat misc/setup.sql | /usr/local/opt/mysql56/bin/mysql -uroot
   # start goapp serve
   project="gigamunch-omninexus-dev"
-  sqlip="localhost"
+  sqlip="104.154.108.220"
   if [[ $2 == "eater" ]]; then
     echo "Starting eaterapi and server."
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
     cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g" > eaterapi/app.yaml
     dev_appserver.py --datastore_path ./.datastore eaterapi/app.yaml server/app.yaml
-  else
+  fi
+  if [[ $2 == "admin" ]]; then
+    echo "Starting admin:"
+    dev_appserver.py --datastore_path ./.datastore admin/app.yaml&
+    cd admin/app
+    gulp watch
+    cd ../..
+  fi
+  if [[ $2 == "server" ]]; then
     echo "Starting cookapi and server."
     cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g" > cookapi/app.yaml
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore cookapi/app.yaml server/app.yaml
+    dev_appserver.py --datastore_path ./.datastore server/app.yaml
   fi
   # stop mysql
   /usr/local/opt/mysql56/bin/mysql.server stop
+  # kill background processes
+  trap 'kill $(jobs -p)' EXIT
 fi 
 
 wait
