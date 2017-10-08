@@ -2,33 +2,33 @@
 
 # Setup
 The following programs need to be installed:
-  - golang app engine sdk
+  - gcloud
   - mysql 5.6 (just use brew for OS X)
-  - nmp
-  - bower
+  - `brew install yarn`
+  - `yarn add global gulp-cli`
 
-Do the following in your .bashprofile file:
-  - export GIGAMUNCH_PRIVATE_DIR = point to the private directory with config files
+Do the following in your .bashprofile or .zsh file:
   - add /usr/local/mysql/support-files/ to PATH
 
 Setting up for web development:
-  - npm install (/)
-  - bower install (/server/app, /server/gigachef)
+  - `yarn install`
+  - give 'app' executable permission
+    - `chmod 755 app`
 
-Run local development:
-  - sh app.sh
+To run local development:
+  - `app serve (admin | server)`
 
 # App Engine Architecture
-There are currently three modules.
-default:
-  - In the 'main' folder.
-  - This module serves all front-end related request such as template based page rendering.
-endpoint-gigachef:
-  - In the 'endpoints-gigachef' folder.
-endpoint-gigamuncher:
-  - In the 'endpoint-gigamuncher' folder.
-cookapi:
-  - 'cookapi' folder
+Here are the modules:
+  - default:
+    - In the 'server' folder.
+    - This module serves landing page.
+  - admin:
+    - In the 'admin' folder.
+  - driver:
+    - In the 'driver' folder.
+  - subscriber:
+    - In the 'subscriber' folder.
 
 # Other notes
   - When added a page to the website, the app.yaml and app-shell.html page must be edited or the page will keep reloading.
