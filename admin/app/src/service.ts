@@ -56,9 +56,7 @@ export function GetLog(id: number): Promise < any > {
   return callFetch(url, 'POST', req);
 }
 
-
-
-function callFetch(url: String, method: String, body: Object): Promise < Response > {
+function callFetch(url: string, method: string, body: object): Promise < Response > {
   return fetch(url, {
     method,
     headers: {

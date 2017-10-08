@@ -1,4 +1,4 @@
-export function GetToken() {
+export function GetToken(): string {
   const name = 'AUTHTKN=';
   const ca = document.cookie.split(';');
   for (let i = 0; i < ca.length; i++) {
@@ -11,7 +11,11 @@ export function GetToken() {
     }
   }
   if (location.hostname === 'localhost') {
-    return window.localStorage.getItem('AUTHTKN');
+    const tnk = window.localStorage.getItem('AUTHTKN');
+    if (!tnk) {
+      return '';
+    }
+    return tnk;
   }
   return '';
 }

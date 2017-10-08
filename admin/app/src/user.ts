@@ -3,9 +3,9 @@ import { GetJWT, GetToken } from './utils/token';
 export function IsLoggedIn(): boolean {
   const tkn = GetToken();
   if (tkn === '') {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
 
 export function ID(): string {
