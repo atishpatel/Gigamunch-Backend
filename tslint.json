@@ -6,6 +6,9 @@
     "max-line-length": [
       false
     ],
-    "align": [true, "statements"]
+    "align": [true, "statements"],
+    "import-name": [false],
+    "function-name": false,
+    "variable-name": [true, "allow-pascal-case"]
   }
 }
