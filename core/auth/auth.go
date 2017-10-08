@@ -12,6 +12,7 @@ import (
 	fba "firebase.google.com/go/auth"
 	"google.golang.org/api/option"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -19,9 +20,11 @@ import (
 )
 
 var (
-	fbAuth *fba.Client
-	db     common.DB
-	jwtKey []byte
+	standAppEngine bool
+	projID         string
+	fbAuth         *fba.Client
+	db             common.DB
+	jwtKey         []byte
 )
 
 var (
@@ -46,7 +49,10 @@ func NewClient(ctx context.Context) (*Client, error) {
 	if !ok {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
-
+	if standAppEngine {
+		httpClient := urlfetch.Client(ctx)
+		setupFBApp(ctx, httpClient)
+	}
 	return &Client{
 		ctx: ctx,
 		log: log,
@@ -150,11 +156,13 @@ func (c *Client) GetFromFBToken(ctx context.Context, fbToken string) (*common.Us
 
 // GetUser gets a User. If the token is fresh, it doesn't make a database call.
 func (c *Client) GetUser(ctx context.Context, tkn string) (*common.User, error) {
+	// TODO: implement
 	return nil, nil
 }
 
 // Refresh returns a fresh token and invalidates the old one.
 func (c *Client) Refresh(ctx context.Context, tkn string) (string, error) {
+	// TODO: implement
 	return "", nil
 }
 
@@ -206,31 +214,40 @@ func getIATTime() time.Time {
 func splitName(name string) (string, string) {
 	first := "-"
 	last := "-"
-	nameArray := strings.Split(strings.TrimSpace(name), " ")
-	switch len(nameArray) {
-	case 3:
-		if len(nameArray[0]) > 2 {
-			first = nameArray[0]
-		}
-		if len(nameArray[2]) > 2 {
-			last = nameArray[2]
-		} else if len(nameArray[1]) > 2 {
-			last = nameArray[1]
-		}
-	case 2:
-		if len(nameArray[1]) > 2 {
-			last = nameArray[1]
-		}
-		if len(nameArray[0]) > 2 {
-			first = nameArray[0]
-		}
+	nameArray := strings.Split(strings.Title(strings.TrimSpace(name)), " ")
+	if len(nameArray) >= 2 {
+		last = nameArray[len(nameArray)-1]
+	}
+	if len(nameArray) >= 1 {
+		first = nameArray[0]
 	}
 	return first, last
 }
 
 // Setup sets up auth.
-func Setup(ctx context.Context, projID string, httpClient *http.Client, dbC common.DB, jwtSecret string) error {
+func Setup(ctx context.Context, standardAppEngine bool, projectID string, httpClient *http.Client, dbC common.DB, jwtSecret string) error {
 	rand.Seed(time.Now().Unix())
+	var err error
+	standAppEngine = standardAppEngine
+	projID = projectID
+	if !standAppEngine {
+		err = setupFBApp(ctx, httpClient)
+		if err != nil {
+			return err
+		}
+	}
+	if dbC == nil {
+		return fmt.Errorf("db cannot be nil for sub")
+	}
+	db = dbC
+	if jwtSecret == "" {
+		return fmt.Errorf("jwt secret is empty")
+	}
+	jwtKey = []byte(jwtSecret)
+	return nil
+}
+
+func setupFBApp(ctx context.Context, httpClient *http.Client) error {
 	var ops []option.ClientOption
 	if httpClient != nil {
 		ops = append(ops, option.WithHTTPClient(httpClient))
@@ -247,13 +264,5 @@ func Setup(ctx context.Context, projID string, httpClient *http.Client, dbC comm
 	if err != nil {
 		return err
 	}
-	if dbC == nil {
-		return fmt.Errorf("db cannot be nil for sub")
-	}
-	db = dbC
-	if jwtSecret == "" {
-		return fmt.Errorf("jwt secret is empty")
-	}
-	jwtKey = []byte(jwtSecret)
 	return nil
 }
