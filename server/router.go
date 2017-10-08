@@ -9,12 +9,16 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
 	"html/template"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -171,6 +175,27 @@ func (s *scheduleSubscriptionReq) valid() error {
 	return nil
 }
 
+// inNashvilleZone checks if an address is in Nashville zone.
+func inNashvilleZone(ctx context.Context, addr *types.Address) (bool, error) {
+	var err error
+	if !addr.GeoPoint.Valid() {
+		// TODO get geopoint form address
+		err = maps.GetGeopointFromAddress(ctx, addr)
+		if err != nil {
+			return false, errors.Annotate(err, "failed to GetGeopointFromAddress")
+		}
+	}
+	fence := new(geofence.Geofence)
+	key := datastore.NewKey(ctx, "Geofence", common.Nashville.String(), 0, nil)
+	err = datastore.Get(ctx, key, fence)
+	if err != nil {
+		return false, errInternal.WithError(err).Annotate("failed to db.Get")
+	}
+	polygon := geofence.NewPolygon(fence.Points)
+	contains := polygon.Contains(geofence.Point{common.GeoPoint{Latitude: addr.Latitude, Longitude: addr.Longitude}})
+	return contains, nil
+}
+
 // called via ajax
 func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
@@ -193,7 +218,13 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		resp.Err = errors.Wrap("failed to validate request", err)
 		return
 	}
-	if sReq.Address.GreatCircleDistance(types.GeoPoint{Latitude: 36.045565, Longitude: -86.784328}) > 25 {
+	inZone, err := inNashvilleZone(ctx, &sReq.Address)
+	if err != nil {
+		resp.Err = errInternal.WithMessage("Woops! something went wrong").WithError(err).Annotate("failed inNashvilleZone")
+		return
+	}
+	if !inZone {
+		utils.Infof(ctx, "failed address zone zip(%s). Address: %s", sReq.Address.Zip, sReq.Address.String())
 		// out of delivery range
 		if sReq.Address.Street == "" {
 			resp.Err = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!")
@@ -227,13 +258,10 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		servings = 0
 	case "1":
 		servings = 1
-		weeklyAmount += 17
 	case "2":
 		servings = 2
-		weeklyAmount += float32(servings*15) + 2.93
 	default:
 		servings = 4
-		weeklyAmount += float32(servings*14) + 5.46
 	}
 	switch sReq.VegetarianServings {
 	case "":
@@ -242,14 +270,12 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 		vegetarianServings = 0
 	case "1":
 		vegetarianServings = 1
-		weeklyAmount += 17
 	case "2":
 		vegetarianServings = 2
-		weeklyAmount += float32(vegetarianServings * 15)
 	default:
 		vegetarianServings = 4
-		weeklyAmount += float32(vegetarianServings * 14)
 	}
+	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
 	customerID := payment.GetIDFromEmail(sReq.Email)
 	firstBoxDate := time.Now().Add(72 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
