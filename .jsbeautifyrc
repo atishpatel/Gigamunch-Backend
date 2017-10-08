@@ -72,5 +72,8 @@
     "h5",
     "h6"
   ],
-  "wrap_attributes": "force-aligned"
+  "wrap_attributes": "force-aligned",
+  "js": {
+    "indent_size": 2
+  }
 }
