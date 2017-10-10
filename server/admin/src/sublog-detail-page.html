@@ -103,7 +103,7 @@
                 <div class="table-cell">[[sublog.servings]]</div>
                 <div class="table-cell">[[sublog.vegetarian_servings]]</div>
                 <div class="table-cell">[[sublog.apt]]</div>
-                <div class="table-cell">[[sublog.addressString]]</div>
+                <div class="table-cell">[[sublog.addressStr]]</div>
                 <div class="table-cell">[[sublog.phone_number]]</div>
                 <div class="table-cell">[[sublog.delivery_tips]]</div>
                 <div class="table-cell">[[sublog.delivery_time]]</div>
@@ -199,7 +199,21 @@
               sublogDay.skippedSublogs.push(slogs[i]);
             } else {
               slogs[i].apt = slogs[i].address.apt;
-              slogs[i].addressString = this.$.skipped.getAddress(slogs[i].address);
+
+              function getAddress(a) {
+                if (a && a.street) {
+                  if (/\d/.test(a.street)) {
+                    return a.street + ', ' + a.city;
+                  }
+                  let apt = '';
+                  if (a.apt) {
+                    apt = a.apt + ' ';
+                  }
+                  return apt + a.street + ', ' + a.city;
+                }
+                return '';
+              }
+              slogs[i].addressStr = getAddress(slogs[i].address);
               slogs[i].status = this.$.skipped.getStatus(slogs[i]);
               sublogDay.unskippedSublogs.push(slogs[i]);
             }

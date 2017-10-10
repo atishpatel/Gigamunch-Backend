@@ -36,6 +36,7 @@ const (
 	updateServingsSubLogStatement            = "UPDATE sub SET servings=?, amount=? WHERE date=? AND sub_email=?"
 	updateServingsPermanentlySubLogStatement = "UPDATE sub SET servings=?, amount=? WHERE date>? AND sub_email=? AND servings=?"
 	deleteSubLogStatment                     = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
+	updateUnpaidPayment                      = "UPDATE sub SET payment_method_token=? WHERE free=0 AND paid=0 AND skip=0 AND sub_email=?"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
 )
@@ -218,6 +219,28 @@ func (c *Client) Setup(date time.Time, subEmail string, servings int8, amount fl
 			return errDuplicateEntry.WithError(err).Wrap("failed to execute insertSubLogStatement statement.")
 		}
 		return errSQLDB.WithError(err).Wrap("failed to execute insertSubLogStatement statement.")
+	}
+	return nil
+}
+
+func (c *Client) UpdatePaymentToken(subEmail string, paymentMethodToken string) error {
+	if subEmail == "" || paymentMethodToken == "" {
+		return errInvalidParameter.Wrapf("expected(actual): subEmail(%s) paymentMethodToken(%s)", subEmail, paymentMethodToken)
+	}
+	s, err := c.GetSubscriber(subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.GetSubscriber", err)
+	}
+	oldPMT := s.PaymentMethodToken
+	s.PaymentMethodToken = paymentMethodToken
+	utils.Infof(c.ctx, "changing sub(%s)'s payment method token from old(%s) new(%s)", subEmail, oldPMT, paymentMethodToken)
+	err = put(c.ctx, subEmail, s)
+	if err != nil {
+		return errors.Wrap("failed to put", err)
+	}
+	_, err = mysqlDB.Exec(updateUnpaidPayment, paymentMethodToken, subEmail)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateUnpaidPayment statement")
 	}
 	return nil
 }

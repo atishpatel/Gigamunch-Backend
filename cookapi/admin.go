@@ -198,6 +198,11 @@ func (service *Service) SetupSubLogs(ctx context.Context, req *DateReq) (*ErrorO
 		return resp, nil
 	}
 
+	if req.Date.Before(time.Now()) {
+		resp.Err = errors.BadRequestError.WithMessage("Date is before now.")
+		return resp, nil
+	}
+
 	subC := sub.New(ctx)
 	err = subC.SetupSubLogs(req.Date)
 	if err != nil {
@@ -367,6 +372,35 @@ func (service *Service) ChangeServingsPermanently(ctx context.Context, req *Chan
 	return resp, nil
 }
 
+// UpdatePaymentMethodTokenReq is a request for UpdatePaymentMethodToken.
+type UpdatePaymentMethodTokenReq struct {
+	EmailReq
+	PaymentMethodToken string `json:"payment_method_token"`
+}
+
+// ChangeServingForDate gives a changes the serving count for a user permanently.
+func (service *Service) UpdatePaymentMethodToken(ctx context.Context, req *UpdatePaymentMethodTokenReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "UpdatePaymentMethodToken", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+
+	subC := sub.New(ctx)
+	err = subC.UpdatePaymentToken(req.Email, req.PaymentMethodToken)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.UpdatePaymentToken")
+		return resp, nil
+	}
+	return resp, nil
+}
+
 // ChangeServingForDateReq is a request for ChangeServingForDate.
 type ChangeServingsForDateReq struct {
 	SubLogReq
@@ -459,6 +493,7 @@ type SubLog struct {
 	Date         time.Time `json:"date"`
 	Servings     int8      `json:"servings"`
 	DeliveryTime int8      `json:"delivery_time"`
+	CustomerID   string    `json:"customer_id"`
 	sub.SubscriptionLog
 	sub.SubscriptionSignUp
 }
@@ -505,6 +540,7 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].SubscriptionLog = *subLogs[i]
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
 					resp.SubLogs[i].Date = subLogs[i].Date
+					resp.SubLogs[i].CustomerID = subLogs[i].CustomerID
 					if subs[j].VegetarianServings > 0 {
 						resp.SubLogs[i].VegetarianServings = subLogs[i].Servings
 					} else {

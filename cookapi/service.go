@@ -8,11 +8,14 @@ import (
 	"time"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
@@ -77,6 +80,7 @@ func main() {
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/send-bag-reminder", handleSendBagReminder)
+	http.HandleFunc("/testbra", testbra)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
 	if err != nil {
 		log.Fatalf("Failed to register service: %#v", err)
@@ -130,6 +134,8 @@ func main() {
 	// register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Give free meal to a customer for a date. Admin func.")
 	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
 	register("ChangeServingsForDate", "ChangeServingsForDate", "POST", "cookservice/ChangeServingsForDate", "Change number of servings for a week. Admin func.")
+
+	register("UpdatePaymentMethodToken", "UpdatePaymentMethodToken", "POST", "cookservice/UpdatePaymentMethodToken", "Updates the payment method token. Admin func.")
 	register("ChangeServingsPermanently", "ChangeServingsPermanently", "POST", "cookservice/ChangeServingsPermanently", "Change number of servings permanently. Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Get all subscription activty. Admin func.")
 	register("GetSubLogsForDate", "getSubLogsForDate", "POST", "cookservice/getSubLogsForDate", "Get subscription activty for a date. Admin func.")
@@ -347,4 +353,40 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+}
+
+func testbra(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	fence := &geofence.Geofence{
+		ID:   "Nashville",
+		Type: geofence.ServiceZone,
+		Points: []geofence.Point{
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.31291, Longitude: -86.57433}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.33974, Longitude: -86.59391}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.32126, Longitude: -86.68052}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34057, Longitude: -86.6835}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34332, Longitude: -86.73258}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.30849, Longitude: -86.75697}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.26393, Longitude: -86.75148}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.22156, Longitude: -86.87645}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.13838, Longitude: -86.89426}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.05874, Longitude: -87.05354}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.98871, Longitude: -86.97543}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.98477, Longitude: -86.81081}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.01971, Longitude: -86.6764}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.0613, Longitude: -86.56121}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.08328, Longitude: -86.56189}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.13833, Longitude: -86.60445}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.24794, Longitude: -86.58857}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.25106, Longitude: -86.58222}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.27722, Longitude: -86.56128}},
+		},
+	}
+	key := datastore.NewKey(ctx, "Geofence", "Nashville", 0, nil)
+	_, err := datastore.Put(ctx, key, fence)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintln("fail: ", err)))
+		return
+	}
+	w.Write([]byte("success"))
 }

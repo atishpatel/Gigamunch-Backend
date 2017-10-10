@@ -244,6 +244,18 @@
                           resizable>
         <template class="header">
           <div class="cell">
+            CustomerID
+          </div>
+        </template>
+        <template>
+          <div class="cell"><a target="_blank"
+               href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[item.customer_id]]">[[item.customer_id]]</a></div>
+        </template>
+      </vaadin-grid-column>
+      <vaadin-grid-column hidden$=[[!detailed]]
+                          resizable>
+        <template class="header">
+          <div class="cell">
             Refunded
           </div>
         </template>
