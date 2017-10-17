@@ -1,4 +1,7 @@
+import { UserUpdated } from './utils/event';
 import { GetJWT, GetToken } from './utils/token';
+
+addEventListener(UserUpdated, UpdateUser);
 
 export function IsLoggedIn(): boolean {
   const tkn = GetToken();
@@ -8,29 +11,19 @@ export function IsLoggedIn(): boolean {
   return true;
 }
 
-export function ID(): string {
-  const jwt = GetJWT(GetToken());
-  return jwt.id;
-}
+export let ID = '';
+export let Email = '';
+export let FirstName = '';
+export let LastName = '';
+export let PhotoURL = '';
 
-export function Email(): string {
+export function UpdateUser() {
   const jwt = GetJWT(GetToken());
-  return jwt.email;
-}
-
-export function FirstName(): string {
-  const jwt = GetJWT(GetToken());
-  return jwt.first_name;
-}
-
-export function LastName(): string {
-  const jwt = GetJWT(GetToken());
-  return jwt.last_name;
-}
-
-export function PhotoURL(): string {
-  const jwt = GetJWT(GetToken());
-  return jwt.photo_url;
+  ID = jwt.id;
+  Email = jwt.email;
+  FirstName = jwt.first_name;
+  LastName = jwt.last_name;
+  PhotoURL = jwt.photo_url;
 }
 
 export function HasCreditCard(): boolean {
@@ -41,3 +34,5 @@ export function HasCreditCard(): boolean {
 function getKthBit(x: number, k: number) {
   return (((x >> k) & 1) === 1);
 }
+
+UpdateUser();
