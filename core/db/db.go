@@ -139,8 +139,8 @@ func (c *Client) GetMulti(ctx context.Context, keys []common.Key, dst interface{
 }
 
 // QueryFilter runs a query with filter parameter.
-func (c *Client) QueryFilter(ctx context.Context, kind string, filterString string, filterValue interface{}, dst interface{}) ([]common.Key, error) {
-	dsKeys, err := datastore.NewQuery(kind).Filter(filterString, filterValue).GetAll(ctx, dst)
+func (c *Client) QueryFilter(ctx context.Context, kind string, offset, limit int, filterString string, filterValue interface{}, dst interface{}) ([]common.Key, error) {
+	dsKeys, err := datastore.NewQuery(kind).Offset(offset).Limit(limit).Filter(filterString, filterValue).GetAll(ctx, dst)
 	if err != nil {
 		return nil, err
 	}

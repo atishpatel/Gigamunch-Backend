@@ -42,16 +42,20 @@ type Client struct {
 
 // NewClient gives you a new client.
 func NewClient(ctx context.Context) (*Client, error) {
+	var err error
+	if standAppEngine {
+		httpClient := urlfetch.Client(ctx)
+		err = setupFBApp(ctx, httpClient)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if fbAuth == nil {
 		return nil, errInternal.Annotate("setup not called")
 	}
 	log, ok := ctx.Value(common.LoggingKey).(*logging.Client)
 	if !ok {
 		return nil, errInternal.Annotate("failed to get logging client")
-	}
-	if standAppEngine {
-		httpClient := urlfetch.Client(ctx)
-		setupFBApp(ctx, httpClient)
 	}
 	return &Client{
 		ctx: ctx,
@@ -63,7 +67,7 @@ func createSessionToken(ctx context.Context, fbID, name, email, photoURL, provid
 	var err error
 	firstTime := false
 	var multiUserSessions []*UserSessions
-	keys, err := db.QueryFilter(ctx, kind, "User.AuthID=", fbID, &multiUserSessions)
+	keys, err := db.QueryFilter(ctx, kind, 0, 1, "User.AuthID=", fbID, &multiUserSessions)
 	if err != nil {
 		if err == db.ErrNoSuchEntity() {
 			firstTime = true
@@ -214,7 +218,8 @@ func getIATTime() time.Time {
 func splitName(name string) (string, string) {
 	first := "-"
 	last := "-"
-	nameArray := strings.Split(strings.Title(strings.TrimSpace(name)), " ")
+	nameStripper := strings.NewReplacer(".", "", "Mr ", "", "Ms ", "", "the", "", "Dr ", "")
+	nameArray := strings.Split(strings.Title(strings.TrimSpace(nameStripper.Replace(name))), " ")
 	if len(nameArray) >= 2 {
 		last = nameArray[len(nameArray)-1]
 	}
