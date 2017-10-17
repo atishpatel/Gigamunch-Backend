@@ -47,34 +47,18 @@
       </style>
     </shared-styles>
     <p><strong>Non-Veg Emails:</strong>
-      <dom-repeat items="[[nonVegEmails]]"
-                  as="email">
+      <dom-repeat items="[[nonvegSublogs]]"
+                  as="sublog">
         <template>
-          [[email]],
+          [[sublog.email]],
         </template>
       </dom-repeat>
     </p>
     <p><strong>Non-veg Names:</strong>
-      <dom-repeat items="[[nonVegNames]]"
-                  as="name">
+      <dom-repeat items="[[nonvegSublogs]]"
+                  as="sublog">
         <template>
-          [[name]],
-        </template>
-      </dom-repeat>
-    </p>
-    <p><strong>Veg Emails:</strong>
-      <dom-repeat items="[[vegEmails]]"
-                  as="email">
-        <template>
-          [[email]],
-        </template>
-      </dom-repeat>
-    </p>
-    <p><strong>Veg Names:</strong>
-      <dom-repeat items="[[vegNames]]"
-                  as="name">
-        <template>
-          [[name]],
+          [[sublog.name]],
         </template>
       </dom-repeat>
     </p>
@@ -84,7 +68,40 @@
         <div class="table-cell">First Name</div>
         <div class="table-cell">Last Name</div>
       </div>
-      <dom-repeat items="[[sublogs]]"
+      <dom-repeat items="[[nonvegSublogs]]"
+                  as="sublog">
+        <template>
+          <div class="table-row">
+            <div class="table-cell">[[sublog.sub_email]]</div>
+            <div class="table-cell">[[sublog.firstName]]</div>
+            <div class="table-cell">[[sublog.lastName]]</div>
+          </div>
+        </template>
+      </dom-repeat>
+    </div>
+    <p><strong>Veg Emails:</strong>
+      <dom-repeat items="[[vegSublogs]]"
+                  as="sublog">
+        <template>
+          [[sublog.email]],
+        </template>
+      </dom-repeat>
+    </p>
+    <p><strong>Veg Names:</strong>
+      <dom-repeat items="[[vegSublogs]]"
+                  as="sublog">
+        <template>
+          [[sublog.name]],
+        </template>
+      </dom-repeat>
+    </p>
+    <div class="table">
+      <div class="table-row table-header-row">
+        <div class="table-cell">Email</div>
+        <div class="table-cell">First Name</div>
+        <div class="table-cell">Last Name</div>
+      </div>
+      <dom-repeat items="[[vegSublogs]]"
                   as="sublog">
         <template>
           <div class="table-row">
@@ -110,16 +127,10 @@
             notify: true,
             observer: 'sublogsObserver',
           },
-          nonVegEmails: {
+          vegSublogs: {
             type: Array,
           },
-          nonVegNames: {
-            type: Array,
-          },
-          vegEmails: {
-            type: Array,
-          },
-          vegNames: {
+          nonvegSublogs: {
             type: Array,
           },
         }
@@ -151,27 +162,21 @@
       sublogsObserver() {
         if (this.sublogs) {
           const sublogs = this.sublogs;
-          let nonVegEmails = [];
-          let nonVegNames = [];
-          let vegEmails = [];
-          let vegNames = [];
+          let vegSublogs = [];
+          let nonvegSublogs = [];
           for (var i = 0; i < sublogs.length; i++) {
-            if (sublogs[i].vegetarian_servings > 0) {
-              vegEmails.push(sublogs[i].sub_email);
-              vegNames.push(sublogs[i].name);
-            } else {
-              nonVegEmails.push(sublogs[i].sub_email);
-              nonVegNames.push(sublogs[i].name);
-            }
             sublogs[i].status = this.getStatus(sublogs[i]);
             var fullName = this.slitName(sublogs[i].name);
             sublogs[i].firstName = fullName.first;
             sublogs[i].lastName = fullName.last;
+            if (sublogs[i].vegetarian_servings > 0) {
+              vegSublogs.push(sublogs[i]);
+            } else {
+              nonvegSublogs.push(sublogs[i]);
+            }
           }
-          this.nonVegEmails = nonVegEmails;
-          this.nonVegNames = nonVegNames;
-          this.vegEmails = vegEmails;
-          this.vegNames = vegNames;
+          this.nonvegSublogs = nonvegSublogs;
+          this.vegSublogs = vegSublogs;
         }
       }
 

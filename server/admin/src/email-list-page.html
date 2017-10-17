@@ -60,13 +60,10 @@
       <paper-button on-tap="getComparison">Get Comparison</paper-button>
 
       <h2>General - For Mondays</h2>
-      <h3>Non-veg subs for [[dateToString]]</h3>
+      <h3>Subs for [[dateToString]]</h3>
       <email-table id="nonVegTable"
-                   sublogs="[[nonVegSubs]]"></email-table>
+                   sublogs="[[subs]]"></email-table>
 
-      <h3>Veg subs for [[dateToString]]</h3>
-      <email-table id="vegTable"
-                   sublogs="[[vegSubs]]"></email-table>
       <hr>
       <h2>Special - For Wednesdays</h2>
       <h3 class="table-title">New People “how was it? / -”</h3>
@@ -117,10 +114,7 @@
           dateToString: {
             type: String,
           },
-          nonVegSubs: {
-            type: Array,
-          },
-          vegSubs: {
+          subs: {
             type: Array,
           },
           noskipXskipXnew: {
@@ -210,8 +204,7 @@
         if (sublogFrom === undefined || sublogTo === undefined) {
           return
         }
-        let nonVegSubs = [],
-          vegSubs = [],
+        let subs = [],
           noskipXskipXnew = [],
           noskipXnoskipXnew = [],
           noskipXskipXnormal = [],
@@ -225,11 +218,7 @@
           }
           // add to veg or non veg
           if (!slTo.skip) {
-            if (slTo.vegetarian_servings > 0) {
-              vegSubs.push(slTo);
-            } else {
-              nonVegSubs.push(slTo);
-            }
+            subs.push(slTo);
           }
 
           // iterate through each 
@@ -274,15 +263,13 @@
         const sublogSorter = function(a, b) {
           return a.email.localeCompare(b.email);
         }
-        nonVegSubs.sort(sublogSorter);
-        vegSubs.sort(sublogSorter);
+        subs.sort(sublogSorter);
         noskipXskipXnew.sort(sublogSorter);
         noskipXnoskipXnew.sort(sublogSorter);
         noskipXskipXnormal.sort(sublogSorter);
         noskipXnoskipXnormal.sort(sublogSorter);
         skipXnoskipXnormal.sort(sublogSorter);
-        this.nonVegSubs = nonVegSubs;
-        this.vegSubs = vegSubs;
+        this.subs = subs;
         this.noskipXskipXnew = noskipXskipXnew;
         this.noskipXnoskipXnew = noskipXnoskipXnew;
         this.noskipXskipXnormal = noskipXskipXnormal;
