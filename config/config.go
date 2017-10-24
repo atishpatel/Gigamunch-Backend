@@ -40,6 +40,8 @@ type Config struct {
 	CompanyCardExpirationDate string   `json:"company_card_expiration_date" datastore:",noindex"`
 	CompanyCardCVV            string   `json:"company_card_cvv" datastore:",noindex"`
 	SendGridKey               string   `json:"send_grid_key" datastore:",noindex"`
+	DripAPIKey                string   `json:"drip_api_key"`
+	DripAccountID             string   `json:"drip_account_id"`
 }
 
 // BTEnvironment is the environment type for braintree
@@ -92,7 +94,9 @@ type CreditCard struct {
 }
 
 type MailConfig struct {
-	SendGridKey string `json:"send_grid_key"`
+	SendGridKey   string `json:"send_grid_key"`
+	DripAPIKey    string `json:"drip_api_key"`
+	DripAccountID string `json:"drip_account_id"`
 }
 
 var (
@@ -112,6 +116,8 @@ func GetMailConfig(ctx context.Context) MailConfig {
 	} else {
 		config := getDatastoreConfig(ctx)
 		mailConfig.SendGridKey = config.SendGridKey
+		mailConfig.DripAPIKey = config.DripAPIKey
+		mailConfig.DripAccountID = config.DripAccountID
 	}
 	return mailConfig
 }
