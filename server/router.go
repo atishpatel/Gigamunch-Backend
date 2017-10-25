@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -32,6 +33,7 @@ import (
 var cookSignupPage []byte
 var scheduleSignupPage []byte
 var scheduleFormPage *template.Template
+var projID string
 
 func init() {
 	var err error
@@ -72,6 +74,11 @@ func init() {
 	http.HandleFunc("/signedup", handleCookSignup)
 	http.HandleFunc("/schedulesignedup", handleScheduleSignup)
 	http.Handle("/", r)
+}
+
+func getProjID() string {
+	projID = os.Getenv("PROJECTID")
+	return projID
 }
 
 func handle404(w http.ResponseWriter, req *http.Request) {
@@ -192,7 +199,13 @@ func inNashvilleZone(ctx context.Context, addr *types.Address) (bool, error) {
 		return false, errInternal.WithError(err).Annotate("failed to db.Get")
 	}
 	polygon := geofence.NewPolygon(fence.Points)
-	contains := polygon.Contains(geofence.Point{common.GeoPoint{Latitude: addr.Latitude, Longitude: addr.Longitude}})
+	pnt := geofence.Point{
+		GeoPoint: common.GeoPoint{
+			Latitude:  addr.Latitude,
+			Longitude: addr.Longitude,
+		},
+	}
+	contains := polygon.Contains(pnt)
 	return contains, nil
 }
 
@@ -321,24 +334,50 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	}
 	if !appengine.IsDevAppServer() {
 		messageC := message.New(ctx)
+		err = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+		}
 		err = messageC.SendSMS("6153975516", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 		}
-		_ = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
-		_ = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
-		_ = messageC.SendSMS("8607485603", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		err = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Piyush. Err: %+v", err)
+		}
 		_ = messageC.SendSMS("9316445311", fmt.Sprintf("$$$ New subscriber schedule page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
+		}
 	}
 	subC := sub.New(ctx)
 	err = subC.Free(firstBoxDate, sReq.Email)
 	if err != nil {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", sReq.Email, firstBoxDate, err)
 	}
+	// mailC := mail.New(ctx)
+	// err = mailC.SendWelcomeEmail(entry)
+	// if err != nil {
+	// 	utils.Criticalf(ctx, "Failed to send welcome email for new sign up(%s). Err:%v", sReq.Email, err)
+	// }
 	mailC := mail.New(ctx)
-	err = mailC.SendWelcomeEmail(entry)
+	mailReq := &mail.UserFields{
+		Email:             entry.Email,
+		Name:              entry.Name,
+		FirstDeliveryDate: firstBoxDate,
+		AddTags:           []mail.Tag{mail.Subscribed, mail.Customer},
+	}
+	if vegetarianServings > 0 {
+		mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
+		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
+	} else {
+		mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
+		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
+	}
+	err = mailC.UpdateUser(mailReq, getProjID())
 	if err != nil {
-		utils.Criticalf(ctx, "Failed to send welcome email for new sign up(%s). Err:%v", sReq.Email, err)
+		utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
 	}
 }
 
@@ -376,18 +415,22 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 			if err != nil {
 				utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 			}
-			_ = messageC.SendSMS("9316446755", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
 		}
-		hourFromNow := time.Now().Add(time.Hour)
-		sendEmailReq := &tasks.SendEmailParams{
-			Email: entry.Email,
-			Type:  "welcome",
-		}
-		tasksC := tasks.New(ctx)
-		err = tasksC.AddSendEmail(hourFromNow, sendEmailReq)
+		mailC := mail.New(ctx)
+		err = mailC.AddTag(entry.Email, mail.LeftWebsiteEmail)
 		if err != nil {
-			utils.Criticalf(ctx, "Error added sendemail to queue for email(%s). Err: %+v", entry.Email, err)
+			utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
 		}
+		// hourFromNow := time.Now().Add(time.Hour)
+		// sendEmailReq := &tasks.SendEmailParams{
+		// 	Email: entry.Email,
+		// 	Type:  "welcome",
+		// }
+		// tasksC := tasks.New(ctx)
+		// err = tasksC.AddSendEmail(hourFromNow, sendEmailReq)
+		// if err != nil {
+		// 	utils.Criticalf(ctx, "Error added sendemail to queue for email(%s). Err: %+v", entry.Email, err)
+		// }
 	} else {
 		utils.Warningf(ctx, "Warning: email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
 	}

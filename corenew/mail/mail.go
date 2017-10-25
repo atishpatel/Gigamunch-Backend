@@ -2,11 +2,16 @@ package mail
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
+	drip "github.com/atishpatel/drip-go"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -48,7 +53,7 @@ While there’s still a seat at the dinner table, I’d like to personally invit
 
 Warm Regards,
 Enis
-https://gigamunchapp.com/`
+https://eatgigamunch.com/`
 	introEmailHTML = `Hello! Welcome to GIGAMUNCH! 🎉 I’m Enis, and I’m the CEO and a co-founder of Gigamunch. I want to personally thank you for checking us out and seeing what we’re about.
  
 We’re all about great international food with great people. We came together from all different walks of life and made a company to reflect that. Our grassroots movement is catching on so fast that we’re about to hit our capacity. 🙌
@@ -57,31 +62,75 @@ While there’s still a seat at the dinner table, I’d like to personally invit
 
 Warm Regards,
 Enis
-https://gigamunchapp.com/`
+https://eatgigamunch.com/`
 )
 
 var (
 	welcomeSender = &User{Name: "Gigamunch", Email: "hello@gigamunchapp.com"}
 	introSender   = &User{Name: "Enis", Email: "enis@gigamunchapp.com"}
 	sendGridKey   string
+	key           string
+	acctID        string
+)
+
+var (
+	errDrip       = errors.InternalServerError
+	errBadRequest = errors.BadRequestError
+)
+
+// Tag is a tag applied to email subscribers.
+type Tag string
+
+func (t Tag) String() string {
+	return string(t)
+}
+
+const (
+	// LeftWebsiteEmail if they left email on website.
+	LeftWebsiteEmail Tag = "LEFT_WEBSITE_EMAIL"
+	// Customer if they are a customer and is removed when they unsubscribe.
+	Customer Tag = "CUSTOMER"
+	// Subscribed is applied when a someone subscribers and is never removed.
+	Subscribed Tag = "SUBSCRIBED"
+	// Vegetarian if they are a vegetarian.
+	Vegetarian Tag = "VEGETARIAN"
+	// NonVegetarian if they a non-vegetarian.
+	NonVegetarian Tag = "NON_VEGETARIAN"
+	// TwoServings if they are 2 servings.
+	TwoServings Tag = "TWO_SERVINGS"
+	// FourServings if they are 4 servings.
+	FourServings Tag = "FOUR_SERVINGS"
+	// Dev if they are development server customers.
+	Dev Tag = "DEV"
 )
 
 // Client is the client for this package.
 type Client struct {
 	ctx      context.Context
 	sgClient *sendgrid.Client
+	dripC    *drip.Client
 }
 
 // New returns a new Client.
 func New(ctx context.Context) *Client {
-	if sendGridKey == "" {
+	if sendGridKey == "" || key == "" || acctID == "" {
 		mailConfig := config.GetMailConfig(ctx)
 		sendGridKey = mailConfig.SendGridKey
+		key = mailConfig.DripAPIKey
+		acctID = mailConfig.DripAccountID
 	}
-	sendgrid.DefaultClient = &rest.Client{HTTPClient: urlfetch.Client(ctx)}
+	httpClient := urlfetch.Client(ctx)
+	sendgrid.DefaultClient = &rest.Client{HTTPClient: httpClient}
+	dripClient, err := drip.New(key, acctID)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to get drip client: %+v", err)
+	} else {
+		dripClient.HTTPClient = httpClient
+	}
 	return &Client{
 		ctx:      ctx,
 		sgClient: sendgrid.NewSendClient(sendGridKey),
+		dripC:    dripClient,
 	}
 }
 
@@ -152,4 +201,119 @@ func dateString(t time.Time) string {
 	}
 	numString = fmt.Sprintf("%d%s", t.Day(), suffix)
 	return fmt.Sprintf("%s, %s %s", t.Weekday().String(), t.Month().String(), numString)
+}
+
+// UserFields contain all the possible fields a user can have.
+type UserFields struct {
+	Email             string    `json:"email"`
+	Name              string    `json:"name"`
+	FirstDeliveryDate time.Time `json:"first_delivery_date"`
+	AddTags           []Tag     `json:"add_tags"`
+	RemoveTags        []Tag     `json:"remove_tags"`
+}
+
+// UpdateUser updates the user custom fields.
+func (c *Client) UpdateUser(req *UserFields, projID string) error {
+	// resp, err := c.dripC.FetchSubscriber(req.Email)
+	// if err != nil {
+	// 	return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
+	// }
+	// if len(resp.Errors) > 0 {
+	// 	return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.FetchSubscriber")
+	// }
+	// if len(resp.Subscribers) != 1 {
+	// 	return errBadRequest.Annotate("failed to find subscriber")
+	// }
+	sub := drip.UpdateSubscriber{
+		Email:        req.Email,
+		CustomFields: make(map[string]string),
+	}
+	firstName, lastName := splitName(req.Name)
+	if firstName != "" {
+		sub.CustomFields["FIRST_NAME"] = firstName
+	}
+	if lastName != "" {
+		sub.CustomFields["LAST_NAME"] = lastName
+	}
+	if !req.FirstDeliveryDate.IsZero() {
+		sub.CustomFields["FIRST_DELIVERY_DATE"] = dateString(req.FirstDeliveryDate)
+	}
+	if len(req.AddTags) > 0 {
+		for _, v := range req.AddTags {
+			sub.Tags = append(sub.Tags, v.String())
+		}
+	}
+	if len(req.RemoveTags) > 0 {
+		for _, v := range req.RemoveTags {
+			sub.RemoveTags = append(sub.RemoveTags, v.String())
+		}
+	}
+	// Add Dev tag to customers in non-prod env.
+	if !common.IsProd(projID) {
+		sub.Tags = append(sub.Tags, Dev.String())
+	}
+	dripReq := &drip.UpdateSubscribersReq{
+		Subscribers: []drip.UpdateSubscriber{
+			sub,
+		},
+	}
+	resp, err := c.dripC.UpdateSubscriber(dripReq)
+	if err != nil {
+		return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
+	}
+	if len(resp.Errors) > 0 {
+		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.FetchSubscriber")
+	}
+	return nil
+}
+
+func splitName(name string) (string, string) {
+	first := ""
+	last := ""
+	nameStripper := strings.NewReplacer(".", "", "mr ", "", "ms ", "", "the", "", "dr ", "")
+	nameReplaced := nameStripper.Replace(strings.ToLower(name))
+	nameArray := strings.Split(strings.Title(strings.TrimSpace(nameReplaced)), " ")
+	if len(nameArray) >= 2 {
+		last = nameArray[len(nameArray)-1]
+	}
+	if len(nameArray) >= 1 {
+		first = nameArray[0]
+	}
+	return first, last
+}
+
+// AddTag adds a tag to a customer. This often triggers a workflow.
+func (c *Client) AddTag(email string, tag Tag) error {
+	req := &drip.TagsReq{
+		Tags: []drip.TagReq{
+			drip.TagReq{
+				Email: email,
+				Tag:   tag.String(),
+			},
+		},
+	}
+	resp, err := c.dripC.TagSubscriber(req)
+	if err != nil {
+		return errDrip.WithError(err).Annotate("failed to drip.TagSubscriber")
+	}
+	if len(resp.Errors) > 0 {
+		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.TagSubscriber")
+	}
+	return nil
+}
+
+// RemoveTag removes a tag from a customer. This often triggers a workflow.
+func (c *Client) RemoveTag(email string, tag Tag) error {
+	req := &drip.TagReq{
+		Email: email,
+		Tag:   tag.String(),
+	}
+	resp, err := c.dripC.RemoveSubscriberTag(req)
+	if err != nil {
+		return errDrip.WithError(err).Annotate("failed to drip.TagSubscriber")
+	}
+	if len(resp.Errors) > 0 {
+		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.TagSubscriber")
+	}
+	return nil
 }

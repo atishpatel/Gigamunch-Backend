@@ -15,6 +15,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"google.golang.org/appengine"
@@ -51,6 +52,7 @@ var (
 	errEntrySkipped     = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
 	errNoSuchEntry      = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
 	errDuplicateEntry   = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
+	projID              string
 )
 
 // Client is the client fro this package.
@@ -64,6 +66,11 @@ func New(ctx context.Context) *Client {
 		connectSQL(ctx)
 	})
 	return &Client{ctx: ctx}
+}
+
+func getProjID() string {
+	projID = os.Getenv("PROJECTID")
+	return projID
 }
 
 // GetSubEmails gets a list of unique subscriber emails within the date range.
@@ -303,7 +310,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 	} else {
 		nonvegServings = servings
 	}
-	utils.Infof(c.ctx, "changing sub(%s)'s servings from nonveg(%d) veg(%d) amount(%2f) to nonveg(%d) veg(%d) amount(%2f)", subEmail, oldServings, oldServings, oldWeeklyAmount, nonvegServings, vegServings, weeklyAmount)
+	utils.Infof(c.ctx, "changing sub(%s)'s servings from nonveg(%d) veg(%d) amount(%2f) to nonveg(%d) veg(%d) amount(%2f)", subEmail, oldServings, oldVegServings, oldWeeklyAmount, nonvegServings, vegServings, weeklyAmount)
 	s.WeeklyAmount = weeklyAmount
 	s.Servings = nonvegServings
 	s.VegetarianServings = vegServings
@@ -311,11 +318,26 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 	if err != nil {
 		return errors.Wrap("failed to put", err)
 	}
-
 	// TODO don't update if past deadline date for Serving count
 	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, servings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail, oldServings+oldVegServings)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
+	}
+
+	mailC := mail.New(c.ctx)
+	mailReq := &mail.UserFields{
+		Email: subEmail,
+	}
+	if vegServings > 0 {
+		mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
+		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
+	} else {
+		mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
+		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
+	}
+	err = mailC.UpdateUser(mailReq, getProjID())
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.UpdateUser")
 	}
 	return nil
 }
@@ -353,6 +375,10 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 
 // Skip skips that subscription for that day.
 func (c *Client) Skip(date time.Time, subEmail string) error {
+	s, err := c.GetSubscriber(subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.GetSubscriber", err)
+	}
 	// insert or update
 	sl, err := c.Get(date, subEmail)
 	if err != nil {
@@ -360,11 +386,11 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 			return errors.Wrap("failed to sub.Get", err)
 		}
 		// insert
-		var s *SubscriptionSignUp
-		s, err = get(c.ctx, subEmail)
-		if err != nil {
-			return errDatastore.WithError(err).Wrap("failed to get")
-		}
+		// var s *SubscriptionSignUp
+		// s, err = get(c.ctx, subEmail)
+		// if err != nil {
+		// 	return errDatastore.WithError(err).Wrap("failed to get")
+		// }
 		servings := s.Servings + s.VegetarianServings
 		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
@@ -374,18 +400,20 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 		if sl.Paid {
 			return errInvalidParameter.WithMessage("Subscriber has already paid. Must refund instead.")
 		}
-		// if there is a discount, move it to next week unskipped week.
-		if sl.DiscountAmount > .01 || sl.DiscountPercent != 0 {
-			nextWeek := date.Add(7 * 24 * time.Hour)
-			for {
-				err = c.Discount(nextWeek, subEmail, sl.DiscountAmount, sl.DiscountPercent, false)
-				if err == nil {
-					break
+		if s.IsSubscribed {
+			// if there is a discount, move it to next week unskipped week.
+			if sl.DiscountAmount > .01 || sl.DiscountPercent != 0 {
+				nextWeek := date.Add(7 * 24 * time.Hour)
+				for {
+					err = c.Discount(nextWeek, subEmail, sl.DiscountAmount, sl.DiscountPercent, false)
+					if err == nil {
+						break
+					}
+					if errors.GetErrorWithCode(err).Code != errEntrySkipped.Code {
+						return errors.Wrap("failed to Discount", err)
+					}
+					nextWeek = nextWeek.Add(7 * 24 * time.Hour)
 				}
-				if errors.GetErrorWithCode(err).Code != errEntrySkipped.Code {
-					return errors.Wrap("failed to Discount", err)
-				}
-				nextWeek = nextWeek.Add(7 * 24 * time.Hour)
 			}
 		}
 		// if first
@@ -439,6 +467,13 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 	// insert or update
 	if date.IsZero() || subEmail == "" || discountAmount < 0 || discountPercent < 0 || discountPercent > 100 {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) discountAmount(%f) discountPercent(%s)", date, subEmail, discountAmount, discountPercent)
+	}
+	s, err := c.GetSubscriber(subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.GetSubscriber", err)
+	}
+	if !s.IsSubscribed {
+		return errInvalidParameter.WithMessage(subEmail + " is no longer a subscriber. :(")
 	}
 	sl, err := c.Get(date, subEmail)
 	if err != nil {
@@ -510,6 +545,16 @@ func (c *Client) Cancel(subEmail string) error {
 	if subEmail == "" {
 		return errInvalidParameter.Wrap("sub email cannot be empty.")
 	}
+	mailC := mail.New(c.ctx)
+	err := mailC.RemoveTag(subEmail, mail.Customer)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.RemoveTag")
+	}
+	// remove any SubLog that are > now
+	_, err = mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrapf("failed to execute statement: %s", deleteSubLogStatment)
+	}
 	// change isSubscribed to false
 	sub, err := get(c.ctx, subEmail)
 	if err != nil {
@@ -523,11 +568,6 @@ func (c *Client) Cancel(subEmail string) error {
 	err = put(c.ctx, subEmail, sub)
 	if err != nil {
 		return errors.Wrap("failed to put sub", err)
-	}
-	// remove any SubLog that are > now
-	_, err = mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
-	if err != nil {
-		return errSQLDB.WithError(err).Wrapf("failed to execute statement: %s", deleteSubLogStatment)
 	}
 	return nil
 }
