@@ -22,4 +22,5 @@ type DB interface {
 	GetMulti(ctx context.Context, keys []Key, dst interface{}) error
 	Query(ctx context.Context, kind string, offset, limit int, orderFieldName string, dst interface{}) ([]Key, error)
 	QueryFilter(ctx context.Context, kind string, offset, limit int, filterString string, filterValue interface{}, dst interface{}) ([]Key, error)
+	QueryFilterOrdered(ctx context.Context, kind string, offset, limit int, orderFieldName string, filterString string, filterValue interface{}, dst interface{}) ([]Key, error)
 }
