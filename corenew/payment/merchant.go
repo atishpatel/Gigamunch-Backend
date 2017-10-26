@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/atishpatel/braintree-go"
+	"github.com/lionelbarrow/braintree-go"
 
 	"golang.org/x/net/context"
 

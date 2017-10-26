@@ -8,7 +8,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
-	"github.com/atishpatel/braintree-go"
+	"github.com/lionelbarrow/braintree-go"
 	"golang.org/x/net/context"
 
 	"strings"
@@ -82,7 +82,7 @@ func (c *Client) ReleaseSale(id string) error {
 	if err != nil {
 		return errBT.WithError(err).Wrapf("cannot release transaction(%d) from escrow", id)
 	}
-	if t.EscrowStatus != braintree.EscrowStatus.ReleasePending && t.EscrowStatus != braintree.EscrowStatus.Released {
+	if t.EscrowStatus != braintree.EscrowStatusReleasePending && t.EscrowStatus != braintree.EscrowStatusReleased {
 		return errBT.Wrapf("invalid escrow status on release: escrow status:%s transactionID: %s", t.EscrowStatus, t.Id)
 	}
 	return nil
@@ -94,7 +94,7 @@ func (c *Client) CancelRelease(id string) (string, error) {
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot cancel release transaction(%d) from escrow", id)
 	}
-	if t.EscrowStatus != braintree.EscrowStatus.Held && t.EscrowStatus != braintree.EscrowStatus.HoldPending {
+	if t.EscrowStatus != braintree.EscrowStatusHeld && t.EscrowStatus != braintree.EscrowStatusHoldPending {
 		return "", errBT.Wrapf("invalid escrow status on cancel release: escrow status:%s transactionID: %s", t.EscrowStatus, t.Id)
 	}
 	return t.Id, nil
@@ -105,7 +105,7 @@ func (c *Client) getTransactionStatus(id string) (string, error) {
 	if err != nil {
 		return "", errBT.WithError(err)
 	}
-	return t.Status, nil
+	return string(t.Status), nil
 }
 
 // RefundSale voids a sale with the SaleID
@@ -137,7 +137,7 @@ func (c *Client) SubmitForSettlement(id string) error {
 
 // GigamunchToSubmerchant sends money form Gigamunch to a submerchant.
 func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (string, error) {
-	t := &braintree.Transaction{
+	tReq := &braintree.TransactionRequest{
 		Type:              "sale",
 		MerchantAccountId: subMerchantID,
 		CreditCard: &braintree.CreditCard{
@@ -152,7 +152,7 @@ func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (s
 			SubmitForSettlement: true,
 		},
 	}
-	t, err := c.bt.Transaction().Create(t)
+	t, err := c.bt.Transaction().Create(tReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
@@ -169,7 +169,7 @@ type SaleReq struct {
 
 // Sale creates a transaction that is immediately sent for settlement.
 func (c *Client) Sale(req *SaleReq) (string, error) {
-	t := &braintree.Transaction{
+	tReq := &braintree.TransactionRequest{
 		Type:               "sale",
 		CustomerID:         req.CustomerID,
 		PaymentMethodToken: req.PaymentMethodToken,
@@ -179,7 +179,7 @@ func (c *Client) Sale(req *SaleReq) (string, error) {
 			SubmitForSettlement: true,
 		},
 	}
-	t, err := c.bt.Transaction().Create(t)
+	t, err := c.bt.Transaction().Create(tReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
@@ -274,7 +274,7 @@ func (s *StartSubscriptionReq) valid() error {
 
 // StartSale starts a sale that will be held in escrow once it's submitted for settlement.
 func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float32) (string, error) {
-	t := &braintree.Transaction{
+	tReq := &braintree.TransactionRequest{
 		Type:               "sale",
 		MerchantAccountId:  subMerchantID,
 		PaymentMethodNonce: nonce,
@@ -285,12 +285,12 @@ func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float
 			HoldInEscrow:        true,
 		},
 	}
-	t, err := c.bt.Transaction().Create(t)
+	t, err := c.bt.Transaction().Create(tReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
-	if t.EscrowStatus != braintree.EscrowStatus.HoldPending && t.EscrowStatus != braintree.EscrowStatus.Held {
-		return "", errBT.Wrap("invalid transaction escrow status: status: " + t.Status + " escrow status: " + t.EscrowStatus)
+	if t.EscrowStatus != braintree.EscrowStatusHoldPending && t.EscrowStatus != braintree.EscrowStatusHeld {
+		return "", errBT.Wrapf("invalid transaction escrow status: status: %s  escrow status: %s", t.Status, t.EscrowStatus)
 	}
 	return t.Id, nil
 }
