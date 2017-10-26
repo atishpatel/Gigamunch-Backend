@@ -98,7 +98,7 @@ func (c *Client) GetDriverZone(ctx context.Context, driverID int64) error {
 		return errBadRequest.Annotate("invalid driverID")
 	}
 	fence := new(Geofence)
-	_, err := db.QueryFilter(ctx, kind, "DriverID=", driverID, fence)
+	_, err := db.QueryFilter(ctx, kind, 0, 1, "DriverID=", driverID, fence)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to db.QueryFilter")
 	}
