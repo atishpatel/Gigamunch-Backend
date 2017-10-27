@@ -1,0 +1,14 @@
+[{
+  "origin": [
+    "https://gigamunchapp.com",
+    "https://www.gigamunchapp.com",
+    "https://eatgigamunch.com",
+    "https://www.eatgigamunch.com",
+    "https://gigamunch-omninexus-dev.appspot.com",
+    "https://gigamunch-omninexus.appspot.com",
+    "http://localhost:8080"
+  ],
+  "responseHeader": ["Content-Type"],
+  "method": ["GET", "HEAD"],
+  "maxAgeSeconds": 3600
+}]
