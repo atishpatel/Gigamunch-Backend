@@ -8,7 +8,7 @@
   [[template "theme" .]]
   <style>
     .checkout-wrapper {
-      background-color: #f7f7f7;
+      background-color: #f1f3f4;
       padding-bottom: 32px;
     }
 
@@ -187,6 +187,7 @@
       }
       .checkout-form-container {
         flex: 3;
+        border-top: solid #e1e1e1 1px;
       }
     }
 
@@ -244,7 +245,7 @@
       background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
       background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
       background: linear-gradient(45deg, #FF5722, #FFB300);
-      /*box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);*/
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       margin: 12px 0 6px 0;
       /*min-width: 275px;*/
     }
@@ -1222,7 +1223,7 @@
             var aptEl = document.getElementById('apt');
             address.apt = aptEl.value;
             if (!address.street) {
-              address.full_address = document.getElementById('address');
+              address.full_address = document.getElementById('address-input').value;
             }
             var req = {
               'email': email,
@@ -1239,24 +1240,28 @@
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/v1/SubmitCheckout', true);
-            xhr.setRequestHeader("Content-type", "application / json ");
+            xhr.setRequestHeader("Content-type", "application/json");
             xhr.onload = function() {
               try {
                 submit.removeAttribute('disabled');
                 var resp = JSON.parse(this.response);
-                if (resp.err && resp.err.code === 400) {
-                  alert(resp.err.message);
-                  console.log(resp.err);
-                  logRespError(resp.err);
+                if (resp.error && resp.error.code === 400) {
+                  alert(resp.error.message);
+                  console.log(resp.error);
+                  logRespError(resp.error);
                   return;
                 }
-                if (resp.err && resp.err.code !== 0) {
-                  alert('Woops something went wrong: ', resp.err.message);
-                  console.error(resp.err);
-                  logRespError(resp.err)
+                if (resp.error && resp.error.code !== 200) {
+                  alert('Woops something went wrong: ', resp.error.message);
+                  console.error(resp.error);
+                  logRespError(resp.error)
                   return;
                 }
-                window.location = '/checkout-thank-you';
+                if (req.email) {
+                  window.location = '/checkout-thank-you?email=' + encodeURIComponent(req.email);
+                } else {
+                  window.location = '/checkout-thank-you';
+                }
               } catch (err) {
                 var fullError = 'resp: ' + JSON.stringify(resp) + 'err: ' + err;
                 console.error(fullError);
