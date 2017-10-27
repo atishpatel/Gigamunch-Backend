@@ -142,6 +142,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		Email:      req.Email,
 		Nonce:      req.PaymentMethodNonce,
 	}
+
 	paymenttkn, err := paymentC.CreateCustomer(paymentReq)
 	if err != nil {
 		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
@@ -225,7 +226,7 @@ func InNashvilleZone(ctx context.Context, addr *shared.Address) (bool, *types.Ad
 	address := &types.Address{
 		APT: addr.Apt,
 	}
-	if !(-90 <= addr.Latitude && addr.Latitude <= 90 && -180 <= addr.Longitude && addr.Longitude <= 180) {
+	if !(-90 <= addr.Latitude && addr.Latitude <= 90 && -180 <= addr.Longitude && addr.Longitude <= 180) || (addr.Latitude == 0 && addr.Longitude == 0) {
 		addrStr := addr.FullAddress
 		if addrStr == "" {
 			addrStr = fmt.Sprintf(" %s, %s, %s %s, %s", addr.Street, addr.City, addr.State, addr.Zip, addr.Country)
@@ -252,8 +253,8 @@ func InNashvilleZone(ctx context.Context, addr *shared.Address) (bool, *types.Ad
 	polygon := geofence.NewPolygon(fence.Points)
 	pnt := geofence.Point{
 		GeoPoint: common.GeoPoint{
-			Latitude:  addr.Latitude,
-			Longitude: addr.Longitude,
+			Latitude:  address.Latitude,
+			Longitude: address.Longitude,
 		},
 	}
 	contains := polygon.Contains(pnt)
@@ -285,6 +286,11 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 		resp := f(ctx, r)
 		// Log errors
 		sharedErr := resp.GetError()
+		if sharedErr == nil || sharedErr.Code == shared.Code(0) {
+			sharedErr = &shared.Error{
+				Code: shared.Code_Success,
+			}
+		}
 		if sharedErr != nil && sharedErr.Code != shared.Code_Success {
 			// 	loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
 			logging.Errorf(ctx, "%+v", sharedErr)
