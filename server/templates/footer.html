@@ -1,0 +1,196 @@
+[[define "footer"]]
+<script src="https://use.fontawesome.com/ea31cf9b69.js"
+        async
+        defer></script>
+<style>
+  .footer-logo {
+    font-family: 'NexaBold', sans-serif;
+    letter-spacing: .05em;
+    text-decoration: none;
+  }
+
+  footer {
+    background-color: #797c82;
+    color: #fff;
+    padding-bottom: 20px;
+    position: relative;
+    font-size: 14px;
+  }
+
+  footer .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  footer .join-us {
+    background: #F06522;
+    background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+    background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+    background: linear-gradient(45deg, #FF5722, #FFB300);
+    padding: 20px;
+    color: white;
+  }
+
+  footer .join-us-title {
+    font-size: 1em;
+    text-align: center;
+  }
+
+  footer .join-us-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  footer .join-us-links a {
+    display: inline-block;
+    padding: 3px 7px;
+    font-size: 13px;
+    font-weight: 500;
+    text-shadow: none;
+    text-decoration: none;
+    text-align: center;
+    min-width: 100px;
+    color: white;
+  }
+
+  footer .join-us-links span {
+    display: none;
+  }
+
+  footer .footer-logo {
+    font-size: 1.5em;
+    color: white;
+    margin: 25px 0;
+  }
+
+  footer .love .footer-logo {
+    font-size: 1em;
+  }
+
+  footer .nav {
+    display: flex;
+    flex-direction: column;
+    letter-spacing: 0.35px;
+  }
+
+  footer section {
+    padding: 10px 0;
+  }
+
+  footer .title {
+    color: #fff;
+    font-weight: bold;
+    margin: 5px 0;
+  }
+
+  footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0
+  }
+
+  footer ul li {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 26px
+  }
+
+  footer a {
+    text-decoration: none;
+  }
+
+  footer .nav a {
+    color: #c6c7ca;
+  }
+
+  footer .nav a:hover {
+    color: #fff;
+  }
+
+  @media (min-width: 767px) {
+    footer {
+      padding-bottom: 60px;
+    }
+    footer .join-us-links span {
+      display: inline-block;
+    }
+    footer .footer-logo {
+      margin: 20px 0 40px;
+    }
+    footer .content {
+      padding: 0 20px;
+    }
+    footer .nav {
+      flex-direction: row;
+      /* justify-content: space-around; */
+    }
+    /* footer .nav section:last-child {
+      margin-left: auto;
+      text-align: center;
+    } */
+    footer section {
+      padding-right: 40px;
+    }
+    footer .love {
+      text-align: center;
+    }
+  }
+
+</style>
+<footer>
+  <section class="join-us">
+    <div class="join-us-title">Join us on</div>
+    <div class="join-us-links">
+      <a href="https://www.facebook.com/eatgigamunch/">
+          <i class="fa fa-facebook fa-2x "
+             aria-hidden="true"></i>
+          <span>/Eatgigamunch</span>
+        </a>
+      <a href="https://www.instagram.com/eatgigamunch/">
+          <i class="fa fa-instagram fa-2x "
+             aria-hidden="true"></i>
+          <span>Eatgigamunch</span>
+        </a>
+      <a href="https://twitter.com/eatgigamunch">
+          <i class="fa fa-twitter fa-2x "
+             aria-hidden="true"></i>
+          <span>@Eatgigamunch</span>
+        </a>
+    </div>
+  </section>
+  <div class="container">
+    <a href="/">
+      <div class="footer-logo">
+        Gigamunch
+      </div>
+    </a>
+
+    <div class="nav">
+      <section>
+        <div class="title">Navigation</div>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/becomechef">Become a cook</a></li>
+        </ul>
+      </section>
+      <section>
+        <div class="title">Legal</div>
+        <ul>
+          <li><a href="/terms">Terms and Agreements</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+        </ul>
+      </section>
+    </div>
+    <div class="love">
+      Made with
+      <i style="color:#FF7043"
+         class="fa fa-heart"
+         aria-hidden="true"></i> by <span class="footer-logo">Gigamunch</span> |
+      <i class="fa fa-copyright"
+         aria-hidden="true"></i> 2017
+    </div>
+  </div>
+</footer>
+[[end]]

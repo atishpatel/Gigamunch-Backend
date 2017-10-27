@@ -12,6 +12,21 @@ import (
 	"google.golang.org/appengine/urlfetch"
 )
 
+// TODO: Logging
+
+var (
+	standAppEngine bool
+	key            string
+	acctID         string
+	projID         string
+)
+
+var (
+	errBadRequest = errors.BadRequestError
+	errDrip       = errors.InternalServerError
+	errInternal   = errors.InternalServerError
+)
+
 // Tag is a tag applied to email subscribers.
 type Tag string
 
@@ -22,8 +37,10 @@ func (t Tag) String() string {
 const (
 	// LeftWebsiteEmail if they left email on website.
 	LeftWebsiteEmail Tag = "LEFT_WEBSITE_EMAIL"
-	// Customer if they are a customer.
+	// Customer if they are a customer and is removed when they unsubscribe.
 	Customer Tag = "CUSTOMER"
+	// Subscribed is applied when a someone subscribers and is never removed.
+	Subscribed Tag = "SUBSCRIBED"
 	// Vegetarian if they are a vegetarian.
 	Vegetarian Tag = "VEGETARIAN"
 	// NonVegetarian if they a non-vegetarian.
@@ -32,18 +49,8 @@ const (
 	TwoServings Tag = "TWO_SERVINGS"
 	// FourServings if they are 4 servings.
 	FourServings Tag = "FOUR_SERVINGS"
-)
-
-var (
-	standAppEngine bool
-	key            string
-	acctID         string
-)
-
-var (
-	errBadRequest = errors.BadRequestError
-	errDrip       = errors.InternalServerError
-	errInternal   = errors.InternalServerError
+	// Dev if they are development server customers.
+	Dev Tag = "DEV"
 )
 
 // Client is a client for manipulating subscribers.
@@ -58,7 +65,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 	var err error
 	dripClient, err := drip.New(key, acctID)
 	if err != nil {
-		return nil, errInternal.Annotate("failed to get drip client")
+		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
 	}
 	if key == "" {
 		return nil, errInternal.Annotate("setup not called or key is empty")
@@ -83,21 +90,26 @@ type UserFields struct {
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
+	AddTags           []Tag     `json:"add_tags"`
+	RemoveTags        []Tag     `json:"remove_tags"`
 }
 
 // UpdateUser updates the user custom fields.
 func (c *Client) UpdateUser(req *UserFields) error {
-	resp, err := c.dripC.FetchSubscriber(req.Email)
-	if err != nil {
-		return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
+	// resp, err := c.dripC.FetchSubscriber(req.Email)
+	// if err != nil {
+	// 	return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
+	// }
+	// if len(resp.Errors) > 0 {
+	// 	return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.FetchSubscriber")
+	// }
+	// if len(resp.Subscribers) != 1 {
+	// 	return errBadRequest.Annotate("failed to find subscriber")
+	// }
+	sub := drip.UpdateSubscriber{
+		Email:        req.Email,
+		CustomFields: make(map[string]string),
 	}
-	if len(resp.Errors) > 0 {
-		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.FetchSubscriber")
-	}
-	if len(resp.Subscribers) != 1 {
-		return errBadRequest.Annotate("failed to find subscriber")
-	}
-	sub := resp.Subscribers[0]
 	if req.FirstName != "" {
 		sub.CustomFields["FIRST_NAME"] = req.FirstName
 	}
@@ -105,7 +117,33 @@ func (c *Client) UpdateUser(req *UserFields) error {
 		sub.CustomFields["LAST_NAME"] = req.LastName
 	}
 	if !req.FirstDeliveryDate.IsZero() {
-		sub.CustomFields["FIRST_DELIVERY_DATE"] = dateString(req.FirstDeliveryDate)
+		sub.CustomFields["FIRST_DELIVERY_DATE"] = DateString(req.FirstDeliveryDate)
+	}
+	if len(req.AddTags) > 0 {
+		for _, v := range req.AddTags {
+			sub.Tags = append(sub.Tags, v.String())
+		}
+	}
+	if len(req.RemoveTags) > 0 {
+		for _, v := range req.RemoveTags {
+			sub.RemoveTags = append(sub.RemoveTags, v.String())
+		}
+	}
+	// Add Dev tag to customers in non-prod env.
+	if !common.IsProd(projID) {
+		sub.Tags = append(sub.Tags, Dev.String())
+	}
+	dripReq := &drip.UpdateSubscribersReq{
+		Subscribers: []drip.UpdateSubscriber{
+			sub,
+		},
+	}
+	resp, err := c.dripC.UpdateSubscriber(dripReq)
+	if err != nil {
+		return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
+	}
+	if len(resp.Errors) > 0 {
+		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.FetchSubscriber")
 	}
 	return nil
 }
@@ -147,14 +185,15 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 }
 
 // Setup sets up the logging package.
-func Setup(ctx context.Context, standardAppEngine bool, apiKey, accountID string) error {
+func Setup(ctx context.Context, standardAppEngine bool, projectID, apiKey, accountID string) error {
 	standAppEngine = standardAppEngine
 	key = apiKey
 	acctID = accountID
 	return nil
 }
 
-func dateString(t time.Time) string {
+// DateString formates the date into a "Monday, January 1st" format.
+func DateString(t time.Time) string {
 	var numString string
 	var suffix string
 	if t.Day() == 1 || t.Day() == 21 || t.Day() == 31 {

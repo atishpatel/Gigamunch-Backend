@@ -89,6 +89,56 @@ func GetDistance(ctx context.Context, p1, p2 types.GeoPoint) (float32, *time.Dur
 	return miles, &element.Duration, nil
 }
 
+// GetAddress gets an address from a string.
+func GetAddress(ctx context.Context, addressString, apt string) (*types.Address, error) {
+	mapsClient, err := getMapsClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	mapsCompMap := make(map[maps.Component]string, 1)
+	mapsCompMap[maps.ComponentCountry] = "US"
+	mapsReq := &maps.GeocodingRequest{
+		Address:    addressString,
+		Components: mapsCompMap,
+	}
+	mapsGeocodeResults, err := mapsClient.Geocode(ctx, mapsReq)
+	if err != nil {
+		return nil, errMaps.WithError(err).Wrap("cannot get geopoint from address")
+	}
+	if mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated) {
+		return nil, errInvalidParameter.WithMessage("Address is not valid. It must be a house address.")
+	}
+	location := mapsGeocodeResults[0].Geometry.Location
+	address := &types.Address{
+		APT: apt,
+		GeoPoint: types.GeoPoint{
+			Latitude:  location.Lat,
+			Longitude: location.Lng,
+		},
+	}
+	var streetNumber, route string
+	for _, v := range mapsGeocodeResults[0].AddressComponents {
+		for _, typ := range v.Types {
+			switch typ {
+			case "locality":
+				address.City = v.ShortName
+			case "street_number":
+				streetNumber = v.ShortName
+			case "route":
+				route = v.ShortName
+			case "administrative_area_level_1":
+				address.State = v.ShortName
+			case "postal_code":
+				address.Zip = v.ShortName
+			case "country":
+				address.Country = v.ShortName
+			}
+		}
+	}
+	address.Street = streetNumber + " " + route
+	return address, nil
+}
+
 // GetGeopointFromAddress sets Latitude and Longitude to an address.
 func GetGeopointFromAddress(ctx context.Context, address *types.Address) error {
 	mapsClient, err := getMapsClient(ctx)

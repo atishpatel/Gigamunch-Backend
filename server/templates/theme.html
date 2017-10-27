@@ -1,0 +1,96 @@
+[[define "theme"]]
+<style>
+  body {
+    display: block;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.5;
+    letter-spacing: .5px;
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  button {
+    border: none;
+    outline: none;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  g {
+    fill: currentcolor;
+  }
+
+  input,
+  select,
+  .hosted-field {
+    padding: 12px;
+    border: solid #CFD8DC 1px;
+    border-radius: 3px;
+    font-size: 14px;
+    background-color: #f7f7f7;
+    outline: none;
+    /*opacity: .95;*/
+    transition: all .3s ease;
+  }
+
+  input:focus,
+  .braintree-hosted-fields-focused {
+    background-color: white;
+    opacity: 1;
+    border-color: #FF7043;
+  }
+
+  input[type=checkbox] {
+    visibility: hidden;
+  }
+
+  input[type=checkbox]:checked+label:after {
+    opacity: 1;
+  }
+
+  select {
+    font-family: 'Roboto';
+    letter-spacing: .5px;
+    width: 100%;
+    margin: 0;
+    outline: none;
+    height: 43px;
+  }
+
+  label {
+    font-size: 14px;
+  }
+
+  .photo-16-9 {
+    display: block;
+    width: 100%;
+    position: relative;
+    height: 0;
+    padding: 56.25% 0 0 0;
+    overflow: hidden;
+    background-color: white;
+  }
+
+  .photo-16-9 img {
+    position: absolute;
+    display: block;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+  }
+
+</style>
+[[end]]

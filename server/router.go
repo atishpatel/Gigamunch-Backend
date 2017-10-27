@@ -73,6 +73,8 @@ func init() {
 	http.HandleFunc("/get-item", handleGetItem)
 	http.HandleFunc("/signedup", handleCookSignup)
 	http.HandleFunc("/schedulesignedup", handleScheduleSignup)
+	addTemplateRoutes()
+	addAPIRoutes()
 	http.Handle("/", r)
 }
 
@@ -389,65 +391,64 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 		email = req.FormValue("email")
 		terp = req.FormValue("terp")
 	}
-	if email == "" {
-		// TODO redirect if email is empty
-
-		return
-	}
-
-	utils.Infof(ctx, "email: %s,  terp: %s ", email, terp)
-	if terp != "" {
-		return
-	}
-	key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
-	err := datastore.Get(ctx, key, entry)
-	if err == datastore.ErrNoSuchEntity {
-		entry.Date = time.Now()
-		entry.Email = email
-		_, err = datastore.Put(ctx, key, entry)
-		if err != nil {
-			utils.Criticalf(ctx, "Error putting ScheduleSignupEmail in datastore ", err)
+	var tkn string
+	var err error
+	if email != "" {
+		utils.Infof(ctx, "email: %s,  terp: %s ", email, terp)
+		if terp != "" {
+			return
 		}
-		if !appengine.IsDevAppServer() {
-			messageC := message.New(ctx)
-			err = messageC.SendSMS("6153975516", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
+		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
+		entry := &sub.SubscriptionSignUp{}
+		err = datastore.Get(ctx, key, entry)
+		if err == datastore.ErrNoSuchEntity {
+			entry.Date = time.Now()
+			entry.Email = email
+			_, err = datastore.Put(ctx, key, entry)
 			if err != nil {
-				utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
+				utils.Criticalf(ctx, "Error putting ScheduleSignupEmail in datastore ", err)
 			}
+			if !appengine.IsDevAppServer() {
+				messageC := message.New(ctx)
+				err = messageC.SendSMS("6153975516", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
+				if err != nil {
+					utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
+				}
+			}
+			mailC := mail.New(ctx)
+			err = mailC.AddTag(entry.Email, mail.LeftWebsiteEmail)
+			if err != nil {
+				utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
+			}
+			// hourFromNow := time.Now().Add(time.Hour)
+			// sendEmailReq := &tasks.SendEmailParams{
+			// 	Email: entry.Email,
+			// 	Type:  "welcome",
+			// }
+			// tasksC := tasks.New(ctx)
+			// err = tasksC.AddSendEmail(hourFromNow, sendEmailReq)
+			// if err != nil {
+			// 	utils.Criticalf(ctx, "Error added sendemail to queue for email(%s). Err: %+v", entry.Email, err)
+			// }
+		} else {
+			utils.Warningf(ctx, "Warning: email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
 		}
-		mailC := mail.New(ctx)
-		err = mailC.AddTag(entry.Email, mail.LeftWebsiteEmail)
-		if err != nil {
-			utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
-		}
-		// hourFromNow := time.Now().Add(time.Hour)
-		// sendEmailReq := &tasks.SendEmailParams{
-		// 	Email: entry.Email,
-		// 	Type:  "welcome",
-		// }
-		// tasksC := tasks.New(ctx)
-		// err = tasksC.AddSendEmail(hourFromNow, sendEmailReq)
-		// if err != nil {
-		// 	utils.Criticalf(ctx, "Error added sendemail to queue for email(%s). Err: %+v", entry.Email, err)
-		// }
-	} else {
-		utils.Warningf(ctx, "Warning: email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
-	}
 
-	paymentC := payment.New(ctx)
-	id := payment.GetIDFromEmail(email)
-	utils.Infof(ctx, "id: %s", id)
-	tkn, err := paymentC.GenerateToken(id)
-	if err != nil {
-		// Do something
-		utils.Errorf(ctx, "Error payment.GenerateToken. Error: %+v", err)
-		return
+		paymentC := payment.New(ctx)
+		id := payment.GetIDFromEmail(email)
+		utils.Infof(ctx, "id: %s", id)
+		tkn, err = paymentC.GenerateToken(id)
+		if err != nil {
+			// Do something
+			utils.Errorf(ctx, "Error payment.GenerateToken. Error: %+v", err)
+			return
+		}
 	}
 	fields := scheduleFormFields{
 		BTToken: tkn,
 		Email:   email,
 	}
+
 	err = scheduleFormPage.ExecuteTemplate(w, "scheduleForm.html", fields)
 	if err != nil {
 		// do something?

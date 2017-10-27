@@ -186,18 +186,53 @@ func (c *Client) Sale(req *SaleReq) (string, error) {
 	return t.Id, nil
 }
 
-// // CreatePaymentMethodReq is the reqest for CreatePaymentMethod.
-// type CreatePaymentMethodReq struct {
-// 	CustomerID string
-// 	Nonce      string
-// }
+// CreateCustomerReq is the reqest for CreateCustomer.
+type CreateCustomerReq struct {
+	CustomerID string
+	FirstName  string
+	LastName   string
+	Email      string
+	Nonce      string
+}
 
-// func (c *Client) CreatePaymentMethod(req *CreatePaymentMethodReq) (string, error) {
-// 	if req == nil {
-// 		return "", errInvalidParameter.Wrap("CreatePaymentMethodReq is nil.")
-// 	}
-// 	braintree.Pa
-// }
+func (c *Client) CreateCustomer(req *CreateCustomerReq) (string, error) {
+	if req == nil {
+		return "", errInvalidParameter.Wrap("CreateCustomerReq is nil.")
+	}
+	cst := &braintree.Customer{
+		Id:        req.CustomerID,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+		// PaymentMethodNonce: req.Nonce,
+	}
+	cst, err := c.bt.Customer().Find(req.CustomerID)
+	if err != nil {
+		cst, err = c.bt.Customer().Create(cst)
+		if err != nil {
+			return "", errBT.WithError(err).Wrap("failed to bt.Customer.Create")
+		}
+	} else {
+		cst, err = c.bt.Customer().Update(cst)
+		if err != nil {
+			return "", errBT.WithError(err).Wrap("failed to bt.Customer.Update")
+		}
+	}
+	tmp := true
+	paymentReq := &braintree.PaymentMethodRequest{
+		CustomerId:         cst.Id,
+		PaymentMethodNonce: req.Nonce,
+		Options: &braintree.PaymentMethodRequestOptions{
+			MakeDefault: true,
+			VerifyCard:  &tmp,
+		},
+	}
+	paymentMethod, err := c.bt.PaymentMethod().Create(paymentReq)
+	if err != nil {
+		return "", errBT.WithError(err).Wrap("failed to bt.PaymentMethod.Create")
+	}
+	return paymentMethod.GetToken(), nil
+}
 
 // GetDefaultPaymentTokenReq is the reqest for GetDefaultPaymentToken.
 type GetDefaultPaymentTokenReq struct {

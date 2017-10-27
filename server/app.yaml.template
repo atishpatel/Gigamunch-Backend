@@ -11,14 +11,6 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
-- url: /.well-known/acme-challenge/j8dhA26CZlfmmOaG7HInznKnx5NcP8tNYoPL0w1Mof0
-  static_files: tmp.tmp
-  upload: tmp.tmp
-
-- url: /.well-known/acme-challenge/MrlN_GJ_9hMD0InQi09hINpgsM79dRx0SqXoVwWOp5c 
-  static_files: tmp2.tmp
-  upload: tmp2.tmp
-
 # Cook app
 - url: /cook/bower_components
   static_dir: cook_SERVEPATH_/bower_components
@@ -67,6 +59,10 @@ handlers:
   secure: always
 
 - url: /cooksignup
+  script: _go_app
+  secure: always
+
+- url: /(checkout|checkout-thank-you|pricing)$
   script: _go_app
   secure: always
 
