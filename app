@@ -1,17 +1,6 @@
 #!/bin/bash
 
 ################################################################################
-# help
-################################################################################
-if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
-  echo "Here are the commands supported by the script:"
-  echo -e "\tapp [help|serve|build|deploy]"
-  echo -e "\tapp serve [eater|*]"
-  echo -e "\tapp build [app|cook|proto]"
-  echo -e "\tapp deploy [--prod|*] [eater|server|cook]"
-fi 
-
-################################################################################
 # build 
 ################################################################################
 if [[ $1 == "build" ]]; then
@@ -38,17 +27,19 @@ if [[ $1 == "build" ]]; then
   fi
   if [[ $* == *proto* ]]; then
     # build protobuf and grpc
-    echo "Building Gigamunch-Proto apis."
+    echo "Building Gigamunch-Proto APIs."
     # Eater
     protoc -I Gigamunch-Proto/common/ -I Gigamunch-Proto/eater/ Gigamunch-Proto/common/*.proto Gigamunch-Proto/eater/*.proto --go_out=plugins=grpc:Gigamunch-Proto/eater
     # Shared
     protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/shared/ Gigamunch-Proto/shared/*.proto --go_out=plugins=grpc:Gigamunch-Proto/shared
-    # Admin
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
     mv Gigamunch-Proto/shared/github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared/*.go Gigamunch-Proto/shared/
     rm -fR Gigamunch-Proto/shared/github.com
+    # Admin
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
+    # Server
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
     # Typescript
-    guild build
+    gulp build
   fi
   exit 0
 fi
@@ -56,7 +47,6 @@ fi
 ################################################################################
 # deploy 
 ################################################################################
-
 if [[ $1 == "deploy" ]]; then 
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
@@ -113,6 +103,7 @@ if [[ $1 == "serve" ]]; then
     echo "Starting admin:"
     dev_appserver.py --datastore_path ./.datastore admin/app.yaml&
     cd admin/app
+    gulp build&
     gulp watch
     cd ../..
   fi
@@ -126,6 +117,20 @@ if [[ $1 == "serve" ]]; then
   /usr/local/opt/mysql56/bin/mysql.server stop
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
+  exit 0
+fi 
+
+################################################################################
+# help
+################################################################################
+if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
+  echo "Here are the commands supported by the script:"
+  echo -e "\tapp [help|serve|build|deploy]"
+  echo -e "\tapp serve [eater|*]"
+  echo -e "\tapp build [app|admin|cook|proto]"
+  echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|]"
+  exit 0
 fi 
 
 wait
+
