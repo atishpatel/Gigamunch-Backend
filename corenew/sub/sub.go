@@ -216,7 +216,7 @@ func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) 
 
 // Setup sets up a SubLog.
 func (c *Client) Setup(date time.Time, subEmail string, servings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string) error {
-	if date.IsZero() || subEmail == "" || servings == 0 || amount == 0 || deliveryTime == 0 || paymentMethodToken == "" || customerID == "" {
+	if date.IsZero() || subEmail == "" || servings == 0 || amount == 0 || paymentMethodToken == "" || customerID == "" {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) servings(%d) amount(%f) deliveryTime(%d) paymentMethodToken(%s) customerID(%s)", date, subEmail, servings, amount, deliveryTime, paymentMethodToken, customerID)
 	}
 	st := fmt.Sprintf(insertSubLogStatement, date.Format(dateFormat), subEmail, servings, amount, deliveryTime, paymentMethodToken, customerID)

@@ -199,21 +199,20 @@ func (c *Client) CreateCustomer(req *CreateCustomerReq) (string, error) {
 	if req == nil {
 		return "", errInvalidParameter.Wrap("CreateCustomerReq is nil.")
 	}
-	cst := &braintree.Customer{
+	cstNew := &braintree.Customer{
 		Id:        req.CustomerID,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
-		// PaymentMethodNonce: req.Nonce,
 	}
 	cst, err := c.bt.Customer().Find(req.CustomerID)
 	if err != nil {
-		cst, err = c.bt.Customer().Create(cst)
+		cst, err = c.bt.Customer().Create(cstNew)
 		if err != nil {
 			return "", errBT.WithError(err).Wrap("failed to bt.Customer.Create")
 		}
 	} else {
-		cst, err = c.bt.Customer().Update(cst)
+		cst, err = c.bt.Customer().Update(cstNew)
 		if err != nil {
 			return "", errBT.WithError(err).Wrap("failed to bt.Customer.Update")
 		}

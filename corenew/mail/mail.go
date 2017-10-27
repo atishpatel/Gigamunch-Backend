@@ -169,7 +169,7 @@ type WelcomeEmailInterface interface {
 
 // SendWelcomeEmail sends the email for new subscribers.
 func (c *Client) SendWelcomeEmail(to WelcomeEmailInterface) error {
-	return sendEmail(c.sgClient, welcomeSender, to, welcomeEmailSubject, fmt.Sprintf(welcomeEmailText, to.GetName(), dateString(to.GetFirstDinnerDate())), fmt.Sprintf(welcomeEmailHTML, to.GetName(), to.GetFirstDinnerDate()))
+	return sendEmail(c.sgClient, welcomeSender, to, welcomeEmailSubject, fmt.Sprintf(welcomeEmailText, to.GetName(), DateString(to.GetFirstDinnerDate())), fmt.Sprintf(welcomeEmailHTML, to.GetName(), to.GetFirstDinnerDate()))
 }
 
 func sendEmail(sgClient *sendgrid.Client, from, to UserInterface, subject, emailText, emailHTML string) error {
@@ -187,7 +187,7 @@ func sendEmail(sgClient *sendgrid.Client, from, to UserInterface, subject, email
 	return nil
 }
 
-func dateString(t time.Time) string {
+func DateString(t time.Time) string {
 	var numString string
 	var suffix string
 	if t.Day() == 1 || t.Day() == 21 || t.Day() == 31 {
@@ -236,7 +236,7 @@ func (c *Client) UpdateUser(req *UserFields, projID string) error {
 		sub.CustomFields["LAST_NAME"] = lastName
 	}
 	if !req.FirstDeliveryDate.IsZero() {
-		sub.CustomFields["FIRST_DELIVERY_DATE"] = dateString(req.FirstDeliveryDate)
+		sub.CustomFields["FIRST_DELIVERY_DATE"] = DateString(req.FirstDeliveryDate)
 	}
 	if len(req.AddTags) > 0 {
 		for _, v := range req.AddTags {

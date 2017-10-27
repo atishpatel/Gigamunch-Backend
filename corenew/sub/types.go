@@ -10,6 +10,8 @@ type SubscriptionSignUp struct {
 	Email              string        `json:"email"`
 	Date               time.Time     `json:"date"` // CreatedDate
 	Name               string        `json:"name"`
+	FirstName          string        `json:"first_name"`
+	LastName           string        `json:"last_name"`
 	Address            types.Address `json:"address"`
 	CustomerID         string        `json:"customer_id"`
 	SubscriptionIDs    []string      `json:"subscription_id"`    // depecrated
