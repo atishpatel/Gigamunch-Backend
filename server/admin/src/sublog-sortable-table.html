@@ -299,6 +299,8 @@
     </vaadin-grid>
     <div>Total Non Veg servings: <strong>[[totalNoVegServings]]</strong></div>
     <div>Total Veg servings: <strong>[[totalVegServings]]</strong></div>
+    <div>Total Non Veg containers: <strong>[[totalNoVegContainers]]</strong></div>
+    <div>Total Veg conatiners: <strong>[[totalVegContainers]]</strong></div>
     <br>
     <div>Number of Customers: <strong>[[numCustomers]]</strong></div>
     <div>Number of 2 Serving Customers: <strong>[[num2Customers]]</strong></div>
@@ -330,6 +332,14 @@
             notify: true,
           },
           totalVegServings: {
+            type: Number,
+            notify: true,
+          },
+          totalNoVegContainers: {
+            type: Number,
+            notify: true,
+          },
+          totalVegContainers: {
             type: Number,
             notify: true,
           },
@@ -459,6 +469,8 @@
           this.sublogs = sublogs;
           this.totalNoVegServings = totalNoVegServings;
           this.totalVegServings = totalVegServings;
+          this.totalNoVegContainers = totalNoVegServings / 2;
+          this.totalVegContainers = totalVegServings / 2;
           this.predictedRevenue = predictedRevenue.toFixed(2);
           this.totalRevenue = totalRevenue.toFixed(2);
           this.totalCost = totalCost.toFixed(2);
