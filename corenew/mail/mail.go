@@ -101,7 +101,8 @@ const (
 	// FourServings if they are 4 servings.
 	FourServings Tag = "FOUR_SERVINGS"
 	// Dev if they are development server customers.
-	Dev Tag = "DEV"
+	Dev          Tag = "DEV"
+	ignoreDomain     = "@test.com"
 )
 
 // Client is the client for this package.
@@ -214,6 +215,9 @@ type UserFields struct {
 
 // UpdateUser updates the user custom fields.
 func (c *Client) UpdateUser(req *UserFields, projID string) error {
+	if strings.Contains(email, ignoreDomain) {
+		return nil
+	}
 	// resp, err := c.dripC.FetchSubscriber(req.Email)
 	// if err != nil {
 	// 	return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
@@ -284,6 +288,9 @@ func splitName(name string) (string, string) {
 
 // AddTag adds a tag to a customer. This often triggers a workflow.
 func (c *Client) AddTag(email string, tag Tag) error {
+	if strings.Contains(email, ignoreDomain) {
+		return nil
+	}
 	req := &drip.TagsReq{
 		Tags: []drip.TagReq{
 			drip.TagReq{
@@ -304,6 +311,9 @@ func (c *Client) AddTag(email string, tag Tag) error {
 
 // RemoveTag removes a tag from a customer. This often triggers a workflow.
 func (c *Client) RemoveTag(email string, tag Tag) error {
+	if strings.Contains(email, ignoreDomain) {
+		return nil
+	}
 	req := &drip.TagReq{
 		Email: email,
 		Tag:   tag.String(),
