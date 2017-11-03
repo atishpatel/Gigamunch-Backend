@@ -10,10 +10,13 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/atishpatel/Gigamunch-Backend/config"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
@@ -50,6 +53,8 @@ func init() {
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", handler(systemsAdmin(GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", handler(systemsAdmin(GetLogs)))
+	// Zone
+	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	//
 	http.HandleFunc("/admin/api/v1/Test", test)
 }
@@ -60,11 +65,11 @@ func setup() error {
 	if projID == "" {
 		log.Fatal(`You need to set the environment variable "PROJECT_ID"`)
 	}
+	// Setup sql db
 	sqlConnectionString := os.Getenv("MYSQL_CONNECTION")
 	if sqlConnectionString == "" {
 		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
 	}
-	// Setup sql db
 	sqlC, err = sqlx.Connect("mysql", sqlConnectionString)
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
@@ -81,17 +86,23 @@ func setupWithContext(ctx context.Context) error {
 	}
 	// Setup auth
 	httpClient := urlfetch.Client(ctx)
-	err = auth.Setup(ctx, projID, httpClient, dbC, "TODO: get config")
+	config := config.GetConfig(ctx)
+	err = auth.Setup(ctx, true, projID, httpClient, dbC, config.JWTSecret)
 	if err != nil {
 		return fmt.Errorf("failed to setup auth: %+v", err)
 	}
 	// Setup logging
-	err = logging.Setup(ctx, projID, "admin", nil, dbC)
+	err = logging.Setup(ctx, true, projID, "admin", nil, dbC)
 	if err != nil {
 		return fmt.Errorf("failed to setup logging: %+v", err)
 	}
+	// Setup mail
+	err = mail.Setup(ctx, true, projID, config.DripAPIKey, config.DripAccountID)
+	if err != nil {
+		return fmt.Errorf("failed to setup mail: %+v", err)
+	}
 	// Setup Sub
-	err = sub.Setup(ctx, sqlC, dbC)
+	err = sub.Setup(ctx, true, projID, sqlC, dbC)
 	if err != nil {
 		return fmt.Errorf("failed to setup sub: %+v", err)
 	}
@@ -178,10 +189,16 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 		resp := f(ctx, r)
 		// Log errors
 		sharedErr := resp.GetError()
+		if sharedErr == nil {
+			sharedErr = &shared.Error{
+				Code: shared.Code_Success,
+			}
+		}
 		if sharedErr != nil && sharedErr.Code != shared.Code_Success {
 			loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
 		}
 		// encode
+		w.Header().Set("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
 		err = encoder.Encode(resp)
 		if err != nil {
