@@ -1,0 +1,179 @@
+[[define "thank-you"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+</head>
+
+<body>
+  [[template "theme" .]]
+
+  <style>
+    *,
+     ::after,
+     ::before {
+      box-sizing: border-box;
+    }
+
+    .share-links {
+      display: flex;
+    }
+
+    .share-links a button {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      color: white;
+      font-size: 16px;
+      padding: 12px;
+      margin: 12px;
+      border-radius: 4px;
+      background: #F06522;
+      background: linear-gradient(45deg, #FF5722, #FFA311);
+      width: 150px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    .share-links a:hover {
+      text-decoration: none;
+    }
+
+    .padding-sides {
+      padding: 0 125px;
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    @media (max-width: 800px) {
+      h1 {
+        font-size: 20px;
+      }
+      .padding-sides {
+        padding: 0 24px;
+      }
+      .share-links {
+        flex-direction: column;
+      }
+      .share-links a button {
+        justify-content: center;
+        padding: 6px;
+        margin: 6px;
+        width: 95%;
+      }
+      .share-links a button i {
+        padding: 0 6px;
+      }
+    }
+
+  </style>
+
+
+  <table role="presentation"
+         cellspacing="0"
+         cellpadding="0"
+         border="0"
+         align="center"
+         width="100%"
+         style="max-width: 800px;">
+
+    <!-- Hero Image, Flush : BEGIN -->
+    <tr>
+      <td bgcolor="#ffffff"
+          align="center">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/email/Welcome/indian-cook-hand-email.jpg"
+             width="600"
+             alt="Welcome to Gigamunch"
+             border="0"
+             align="center"
+             style="width: 100%; max-width: 800px; height: auto; background: #dddddd; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48; margin: auto;"
+             class="g-img">
+      </td>
+    </tr>
+    <!-- Hero Image, Flush : END -->
+
+    <!-- White Background : BEGIN -->
+    <tr align="center">
+      <td align="center"
+          bgcolor="#ffffff"
+          style="padding: 2px; width: 100%; box-shadow: 0px 0px 3px #dadfe1;">
+        <table role="presentation"
+               cellspacing="0"
+               cellpadding="0"
+               border="0"
+               width="100%"
+               align="center"
+               class="padding-sides">
+          <!-- Intro : BEGIN -->
+          <tr>
+            <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+              <tr>
+                <h1 class="padding-sides"
+                    style="margin: 25px 0; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-weight: 500; line-height: 1.75; color: #333e48; text-align: center;">
+                        Thank you! 
+                </h1>
+              </tr>
+              <!-- Intro : END -->
+
+              <!-- Gigamunch Journeys : BEGIN -->
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <hr style="margin: 30px 0; border: 0; border-bottom: 2px solid #dadfe1;">
+                  <h1 style="display: inline-block; margin: 10px 0 0 0; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif;font-weight: 300; line-height: 1.25; color: #333e48;">
+                    A Journey is Better With Friends! 😁
+               <hr style="margin: 10px 0 25px 0;  border: 0; border-bottom: 4px solid #ff7043; width: 100%;"/>
+             </h1>
+                  <p style="margin: 15px 0;">
+                    <div class="share-links"
+                         style="padding-bottom:32px;">
+                      <a href="https://www.facebook.com/dialog/share?app_id=522395114612219&display=popup&href=https%3A%2F%2Featgigamunch.com"
+                         target="_window">
+                         <button>
+                                    <i class="fa fa-facebook fa-2x "
+                                       aria-hidden="true"></i>
+                                    <span>Facebook</span>
+                                </button>
+                                  </a>
+                      <br>
+                      <a href="https://www.instagram.com/eatgigamunch/"
+                         target="_window">
+                         <button>
+                                    <i class="fa fa-instagram fa-2x "
+                                       aria-hidden="true"></i>
+                                    <span>Instagram</span>
+                                </button>
+                                  </a>
+                      <br>
+                      <a href="https://twitter.com/eatgigamunch"
+                         target="_window">
+                         <button>
+                                    <i class="fa fa-twitter fa-2x "
+                                       aria-hidden="true"></i>
+                                    <span>Twitter</span>
+                                </button>
+                            </a>
+                    </div>
+                  </p>
+                </td>
+              </tr>
+              <!-- Gigamunch Journeys : END -->
+
+        </table>
+        </td>
+        </tr>
+        <!-- White Background  : END -->
+  </table>
+  <!-- Email Body : END -->
+
+
+
+
+
+
+  [[template "footer" .]]
+</body>
+
+</html>
+[[end]]
