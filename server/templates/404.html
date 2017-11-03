@@ -1,0 +1,85 @@
+[[define "404"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Page not found</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    html {
+      color: #888;
+      display: table;
+      font-family: sans-serif;
+      height: 100%;
+      text-align: center;
+      width: 100%;
+    }
+
+    body {
+      display: table-cell;
+      vertical-align: middle;
+      margin: 2em auto;
+    }
+
+    h1 {
+      color: #555;
+      font-size: 2em;
+      font-weight: 400;
+    }
+
+    p {
+      margin: 8px auto;
+      max-width: 500px;
+    }
+
+    @media only screen and (max-width: 280px) {
+      body,
+      p {
+        width: 95%;
+      }
+      h1 {
+        font-size: 1.5em;
+        margin: 0 0 0.3em;
+      }
+    }
+
+    @font-face {
+      font-family: 'NexaBold';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+    }
+
+    .logo-container {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+    }
+
+    .logo,
+    .logo:hover {
+      font-family: 'NexaBold', Roboto, sans-serif;
+      text-decoration: none;
+      color: #ff7043;
+      font-size: 24px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="logo-container"><a class="logo"
+       href="/">Gigamunch</a></div>
+  <h1>Page Not Found</h1>
+  <p>Sorry, but the page you were trying to view does not exist.</p>
+  <p>Please email <a target="_blank"
+       href="mailto:atish@eatgigamunch.com">atish@eatgigamunch.com</a> if problem persist.</p>
+</body>
+
+</html>
+[[end]]
