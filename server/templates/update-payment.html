@@ -1,0 +1,760 @@
+[[define "update-payment"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+</head>
+
+<body>
+  [[template "theme" .]]
+
+  <style>
+    .checkout-wrapper {
+      background-color: #f1f3f4;
+      padding-bottom: 32px;
+    }
+
+    .checkout-wrapper>* {
+      margin: auto;
+      max-width: 800px;
+      background-color: #ffffff;
+    }
+
+    body {
+      color: #424242;
+    }
+
+    .checkout-email-title {
+      padding: 8px 0;
+    }
+
+    .hosted-field {
+      height: 22px;
+    }
+
+    .form-section-title {
+      border-bottom: solid #e1e1e1 1px;
+      margin: 12px 0;
+    }
+
+    .form-section-title>* {
+      font-size: 16px;
+      margin: 8px 0;
+    }
+
+    .form-section-desc {
+      color: #797c82;
+      font-size: 14px;
+    }
+
+    .form-section-note {
+      font-size: 14px;
+      color: #797c82;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .checkout-logo {
+      font-family: 'NexaBold', 'Roboto', sans-serif;
+      font-weight: bold;
+      font-size: 24px;
+      color: #ff5722;
+    }
+
+    .header {
+      height: 50vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #64656a url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/whats_next_box_cut.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .header-title {
+      font-size: 35px;
+      color: white;
+      padding: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .header-title {
+        font-size: 26px;
+      }
+    }
+
+    .checkout-section {
+      background-color: #ffffff;
+      background-size: cover;
+      display: flex;
+      flex-direction: row-reverse;
+    }
+
+    .checkout-trust {
+      font-size: 15px;
+      padding: 12px;
+      flex: 3;
+      border-left: #dedede 1.5px solid;
+    }
+
+    .checkout-trust-title {
+      color: #ff5722;
+    }
+
+    .checkout-trust-list {
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+
+    .checkout-trust-list-item {
+      margin: 0;
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .checkout-trust-list-check {
+      margin-right: 8px;
+      color: #1f8458;
+    }
+
+    .checkout-trust-list-text {}
+
+    .checkout-trust-review {}
+
+    .checkout-trust-review-image {
+      padding-bottom: 12px;
+    }
+
+    .checkout-trust-review-image img {
+      width: 50px;
+      border-radius: 50%;
+      display: block;
+      margin: 0 32px 0 auto;
+    }
+
+    .checkout-trust-review p {
+      font-style: italic;
+    }
+
+    .checkout-trust-security-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .checkout-trust-security-image {}
+
+    .checkout-trust-security-image img {
+      width: 50px;
+      display: block;
+      margin: 8px auto 8px 2px;
+    }
+
+    .checkout-trust-security-title {
+      color: #ff5722;
+    }
+
+    .checkout-trust-security-desc {
+      font-size: 13px;
+    }
+
+    .checkout-form-container {
+      padding: 12px;
+      flex: 5;
+    }
+
+    @media (max-width: 700px) {
+      .checkout-section {
+        flex-direction: column;
+      }
+      .checkout-trust {
+        flex: 1;
+      }
+      .checkout-trust-security-item {
+        flex-direction: row;
+        padding: 8px 0;
+      }
+      .checkout-trust-security-image img {
+        margin: 0 12px 0 12px;
+      }
+      .checkout-form-container {
+        flex: 3;
+        border-top: solid #e1e1e1 1px;
+      }
+    }
+
+    .checkout-row {
+      display: flex;
+    }
+
+    .checkout-row>* {
+      flex: 1;
+    }
+
+    .checkout-row>*:not(:first-child) {
+      margin-left: 12px;
+    }
+
+    .checkout-title-container {
+      background: #F06522;
+      background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+      background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+      background: linear-gradient(45deg, #FF5722, #FFB300);
+      padding: 16px;
+    }
+
+    .checkout-title {
+      font-size: 24px;
+      margin: 12px 0;
+      text-align: center;
+      font-style: italic;
+      font-weight: 400;
+      color: white;
+    }
+
+    @media (max-width: 700px) {
+      .checkout-title {
+        font-size: 20px;
+      }
+    }
+
+    .checkout-form-container {
+      padding: 16px;
+    }
+
+    .checkout-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .checkout-button {
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      padding: 11px;
+      background: #F06522;
+      background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+      background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+      background: linear-gradient(45deg, #FF5722, #FFB300);
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      margin: 12px 0 6px 0;
+      /*min-width: 275px;*/
+    }
+
+    .checkout-button:disabled {
+      background: #dfdfdf;
+    }
+
+    .no-commitment {
+      margin-top: 12px;
+      background-color: #28a971;
+      color: white;
+      border-radius: 3px;
+      padding: 12px;
+      display: flex;
+      font-size: 14px;
+    }
+
+    .no-commitment-checkmark {
+      font-size: 64px;
+      padding: 0 12px;
+      margin: auto;
+    }
+
+    .no-commitment-text {
+      padding-left: 12px;
+    }
+
+    .no-commitment-title {
+      border-bottom: solid white 2px;
+      font-weight: bold;
+      padding: 8px 0;
+    }
+
+    .no-commitment-desc {
+      padding-top: 8px;
+    }
+
+    .checkout-payment-lock {
+      color: #1f8458;
+    }
+
+    .card-number>i {
+      padding: 0 2px;
+    }
+
+    .input-container {
+      display: flex;
+    }
+
+    .hosted-field,
+    .input-container>*,
+    select {
+      margin: 8px 0 12px;
+    }
+
+    .input-container>* {
+      flex: 1;
+    }
+
+    .input-container>*:not(:first-child) {
+      flex: 2;
+      margin-left: 12px;
+    }
+    /* Review section */
+
+    .review-order {
+      background-color: #fafafa;
+      padding: 24px;
+      font-size: 14px;
+    }
+
+    .item {
+      display: flex;
+      flex-direction: row;
+      padding-bottom: 12px;
+    }
+
+    @media (max-width:700px) {
+      .item {
+        flex-direction: column;
+      }
+    }
+
+    .item-image>img {
+      margin-right: 12px;
+      width: 200px;
+      border-radius: 3px;
+    }
+
+    .item-detail {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .item-title {
+      font-weight: 500;
+      font-size: 18px;
+    }
+
+    .item-desc {
+      opacity: .87;
+      font-size: 12px;
+    }
+
+    .order-summary {
+      border-top: solid #d3d3d3 1px;
+      padding: 12px 0;
+    }
+
+    .order-summary-section {
+      padding-top: 8px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .order-summary-section-name {
+      font-weight: 700;
+      margin-right: auto;
+    }
+
+    .multiplier {
+      opacity: .56;
+    }
+
+    .old_price {
+      opacity: .56;
+      text-decoration: line-through;
+    }
+
+    @media (max-width: 600px) {}
+    /* Selector */
+
+    .select-package-container {
+      padding: 12px 0;
+    }
+
+    .select-package-container ul {
+      list-style: none;
+      height: 100%;
+      width: 100%;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    .select-package-container ul li {
+      color: #000000;
+      opacity: 0.87;
+      display: block;
+      position: relative;
+      float: left;
+    }
+
+    .select-package-container ul li input[type=radio] {
+      position: absolute;
+      visibility: hidden;
+    }
+
+    .select-package-container-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      width: 150px;
+      height: 115px;
+      border: 2px solid #cfd8dc;
+      cursor: pointer;
+      transition: all 0.15s linear;
+      -webkit-transition: all 0.15s linear;
+    }
+
+    .select-package-container ul li:first-child .select-package-container-button {
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      border-right: 0;
+    }
+
+    .select-package-container ul li:last-child .select-package-container-button {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      border-left: 0;
+    }
+
+    .select-package-container-button label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+      text-align: center;
+      width: 100%;
+      transition: all 0.15s linear;
+      -webkit-transition: all 0.15s linear;
+    }
+
+    .most-popular-label {
+      font-weight: 300;
+      font-size: 12px;
+      color: #F44336;
+      z-index: 2;
+      flex: 3;
+    }
+
+    .num-meals-label {
+      font-weight: 300;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.87);
+      flex: 6;
+    }
+
+    .price-per-meal-label {
+      font-weight: 300;
+      font-size: 12px;
+      padding: 0;
+      color: rgba(0, 0, 0, 0.54);
+      flex: 4;
+    }
+
+    ul li:hover .select-package-container-button {
+      background-color: rgba(255, 112, 67, 0.1);
+    }
+
+    input[type=radio]:checked~.num-meals-label,
+    input[type=radio]:checked~.price-per-meal-label,
+    input[type=radio]:checked~.most-popular-label {
+      color: #ffffff;
+      opacity: 1.0;
+      background-color: #ff7043;
+    }
+
+    @media (max-width: 500px) {
+      .select-package-container-button,
+      .select-package-container ul li:last-child .select-package-container-button,
+      .select-package-container ul li:last-child .select-package-container-button {
+        width: 255px;
+        border: 2px solid #cfd8dc;
+        border-radius: 0px;
+      }
+    }
+
+    .vegetarian-section {
+      padding: 12px 0;
+    }
+
+    .vegetarian-label {
+      font-weight: 500;
+    }
+
+    .checkbox {
+      display: inline-block;
+      display: inline-flex;
+      width: 20px;
+      position: relative;
+      margin: 4px;
+    }
+
+    .checkbox label {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #f7f7f7;
+      /*background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);*/
+      border-radius: 4px;
+      border: solid #CFD8DC 1px;
+      transition: all .3s ease;
+      /*box-shadow: inset 0px 1px 1px white, 0px 1px 3px rgba(0, 0, 0, 0.5);*/
+    }
+
+    .checkbox label:after {
+      content: '';
+      width: 9px;
+      height: 5px;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      border: 3px solid #FF7043;
+      border-top: none;
+      border-right: none;
+      background: transparent;
+      opacity: 0;
+      transform: rotate(-45deg);
+    }
+
+    .checkbox label:hover::after {
+      opacity: 0.3;
+    }
+
+    .terms-and-conditions {
+      opacity: .87;
+      font-size: 12px;
+      padding: 8px 0;
+    }
+
+    .address-input-container .apt {
+      max-width: 75px;
+    }
+
+    .checkout-padding {
+      padding: 24px;
+    }
+
+  </style>
+
+  <div class="checkout-wrapper">
+    <div class="checkout-padding">
+      <h1><a href="/" class="checkout-logo">Gigamunch</a></h1>
+      <form id="checkout-form"
+            action="/checkout-thank-you"
+            method="post"
+            class="checkout-form"
+            enctype="application/x-www-form-urlencoded">
+        <div class="input-label">
+          <label for="name">Email</label>
+          <div class="input-container">
+            <input type="text"
+                   name="email"
+                   id="email"
+                   class="checkout-email"
+                   placeholder="Email"
+                   size="1"
+                   value="[[.Email]]" />
+          </div>
+        </div>
+        <div class="form-section-title">
+          <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
+        </div>
+        <div>
+          <label for="card-number"
+                 class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i>
+                         <i class="fa fa-cc-mastercard" aria-hidden="true"></i>
+                         <i class="fa fa-cc-discover" aria-hidden="true"></i></label>
+          <div class="hosted-field"
+               id="card-number"></div>
+        </div>
+        <div>
+          <label for="cvv">CVV</label>
+          <div class="hosted-field"
+               id="cvv"></div>
+
+          <label for="expiration-date">Expiration Date</label>
+          <div class="hosted-field"
+               id="expiration-date"></div>
+        </div>
+        <input type="hidden"
+               name="payment_method_nonce">
+        <input class="checkout-button"
+               type="submit"
+               value="Update"
+               disabled/>
+      </form>
+    </div>
+  </div>
+  </div>
+  </div>
+  </div>
+  <style>
+    /* Fix issue with font not importing */
+
+    @font-face {
+      font-family: 'NexaBold';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+    }
+
+  </style>
+  <!-- Load the Client component. -->
+  <script src="https://js.braintreegateway.com/web/3.24.1/js/client.min.js"></script>
+
+  <!-- Load the Hosted Fields component. -->
+  <script src="https://js.braintreegateway.com/web/3.24.1/js/hosted-fields.min.js"></script>
+  <script>
+    function logError(desc) {
+      ga('send', 'event', 'schedule_checkout_error');
+      ga('send', 'exception', {
+        exDescription: desc,
+        exFatal: false,
+      });
+    }
+
+    function logRespError(err) {
+      const desc = 'Function: UpdatePayment | Message: ' + err.message + '| Details: ' + err.detail;
+      logError(desc);
+    }
+
+    // BrainTree 
+    var authorization = 'production_fzp6pdxg_wsgmypp8c46cnbpc';
+    if (!APP.IsProd) {
+      authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
+    }
+    var submit = document.querySelector('input[type="submit"]');
+    var form = document.querySelector('#checkout-form');
+    var hostedFieldsInst;
+    braintree.client.create({
+      authorization: authorization
+    }, function(clientErr, clientInstance) {
+      if (clientErr) {
+        // Handle error in client creation
+        console.error('Error with client creation', clientErr);
+        return;
+      }
+
+      braintree.hostedFields.create({
+        client: clientInstance,
+        styles: {
+          'input': {
+            'font-size': '14px',
+            'outline': 'none'
+          },
+          '.invalid': {
+            'color': 'red'
+          },
+          '.valid': {
+            'color': 'green'
+          }
+        },
+        fields: {
+          number: {
+            selector: '#card-number',
+            placeholder: '4111 1111 1111 1111'
+          },
+          cvv: {
+            selector: '#cvv',
+            placeholder: '123'
+          },
+          expirationDate: {
+            selector: '#expiration-date',
+            placeholder: '10/2021'
+          }
+        }
+      }, function(hostedFieldsErr, hostedFieldsInstance) {
+        if (hostedFieldsErr) {
+          // Handle error in Hosted Fields creation
+          console.error('Error with hosted fields creation', hostedFieldsErr);
+          return;
+        }
+        hostedFieldsInst = hostedFieldsInstance;
+        submit.removeAttribute('disabled');
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          submit.setAttribute('disabled', true);
+          hostedFieldsInstance.tokenize({}, function(tokenizeErr, payload) {
+            if (tokenizeErr) {
+              // Handle error in Hosted Fields tokenization
+              console.error('failed to tokenize fields', tokenizeErr)
+              logError(JSON.stringify(tokenizeErr));
+              if (tokenizeErr.type === 'CUSTOMER') {
+                alert('Invalid credit card information.');
+              } else {
+                alert('An unknown error occured while verifying your credit card. Please try a different card or contact enis@gigamunchapp.com.');
+              }
+              submit.removeAttribute('disabled');
+              return;
+            }
+
+            // Put `payload.nonce` into the `payment_method_nonce` input, and then
+            // submit the form. Alternatively, you could send the nonce to your server
+            // with AJAX.
+            document.querySelector('input[name="payment_method_nonce"]').value = payload.nonce;
+
+            // submit form 
+            var email = form.elements['email'].value;
+            var paymentNonce = form.elements['payment_method_nonce'].value;
+
+            var req = {
+              'email': email,
+              'payment_method_nonce': payload.nonce,
+            };
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/UpdatePayment', true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onload = function() {
+              try {
+                submit.removeAttribute('disabled');
+                var resp = JSON.parse(this.response);
+                if (resp.error && resp.error.code === 400) {
+                  alert(resp.error.message);
+                  console.log(resp.error);
+                  logRespError(resp.error);
+                  return;
+                }
+                if (resp.error && resp.error.code !== 200) {
+                  alert('Woops something went wrong: ', resp.error.message);
+                  console.error(resp.error);
+                  logRespError(resp.error)
+                  return;
+                }
+                window.location = '/thank-you';
+              } catch (err) {
+                var fullError = err;
+                try {
+                  fullError = 'resp: ' + JSON.stringify(resp) + 'err: ' + err;
+                } catch (e) {}
+                console.error(fullError);
+                logError(fullError);
+              }
+            };
+            xhr.send(JSON.stringify(req));
+          });
+        }, false);
+      });
+    });
+
+  </script>
+  [[template "footer" .]]
+</body>
+
+</html>
+[[end]]

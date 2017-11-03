@@ -20,6 +20,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -29,8 +30,9 @@ var (
 	errBadRequest = errors.BadRequestError
 )
 
-func addAPIRoutes() {
+func addAPIRoutes(r *httprouter.Router) {
 	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
+	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
 }
 
 func validateSubmitCheckoutReq(r *pb.SubmitCheckoutReq) error {
@@ -44,6 +46,60 @@ func validateSubmitCheckoutReq(r *pb.SubmitCheckoutReq) error {
 		return errInvalidParameter.WithMessage("First name must be provided.").Annotate("no first name")
 	}
 	return nil
+}
+
+// UpdatePayment updates a user's payment.
+func UpdatePayment(ctx context.Context, r *http.Request) Response {
+	req := new(pb.UpdatePaymentReq)
+	var err error
+	// decode request
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	defer closeRequestBody(r)
+	// end decode request
+	resp := &pb.ErrorOnlyResp{}
+
+	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
+	entry := &sub.SubscriptionSignUp{}
+	err = datastore.Get(ctx, key, entry)
+	if err == datastore.ErrNoSuchEntity {
+		resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", req.Email)).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		return resp
+	}
+	if err != nil {
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		return resp
+	}
+	paymentC := payment.New(ctx)
+	paymentReq := &payment.CreateCustomerReq{
+		CustomerID: entry.CustomerID,
+		FirstName:  entry.FirstName,
+		LastName:   entry.LastName,
+		Email:      req.Email,
+		Nonce:      req.PaymentMethodNonce,
+	}
+
+	paymenttkn, err := paymentC.CreateCustomer(paymentReq)
+	if err != nil {
+		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
+		return resp
+	}
+
+	subC := sub.New(ctx)
+	err = subC.UpdatePaymentToken(req.Email, paymenttkn)
+	if err != nil {
+		resp.Error = errors.Wrap("failed to sub.UpdatePaymentToken", err).SharedError()
+		return resp
+	}
+	messageC := message.New(ctx)
+	err = messageC.SendSMS("6155454989", fmt.Sprintf("Credit card updated. $$$ \nName: %s\nEmail: %s", entry.Name, entry.Email))
+	if err != nil {
+		utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+	}
+	return resp
 }
 
 // SubmitCheckout submits a checkout.
@@ -150,8 +206,8 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 	entry.Email = req.Email
 	entry.Name = req.FirstName + " " + req.LastName
-	entry.FirstName = req.FirstName
-	entry.LastName = req.LastName
+	entry.FirstName = strings.Trim(req.FirstName)
+	entry.LastName = strings.Trim(req.LastName)
 	entry.Address = *address
 	if entry.Date.IsZero() {
 		entry.Date = time.Now()
@@ -199,23 +255,27 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	if err != nil {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
 	}
-	mailC := mail.New(ctx)
-	mailReq := &mail.UserFields{
-		Email:             entry.Email,
-		Name:              entry.Name,
-		FirstDeliveryDate: firstBoxDate,
-		AddTags:           []mail.Tag{mail.Subscribed, mail.Customer},
-	}
-	if vegetarianServings > 0 {
-		mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
-		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
-	} else {
-		mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
-		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
-	}
-	err = mailC.UpdateUser(mailReq, getProjID())
-	if err != nil {
-		utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
+	if !strings.Contains(req.Email, "test.com") {
+		mailC := mail.New(ctx)
+		mailReq := &mail.UserFields{
+			Email:             entry.Email,
+			Name:              entry.Name,
+			FirstName:         entry.FirstName,
+			LastName:          entry.LastName,
+			FirstDeliveryDate: firstBoxDate,
+			AddTags:           []mail.Tag{mail.Subscribed, mail.Customer},
+		}
+		if vegetarianServings > 0 {
+			mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
+		} else {
+			mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
+		}
+		err = mailC.UpdateUser(mailReq, getProjID())
+		if err != nil {
+			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
+		}
 	}
 	return resp
 }
