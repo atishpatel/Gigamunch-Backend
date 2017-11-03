@@ -104,6 +104,30 @@ var (
 	config       *Config
 )
 
+func GetConfig(ctx context.Context) Config {
+	var config Config
+	if appengine.IsDevAppServer() {
+		filedata := readFile("config.json")
+		err := json.Unmarshal(filedata, &config)
+		if err != nil {
+			log.Println("Failed to unmarshal config file.")
+			log.Fatal(err)
+		}
+	} else {
+		key := datastore.NewKey(ctx, "Config", "", 100, nil)
+		err := datastore.Get(ctx, key, &config)
+		if err != nil {
+			if err == datastore.ErrNoSuchEntity {
+				config.PhoneNumbers = []string{"14243484448"}
+				_, _ = datastore.Put(ctx, key, config)
+			} else {
+				log.Fatalf("Error getting Config from datastore: %+v", err)
+			}
+		}
+	}
+	return config
+}
+
 func GetMailConfig(ctx context.Context) MailConfig {
 	var mailConfig MailConfig
 	if appengine.IsDevAppServer() {
