@@ -3,12 +3,6 @@
         async
         defer></script>
 <style>
-  .footer-logo {
-    font-family: 'NexaBold', sans-serif;
-    letter-spacing: .05em;
-    text-decoration: none;
-  }
-
   footer {
     background-color: #797c82;
     color: #fff;
@@ -43,8 +37,10 @@
   }
 
   footer .join-us-links a {
-    display: inline-block;
-    padding: 3px 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
     font-size: 13px;
     font-weight: 500;
     text-shadow: none;
@@ -56,16 +52,25 @@
 
   footer .join-us-links span {
     display: none;
+    padding-left: 12px;
   }
 
   footer .footer-logo {
+    font-family: 'NexaBold', sans-serif;
+    letter-spacing: .05em;
+    text-decoration: none;
+    display: inline-block;
     font-size: 1.5em;
     color: white;
     margin: 25px 0;
   }
 
-  footer .love .footer-logo {
+  footer .love-logo {
+    font-family: 'NexaBold', sans-serif;
+    letter-spacing: .05em;
+    text-decoration: none;
     font-size: 1em;
+    color: white;
   }
 
   footer .nav {
@@ -108,15 +113,19 @@
     color: #fff;
   }
 
+  footer .love {
+    padding: 24px 0;
+  }
+
   @media (min-width: 767px) {
     footer {
-      padding-bottom: 60px;
+      padding-bottom: 20px;
     }
     footer .join-us-links span {
       display: inline-block;
     }
     footer .footer-logo {
-      margin: 20px 0 40px;
+      margin: 40px 0 40px;
     }
     footer .content {
       padding: 0 20px;
@@ -160,10 +169,9 @@
     </div>
   </section>
   <div class="container">
-    <a href="/">
-      <div class="footer-logo">
+    <a class="logo footer-logo"
+       href="/">
         Gigamunch
-      </div>
     </a>
 
     <div class="nav">
@@ -186,7 +194,7 @@
       Made with
       <i style="color:#FF7043"
          class="fa fa-heart"
-         aria-hidden="true"></i> by <span class="footer-logo">Gigamunch</span> |
+         aria-hidden="true"></i> by <span class="love-logo">Gigamunch</span> |
       <i class="fa fa-copyright"
          aria-hidden="true"></i> 2017
     </div>

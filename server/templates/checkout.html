@@ -1,8 +1,10 @@
 [[define "checkout"]]
 <!doctype html>
 <html lang="en">
-[[template "head" .]]
 
+<head>
+  [[template "head" .]]
+</head>
 
 <body>
   [[template "theme" .]]
@@ -653,8 +655,8 @@
     <div>
       <div class="header">
         <a href="/"
-           class="checkout-logo">Gigamunch</a>
-        <div class="header-title">Where will your next meal take you?</div>
+           class="logo checkout-logo">Gigamunch</a>
+        <div class="header-title">Where will your next dinner take you?</div>
       </div>
 
       <div class="checkout-section">
@@ -1025,15 +1027,6 @@
     </div>
   </div>
   </div>
-  <style>
-    /* Fix issue with font not importing */
-
-    @font-face {
-      font-family: 'NexaBold';
-      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
-    }
-
-  </style>
   <!-- Load the Client component. -->
   <script src="https://js.braintreegateway.com/web/3.24.1/js/client.min.js"></script>
 
@@ -1121,7 +1114,7 @@
 
     // BrainTree 
     var authorization = 'production_fzp6pdxg_wsgmypp8c46cnbpc';
-    if (!IsProd) {
+    if (!APP.IsProd) {
       authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
     }
     var submit = document.querySelector('input[type="submit"]');
@@ -1263,7 +1256,10 @@
                   window.location = '/checkout-thank-you';
                 }
               } catch (err) {
-                var fullError = 'resp: ' + JSON.stringify(resp) + 'err: ' + err;
+                var fullError = err;
+                try {
+                  fullError = 'resp: ' + JSON.stringify(resp) + 'err: ' + err;
+                } catch (e) {}
                 console.error(fullError);
                 logError(fullError);
               }

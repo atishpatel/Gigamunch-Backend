@@ -11,12 +11,23 @@
     background-color: #f1f3f4;
   }
 
-  button {
+  button,
+  .btn {
     border: none;
     outline: none;
     text-align: center;
     color: white;
     cursor: pointer;
+    border: none;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.4;
+    border-radius: 4px;
+    padding: 10px 15px;
+    -webkit-font-smoothing: subpixel-antialiased;
+    transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+    background: linear-gradient(45deg, #FF5722, #FFB300);
+    background-color: #FF7043;
   }
 
   a {
@@ -40,7 +51,6 @@
     font-size: 14px;
     background-color: #f7f7f7;
     outline: none;
-    /*opacity: .95;*/
     transition: all .3s ease;
   }
 
@@ -70,6 +80,25 @@
 
   label {
     font-size: 14px;
+    margin: 0;
+  }
+
+  table {
+    border-collapse: initial;
+  }
+
+  *,
+   ::after,
+   ::before {
+    box-sizing: initial;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .bg-orange-gradient {
+    background: linear-gradient(45deg, #FF5722, #FFB300);
   }
 
   .photo-16-9 {
@@ -91,6 +120,27 @@
     top: 0;
     bottom: 0;
     margin: auto;
+  }
+
+  .logo,
+  .logo:hover {
+    font-family: 'NexaBold', Roboto, sans-serif;
+    text-decoration: none;
+    color: white;
+  }
+
+  nav {
+    max-width: 1000px;
+    margin: auto;
+  }
+
+  .navbar {
+    padding: 16px 32px;
+  }
+
+  @font-face {
+    font-family: 'NexaBold';
+    src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
   }
 
 </style>

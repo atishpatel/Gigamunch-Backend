@@ -1,141 +1,146 @@
 [[define "head"]]
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+<meta http-equiv="X-UA-Compatible"
+      content="IE=edge,chrome=1">
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport"
-        content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+<title>[[or .Title "A new international meal delivered to you every week!"]] | Gigamunch</title>
 
-  <title>[[or .Title "Gigamunch | Get a new international meal delivered to you every week!"]]</title>
+<meta name="description"
+      content="For people who want to see the world, but don’t have time, we deliver meals from a different country every week so you can explore the world from your own dinner table.">
+<meta name="keywords"
+      content="gigamunch, local, nashville, chef, cook, homemade, online, buy, startup, meal, cooking, eat, job, sell, food, home">
+<meta property="og:title"
+      content="Get a new international meal delivered to you every week! | Gigamunch" />
+<meta property="og:site_name"
+      content="Gigamunch" />
+<meta property="og:type"
+      content="website" />
+<meta property="og:url"
+      content="https://eatgigamunch.com" />
+<meta property="og:image"
+      content="https://storage.googleapis.com/gigamunch-omninexus-website/social/facebook_share_image.png" />
+<meta property="og:image:width"
+      content="1200" />
+<meta property="og:image:height"
+      content="628" />
+<meta property="og:description"
+      content="For people who want to see the world, but don’t have time, we deliver meals from a different country every week so you can explore the world from your own dinner table." />
+<meta property="twitter:site"
+      content="@gigamunchapp" />
+<meta name="twitter:image"
+      content="https://storage.googleapis.com/gigamunch-omninexus-website/social/twitter_share_image.png">
+<meta name="twitter:card"
+      content="summary_large_image">
+<meta property="fb:admins"
+      content="100001118620838" />
+<meta property="fb:admins"
+      content="100000667982153" />
 
-  <meta name="description"
-        content="For people who want to see the world, but don’t have time, we deliver meals from a different country every week so you can explore the world from your own dinner table.">
-  <meta name="keywords"
-        content="gigamunch, local, nashville, chef, cook, homemade, online, buy, startup, meal, cooking, eat, job, sell, food, home">
-  <meta property="og:title"
-        content="Gigamunch | Get a new international meal delivered to you every week!" />
-  <meta property="og:site_name"
-        content="Gigamunch" />
-  <meta property="og:type"
-        content="website" />
-  <meta property="og:url"
-        content="https://www.eatgigamunch.com" />
-  <meta property="og:image"
-        content="https://storage.googleapis.com/gigamunch-omninexus-website/social/facebook_share_image.png" />
-  <meta property="og:image:width"
-        content="1200" />
-  <meta property="og:image:height"
-        content="628" />
-  <meta property="og:description"
-        content="Gigamunch allows you to buy homemade food from local cooks. Save time by using your smartphone to order vegan, gluten free, paleo, organic, and other healthy and nourishing food nearby." />
-  <meta property="twitter:site"
-        content="@gigamunchapp" />
-  <meta name="twitter:image"
-        content="https://storage.googleapis.com/gigamunch-omninexus-website/social/twitter_share_image.png">
-  <meta name="twitter:card"
-        content="summary_large_image">
-  <meta property="fb:admins"
-        content="100001118620838" />
-  <meta property="fb:admins"
-        content="100000667982153" />
+<meta name="theme-color"
+      content="#546E7A">
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500,700"
+      rel="stylesheet">
+<link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+      integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+      crossorigin="anonymous">
+<script async
+        src="https://www.google-analytics.com/analytics.js"></script>
+<script>
+  // Set Environment
+  var APP = APP || {};
+  APP.IsDev = false;
+  APP.IsStage = false;
+  APP.IsProd = false;
+  switch (location.hostname) {
+    case '127.0.0.1':
+    case 'localhost':
+      APP.IsDev = true;
+      break;
+    case 'gigamunch-omninexus-dev.appspot.com':
+      APP.IsStage = true;
+      break;
+    default:
+      APP.IsProd = true;
+  }
 
-  <meta name="theme-color"
-        content="#546E7A">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500,700"
-        rel="stylesheet">
-  <script async
-          src="https://www.google-analytics.com/analytics.js"></script>
-  <script>
-    var IsDev = false;
-    var IsStage = false;
-    var IsProd = false;
-    switch (location.hostname) {
-      case 'localhost':
-        IsDev = true;
-        break;
-      case 'gigamunch-omninexus-dev.appspot.com':
-        IsStage = true;
-        break;
-      default:
-        IsProd = true;
-    }
-
-    // Google Analytics
-    window.ga = window.ga || function() {
-      (ga.q = ga.q || []).push(arguments)
-    };
-    ga.l = +new Date;
-    var ua = IsProd ? 'UA-71567908-1' : 'UA-71567908-4';
-    ga('create', ua, 'auto');
-    ga('send', 'pageview');
-    // Setup error tracking before anything else runs.
-    window.onerror = function(message, file, lineNumber, columnNumber, error) {
-      // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
-      try {
-        // Some browsers don't support error param yet.
-        if (error !== undefined) {
-          message = error.stack;
-        }
-        ga('send', 'event', 'error', file + ':' + lineNumber, message);
-      } catch (e) {
-        // no-op
+  // Google Analytics
+  window.ga = window.ga || function() {
+    (ga.q = ga.q || []).push(arguments)
+  };
+  ga.l = +new Date;
+  var ua = APP.IsProd ? 'UA-71567908-1' : 'UA-71567908-4';
+  ga('create', ua, 'auto');
+  ga('send', 'pageview');
+  // Setup error tracking before anything else runs.
+  window.onerror = function(message, file, lineNumber, columnNumber, error) {
+    // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
+    try {
+      // Some browsers don't support error param yet.
+      if (error !== undefined) {
+        message = error.stack;
       }
+      ga('send', 'event', 'server-error', file + ':' + lineNumber, message);
+    } catch (e) {
+      // no-op
+    }
+  };
+  // End Google Analytics
+
+</script>
+<!-- Facebook Pixel Code -->
+<script>
+  ! function(f, b, e, v, n, t, s) {
+    if (f.fbq) return;
+    n = f.fbq = function() {
+      n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
     };
-    // End Google Analytics
+    if (!f._fbq) f._fbq = n;
+    n.push = n;
+    n.loaded = !0;
+    n.version = '2.0';
+    n.queue = [];
+    t = b.createElement(e);
+    t.async = !0;
+    t.src = v;
+    s = b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t, s)
+  }(window,
+    document, 'script', '//connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1118457214861493');
+  fbq('track', "PageView");
 
-  </script>
-  <!-- Facebook Pixel Code -->
-  <script>
-    ! function(f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function() {
-        n.callMethod ?
-          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s)
-    }(window,
-      document, 'script', '//connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1118457214861493');
-    fbq('track', "PageView");
-
-  </script>
-  <noscript><img height="1" width="1" style="display:none"
+</script>
+<noscript><img height="1" width="1" style="display:none"
     src="https://www.facebook.com/tr?id=522395114612219&ev=PageView&noscript=1"
     /></noscript>
-  <!-- End Facebook Pixel Code -->
-  <!-- Hotjar Tracking Code for www.ea.com -->
-  <script>
-    (function(h, o, t, j, a, r) {
-      var id = 569991;
-      if (location.host === 'eatgigamunch.com') {
-        id = 648960;
-      }
-      h.hj = h.hj || function() {
-        (h.hj.q = h.hj.q || []).push(arguments)
-      };
-      h._hjSettings = {
-        hjid: id,
-        hjsv: 5
-      };
-      a = o.getElementsByTagName('head')[0];
-      r = o.createElement('script');
-      r.async = 1;
-      r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
-      a.appendChild(r);
-    })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
+<!-- End Facebook Pixel Code -->
+<!-- Hotjar Tracking Code for www.ea.com -->
+<script>
+  (function(h, o, t, j, a, r) {
+    var id = 569991;
+    if (location.host === 'eatgigamunch.com') {
+      id = 648960;
+    }
+    h.hj = h.hj || function() {
+      (h.hj.q = h.hj.q || []).push(arguments)
+    };
+    h._hjSettings = {
+      hjid: id,
+      hjsv: 5
+    };
+    a = o.getElementsByTagName('head')[0];
+    r = o.createElement('script');
+    r.async = 1;
+    r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+    a.appendChild(r);
+  })(window, document, '//static.hotjar.com/c/hotjar-', '.js?sv=');
 
-  </script>
-  <script src="https://use.fontawesome.com/ea31cf9b69.js"
-          async
-          defer></script>
-</head>
-
+</script>
+<script src="https://use.fontawesome.com/ea31cf9b69.js"
+        async
+        defer></script>
 [[end]]
