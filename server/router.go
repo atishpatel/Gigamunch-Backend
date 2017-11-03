@@ -66,15 +66,14 @@ func init() {
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
 	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
-	r.NotFound = http.HandlerFunc(handle404)
 	http.HandleFunc("/get-upload-url", handleGetUploadURL)
 	http.HandleFunc("/upload", handleUpload)
 	http.HandleFunc("/get-feed", handleGetFeed)
 	http.HandleFunc("/get-item", handleGetItem)
 	http.HandleFunc("/signedup", handleCookSignup)
 	http.HandleFunc("/schedulesignedup", handleScheduleSignup)
-	addTemplateRoutes()
-	addAPIRoutes()
+	addTemplateRoutes(r)
+	addAPIRoutes(r)
 	http.Handle("/", r)
 }
 
@@ -415,10 +414,12 @@ func handleScheduleForm(w http.ResponseWriter, req *http.Request, param httprout
 					utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 				}
 			}
-			mailC := mail.New(ctx)
-			err = mailC.AddTag(entry.Email, mail.LeftWebsiteEmail)
-			if err != nil {
-				utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
+			if !entry.IsSubscribed {
+				mailC := mail.New(ctx)
+				err = mailC.AddTag(entry.Email, mail.LeftWebsiteEmail)
+				if err != nil {
+					utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
+				}
 			}
 			// hourFromNow := time.Now().Add(time.Hour)
 			// sendEmailReq := &tasks.SendEmailParams{

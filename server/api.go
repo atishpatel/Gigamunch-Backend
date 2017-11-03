@@ -206,8 +206,8 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 	entry.Email = req.Email
 	entry.Name = req.FirstName + " " + req.LastName
-	entry.FirstName = strings.Trim(req.FirstName)
-	entry.LastName = strings.Trim(req.LastName)
+	entry.FirstName = strings.TrimSpace(req.FirstName)
+	entry.LastName = strings.TrimSpace(req.LastName)
 	entry.Address = *address
 	if entry.Date.IsZero() {
 		entry.Date = time.Now()
