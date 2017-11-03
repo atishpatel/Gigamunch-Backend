@@ -206,8 +206,10 @@ func DateString(t time.Time) string {
 
 // UserFields contain all the possible fields a user can have.
 type UserFields struct {
-	Email             string    `json:"email"`
-	Name              string    `json:"name"`
+	Email             string `json:"email"`
+	Name              string `json:"name"`
+	FirstName         string
+	LastName          string
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
 	AddTags           []Tag     `json:"add_tags"`
 	RemoveTags        []Tag     `json:"remove_tags"`
@@ -215,7 +217,7 @@ type UserFields struct {
 
 // UpdateUser updates the user custom fields.
 func (c *Client) UpdateUser(req *UserFields, projID string) error {
-	if strings.Contains(email, ignoreDomain) {
+	if strings.Contains(req.Email, ignoreDomain) {
 		return nil
 	}
 	// resp, err := c.dripC.FetchSubscriber(req.Email)
@@ -232,7 +234,13 @@ func (c *Client) UpdateUser(req *UserFields, projID string) error {
 		Email:        req.Email,
 		CustomFields: make(map[string]string),
 	}
-	firstName, lastName := splitName(req.Name)
+	var firstName, lastName string
+	if req.FirstName == "" {
+		firstName, lastName = splitName(req.Name)
+	} else {
+		firstName = req.FirstName
+		lastName = req.LastName
+	}
 	if firstName != "" {
 		sub.CustomFields["FIRST_NAME"] = firstName
 	}
@@ -274,14 +282,13 @@ func (c *Client) UpdateUser(req *UserFields, projID string) error {
 func splitName(name string) (string, string) {
 	first := ""
 	last := ""
-	nameStripper := strings.NewReplacer(".", "", "mr ", "", "ms ", "", "the", "", "dr ", "")
-	nameReplaced := nameStripper.Replace(strings.ToLower(name))
-	nameArray := strings.Split(strings.Title(strings.TrimSpace(nameReplaced)), " ")
-	if len(nameArray) >= 2 {
-		last = nameArray[len(nameArray)-1]
-	}
-	if len(nameArray) >= 1 {
-		first = nameArray[0]
+	name = strings.Title(strings.TrimSpace(name))
+	lastSpace := strings.LastIndex(name, " ")
+	if lastSpace == -1 {
+		first = name
+	} else {
+		first = name[:lastSpace]
+		last = name[lastSpace:]
 	}
 	return first, last
 }
