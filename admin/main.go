@@ -109,7 +109,7 @@ func setupWithContext(ctx context.Context) error {
 	return nil
 }
 
-func userAdmin(f func(context.Context, *http.Request) Response) func(context.Context, *http.Request) Response {
+func userAdmin(f handle) handle {
 	return func(ctx context.Context, r *http.Request) Response {
 		user, err := getUserFromRequest(ctx, r)
 		if !err.IsNil() {
@@ -122,7 +122,7 @@ func userAdmin(f func(context.Context, *http.Request) Response) func(context.Con
 	}
 }
 
-func driverAdmin(f func(context.Context, *http.Request) Response) func(context.Context, *http.Request) Response {
+func driverAdmin(f handle) handle {
 	return func(ctx context.Context, r *http.Request) Response {
 		user, err := getUserFromRequest(ctx, r)
 		if !err.IsNil() {
@@ -135,7 +135,7 @@ func driverAdmin(f func(context.Context, *http.Request) Response) func(context.C
 	}
 }
 
-func systemsAdmin(f func(context.Context, *http.Request) Response) func(context.Context, *http.Request) Response {
+func systemsAdmin(f handle) handle {
 	return func(ctx context.Context, r *http.Request) Response {
 		user, err := getUserFromRequest(ctx, r)
 		if !err.IsNil() {
@@ -227,3 +227,5 @@ func closeRequestBody(r *http.Request) {
 func test(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
+
+type handle func(context.Context, *http.Request) Response
