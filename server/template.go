@@ -225,7 +225,7 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		}
 		page.ReferrerName = entry.FirstName + " " + entry.LastName
 		if page.ReferrerName == "" {
-			page.ReferredName = entry.Name
+			page.ReferrerName = entry.Name
 		}
 	}
 }
