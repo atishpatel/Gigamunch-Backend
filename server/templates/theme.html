@@ -45,13 +45,19 @@
   input,
   select,
   .hosted-field {
-    padding: 12px;
+    padding: 0 12px;
     border: solid #CFD8DC 1px;
     border-radius: 3px;
     font-size: 14px;
     background-color: #f7f7f7;
     outline: none;
     transition: all .3s ease;
+    /* fixes ie bug */
+    height: 43px;
+  }
+
+  .hosted-field iframe {
+    min-height: 22px;
   }
 
   input:focus,

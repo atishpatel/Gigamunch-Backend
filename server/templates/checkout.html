@@ -4,6 +4,11 @@
 
 <head>
   [[template "head" .]]
+  <!-- Load the Client component. -->
+  <script src="https://js.braintreegateway.com/web/3.24.1/js/client.min.js"></script>
+
+  <!-- Load the Hosted Fields component. -->
+  <script src="https://js.braintreegateway.com/web/3.24.1/js/hosted-fields.min.js"></script>
 </head>
 
 <body>
@@ -26,10 +31,6 @@
 
     .checkout-email-title {
       padding: 8px 0;
-    }
-
-    .hosted-field {
-      height: 22px;
     }
 
     .form-section-title {
@@ -104,6 +105,11 @@
       padding: 12px;
       flex: 3;
       border-left: #dedede 1.5px solid;
+    }
+
+    .checkout-trust-get,
+    .checkout-trust-say {
+      padding: 12px 0;
     }
 
     .checkout-trust-title {
@@ -382,7 +388,7 @@
     /* Selector */
 
     .select-package-container {
-      padding: 12px 0;
+      padding: 24px 0 12px 0;
     }
 
     .select-package-container ul {
@@ -714,7 +720,7 @@
                     </div>
                   </div>
                   <div class="checkout-trust-review">
-                    <p>We loved exploring food from various parts of the world.</p>
+                    <p>"We loved exploring food from various parts of the world."</p>
                     <div class="checkout-trust-review-image">
                       <img alt="Paige Orr Clancy picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/paige_orr_clancy.jpg">
@@ -722,7 +728,7 @@
                   </div>
 
                   <div class="checkout-trust-review">
-                    <p>Bravo! I love these meals. They are delicious, convenient and no waste.</p>
+                    <p>"Bravo! I love these meals. They are delicious, convenient and no waste."</p>
                     <div class="checkout-trust-review-image">
                       <img alt="Barbara Futter picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/barbara_futter.jpg">
@@ -889,7 +895,8 @@
                     <option selected value>Monday</option>
                   </select>
             </div>
-            <div class="form-section-note">*Deliveries are only offered on Monday nights. If you want it on some other day, <a href="mailto:enis@eatgigamunch.com">let us know!</a></div>
+            <div class="form-section-note">*Deliveries are only offered on Monday nights. If you want it on some other day, <a target="_blank"
+                 href="mailto:enis@eatgigamunch.com">let us know!</a></div>
             <div class="select-package-container">
               <ul>
                 <li>
@@ -1008,9 +1015,6 @@
                 </div>
               </div>
             </div>
-            <input type="text"
-                   name="terp"
-                   style="display:none">
             <input type="hidden"
                    name="payment_method_nonce">
             <div class="terms-and-conditions">By subscribing, I agree to the <a href="/terms"
@@ -1026,12 +1030,7 @@
       </div>
     </div>
   </div>
-  </div>
-  <!-- Load the Client component. -->
-  <script src="https://js.braintreegateway.com/web/3.24.1/js/client.min.js"></script>
 
-  <!-- Load the Hosted Fields component. -->
-  <script src="https://js.braintreegateway.com/web/3.24.1/js/hosted-fields.min.js"></script>
   <script>
     function logError(desc) {
       ga('send', 'event', 'schedule_checkout_error');
@@ -1042,7 +1041,7 @@
     }
 
     function logRespError(err) {
-      const desc = 'Function: startsubscription | Message: ' + err.message + '| Details: ' + err.detail;
+      var desc = 'Function: startsubscription | Message: ' + err.message + '| Details: ' + err.detail;
       logError(desc);
     }
 
@@ -1120,6 +1119,7 @@
     var submit = document.querySelector('input[type="submit"]');
     var form = document.querySelector('#checkout-form');
     var hostedFieldsInst;
+    var btClientInst;
     braintree.client.create({
       authorization: authorization
     }, function(clientErr, clientInstance) {
@@ -1128,7 +1128,7 @@
         console.error('Error with client creation', clientErr);
         return;
       }
-
+      byClientInst = clientInstance;
       braintree.hostedFields.create({
         client: clientInstance,
         styles: {
@@ -1197,14 +1197,14 @@
             var deliveryNotes = form.elements['delivery_notes'].value;
             var reference = form.elements['reference'].value;
             var phoneNumber = form.elements['phone_number'].value;
-            var paymentNonce = form.elements['payment_method_nonce'].value;
+            var paymentNonce = payload.nonce;
             // get value of checked radio button
             var servings;
             var radios = form.elements['servings'];
             for (var i = 0, len = radios.length; i < len; i++) {
               if (radios[i].checked) { // radio checked?
-                servings = radios[i].value; // if so, hold its value in val
-                break; // and break out of for loop
+                servings = radios[i].value; // if so, hold its value in servings
+                break;
               }
             }
             // check if servings should be vegetarian

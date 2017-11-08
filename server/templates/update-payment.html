@@ -733,7 +733,7 @@
                 if (resp.error && resp.error.code !== 200) {
                   alert('Woops something went wrong: ', resp.error.message);
                   console.error(resp.error);
-                  logRespError(resp.error)
+                  logRespError(resp.error);
                   return;
                 }
                 window.location = '/thank-you';
