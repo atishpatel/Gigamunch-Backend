@@ -1,0 +1,243 @@
+[[define "gift"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+  <script src="https://unpkg.com/sweetalert2@latest/dist/sweetalert2.all.min.js"></script>
+</head>
+
+<body>
+  [[template "theme" .]]
+  <style>
+    *,
+     ::after,
+     ::before {
+      box-sizing: border-box;
+    }
+
+    main>* {
+      max-width: 1000px;
+      margin: auto;
+      background-color: white;
+    }
+
+    nav {
+      background-color: white;
+    }
+
+    .header {
+      display: flex;
+    }
+
+    .header-image {
+      flex: 2;
+    }
+
+    .card {
+      flex: 1;
+      padding: 24px;
+      max-width: 400px;
+      margin: 32px;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .banner {
+      color: white;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .steps {
+      padding: 32px;
+    }
+
+    .steps .btn {
+      margin: auto;
+    }
+
+    .swal2-modal .swal2-title {
+      margin: 0;
+    }
+
+    .dialog {
+      display: flex;
+      min-width: 600px;
+    }
+
+    .dialog .close-button {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    .dialog .img-section {
+      min-width: 300px;
+      min-height: 300px;
+      background: pink;
+    }
+
+    .dialog .share-section {
+      min-width: 300px;
+      min-height: 300px;
+    }
+
+    .dialog .nav-link {
+      background-color: #696;
+      color: white;
+      border-color: white;
+      border-top: 0px;
+      min-height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 0;
+    }
+
+    .dialog .nav-link .active {
+      background-color: white;
+      color: #696;
+    }
+
+    @media (max-width: 650px) {
+      .dialog {
+        flex-direction: column;
+      }
+    }
+
+  </style>
+
+  <header>
+    [[ template "nav" . ]]
+  </header>
+  <main>
+    <div class="header">
+      <div class="header-image">
+
+      </div>
+      <div class="card">
+        <div>
+          <h1 class="card-title">Give a piece of the world</h1>
+          <p>
+            Give your friends a journey to a different country - a different culture - all for no cost.
+          </p>
+        </div>
+        <button id="giveButton">Give Free Gift</button>
+      </div>
+    </div>
+    <div class="banner bg-orange-gradient">
+      <h2>Tis the season for giving</h2>
+    </div>
+    <div class="steps">
+      <h2>Giving has never been so easy!</h2>
+      <ol>
+        <li>Send link to your friends</li>
+        <li>Your friend enters their information</li>
+        <li>They get a gift from you and Gigamunch for Free</li>
+      </ol>
+      <button class="btn"
+              id="shareButton">Share the world</button>
+    </div>
+  </main>
+
+  <div class="hidden">
+    <div id="dialog"
+         class="dialog">
+      <div class="img-section">
+
+      </div>
+      <div class="share-section">
+
+        <div class="nav-tabs-container">
+          <ul class="nav nav-tabs"
+              id="shareTabs"
+              role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active"
+                 id="email-tab"
+                 data-toggle="tab"
+                 href="#email"
+                 role="tab"
+                 aria-controls="email"
+                 aria-selected="true">Email</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"
+                 id="facebook-tab"
+                 data-toggle="tab"
+                 href="#facebook"
+                 role="tab"
+                 aria-controls="facebook"
+                 aria-selected="false">Facebook</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"
+                 id="sms-tab"
+                 data-toggle="tab"
+                 href="#sms"
+                 role="tab"
+                 aria-controls="sms"
+                 aria-selected="false">SMS</a>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content"
+             id="shareTabsContent">
+          <div class="tab-pane fade show active"
+               id="email"
+               role="tabpanel"
+               aria-labelledby="email-tab">Email form...</div>
+          <div class="tab-pane fade"
+               id="facebook"
+               role="tabpanel"
+               aria-labelledby="facebook-tab">Facebook tab ...</div>
+          <div class="tab-pane fade"
+               id="sms"
+               role="tabpanel"
+               aria-labelledby="sms-tab"> sms tab ...</div>
+        </div>
+        <div class="shareCopyLink">
+
+        </div>
+      </div>
+      <div class="close-button">
+        <button type="button"
+                class="close"
+                data-close="shareDialog"
+                aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function closeShareDialog() {
+      swal.close();
+    }
+
+    function openShareDialog() {
+      swal({
+        html: document.getElementById('dialog').outerHTML,
+        showConfirmButton: false,
+        padding: 0,
+        onOpen: function() {
+          document.querySelectorAll('[data-close=shareDialog]').forEach(function(e) {
+            e.addEventListener('click', closeShareDialog);
+          });
+        },
+      });
+    }
+    document.getElementById('giveButton').addEventListener('click', openShareDialog);
+    document.getElementById('shareButton').addEventListener('click', openShareDialog);
+
+  </script>
+  [[template "footer" .]]
+</body>
+
+</html>
+[[end]]
