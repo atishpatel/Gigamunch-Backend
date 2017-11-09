@@ -512,6 +512,14 @@
       max-width: 75px;
     }
 
+    .why-free {
+      padding: 12px 0;
+    }
+
+    .why-free-title {
+      color: #28a971;
+    }
+
   </style>
 
   <script type="text/javascript">
@@ -686,7 +694,7 @@
                   </div>
 
                   <div class="checkout-trust-review">
-                    <p>"Bravo! I love these meals. They are delicious, convenient and no waste."</p>
+                    <p>"Bravo! I love these meals, culture guides, and songs. They are delicious, convenient, educational, and fun."</p>
                     <div class="checkout-trust-review-image">
                       <img alt="Barbara Futter picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/barbara_futter.jpg">
@@ -753,7 +761,7 @@
                          name="first_name"
                          id="first_name"
                          onfocus="nameInputFocused()"
-                         placeholder="Mr. Excited"
+                         placeholder="Ms. Excited"
                          size="1"
                          required />
                 </div>
@@ -838,7 +846,7 @@
             </div>
 
             <div class="form-section-desc">
-              Every Monday, you'll get a bag that 'll take you on a new journey! How do you want your journey to be?
+              Every Monday, you will get a bag that will take you on a new journey! How do you want your journey to be?
             </div>
             <br>
             <div class="select-input-group">
@@ -846,14 +854,13 @@
               <select id="delivery-day"
                       option-value="value"
                       form="checkout-form"
-                      onclick="dayInputClick()"
-                      required>
-                    <option selected value>Monday</option>
+                      onclick="dayInputClick()">
+                    <option selected value="Monday">Monday</option>
                   </select>
             </div>
-            <div class="form-section-note">*Deliveries are only offered on Monday nights. If you want it on some other day, <a target="_blank"
-                 href="mailto:enis@eatgigamunch.com">let us know!</a></div>
-            <div class="select-package-container">
+            <div class="form-section-note">*Deliveries are only offered on Monday nights for now.</div>
+            <div id="meal-selector"
+                 class="select-package-container">
               <ul>
                 <li>
                   <div class="select-package-container-button"
@@ -902,6 +909,13 @@
               <label class="vegetarian-label checkbox-label">I'm a vegetarian! 🌱</label>
             </div>
 
+            <div id="why-free"
+                 class="why-free">
+              <div class="form-section-title">
+                <h2 class="why-free-title">Why Free Meal?</h2>
+              </div>
+              <p class="form-section-desc">We believe in trying before buying. We're so confident you'll love it; we're willing to take the risk.</p>
+            </div>
 
             <div class="no-commitment">
               <div class="no-commitment-checkmark"><i class="fa
@@ -909,7 +923,7 @@
                    aria-hidden="true"></i></div>
               <div class="no-commitment-text">
                 <div class="no-commitment-title">No commitment. No, really.</div>
-                <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 3 days to cancel without getting charged a dime.</div>
+                <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 4 days after your first meal to cancel without getting charged a dime.</div>
               </div>
             </div>
             <div class="form-section-title">
@@ -946,7 +960,7 @@
                     <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
                     <div class="item-desc">
                       Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime with
-                      a 3 day notice.
+                      a 4 day notice.
                     </div>
                   </div>
                 </div>
@@ -976,7 +990,8 @@
             <div class="terms-and-conditions">By subscribing, I agree to the <a href="/terms"
                  target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
                  target="_blank">Privacy Policy</a>.</div>
-            <input class="checkout-button"
+            <input id="submit-button"
+                   class="checkout-button"
                    type="submit"
                    value="Subscribe"
                    onclick="subscribeClick()"
@@ -989,7 +1004,7 @@
 
   <script>
     function logError(desc) {
-      ga('send', 'event', 'schedule_checkout_error');
+      ga('send', 'event', 'schedule_checkout_error', desc);
       ga('send', 'exception', {
         exDescription: desc,
         exFatal: false,
@@ -1306,7 +1321,24 @@
     document.getElementById('meal-option-2').addEventListener('change', updateOrderInfo);
     document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
 
-    updateOrderInfo()
+    updateOrderInfo();
+
+    function getQueryParameter(name, url) {
+      if (!url) url = location.href;
+      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+      var regexS = "[\\?&]" + name + "=([^&#]*)";
+      var regex = new RegExp(regexS);
+      var results = regex.exec(url);
+      return results == null ? null : results[1];
+    }
+    var promo = getQueryParameter('promo', location.href);
+    if (promo && (promo === 'quizfree')) {
+      var submitButton = document.querySelector('#submit-button');
+      submitButton.value = 'Get Free Dinner';
+      var mealSelector = document.querySelector('#meal-selector');
+      mealSelector.style.display = 'none';
+
+    }
 
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y&libraries=places&callback=initMap"
