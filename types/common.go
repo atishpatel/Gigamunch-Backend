@@ -27,8 +27,13 @@ type Address struct {
 	GeoPoint        // embedded
 }
 
-func (a *Address) String() string {
+func (a Address) String() string {
 	return fmt.Sprintf("#%s %s, %s, %s %s, %s", a.APT, a.Street, a.City, a.State, a.Zip, a.Country)
+}
+
+// StringNoAPT returns a string of the address without the APT.
+func (a Address) StringNoAPT() string {
+	return fmt.Sprintf("%s, %s, %s %s, %s", a.Street, a.City, a.State, a.Zip, a.Country)
 }
 
 // GeoPoint represents a location as latitude/longitude in degrees.

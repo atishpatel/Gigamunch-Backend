@@ -44,6 +44,7 @@ type Point struct {
 // Geofence is a polygon related to a geofence.
 type Geofence struct {
 	ID          string  `json:"id" datastore:",noindex"`
+	Name        string  `json:"name" datastore:",index"`
 	Type        Type    `json:"type" datastore:",index"`
 	DriverID    int64   `json:"driver_id" datastore:",index"`
 	DriverEmail string  `json:"driver_email" datastore:",index"`

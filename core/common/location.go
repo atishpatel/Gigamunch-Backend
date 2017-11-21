@@ -6,12 +6,12 @@ type Location int
 
 const (
 	// Nashville is Greater Nashville Area (Nashville, Brentwood, Franklin).
-	Nashville Location = 0
+	Nashville Location = 1
 )
 
 func (c Location) String() string {
-	switch int(c) {
-	case 0:
+	switch int64(c) {
+	case Nashville.ID():
 		return "Nashville"
 	}
 	return ""
