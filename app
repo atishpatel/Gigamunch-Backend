@@ -108,7 +108,7 @@ if [[ $1 == "serve" ]]; then
     cd ../..
   fi
   if [[ $2 == "server" ]]; then
-    echo "Starting cookapi and server."
+    echo "Starting server:"
     cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g" > cookapi/app.yaml
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
     dev_appserver.py --datastore_path ./.datastore server/app.yaml
