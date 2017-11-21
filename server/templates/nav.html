@@ -2,6 +2,10 @@
 
 <header>
   <style>
+    .main-nav {
+      padding: 0 32px;
+    }
+
     nav .nav-logo,
     nav .nav-logo:hover {
       font-size: 24px;
@@ -10,20 +14,28 @@
 
     nav .navbar-toggler {
       margin-right: 24px;
+      border: none;
+    }
+
+    nav .navbar-toggler:hover {
+      background-color: initial;
     }
 
     nav .navbar-nav {
       margin-left: auto;
     }
 
-    nav .navbar-nav .nav-link {
-      padding-right: 1rem;
-      padding-left: 1rem;
+    nav .navbar-collapse .navbar-nav .nav-link {
+      padding: 24px 32px;
     }
 
     @media (max-width:990px) {
       .main-nav {
+        padding: 24px 32px;
         justify-content: flex-start;
+      }
+      nav .navbar-toggler {
+        margin-right: 8px;
       }
     }
 
@@ -49,7 +61,7 @@
         </li>
         <li class="nav-item">
           <a class="nav-link"
-             href="/becomechef">Become cook</a>
+             href="/becomechef">Become chef</a>
         </li>
       </ul>
     </div>

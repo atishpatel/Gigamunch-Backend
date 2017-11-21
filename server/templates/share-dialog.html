@@ -1,0 +1,212 @@
+[[define "share-dialog"]]
+<style>
+  .dialog .img-section {
+    min-width: 300px;
+    min-height: 300px;
+    background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/mom_daughter_eating.jpg');
+    background-size: cover;
+    background-position: center top;
+  }
+
+  .dialog .share-section {
+    min-width: 300px;
+    min-height: 350px;
+  }
+
+  .dialog .nav-link {
+    background-color: #696;
+    color: white;
+    fill: white;
+    border-color: white;
+    border-top: 0px;
+    min-height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+    font-size: 25px;
+  }
+
+  .dialog .nav-item {
+    flex: 1;
+  }
+
+  .dialog .nav-tabs .nav-link.active {
+    background-color: white;
+    color: #696;
+    fill: #696;
+    border-width: 1px 0px;
+  }
+
+  .dialog .tab-content {
+    padding: 12px;
+  }
+
+  .dialog .share-copy-input-group {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0;
+  }
+
+  .dialog .share-copy-button {
+    border: none;
+    background-color: #FF7043;
+  }
+
+  @media (max-width: 650px) {
+    .dialog {
+      flex-direction: column;
+    }
+
+    .dialog .img-section {
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/mom_daughter_eating.jpg');
+    }
+  }
+
+</style>
+<div class="hidden">
+  <div id="dialog"
+       class="dialog">
+    <div class="img-section">
+    </div>
+    <div class="share-section">
+      <div class="nav-tabs-container">
+        <ul class="nav nav-tabs"
+            id="shareTabs"
+            role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active"
+               data-id="messenger-tab"
+               data-toggle="tab"
+               href="#messenger"
+               role="tab"
+               aria-controls="messenger"
+               aria-selected="true">
+               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="96 93 322 324"><path d="M257 93c-88.918 0-161 67.157-161 150 0 47.205 23.412 89.311 60 116.807V417l54.819-30.273C225.449 390.801 240.948 393 257 393c88.918 0 161-67.157 161-150S345.918 93 257 93zm16 202l-41-44-80 44 88-94 42 44 79-44-88 94z"/></svg>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link"
+               data-id="email-tab"
+               data-toggle="tab"
+               href="#email"
+               role="tab"
+               aria-controls="email"
+               aria-selected="true">
+               <i class="fa fa-envelope" aria-hidden="true"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link"
+               data-id="facebook-tab"
+               data-toggle="tab"
+               href="#facebook"
+               role="tab"
+               aria-controls="facebook"
+               aria-selected="false">
+               <i class="fa fa-facebook-square" aria-hidden="true"></i>
+            </a>
+          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link"
+               data-id="sms-tab"
+               data-toggle="tab"
+               href="#sms"
+               role="tab"
+               aria-controls="sms"
+               aria-selected="false">
+               <i class="fa fa-comments" aria-hidden="true"></i>
+            </a>
+          </li> -->
+        </ul>
+      </div>
+      <div class="tab-content"
+           id="shareTabsContent">
+        <div class="tab-pane fade show active"
+             data-id="messenger"
+             role="tabpanel"
+             aria-labelledby="messenger-tab">Messenger form...</div>
+        <div class="tab-pane fade show"
+             data-id="email"
+             role="tabpanel"
+             aria-labelledby="email-tab">
+          <div class="">
+            <textarea>
+
+              </textarea>
+            <button></button>
+          </div>
+        </div>
+        <div class="tab-pane fade"
+             data-id="facebook"
+             role="tabpanel"
+             aria-labelledby="facebook-tab">Facebook tab ...</div>
+        <div class="tab-pane fade"
+             data-id="sms"
+             role="tabpanel"
+             aria-labelledby="sms-tab"> sms tab ...</div>
+      </div>
+      <div class="share-copy-">
+        <div class="input-group share-copy-input-group">
+          <input type="text"
+                 data-id="shareCopyInput"
+                 class="share-copy-input"
+                 aria-label="User's share link"
+                 aria-describedby="basic-addon2"
+                 value="https://eatgigamunch/referred/[[.Email]]"
+                 readonly>
+          <button class="input-group-addon share-copy-button"
+                  data-clipboard-target="#shareCopyInput"
+                  data-id="basic-addon2">COPY</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="close-button">
+      <button type="button"
+              class="close"
+              data-close="shareDialog"
+              aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+    </div>
+  </div>
+</div>
+<script async
+        src="https://unpkg.com/clipboard@1.7.1/dist/clipboard.min.js"></script>
+<script>
+  function dialogClosed() {}
+
+  function closeShareDialog() {
+    swal.close();
+  }
+
+  function openShareDialog() {
+    var config = {
+      html: document.getElementById('dialog').outerHTML,
+      showConfirmButton: false,
+      padding: 0,
+      customClass: 'swal-custom',
+      onOpen: function() {
+        var dialog = document.querySelector('.swal-custom');
+        dialog.querySelectorAll('[data-close=shareDialog]').forEach(function(e) {
+          e.addEventListener('click', closeShareDialog);
+        });
+        dialog.querySelectorAll('[data-id]').forEach(function(e) {
+          e.id = e.getAttribute('data-id');
+        });
+        dialog.querySelectorAll('[data-clipboard-target]').forEach(function(e) {
+          new Clipboard('#' + e.getAttribute('data-id'));
+        });
+
+      },
+    };
+    if (window.innerWidth > 650) {
+      config.width = 600;
+    }
+    swal(config).catch(dialogClosed);
+  }
+  document.getElementById('giveButton').addEventListener('click', openShareDialog);
+
+</script>
+[[end]]

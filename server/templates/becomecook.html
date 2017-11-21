@@ -1,0 +1,881 @@
+[[define "becomecook"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+</head>
+
+<body>
+  <style>
+    body {
+      display: block;
+      background-color: white;
+      font-family: 'FontRegular', 'Roboto', sans-serif;
+      line-height: 1.5;
+      letter-spacing: .5px;
+      font-smoothing: antialiased;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      color: #212121;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    g {
+      fill: currentcolor;
+    }
+
+    input {
+      padding: 12px;
+      border: solid #CFD8DC 1px;
+      border-radius: 3px;
+      font-size: 14px;
+      background-color: #f7f7f7;
+      outline: none;
+      opacity: .95;
+      transition: all .5s ease;
+    }
+
+    input:focus {
+      background-color: white;
+      opacity: 1;
+    }
+
+    input:placeholder {
+      color: white;
+    }
+
+     ::-webkit-input-placeholder {
+      /* Chrome */
+      color: black;
+    }
+
+     :-ms-input-placeholder {
+      /* IE 10+ */
+      color: black;
+    }
+
+     ::-moz-placeholder {
+      /* Firefox 19+ */
+      color: black;
+      opacity: 1;
+    }
+
+     :-moz-placeholder {
+      /* Firefox 4 - 18 */
+      color: black;
+      opacity: 1;
+    }
+
+    input:focus::-webkit-input-placeholder {
+      /* Chrome */
+      color: #626262;
+    }
+
+    input:focus:-ms-input-placeholder {
+      /* IE 10+ */
+      color: #626262;
+    }
+
+    input:focus::-moz-placeholder {
+      /* Firefox 19+ */
+      color: #626262;
+      opacity: 1;
+    }
+
+    input:focus:-moz-placeholder {
+      /* Firefox 4 - 18 */
+      color: #626262;
+      opacity: 1;
+    }
+
+    .signup-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      align-self: center;
+    }
+
+    .signup-container>* {
+      margin: 6px;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    @media (min-width: 900px) {
+      .signup-container {
+        flex-direction: row;
+      }
+    }
+
+    .photo-16-9 {
+      display: block;
+      width: 100%;
+      position: relative;
+      height: 0;
+      padding: 56.25% 0 0 0;
+      overflow: hidden;
+      background-color: white;
+    }
+
+    .photo-16-9 img {
+      position: absolute;
+      display: block;
+      width: 100%;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+    }
+
+    .content {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .bottom-cta-section {
+      background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/cooking_at_home.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .bottom-cta-container {
+      color: white;
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.25);
+      min-height: 65vh;
+    }
+
+    .header-section {
+      background: #FF7043 url('https://storage.googleapis.com/gigamunch-omninexus-website/home/victoria1.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    .header-container {
+      color: white;
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.25);
+      min-height: 62vh;
+      transition: height 9999s;
+    }
+
+    .watch-video-button {
+      max-width: 200px;
+      background: transparent;
+      margin: 0 auto;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 24px;
+    }
+
+    .header-title {
+      color: white;
+      text-align: center;
+      font-size: 24px;
+      line-height: 25px;
+      letter-spacing: 1px;
+      margin: 24px 0;
+      text-shadow: 2px 2px 10px black;
+    }
+
+    @media (min-width: 700px) {
+      .header-title {
+        font-size: 48px;
+        line-height: 49px;
+      }
+    }
+
+    .sign-up-button {
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 4px;
+      padding: 10px;
+      background: #F06522;
+      background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+      background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+      background: linear-gradient(45deg, #FF5722, #FFB300);
+      width: 200px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      margin: 6px;
+      min-width: 275px;
+    }
+
+    .love-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      padding: 24px;
+      min-height: 25vh;
+    }
+
+    .love-title {
+      font-size: 20px;
+      line-height: 21px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .love-desc-list {
+      margin: auto;
+      height: 100px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .love-image {
+      display: flex;
+    }
+
+    .love-image>img {
+      margin: auto;
+      width: 50px;
+    }
+
+    .love-desc {
+      padding: 0 12px;
+      font-size: 16px;
+      line-height: 17px;
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    @media (min-width: 700px) {
+      .love-title {
+        font-size: 24px;
+        line-height: 25px;
+      }
+      .love-desc {
+        padding: 0 24px;
+        font-size: 20px;
+        line-height: 21px;
+      }
+    }
+
+    @media (min-width: 1000px) {
+      .love-title {
+        font-size: 32px;
+        line-height: 33px;
+      }
+      .love-desc {
+        font-size: 28px;
+        line-height: 29px;
+      }
+    }
+
+    .why-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      color: white;
+      padding: 24px 12px;
+      background: #F06522;
+      background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+      background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+      background: linear-gradient(45deg, #FF5722, #FFB300);
+    }
+
+    .why-title {
+      margin: auto;
+      text-align: center;
+      font-size: 18px;
+      line-height: 19px;
+      font-weight: bold;
+      padding: 12px 0;
+    }
+
+    .why-point-list {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .why-point {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      font-size: 16px;
+      line-height: 17px;
+      padding-left: 12px;
+    }
+
+    .why-image {
+      display: flex;
+      padding: 12px 12px 12px 0;
+      min-width: 100px;
+    }
+
+    .why-image>img {
+      margin: auto;
+      max-width: 75px;
+      max-height: 55px;
+    }
+
+    .why-point-text {
+      display: flex;
+      flex-direction: column;
+      padding: 18px 0;
+    }
+
+    .why-point-title {
+      font-size: 16px;
+      line-height: 16px;
+      margin: 0 0 8px 0;
+    }
+
+    .why-point-desc {
+      opacity: .87;
+    }
+
+    @media (min-width: 700px) {
+      .why-point-list {
+        flex-direction: row;
+      }
+      .why-point {
+        flex-direction: column;
+        padding: 0 12px;
+      }
+      .why-image>img {
+        max-width: 150px;
+      }
+      .why-point-text {
+        text-align: center;
+      }
+    }
+
+    .hiw-section {
+      padding: 24px 36px;
+    }
+
+    .hiw-title-section {
+      padding: 12px 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .hiw-title-line {
+      flex: 1;
+      height: 1px;
+      background-color: #CFD8DC;
+      margin: auto 0;
+    }
+
+    .hiw-title {
+      text-align: center;
+      margin: 0 24px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .step {
+      padding: 12px 0;
+    }
+
+    .step-header {
+      padding: 6px 0;
+    }
+
+    .step-number {
+      display: flex;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: solid #212121 1px;
+      font-size: 16px;
+      margin: 8px 0;
+    }
+
+    .step-number>* {
+      margin: auto;
+    }
+
+    .step-header-title {
+      font-weight: bold;
+      padding: 4px 0;
+      font-size: 18px;
+    }
+
+    .step-header-desc {
+      font-size: 18px;
+      line-height: 19px;
+      opacity: .54;
+    }
+
+    .step-detail-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .step-detail {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      padding: 6px 0;
+    }
+
+    @media (min-width: 700px) {
+      .step-detail-list {
+        flex-direction: row;
+      }
+      .step-detail {
+        padding: 6px 18px 6px 0;
+      }
+    }
+
+    .step-detail-icon {
+      color: #FF7043;
+      margin: 8px 0 8px -2px;
+    }
+
+    .step-detail-icon>* {
+      width: 30px;
+      height: 30px;
+    }
+
+    .step-detail-title {
+      font-size: 18px;
+      line-height: 19px;
+      padding: 6px 0;
+    }
+
+    .step-detail-desc {
+      font-size: 16px;
+      line-height: 17px;
+      opacity: .54;
+    }
+
+    .contact-us-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 24px;
+      color: white;
+      min-height: 150px;
+      background: #F06522;
+      background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+      background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+      background: linear-gradient(45deg, #FF5722, #FFB300);
+    }
+
+    .contact-us-title {
+      font-size: 20px;
+      text-align: center;
+      padding-bottom: 24px;
+    }
+
+    .contact-us-link-list {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .contact-us-link {
+      text-decoration: none;
+      margin: 0 12px;
+      text-align: center;
+      border-radius: 4px;
+    }
+
+    .contact-us-button {
+      color: #FF7043;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      width: 135px;
+      padding: 8px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (min-width: 700px) {
+      .contact-us-button {
+        width: 175px;
+      }
+    }
+
+    .contact-us-button-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .contact-us-button-desc {
+      font-size: 10px;
+      font-weight: bold;
+      opacity: .54;
+    }
+
+    @media (min-width: 1400px) {
+      .header-container {
+        min-height: 75vh;
+      }
+    }
+
+    .for-who-section {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .for-who-title {
+      padding-bottom: 12px;
+      font-size: 20px;
+      line-height: 12px;
+      text-align: center;
+    }
+
+    .for-who-desc {
+      font-size: 16px;
+      line-height: 17px;
+      text-align: center;
+    }
+
+    .for-who-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .for-who-image {
+      position: relative;
+      width: 40%;
+      margin: 12px;
+      background-color: #FF7043;
+    }
+
+    @media (min-width: 1015px) {
+      .for-who-list {
+        margin: 0 auto;
+      }
+      .for-who-image {
+        height: 123px;
+        width: 220px;
+      }
+    }
+
+    .for-who-image-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      background-color: rgba(0, 0, 0, 0.25);
+      color: white;
+      text-align: center;
+    }
+
+    .for-who-image-cover>* {
+      margin: auto;
+    }
+
+    .floating-logo {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      font-family: 'NexaBold', 'FontRegular', sans-serif;
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
+    }
+
+  </style>
+
+  <script type="text/javascript">
+    function callUsTapped() {
+      ga('send', 'event', 'callus', 'clicked');
+    }
+
+    function emailUsTapped() {
+      ga('send', 'event', 'emailus', 'clicked');
+    }
+
+  </script>
+  <header class="nav-header">
+    [[ template "nav" .]]
+  </header>
+  <header class="header-section">
+    <div id="topHeader"
+         class="header-container">
+      <h1 id="headerText"
+          class="header-title">Nashville can't wait to try<br> your ethnic food!</h1>
+      <form action="/signedup"
+            method="post"
+            class="signup-container"
+            id="headerSignUpForm">
+        <input type="text"
+               name="name"
+               id="name"
+               class="signup-name"
+               placeholder="Name"
+               required>
+        <input type="text"
+               name="email"
+               id="email"
+               class="signup-email"
+               placeholder="Phone Number"
+               required>
+        <input type="text"
+               name="terp"
+               style="display:none">
+        <button class="sign-up-button"
+                raised>Learn more
+              </button>
+      </form>
+    </div>
+    <div id="videoHeader"
+         style="width: 100%; height:100%; z-index:100; display:none;">
+      <iframe id="video"
+              style="width:100%;height:100%; min-height: 60vh"
+              frameborder="0"
+              allowfullscreen>
+              </iframe>
+    </div>
+  </header>
+  <div class="love-section">
+    <div class="love-title content">
+      Make money and become a featured cook
+    </div>
+    <div class="love-desc-list content">
+      <div class="love-image-right love-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/heart.png"></img>
+      </div>
+      <p class="love-desc content">
+        Earn up to <span class="bold">$200</span>
+        <br>sharing your culture!
+      </p>
+      <div class="love-image-right love-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/money.png"></img>
+      </div>
+    </div>
+  </div>
+  </div>
+  <!-- <div class="why-section">
+          <h2 class="why-title">Why Join?</h2>
+          <div class="why-point-list content">
+            <div class="why-point">
+              <div class="why-image">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/money_clock.png">
+              </div>
+              <div class="why-point-text">
+                <h3 class="why-point-title">Earn money on a flexible schedule</h3>
+                <p class="why-point-desc">
+                  Choose your own schedule and be your own boss. Have the freedom to cook whenever you want.
+                </p>
+              </div>
+            </div>
+      
+            <div class="why-point">
+              <div class="why-image">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/chef_hat.png">
+              </div>
+              <div class="why-point-text">
+                <h3 class="why-point-title">Build your brand</h3>
+                <p class="why-point-desc">
+                  Create a loyal following of customers who love your food. Find new clients and catering opportunities.
+                </p>
+              </div>
+            </div>
+      
+            <div class="why-point">
+              <div class="why-image">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/high_five.png">
+              </div>
+              <div class="why-point-text">
+                <h3 class="why-point-title">No hassle with payments</h3>
+                <p class="why-point-desc">
+                  Expand your side hustle without being a marketing expert. Let us manage the boring part like orders, payments, and logistics.
+                </p>
+              </div>
+            </div>
+          </div>
+      
+        </div> -->
+
+  <div class="hiw-section">
+    <div class="hiw-title-section content">
+      <div class="hiw-title-line"></div>
+      <div class="hiw-title">How it works</div>
+      <div class="hiw-title-line"></div>
+    </div>
+    <div class="step content">
+      <div class="step-header">
+        <div class="step-number"><span>1</span></div>
+        <div class="step-header-title">Sign up</div>
+        <div class="step-header-desc">
+          We are looking for cooks who can cook international dishes on Sundays nights. Every cook we work with is our friend and partner. You get to be creative and co-design the menu with us. This means we are looking for self-motivated, entrepreneurial-minded,
+          and collaborative individuals.</div>
+      </div>
+    </div>
+    <div class="step content">
+      <div class="step-header">
+        <div class="step-number"><span>2</span></div>
+        <div class="step-header-title">Taste Test and Photoshoot!</div>
+        <div class="step-header-desc">Let’s get you set up with a quick phone call, taste test, and photoshoot!</div>
+      </div>
+    </div>
+    <div class="step content">
+      <div class="step-header">
+        <div class="step-number"><span>3</span></div>
+        <div class="step-header-title">Earn money and sharing your culture!</div>
+        <div class="step-header-desc">The fun part! Make food for people. Make money for you.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-us-section">
+    <div class="contact-us-title">Still have questions?</div>
+    <div class="contact-us-link-list">
+      <a class="contact-us-link"
+         href="mailto:enis@eatgigamunch.com"
+         onclick="emailUsTapped()">
+              <button raised
+                      class="contact-us-button">
+                <div class="contact-us-button-title">EMAIL US</div>
+                <div class="contact-us-button-desc">enis@eatgigamunch.com</div>
+              </button>
+            </a>
+      <a class="contact-us-link"
+         href="tel:+6153975516"
+         onclick="callUsTapped()">
+              <button raised
+                      class="contact-us-button">
+                <div class="contact-us-button-title">CALL US</div>
+                <div class="contact-us-button-desc">615-397-5516</div>
+              </button>
+            </a>
+    </div>
+  </div>
+  <div class="for-who-section">
+    <div class="for-who-title content">
+      Is this for me?
+    </div>
+    <div class="for-who-desc content">If you love making food, then the answer is <span class="bold">yes!</span></div>
+    <div class="for-who-list content">
+      <div class="for-who-image">
+        <div class="photo-16-9">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/stay_at_home_mom.jpg">
+        </div>
+        <div class="for-who-image-cover">
+          <span>stay-at-home parents</span>
+        </div>
+      </div>
+
+      <div class="for-who-image">
+        <div class="photo-16-9">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/pro_chef.png">
+        </div>
+        <div class="for-who-image-cover">
+          <span>professional chef</span>
+        </div>
+      </div>
+
+      <div class="for-who-image">
+        <div class="photo-16-9">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/culinary_student.jpg">
+        </div>
+        <div class="for-who-image-cover">
+          <span>culinary student</span>
+        </div>
+      </div>
+
+      <div class="for-who-image">
+        <div class="photo-16-9">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/becomechef/hobbyist.jpg">
+        </div>
+        <div class="for-who-image-cover">
+          <span>hobbyist</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-cta-section">
+    <div class="bottom-cta-container">
+      <h1 id="headerText"
+          class="header-title">Get ready to feed the Nashville community!</h1>
+      <form action="/signedup"
+            method="post"
+            class="signup-container">
+        <input type="text"
+               name="name"
+               id="name"
+               class="signup-name"
+               placeholder="Name"
+               required>
+        <input type="text"
+               name="email"
+               id="email"
+               class="signup-email"
+               placeholder="Phone Number"
+               required>
+        <input type="text"
+               name="terp"
+               style="display:none">
+        <button class="sign-up-button"
+                raised>Learn more
+              </button>
+      </form>
+    </div>
+  </div>
+  <style>
+    /* Fix issue with font not importing */
+
+    @font-face {
+      font-family: 'NexaBold';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+    }
+
+    @font-face {
+      font-family: 'FontRegular';
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'FontRegular';
+      font-weight: bold;
+      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
+    }
+
+  </style>
+  [[template "footer" .]]
+</body>
+
+</html>
+
+[[end]]

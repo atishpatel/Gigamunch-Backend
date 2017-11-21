@@ -1,0 +1,118 @@
+[[define "login"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+  <script src="https://cdn.firebase.com/libs/firebaseui/2.4.1/firebaseui.js"></script>
+  <link type="text/css"
+        rel="stylesheet"
+        href="https://cdn.firebase.com/libs/firebaseui/2.4.1/firebaseui.css" />
+  <script src="https://www.gstatic.com/firebasejs/4.4.0/firebase.js"></script>
+</head>
+
+<body>
+  [[template "theme" .]]
+  <style>
+    .nav-header {
+      background-color: white;
+    }
+
+    main {
+      background-color: white;
+      margin: auto;
+    }
+
+  </style>
+  <header class="nav-header">
+    [[ template "nav" .]]
+  </header>
+  <main>
+    <h1>Login Page</h1>
+    <div id="firebaseui-auth-container"></div>
+  </main>
+
+  <script>
+    let config;
+    if (APP.IsProd) {
+      config = {
+        apiKey: 'AIzaSyC-1vqT4YIKXVmrGkaoVSj1BJnm48NxlT0',
+        authDomain: 'gigamunch-omninexus.firebaseapp.com',
+        databaseURL: 'https://gigamunch-omninexus.firebaseio.com',
+        projectId: 'gigamunch-omninexus',
+        storageBucket: 'gigamunch-omninexus.appspot.com',
+        messagingSenderId: '837147123677',
+      };
+    } else {
+      config = {
+        apiKey: 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g',
+        authDomain: 'gigamunch-omninexus-dev.firebaseapp.com',
+        databaseURL: 'https://gigamunch-omninexus-dev.firebaseio.com',
+        projectId: 'gigamunch-omninexus-dev',
+        storageBucket: 'gigamunch-omninexus-dev.appspot.com',
+        messagingSenderId: '108585202286',
+      };
+    }
+    firebase.initializeApp(config);
+
+    function setupFBLogin() {
+      // FirebaseUI config.
+      var uiConfig = {
+        callbacks: {
+          signInSuccess: this.signInSuccess,
+        },
+        tosUrl: '/terms',
+        signInSuccessUrl: 'login',
+        signInOptions: [
+          // TODO: setup facebook perms
+          // Leave the lines as is for the providers you want to offer your users.
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          {
+            provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+            scopes: [
+              'public_profile',
+              'email',
+              'user_likes',
+              'user_friends',
+            ],
+          },
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        ],
+      };
+
+      // Initialize the FirebaseUI Widget using Firebase.
+      const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      // The start method will wait until the DOM is loaded.
+      ui.start('#firebaseui-auth-container', uiConfig);
+    }
+
+    // TODO: change to es5
+    firebase.auth().onAuthStateChanged((user) => {
+      console.log('user', user);
+      if (!user && !IsLoggedIn()) {
+        console.log('setup fb login');
+        this.setupFBLogin();
+      } else {
+        user.getToken(false).then((idToken) => {
+          console.log('signing in');
+          Login(idToken).then((resp) => {
+            console.log('login resp: ', resp);
+            firebase.auth().signOut();
+          });
+        });
+      }
+    });
+
+    function signInSuccess(currentUser, credential, redirectUrl) {
+      console.log('currentUser:', currentUser);
+      console.log('credential:', credential);
+      console.log('redirectUrl:', redirectUrl);
+      return true;
+    }
+
+  </script>
+  [[template "footer" .]]
+</body>
+
+</html>
+[[end]]

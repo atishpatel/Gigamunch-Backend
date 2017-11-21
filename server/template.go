@@ -25,18 +25,27 @@ var (
 
 // Page is the basic info required for a template page.
 type Page struct {
-	Title string
+	ID string
 }
 
 func addTemplateRoutes(r *httprouter.Router) {
+	r.GET("/", handleHome)
+	r.GET("/login", handleLogin)
+	r.GET("/schedule", handleHome)
+	r.GET("/terms", handleTerms)
+	r.GET("/privacy", handlePrivacy)
 	r.GET("/checkout", handleCheckout)
 	r.GET("/checkout-thank-you", handleCheckoutThankYou)
 	r.GET("/update-payment", handleUpdatePayment)
 	r.GET("/thank-you", handleThankYou)
 	r.GET("/gift", handleGift)
 	r.GET("/gift/:email", handleGift)
+	r.GET("/referral", handleReferral)
+	r.GET("/referral/:email", handleReferral)
 	r.GET("/referred", handleReferred)
 	r.GET("/referred/:email", handleReferred)
+	r.GET("/becomechef", handleBecomecook)
+	r.GET("/becomecook", handleBecomecook)
 	r.NotFound = new(handler404)
 }
 
@@ -46,34 +55,42 @@ func display(ctx context.Context, w http.ResponseWriter, tmplName string, data i
 	if tmpl == nil {
 		utils.Errorf(ctx, "failed to Lookup: %s", tmplName)
 		w.WriteHeader(http.StatusNotFound)
-		_ = templates.ExecuteTemplate(w, "404", nil)
+		_ = templates.ExecuteTemplate(w, "404", &Page{ID: "404"})
 		return
 	}
 	err := tmpl.Execute(w, data)
 	if err != nil {
 		utils.Errorf(ctx, "failed to ExecuteTemplate: %+v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		_ = templates.ExecuteTemplate(w, "500", nil)
+		_ = templates.ExecuteTemplate(w, "500", &Page{ID: "500"})
 	}
 }
 
 type checkoutPage struct {
 	Page
-	Email string
+	Email         string
+	FirstName     string
+	LastName      string
+	PhoneNumber   string
+	Address       string
+	APT           string
+	DeliveryNotes string
+	Reference     string
 }
 
 func handleCheckout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	ctx := appengine.NewContext(req)
 	page := &checkoutPage{
 		Page: Page{
-			Title: "Checkout",
+			ID: "checkout",
 		},
 	}
 	defer display(ctx, w, "checkout", page)
 	email := req.FormValue("email")
+	terp := req.FormValue("terp")
 	// TODO: add referred email address
 	var err error
-	if email != "" {
+	if email != "" && terp == "" && strings.Contains(email, "@") {
 		logging.Infof(ctx, "email: %s", email)
 		page.Email = email
 		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
@@ -103,6 +120,15 @@ func handleCheckout(w http.ResponseWriter, req *http.Request, _ httprouter.Param
 		} else {
 			utils.Infof(ctx, "email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
 		}
+		page.FirstName = entry.FirstName
+		page.LastName = entry.LastName
+		page.PhoneNumber = entry.PhoneNumber
+		if entry.Address.GeoPoint.Valid() {
+			page.Address = entry.Address.StringNoAPT()
+		}
+		page.APT = entry.Address.APT
+		page.DeliveryNotes = entry.DeliveryTips
+		page.Reference = entry.Reference
 	}
 }
 
@@ -110,7 +136,7 @@ func handleUpdatePayment(w http.ResponseWriter, req *http.Request, _ httprouter.
 	ctx := appengine.NewContext(req)
 	page := &checkoutPage{
 		Page: Page{
-			Title: "Update Payment",
+			ID: "update-payment",
 		},
 	}
 	defer display(ctx, w, "update-payment", page)
@@ -130,7 +156,7 @@ func handleCheckoutThankYou(w http.ResponseWriter, req *http.Request, _ httprout
 	ctx := appengine.NewContext(req)
 	page := &checkoutThankYouPage{
 		Page: Page{
-			Title: "Thank you",
+			ID: "checkout-thank-you",
 		},
 	}
 	defer display(ctx, w, "checkout-thank-you", page)
@@ -142,6 +168,7 @@ func handleCheckoutThankYou(w http.ResponseWriter, req *http.Request, _ httprout
 		entry := &sub.SubscriptionSignUp{}
 		err = datastore.Get(ctx, key, entry)
 		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
 		page.FirstName = entry.FirstName
@@ -153,13 +180,13 @@ func handleThankYou(w http.ResponseWriter, req *http.Request, _ httprouter.Param
 	ctx := appengine.NewContext(req)
 	page := &checkoutThankYouPage{
 		Page: Page{
-			Title: "Thank you",
+			ID: "thank-you",
 		},
 	}
 	defer display(ctx, w, "thank-you", page)
 }
 
-type giftPage struct {
+type referralPage struct {
 	Page
 	Email     string
 	FirstName string
@@ -167,9 +194,9 @@ type giftPage struct {
 
 func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	ctx := appengine.NewContext(req)
-	page := &giftPage{
+	page := &referralPage{
 		Page: Page{
-			Title: "Gift A Piece of the World",
+			ID: "gift",
 		},
 	}
 	defer display(ctx, w, "gift", page)
@@ -177,7 +204,6 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 	if email == "" {
 		email = params.ByName("email")
 	}
-
 	var err error
 	if email != "" {
 		logging.Infof(ctx, "email: %s", email)
@@ -185,31 +211,22 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 		entry := &sub.SubscriptionSignUp{}
 		err = datastore.Get(ctx, key, entry)
 		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
+		page.FirstName = entry.FirstName
 		page.Email = email
-		if entry.FirstName != "" {
-			page.FirstName = entry.FirstName
-		} else {
-			page.FirstName, _ = splitName(entry.Name)
-		}
-
 	}
 }
 
-type referredPage struct {
-	Page
-	ReferrerName string
-}
-
-func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	ctx := appengine.NewContext(req)
-	page := &referredPage{
+	page := &referralPage{
 		Page: Page{
-			Title: "A Piece of the World",
+			ID: "referral",
 		},
 	}
-	defer display(ctx, w, "referred", page)
+	defer display(ctx, w, "referral", page)
 	email := req.FormValue("email")
 	if email == "" {
 		email = params.ByName("email")
@@ -221,13 +238,78 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		entry := &sub.SubscriptionSignUp{}
 		err = datastore.Get(ctx, key, entry)
 		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
-		page.ReferrerName = entry.FirstName + " " + entry.LastName
+		page.FirstName = entry.FirstName
+		page.Email = email
+	}
+}
+
+type homePage struct {
+	Page
+	ReferredSection bool
+	ReferrerName    string
+}
+
+func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &homePage{
+		Page: Page{
+			ID: "home",
+		},
+		ReferredSection: false,
+	}
+	defer display(ctx, w, "home", page)
+}
+
+func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &homePage{
+		Page: Page{
+			ID: "referred",
+		},
+		ReferredSection: true,
+	}
+	defer display(ctx, w, "home", page)
+	email := req.FormValue("email")
+	if email == "" {
+		email = params.ByName("email")
+	}
+	var err error
+	if email != "" {
+		logging.Infof(ctx, "email: %s", email)
+		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
+		entry := &sub.SubscriptionSignUp{}
+		err = datastore.Get(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+			return
+		}
+		page.ReferrerName = entry.Name
 		if page.ReferrerName == "" {
-			page.ReferrerName = entry.Name
+			page.ReferrerName = entry.FirstName + " " + entry.LastName
 		}
 	}
+}
+
+func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &homePage{
+		Page: Page{
+			ID: "login",
+		},
+		ReferredSection: true,
+	}
+	defer display(ctx, w, "login", page)
+}
+
+func handleBecomecook(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &Page{
+		ID: "becomecook",
+	}
+	defer display(ctx, w, "becomecook", page)
 }
 
 type handler404 struct {
@@ -257,4 +339,20 @@ func splitName(name string) (string, string) {
 		last = name[lastSpace:]
 	}
 	return first, last
+}
+
+func handleTerms(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &Page{
+		ID: "terms",
+	}
+	defer display(ctx, w, "terms", page)
+}
+
+func handlePrivacy(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &Page{
+		ID: "privacy",
+	}
+	defer display(ctx, w, "privacy", page)
 }

@@ -1,0 +1,657 @@
+[[define "home"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+  <script src="https://unpkg.com/sweetalert2@latest/dist/sweetalert2.all.min.js"></script>
+</head>
+
+<body>
+  [[template "theme" .]]
+  <style>
+    body {
+      color: #333;
+    }
+
+    .nav-header {
+      background-color: white;
+    }
+
+    main h1 {
+      font-size: 40px;
+      font-weight: 600;
+    }
+
+    main h2 {
+      font-size: 30px;
+      font-weight: 500;
+    }
+
+    main p {
+      font-size: 20px;
+    }
+
+    .br-md-hide {
+      display: block;
+    }
+
+    .br-md-show {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      main h1 {
+        font-size: 26px;
+      }
+      main h2 {
+        font-size: 20px;
+      }
+      .br-md-hide {
+        display: none;
+      }
+      .br-md-show {
+        display: block;
+      }
+    }
+
+    main section>* {
+      max-width: 1000px;
+      margin-right: auto;
+      margin-left: auto;
+    }
+
+    main button {
+      min-width: 200px;
+      margin: auto;
+      text-transform: uppercase;
+      font-size: 18px;
+      font-weight: 600;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    .card {
+      max-width: 1000px;
+      border-radius: 10px;
+      border: none;
+      padding: 45px;
+    }
+
+    @media (max-width: 800px) {
+      .card {
+        padding: 32px 20px;
+        border-radius: 0;
+      }
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #352e24 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/top_down_box_left_clean.jpg') no-repeat center center;
+      background-size: cover;
+      height: 50vh;
+    }
+
+    .hero-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      color: white;
+      text-align: center;
+      padding: 40px;
+      margin-right: 51%;
+      font-size: 44px;
+      font-style: italic;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        align-items: flex-end;
+        background: #352e24 url('https://storage.googleapis.com/gigamunch-omninexus-website/schedule/top_down_box_bottom_clean.jpg') no-repeat center center;
+        background-size: cover;
+      }
+      .hero-title {
+        font-size: 24px;
+        margin: 0;
+      }
+    }
+    /* Intro */
+
+    .intro-section {
+      background-color: white;
+      padding: 40px 24px;
+      text-align: center;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+
+    .intro-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      color: #ff7043;
+      margin-bottom: 0;
+    }
+
+    .intro-desc {
+      padding: 24px 0;
+      margin: auto;
+    }
+
+    .intro-button {
+      min-width: 300px;
+    }
+
+    @media (max-width: 400px) {
+      .intro-button {
+        min-width: 225px;
+      }
+    }
+    /* Features */
+
+    .features-section {
+      margin: auto;
+    }
+
+    .features-card {
+      margin: 24px auto;
+    }
+
+    .features-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-align: center;
+      color: #ff7043;
+    }
+
+    .feature {
+      display: flex;
+      flex-direction: row;
+      padding: 12px 0;
+    }
+
+    .feature-reverse {
+      flex-direction: row-reverse;
+    }
+
+    .feature-image {
+      max-width: 450px;
+      margin: auto;
+    }
+
+    .feature-image img {
+      max-width: 450px;
+      border-radius: 5px;
+    }
+
+    .feature-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 12px 24px;
+    }
+
+    .feature-desc {
+      font-size: 18px;
+      color: #939393;
+    }
+
+    @media (max-width: 800px) {
+      .features-card {
+        margin-bottom: 0;
+      }
+      .feature,
+      .feature-reverse {
+        flex-direction: column;
+      }
+      .feature-image img {
+        width: 100%;
+      }
+      .feature-text {
+        padding: 18px 0;
+      }
+      .feature-title {
+        margin-bottom: 12px;
+      }
+    }
+    /* How It Works */
+
+    .hiw-section {
+      color: white;
+      text-align: center;
+      background: #00796b;
+      background: -moz-linear-gradient(45deg, #00796b, #009688);
+      background: -webkit-linear-gradient(45deg, #00796b, #009688);
+      background: linear-gradient(45deg, #00796b, #009688);
+      padding: 40px 12px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .hiw {
+      list-style: none;
+      padding: 8px;
+      display: flex;
+    }
+
+    .hiw-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .hiw-step {
+      padding: 12px;
+    }
+
+    .hiw-image img {
+      border-radius: 20%;
+      width: 125px;
+    }
+
+    .hiw-text {
+      padding: 12px 0;
+    }
+
+    .hiw-button {
+      background: white;
+      color: #333;
+    }
+
+    @media (max-width: 900px) {
+      .hiw-section {
+        border-radius: 0;
+      }
+      .hiw {
+        flex-direction: column;
+      }
+      .hiw-step {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 12px;
+      }
+      .hiw-image img {
+        width: 75px;
+      }
+      .hiw-text {
+        padding-left: 24px;
+        line-height: 1.3;
+        text-align: left;
+      }
+    }
+    /* Testimonial */
+
+    .testimonial-section {
+      padding: 40px 12px;
+      background-color: white;
+      text-align: center;
+    }
+
+    .testimonial-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      color: #ff7043;
+    }
+
+    .testimonial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .testimonial-image {
+      display: inline-block;
+    }
+
+    .testimonial-image img {
+      width: 250px;
+      border-radius: 50%;
+    }
+
+    .testimonial-text {
+      display: inline-block;
+      font-size: 20px;
+      max-width: 600px;
+      padding-left: 12px;
+      color: #939393;
+      margin-left: 32px;
+      margin-bottom: 18px;
+    }
+
+    .testimonial-name {
+      text-align: end;
+      padding-top: 12px;
+    }
+
+    .testimonial-quote {
+      font-style: italic;
+    }
+
+    @media (max-width: 800px) {
+      .testimonial-title {
+        margin-bottom: 24px;
+      }
+      .testimonial {
+        flex-direction: column;
+      }
+      .testimonial-image img {
+        width: 125px;
+      }
+      .testimonial-text {
+        margin: auto;
+      }
+      .testimonial-quote {
+        padding-top: 18px;
+      }
+    }
+    /* As seen on */
+
+    .as-seen-on-section {
+      background-color: white;
+      text-align: center;
+      padding: 24px 12px;
+    }
+
+    .as-seen-on-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .company-logos {
+      margin: auto;
+    }
+
+    .company-logo {
+      display: inline-block;
+      padding: 8px 12px;
+    }
+
+    .company-logo img {
+      height: 28px;
+    }
+
+    .fast-company,
+    .kickstarter,
+    .edible-nashville {
+      -webkit-filter: grayscale(100%);
+      filter: grayscale(100%);
+      opacity: .7;
+    }
+
+    .company-logo .edible-nashville {
+      height: 60px;
+    }
+
+    @media (max-width: 800px) {
+      .company-logo img {
+        height: 20px;
+      }
+      .company-logo .edible-nashville {
+        height: 52px;
+      }
+    }
+    /* Checklist section */
+
+    .checklist-section {
+      background: #352e24 url("https://storage.googleapis.com/gigamunch-omninexus-website/landing/bosnian_background_clean_center.jpg") no-repeat center center;
+      background-size: cover;
+      height: 80vh;
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .checklist-card {
+      margin: auto;
+    }
+
+    .checklist-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      color: #ff7043;
+      font-size: 30px;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 24px 0;
+    }
+
+    .get-started-dialog {}
+
+    .get-started-form {
+      padding: 32px 12px;
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      justify-content: center
+    }
+
+    .get-started-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      font-size: 36px;
+    }
+
+    .get-started-input {
+      margin: 12px 0;
+    }
+
+    .get-started-button {
+      padding: 12px 16px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+  </style>
+  <header class="nav-header">
+    [[ template "nav" .]]
+  </header>
+  <main>
+    [[if .ReferredSection]] [[template "referred-section" .]] [[end]]
+    <header class="hero">
+      <h1 class="hero-title">Where will<br class="br-md-hide"/> your<br class="br-md-show"/> dinner<br class="br-md-hide"/> take you?</h1>
+    </header>
+
+    <section class="intro-section">
+      <h1 class="title intro-title">Travel the world from your dinner table</h1>
+      <p class="intro-desc">
+        For those who want to discover the world, <br class="br-md-hide" />
+        <strong>we deliver ready-to-eat meals from a different country each week</strong> <br class="br-md-hide" /> so you can explore the world from your own dinner table.
+      </p>
+      <button id="introButton"
+              class="intro-button">Get your first <br/>dinner free</button>
+    </section>
+    <section class="features-section">
+      <div class="card features-card">
+        <h1 class="features-title">Every Week, A New Journey</h1>
+        <div class="features">
+          <div class="feature">
+            <div class="feature-image">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/offering_food.jpg"
+                   alt="Woman holding foreign food">
+            </div>
+            <div class="feature-text">
+              <h2 class="feature-title">Meals Creafted by Local Immigrants</h2>
+              <p class="feature-desc">Every meal is designed by local immigrants to ensure the most authentic taste of their country. As you explore each region, you'll find a complete dinner with a dessert to leave you full and satisfied. <strong>No Cooking!</strong></p>
+            </div>
+          </div>
+          <div class="feature feature-reverse">
+            <div class="feature-image">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/music_band.jpg"
+                   alt="A band playing instruments from around the world">
+            </div>
+            <div class="feature-text">
+              <h2 class="feature-title">Listen to Cultural Music</h2>
+              <p class="feature-desc">Immerse yourself in the culture wiht a playlist of popular songs from that country. You can enjoy the music on Spotify or Youtube while you eat.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <div class="feature-image">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/personal_guide.jpg"
+                   alt="A cultural woman showing off her culture and food">
+            </div>
+            <div class="feature-text">
+              <h2 class="feature-title">A Personal Culture Guide</h2>
+              <p class="feature-desc">Each journey comes with a personal guide. The culture guide tells a story about the immigrant chef and dives into their unique culture.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hiw-section">
+      <h1 class="hiw-title">Experience cultures in a unique way</h1>
+      <ol class="hiw">
+        <li class="hiw-step">
+          <div class="hiw-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/email/Welcome/door-icon.jpg"
+                 alt="Gigamunch bag outside door">
+          </div>
+          <p class="hiw-text">Your journey will arrive at your doorstep before 5 pm in an insulated bag.</p>
+        </li>
+        <li class="hiw-step">
+          <div class="hiw-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/email/Welcome/microwave-icon.jpg"
+                 alt="A Microwave">
+          </div>
+          <p class="hiw-text">Place bag in fridge when you get home. At dinner time, reheat - <br class="br-md-show" /> <strong>no cooking.</strong></p>
+        </li>
+        <li class="hiw-step">
+          <div class="hiw-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/email/Welcome/map-icon.jpg"
+                 alt="A map of a journey across the world">
+          </div>
+          <p class="hiw-text">Gather around the dinner table, and enjoy your journey to a new country!</p>
+        </li>
+      </ol>
+      <button id="hiwButton"
+              class="hiw-button">Start your free journey</button>
+    </section>
+    <section class="testimonial-section">
+      <h1 class="title testimonial-title">What Members Are Saying</h1>
+      <div class="testimonial">
+        <div class="testimonial-image">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/louise_merritt.jpg"
+               alt="A picture of Louise Merritt">
+        </div>
+        <div class="testimonial-text">
+          <div class="testimonial-quote">"What a wonderful experience all the way around the world! The food has been delectable! I love learning the history of the country and chef."</div>
+          <div class="testimonial-name">- Louise Merritt</div>
+        </div>
+      </div>
+    </section>
+    <section class="as-seen-on-section bg-noise">
+      <h1 class="title as-seen-on-title">As seen on</h1>
+      <div class="company-logos">
+        <div class="company-logo">
+          <img class="fast-company"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/fast_company.png"
+               alt="Fast Company">
+        </div>
+        <div class="company-logo">
+          <img class="kickstarter"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/kickstarter.png"
+               alt="Kickstarter">
+        </div>
+        <div class="company-logo">
+          <img class="edible-nashville"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/edible_nashville.png"
+               alt="Edible Nashville">
+        </div>
+      </div>
+    </section>
+    <section class="checklist-section">
+      <div class="card checklist-card">
+        <h1 class="title checklist-title">Let the world travel to you</h1>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <i class="fa fa-check checkout-item-check"
+               aria-hidden="true"></i>
+            <span class="checklist-item-text">No Cooking!</span>
+          </li>
+          <li class="checklist-item">
+            <i class="fa fa-check checkout-item-check"
+               aria-hidden="true"></i>
+            <span class="checklist-item-text">Delivered to your doorstep</span>
+          </li>
+          <li class="checklist-item">
+            <i class="fa fa-check checkout-item-check"
+               aria-hidden="true"></i>
+            <span class="checklist-item-text">No Commitment! (skip or cancel anytime)</span>
+          </li>
+          <li class="checklist-item">
+            <i class="fa fa-check checkout-item-check"
+               aria-hidden="true"></i>
+            <span class="checklist-item-text">Meals designed by local immigrants</span>
+          </li>
+        </ul>
+        <button id="checklistButton"
+                class="checklist-button">Get Started with a free dinner</button>
+      </div>
+    </section>
+  </main>
+  <div class="hidden">
+    <div id="getStartedDialog"
+         class="get-started-dialog dialog">
+      <form action="/checkout"
+            method="GET"
+            class="get-started-form"
+            enctype="application/x-www-form-urlencoded">
+        <h1 class="get-started-title">JOURNEY THE WORLD</h1>
+        <p></p>
+        <input class="get-started-input"
+               name="email"
+               id="email"
+               placeholder="Enter Email Address Here"
+               pattern="\S+@\S+\.\S+"
+               required>
+        <button type="submit"
+                class="get-started-button">Get My Free Dinner</button>
+      </form>
+      <div class="close-button">
+        <button type="button"
+                class="close"
+                data-close="getStarted"
+                aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script>
+    function dialogClosed() {}
+
+    function closeDialog() {
+      swal.close();
+    }
+
+    function openGetStartedDialog() {
+      swal({
+        html: document.getElementById('getStartedDialog').outerHTML,
+        showConfirmButton: false,
+        padding: 0,
+        onOpen: function() {
+          document.querySelectorAll('[data-close=getStarted]').forEach(function(e) {
+            e.addEventListener('click', closeDialog);
+          });
+        },
+      }).catch(dialogClosed);
+    }
+    document.getElementById('introButton').addEventListener('click', openGetStartedDialog);
+    document.getElementById('hiwButton').addEventListener('click', openGetStartedDialog);
+    document.getElementById('checklistButton').addEventListener('click', openGetStartedDialog);
+
+  </script>
+  [[template "footer" .]]
+</body>
+
+</html>
+
+[[end]]

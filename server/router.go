@@ -52,7 +52,6 @@ func init() {
 	}
 	r := httprouter.New()
 
-	r.GET(baseLoginURL, handleLogin)
 	r.GET(signOutURL, handleSignout)
 
 	r.GET("/scheduleform/:email", handleScheduleForm)
@@ -85,16 +84,6 @@ func getProjID() string {
 func handle404(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	_, _ = w.Write([]byte("GIGA 404 page. :()"))
-}
-
-func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	user := CurrentUser(w, req)
-	if user != nil {
-		http.Redirect(w, req, baseCookURL, http.StatusTemporaryRedirect)
-		return
-	}
-	removeCookies(w)
-	http.Redirect(w, req, "/becomechef", http.StatusTemporaryRedirect)
 }
 
 func handleSignout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {

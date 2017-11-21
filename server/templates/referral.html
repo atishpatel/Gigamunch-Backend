@@ -1,4 +1,4 @@
-[[define "gift"]]
+[[define "referral"]]
 <!doctype html>
 <html lang="en">
 
@@ -10,19 +10,18 @@
 <body>
   [[template "theme" .]]
   <style>
+    .main-nav {
+      max-width: 800px;
+    }
+
     *,
      ::after,
      ::before {
       box-sizing: border-box;
     }
 
-    @font-face {
-      font-family: 'StNicholas';
-      src: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/stnicholas.ttf') format('truetype');
-    }
-
     main>* {
-      max-width: 1000px;
+      max-width: 800px;
       margin: auto;
       background-color: white;
     }
@@ -33,13 +32,15 @@
 
     .header {
       display: flex;
+      flex-direction: column;
     }
 
-    .header-image {
+    .header-video {
       flex: 1;
+      background-color: black;
     }
 
-    .header-image img {
+    .header-video iframe {
       width: 100%;
     }
 
@@ -53,8 +54,9 @@
     }
 
     .header-card-title {
-      font-family: 'StNicholas';
-      color: #db0311;
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      color: #ff7043;
       font-style: italic;
     }
 
@@ -69,27 +71,41 @@
     .header-button {
       margin-top: 12px;
       text-transform: uppercase;
-      background: #db0311;
+      /* background: #db0311; */
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       font-weight: 500;
     }
 
-    .header-button:hover {
-      background: #ff0515;
-    }
 
-    @media (max-width: 900px) {
-      .header {
-        flex-direction: column;
-      }
-    }
 
     .banner {
       color: white;
       text-align: center;
       font-style: italic;
       padding: 40px 24px;
-      background-color: #035610;
+      background-color: #00796b;
+    }
+
+    .video-16-9 {
+      display: block;
+      width: 100%;
+      position: relative;
+      height: 0;
+      padding: 56.25% 0 0 0;
+      overflow: hidden;
+      background-color: white;
+    }
+
+    .video-16-9 iframe {
+      position: absolute;
+      display: block;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
     }
 
   </style>
@@ -99,11 +115,12 @@
   </header>
   <main>
     <div class="header">
-      <div class="header-image">
-        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/gift/couple_dining_glasses.jpg"
-             alt="Couple eating food at dinner table">
+      <div class="header-video video-16-9">
+        <iframe src="https://www.youtube.com/embed/qS6LoRYUdhw?rel=0&amp;showinfo=0"
+                frameborder="0"
+                allowfullscreen></iframe>
       </div>
-      <div class="header-card bg-noise">
+      <div class="header-card">
         <div>
           <h1 class="header-card-title">Give a piece of the world</h1>
           <p class="header-card-desc">
@@ -116,11 +133,11 @@
           </ol>
         </div>
         <button class="header-button"
-                id="giveButton">Give Free Gift</button>
+                id="giveButton">Give Free Dinner</button>
       </div>
     </div>
     <div class="banner bg-noise">
-      <h1>Tis the season for giving</h1>
+      <h1>Thank you for being a part of of <span class="logo">Gigamunch</span></h1>
     </div>
   </main>
 

@@ -4,11 +4,30 @@
       content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 <meta http-equiv="X-UA-Compatible"
       content="IE=edge,chrome=1">
+<!-- Title -->
+[[if eq .ID "checkout"]]
+<title>Checkout | Gigamunch</title>
+[[else if eq .ID "terms"]]
+<title>Terms | Gigamunch</title>
+[[else if eq .ID "privacy"]]
+<title>Privacy Policy | Gigamunch</title>
+[[else if eq .ID "thank-you"]]
+<title>Thank you | Gigamunch</title>
+[[else if eq .ID "checkout-thank-you"]]
+<title>Thank you | Gigamunch</title>
+[[else if eq .ID "update-payment"]]
+<title>Update Payment | Gigamunch</title>
+[[else if eq .ID "404"]]
+<title>Page Not Found | Gigamunch</title>
+[[else if eq .ID "500"]]
+<title>Woops! Something went wrong! | Gigamunch</title>
+[[else]]
+<title> A new international meal delivered to you every week! | Gigamunch </title>
+[[end]]
 
-<title>[[or .Title "A new international meal delivered to you every week!"]] | Gigamunch</title>
 
 <meta name="description"
-      content="For people who want to see the world, but don’t have time, we deliver meals from a different country every week so you can explore the world from your own dinner table.">
+      content="For those who want to discover the world, we deliver meals from a different country every week so you can explore the world from your own dinner table.">
 <meta name="keywords"
       content="gigamunch, local, nashville, chef, cook, homemade, online, buy, startup, meal, cooking, eat, job, sell, food, home">
 <meta property="og:title"
@@ -20,17 +39,17 @@
 <meta property="og:url"
       content="https://eatgigamunch.com" />
 <meta property="og:image"
-      content="https://storage.googleapis.com/gigamunch-omninexus-website/social/facebook_share_image.png" />
+      content="https://storage.googleapis.com/gigamunch-omninexus-website/social/facebook_share_image2.jpg" />
 <meta property="og:image:width"
       content="1200" />
 <meta property="og:image:height"
       content="628" />
 <meta property="og:description"
-      content="For people who want to see the world, but don’t have time, we deliver meals from a different country every week so you can explore the world from your own dinner table." />
+      content="For those who want to discover the world, we deliver meals from a different country every week so you can explore the world from your own dinner table." />
 <meta property="twitter:site"
       content="@gigamunchapp" />
 <meta name="twitter:image"
-      content="https://storage.googleapis.com/gigamunch-omninexus-website/social/twitter_share_image.png">
+      content="https://storage.googleapis.com/gigamunch-omninexus-website/social/twitter_share_image2.jpg">
 <meta name="twitter:card"
       content="summary_large_image">
 <meta property="fb:admins"
@@ -40,56 +59,12 @@
 
 <meta name="theme-color"
       content="#546E7A">
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500,700"
+<link href="https://fonts.googleapis.com/css?family=Merienda:400,700|Roboto:300,400,400i,500,500i,700,700i"
       rel="stylesheet">
 <link rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
       integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
       crossorigin="anonymous">
-<script async
-        src="https://www.google-analytics.com/analytics.js"></script>
-<script>
-  // Set Environment
-  var APP = APP || {};
-  APP.IsDev = false;
-  APP.IsStage = false;
-  APP.IsProd = false;
-  switch (location.hostname) {
-    case '127.0.0.1':
-    case 'localhost':
-      APP.IsDev = true;
-      break;
-    case 'gigamunch-omninexus-dev.appspot.com':
-      APP.IsStage = true;
-      break;
-    default:
-      APP.IsProd = true;
-  }
-
-  // Google Analytics
-  window.ga = window.ga || function() {
-    (ga.q = ga.q || []).push(arguments)
-  };
-  ga.l = +new Date;
-  var ua = APP.IsProd ? 'UA-71567908-1' : 'UA-71567908-4';
-  ga('create', ua, 'auto');
-  ga('send', 'pageview');
-  // Setup error tracking before anything else runs.
-  window.onerror = function(message, file, lineNumber, columnNumber, error) {
-    // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
-    try {
-      // Some browsers don't support error param yet.
-      if (error !== undefined) {
-        message = error.stack;
-      }
-      ga('send', 'event', 'server-error', file + ':' + lineNumber, message);
-    } catch (e) {
-      // no-op
-    }
-  };
-  // End Google Analytics
-
-</script>
 <!-- Facebook Pixel Code -->
 <script>
   ! function(f, b, e, v, n, t, s) {
@@ -143,4 +118,49 @@
 <script src="https://use.fontawesome.com/ea31cf9b69.js"
         async
         defer></script>
+<script async
+        src="https://www.google-analytics.com/analytics.js"></script>
+<script>
+  // Set Environment
+  var APP = APP || {};
+  APP.IsDev = false;
+  APP.IsStage = false;
+  APP.IsProd = false;
+  switch (location.hostname) {
+    case '127.0.0.1':
+    case 'localhost':
+      APP.IsDev = true;
+      break;
+    case 'gigamunch-omninexus-dev.appspot.com':
+      APP.IsStage = true;
+      break;
+    default:
+      APP.IsProd = true;
+  }
+
+  // Google Analytics
+  window.ga = window.ga || function() {
+    (ga.q = ga.q || []).push(arguments)
+  };
+  ga.l = +new Date;
+  var ua = APP.IsProd ? 'UA-71567908-1' : 'UA-71567908-4';
+  ga('create', ua, 'auto');
+  ga('send', 'pageview');
+  // Setup error tracking before anything else runs.
+  window.onerror = function(message, file, lineNumber, columnNumber, error) {
+    // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
+    try {
+      // Some browsers don't support error param yet.
+      if (error !== undefined) {
+        message = error.stack;
+      }
+      ga('send', 'event', 'server-error', file + ':' + lineNumber, message);
+    } catch (e) {
+      // no-op
+    }
+  };
+  // End Google Analytics
+
+</script>
+<script src="/js/app.min.js"></script>
 [[end]]

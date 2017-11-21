@@ -1,0 +1,35 @@
+[[define "referred-section"]]
+<style>
+  .referred {
+    min-height: 150px;
+    text-align: center;
+    background-color: #00796B;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .referred-header {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .referrer-name {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  @media (max-width: 800px) {
+    .referred-br {
+      display: none;
+    }
+  }
+
+</style>
+<div class="referred bg-noise">
+  <h1 class="referred-header">Welcome! [[if .ReferrerName]] <span class="referrer-name">[[.ReferrerName]]</span> just invited you [[else]] You've just been invited [[end]]  to a <br class="referred-br"/>
+    free trial of <span class="logo">Gigamunch</span></h1>
+</div>
+[[end]]
