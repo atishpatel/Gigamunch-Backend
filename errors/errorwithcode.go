@@ -163,7 +163,7 @@ func (ewc ErrorWithCode) GetHTTPCode() int {
 }
 
 func (ewc ErrorWithCode) Error() string {
-	return fmt.Sprintf("Errorcode: %d| Message: %s| Detail: %s", ewc.Code, ewc.Message, ewc.Detail)
+	return fmt.Sprintf("Code: %d |\n Message: %s |\n Detail: %s", ewc.Code, ewc.Message, ewc.Detail)
 }
 
 // WithMessage sets Message. Makes chaining easier.
