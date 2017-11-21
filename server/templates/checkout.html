@@ -255,6 +255,7 @@
       background: linear-gradient(45deg, #FF5722, #FFB300);
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       margin: 12px 0 6px 0;
+      font-weight: 600;
       /*min-width: 275px;*/
     }
 
@@ -707,7 +708,7 @@
           <div class="checkout-trust-security">
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/icon-sealygold.png">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/certificate-icon.png">
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -720,7 +721,7 @@
             </div>
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/icon-safe.png">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/shield-icon.png">
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -733,7 +734,7 @@
             </div>
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
-                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/icon-lock.png">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/lock-icon.png">
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -763,6 +764,7 @@
                          onfocus="nameInputFocused()"
                          placeholder="Ms. Excited"
                          size="1"
+                         value="[[.FirstName]]"
                          required />
                 </div>
               </div>
@@ -774,6 +776,7 @@
                          id="last_name"
                          size="1"
                          onfocus="nameInputFocused()"
+                         value="[[.LastName]]"
                          required />
                 </div>
               </div>
@@ -798,7 +801,8 @@
                          name="phone_number"
                          id="phone_number"
                          size="1"
-                         placeholder="615-123-1234" />
+                         placeholder="615-123-1234"
+                         value="[[.PhoneNumber]]" />
                 </div>
               </div>
             </div>
@@ -812,12 +816,14 @@
                        id="address-input"
                        onfocus="addressInputFocused()"
                        placeholder="123 Street Name, City"
-                       required/>
+                       required
+                       value="[[.Address]]" />
                 <input type="text"
                        name="apt"
                        class="apt"
                        id="apt"
-                       placeholder="APT/Unit" />
+                       placeholder="APT/Unit"
+                       value="[[.APT]]" />
               </div>
             </div>
             <div>
@@ -826,7 +832,8 @@
                 <input type="text"
                        name="delivery_notes"
                        id="delivery_notes"
-                       placeholder="Gate code: # or any other delivery tips" />
+                       placeholder="Gate code: # or any other delivery tips"
+                       value="[[.DeliveryNotes]]" />
               </div>
             </div>
             <div>
@@ -838,7 +845,8 @@
                 <input type="text"
                        name="reference"
                        id="reference"
-                       placeholder="My friend Joe Shmoe." />
+                       placeholder="My friend Joe Shmoe."
+                       value="[[.Reference]]" />
               </div>
             </div>
             <div class="form-section-title">
@@ -952,7 +960,7 @@
               </div>
               <div class="item">
                 <div class="item-image">
-                  <img src="https://storage.googleapis.com/gigamunch-omninexus-website/schedule/final_box.jpg"
+                  <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/product_shot_checkout.jpg"
                        alt="A bag with an international meal.">
                 </div>
                 <div class="item-detail">
@@ -988,8 +996,10 @@
             <input type="hidden"
                    name="payment_method_nonce">
             <div class="terms-and-conditions">By subscribing, I agree to the <a href="/terms"
-                 target="_blank">Terms &amp; Conditions</a> and <a href="/privacy"
-                 target="_blank">Privacy Policy</a>.</div>
+                 target="_blank"
+                 rel="noopener">Terms &amp; Conditions</a> and <a href="/privacy"
+                 target="_blank"
+                 rel="noopener">Privacy Policy</a>.</div>
             <input id="submit-button"
                    class="checkout-button"
                    type="submit"
@@ -1334,7 +1344,7 @@
     var promo = getQueryParameter('promo', location.href);
     if (promo && (promo === 'quizfree')) {
       var submitButton = document.querySelector('#submit-button');
-      submitButton.value = 'Get Free Dinner';
+      submitButton.value = 'GET FREE DINNER';
       var mealSelector = document.querySelector('#meal-selector');
       mealSelector.style.display = 'none';
 

@@ -49,6 +49,9 @@ func (g GeoPoint) String() string {
 
 // Valid returns whether a GeoPoint is within [-90, 90] latitude and [-180, 180] longitude.
 func (g GeoPoint) Valid() bool {
+	if g.Latitude == 0 && g.Longitude == 0 {
+		return false
+	}
 	return -90 <= g.Latitude && g.Latitude <= 90 && -180 <= g.Longitude && g.Longitude <= 180
 }
 
