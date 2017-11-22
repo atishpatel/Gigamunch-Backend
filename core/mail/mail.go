@@ -41,7 +41,7 @@ const (
 	// Customer if they are a customer and is removed when they unsubscribe.
 	Customer Tag = "CUSTOMER"
 	// Subscribed is applied when a someone subscribers and is never removed.
-	Subscribed Tag = "SUBSCRIBED"
+	Subscribed Tag = "HAS_SUBSCRIBED"
 	// Vegetarian if they are a vegetarian.
 	Vegetarian Tag = "VEGETARIAN"
 	// NonVegetarian if they a non-vegetarian.
