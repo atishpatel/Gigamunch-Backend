@@ -54,35 +54,16 @@ handlers:
   secure: always
 
 # Website app
-- url: /source
-  static_dir: app_SERVEPATH_/source
-  secure: always
-
 - url: /cooksignup
   script: _go_app
   secure: always
 
-- url: /(checkout|checkout-thank-you|pricing)$
+- url: /js
+  static_dir: js
+  secure: always
+
+- url: /(|terms|privacy|becomecook|checkout|checkout-thank-you|pricing|login|update-payment|thank-you|gift|referred|referred.*)$
   script: _go_app
-  secure: always
-
-- url: /(|home|becomechef|faq|terms|privacy|upgrade|about|feed|item.*)$
-  static_files: app_SERVEPATH_/index.html
-  upload: app_SERVEPATH_/index.html
-  secure: always
-
-- url: /becomecook
-  static_files: becomecook.html
-  upload: becomecook.html
-  secure: always
-
-- url: /schedule
-  static_files: schedule.html
-  upload: schedule.html
-  secure: always
-
-- url: /bower_components
-  static_dir: app_SERVEPATH_/bower_components
   secure: always
 
 - url: /.*

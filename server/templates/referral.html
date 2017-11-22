@@ -64,6 +64,16 @@
       padding: 12px 0;
     }
 
+    .header-card-link {
+      padding: 12px 0;
+    }
+
+    .header-card-link-url {
+      font-style: italic;
+      color: #a1a1a1;
+      word-wrap: break-word;
+    }
+
     .header-card-list li {
       padding: 1px 0;
     }
@@ -128,11 +138,11 @@
             <span>Hey [[.FirstName]], we're</span> [[else]]
             <span>We're</span> [[end]] giving you a personal link so you can give your friend a free Gigamunch dinner. Give them a journey to a different country - a different culture. <strong>No planning. No cost.</strong>
           </p>
-          <p class="header-card-desc"
+          <p class="header-card-link"
              style="text-align:center">
             [[if .FirstName]]
             <span>[[.FirstName]]'s</span> [[else]]
-            <span>Your</span> [[end]] personal link: <br><span style="font-style:italic;color:#a1a1a1">https://eatgigamunch.com/referred/[[.Email]]</span>
+            <span>Your</span> [[end]] personal link: <br><span class="header-card-link-url">https://eatgigamunch.com/referred/[[.Email]]</span>
           </p>
         </div>
         <button class="orange-button header-button"
