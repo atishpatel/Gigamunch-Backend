@@ -1,7 +1,24 @@
 [[define "share-dialog"]]
 <style>
+  .dialog .green-button {
+    background-color: #696;
+    color: white;
+  }
+
+  .dialog .green-button:focus {
+    border-color: #696;
+  }
+
+  .dialog .green-button:hover {
+    background-color: #2b2b2b;
+  }
+
+  .dialog .different-tab-content {
+    min-height: 160px;
+  }
+
   .dialog .img-section {
-    min-width: 300px;
+    min-width: 350px;
     min-height: 300px;
     background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/mom_daughter_eating.jpg');
     background-size: cover;
@@ -9,8 +26,9 @@
   }
 
   .dialog .share-section {
-    min-width: 300px;
-    min-height: 350px;
+    min-width: 350px;
+    min-height: 400px;
+    font-size: 14px;
   }
 
   .dialog .nav-link {
@@ -42,24 +60,89 @@
     padding: 12px;
   }
 
+  .dialog .messenger-section,
+  .dialog .facebook-section,
+  .dialog .sms-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog .messenger-section-text,
+  .dialog .facebook-section-text,
+  .dialog .sms-section-text {
+    font-size: 16px;
+    line-height: 20px;
+    padding: 32px 0;
+  }
+
+  .dialog .email-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog .email-section-textarea {
+    min-height: 120px;
+    background-color: #f7f7f7;
+    border: solid #CFD8DC 1px;
+    padding: 12px;
+    resize: none;
+    font-size: 14px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+  }
+
+  .dialog .email-section-button {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .dialog .or-divider {
+    padding: 12px;
+    color: #acacac;
+  }
+
+  .dialog .share-copy-section {
+    padding: 24px 0;
+  }
+
   .dialog .share-copy-input-group {
+    font-size: 14px;
     display: flex;
     justify-content: center;
-    padding: 12px 0;
+    padding: 12px 12px;
+  }
+
+  .dialog .share-copy-input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   .dialog .share-copy-button {
     border: none;
-    background-color: #FF7043;
   }
 
-  @media (max-width: 650px) {
+  .dialog .sms-nav-tab-item {
+    display: none;
+  }
+
+  @media (max-width: 750px) {
     .dialog {
       flex-direction: column;
     }
 
     .dialog .img-section {
-      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/mom_daughter_eating.jpg');
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/spices_spoon.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .dialog .sms-nav-tab-item {
+      display: list-item;
+    }
+
+    .dialog .close {
+      color: white;
     }
   }
 
@@ -107,7 +190,7 @@
                <i class="fa fa-facebook-square" aria-hidden="true"></i>
             </a>
           </li>
-          <!-- <li class="nav-item">
+          <li class="nav-item sms-nav-tab-item">
             <a class="nav-link"
                data-id="sms-tab"
                data-toggle="tab"
@@ -117,36 +200,71 @@
                aria-selected="false">
                <i class="fa fa-comments" aria-hidden="true"></i>
             </a>
-          </li> -->
+          </li>
         </ul>
       </div>
-      <div class="tab-content"
+      <div class="tab-content different-tab-content"
            id="shareTabsContent">
         <div class="tab-pane fade show active"
              data-id="messenger"
              role="tabpanel"
-             aria-labelledby="messenger-tab">Messenger form...</div>
+             aria-labelledby="messenger-tab">
+          <section class="messenger-section">
+            <p class="messenger-section-text">Share with your friends on Facebook Messenger <br/>by clicking the button below:</p>
+            <a target="_blank"
+               href="https://www.facebook.com/dialog/send?app_id=522395114612219&display=popup&link=https://eatgigamunch.com/referred/[[.Email]]&redirect_uri=https://eatgigamunch.com/referral/[[.Email]]"
+               class="btn green-button messenger-section-button">Open Messenger <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+          </section>
+        </div>
         <div class="tab-pane fade show"
              data-id="email"
              role="tabpanel"
              aria-labelledby="email-tab">
-          <div class="">
-            <textarea data-id="email-template-text">
-              thsis the text
-              </textarea>
-            <button data-clipboard-target="#shareCopyInput">COPY TEMPLATE</button>
-          </div>
+          <!-- EMAIL TAB -->
+          <section class="email-section">
+            <h1 class="dialog-title email-section-title"></h1>
+            <textarea class="email-section-textarea"
+                      data-id="emailTemplateText">Hey, check this out! I’ve been using a service called Gigamunch - they deliver international meals form a different country every week. They make it super easy and fun to try foods from all around the world. Here's a special link that gives you a chance to try it out for free. Give it a shot!
+
+https://eatgigamunch.com/referred/[[.Email]]
+</textarea>
+            <button class="green-button email-section-button"
+                    data-clipboard-target="#emailTemplateText"
+                    data-id="copyEmailButton">Copy Email Template</button>
+          </section>
         </div>
         <div class="tab-pane fade"
              data-id="facebook"
              role="tabpanel"
-             aria-labelledby="facebook-tab">Facebook tab ...</div>
+             aria-labelledby="facebook-tab">
+          <section class="facebook-section">
+            <p class="facebook-section-text">Make a post of Facebook <br/>by clicking the button below:</p>
+            <a target="_blank"
+               href="https://www.facebook.com/dialog/share?app_id=522395114612219&display=popup&href=https://eatgigamunch.com/referred/[[.Email]]"
+               class="btn green-button facebook-section-button">Open Facebook <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+          </section>
+        </div>
         <div class="tab-pane fade"
              data-id="sms"
              role="tabpanel"
-             aria-labelledby="sms-tab"> sms tab ...</div>
+             aria-labelledby="sms-tab">
+          <section class="sms-section">
+            <p class="sms-section-text">Text your friends <br/>by clicking the button below:</p>
+            <a target="_blank"
+               href="sms:?body=Hey%2C%20check%20this%20out%21%20I%E2%80%99ve%20been%20using%20a%20service%20called%20Gigamunch%20-%20they%20deliver%20international%20meals%20form%20a%20different%20country%20every%20week.%20They%20make%20it%20super%20easy%20and%20fun%20to%20try%20foods%20from%20all%20around%20the%20world.%20Here%27s%20a%20special%20link%20that%20gives%20you%20a%20chance%20to%20try%20it%20out%20for%20free.%20Give%20it%20a%20shot%21%0D%0Ahttps://eatgigamunch.com/referred/[[.Email]]"
+          
+               class="btn green-button sms-section-button">Open Messages App <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+          </section>
+        </div>
       </div>
-      <div class="share-copy-">
+      <div class="share-copy-section">
+        <div class="or-divider">
+          <div style="width: 100%; height: 10px; border-bottom: 1px solid #ccc; text-align: center">
+            <span style="font-size: 14px; background-color: white; padding: 0 10px;">
+                Or share your personal link
+              </span>
+          </div>
+        </div>
         <div class="input-group share-copy-input-group">
           <input type="text"
                  data-id="shareCopyInput"
@@ -155,9 +273,9 @@
                  aria-describedby="basic-addon2"
                  value="https://eatgigamunch/referred/[[.Email]]"
                  readonly>
-          <button class="input-group-addon share-copy-button"
+          <button class="green-button input-group-addon share-copy-button"
                   data-clipboard-target="#shareCopyInput"
-                  data-id="basic-addon2">COPY</button>
+                  data-id="copyCustomURLButton"><i class="fa fa-files-o" aria-hidden="true"></i></button>
         </div>
       </div>
 
@@ -175,13 +293,25 @@
 <script async
         src="https://unpkg.com/clipboard@1.7.1/dist/clipboard.min.js"></script>
 <script>
-  function dialogClosed() {}
+  var clips = [];
+
+  function dialogCleanup() {
+    clips.forEach(function(c) {
+      c.destroy();
+    });
+    clips = [];
+  }
+
+  function dialogClosed() {
+    dialogCleanup();
+  }
 
   function closeShareDialog() {
     swal.close();
   }
 
   function openShareDialog() {
+    dialogCleanup();
     var config = {
       html: document.getElementById('dialog').outerHTML,
       showConfirmButton: false,
@@ -196,13 +326,26 @@
           e.id = e.getAttribute('data-id');
         });
         dialog.querySelectorAll('[data-clipboard-target]').forEach(function(e) {
-          new Clipboard('#' + e.getAttribute('data-id'));
+          var clip = new Clipboard('#' + e.getAttribute('data-id'));
+          clip.on('success', function() {
+            var event = new CustomEvent(
+              'toast', {
+                detail: {
+                  title: 'Text copied',
+                  message: '',
+                },
+                bubbles: true,
+                cancelable: true
+              });
+            document.dispatchEvent(event);
+          });
+          clips.push(clip);
         });
-
       },
+      onClose: dialogClosed,
     };
-    if (window.innerWidth > 650) {
-      config.width = 600;
+    if (window.innerWidth > 700) {
+      config.width = 700;
     }
     swal(config).catch(dialogClosed);
   }

@@ -215,6 +215,9 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 			return
 		}
 		page.FirstName = entry.FirstName
+		if entry.FirstName == "" {
+			page.FirstName = getFirstName(entry.Name)
+		}
 		page.Email = email
 	}
 }
@@ -242,8 +245,17 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 			return
 		}
 		page.FirstName = entry.FirstName
+		if entry.FirstName == "" {
+			page.FirstName = getFirstName(entry.Name)
+		}
 		page.Email = email
 	}
+}
+
+func getFirstName(name string) string {
+	nameReplaced := strings.NewReplacer(".", "", "Mr", "", "Ms", "", "Mrs", "", "The", "").Replace(strings.Title(name))
+	nameArray := strings.Split(nameReplaced, " ")
+	return nameArray[0]
 }
 
 type homePage struct {

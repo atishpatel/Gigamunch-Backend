@@ -10,19 +10,20 @@
 <body>
   [[template "theme" .]]
   <style>
-    .main-nav {
-      max-width: 800px;
-    }
-
     *,
      ::after,
      ::before {
       box-sizing: border-box;
     }
 
-    main>* {
+    main,
+    .main-nav,
+    footer {
       max-width: 800px;
       margin: auto;
+    }
+
+    main {
       background-color: white;
     }
 
@@ -50,7 +51,6 @@
       justify-content: center;
       flex: 1;
       padding: 32px;
-      min-height: 400px;
     }
 
     .header-card-title {
@@ -61,7 +61,7 @@
     }
 
     .header-card-desc {
-      padding: 12px;
+      padding: 12px 0;
     }
 
     .header-card-list li {
@@ -69,21 +69,21 @@
     }
 
     .header-button {
-      margin-top: 12px;
+      padding: 14px 18px;
       text-transform: uppercase;
-      /* background: #db0311; */
       box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       font-weight: 500;
+      max-width: 500px;
+      min-width: 300px;
+      margin: 12px auto;
     }
-
-
 
     .banner {
       color: white;
       text-align: center;
       font-style: italic;
       padding: 40px 24px;
-      background-color: #00796b;
+      background-color: #696;
     }
 
     .video-16-9 {
@@ -116,7 +116,7 @@
   <main>
     <div class="header">
       <div class="header-video video-16-9">
-        <iframe src="https://www.youtube.com/embed/qS6LoRYUdhw?rel=0&amp;showinfo=0"
+        <iframe src="https://www.youtube.com/embed/zg76NiSxP2I?rel=0&amp;showinfo=0&amp;autoplay=1"
                 frameborder="0"
                 allowfullscreen></iframe>
       </div>
@@ -124,20 +124,23 @@
         <div>
           <h1 class="header-card-title">Give a piece of the world</h1>
           <p class="header-card-desc">
-            Give your friends a journey to a different country - a different culture - all for no cost.
+            [[if .FirstName]]
+            <span>Hey [[.FirstName]], we're</span> [[else]]
+            <span>We're</span> [[end]] giving you a personal link so you can give your friend a free Gigamunch dinner. Give them a journey to a different country - a different culture. <strong>No planning. No cost.</strong>
           </p>
-          <ol class="header-card-list">
-            <li>Send a link to your friends. <strong>No planning. No cost.</strong></li>
-            <li>Your friend enters their information.</li>
-            <li>They get a gift from you and Gigamunch whenever they want.</li>
-          </ol>
+          <p class="header-card-desc"
+             style="text-align:center">
+            [[if .FirstName]]
+            <span>[[.FirstName]]'s</span> [[else]]
+            <span>Your</span> [[end]] personal link: <br><span style="font-style:italic;color:#a1a1a1">https://eatgigamunch.com/referred/[[.Email]]</span>
+          </p>
         </div>
         <button class="orange-button header-button"
                 id="giveButton">Give Free Dinner</button>
       </div>
     </div>
     <div class="banner bg-noise">
-      <h1>Thank you for being a part of of <span class="logo">Gigamunch</span></h1>
+      <h1>Thank you for being a part of <span class="logo">Gigamunch</span></h1>
     </div>
   </main>
 

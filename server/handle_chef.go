@@ -31,7 +31,7 @@ import (
 
 var (
 	bucketName          string
-	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error while uploading file."}
+	errInternal         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Internal error."}
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
 	projectID           string
 )
