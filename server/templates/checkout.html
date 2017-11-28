@@ -837,9 +837,6 @@
               </div>
             </div>
             <div>
-
-            </div>
-            <div>
               <label for="reference">How did you hear about us?</label>
               <div class="input-container">
                 <input type="text"
@@ -858,8 +855,8 @@
             </div>
             <br>
             <div class="select-input-group">
-              <label>Delivery Day</label>
-              <select id="delivery-day"
+              <label>First Delivery Day</label>
+              <select id="delivery-date"
                       option-value="value"
                       form="checkout-form"
                       onclick="dayInputClick()">
@@ -1175,6 +1172,7 @@
             var firstName = form.elements['first_name'].value;
             var lastName = form.elements['last_name'].value;
             var email = form.elements['email'].value;
+            var firstDeliveryDate = document.getElementById('delivery-date').value;
             var deliveryNotes = form.elements['delivery_notes'].value;
             var reference = form.elements['reference'].value;
             var phoneNumber = form.elements['phone_number'].value;
@@ -1202,6 +1200,7 @@
             var req = {
               'email': email,
               'address': address,
+              'first_delivery_date': firstDeliveryDate,
               'delivery_notes': deliveryNotes,
               'first_name': firstName,
               'last_name': lastName,
@@ -1271,19 +1270,8 @@
     }
 
     function updateOrderInfo() {
-      var d = new Date();
-      // d.setDate(d.getDate() + 2);
-      d.setTime(d.getTime() + 72 * 3600 * 1000); // add 72 hours
-      while (d.getDay() !== 1) { // while not Monday
-        d.setDate(d.getDate() + 1);
-      }
-      // TODO remove after Aug 21, 2017
-      if (d.getMonth() === 7 && d.getDay() === 21) {
-        d.setDate(d.getDate() + 7)
-      }
-      d.setDate(d.getDate() + 4);
-      var date = d.getDate();
-      document.getElementById('first_date').innerHTML = d.toLocaleDateString();
+      var deliveryDayElement = document.getElementById('delivery-date');
+      document.getElementById('first_date').innerHTML = deliveryDayElement.value;
       var oneBoxPrice = 0.0;
       var servingsPerBox = 0;
 
@@ -1331,6 +1319,46 @@
     document.getElementById('meal-option-2').addEventListener('change', updateOrderInfo);
     document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
 
+    function generateDeliveryDays() {
+      var d = new Date();
+      d.setTime(d.getTime() + 72 * 3600 * 1000); // add 72 hours
+      while (d.getDay() !== 1) { // while not Monday
+        d.setDate(d.getDate() + 1);
+      }
+
+      var days = [];
+      for (var i = 0; i < 5; d.setDate(d.getDate() + 7)) {
+        var dayArray = d.toString().split(' ');
+        var display = d.toLocaleDateString();
+        if (dayArray.length > 3) {
+          display = dayArray[1] + ' ' + dayArray[2];
+        }
+        // TODO: remove after Dec 25, 2017
+        if (d.getMonth() === 11 && d.getDate() === 25) {
+          continue;
+        }
+        if (d.getMonth() === 0 && d.getDate() === 1) {
+          display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
+        }
+        // end TODO
+        var day = {
+          display: display,
+          value: d.toISOString(),
+        };
+        days.push(day);
+        i++;
+      }
+      var deliveryDayElement = document.getElementById('delivery-date');
+      deliveryDayElement.innerHTML = '';
+      for (var i = 0; i < days.length; i++) {
+        var opt = document.createElement("option");
+        opt.value = days[i].value;
+        opt.innerHTML = days[i].display;
+        deliveryDayElement.appendChild(opt);
+      }
+    }
+
+    generateDeliveryDays();
     updateOrderInfo();
 
     function getQueryParameter(name, url) {

@@ -203,10 +203,19 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
-	// TODO remove after Aug 21, 2017
-	if firstBoxDate.Month() == time.August && firstBoxDate.Day() == 21 {
-		firstBoxDate = firstBoxDate.Add(time.Hour * 24 * 7)
+	if req.FirstDeliveryDate != "" {
+		firstBoxDate, err = time.Parse(time.RFC3339, req.FirstDeliveryDate)
+		if err != nil || firstBoxDate.Weekday() == time.Tuesday {
+			firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() != time.Monday {
+			resp.Error = errBadRequest.WithMessage("Invalid first delivery day selected.").SharedError()
+			utils.Criticalf(ctx, "user selected invalid start date: %+v", req.FirstDeliveryDate)
+			return resp
+		}
+
 	}
+
 	paymentC := payment.New(ctx)
 	paymentReq := &payment.CreateCustomerReq{
 		CustomerID: customerID,
