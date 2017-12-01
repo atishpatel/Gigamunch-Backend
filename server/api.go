@@ -135,8 +135,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	req := new(pb.SubmitCheckoutReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -145,7 +144,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	resp := &pb.ErrorOnlyResp{}
 	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
 	req.PhoneNumber = strings.Replace(req.PhoneNumber, " ", "", -1)
-	utils.Infof(ctx, "Request struct: %+v", req)
+	logging.Infof(ctx, "Request struct: %+v", req)
 	err = validateSubmitCheckoutReq(req)
 	if err != nil {
 		resp.Error = errors.GetSharedError(err)
@@ -199,7 +198,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
 	customerID := payment.GetIDFromEmail(req.Email)
-	firstBoxDate := time.Now().Add(72 * time.Hour)
+	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
@@ -208,13 +207,19 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		if err != nil || firstBoxDate.Weekday() == time.Tuesday {
 			firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
 		}
+		if err != nil || firstBoxDate.Weekday() == time.Sunday {
+			firstBoxDate = firstBoxDate.Add(12 * time.Hour)
+		}
 		if err != nil || firstBoxDate.Weekday() != time.Monday {
 			resp.Error = errBadRequest.WithMessage("Invalid first delivery day selected.").SharedError()
 			utils.Criticalf(ctx, "user selected invalid start date: %+v", req.FirstDeliveryDate)
 			return resp
 		}
-
 	}
+	// TODO: remove
+	logging.Infof(ctx, "firstBoxDate would change from %s to %s to %s", firstBoxDate, firstBoxDate.UTC(), firstBoxDate.UTC().Truncate(24*time.Hour))
+	tmpNow := time.Now()
+	logging.Infof(ctx, "now would change from %s to %s to %s", tmpNow, tmpNow.UTC(), tmpNow.UTC().Truncate(24*time.Hour))
 
 	paymentC := payment.New(ctx)
 	paymentReq := &payment.CreateCustomerReq{
@@ -260,7 +265,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		return resp
 	}
 	if !inZone {
-		utils.Infof(ctx, "failed address zone zip(%s). Address: %s", address.Zip, address.String())
+		logging.Infof(ctx, "failed address zone zip(%s). Address: %s", address.Zip, address.String())
 		// out of delivery range
 		if address.Street == "" {
 			resp.Error = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!").SharedError()
@@ -279,7 +284,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		resp.Error = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!").SharedError()
 		return resp
 	}
-	if !appengine.IsDevAppServer() {
+	if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
 		messageC := message.New(ctx)
 		err = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber checkout page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
 		if err != nil {
@@ -319,6 +324,10 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		} else {
 			mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
 			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
+		}
+		durationTillFirstMeal := time.Until(firstBoxDate.UTC().Truncate(24 * time.Hour))
+		if durationTillFirstMeal > 0 && durationTillFirstMeal < ((6*24)-12)*time.Hour {
+			mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(firstBoxDate))
 		}
 		err = mailC.UpdateUser(mailReq, getProjID())
 		if err != nil {

@@ -1321,7 +1321,7 @@
 
     function generateDeliveryDays() {
       var d = new Date();
-      d.setTime(d.getTime() + 72 * 3600 * 1000); // add 72 hours
+      d.setTime(d.getTime() + 81 * 3600 * 1000); // Friday at 3 PM
       while (d.getDay() !== 1) { // while not Monday
         d.setDate(d.getDate() + 1);
       }
