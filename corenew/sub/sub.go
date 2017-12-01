@@ -328,6 +328,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 	mailReq := &mail.UserFields{
 		Email: subEmail,
 	}
+	// TODO: add 2 serving 4 serving tag
 	if vegServings > 0 {
 		mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
 		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
@@ -642,6 +643,9 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 	taskC := tasks.New(c.ctx)
 	dayBeforeBox := date.Add(-2 * time.Hour)
 	for _, v := range subs {
+		if (!v.FirstBoxDate.IsZero() && v.FirstBoxDate.After(dayBeforeBox)) || (!v.SubscriptionDate.IsZero() && v.SubscriptionDate.After(dayBeforeBox)) {
+			continue
+		}
 		// TODO instead of inserting all in this task, split it into many tasks?
 		// insert into subLog
 		amt := v.WeeklyAmount
