@@ -103,7 +103,7 @@ func handleCheckout(w http.ResponseWriter, req *http.Request, _ httprouter.Param
 			if err != nil {
 				utils.Criticalf(ctx, "Error putting ScheduleSignupEmail in datastore ", err)
 			}
-			if !appengine.IsDevAppServer() {
+			if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
 				messageC := message.New(ctx)
 				err = messageC.SendSMS("6153975516", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
 				if err != nil {

@@ -42,6 +42,8 @@ const (
 	Customer Tag = "CUSTOMER"
 	// Subscribed is applied when a someone subscribers and is never removed.
 	Subscribed Tag = "HAS_SUBSCRIBED"
+	// Canceled is applied when a subscribers cancels.
+	Canceled Tag = "CANCELED"
 	// Vegetarian if they are a vegetarian.
 	Vegetarian Tag = "VEGETARIAN"
 	// NonVegetarian if they a non-vegetarian.
@@ -54,6 +56,16 @@ const (
 	Dev          Tag = "DEV"
 	ignoreDomain     = "@test.com"
 )
+
+// GetPreviewEmailTag returns the tag that needs to be added to get the preview email based on date provided. Date should be date the person is recieving their meal.
+func GetPreviewEmailTag(t time.Time) Tag {
+	return Tag(t.Format("01/02/2006") + "_PREVIEW_EMAIL")
+}
+
+// GetCultureEmailTag returns the tag that needs to be added to get the culture email based on date provided. Date should be date the person is recieving their first meal.
+func GetCultureEmailTag(t time.Time) Tag {
+	return Tag(t.Format("01/02/2006") + "_CULTURE_EMAIL")
+}
 
 // Client is a client for manipulating subscribers.
 type Client struct {

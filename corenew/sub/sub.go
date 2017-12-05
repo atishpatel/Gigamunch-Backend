@@ -547,9 +547,14 @@ func (c *Client) Cancel(subEmail string) error {
 		return errInvalidParameter.Wrap("sub email cannot be empty.")
 	}
 	mailC := mail.New(c.ctx)
-	err := mailC.RemoveTag(subEmail, mail.Customer)
+	mailReq := &mail.UserFields{
+		Email:      subEmail,
+		AddTags:    []mail.Tag{mail.Canceled},
+		RemoveTags: []mail.Tag{mail.Customer},
+	}
+	err := mailC.UpdateUser(mailReq, getProjID())
 	if err != nil {
-		return errors.Annotate(err, "failed to mail.RemoveTag")
+		return errors.Annotate(err, "failed to mail.UpdateUser")
 	}
 	// remove any SubLog that are > now
 	_, err = mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
@@ -570,6 +575,7 @@ func (c *Client) Cancel(subEmail string) error {
 	if err != nil {
 		return errors.Wrap("failed to put sub", err)
 	}
+
 	return nil
 }
 

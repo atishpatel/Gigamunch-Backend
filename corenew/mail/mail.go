@@ -92,6 +92,8 @@ const (
 	Customer Tag = "CUSTOMER"
 	// Subscribed is applied when a someone subscribers and is never removed.
 	Subscribed Tag = "HAS_SUBSCRIBED"
+	// Canceled is applied when a subscribers cancels.
+	Canceled Tag = "CANCELED"
 	// Vegetarian if they are a vegetarian.
 	Vegetarian Tag = "VEGETARIAN"
 	// NonVegetarian if they a non-vegetarian.
@@ -104,6 +106,16 @@ const (
 	Dev          Tag = "DEV"
 	ignoreDomain     = "@test.com"
 )
+
+// GetPreviewEmailTag returns the tag that needs to be added to get the preview email based on date provided. Date should be date the person is recieving their meal.
+func GetPreviewEmailTag(t time.Time) Tag {
+	return Tag(t.Format("01/02/2006") + "_PREVIEW_EMAIL")
+}
+
+// GetCultureEmailTag returns the tag that needs to be added to get the culture email based on date provided. Date should be date the person is recieving their first meal.
+func GetCultureEmailTag(t time.Time) Tag {
+	return Tag(t.Format("01/02/2006") + "_CULTURE_EMAIL")
+}
 
 // Client is the client for this package.
 type Client struct {
@@ -331,6 +343,42 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 	}
 	if len(resp.Errors) > 0 {
 		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.TagSubscriber")
+	}
+	return nil
+}
+
+// AddBatchTags adds tags to emails. This often triggers a workflow.
+func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
+	// TODO:
+	tagsString := make([]string, len(tags))
+	for i, tag := range tags {
+		tagsString[i] = tag.String()
+	}
+	subs := make([]drip.UpdateSubscriber, len(emails))
+	i := 0
+	for _, email := range emails {
+		if !strings.Contains(email, ignoreDomain) {
+			subs[i].Email = email
+			subs[i].Tags = tagsString
+			i++
+		}
+	}
+	if len(subs) == 0 || len(tags) == 0 {
+		return nil
+	}
+	req := &drip.UpdateBatchSubscribersReq{
+		Batches: []drip.SubscribersBatch{
+			drip.SubscribersBatch{
+				Subscribers: subs[:i],
+			},
+		},
+	}
+	resp, err := c.dripC.UpdateBatchSubscribers(req)
+	if err != nil {
+		return errDrip.WithError(err).Annotate("failed to drip.UpdateBatchSubscribers")
+	}
+	if len(resp.Errors) > 0 {
+		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.UpdateBatchSubscribers")
 	}
 	return nil
 }
