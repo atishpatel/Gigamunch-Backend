@@ -32,6 +32,9 @@ type Config struct {
 	TwilioKeyAuthToken        string   `json:"twilio_key_auth_token" datastore:",noindex"`
 	TwilioIPMessagingSID      string   `json:"twilio_ip_messaging_sid" datastore:",noindex"`
 	TwilioPushCredentialSID   string   `json:"push_credential_sid" datastore:",noindex"`
+	TwilioAdminServiceSID     string   `json:"twilio_admin_service_sid" datastore:",noindex"`
+	TwilioDeliveryServiceSID  string   `json:"twilio_delivery_service_sid" datastore:",noindex"`
+	TwilioBagServiceSID       string   `json:"twilio_bag_service_sid" datastore:",noindex"`
 	PhoneNumbers              []string `json:"phone_numbers" datastore:",noindex"`
 	BucketName                string   `json:"bucket_name" datastore:",noindex"`
 	ProjectID                 string   `json:"project_id" datastore:",noindex"`
@@ -76,13 +79,16 @@ type GitkitConfig struct {
 
 // TwilioConfig is used to load twilio configurations
 type TwilioConfig struct {
-	AccountSID        string   `json:"account_sid"`
-	KeySID            string   `json:"key_sid"`
-	AuthToken         string   `json:"auth_token"`
-	KeyAuthToken      string   `json:"key_auth_token"`
-	IPMessagingSID    string   `json:"ip_messaging_sid"`
-	PushCredentialSID string   `json:"push_credential_sid"`
-	PhoneNumbers      []string `json:"phone_numbers"`
+	AccountSID         string   `json:"account_sid"`
+	KeySID             string   `json:"key_sid"`
+	AuthToken          string   `json:"auth_token"`
+	KeyAuthToken       string   `json:"key_auth_token"`
+	IPMessagingSID     string   `json:"ip_messaging_sid"`
+	PushCredentialSID  string   `json:"push_credential_sid"`
+	PhoneNumbers       []string `json:"phone_numbers"`
+	AdminServiceSID    string   `json:"admin_service_sid"`
+	DeliveryServiceSID string   `json:"delivery_service_sid"`
+	BagServiceSID      string   `json:"bag_service_sid"`
 }
 
 // CreditCard holds data related to a credit card.
@@ -165,6 +171,9 @@ func GetTwilioConfig(ctx context.Context) TwilioConfig {
 		twilioConfig.IPMessagingSID = config.TwilioIPMessagingSID
 		twilioConfig.PushCredentialSID = config.TwilioPushCredentialSID
 		twilioConfig.PhoneNumbers = config.PhoneNumbers
+		twilioConfig.AdminServiceSID = config.TwilioAdminServiceSID
+		twilioConfig.DeliveryServiceSID = config.TwilioDeliveryServiceSID
+		twilioConfig.BagServiceSID = config.TwilioBagServiceSID
 	}
 	return twilioConfig
 }

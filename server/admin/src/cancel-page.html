@@ -39,7 +39,8 @@
             <option value="[[email]]">[[email]]</option>
           </template>
         </select>
-      <paper-button on-tap="submitCancel">Submit Cancel</paper-button>
+      <paper-button disabled$="[[loading]]"
+                    on-tap="submitCancel">Submit Cancel</paper-button>
     </div>
   </template>
 

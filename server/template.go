@@ -35,6 +35,8 @@ func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/terms", handleTerms)
 	r.GET("/privacy", handlePrivacy)
 	r.GET("/checkout", handleCheckout)
+	r.GET("/scheduleform/:email", handleCheckout)
+	r.GET("/scheduleform", handleCheckout)
 	r.GET("/checkout-thank-you", handleCheckoutThankYou)
 	r.GET("/update-payment", handleUpdatePayment)
 	r.GET("/thank-you", handleThankYou)
@@ -78,7 +80,7 @@ type checkoutPage struct {
 	Reference     string
 }
 
-func handleCheckout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func handleCheckout(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	ctx := appengine.NewContext(req)
 	page := &checkoutPage{
 		Page: Page{
@@ -88,6 +90,9 @@ func handleCheckout(w http.ResponseWriter, req *http.Request, _ httprouter.Param
 	defer display(ctx, w, "checkout", page)
 	email := req.FormValue("email")
 	terp := req.FormValue("terp")
+	if email == "" {
+		email = params.ByName("email")
+	}
 	// TODO: add referred email address
 	var err error
 	if email != "" && terp == "" && strings.Contains(email, "@") {

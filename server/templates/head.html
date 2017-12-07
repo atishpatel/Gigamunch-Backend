@@ -124,6 +124,8 @@
         defer></script>
 <script async
         src="https://www.google-analytics.com/analytics.js"></script>
+<script async
+        src="https://unpkg.com/autotrack@2.4.1/autotrack.js"></script>
 <script>
   // Set Environment
   var APP = APP || {};
@@ -149,6 +151,12 @@
   ga.l = +new Date;
   var ua = APP.IsProd ? 'UA-71567908-1' : 'UA-71567908-4';
   ga('create', ua, 'auto');
+  // autotracker setup
+  ga('require', 'eventTracker');
+  ga('require', 'maxScrollTracker');
+  ga('require', 'outboundLinkTracker');
+
+  // end autotracker
   ga('send', 'pageview');
   // Setup error tracking before anything else runs.
   window.onerror = function(message, file, lineNumber, columnNumber, error) {

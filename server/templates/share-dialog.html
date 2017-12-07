@@ -165,7 +165,10 @@
                href="#messenger"
                role="tab"
                aria-controls="messenger"
-               aria-selected="true">
+               aria-selected="true"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="messenger-tab">
                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="96 93 322 324"><path d="M257 93c-88.918 0-161 67.157-161 150 0 47.205 23.412 89.311 60 116.807V417l54.819-30.273C225.449 390.801 240.948 393 257 393c88.918 0 161-67.157 161-150S345.918 93 257 93zm16 202l-41-44-80 44 88-94 42 44 79-44-88 94z"/></svg>
             </a>
           </li>
@@ -176,7 +179,10 @@
                href="#email"
                role="tab"
                aria-controls="email"
-               aria-selected="true">
+               aria-selected="true"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="email-tab">
                <i class="fa fa-envelope" aria-hidden="true"></i>
             </a>
           </li>
@@ -187,7 +193,10 @@
                href="#facebook"
                role="tab"
                aria-controls="facebook"
-               aria-selected="false">
+               aria-selected="false"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="facebook-tab">
                <i class="fa fa-facebook-square" aria-hidden="true"></i>
             </a>
           </li>
@@ -198,7 +207,10 @@
                href="#sms"
                role="tab"
                aria-controls="sms"
-               aria-selected="false">
+               aria-selected="false"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="sms-tab">
                <i class="fa fa-comments" aria-hidden="true"></i>
             </a>
           </li>
@@ -214,7 +226,10 @@
             <p class="messenger-section-text">Share with your friends on Facebook Messenger <br/>by clicking the button below:</p>
             <a target="_blank"
                href="https://www.facebook.com/dialog/send?app_id=522395114612219&display=popup&link=https://eatgigamunch.com/referred/[[.Email]]&redirect_uri=https://eatgigamunch.com/referral/[[.Email]]"
-               class="btn green-button messenger-section-button">Open Messenger <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+               class="btn green-button messenger-section-button"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="messenger-action-button">Open Messenger <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
           </section>
         </div>
         <div class="tab-pane fade show"
@@ -225,13 +240,19 @@
           <section class="email-section">
             <h1 class="dialog-title email-section-title"></h1>
             <textarea class="email-section-textarea"
-                      data-id="emailTemplateText">Hey, check this out! I’ve been using a service called Gigamunch - they deliver international meals form a different country every week. They make it super easy and fun to try foods from all around the world. Here's a special link that gives you a chance to try it out for free. Give it a shot!
+                      data-id="emailTemplateText"
+                      ga-on="click"
+                      ga-event-category="share"
+                      ga-event-action="email-action-button">Hey, check this out! I’ve been using a service called Gigamunch - they deliver international meals form a different country every week. They make it super easy and fun to try foods from all around the world. Here's a special link that gives you a chance to try it out for free. Give it a shot!
 
 https://eatgigamunch.com/referred/[[.Email]]
 </textarea>
             <button class="green-button email-section-button"
                     data-clipboard-target="#emailTemplateText"
-                    data-id="copyEmailButton">Copy Email Template</button>
+                    data-id="copyEmailButton"
+                    ga-on="click"
+                    ga-event-category="share"
+                    ga-event-action="email-action-button">Copy Email Template</button>
           </section>
         </div>
         <div class="tab-pane fade"
@@ -242,7 +263,10 @@ https://eatgigamunch.com/referred/[[.Email]]
             <p class="facebook-section-text">Make a post of Facebook <br/>by clicking the button below:</p>
             <a target="_blank"
                href="https://www.facebook.com/dialog/share?app_id=522395114612219&display=popup&href=https://eatgigamunch.com/referred/[[.Email]]"
-               class="btn green-button facebook-section-button">Open Facebook <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+               class="btn green-button facebook-section-button"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="facebook-action-button">Open Facebook <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
           </section>
         </div>
         <div class="tab-pane fade"
@@ -254,7 +278,10 @@ https://eatgigamunch.com/referred/[[.Email]]
             <a target="_blank"
                href="sms:?body=Hey%2C%20check%20this%20out%21%20I%E2%80%99ve%20been%20using%20a%20service%20called%20Gigamunch%20-%20they%20deliver%20international%20meals%20form%20a%20different%20country%20every%20week.%20They%20make%20it%20super%20easy%20and%20fun%20to%20try%20foods%20from%20all%20around%20the%20world.%20Here%27s%20a%20special%20link%20that%20gives%20you%20a%20chance%20to%20try%20it%20out%20for%20free.%20Give%20it%20a%20shot%21%0D%0Ahttps://eatgigamunch.com/referred/[[.Email]]"
           
-               class="btn green-button sms-section-button">Open Messages App <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+               class="btn green-button sms-section-button"
+               ga-on="click"
+               ga-event-category="share"
+               ga-event-action="sms-action-button">Open Messages App <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
           </section>
         </div>
       </div>
@@ -272,11 +299,17 @@ https://eatgigamunch.com/referred/[[.Email]]
                  class="share-copy-input"
                  aria-label="User's share link"
                  aria-describedby="basic-addon2"
-                 value="https://eatgigamunch/referred/[[.Email]]"
-                 readonly>
+                 value="https://eatgigamunch.com/referred/[[.Email]]"
+                 readonly
+                 ga-on="click"
+                 ga-event-category="share"
+                 ga-event-action="link-action-button">
           <button class="green-button input-group-addon share-copy-button"
                   data-clipboard-target="#shareCopyInput"
-                  data-id="copyCustomURLButton"><i class="fa fa-files-o" aria-hidden="true"></i></button>
+                  data-id="copyCustomURLButton"
+                  ga-on="click"
+                  ga-event-category="share"
+                  ga-event-action="link-action-button"><i class="fa fa-files-o" aria-hidden="true"></i></button>
         </div>
       </div>
 

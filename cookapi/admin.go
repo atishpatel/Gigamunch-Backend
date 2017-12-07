@@ -1,14 +1,15 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -123,7 +124,7 @@ func (service *Service) CreateFakeSubmerchant(ctx context.Context, req *CreateFa
 // SendSMSReq is the request for CreateFakeSubmerchant.
 type SendSMSReq struct {
 	GigatokenReq
-	Number  string `json:"number"`
+	Numbers string `json:"numbers"`
 	Message string `json:"message"`
 }
 
@@ -141,10 +142,18 @@ func (service *Service) SendSMS(ctx context.Context, req *SendSMSReq) (*ErrorOnl
 		return resp, nil
 	}
 	messageC := message.New(ctx)
-	err = messageC.SendSMS(req.Number, req.Message)
-	if err != nil {
-		resp.Err = errors.Wrap("failed to message.SendSMS", err)
-		return resp, nil
+	var numbers []string
+	if strings.Contains(req.Numbers, ",") {
+		numbers = strings.Split(req.Numbers, ",")
+	} else {
+		numbers = []string{req.Numbers}
+	}
+	for _, n := range numbers {
+		err = messageC.SendDeliverySMS(n, req.Message)
+		if err != nil {
+			resp.Err = errors.Wrap("failed to message.SendSMS", err)
+			return resp, nil
+		}
 	}
 	return resp, nil
 }
@@ -540,7 +549,7 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].SubscriptionLog = *subLogs[i]
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
 					resp.SubLogs[i].Date = subLogs[i].Date
-					resp.SubLogs[i].CustomerID = subLogs[i].CustomerID
+					resp.SubLogs[i].CustomerID = subs[j].CustomerID
 					if subs[j].VegetarianServings > 0 {
 						resp.SubLogs[i].VegetarianServings = subLogs[i].Servings
 					} else {
@@ -653,5 +662,32 @@ func (service *Service) SendIntroEmail(ctx context.Context, req *SendEmailReq) (
 		return resp, nil
 	}
 
+	return resp, nil
+}
+
+// UpdateMailCustomerFields updates the custom fields in Drip.
+func (service *Service) UpdateMailCustomerFields(ctx context.Context, req *SendEmailReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "UpdateMailCustomerFields", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	r := &mail.UserFields{
+		Email:             req.Email,
+		Name:              req.Name,
+		FirstDeliveryDate: req.FirstDinnerDate,
+	}
+	mailC := mail.New(ctx)
+	err = mailC.UpdateUser(r, projectID)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to mail.UpdateUser")
+		return resp, nil
+	}
 	return resp, nil
 }

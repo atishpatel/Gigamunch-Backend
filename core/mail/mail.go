@@ -67,6 +67,11 @@ func GetCultureEmailTag(t time.Time) Tag {
 	return Tag(t.Format("01/02/2006") + "_CULTURE_EMAIL")
 }
 
+// GetReceivedJourneyTag returns the tag that needs to be added to customer based on how many meals they have.
+func GetReceivedJourneyTag(numJourneys int) Tag {
+	return Tag(fmt.Sprintf("RECEIVED_%d_JOURNEY", numJourneys))
+}
+
 // Client is a client for manipulating subscribers.
 type Client struct {
 	ctx   context.Context

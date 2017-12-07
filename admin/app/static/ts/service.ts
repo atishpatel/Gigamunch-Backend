@@ -1,5 +1,11 @@
-import { Fire, UserUpdated } from './utils/event';
-import { GetToken, SetToken } from './utils/token';
+import {
+  Fire,
+  UserUpdated,
+} from './utils/event';
+import {
+  GetToken,
+  SetToken,
+} from './utils/token';
 
 const baseURL = '/admin/api/v1/';
 

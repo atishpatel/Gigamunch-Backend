@@ -1,0 +1,245 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ServerAPI.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/Login": {
+      "post": {
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ServerAPITokenOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServerAPITokenOnlyReq"
+            }
+          }
+        ],
+        "tags": [
+          "Server"
+        ]
+      }
+    },
+    "/api/v1/SubmitCheckout": {
+      "post": {
+        "summary": "Checkout",
+        "operationId": "SumbitCheckout",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ServerAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServerAPISubmitCheckoutReq"
+            }
+          }
+        ],
+        "tags": [
+          "Server"
+        ]
+      }
+    },
+    "/api/v1/UpdatePayment": {
+      "post": {
+        "operationId": "UpdatePayment",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ServerAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServerAPIUpdatePaymentReq"
+            }
+          }
+        ],
+        "tags": [
+          "Server"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AddressAddress": {
+      "type": "object",
+      "properties": {
+        "apt": {
+          "type": "string"
+        },
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "full_address": {
+          "type": "string"
+        }
+      },
+      "title": "The error object that gets returned with every"
+    },
+    "ErrorCode": {
+      "type": "string",
+      "enum": [
+        "Unknown",
+        "Success",
+        "InvalidArgument",
+        "NotFound",
+        "PermissionDenied",
+        "Unauthenticated",
+        "SignOut",
+        "Internal"
+      ],
+      "default": "Unknown",
+      "title": "- Unknown: TODO:  figure out codes"
+    },
+    "ErrorError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/ErrorCode"
+        },
+        "message": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      },
+      "title": "The error object that gets returned with every"
+    },
+    "ServerAPIErrorOnlyResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        }
+      },
+      "title": "Common"
+    },
+    "ServerAPISubmitCheckoutReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "phone_number": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/AddressAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "payment_method_nonce": {
+          "type": "string"
+        },
+        "servings": {
+          "type": "string"
+        },
+        "vegetarian_servings": {
+          "type": "string"
+        },
+        "first_delivery_date": {
+          "type": "string"
+        }
+      },
+      "title": "SubmitCheckoutReq"
+    },
+    "ServerAPITokenOnlyReq": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "title": "Auth"
+    },
+    "ServerAPITokenOnlyResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "ServerAPIUpdatePaymentReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "payment_method_nonce": {
+          "type": "string"
+        }
+      },
+      "title": "UpdatePaymentReq"
+    }
+  }
+}

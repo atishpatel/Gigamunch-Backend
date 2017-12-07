@@ -1,0 +1,8 @@
+{
+  "name": "server-app",
+  "repository": "https://github.com/atishpatel/Gigamunch-Backend.git",
+  "author": "Atish Patel <atishpatel2012@gmail.com>",
+  "license": "No licence",
+  "private": true,
+  "version": "1.0.0"
+}

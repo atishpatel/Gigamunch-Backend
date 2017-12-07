@@ -19,6 +19,7 @@ const htmlMinifier = require('html-minifier').minify;
 
 // const swPrecacheConfig = require('./sw-precache-config.js');
 const buildDirectory = 'build';
+const protoDirectory = '../../Gigamunch-Proto';
 
 function buildApp() {
   return new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
@@ -26,6 +27,7 @@ function buildApp() {
     console.log(`Deleting ${buildDirectory} directory...`);
     del([buildDirectory])
       .then(() => {
+        console.log(`Compiling typescript...`);
         let stream = gulp.src('./src/**/*.ts')
           .pipe(importsInliner({
             parserOptions: {
@@ -51,6 +53,7 @@ function buildApp() {
             target: 'ES2015',
             module: 'es2015',
             removeComments: true,
+            typeRoots: [`${protoDirectory}/shared`, `${protoDirectory}/admin`, `${protoDirectory}/driver`, `${protoDirectory}/sub`],
           }))
           .pipe(
             gulp.dest(buildDirectory)
@@ -60,6 +63,7 @@ function buildApp() {
           stream.on('error', reject);
         });
       }).then(() => {
+        console.log(`Rolling up...`);
         let stream = gulp.src(`${buildDirectory}/app-shell.js`)
           .pipe(
             rollup('es')
@@ -73,6 +77,7 @@ function buildApp() {
         });
       })
       .then(() => {
+        console.log(`Minifying...`);
         let stream = gulp.src(`${buildDirectory}/app-shell.js`)
           .pipe(
             uglify()

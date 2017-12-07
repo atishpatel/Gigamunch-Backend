@@ -8,17 +8,16 @@ import (
 	"time"
 
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
-	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -70,16 +69,28 @@ func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*t
 type Service struct{}
 
 func main() {
+	if projectID == "" {
+		projectID = os.Getenv("PROJECTID")
+	}
 	getDomainString()
 	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
 	http.HandleFunc("/sub-merchant-approved", handleSubMerchantApproved)
 	http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
 	http.HandleFunc("/sub-merchant-disbursement-exception", handleDisbursementException)
-	http.HandleFunc("/on-message-sent", handleOnMessageSent)
+	// http.HandleFunc("/on-message-sent", handleOnMessageSent)
 
+	http.HandleFunc(tasks.UpdateDripURL, handleUpdateDrip)
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/send-bag-reminder", handleSendBagReminder)
+	http.HandleFunc("/send-preview-culture-email", handleSendPreviewCultureEmail)
+	http.HandleFunc("/send-culture-email", handleSendCultureEmail)
+	http.HandleFunc("/task/process-subscribers", handelProcessSubscribers)
+	http.HandleFunc("/task/process-subscription", handelProcessSubscription)
+	http.HandleFunc("/task/send-bag-reminder", handleSendBagReminder)
+	http.HandleFunc("/task/send-preview-culture-email", handleSendPreviewCultureEmail)
+	http.HandleFunc("/task/send-culture-email", handleSendCultureEmail)
+	http.HandleFunc("/webhook/twilio-sms", handleTwilioSMS)
 	http.HandleFunc("/testbra", testbra)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
 	if err != nil {
@@ -134,14 +145,14 @@ func main() {
 	// register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Give free meal to a customer for a date. Admin func.")
 	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
 	register("ChangeServingsForDate", "ChangeServingsForDate", "POST", "cookservice/ChangeServingsForDate", "Change number of servings for a week. Admin func.")
-
+	register("UpdateMailCustomerFields", "UpdateMailCustomerFields", "POST", "cookservice/UpdateMailCustomerFields", "Updates the custom filds in Drip. Admin func.")
 	register("UpdatePaymentMethodToken", "UpdatePaymentMethodToken", "POST", "cookservice/UpdatePaymentMethodToken", "Updates the payment method token. Admin func.")
 	register("ChangeServingsPermanently", "ChangeServingsPermanently", "POST", "cookservice/ChangeServingsPermanently", "Change number of servings permanently. Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Get all subscription activty. Admin func.")
 	register("GetSubLogsForDate", "getSubLogsForDate", "POST", "cookservice/getSubLogsForDate", "Get subscription activty for a date. Admin func.")
 	register("AddToProcessSubscriptionQueue", "addToProcessSubscriptionQueue", "POST", "cookservice/addToProcessSubscriptionQueue", "Admin func.")
-	register("SendWelcomeEmail", "SendWelcomeEmail", "POST", "cookservice/SendWelcomeEmail", "Admin func. Sends welcome email.")
-	register("SendIntroEmail", "SendIntroEmail", "POST", "cookservice/SendIntroEmail", "Admin func. Sends email for people who just left email.")
+	// register("SendWelcomeEmail", "SendWelcomeEmail", "POST", "cookservice/SendWelcomeEmail", "Admin func. Sends welcome email.")
+	// register("SendIntroEmail", "SendIntroEmail", "POST", "cookservice/SendIntroEmail", "Admin func. Sends email for people who just left email.")
 	endpoints.HandleHTTP()
 	appengine.Main()
 }
@@ -235,62 +246,62 @@ func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	err := req.ParseForm()
-	if err != nil {
-		utils.Criticalf(ctx, "Error parsing %s request form: %v", "OnMessageSent", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	eventType := req.FormValue("EventType")
-	if eventType != "onMessageSent" {
-		utils.Warningf(ctx, "invalid event type for handleOnMessageSent: eventType: %+v", eventType)
-	}
-	channelSid := req.FormValue("ChannelSid")
-	body := req.FormValue("Body")
-	from := req.FormValue("From")
-	if body == "" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-	messageC := message.New(ctx)
-	resp, err := messageC.GetChannelInfo(channelSid)
-	if err != nil {
-		utils.Criticalf(ctx, "errors while to message.GetChannelInfo onMessageSent. err: %+v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	userInfo, err := messageC.GetUserInfo(from)
-	if err != nil {
-		utils.Criticalf(ctx, "errors while to message.GetUserInfo onMessageSent. err: %+v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	shouldNotifyCook := resp.CookID != userInfo.ID // isn't cook
-	gigamessage := ""
-	if shouldNotifyCook {
-		gigamessage = fmt.Sprintf("From: %s\nTo: %s\n Message:%s", userInfo.Name, resp.EaterName, body)
-	} else {
-		gigamessage = fmt.Sprintf("From: %s\nTo: %s\n Message:%s", userInfo.Name, resp.CookName, body)
-	}
-	err = messageC.SendSMS("6153975516", gigamessage)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to notify enis about message on app. err: %s", err)
-	}
-	if shouldNotifyCook {
-		cookC := cook.New(ctx)
-		encodedChannelName := resp.CookID + "%3C%3B%3E" + resp.EaterID
-		msg := fmt.Sprintf("%s just sent you a message on Gigamunch:\n\"%s\"\n\n%s/cook/channel/%s", userInfo.Name, body, domainURL, encodedChannelName)
-		err = cookC.Notify(resp.CookID, "You just got a message", msg)
-		if err != nil {
-			utils.Criticalf(ctx, "failed to cook.Notify cookID(%s) in onMessageSent. err: %+v", resp.CookID, err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}
+// func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	err := req.ParseForm()
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Error parsing %s request form: %v", "OnMessageSent", err)
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	eventType := req.FormValue("EventType")
+// 	if eventType != "onMessageSent" {
+// 		utils.Warningf(ctx, "invalid event type for handleOnMessageSent: eventType: %+v", eventType)
+// 	}
+// 	channelSid := req.FormValue("ChannelSid")
+// 	body := req.FormValue("Body")
+// 	from := req.FormValue("From")
+// 	if body == "" {
+// 		w.WriteHeader(http.StatusOK)
+// 		return
+// 	}
+// 	messageC := message.New(ctx)
+// 	resp, err := messageC.GetChannelInfo(channelSid)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "errors while to message.GetChannelInfo onMessageSent. err: %+v", err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
+// 	userInfo, err := messageC.GetUserInfo(from)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "errors while to message.GetUserInfo onMessageSent. err: %+v", err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
+// 	shouldNotifyCook := resp.CookID != userInfo.ID // isn't cook
+// 	gigamessage := ""
+// 	if shouldNotifyCook {
+// 		gigamessage = fmt.Sprintf("From: %s\nTo: %s\n Message:%s", userInfo.Name, resp.EaterName, body)
+// 	} else {
+// 		gigamessage = fmt.Sprintf("From: %s\nTo: %s\n Message:%s", userInfo.Name, resp.CookName, body)
+// 	}
+// 	err = messageC.SendSMS("6153975516", gigamessage)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "failed to notify enis about message on app. err: %s", err)
+// 	}
+// 	if shouldNotifyCook {
+// 		cookC := cook.New(ctx)
+// 		encodedChannelName := resp.CookID + "%3C%3B%3E" + resp.EaterID
+// 		msg := fmt.Sprintf("%s just sent you a message on Gigamunch:\n\"%s\"\n\n%s/cook/channel/%s", userInfo.Name, body, domainURL, encodedChannelName)
+// 		err = cookC.Notify(resp.CookID, "You just got a message", msg)
+// 		if err != nil {
+// 			utils.Criticalf(ctx, "failed to cook.Notify cookID(%s) in onMessageSent. err: %+v", resp.CookID, err)
+// 			w.WriteHeader(http.StatusInternalServerError)
+// 			return
+// 		}
+// 	}
+// 	w.WriteHeader(http.StatusOK)
+// }
 
 func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
@@ -302,7 +313,7 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
 	subC := sub.New(ctx)
 	err = subC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). \n\nErr:%+v", parms.Date.Format("2006-01-02"), parms.SubEmail, err)
 		// TODO schedule for later?
 		return
 	}
@@ -316,6 +327,65 @@ func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in6days, err)
 		return
+	}
+}
+
+func handleSendPreviewCultureEmail(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	cultureDate := time.Now().Add(6 * 24 * time.Hour)
+	utils.Infof(ctx, "culture date:%s", cultureDate)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(projectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com")
+		}
+		tag := mail.GetPreviewEmailTag(cultureDate)
+		mailC := mail.New(ctx)
+		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to mail.AddBatchTag: %s", err)
+		}
+	}
+}
+
+func handleSendCultureEmail(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	cultureDate := time.Now()
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(projectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com")
+		}
+		tag := mail.GetCultureEmailTag(cultureDate)
+		mailC := mail.New(ctx)
+		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			utils.Criticalf(ctx, "failed to handleSendCultureEmail: failed to mail.AddBatchTag: %s", err)
+		}
 	}
 }
 
@@ -343,7 +413,7 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 		messageC := message.New(ctx)
 		for _, sub := range subs {
 			if sub.PhoneNumber != "" && sub.BagReminderSMS {
-				err := messageC.SendSMS(sub.PhoneNumber, fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName()))
+				err := messageC.SendBagSMS(sub.PhoneNumber, fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName()))
 				if err != nil {
 					utils.Criticalf(ctx, "error in SendBagReminder: failed to message.SendSMS to %s: %s", sub.PhoneNumber, err)
 					continue
@@ -355,38 +425,96 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func testbra(w http.ResponseWriter, req *http.Request) {
+func handleTwilioSMS(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
-	fence := &geofence.Geofence{
-		ID:   "Nashville",
-		Type: geofence.ServiceZone,
-		Points: []geofence.Point{
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.31291, Longitude: -86.57433}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.33974, Longitude: -86.59391}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.32126, Longitude: -86.68052}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34057, Longitude: -86.6835}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34332, Longitude: -86.73258}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.30849, Longitude: -86.75697}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.26393, Longitude: -86.75148}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.22156, Longitude: -86.87645}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.13838, Longitude: -86.89426}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.05874, Longitude: -87.05354}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.98871, Longitude: -86.97543}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.98477, Longitude: -86.81081}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.01971, Longitude: -86.6764}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.0613, Longitude: -86.56121}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.08328, Longitude: -86.56189}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.13833, Longitude: -86.60445}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.24794, Longitude: -86.58857}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.25106, Longitude: -86.58222}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.27722, Longitude: -86.56128}},
-		},
-	}
-	key := datastore.NewKey(ctx, "Geofence", "Nashville", 0, nil)
-	_, err := datastore.Put(ctx, key, fence)
+	err := req.ParseForm()
+	utils.Infof(ctx, "req body: %s err: %s", req.Form, err)
+	from := req.FormValue("From")
+	body := req.FormValue("Body")
+	var name, email string
+	// TODO: auto get name and email
+	messageC := message.New(ctx)
+	err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
 	if err != nil {
-		w.Write([]byte(fmt.Sprintln("fail: ", err)))
+		utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+	}
+}
+
+func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	params, err := tasks.ParseUpdateDripRequest(req)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to tasks.ParseUpdateDripRequest: %+v", err)
 		return
 	}
-	w.Write([]byte("success"))
+	logging.Infof(ctx, "Params: %+v", params)
+	subC := sub.New(ctx)
+	activites, err := subC.GetSubscriberActivities(params.Email)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var numNonSkips int
+	for _, activity := range activites {
+		if !activity.Skip {
+			numNonSkips++
+		}
+	}
+	if numNonSkips >= 1 && numNonSkips <= 3 {
+		tag := mail.GetReceivedJourneyTag(numNonSkips)
+		utils.Infof(ctx, "Applying Tag(%s) to Email(%s)", tag, params.Email)
+		mailC := mail.New(ctx)
+		err := mailC.AddTag(params.Email, tag)
+		if err != nil {
+			logging.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.AddTag: %+v", err)
+			w.WriteHeader(500)
+			return
+		}
+	}
+}
+
+func testbra(w http.ResponseWriter, req *http.Request) {
+	// ctx := appengine.NewContext(req)
+	// fence := &geofence.Geofence{
+	// 	ID:   "Nashville",
+	// 	Type: geofence.ServiceZone,
+	// 	Name: "Nashville",
+	// 	Points: []geofence.Point{
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.31623169903713, Longitude: -86.56951904296875}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34057185894721, Longitude: -86.68075561523438}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.33946565299958, Longitude: -86.73431396484375}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2675285739382, Longitude: -86.75491333007812}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.22544232423855, Longitude: -86.87713623046875}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.140092827322654, Longitude: -86.89773559570312}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.060201412392914, Longitude: -87.05703735351562}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.94243575255426, Longitude: -87.00210571289062}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.870134015336994, Longitude: -87.03506469726562}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.830061559034036, Longitude: -87.04605102539062}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.828948146199636, Longitude: -86.94580078125}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.81669957403484, Longitude: -86.84829711914062}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.821153818963175, Longitude: -86.77001953125}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.84898718690659, Longitude: -86.67938232421875}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.943547570924665, Longitude: -86.649169921875}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.019114512959, Longitude: -86.627197265625}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.049098959065645, Longitude: -86.60247802734375}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.06575205170711, Longitude: -86.55990600585938}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.134547437460064, Longitude: -86.59423828125}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.245380741380465, Longitude: -86.58737182617188}},
+	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.29741818650811, Longitude: -86.55441284179688}},
+	// 	},
+	// }
+	// key := datastore.NewKey(ctx, "Geofence", "Nashville", 0, nil)
+	// _, err := datastore.Put(ctx, key, fence)
+	// if err != nil {
+	// 	w.Write([]byte(fmt.Sprintln("fail: ", err)))
+	// 	return
+	// }
+	// key = datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
+	// _, err = datastore.Put(ctx, key, fence)
+	// if err != nil {
+	// 	w.Write([]byte(fmt.Sprintln("fail: ", err)))
+	// 	return
+	// }
+	// w.Write([]byte("success"))
+	w.Write([]byte(projectID))
 }

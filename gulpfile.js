@@ -39,6 +39,7 @@ function buildProto(file, path, callback) {
         "string": "string",
         "bytes": "string",
         "Error.Error": "Error",
+        "Log.Log": "Log",
       };
       if (types[p]) {
         return types[p];

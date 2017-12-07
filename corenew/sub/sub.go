@@ -26,7 +26,8 @@ const (
 	dateFormat                               = "2006-01-02"          // "Jan 2, 2006"
 	insertSubLogStatement                    = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
 	selectSubLogEmails                       = "SELECT DISTINCT sub_email from sub where date>? and date<?"
-	selectSubLogStatement                    = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent FROM `sub` WHERE date='%s' AND sub_email='%s'"
+	selectSubLogStatement                    = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date='%s' AND sub_email='%s'"
+	selectSubscriberSubLogsStatement         = "SELECT date,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent, refunded FROM `sub` WHERE sub_email='%s'"
 	selectAllSubLogStatement                 = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` ORDER BY date DESC LIMIT %d"
 	selectSubLogFromDateStatement            = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
 	updatePaidSubLogStatement                = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
@@ -201,7 +202,7 @@ func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) 
 	}
 	var createdNulltime mysql.NullTime
 	var paidNulltime mysql.NullTime
-	err = rows.Scan(&createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.DeliveryTime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent)
+	err = rows.Scan(&createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.DeliveryTime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 	}
@@ -212,6 +213,42 @@ func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) 
 		subLog.PaidDatetime = paidNulltime.Time
 	}
 	return subLog, nil
+}
+
+// GetSubscriberActivities gets a subscriber.
+func (c *Client) GetSubscriberActivities(email string) ([]*SubscriptionLog, error) {
+	if email == "" {
+		return nil, errInvalidParameter.Wrapf("expected(actual): subEmail(%s) ", email)
+	}
+	st := fmt.Sprintf(selectSubscriberSubLogsStatement, email)
+	rows, err := mysqlDB.Query(st)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSubscriberSubLogsStatement statement.")
+	}
+	defer handleCloser(c.ctx, rows)
+	var subLogs []*SubscriptionLog
+	for rows.Next() {
+		subLog := new(SubscriptionLog)
+		subLog.SubEmail = email
+		var date mysql.NullTime
+		var createdNulltime mysql.NullTime
+		var paidNulltime mysql.NullTime
+		err = rows.Scan(&date, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.DeliveryTime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
+		}
+		if date.Valid {
+			subLog.Date = date.Time
+		}
+		if createdNulltime.Valid {
+			subLog.CreatedDatetime = createdNulltime.Time
+		}
+		if paidNulltime.Valid {
+			subLog.PaidDatetime = paidNulltime.Time
+		}
+		subLogs = append(subLogs, subLog)
+	}
+	return subLogs, nil
 }
 
 // Setup sets up a SubLog.
@@ -584,11 +621,16 @@ func (c *Client) Process(date time.Time, subEmail string) error {
 	utils.Infof(c.ctx, "Processing Sub: date(%v) subEmail(%s)", date, subEmail)
 	subLog, err := c.Get(date, subEmail)
 	if err != nil {
+		errCode := errors.GetErrorWithCode(err)
+		if errCode.Code == errNoSuchEntry.Code {
+			utils.Infof(c.ctx, "failed to sub.Get because user canceled: %+v", err)
+			return nil
+		}
 		return errors.Wrap("failed to sub.Get", err)
 	}
-	if subLog.Free || subLog.Skip || subLog.Paid {
-		// done
-		utils.Infof(c.ctx, "Subscription is already finished. Free(%v) Skip(%v) Paid(%v)", subLog.Free, subLog.Skip, subLog.Paid)
+	// done if Skipped
+	if subLog.Skip {
+		utils.Infof(c.ctx, "Subscription is already finished. Skip(%v)", subLog.Skip)
 		return nil
 	}
 	dayBeforeBox := subLog.Date.Add(-24 * time.Hour)
@@ -605,6 +647,19 @@ func (c *Client) Process(date time.Time, subEmail string) error {
 			return errors.Wrap("failed to tasks.AddProcessSubscription", err)
 		}
 		utils.Infof(c.ctx, "Too early to process Sub. now(%v) < dayBeforeBox(%v)", time.Now(), dayBeforeBox)
+		return nil
+	}
+	taskC := tasks.New(c.ctx)
+	r := &tasks.UpdateDripParams{
+		Email: subLog.SubEmail,
+	}
+	err = taskC.AddUpdateDrip(dayBeforeBox, r)
+	if err != nil {
+		utils.Criticalf(c.ctx, "failed to tasks.AddUpdateDrip: %+v", err)
+	}
+	// done if Free, Paid
+	if subLog.Free || subLog.Paid {
+		utils.Infof(c.ctx, "Subscription is already finished. Free(%v) Paid(%v)", subLog.Free, subLog.Paid)
 		return nil
 	}
 	// charge customer

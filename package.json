@@ -1,5 +1,5 @@
 {
-  "name": "gigamunch-backend",
+  "name": "gigamunch",
   "repository": "https://github.com/atishpatel/Gigamunch-Backend.git",
   "author": "Atish Patel <atishpatel2012@gmail.com>",
   "license": "No licence",
@@ -25,6 +25,6 @@
     "html-minifier": "^3.5.5",
     "ts-protoc-gen": "^0.4.0",
     "tslint-config-airbnb": "^5.2.1",
-    "typescript": "^2.4.1"
+    "typescript": "^2.6.2"
   }
 }

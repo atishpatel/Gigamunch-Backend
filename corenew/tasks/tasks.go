@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	// NotifyEaterQueue    = "notify-eater"
-	// NotifyEaterURL      = "/notify-eater"
+	UpdateDripQueue          = "update-drip"
+	UpdateDripURL            = "/task/update-drip"
 	ProcessInquiryQueue      = "process-inquiry"
 	ProcessInquiryURL        = "/process-inquiry"
 	ProcessSubscriptionQueue = "process-subscription"
@@ -72,6 +72,49 @@ func (c *Client) AddProcessSubscription(at time.Time, req *ProcessSubscriptionPa
 		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
 	}
 	return nil
+}
+
+// UpdateDripParams are the parms for UpdateDrip.
+type UpdateDripParams struct {
+	Email string
+}
+
+// AddUpdateDrip adds a process subscription at specified time.
+func (c *Client) AddUpdateDrip(at time.Time, req *UpdateDripParams) error {
+	var err error
+	if req.Email == "" {
+		return errInvalidParameter.Wrapf("expected(recieved): email(%s) date(%s)", req.Email)
+	}
+	h := make(http.Header)
+	h.Set("Content-Type", "application/x-www-form-urlencoded")
+	v := url.Values{}
+	v.Set("email", req.Email)
+	task := &taskqueue.Task{
+		Path:    UpdateDripURL,
+		Payload: []byte(v.Encode()),
+		Header:  h,
+		Method:  "POST",
+		ETA:     at,
+	}
+	_, err = taskqueue.Add(c.ctx, task, UpdateDripQueue)
+	if err != nil {
+		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
+	}
+	return nil
+}
+
+// ParseUpdateDripRequest parses an UpdateDripRequest from a task request.
+func ParseUpdateDripRequest(req *http.Request) (*UpdateDripParams, error) {
+	err := req.ParseForm()
+	if err != nil {
+		return nil, errParse.WithError(err).Wrap("failed to parse from from request")
+	}
+	parms := new(UpdateDripParams)
+	parms.Email = req.FormValue("email")
+	if parms.Email == "" {
+		return nil, errParse.Wrapf("Invalid request for UpdateDrip. SubEmail: %s", parms.Email)
+	}
+	return parms, nil
 }
 
 // ParseProcessSubscriptionRequest parses an ProcessSubscriptionRequest from a task request.

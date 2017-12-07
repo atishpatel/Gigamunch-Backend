@@ -11,7 +11,9 @@ import (
 
 	sdlogging "cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"google.golang.org/api/option"
 	aelog "google.golang.org/appengine/log"
+	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -97,10 +99,11 @@ const (
 )
 
 var (
-	projID   string
-	loggerID string
-	sdClient *sdlogging.Client
-	db       common.DB
+	standAppEngine bool
+	projID         string
+	loggerID       string
+	sdClient       *sdlogging.Client
+	db             common.DB
 )
 
 var (
@@ -141,6 +144,10 @@ func NewClient(ctx context.Context, path string) (*Client, error) {
 	if db == nil {
 		return nil, errInternal.Annotate("setup not called")
 	}
+	if standAppEngine {
+		httpClient := urlfetch.Client(ctx)
+		setup(ctx, httpClient)
+	}
 	var sdLogger *sdlogging.Logger
 	if sdClient != nil {
 		sdLogger = sdClient.Logger(loggerID)
@@ -170,6 +177,19 @@ func (c *Client) GetLogs(start, limit int) ([]*Entry, error) {
 	return dst, nil
 }
 
+// GetUserLogs gets logs with UserID.
+func (c *Client) GetUserLogs(userID int64, start, limit int) ([]*Entry, error) {
+	var dst []*Entry
+	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, dst)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to db.QueryFilterOrdered")
+	}
+	for i := range dst {
+		dst[i].ID = keys[i].IntID()
+	}
+	return dst, nil
+}
+
 // GetLog gets a log.
 func (c *Client) GetLog(id int64) (*Entry, error) {
 	var entry *Entry
@@ -182,58 +202,59 @@ func (c *Client) GetLog(id int64) (*Entry, error) {
 	return entry, nil
 }
 
-// SaleEntry is a sales entry.
-type SaleEntry struct {
+// SalePayload is a sales payload.
+type SalePayload struct {
 	Amount float32 `json:"amount"`
 }
 
 // LogPaid is when a transaction is paid.
-func (c *Client) LogPaid(e *SaleEntry) {
+func (c *Client) LogPaid(e *SalePayload) {
 
 }
 
 // LogRefund is when a transaction is refunded.
-func (c *Client) LogRefund(e *SaleEntry) {
+func (c *Client) LogRefund(e *SalePayload) {
 
 }
 
 // LogDeclined is when a transaction is declined.
-func (c *Client) LogDeclined(e *SaleEntry) {
+func (c *Client) LogDeclined(e *SalePayload) {
 
 }
 
 // LogForgiven is when a transaction is forgiven.
-func (c *Client) LogForgiven(e *SaleEntry) {
+func (c *Client) LogForgiven(e *SalePayload) {
 
 }
 
-// SubEntry is a subscriber entry.
-type SubEntry struct {
-	ID string `json:"id"`
+// SubPayload is a subscriber entry.
+type SubPayload struct {
+	ID        string `json:"id,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
 }
 
-func (c *Client) LogSubActivate(e *SubEntry) {
-
-}
-
-func (c *Client) LogSubDeactivate(e *SubEntry) {
+func (c *Client) LogSubActivate(e *SubPayload) {
 
 }
 
-func (c *Client) LogSubCancel(e *SubEntry) {
+func (c *Client) LogSubDeactivate(e *SubPayload) {
 
 }
 
-func (c *Client) LogSubSignup(e *SubEntry) {
+func (c *Client) LogSubCancel(e *SubPayload) {
 
 }
 
-func (c *Client) LogSubUpdate(e *SubEntry) {
+func (c *Client) LogSubSignup(e *SubPayload) {
 
 }
 
-// ActivityEntry is a Activity entry.
-type ActivityEntry struct {
+func (c *Client) LogSubUpdate(e *SubPayload) {
+
+}
+
+// ActivityPayload is a Activity entry.
+type ActivityPayload struct {
 	ActionUserID   string    `json:"action_user_id"`
 	ActionUserName string    `json:"action_user_name"`
 	Date           time.Time `json:"date"`
@@ -242,40 +263,40 @@ type ActivityEntry struct {
 }
 
 // LogSkip logs a skip.
-func (c *Client) LogSkip(e *ActivityEntry) {
+func (c *Client) LogSkip(e *ActivityPayload) {
 
 }
 
 // LogUnskip logs a unskip.
-func (c *Client) LogUnskip(e *ActivityEntry) {
+func (c *Client) LogUnskip(e *ActivityPayload) {
 
 }
 
 // LogServingsChanged logs a servings change.
-func (c *Client) LogServingsChanged(e *ActivityEntry) {
+func (c *Client) LogServingsChanged(e *ActivityPayload) {
 
 }
 
-// SystemEntry is a System entry.
-type SystemEntry struct {
+// SystemPayload is a System payload.
+type SystemPayload struct {
 	ID        string    `json:"id"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
 // LogActivitySetup is a log of when the cron job for activity setup runs.
-func (c *Client) LogActivitySetup(e *SystemEntry) {
+func (c *Client) LogActivitySetup(e *SystemPayload) {
 
 }
 
-// ErrorEntry is an error entry assocted with LogRequestError.
-type ErrorEntry struct {
+// ErrorPayload is an error entry assocted with LogRequestError.
+type ErrorPayload struct {
 	Request http.Request
 	errors.ErrorWithCode
 }
 
 // LogRequestError is used to log an error at the end of a request.
 func (c *Client) LogRequestError(r *http.Request, ewc errors.ErrorWithCode) {
-	errEntry := &ErrorEntry{
+	errPayload := &ErrorPayload{
 		Request:       *r,
 		ErrorWithCode: ewc,
 	}
@@ -284,7 +305,7 @@ func (c *Client) LogRequestError(r *http.Request, ewc errors.ErrorWithCode) {
 		Severity: Error,
 		Path:     r.URL.Path,
 	}
-	err := e.setPayload(errEntry)
+	err := e.setPayload(errPayload)
 	if err != nil {
 		Errorf(c.ctx, "failed to setPayload: %+v", err)
 	}
@@ -295,6 +316,7 @@ func (c *Client) LogRequestError(r *http.Request, ewc errors.ErrorWithCode) {
 type Entry struct {
 	ID        int64              `json:"id" datastore:",noindex"`
 	Type      Type               `json:"type" datastore:",index"`
+	UserID    int64              `json:"user_id" datastore:",index"`
 	Severity  sdlogging.Severity `json:"serverity" datastore:",noindex"`
 	Path      string             `json:"path" datastore:",noindex"`
 	Labels    []Label            `json:"labels" datastore:",noindex"`
@@ -335,21 +357,29 @@ func (c *Client) Log(e *Entry) {
 }
 
 // Setup sets up the logging package.
-func Setup(ctx context.Context, projectID, logID string, httpClient *http.Client, dbC common.DB) error {
+func Setup(ctx context.Context, standardAppEngine bool, projectID, logID string, httpClient *http.Client, dbC common.DB) error {
 	projID = projectID
 	loggerID = logID
+	standAppEngine = standardAppEngine
 	if dbC == nil {
 		return fmt.Errorf("db cannot be nil for logging")
 	}
 	db = dbC
-	// var ops option.ClientOption
-	// if httpClient != nil {
-	// 	ops = option.WithHTTPClient(httpClient)
-	// }
-	// var err error
-	// sdClient, err = sdlogging.NewClient(ctx, projectID, ops)
-	// if err != nil {
-	// 	return err
-	// }
+	if !standAppEngine {
+		setup(ctx, httpClient)
+	}
+	return nil
+}
+
+func setup(ctx context.Context, httpClient *http.Client) error {
+	var ops option.ClientOption
+	if httpClient != nil {
+		ops = option.WithHTTPClient(httpClient)
+	}
+	var err error
+	sdClient, err = sdlogging.NewClient(ctx, projID, ops)
+	if err != nil {
+		return err
+	}
 	return nil
 }

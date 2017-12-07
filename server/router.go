@@ -54,8 +54,8 @@ func init() {
 
 	r.GET(signOutURL, handleSignout)
 
-	r.GET("/scheduleform/:email", handleScheduleForm)
-	r.GET("/scheduleform", handleScheduleForm)
+	// r.GET("/scheduleform/:email", handleScheduleForm)
+	// r.GET("/scheduleform", handleScheduleForm)
 
 	r.POST("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
@@ -79,11 +79,6 @@ func init() {
 func getProjID() string {
 	projID = os.Getenv("PROJECTID")
 	return projID
-}
-
-func handle404(w http.ResponseWriter, req *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	_, _ = w.Write([]byte("GIGA 404 page. :()"))
 }
 
 func handleSignout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {

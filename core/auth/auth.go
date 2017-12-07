@@ -45,7 +45,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 	var err error
 	if standAppEngine {
 		httpClient := urlfetch.Client(ctx)
-		err = setupFBApp(ctx, httpClient)
+		err = setupFBApp(ctx, httpClient, projID)
 		if err != nil {
 			return nil, err
 		}
@@ -141,7 +141,7 @@ func (c *Client) GetFromFBToken(ctx context.Context, fbToken string) (*common.Us
 	name := claims["name"].(string)
 	email, ok := claims["email"].(string)
 	if !ok {
-
+		return nil, "", errInvalidFBToken.WithMessage("User must have email.").Annotate("firebase token does not have email")
 	}
 	provider, ok := claims["sign_in_provider"].(string)
 	firebase, ok := claims["firebase"].(string)
@@ -216,15 +216,15 @@ func getIATTime() time.Time {
 }
 
 func splitName(name string) (string, string) {
-	first := "-"
-	last := "-"
-	nameStripper := strings.NewReplacer(".", "", "Mr ", "", "Ms ", "", "the", "", "Dr ", "")
-	nameArray := strings.Split(strings.Title(strings.TrimSpace(nameStripper.Replace(name))), " ")
-	if len(nameArray) >= 2 {
-		last = nameArray[len(nameArray)-1]
-	}
-	if len(nameArray) >= 1 {
-		first = nameArray[0]
+	first := ""
+	last := ""
+	name = strings.Title(strings.TrimSpace(name))
+	lastSpace := strings.LastIndex(name, " ")
+	if lastSpace == -1 {
+		first = name
+	} else {
+		first = name[:lastSpace]
+		last = name[lastSpace:]
 	}
 	return first, last
 }
@@ -236,7 +236,7 @@ func Setup(ctx context.Context, standardAppEngine bool, projectID string, httpCl
 	standAppEngine = standardAppEngine
 	projID = projectID
 	if !standAppEngine {
-		err = setupFBApp(ctx, httpClient)
+		err = setupFBApp(ctx, httpClient, projectID)
 		if err != nil {
 			return err
 		}
@@ -252,7 +252,7 @@ func Setup(ctx context.Context, standardAppEngine bool, projectID string, httpCl
 	return nil
 }
 
-func setupFBApp(ctx context.Context, httpClient *http.Client) error {
+func setupFBApp(ctx context.Context, httpClient *http.Client, projectID string) error {
 	var ops []option.ClientOption
 	if httpClient != nil {
 		ops = append(ops, option.WithHTTPClient(httpClient))
@@ -261,7 +261,7 @@ func setupFBApp(ctx context.Context, httpClient *http.Client) error {
 		ops = append(ops, option.WithCredentialsFile("../private/gitkit_cert.json"))
 	}
 	var err error
-	fbApp, err := fb.NewApp(ctx, &fb.Config{ProjectID: projID}, ops...)
+	fbApp, err := fb.NewApp(ctx, &fb.Config{ProjectID: projectID}, ops...)
 	if err != nil {
 		return err
 	}
