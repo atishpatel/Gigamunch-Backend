@@ -28,7 +28,7 @@ func (c *Client) GetSubMerchant(subMerchantID string) (*SubMerchantInfo, error) 
 	if len(subMerchantID) != 32 {
 		return nil, errInvalidParameter.WithMessage("ID must be length 32.")
 	}
-	ma, err := c.bt.MerchantAccount().Find(subMerchantID)
+	ma, err := c.bt.MerchantAccount().Find(c.ctx, subMerchantID)
 	if err != nil {
 		return nil, errBT.WithError(err).Wrapf("cannot bt.MerchantAccount().Find sub-merchant(%s)", subMerchantID)
 	}
@@ -151,9 +151,9 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, cookC cookI
 			RoutingNumber: req.RoutingNumber,
 		},
 	}
-	_, err := bt.MerchantAccount().Find(req.ID)
+	_, err := bt.MerchantAccount().Find(ctx, req.ID)
 	if err == nil {
-		ma, err = bt.MerchantAccount().Update(ma)
+		ma, err = bt.MerchantAccount().Update(ctx, ma)
 		if err != nil {
 			if strings.Contains(err.Error(), "number is invalid") {
 				return errInvalidParameter.WithMessage(err.Error())
@@ -161,7 +161,7 @@ func updateSubMerchant(ctx context.Context, bt *braintree.Braintree, cookC cookI
 			return errBT.WithError(err).Wrapf("cannot bt.MerchantAccount().Update sub-merchant(%s)", req.ID)
 		}
 	} else {
-		ma, err = bt.MerchantAccount().Create(ma)
+		ma, err = bt.MerchantAccount().Create(ctx, ma)
 		if err != nil {
 			if strings.Contains(err.Error(), "number is invalid") {
 				return errInvalidParameter.WithMessage(err.Error())

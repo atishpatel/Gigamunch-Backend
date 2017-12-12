@@ -56,20 +56,20 @@ func (c *Client) GenerateToken(customerID string) (string, error) {
 	}
 	// check if customer exist
 	customerGateway := c.bt.Customer()
-	_, err := customerGateway.Find(customerID)
+	_, err := customerGateway.Find(c.ctx, customerID)
 	if err != nil {
 		// create customer
-		c := &braintree.Customer{
+		cust := &braintree.Customer{
 			Id: customerID,
 		}
-		_, err = customerGateway.Create(c)
+		_, err = customerGateway.Create(c.ctx, cust)
 		if err != nil {
 			return "", errBT.WithError(err).Wrap("cannot create a customer")
 		}
 	}
 	// generate token
 	clientToken := c.bt.Transaction().ClientToken()
-	token, err := clientToken.GenerateWithCustomer(customerID)
+	token, err := clientToken.GenerateWithCustomer(c.ctx, customerID)
 	if err != nil {
 		return "", errBT.WithError(err).WithMessage("cannot generate token")
 	}
@@ -78,7 +78,7 @@ func (c *Client) GenerateToken(customerID string) (string, error) {
 
 // ReleaseSale release a sale with the SaleID
 func (c *Client) ReleaseSale(id string) error {
-	t, err := c.bt.Transaction().ReleaseFromEscrow(id)
+	t, err := c.bt.Transaction().ReleaseFromEscrow(c.ctx, id)
 	if err != nil {
 		return errBT.WithError(err).Wrapf("cannot release transaction(%d) from escrow", id)
 	}
@@ -90,7 +90,7 @@ func (c *Client) ReleaseSale(id string) error {
 
 // CancelRelease cancels release a sale with the SaleID
 func (c *Client) CancelRelease(id string) (string, error) {
-	t, err := c.bt.Transaction().CancelRelease(id)
+	t, err := c.bt.Transaction().CancelRelease(c.ctx, id)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot cancel release transaction(%d) from escrow", id)
 	}
@@ -101,7 +101,7 @@ func (c *Client) CancelRelease(id string) (string, error) {
 }
 
 func (c *Client) getTransactionStatus(id string) (string, error) {
-	t, err := c.bt.Transaction().Find(id)
+	t, err := c.bt.Transaction().Find(c.ctx, id)
 	if err != nil {
 		return "", errBT.WithError(err)
 	}
@@ -116,9 +116,9 @@ func (c *Client) RefundSale(id string) (string, error) {
 	}
 	var t *braintree.Transaction
 	if status == "authorized" || status == "submitted_for_settlement" {
-		t, err = c.bt.Transaction().Void(id)
+		t, err = c.bt.Transaction().Void(c.ctx, id)
 	} else {
-		t, err = c.bt.Transaction().Refund(id)
+		t, err = c.bt.Transaction().Refund(c.ctx, id)
 	}
 	if err != nil {
 		return "", errBT.WithError(err)
@@ -128,7 +128,7 @@ func (c *Client) RefundSale(id string) (string, error) {
 
 // SubmitForSettlement submits a Sale for settlement with the SaleID.
 func (c *Client) SubmitForSettlement(id string) error {
-	_, err := c.bt.Transaction().SubmitForSettlement(id)
+	_, err := c.bt.Transaction().SubmitForSettlement(c.ctx, id)
 	if err != nil {
 		return errBT.WithError(err)
 	}
@@ -179,7 +179,7 @@ func (c *Client) Sale(req *SaleReq) (string, error) {
 			SubmitForSettlement: true,
 		},
 	}
-	t, err := c.bt.Transaction().Create(tReq)
+	t, err := c.bt.Transaction().Create(c.ctx, tReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
@@ -205,14 +205,14 @@ func (c *Client) CreateCustomer(req *CreateCustomerReq) (string, error) {
 		LastName:  req.LastName,
 		Email:     req.Email,
 	}
-	cst, err := c.bt.Customer().Find(req.CustomerID)
+	cst, err := c.bt.Customer().Find(c.ctx, req.CustomerID)
 	if err != nil {
-		cst, err = c.bt.Customer().Create(cstNew)
+		cst, err = c.bt.Customer().Create(c.ctx, cstNew)
 		if err != nil {
 			return "", errBT.WithError(err).Wrap("failed to bt.Customer.Create")
 		}
 	} else {
-		cst, err = c.bt.Customer().Update(cstNew)
+		cst, err = c.bt.Customer().Update(c.ctx, cstNew)
 		if err != nil {
 			return "", errBT.WithError(err).Wrap("failed to bt.Customer.Update")
 		}
@@ -226,7 +226,7 @@ func (c *Client) CreateCustomer(req *CreateCustomerReq) (string, error) {
 			VerifyCard:  &tmp,
 		},
 	}
-	paymentMethod, err := c.bt.PaymentMethod().Create(paymentReq)
+	paymentMethod, err := c.bt.PaymentMethod().Create(c.ctx, paymentReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrap("failed to bt.PaymentMethod.Create")
 	}
