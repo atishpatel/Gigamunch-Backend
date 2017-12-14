@@ -11,33 +11,14 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
-# Cook app
-- url: /cook/bower_components
-  static_dir: cook_SERVEPATH_/bower_components
-  secure: always
-
-- url: /cook/service-worker.js
-  static_files: cook_SERVEPATH_/service-worker.js
-  upload: cook_SERVEPATH_/service-worker.js
-  secure: always
-
-- url: /cook/manifest.json
-  static_files: cook_SERVEPATH_/manifest.json
-  upload: cook_SERVEPATH_/manifest.json
-  secure: always
-
+# Cook
 - url: /cook/js
-  static_dir: cook_SERVEPATH_/js
-  secure: always
+  static_dir: cook/js
+  secure: always  
 
-- url: /cook/src
-  static_dir: cook_SERVEPATH_/src
-  secure: always
-
-- url: /cook.*
-  static_files: cook_SERVEPATH_/index.html
-  upload: cook_SERVEPATH_/index.html
-  secure: always
+- url: /cook/bower_components
+  static_dir: cook/bower_components
+  secure: always  
 
 # Admin
 - url: /admin/bower_components
