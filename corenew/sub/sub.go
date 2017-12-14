@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -679,7 +680,20 @@ func (c *Client) Process(date time.Time, subEmail string) error {
 		utils.Infof(c.ctx, "Charging Customer(%s) %f on card(%s)", subLog.CustomerID, amount, subLog.PaymentMethodToken)
 		tID, err = paymentC.Sale(saleReq)
 		if err != nil {
-			// TODO
+			if strings.Contains(err.Error(), "duplicate") {
+				// Dulicate transaction error because two customers have same card
+				r := &tasks.ProcessSubscriptionParams{
+					SubEmail: subLog.SubEmail,
+					Date:     subLog.Date,
+				}
+				taskC := tasks.New(c.ctx)
+				err = taskC.AddProcessSubscription(time.Now().Add(1*time.Hour), r)
+				if err != nil {
+					// TODO critical?
+					return errors.Wrap("failed to tasks.AddProcessSubscription", err)
+				}
+				return nil
+			}
 			return errors.Wrap("failed to payment.Sale", err)
 		}
 	}
