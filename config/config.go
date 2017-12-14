@@ -137,10 +137,10 @@ func GetConfig(ctx context.Context) Config {
 func GetMailConfig(ctx context.Context) MailConfig {
 	var mailConfig MailConfig
 	if appengine.IsDevAppServer() {
-		filedata := readFile("mail_config.json")
+		filedata := readFile("config.json")
 		err := json.Unmarshal(filedata, &mailConfig)
 		if err != nil {
-			log.Println("Failed to unmarshal mail_config file.")
+			log.Println("Failed to unmarshal config file.")
 			log.Fatal(err)
 		}
 	} else {
@@ -156,10 +156,10 @@ func GetMailConfig(ctx context.Context) MailConfig {
 func GetTwilioConfig(ctx context.Context) TwilioConfig {
 	var twilioConfig TwilioConfig
 	if appengine.IsDevAppServer() {
-		filedata := readFile("twilio_config.json")
+		filedata := readFile("config.json")
 		err := json.Unmarshal(filedata, &twilioConfig)
 		if err != nil {
-			log.Println("Failed to unmarshal twilio_config file.")
+			log.Println("Failed to unmarshal config file.")
 			log.Fatal(err)
 		}
 	} else {
@@ -182,10 +182,10 @@ func GetTwilioConfig(ctx context.Context) TwilioConfig {
 func GetBTConfig(ctx context.Context) BTConfig {
 	var btConfig BTConfig
 	if appengine.IsDevAppServer() {
-		filedata := readFile("bt_config.json")
+		filedata := readFile("config.json")
 		err := json.Unmarshal(filedata, &btConfig)
 		if err != nil {
-			log.Println("Failed to unmarshal bt_config file.")
+			log.Println("Failed to unmarshal config file.")
 			log.Fatal(err)
 		}
 	} else {
