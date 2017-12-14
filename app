@@ -93,9 +93,9 @@ fi
 ################################################################################
 if [[ $1 == "serve" ]]; then
   # setup mysql
-  /usr/local/opt/mysql56/bin/mysql.server start
+  /usr/local/opt/mysql@5.6/bin/mysql.server start
   # create gigamunch database
-  cat misc/setup.sql | /usr/local/opt/mysql56/bin/mysql -uroot
+  cat misc/setup.sql | /usr/local/opt/mysql@5.6/bin/mysql -uroot
   # start goapp serve
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
@@ -120,7 +120,7 @@ if [[ $1 == "serve" ]]; then
     dev_appserver.py --datastore_path ./.datastore server/app.yaml
   fi
   # stop mysql
-  /usr/local/opt/mysql56/bin/mysql.server stop
+  /usr/local/opt/mysql@5.6/bin/mysql.server stop
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
   exit 0

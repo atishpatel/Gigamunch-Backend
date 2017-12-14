@@ -4,7 +4,7 @@
 The following programs need to be installed:
   - gcloud
   - golang 1.8
-  - mysql 5.6 (just use brew for OS X)
+  - `brew install mysql@5.6`
   - protoc 
     - https://github.com/google/protobuf/releases 
     - `go get -u github.com/golang/protobuf/protoc-gen-go`
