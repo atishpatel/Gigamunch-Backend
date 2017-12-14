@@ -368,7 +368,7 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 			i++
 		}
 	}
-	if len(subs) == 0 || len(tags) == 0 {
+	if i == 0 || len(tags) == 0 {
 		return nil
 	}
 	req := &drip.UpdateBatchSubscribersReq{

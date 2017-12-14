@@ -212,6 +212,42 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 	return nil
 }
 
+// AddBatchTags adds tags to emails. This often triggers a workflow.
+func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
+	// TODO:
+	tagsString := make([]string, len(tags))
+	for i, tag := range tags {
+		tagsString[i] = tag.String()
+	}
+	subs := make([]drip.UpdateSubscriber, len(emails))
+	i := 0
+	for _, email := range emails {
+		if !strings.Contains(email, ignoreDomain) {
+			subs[i].Email = email
+			subs[i].Tags = tagsString
+			i++
+		}
+	}
+	if i == 0 || len(tags) == 0 {
+		return nil
+	}
+	req := &drip.UpdateBatchSubscribersReq{
+		Batches: []drip.SubscribersBatch{
+			drip.SubscribersBatch{
+				Subscribers: subs[:i],
+			},
+		},
+	}
+	resp, err := c.dripC.UpdateBatchSubscribers(req)
+	if err != nil {
+		return errDrip.WithError(err).Annotate("failed to drip.UpdateBatchSubscribers")
+	}
+	if len(resp.Errors) > 0 {
+		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.UpdateBatchSubscribers")
+	}
+	return nil
+}
+
 // Setup sets up the logging package.
 func Setup(ctx context.Context, standardAppEngine bool, projectID, apiKey, accountID string) error {
 	standAppEngine = standardAppEngine
