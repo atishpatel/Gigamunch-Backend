@@ -152,7 +152,7 @@ func (c *Client) GigamunchToSubmerchant(subMerchantID string, amount float32) (s
 			SubmitForSettlement: true,
 		},
 	}
-	t, err := c.bt.Transaction().Create(tReq)
+	t, err := c.bt.Transaction().Create(c.ctx, tReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
@@ -243,7 +243,7 @@ func (c *Client) GetDefaultPaymentToken(req *GetDefaultPaymentTokenReq) (string,
 	if req == nil {
 		return "", errInvalidParameter.Wrap("GetDefaultPaymentTokenReq is nil.")
 	}
-	cst, err := c.bt.Customer().Find(req.CustomerID)
+	cst, err := c.bt.Customer().Find(c.ctx, req.CustomerID)
 	if err != nil {
 		return "", errBT.WithError(err).Wrap("failed to bt.Customer.Find")
 	}
@@ -319,7 +319,7 @@ func (c *Client) StartSale(subMerchantID, nonce string, amount, serviceFee float
 			HoldInEscrow:        true,
 		},
 	}
-	t, err := c.bt.Transaction().Create(tReq)
+	t, err := c.bt.Transaction().Create(c.ctx, tReq)
 	if err != nil {
 		return "", errBT.WithError(err).Wrapf("cannot create transaction(%#v)", t)
 	}
