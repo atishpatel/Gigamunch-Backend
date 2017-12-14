@@ -21,6 +21,13 @@
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/stnicholas.ttf') format('truetype');
     }
 
+    main,
+    .main-nav,
+    footer {
+      max-width: 1000px;
+      margin: auto;
+    }
+
     main>* {
       max-width: 1000px;
       margin: auto;
@@ -36,7 +43,16 @@
     }
 
     .header-image {
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/couple_dining_glasses.jpg');
+      background-size: cover;
       flex: 1;
+    }
+
+    @media (max-width: 800px) {
+      .header-image {
+        width: 100%;
+        padding-top: 90%; 
+    }
     }
 
     .header-image img {
@@ -59,7 +75,7 @@
     }
 
     .header-card-desc {
-      padding: 12px;
+      padding: 12px 2px;
     }
 
     .header-card-list li {
@@ -78,18 +94,74 @@
       background: #ff0515;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 800px) {
       .header {
         flex-direction: column;
       }
     }
 
     .banner {
+      font-family: 'StNicholas';
+      font-size: 50px;
       color: white;
       text-align: center;
       font-style: italic;
       padding: 40px 24px;
       background-color: #035610;
+    }
+
+    @media (max-width: 900px) {
+      .banner {
+        font-size: 34px;
+      }
+    }
+
+    /* As seen on */
+
+    .as-seen-on-section {
+      background-color: white;
+      text-align: center;
+      padding: 24px 12px;
+    }
+
+    .as-seen-on-title {
+      font-family: 'Roboto';
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .company-logos {
+      margin: auto;
+    }
+
+    .company-logo {
+      display: inline-block;
+      padding: 8px 12px;
+    }
+
+    .company-logo img {
+      height: 28px;
+    }
+
+    .fast-company,
+    .kickstarter,
+    .edible-nashville {
+      -webkit-filter: grayscale(100%);
+      filter: grayscale(100%);
+      opacity: .7;
+    }
+
+    .company-logo .edible-nashville {
+      height: 60px;
+    }
+
+    @media (max-width: 800px) {
+      .company-logo img {
+        height: 20px;
+      }
+      .company-logo .edible-nashville {
+        height: 52px;
+      }
     }
 
   </style>
@@ -100,31 +172,54 @@
   <main>
     <div class="header">
       <div class="header-image">
-        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/gift/couple_dining_glasses.jpg"
-             alt="Couple eating food at dinner table">
+        <!-- <img src="https://storage.googleapis.com/gigamunch-omninexus-website/gift/couple_dining_glasses.jpg"
+             alt="Couple eating food at dinner table"> -->
       </div>
       <div class="header-card bg-noise">
         <div>
-          <h1 class="header-card-title">Give a piece of the world</h1>
+          <h1 class="header-card-title">Give your foodie friend a gift they'll love</h1>
           <p class="header-card-desc">
-            Give your friends a journey to a different country - a different culture - all for no cost.
+              Gift your friends an international dinner delivered to their home from one of Nashville's hottest food startup. And do it without paying a dime.
           </p>
-          <ol class="header-card-list">
-            <li>Send a link to your friends. <strong>No planning. No cost.</strong></li>
-            <li>Your friend enters their information.</li>
-            <li>They get a gift from you and Gigamunch whenever they want.</li>
-          </ol>
+          <ul class="header-card-list">
+            <li><strong>No planning. No cost.</strong> ( But we don't have to tell them that 😉 )</li>
+            <li>Perfect for adventrous foodies</li>
+            <li>Easy last minute gift</li>
+          </ul>
         </div>
         <button class="orange-button header-button"
-                id="giveButton">Give Free Gift</button>
+                id="giveButton"
+                ga-on="click"
+                ga-event-category="gift"
+                ga-event-action="gift-button">Gift a Gigamunch Dinner</button>
       </div>
     </div>
     <div class="banner bg-noise">
-      <h1>Tis the season for giving</h1>
+      <h1>'Tis the season for giving</h1>
     </div>
+    <section class="as-seen-on-section bg-noise">
+      <h1 class="title as-seen-on-title">As seen on</h1>
+      <div class="company-logos">
+        <div class="company-logo">
+          <img class="fast-company"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/fast_company.png"
+               alt="Fast Company">
+        </div>
+        <div class="company-logo">
+          <img class="kickstarter"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/kickstarter.png"
+               alt="Kickstarter">
+        </div>
+        <div class="company-logo">
+          <img class="edible-nashville"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/landing/edible_nashville.png"
+               alt="Edible Nashville">
+        </div>
+      </div>
+    </section>
   </main>
 
-  [[template "share-dialog" .]]
+  [[template "gift-dialog" .]]
   <script>
     document.getElementById('giveButton').addEventListener('click', openShareDialog);
 

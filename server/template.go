@@ -40,12 +40,14 @@ func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/checkout-thank-you", handleCheckoutThankYou)
 	r.GET("/update-payment", handleUpdatePayment)
 	r.GET("/thank-you", handleThankYou)
-	r.GET("/gift", handleGift)
-	r.GET("/gift/:email", handleGift)
 	r.GET("/referral", handleReferral)
 	r.GET("/referral/:email", handleReferral)
 	r.GET("/referred", handleReferred)
 	r.GET("/referred/:email", handleReferred)
+	r.GET("/gift", handleGift)
+	r.GET("/gift/:email", handleGift)
+	r.GET("/gifted", handleGifted)
+	r.GET("/gifted/:email", handleGifted)
 	r.GET("/becomechef", handleBecomecook)
 	r.GET("/becomecook", handleBecomecook)
 	r.NotFound = new(handler404)
@@ -197,6 +199,78 @@ type referralPage struct {
 	FirstName string
 }
 
+func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &referralPage{
+		Page: Page{
+			ID: "referral",
+		},
+	}
+	defer display(ctx, w, "referral", page)
+	email := req.FormValue("email")
+	if email == "" {
+		email = params.ByName("email")
+	}
+	var err error
+	if email != "" {
+		page.Email = email
+		logging.Infof(ctx, "email: %s", email)
+		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
+		entry := &sub.SubscriptionSignUp{}
+		err = datastore.Get(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+			return
+		}
+		page.FirstName = entry.FirstName
+		if entry.FirstName == "" {
+			page.FirstName = getFirstName(entry.Name)
+		}
+		entry.ReferralPageOpens++
+		_, err = datastore.Put(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+		}
+	}
+}
+
+func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &homePage{
+		Page: Page{
+			ID: "referred",
+		},
+	}
+	defer display(ctx, w, "home", page)
+	email := req.FormValue("email")
+	if email == "" {
+		email = params.ByName("email")
+	}
+	var err error
+	if email != "" {
+		logging.Infof(ctx, "email: %s", email)
+		page.ReferrerName = email
+		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
+		entry := &sub.SubscriptionSignUp{}
+		err = datastore.Get(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+			return
+		}
+		if entry.Name != "" {
+			page.ReferrerName = entry.Name
+		}
+		if entry.FirstName != "" {
+			page.ReferrerName = entry.FirstName + " " + entry.LastName
+		}
+		entry.ReferredPageOpens++
+		_, err = datastore.Put(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+		}
+	}
+}
+
 func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	ctx := appengine.NewContext(req)
 	page := &referralPage{
@@ -212,6 +286,7 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 	var err error
 	if email != "" {
 		logging.Infof(ctx, "email: %s", email)
+		page.Email = email
 		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
 		entry := &sub.SubscriptionSignUp{}
 		err = datastore.Get(ctx, key, entry)
@@ -223,18 +298,22 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 		if entry.FirstName == "" {
 			page.FirstName = getFirstName(entry.Name)
 		}
-		page.Email = email
+		entry.GiftPageOpens++
+		_, err = datastore.Put(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+		}
 	}
 }
 
-func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	ctx := appengine.NewContext(req)
-	page := &referralPage{
+	page := &homePage{
 		Page: Page{
-			ID: "referral",
+			ID: "gifted",
 		},
 	}
-	defer display(ctx, w, "referral", page)
+	defer display(ctx, w, "home", page)
 	email := req.FormValue("email")
 	if email == "" {
 		email = params.ByName("email")
@@ -242,6 +321,7 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 	var err error
 	if email != "" {
 		logging.Infof(ctx, "email: %s", email)
+		page.ReferrerName = email
 		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
 		entry := &sub.SubscriptionSignUp{}
 		err = datastore.Get(ctx, key, entry)
@@ -249,11 +329,17 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
-		page.FirstName = entry.FirstName
-		if entry.FirstName == "" {
-			page.FirstName = getFirstName(entry.Name)
+		if entry.Name != "" {
+			page.ReferrerName = entry.Name
 		}
-		page.Email = email
+		if entry.FirstName != "" {
+			page.ReferrerName = entry.FirstName + " " + entry.LastName
+		}
+		entry.GiftedPageOpens++
+		_, err = datastore.Put(ctx, key, entry)
+		if err != nil {
+			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+		}
 	}
 }
 
@@ -265,8 +351,7 @@ func getFirstName(name string) string {
 
 type homePage struct {
 	Page
-	ReferredSection bool
-	ReferrerName    string
+	ReferrerName string
 }
 
 func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
@@ -275,39 +360,8 @@ func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Para
 		Page: Page{
 			ID: "home",
 		},
-		ReferredSection: false,
 	}
 	defer display(ctx, w, "home", page)
-}
-
-func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	ctx := appengine.NewContext(req)
-	page := &homePage{
-		Page: Page{
-			ID: "referred",
-		},
-		ReferredSection: true,
-	}
-	defer display(ctx, w, "home", page)
-	email := req.FormValue("email")
-	if email == "" {
-		email = params.ByName("email")
-	}
-	var err error
-	if email != "" {
-		logging.Infof(ctx, "email: %s", email)
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
-		if err != nil {
-			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
-			return
-		}
-		page.ReferrerName = entry.Name
-		if page.ReferrerName == "" {
-			page.ReferrerName = entry.FirstName + " " + entry.LastName
-		}
-	}
 }
 
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
@@ -316,7 +370,6 @@ func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) 
 		Page: Page{
 			ID: "login",
 		},
-		ReferredSection: true,
 	}
 	defer display(ctx, w, "login", page)
 }
