@@ -1,12 +1,12 @@
 [[define "gift-dialog"]]
 <style>
   .dialog .green-button {
-    background-color: #035610;
+    background-color: #296432;
     color: white;
   }
 
   .dialog .green-button:focus {
-    border-color: #035610;
+    border-color: #296432;
   }
 
   .dialog .green-button:hover {
@@ -20,19 +20,19 @@
   .dialog .img-section {
     min-width: 350px;
     min-height: 300px;
-    background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/mom_daughter_eating.jpg');
+    background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/gift_box.jpg');
     background-size: cover;
-    background-position: center top;
+    background-position: center;
   }
 
   .dialog .share-section {
     min-width: 350px;
-    min-height: 400px;
+    min-height: 360px;
     font-size: 14px;
   }
 
   .dialog .nav-link {
-    background-color: #035610;
+    background-color: #296432;
     color: white;
     fill: white;
     border-color: white;
@@ -51,8 +51,8 @@
 
   .dialog .nav-tabs .nav-link.active {
     background-color: white;
-    color: #035610;
-    fill: #035610;
+    color: #296432;
+    fill: #296432;
     border-width: 1px 0px;
   }
 
@@ -81,7 +81,7 @@
   }
 
   .dialog .email-section-textarea {
-    min-height: 120px;
+    min-height: 160px;
     background-color: #f7f7f7;
     border: solid #CFD8DC 1px;
     padding: 12px;
@@ -132,7 +132,7 @@
     }
 
     .dialog .img-section {
-      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/spices_spoon.jpg');
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/gift_box.jpg');
       background-size: cover;
       background-position: center;
       min-height: 215px;
@@ -158,8 +158,22 @@
         <ul class="nav nav-tabs"
             id="shareTabs"
             role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active"
+                   data-id="facebook-tab"
+                   data-toggle="tab"
+                   href="#gift"
+                   role="tab"
+                   aria-controls="facebook"
+                   aria-selected="false"
+                   ga-on="click"
+                   ga-event-category="gift"
+                   ga-event-action="gift-tab">
+                   <i class="fa fa-gift" aria-hidden="true"></i>
+                </a>
+              </li>
           <li class="nav-item">
-            <a class="nav-link active"
+            <a class="nav-link"
                data-id="messenger-tab"
                data-toggle="tab"
                href="#messenger"
@@ -186,20 +200,7 @@
                <i class="fa fa-envelope" aria-hidden="true"></i>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link"
-               data-id="facebook-tab"
-               data-toggle="tab"
-               href="#facebook"
-               role="tab"
-               aria-controls="facebook"
-               aria-selected="false"
-               ga-on="click"
-               ga-event-category="gift"
-               ga-event-action="facebook-tab">
-               <i class="fa fa-facebook-square" aria-hidden="true"></i>
-            </a>
-          </li>
+          
           <li class="nav-item sms-nav-tab-item">
             <a class="nav-link"
                data-id="sms-tab"
@@ -218,12 +219,38 @@
       </div>
       <div class="tab-content different-tab-content"
            id="shareTabsContent">
-        <div class="tab-pane fade show active"
+           <div class="tab-pane fade show active"
+           data-id="gift"
+           role="tabpanel"
+           aria-labelledby="gift-tab">
+        <section class="facebook-section">
+          <p class="facebook-section-text">Use the link below <br/>to give your friend their gift:</p>
+          <div class="input-group share-copy-input-group">
+              <input type="text"
+                     data-id="shareCopyInput"
+                     class="share-copy-input"
+                     aria-label="User's share link"
+                     aria-describedby="basic-addon2"
+                     value="https://eatgigamunch.com/gifted/[[.Email]]"
+                     readonly
+                     ga-on="click"
+                     ga-event-category="gift"
+                     ga-event-action="link-action-button">
+              <button class="green-button input-group-addon share-copy-button"
+                      data-clipboard-target="#shareCopyInput"
+                      data-id="copyCustomURLButton"
+                      ga-on="click"
+                      ga-event-category="gift"
+                      ga-event-action="link-action-button"><i class="fa fa-files-o" aria-hidden="true"></i></button>
+            </div>
+        </section>
+      </div>
+        <div class="tab-pane fade"
              data-id="messenger"
              role="tabpanel"
              aria-labelledby="messenger-tab">
           <section class="messenger-section">
-            <p class="messenger-section-text">Share with your friends on Facebook Messenger <br/>by clicking the button below:</p>
+            <p class="messenger-section-text">Give your gift on Facebook Messenger <br/>by clicking the button below:</p>
             <a target="_blank"
                href="https://www.facebook.com/dialog/send?app_id=522395114612219&display=popup&link=https://eatgigamunch.com/gifted/[[.Email]]&redirect_uri=https://eatgigamunch.com/gift/[[.Email]]"
                class="btn green-button messenger-section-button"
@@ -256,20 +283,6 @@ https://eatgigamunch.com/gifted/[[.Email]]
           </section>
         </div>
         <div class="tab-pane fade"
-             data-id="facebook"
-             role="tabpanel"
-             aria-labelledby="facebook-tab">
-          <section class="facebook-section">
-            <p class="facebook-section-text">Make a post of Facebook <br/>by clicking the button below:</p>
-            <a target="_blank"
-               href="https://www.facebook.com/dialog/share?app_id=522395114612219&display=popup&href=https://eatgigamunch.com/gifted/[[.Email]]"
-               class="btn green-button facebook-section-button"
-               ga-on="click"
-               ga-event-category="gift"
-               ga-event-action="facebook-action-button">Open Facebook <i class="fa fa-chevron-right" aria-hidden="true"></i></a>
-          </section>
-        </div>
-        <div class="tab-pane fade"
              data-id="sms"
              role="tabpanel"
              aria-labelledby="sms-tab">
@@ -285,33 +298,7 @@ https://eatgigamunch.com/gifted/[[.Email]]
           </section>
         </div>
       </div>
-      <div class="share-copy-section">
-        <div class="or-divider">
-          <div style="width: 100%; height: 10px; border-bottom: 1px solid #ccc; text-align: center">
-            <span style="font-size: 14px; background-color: white; padding: 0 10px;">
-                Or share your personal link
-              </span>
-          </div>
-        </div>
-        <div class="input-group share-copy-input-group">
-          <input type="text"
-                 data-id="shareCopyInput"
-                 class="share-copy-input"
-                 aria-label="User's share link"
-                 aria-describedby="basic-addon2"
-                 value="https://eatgigamunch.com/gifted/[[.Email]]"
-                 readonly
-                 ga-on="click"
-                 ga-event-category="gift"
-                 ga-event-action="link-action-button">
-          <button class="green-button input-group-addon share-copy-button"
-                  data-clipboard-target="#shareCopyInput"
-                  data-id="copyCustomURLButton"
-                  ga-on="click"
-                  ga-event-category="gift"
-                  ga-event-action="link-action-button"><i class="fa fa-files-o" aria-hidden="true"></i></button>
-        </div>
-      </div>
+      
 
     </div>
     <div class="close-button">
