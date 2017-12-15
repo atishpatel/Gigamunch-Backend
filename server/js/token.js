@@ -29,6 +29,9 @@ export function SetToken(cvalue) {
     }
 }
 export function GetJWT(tkn) {
+    if (!tkn) {
+        return '';
+    }
     const tknConv = tkn.replace(/[+\/]/g, (m0) => {
         return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');
