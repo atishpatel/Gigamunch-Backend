@@ -683,7 +683,7 @@ class Service {
         exDescription: desc,
         exFatal: false,
       });
-      if (err.code && err.code === 452) { // code signout
+      if (err.code && err.code === 452 && !COOK.isDev) { // code signout
         window.location.href = '/signout';
       }
       return true;

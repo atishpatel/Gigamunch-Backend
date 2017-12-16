@@ -622,7 +622,7 @@ var Service = (function () {
                 exDescription: desc,
                 exFatal: false,
             });
-            if (err.code && err.code === 452) {
+            if (err.code && err.code === 452 && !COOK.isDev) {
                 window.location.href = '/signout';
             }
             return true;
