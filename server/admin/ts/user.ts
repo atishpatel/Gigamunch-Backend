@@ -87,5 +87,5 @@ COOK.User = new User();
 
 // redirect if token is empty
 if (!COOK.User.isLoggedIn && !COOK.isDev) {
-  window.location.href = '/becomechef?gstate=login';
+  window.location.href = '/login';
 }
