@@ -9,7 +9,7 @@ The following programs need to be installed:
     - https://github.com/google/protobuf/releases 
     - `go get -u github.com/golang/protobuf/protoc-gen-go`
     - `go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger`
-    - `go get github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis`
+  - install node LTS: https://nodejs.org/en/
   - `brew install yarn`
   - `yarn global add gulp-cli`
 
@@ -23,13 +23,14 @@ Do the following in your .bashprofile or .zshrc file:
     - `~/Development/protoc/bin`
 
 Setting up for web development:
-  - `app build proto`
-  - `go get ./server`
-  - `go get ./cookapi`
   - run `yarn install`
     - in ./
     - in ./admin/app
     - in ./driver/app
+  - `go get ./cookapi`
+  - `go get ./server`
+  - `app build proto`
+  - add private folder
   - setup mysql servers by running ./misc/setup.sql
 
 To run local development:
