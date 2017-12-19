@@ -30,8 +30,9 @@ type Page struct {
 
 func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/", handleHome)
-	r.GET("/login", handleLogin)
 	r.GET("/schedule", handleHome)
+	r.GET("/passport", handleHome)
+	r.GET("/login", handleLogin)
 	r.GET("/terms", handleTerms)
 	r.GET("/privacy", handlePrivacy)
 	r.GET("/checkout", handleCheckout)
