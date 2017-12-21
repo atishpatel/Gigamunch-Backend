@@ -102,6 +102,8 @@ const (
 	TwoServings Tag = "TWO_SERVINGS"
 	// FourServings if they are 4 servings.
 	FourServings Tag = "FOUR_SERVINGS"
+	// Gifted if tehy were given Gigamunch as a gift
+	Gifted Tag = "GIFTED"
 	// Dev if they are development server customers.
 	Dev          Tag = "DEV"
 	ignoreDomain     = "@test.com"
@@ -228,6 +230,8 @@ type UserFields struct {
 	FirstName         string
 	LastName          string
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
+	GifterName        string    `json:"gifter_name"`
+	GifterEmail       string    `json:"gifter_email"`
 	AddTags           []Tag     `json:"add_tags"`
 	RemoveTags        []Tag     `json:"remove_tags"`
 }
@@ -266,6 +270,12 @@ func (c *Client) UpdateUser(req *UserFields, projID string) error {
 	}
 	if !req.FirstDeliveryDate.IsZero() {
 		sub.CustomFields["FIRST_DELIVERY_DATE"] = DateString(req.FirstDeliveryDate)
+	}
+	if req.GifterName != "" {
+		sub.CustomFields["GIFTER_NAME"] = req.GifterName
+	}
+	if req.GifterEmail != "" {
+		sub.CustomFields["GIFTER_EMAIL"] = req.GifterEmail
 	}
 	if len(req.AddTags) > 0 {
 		for _, v := range req.AddTags {

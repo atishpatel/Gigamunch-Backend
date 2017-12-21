@@ -30,6 +30,10 @@ type SubscriptionSignUp struct {
 	PhoneNumber        string        `json:"phone_number"`
 	DeliveryTips       string        `json:"delivery_tips"`
 	BagReminderSMS     bool          `json:"bag_reminder_sms" datastore:",noindex"`
+	// gift
+	NumGiftDinners int       `json:"num_gift_dinners" datastore:",noindex"`
+	ReferenceEmail string    `json:"reference_email"`
+	GiftRevealDate time.Time `json:"gift_reveal_date"`
 	// stats
 	ReferralPageOpens int `json:"referral_page_opens" datastore:",noindex"`
 	ReferredPageOpens int `json:"referred_page_opens" datastore:",noindex"`

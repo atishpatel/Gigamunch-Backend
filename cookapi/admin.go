@@ -48,7 +48,7 @@ func (service *Service) CreateFakeGigatoken(ctx context.Context, req *CreateFake
 
 // AddToProcessInquiryQueueReq is the request for AddToProcessInquiryQueue.
 type AddToProcessInquiryQueueReq struct {
-	IDReq
+	EmailReq
 	Hours int `json:"hours"`
 }
 
@@ -68,7 +68,7 @@ func (service *Service) AddToProcessInquiryQueue(ctx context.Context, req *AddTo
 
 	at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
 	tasksC := tasks.New(ctx)
-	err = tasksC.AddProcessInquiry(req.ID, at)
+	err = tasksC.AddUpdateDrip(at, &tasks.UpdateDripParams{Email: req.Email})
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessInquiry")
 		return resp, nil

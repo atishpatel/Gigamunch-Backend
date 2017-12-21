@@ -8,12 +8,14 @@ import (
 	"time"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
@@ -449,6 +451,40 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	logging.Infof(ctx, "Params: %+v", params)
 	subC := sub.New(ctx)
+	mailC := mail.New(ctx)
+	// make subscriber if date is same as give reveal date
+	sub, err := subC.GetSubscriber(params.Email)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriber: %s", err)
+		return
+	}
+	timeTillGiftReveal := sub.GiftRevealDate.Sub(time.Now())
+	utils.Infof(ctx, "time till gift reaveal", timeTillGiftReveal)
+	if sub.IsSubscribed && timeTillGiftReveal < time.Hour*12 {
+		mailReq := &mail.UserFields{
+			Email:             sub.Email,
+			Name:              sub.Name,
+			FirstName:         sub.FirstName,
+			LastName:          sub.LastName,
+			FirstDeliveryDate: sub.FirstBoxDate,
+			GifterName:        sub.Reference,
+			GifterEmail:       sub.ReferenceEmail,
+			AddTags:           []mail.Tag{mail.Subscribed, mail.Customer, mail.Gifted},
+		}
+		if sub.VegetarianServings > 0 {
+			mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
+		} else {
+			mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
+		}
+		mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
+		err = mailC.UpdateUser(mailReq, projectID)
+		if err != nil {
+			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", sub.Email, err)
+		}
+	}
+	// add num meals recieved
 	activites, err := subC.GetSubscriberActivities(params.Email)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetForDate: %s", err)
@@ -456,14 +492,14 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	var numNonSkips int
 	for _, activity := range activites {
-		if !activity.Skip {
+		if !activity.Skip && activity.Date.Before(time.Now().Add(time.Hour*48)) {
 			numNonSkips++
 		}
 	}
 	if numNonSkips >= 1 && numNonSkips <= 3 {
 		tag := mail.GetReceivedJourneyTag(numNonSkips)
 		utils.Infof(ctx, "Applying Tag(%s) to Email(%s)", tag, params.Email)
-		mailC := mail.New(ctx)
+
 		err := mailC.AddTag(params.Email, tag)
 		if err != nil {
 			logging.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.AddTag: %+v", err)
@@ -471,50 +507,58 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
+	// send chris a message if user reached their set amout of gift meals
+	if numNonSkips == sub.NumGiftDinners {
+		messageC := message.New(ctx)
+		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Person is done with their gifted meals \nName: %s\nEmail: %s", sub.Name, sub.Email))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+		}
+	}
 }
 
 func testbra(w http.ResponseWriter, req *http.Request) {
-	// ctx := appengine.NewContext(req)
-	// fence := &geofence.Geofence{
-	// 	ID:   "Nashville",
-	// 	Type: geofence.ServiceZone,
-	// 	Name: "Nashville",
-	// 	Points: []geofence.Point{
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.31623169903713, Longitude: -86.56951904296875}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34057185894721, Longitude: -86.68075561523438}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.33946565299958, Longitude: -86.73431396484375}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2675285739382, Longitude: -86.75491333007812}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.22544232423855, Longitude: -86.87713623046875}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.140092827322654, Longitude: -86.89773559570312}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.060201412392914, Longitude: -87.05703735351562}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.94243575255426, Longitude: -87.00210571289062}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.870134015336994, Longitude: -87.03506469726562}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.830061559034036, Longitude: -87.04605102539062}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.828948146199636, Longitude: -86.94580078125}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.81669957403484, Longitude: -86.84829711914062}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.821153818963175, Longitude: -86.77001953125}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.84898718690659, Longitude: -86.67938232421875}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.943547570924665, Longitude: -86.649169921875}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.019114512959, Longitude: -86.627197265625}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.049098959065645, Longitude: -86.60247802734375}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.06575205170711, Longitude: -86.55990600585938}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.134547437460064, Longitude: -86.59423828125}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.245380741380465, Longitude: -86.58737182617188}},
-	// 		geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.29741818650811, Longitude: -86.55441284179688}},
-	// 	},
-	// }
-	// key := datastore.NewKey(ctx, "Geofence", "Nashville", 0, nil)
-	// _, err := datastore.Put(ctx, key, fence)
-	// if err != nil {
-	// 	w.Write([]byte(fmt.Sprintln("fail: ", err)))
-	// 	return
-	// }
-	// key = datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
-	// _, err = datastore.Put(ctx, key, fence)
-	// if err != nil {
-	// 	w.Write([]byte(fmt.Sprintln("fail: ", err)))
-	// 	return
-	// }
-	// w.Write([]byte("success"))
+	ctx := appengine.NewContext(req)
+	fence := &geofence.Geofence{
+		ID:   "Nashville",
+		Type: geofence.ServiceZone,
+		Name: "Nashville",
+		Points: []geofence.Point{
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.31623169903713, Longitude: -86.56951904296875}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34057185894721, Longitude: -86.68075561523438}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.33946565299958, Longitude: -86.73431396484375}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2675285739382, Longitude: -86.75491333007812}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.22544232423855, Longitude: -86.87713623046875}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.140092827322654, Longitude: -86.89773559570312}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.060201412392914, Longitude: -87.05703735351562}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.94243575255426, Longitude: -87.00210571289062}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.870134015336994, Longitude: -87.03506469726562}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.830061559034036, Longitude: -87.04605102539062}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.828948146199636, Longitude: -86.94580078125}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.81669957403484, Longitude: -86.84829711914062}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.821153818963175, Longitude: -86.77001953125}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.84898718690659, Longitude: -86.67938232421875}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.943547570924665, Longitude: -86.649169921875}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.019114512959, Longitude: -86.627197265625}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.049098959065645, Longitude: -86.60247802734375}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.06575205170711, Longitude: -86.55990600585938}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.134547437460064, Longitude: -86.59423828125}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.245380741380465, Longitude: -86.58737182617188}},
+			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.29741818650811, Longitude: -86.55441284179688}},
+		},
+	}
+	key := datastore.NewKey(ctx, "Geofence", "Nashville", 0, nil)
+	_, err := datastore.Put(ctx, key, fence)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintln("fail: ", err)))
+		return
+	}
+	key = datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
+	_, err = datastore.Put(ctx, key, fence)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintln("fail: ", err)))
+		return
+	}
+	w.Write([]byte("success"))
 	w.Write([]byte(projectID))
 }

@@ -9,6 +9,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	"google.golang.org/appengine/taskqueue"
 )
@@ -100,6 +101,7 @@ func (c *Client) AddUpdateDrip(at time.Time, req *UpdateDripParams) error {
 	if err != nil {
 		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
 	}
+	utils.Infof(c.ctx, "added tasks update drip at %s for %s", at, req.Email)
 	return nil
 }
 

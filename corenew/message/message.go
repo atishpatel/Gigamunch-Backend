@@ -78,7 +78,7 @@ func New(ctx context.Context) *Client {
 
 // SendSMS sends an sms to the user
 func (c *Client) SendSMS(to, message string) error {
-	_, err := twilio.NewMessage(c.twilioC, getFromNumber(to), to, twilio.Body(message))
+	_, err := twilio.NewMessageFromService(c.twilioC, twilioConfig.AdminServiceSID, to, twilio.Body(message))
 	if err != nil {
 		if twilioErr, ok := err.(*twilio.TwilioError); ok {
 			switch twilioErr.Code {

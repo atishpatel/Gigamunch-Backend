@@ -13,11 +13,12 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -34,6 +35,7 @@ var (
 func addAPIRoutes(r *httprouter.Router) {
 	http.HandleFunc("/api/v1/Login", handler(Login))
 	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
+	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
 	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
 }
 
@@ -49,6 +51,25 @@ func validateSubmitCheckoutReq(r *pb.SubmitCheckoutReq) error {
 	}
 	if r.FirstName == "" {
 		return errInvalidParameter.WithMessage("First name must be provided.").Annotate("no first name")
+	}
+	return nil
+}
+
+func validateSubmitGiftCheckoutReq(r *giftCheckout) error {
+	if r.Email == "" {
+		return errInvalidParameter.WithMessage("Email address cannot be empty.").Annotate("no email address")
+	}
+	if !strings.Contains(r.Email, "@") {
+		return errInvalidParameter.WithMessage("Email address must be an email.").Annotate("not email address")
+	}
+	if r.PaymentMethodNonce == "" {
+		return errInvalidParameter.WithMessage("Invalid payment info.").Annotate("no payment nonce")
+	}
+	if r.FirstName == "" {
+		return errInvalidParameter.WithMessage("First name must be provided.").Annotate("no first name")
+	}
+	if r.ReferenceEmail == "" {
+		return errInvalidParameter.WithMessage("Your email address cannot be empty.").Annotate("no email address")
 	}
 	return nil
 }
@@ -123,7 +144,7 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 		return resp
 	}
 	messageC := message.New(ctx)
-	err = messageC.SendSMS("6155454989", fmt.Sprintf("Credit card updated. $$$ \nName: %s\nEmail: %s", entry.Name, entry.Email))
+	err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Credit card updated. $$$ \nName: %s\nEmail: %s", entry.Name, entry.Email))
 	if err != nil {
 		utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
 	}
@@ -272,11 +293,11 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 			return resp
 		}
 		messageC := message.New(ctx)
-		err = messageC.SendSMS("6153975516", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 		}
-		_ = messageC.SendSMS("9316445311", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
+		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
@@ -286,19 +307,19 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 	if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
 		messageC := message.New(ctx)
-		err = messageC.SendSMS("6155454989", fmt.Sprintf("$$$ New subscriber checkout page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
 		}
-		err = messageC.SendSMS("6153975516", fmt.Sprintf("$$$ New subscriber checkout page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 		}
-		err = messageC.SendSMS("9316446755", fmt.Sprintf("$$$ New subscriber checkout page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		err = messageC.SendAdminSMS("9316446755", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Piyush. Err: %+v", err)
 		}
-		_ = messageC.SendSMS("9316445311", fmt.Sprintf("$$$ New subscriber checkout page. Email that booty. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
@@ -337,6 +358,220 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
+type giftCheckout struct {
+	pb.SubmitCheckoutReq
+	NumGiftDinners int    `json:"num_gift_dinners"`
+	ReferenceEmail string `json:"reference_email"`
+	GiftRevealDate string `json:"gift_reveal_date"`
+}
+
+// SubmitGiftCheckout submits a checkout.
+func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
+	req := new(giftCheckout)
+	var err error
+	// decode request
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	defer closeRequestBody(r)
+	// end decode request
+	resp := &pb.ErrorOnlyResp{}
+	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
+	req.PhoneNumber = strings.Replace(req.PhoneNumber, " ", "", -1)
+	logging.Infof(ctx, "Request struct: %+v", req)
+	err = validateSubmitGiftCheckoutReq(req)
+	if err != nil {
+		resp.Error = errors.GetSharedError(err)
+		return resp
+	}
+
+	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
+	entry := &sub.SubscriptionSignUp{}
+	err = datastore.Get(ctx, key, entry)
+	if err != nil && err != datastore.ErrNoSuchEntity {
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		return resp
+	}
+	if entry.IsSubscribed {
+		// user is already subscribed
+		resp.Error = errInvalidParameter.WithMessage("You already have a subscription! :)").SharedError()
+		return resp
+	}
+	inZone, address, err := InNashvilleZone(ctx, req.Address)
+	if err != nil {
+		resp.Error = errInternal.WithMessage("Woops! something went wrong").WithError(err).Annotate("failed inNashvilleZone").SharedError()
+		return resp
+	}
+	// var planID string
+	var servings int8
+	var vegetarianServings int8
+	var weeklyAmount float32
+	switch req.Servings {
+	case "":
+		fallthrough
+	case "0":
+		servings = 0
+	case "1":
+		servings = 1
+	case "2":
+		servings = 2
+	default:
+		servings = 4
+	}
+	switch req.VegetarianServings {
+	case "":
+		fallthrough
+	case "0":
+		vegetarianServings = 0
+	case "1":
+		vegetarianServings = 1
+	case "2":
+		vegetarianServings = 2
+	default:
+		vegetarianServings = 4
+	}
+	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
+	customerID := payment.GetIDFromEmail(req.ReferenceEmail)
+	firstBoxDate := time.Now().Add(81 * time.Hour)
+	for firstBoxDate.Weekday() != time.Monday {
+		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
+	}
+	if req.FirstDeliveryDate != "" {
+		firstBoxDate, err = time.Parse(time.RFC3339, req.FirstDeliveryDate)
+		if err != nil || firstBoxDate.Weekday() == time.Tuesday {
+			firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() == time.Sunday {
+			firstBoxDate = firstBoxDate.Add(12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() != time.Monday {
+			resp.Error = errBadRequest.WithMessage("Invalid first delivery day selected.").SharedError()
+			utils.Criticalf(ctx, "user selected invalid first delivery date: %+v", req.FirstDeliveryDate)
+			return resp
+		}
+	}
+	giftRevealDate := firstBoxDate
+	if req.GiftRevealDate != "" {
+		tmpDate, err := time.Parse(time.RFC3339, req.GiftRevealDate)
+		if err != nil {
+			resp.Error = errBadRequest.WithMessage("Invalid gift reveal date.").SharedError()
+			utils.Criticalf(ctx, "user selected invalid gift reaveal date: %+v", req.FirstDeliveryDate)
+			return resp
+		}
+		giftRevealDate = tmpDate
+	}
+
+	paymentC := payment.New(ctx)
+	paymentReq := &payment.CreateCustomerReq{
+		CustomerID: customerID,
+		FirstName:  req.FirstName,
+		LastName:   req.LastName,
+		Email:      req.Email,
+		Nonce:      req.PaymentMethodNonce,
+	}
+
+	paymenttkn, err := paymentC.CreateCustomer(paymentReq)
+	if err != nil {
+		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
+		return resp
+	}
+	entry.Email = req.Email
+	entry.Name = req.FirstName + " " + req.LastName
+	entry.FirstName = strings.TrimSpace(req.FirstName)
+	entry.LastName = strings.TrimSpace(req.LastName)
+	entry.Address = *address
+	if entry.Date.IsZero() {
+		entry.Date = time.Now()
+	}
+	// entry.SubscriptionIDs = append(entry.SubscriptionIDs, subID)
+	if inZone {
+		entry.IsSubscribed = true
+		entry.SubscriptionDate = time.Now()
+		entry.WeeklyAmount = weeklyAmount
+		entry.FirstBoxDate = firstBoxDate
+		// entry.FirstPaymentDate = paymentDate
+		entry.SubscriptionDay = time.Monday.String()
+	}
+	entry.CustomerID = customerID
+	entry.DeliveryTips = req.DeliveryNotes
+	entry.Servings = servings
+	entry.VegetarianServings = vegetarianServings
+	entry.PhoneNumber = req.PhoneNumber
+	entry.PaymentMethodToken = paymenttkn
+	entry.Reference = req.Reference
+	entry.ReferenceEmail = req.ReferenceEmail
+	entry.NumGiftDinners = req.NumGiftDinners
+	entry.GiftRevealDate = giftRevealDate
+	_, err = datastore.Put(ctx, key, entry)
+	if err != nil {
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		return resp
+	}
+	if !inZone {
+		logging.Infof(ctx, "failed address zone zip(%s). Address: %s", address.Zip, address.String())
+		// out of delivery range
+		if address.Street == "" {
+			resp.Error = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!").SharedError()
+			return resp
+		}
+		messageC := message.New(ctx)
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
+		}
+		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
+		}
+		// TODO: add to some datastore to save address and stuff
+		resp.Error = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!").SharedError()
+		return resp
+	}
+	if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
+		messageC := message.New(ctx)
+		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("$$$ Gift checkout page. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+		}
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("$$$ Gift checkout page. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
+		}
+		err = messageC.SendAdminSMS("9316446755", fmt.Sprintf("$$$ Gift checkout page. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Piyush. Err: %+v", err)
+		}
+		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("$$$ Gift checkout page. \nName: %s\nEmail: %s\nReference: %s", entry.Name, entry.Email, entry.Reference))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
+		}
+	}
+	subC := sub.New(ctx)
+	if req.NumGiftDinners > 2 {
+		err = subC.Free(firstBoxDate, req.Email)
+		if err != nil {
+			utils.Criticalf(ctx, "error in gifCheckout: Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
+		}
+	} else {
+		err = subC.Setup(firstBoxDate, req.Email, entry.Servings+entry.VegetarianServings, entry.WeeklyAmount, 6, entry.PaymentMethodToken, entry.CustomerID)
+		if err != nil {
+			utils.Criticalf(ctx, "error in giftCheckout: Failed to setup sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
+		}
+	}
+	if !strings.Contains(req.Email, "test.com") {
+		tasksC := tasks.New(ctx)
+		tasksReq := &tasks.UpdateDripParams{
+			Email: entry.Email,
+		}
+		err = tasksC.AddUpdateDrip(entry.GiftRevealDate, tasksReq)
+		if err != nil {
+			utils.Criticalf(ctx, "error in giftCheckout: failed to AddUpdateDrip: %+v", err)
+		}
+	}
+	return resp
+}
+
 // InNashvilleZone checks if an address is in Nashville zone.
 func InNashvilleZone(ctx context.Context, addr *shared.Address) (bool, *types.Address, error) {
 	var err error
@@ -361,9 +596,7 @@ func InNashvilleZone(ctx context.Context, addr *shared.Address) (bool, *types.Ad
 		address.Latitude = addr.Latitude
 		address.Longitude = addr.Longitude
 	}
-	fence := new(geofence.Geofence)
-	key := datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
-	err = datastore.Get(ctx, key, fence)
+	fence, err := getNasvilleGeopoint(ctx)
 	if err != nil {
 		return false, nil, errInternal.WithError(err).Annotate("failed to db.Get")
 	}
@@ -422,6 +655,46 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 			return
 		}
 	}
+}
+
+func getNasvilleGeopoint(ctx context.Context) (*geofence.Geofence, error) {
+	fence := new(geofence.Geofence)
+	key := datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
+	err := datastore.Get(ctx, key, fence)
+	if err != nil && err != datastore.ErrNoSuchEntity {
+		return nil, err
+	}
+	if err == datastore.ErrNoSuchEntity {
+		fence = &geofence.Geofence{
+			ID:   "Nashville",
+			Type: geofence.ServiceZone,
+			Name: "Nashville",
+			Points: []geofence.Point{
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.31623169903713, Longitude: -86.56951904296875}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.34057185894721, Longitude: -86.68075561523438}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.33946565299958, Longitude: -86.73431396484375}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2675285739382, Longitude: -86.75491333007812}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.22544232423855, Longitude: -86.87713623046875}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.140092827322654, Longitude: -86.89773559570312}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.060201412392914, Longitude: -87.05703735351562}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.94243575255426, Longitude: -87.00210571289062}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.870134015336994, Longitude: -87.03506469726562}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.830061559034036, Longitude: -87.04605102539062}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.828948146199636, Longitude: -86.94580078125}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.81669957403484, Longitude: -86.84829711914062}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.821153818963175, Longitude: -86.77001953125}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.84898718690659, Longitude: -86.67938232421875}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.943547570924665, Longitude: -86.649169921875}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.019114512959, Longitude: -86.627197265625}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.049098959065645, Longitude: -86.60247802734375}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.06575205170711, Longitude: -86.55990600585938}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.134547437460064, Longitude: -86.59423828125}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.245380741380465, Longitude: -86.58737182617188}},
+				geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.29741818650811, Longitude: -86.55441284179688}},
+			},
+		}
+	}
+	return fence, nil
 }
 
 // Response is a response to a rpc call. All responses contain an error.
