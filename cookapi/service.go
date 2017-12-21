@@ -460,7 +460,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	timeTillGiftReveal := sub.GiftRevealDate.Sub(time.Now())
 	utils.Infof(ctx, "time till gift reaveal", timeTillGiftReveal)
-	if sub.IsSubscribed && timeTillGiftReveal < time.Hour*12 {
+	if sub.IsSubscribed && !sub.GiftRevealDate.IsZero() && timeTillGiftReveal < time.Hour*12 {
 		mailReq := &mail.UserFields{
 			Email:             sub.Email,
 			Name:              sub.Name,
