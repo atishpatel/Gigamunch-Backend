@@ -865,7 +865,7 @@
               </div>
                 <div class="checkout-row">
                   <div>
-                    <label for="first_name">First Name</label>
+                    <label for="first_name">Their First Name</label>
                     <div class="input-container">
                       <input type="text"
                              name="first_name"
@@ -877,7 +877,7 @@
                     </div>
                   </div>
                   <div>
-                    <label for="last_name">Last Name</label>
+                    <label for="last_name">Their Last Name</label>
                     <div class="input-container">
                       <input type="text"
                              name="last_name"
@@ -890,7 +890,7 @@
                 </div>
                 <div class="checkout-row">
                   <div class="input-label">
-                    <label for="name">Email</label>
+                    <label for="name">Their Email</label>
                     <div class="input-container">
                       <input type="text"
                              name="email"
@@ -901,7 +901,7 @@
                     </div>
                   </div>
                   <div class="input-label">
-                    <label for="phone_number">Phone Number (optional)</label>
+                    <label for="phone_number">Their Phone Number (optional)</label>
                     <div class="input-container">
                       <input type="tel"
                              name="phone_number"
@@ -913,7 +913,7 @@
                 </div>
     
                 <div>
-                  <label for="address-input">Address</label>
+                  <label for="address-input">Their Address</label>
                   <div class="input-container
                            address-input-container">
                     <input type="text"
@@ -939,7 +939,7 @@
                   </div>
                 </div>
             <div class="form-section-title">
-              <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
+              <h2>Your Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
             </div>
             <div>
               <label for="card-number"
@@ -971,7 +971,7 @@
                   <div class="item-text">
                     <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
                     <div class="item-desc">
-                      Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. The person you are gifting can skip a week or cancel your subscription anytime with
+                      Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total_weekly"></span> (+ tax) will charged every week. The person you are gifting can skip a week or cancel your subscription anytime with
                       a 4 day notice.
                     </div>
                   </div>
@@ -1323,6 +1323,7 @@
       }
       var numGiftDinners = Number(document.getElementById('num-gift-dinners').value);
       taxTotal = taxTotal * numGiftDinners;
+      var totalWeekly = oneBoxPrice * servingsPerBox;
       var boxTotal = oneBoxPrice * servingsPerBox * numGiftDinners;
       // var total = boxTotal + deliveryTotal + taxTotal;
       var total = boxTotal + taxTotal;
@@ -1331,7 +1332,7 @@
       document.getElementById('boxForTitle').innerHTML = boxForTitleText;
       document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
       document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
-      document.getElementById('total').innerHTML = boxTotal.toFixed(2);
+      document.getElementById('total_weekly').innerHTML = totalWeekly.toFixed(2);
       document.getElementById('final_total').innerHTML = total.toFixed(2);
     }
 

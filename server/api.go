@@ -501,8 +501,11 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	entry.PaymentMethodToken = paymenttkn
 	entry.Reference = req.Reference
 	entry.ReferenceEmail = req.ReferenceEmail
-	entry.NumGiftDinners = req.NumGiftDinners
 	entry.GiftRevealDate = giftRevealDate
+	if req.NumGiftDinners > 2 {
+		req.NumGiftDinners++
+	}
+	entry.NumGiftDinners = req.NumGiftDinners
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
 		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
@@ -548,18 +551,18 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 		}
 	}
 	subC := sub.New(ctx)
-	if req.NumGiftDinners > 2 {
-		err = subC.Free(firstBoxDate, req.Email)
+	if entry.NumGiftDinners > 2 {
+		err = subC.Free(firstBoxDate, entry.Email)
 		if err != nil {
-			utils.Criticalf(ctx, "error in gifCheckout: Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
+			utils.Criticalf(ctx, "error in gifCheckout: Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", entry.Email, firstBoxDate, err)
 		}
 	} else {
-		err = subC.Setup(firstBoxDate, req.Email, entry.Servings+entry.VegetarianServings, entry.WeeklyAmount, 6, entry.PaymentMethodToken, entry.CustomerID)
+		err = subC.Setup(firstBoxDate, entry.Email, entry.Servings+entry.VegetarianServings, entry.WeeklyAmount, 6, entry.PaymentMethodToken, entry.CustomerID)
 		if err != nil {
-			utils.Criticalf(ctx, "error in giftCheckout: Failed to setup sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
+			utils.Criticalf(ctx, "error in giftCheckout: Failed to setup sub box for new sign up(%s) for date(%v). Err:%v", entry.Email, firstBoxDate, err)
 		}
 	}
-	if !strings.Contains(req.Email, "test.com") {
+	if !strings.Contains(entry.Email, "test.com") {
 		tasksC := tasks.New(ctx)
 		tasksReq := &tasks.UpdateDripParams{
 			Email: entry.Email,
