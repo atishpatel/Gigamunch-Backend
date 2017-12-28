@@ -110,50 +110,50 @@ func setupWithContext(ctx context.Context) error {
 }
 
 func userAdmin(f handle) handle {
-	return func(ctx context.Context, r *http.Request) Response {
-		user, err := getUserFromRequest(ctx, r)
+	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
+		user, err := getUserFromRequest(ctx, r, log)
 		if !err.IsNil() {
 			return err
 		}
 		if !user.IsUserAdmin() {
 			return errPermissionDenied
 		}
-		return f(ctx, r)
+		return f(ctx, r, log)
 	}
 }
 
 func driverAdmin(f handle) handle {
-	return func(ctx context.Context, r *http.Request) Response {
-		user, err := getUserFromRequest(ctx, r)
+	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
+		user, err := getUserFromRequest(ctx, r, log)
 		if !err.IsNil() {
 			return err
 		}
 		if !user.IsDriverAdmin() {
 			return errPermissionDenied
 		}
-		return f(ctx, r)
+		return f(ctx, r, log)
 	}
 }
 
 func systemsAdmin(f handle) handle {
-	return func(ctx context.Context, r *http.Request) Response {
-		user, err := getUserFromRequest(ctx, r)
+	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
+		user, err := getUserFromRequest(ctx, r, log)
 		if !err.IsNil() {
 			return err
 		}
 		if !user.IsSystemsAdmin() {
 			return errPermissionDenied
 		}
-		return f(ctx, r)
+		return f(ctx, r, log)
 	}
 }
 
-func getUserFromRequest(ctx context.Context, r *http.Request) (*common.User, errors.ErrorWithCode) {
+func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Client) (*common.User, errors.ErrorWithCode) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
 		return nil, errBadRequest.Annotate("auth-token is empty")
 	}
-	authC, err := auth.NewClient(ctx)
+	authC, err := auth.NewClient(ctx, log)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to get auth.NewClient")
 	}
@@ -164,7 +164,7 @@ func getUserFromRequest(ctx context.Context, r *http.Request) (*common.User, err
 	return user, errors.NoError
 }
 
-func handler(f func(context.Context, *http.Request) Response) func(http.ResponseWriter, *http.Request) {
+func handler(f func(context.Context, *http.Request, *logging.Client) Response) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		ctx := appengine.NewContext(r)
@@ -183,10 +183,8 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(errString))
 		}
-		ctx = context.WithValue(ctx, common.LoggingKey, loggingC)
-
 		// call function
-		resp := f(ctx, r)
+		resp := f(ctx, r, loggingC)
 		// Log errors
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
@@ -228,4 +226,4 @@ func test(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("success"))
 }
 
-type handle func(context.Context, *http.Request) Response
+type handle func(context.Context, *http.Request, *logging.Client) Response

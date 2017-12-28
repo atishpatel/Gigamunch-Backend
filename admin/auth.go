@@ -7,11 +7,12 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
 // Login takes a Firebase Token and returns an auth token.
-func Login(ctx context.Context, r *http.Request) Response {
+func Login(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.TokenOnlyReq)
 	var err error
 	// decode request
@@ -22,7 +23,7 @@ func Login(ctx context.Context, r *http.Request) Response {
 	}
 	defer closeRequestBody(r)
 	// end decode request
-	authC, err := auth.NewClient(ctx)
+	authC, err := auth.NewClient(ctx, log)
 	if err != nil {
 		return errors.Annotate(err, "failed to get auth.NewClient")
 	}
@@ -37,7 +38,7 @@ func Login(ctx context.Context, r *http.Request) Response {
 }
 
 // Refresh refreshs an auth token.
-func Refresh(ctx context.Context, r *http.Request) Response {
+func Refresh(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.TokenOnlyReq)
 	var err error
 	// decode request
@@ -48,7 +49,7 @@ func Refresh(ctx context.Context, r *http.Request) Response {
 	}
 	defer closeRequestBody(r)
 	// end decode request
-	authC, err := auth.NewClient(ctx)
+	authC, err := auth.NewClient(ctx, log)
 	if err != nil {
 		return errors.Annotate(err, "failed to get auth.NewClient")
 	}

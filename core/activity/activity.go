@@ -28,9 +28,8 @@ type Client struct {
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context) (*Client, error) {
-	log, ok := ctx.Value(common.LoggingKey).(*logging.Client)
-	if !ok {
+func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
+	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	return &Client{

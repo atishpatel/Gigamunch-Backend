@@ -31,7 +31,7 @@ type Client struct {
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context) (*Client, error) {
+func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 	var err error
 	if standAppEngine {
 		err = setup(ctx)
@@ -42,8 +42,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 	if sql == nil {
 		return nil, errInternal.Annotate("setup not called")
 	}
-	log, ok := ctx.Value(common.LoggingKey).(*logging.Client)
-	if !ok {
+	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	return &Client{

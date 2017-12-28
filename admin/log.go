@@ -8,14 +8,13 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	shared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
-	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 // GetLog gets a log.
-func GetLog(ctx context.Context, r *http.Request) Response {
+func GetLog(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetLogReq)
 	var err error
 	// decode request
@@ -26,19 +25,18 @@ func GetLog(ctx context.Context, r *http.Request) Response {
 	}
 	defer closeRequestBody(r)
 	// end decode request
-	logger := ctx.Value(common.LoggingKey).(*logging.Client)
-	log, err := logger.GetLog(req.Id)
+	l, err := log.GetLog(req.Id)
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
 	resp := &pb.GetLogResp{
-		Log: pbLog(log),
+		Log: pbLog(l),
 	}
 	return resp
 }
 
 // GetLogs gets logs.
-func GetLogs(ctx context.Context, r *http.Request) Response {
+func GetLogs(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetLogsReq)
 	var err error
 	// decode request
@@ -49,8 +47,7 @@ func GetLogs(ctx context.Context, r *http.Request) Response {
 	}
 	defer closeRequestBody(r)
 	// end decode request
-	logger := ctx.Value(common.LoggingKey).(*logging.Client)
-	logs, err := logger.GetLogs(int(req.Start), int(req.Limit))
+	logs, err := log.GetLogs(int(req.Start), int(req.Limit))
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}

@@ -80,7 +80,7 @@ type Client struct {
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context) (*Client, error) {
+func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 	var err error
 	dripClient, err := drip.New(key, acctID)
 	if err != nil {
@@ -92,8 +92,7 @@ func NewClient(ctx context.Context) (*Client, error) {
 	if standAppEngine {
 		dripClient.HTTPClient = urlfetch.Client(ctx)
 	}
-	log, ok := ctx.Value(common.LoggingKey).(*logging.Client)
-	if !ok {
+	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	return &Client{
