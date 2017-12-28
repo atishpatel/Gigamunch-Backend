@@ -432,6 +432,8 @@ func handleTwilioSMS(w http.ResponseWriter, req *http.Request) {
 	err := req.ParseForm()
 	utils.Infof(ctx, "req body: %s err: %s", req.Form, err)
 	from := req.FormValue("From")
+	l := len(from)
+	from = from[:l-7] + "-" + from[l-7:l-4] + "-" + from[l-4:]
 	body := req.FormValue("Body")
 	var name, email string
 	// TODO: auto get name and email
