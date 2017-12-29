@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define a timestamp function
-timestamp() {
-  date +"%T"
+timestamp() { 
+  date +"%T" 
 }
 timestamp
 
@@ -87,15 +87,16 @@ if [[ $1 == "deploy" ]]; then
   exit 0
 fi
 
-
 ################################################################################
 # serve
 ################################################################################
 if [[ $1 == "serve" ]]; then
   # setup mysql
-  /usr/local/opt/mysql@5.6/bin/mysql.server start
-  # create gigamunch database
-  cat misc/setup.sql | /usr/local/opt/mysql@5.6/bin/mysql -uroot
+  if [[ $OSTYPE == "linux-gnu" ]]; then 
+    service mysql start&
+  else
+    /usr/local/opt/mysql@5.6/bin/mysql.server start
+  fi
   # start goapp serve
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
@@ -120,11 +121,16 @@ if [[ $1 == "serve" ]]; then
     dev_appserver.py --datastore_path ./.datastore server/app.yaml
   fi
   # stop mysql
-  /usr/local/opt/mysql@5.6/bin/mysql.server stop
+
+  if [[ $OSTYPE == "linux-gnu" ]]; then 
+    service mysql stop&
+  else
+    /usr/local/opt/mysql@5.6/bin/mysql.server stop
+  fi
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
   exit 0
-fi 
+fi
 
 ################################################################################
 # help
@@ -136,7 +142,6 @@ if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo -e "\tapp build [app|admin|cook|proto]"
   echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|]"
   exit 0
-fi 
+fi
 
 wait
-
