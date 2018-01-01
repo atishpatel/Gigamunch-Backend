@@ -195,8 +195,8 @@
         // ray-casting algorithm based on
         // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 
-        var x = point[0],
-          y = point[1];
+        var x = point[1],
+          y = point[0];
 
         var inside = false;
         for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
@@ -214,127 +214,32 @@
       };
 
       setPolygons() {
-
-        var shapes = [];
-        var katherinePath = [
-          new google.maps.LatLng(36.240950421445, -86.74942016601562),
-          new google.maps.LatLng(36.19220033141526, -86.77482604980469),
-          new google.maps.LatLng(36.16060736183511, -86.759033203125),
-          new google.maps.LatLng(36.17945382412255, -86.69929504394531),
-          new google.maps.LatLng(36.22101087439238, -86.71028137207031),
-          new google.maps.LatLng(36.2354121683998, -86.7205810546875),
-          new google.maps.LatLng(36.240950421445, -86.748046875)
-        ];
-        var polyline = new google.maps.Polyline({
-          path: katherinePath,
-          strokeColor: "#FF0000",
-          strokeOpacity: .7,
-          strokeWeight: 2
+        var geofences = this.getGeofences();
+        geofences.forEach((geofence) => {
+          var path = [];
+          geofence.Path.forEach((point) => {
+            path.push(new google.maps.LatLng(point[1], point[0]));
+          });
+          var polyline = new google.maps.Polyline({
+            path: path,
+            strokeColor: geofence.Color,
+            strokeOpacity: .5,
+            strokeWeight: 2,
+          });
+          polyline.setMap(this.map);
         });
-        polyline.setMap(this.map);
-        shapes.push(polyline);
-        var piyushPath = [
-          new google.maps.LatLng(36.32563675305861, -86.60316467285156),
-          new google.maps.LatLng(36.30516547666426, -86.69586181640625),
-          new google.maps.LatLng(36.23208902824811, -86.71165466308594),
-          new google.maps.LatLng(36.17945382412255, -86.69174194335938),
-          new google.maps.LatLng(36.130110843400146, -86.69174194335938),
-          new google.maps.LatLng(36.14397436703243, -86.61003112792969),
-          new google.maps.LatLng(36.16615090943873, -86.56333923339844),
-          new google.maps.LatLng(36.24870331653197, -86.561279296875),
-          new google.maps.LatLng(36.32508354600387, -86.60110473632812)
-        ];
-        var polyline = new google.maps.Polyline({
-          path: piyushPath,
-          strokeColor: "#00FF00",
-          strokeOpacity: .7,
-          strokeWeight: 2
-        });
-        polyline.setMap(this.map);
-        shapes.push(polyline);
-        var atishPath = [
-          new google.maps.LatLng(36.086840909511004, -86.70272827148438),
-          new google.maps.LatLng(36.07629718752892, -86.80778503417969),
-          new google.maps.LatLng(35.915747419499695, -86.91009521484375),
-          new google.maps.LatLng(35.884043325566886, -86.79130554199219),
-          new google.maps.LatLng(35.89071892694686, -86.64710998535156),
-          new google.maps.LatLng(35.94243575255426, -86.56951904296875),
-          new google.maps.LatLng(35.97800618085566, -86.53793334960938),
-          new google.maps.LatLng(36.00967260287175, -86.53175354003906),
-          new google.maps.LatLng(36.041326309894316, -86.54205322265625),
-          new google.maps.LatLng(36.072967297371555, -86.6217041015625),
-          new google.maps.LatLng(36.08351146584746, -86.68899536132812),
-          new google.maps.LatLng(36.08667546783092, -86.70437682733143)
-        ];
-        var polyline = new google.maps.Polyline({
-          path: atishPath,
-          strokeColor: "#0000FF",
-          strokeOpacity: .7,
-          strokeWeight: 2
-        });
-        polyline.setMap(this.map);
-        shapes.push(polyline);
       }
 
       getDriver(latLng) {
-        var katherinePath = [
-          [36.240950421445, -86.74942016601562],
-          [36.19220033141526, -86.77482604980469],
-          [36.16060736183511, -86.759033203125],
-          [36.17945382412255, -86.69929504394531],
-          [36.22101087439238, -86.71028137207031],
-          [36.2354121683998, -86.7205810546875],
-          [36.240950421445, -86.748046875]
-        ];
-        if (this.inside(latLng, katherinePath)) {
-          return 'Jackie';
-        }
-        var piyushPath = [
-          [36.32563675305861, -86.60316467285156],
-          [36.30516547666426, -86.69586181640625],
-          [36.23208902824811, -86.71165466308594],
-          [36.17945382412255, -86.69174194335938],
-          [36.130110843400146, -86.69174194335938],
-          [36.14397436703243, -86.61003112792969],
-          [36.16615090943873, -86.56333923339844],
-          [36.24870331653197, -86.561279296875],
-          [36.32508354600387, -86.60110473632812]
-        ];
-        if (this.inside(latLng, piyushPath)) {
-          return 'Piyush';
-        }
-        var atishPath = [
-          [36.086840909511004, -86.70272827148438],
-          [36.07629718752892, -86.80778503417969],
-          [35.915747419499695, -86.91009521484375],
-          [35.884043325566886, -86.79130554199219],
-          [35.89071892694686, -86.64710998535156],
-          [35.94243575255426, -86.56951904296875],
-          [35.97800618085566, -86.53793334960938],
-          [36.00967260287175, -86.53175354003906],
-          [36.041326309894316, -86.54205322265625],
-          [36.072967297371555, -86.6217041015625],
-          [36.08351146584746, -86.68899536132812],
-          [36.08667546783092, -86.70437682733143]
-        ];
-        if (this.inside(latLng, atishPath)) {
-          return 'Atish';
-        }
-        var aliPath = [
-          [36.17169406500341, -86.80503845214844],
-          [36.146746777814364, -86.7974853515625],
-          [36.11957292735451, -86.80366516113281],
-          [36.09183481061278, -86.78787231445312],
-          [36.08739580307919, -86.83387756347656],
-          [36.10404078863735, -86.87370300292969],
-          [36.13343831245866, -86.88812255859375],
-          [36.15894422111004, -86.85859680175781],
-          [36.16927640882672, -86.80430637156974]
-        ];
-        if (this.inside(latLng, aliPath)) {
-          return 'Brea';
-        }
-        return '-';
+        var geofences = this.getGeofences();
+        var name = '-';
+        geofences.forEach((geofence) => {
+          if(this.inside(latLng, geofence.Path)) {
+            name = geofence.Name;
+            return
+          }
+        });
+        return name;
       }
 
       getSubLogsForDate(d) {
@@ -379,14 +284,110 @@
               sublogDay.unskippedSublogs.push(slogs[i]);
             }
           }
-
           this.sublogsByDate = sublogDay;
+          this.setPolygons();
         });
       }
 
       getDateString(dateString) {
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
+      }
+
+      getGeofences() {
+        return [
+          {
+            Name: 'Atish',
+            Color: '#0000FF',
+            Path: [
+              [-86.6917419,36.0035625],
+              [-86.8263245,35.9735608],
+              [-86.9430542,35.9279807],
+              [-86.9059753,35.8322883],
+              [-86.7274475,35.8222673],
+              [-86.6546631,35.8501003],
+              [-86.6917419,36.0035625],
+            ],
+          },
+          {
+            Name: 'Chris',
+            Color: '#000FF0',
+            Path: [
+              [-86.602478,36.2542406],
+              [-86.5756989,36.2647604],
+              [-86.583252,36.316785],
+              [-86.8798828,36.359375],
+              [-86.8661499,36.2487033],
+              [-86.602478,36.2542406],
+            ],
+          },
+          {
+            Name: 'Piyush',
+            Color: '#00FF00',
+            Path: [
+              [-86.5612793,36.0446575],
+              [-86.4733887,36.1622705],
+              [-86.5180206,36.2791537],
+              [-86.6278839,36.2398428],
+              [-86.6580963,36.1971875],
+              [-86.7034149,36.2370737],
+              [-86.6986084,36.1434199],
+              [-86.7336273,36.1162449],
+              [-86.6704559,35.9613345],
+              [-86.5612793,36.0446575],  
+            ],
+          },
+          {
+            Name: 'Enis',
+            Color: '#0FF000',
+            Path: [
+              [-86.9128418,36.1356565],
+              [-87.0611572,36.078517],
+              [-87.0206452,35.9518857],
+              [-86.8572235,36.0463231],
+              [-86.8366241,36.0824016],
+              [-86.9128418,36.1356565],
+            ],
+          },
+          {
+            Name: 'Enis',
+            Color: '#FF0000',
+            Path: [
+              [-86.9128418,36.1356565],
+              [-87.0611572,36.078517],
+              [-87.0206452,35.9518857],
+              [-86.8572235,36.0463231],
+              [-86.8366241,36.0824016],
+              [-86.9128418,36.1356565],
+            ],
+          },
+          {
+            Name: 'JoyDriv1',
+            Color: '#000F0F',
+            Path: [
+              [-86.7164612,36.2343045],
+              [-86.8064117,36.2348583],
+              [-86.8173981,36.1982958],
+              [-86.786499,36.1500735],
+              [-86.7576599,36.154509],
+              [-86.7521667,36.1628248],
+              [-86.7020416,36.1750198],
+              [-86.6972351,36.1938628],
+              [-86.7164612,36.2343045],
+            ],
+          },
+          {
+            Name: 'JoyDriv2',
+            Color: '#00F00F',
+            Path: [
+              [-86.8235779,36.160053],
+              [-86.8901825,36.1217916],
+              [-86.8283844,36.0751872],
+              [-86.786499,36.1500735],
+              [-86.8235779,36.160053],
+            ],
+          },
+        ]
       }
 
     }
