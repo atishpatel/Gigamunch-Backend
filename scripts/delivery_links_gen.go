@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 )
 
@@ -15,18 +14,22 @@ var (
 	docSheet = ""
 	input    = []nameAndAddresses{
 		nameAndAddresses{
-			Name:      "Tina",
+			Name:      "Haseen",
 			Addresses: ``,
 		},
 		nameAndAddresses{
-			Name:      "Kris",
+			Name:      "Tim",
 			Addresses: ``,
 		},
 		nameAndAddresses{
-			Name:      "Brea",
+			Name:      "Traci",
 			Addresses: ``,
 		},
 		// Founders
+		nameAndAddresses{
+			Name:      "Hanako",
+			Addresses: ``,
+		},
 		nameAndAddresses{
 			Name:      "Piyush",
 			Addresses: ``,
@@ -50,9 +53,10 @@ func main() {
 	fmt.Printf("Doc link:\n%s\n----------\n", docSheet)
 	startAddress := []string{"166 Chesapeake Harbor Blvd, Hendersonville"}
 	del := "\n"
+	replacer := strings.NewReplacer("\t", "", " ", "+")
 	for _, i := range input {
 		if len(i.Addresses) > 0 {
-			addresses := strings.Split(strings.Replace(i.Addresses, "\t", "", -1), del)
+			addresses := strings.Split(replacer.Replace(i.Addresses), del)
 			addresses = append(startAddress, addresses...)
 			printMapLinks(i.Name, addresses)
 		}
@@ -73,7 +77,7 @@ func printMapLinks(driverName string, addresses []string) {
 		}
 		var addressesString string
 		for _, address := range addresses[i:n] {
-			addressesString = addressesString + "/" + url.PathEscape(address)
+			addressesString = addressesString + "/" + address
 		}
 		urls = append(urls, fmt.Sprintf("https://www.google.com/maps/dir%s", addressesString))
 		i = n
