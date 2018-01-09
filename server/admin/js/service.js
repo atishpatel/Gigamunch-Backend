@@ -475,6 +475,26 @@ var Service = (function () {
             callback(resp.sub_emails, resp.err);
         });
     };
+    Service.prototype.getSubEmailsAndSubs = function (callback) {
+        var _this = this;
+        // if api is not loaded, add to _callQueue
+        if (!this.loaded) {
+            this.callQueue.push(function () {
+                _this.getSubEmailsAndSubs(callback);
+            });
+            return;
+        }
+        var request = {
+            gigatoken: this.getToken(),
+        };
+        this
+            .service
+            .getSubEmails(request)
+            .execute(function (resp) {
+            _this.logError('getSubEmails', resp.err);
+            callback(resp.sub_emails,resp.subscribers, resp.err);
+        });
+    };
     Service.prototype.skipSubLog = function (date, subEmail, callback) {
         var _this = this;
         // if api is not loaded, add to _callQueue

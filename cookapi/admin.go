@@ -246,7 +246,8 @@ func (service *Service) ProcessSubLog(ctx context.Context, req *SubLogReq) (*Err
 
 // GetSubEmailsResp is a resp for GetSubEmails.
 type GetSubEmailsResp struct {
-	SubEmails []string `json:"sub_emails"`
+	SubEmails   []string                  `json:"sub_emails"`
+	Subscribers []*sub.SubscriptionSignUp `json:"subscribers"`
 	ErrorOnlyResp
 }
 
@@ -270,6 +271,11 @@ func (service *Service) GetSubEmails(ctx context.Context, req *GigatokenReq) (*G
 	resp.SubEmails, err = subC.GetSubEmails(from, to)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetSubEmails")
+		return resp, nil
+	}
+	resp.Subscribers, err = subC.GetSubscribers(resp.SubEmails)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetSubscribers")
 		return resp, nil
 	}
 	return resp, nil
