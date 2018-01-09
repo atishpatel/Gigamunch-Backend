@@ -51,7 +51,7 @@ var (
 
 func main() {
 	fmt.Printf("Doc link:\n%s\n----------\n", docSheet)
-	startAddress := []string{"166 Chesapeake Harbor Blvd, Hendersonville"}
+	startAddress := []string{"166+Chesapeake+Harbor+Blvd,+Hendersonville"}
 	del := "\n"
 	replacer := strings.NewReplacer("\t", "", " ", "+")
 	for _, i := range input {
