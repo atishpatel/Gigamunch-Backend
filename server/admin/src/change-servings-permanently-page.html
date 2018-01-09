@@ -111,6 +111,10 @@
           },
           loading: {
             type: Boolean
+          },
+          delim: {
+            type: String,
+            value: ' - ',
           }
         }
       }
@@ -136,7 +140,7 @@
             if (subs[i].vegetarian_servings > 0) {
               bagType = ' veg';
             }
-            emails[i] += ' - ' + servings + bagType;
+            emails[i] += this.delim + servings + bagType;
           }
           emails.sort(function(a, b) {
             return a.localeCompare(b);
@@ -157,7 +161,7 @@
 
       changeServingsPermanently() {
         this.loading = true;
-        const email = this.email;
+        const email = this.email.split(this.delim)[0];
         const servings = Number(this.servings);
         const vegetarian = this.vegetarian;
         this.service.ChangeServingsPermanently(email, servings, vegetarian, (err) => {
