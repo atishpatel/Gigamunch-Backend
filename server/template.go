@@ -31,7 +31,7 @@ type Page struct {
 func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/", handleHome)
 	r.GET("/schedule", handleHome)
-	r.GET("/passport", handleHome)
+	r.GET("/passport", handlePassport)
 	r.GET("/login", handleLogin)
 	r.GET("/terms", handleTerms)
 	r.GET("/privacy", handlePrivacy)
@@ -369,6 +369,16 @@ func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Para
 	page := &homePage{
 		Page: Page{
 			ID: "home",
+		},
+	}
+	defer display(ctx, w, "home", page)
+}
+
+func handlePassport(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	ctx := appengine.NewContext(req)
+	page := &homePage{
+		Page: Page{
+			ID: "passport",
 		},
 	}
 	defer display(ctx, w, "home", page)

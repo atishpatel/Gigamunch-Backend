@@ -454,6 +454,7 @@
     [[ template "nav" .]]
   </header>
   <main>
+      [[if eq .ID "passport"]] [[template "passport-section" .]] [[end]]
     [[if eq .ID "referred"]] [[template "referred-section" .]] [[end]]
     [[if eq .ID "gifted"]] [[template "gifted-section" .]] [[end]]
     <header class="hero">
