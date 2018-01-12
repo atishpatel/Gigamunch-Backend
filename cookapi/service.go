@@ -92,6 +92,8 @@ func main() {
 	http.HandleFunc("/task/send-bag-reminder", handleSendBagReminder)
 	http.HandleFunc("/task/send-preview-culture-email", handleSendPreviewCultureEmail)
 	http.HandleFunc("/task/send-culture-email", handleSendCultureEmail)
+	http.HandleFunc("/task/send-quantity-sms", handleSendQuantitySMS)
+	http.HandleFunc("/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/webhook/twilio-sms", handleTwilioSMS)
 	http.HandleFunc("/testbra", testbra)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
@@ -387,6 +389,108 @@ func handleSendCultureEmail(w http.ResponseWriter, req *http.Request) {
 		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
 		if err != nil {
 			utils.Criticalf(ctx, "failed to handleSendCultureEmail: failed to mail.AddBatchTag: %s", err)
+		}
+	}
+}
+
+func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	if !common.IsProd(projectID) {
+		return
+	}
+	// cultureDate := time.Now().Add(3 * 24 * time.Hour)
+	cultureDate := time.Now()
+	if cultureDate.Weekday() != time.Monday {
+		cultureDate = cultureDate.Add(24 * time.Hour)
+	}
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleSendQuantitySMS: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var nonSkippers []*sub.SubscriptionLog
+	var nonSkippersEmails []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i])
+			nonSkippersEmails = append(nonSkippersEmails, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippersEmails) == 0 {
+		return
+	}
+	subs, err := subC.GetSubscribers(nonSkippersEmails)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleSendQuantitySMS: failed to sub.GetSubscribers: %s", err)
+		return
+	}
+	twoBags := 0
+	twoVegBags := 0
+	fourBags := 0
+	fourVegBags := 0
+	moreThanFourBags := 0
+	moreThanFourVegBags := 0
+	var specialNames []string
+	var listOfMoreThanFourBags []int8
+	var listOfMoreThanFourVegBags []int8
+	for i, sublog := range nonSkippers {
+		veg := false
+		if subs[i].VegetarianServings > 0 {
+			veg = true
+		}
+		if sublog.Servings == 2 {
+			if veg {
+				twoVegBags++
+			} else {
+				twoBags++
+			}
+		} else if sublog.Servings == 4 {
+			if veg {
+				fourVegBags++
+			} else {
+				fourBags++
+			}
+		} else {
+			if veg {
+				moreThanFourVegBags++
+				listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, sublog.Servings)
+			} else {
+				moreThanFourBags++
+				listOfMoreThanFourBags = append(listOfMoreThanFourBags, sublog.Servings)
+			}
+		}
+		if sublog.Free {
+			var name string
+			if veg {
+				name = fmt.Sprintf("%s %d veg", subs[i].Name, sublog.Servings)
+			} else {
+				name = fmt.Sprintf("%s %d non-veg", subs[i].Name, sublog.Servings)
+			}
+			specialNames = append(specialNames, name)
+		}
+	}
+	msg := `%s culture execution: 
+	2 bags: %d 
+	2 veg bags: %d
+	4 bags: %d 
+	4 veg bags: %d
+	
+	4+ bags: %d 
+	4+ bags list: %v 
+	4+ veg bags: %d
+	4+ veg bags list: %v
+	
+	New Customers: %d 
+	%v`
+
+	msg = fmt.Sprintf(msg, cultureDate.Format("2006-01-02"), twoBags, twoVegBags, fourBags, fourVegBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, len(specialNames), specialNames)
+	messageC := message.New(ctx)
+	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
+	for _, number := range numbers {
+		err = messageC.SendDeliverySMS(number, msg)
+		if err != nil {
+			logging.Errorf(ctx, "failed to send quantity sms: %+v", err)
 		}
 	}
 }
