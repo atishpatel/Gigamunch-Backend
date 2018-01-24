@@ -72,7 +72,7 @@
         Unskipped
       </h2>
       <sublog-sortable-table id="unskipped"
-                             sublogs="[[sublogsByDate.unskippedSublogs]]">
+                             sublogs="[[sublogsByDate.unskippedSublogs]]" percent-skip="[[percentSkip]]">
       </sublog-sortable-table>
       <h2 class="table-title">
         Skipped
@@ -162,6 +162,9 @@
           sublogsByDate: {
             type: Array,
             notify: true,
+          },
+          percentSkip: {
+            type: String,
           },
           polys: {
             type: Object,
@@ -285,6 +288,7 @@
             }
           }
           this.sublogsByDate = sublogDay;
+          this.percentSkip = (sublogDay.skippedSublogs.length / slogs.length * 100).toFixed(2);
           this.setPolygons();
         });
       }
