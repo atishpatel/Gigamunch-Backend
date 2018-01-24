@@ -398,7 +398,6 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	if !common.IsProd(projectID) {
 		return
 	}
-	// cultureDate := time.Now().Add(3 * 24 * time.Hour)
 	cultureDate := time.Now()
 	if cultureDate.Weekday() != time.Monday {
 		cultureDate = cultureDate.Add(24 * time.Hour)
@@ -467,14 +466,23 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 			} else {
 				name = fmt.Sprintf("%s %d non-veg", subs[i].Name, sublog.Servings)
 			}
+			if subs[i].NumGiftDinners > 0 {
+				gifter, err := subC.GetSubscriber(subs[i].ReferenceEmail)
+				if err == nil {
+					name += " gifted from " + gifter.Name
+				}
+			}
 			specialNames = append(specialNames, name)
 		}
 	}
+	totalStandardBags := twoBags + twoVegBags + fourBags + fourVegBags
 	msg := `%s culture execution: 
 	2 bags: %d 
 	2 veg bags: %d
 	4 bags: %d 
 	4 veg bags: %d
+
+	Total bags: %d + 4+ bags below
 	
 	4+ bags: %d 
 	4+ bags list: %v 
@@ -483,8 +491,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	
 	New Customers: %d 
 	%v`
-
-	msg = fmt.Sprintf(msg, cultureDate.Format("2006-01-02"), twoBags, twoVegBags, fourBags, fourVegBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, len(specialNames), specialNames)
+	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, twoVegBags, fourBags, fourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, len(specialNames), common.CommaSeperate(specialNames))
 	messageC := message.New(ctx)
 	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
 	for _, number := range numbers {
