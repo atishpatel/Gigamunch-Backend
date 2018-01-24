@@ -21,6 +21,14 @@
           padding: 10px;
         }
 
+        .page-title {
+          color: red;
+        }
+
+        paper-button {
+          margin: 12px 0;
+        }
+
       </style>
     </shared-styles>
 
@@ -39,6 +47,7 @@
             <option value="[[email]]">[[email]]</option>
           </template>
         </select>
+        <br>
       <paper-button disabled$="[[loading]]"
                     on-tap="submitCancel">Submit Cancel</paper-button>
     </div>

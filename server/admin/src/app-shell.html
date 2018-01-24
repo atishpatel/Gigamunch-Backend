@@ -65,6 +65,10 @@
           --paper-icon-button-ink-color: white;
         }
 
+        .toolbar-title-link, .toolbar-title-link:visited {
+          color: #4F4F4F;
+        }
+
         .page-header-title {
           font-size: 24px;
           @apply --font-bold;
@@ -315,7 +319,7 @@
             <paper-icon-button icon="app-icons:menu"
                                drawer-toggle>
             </paper-icon-button>
-            <div main-title><a href="/admin">Gigamunch Admin</a></div>
+            <div main-title><a class="toolbar-title-link" href="/admin">Gigamunch Admin</a></div>
           </app-toolbar>
         </app-header>
 
