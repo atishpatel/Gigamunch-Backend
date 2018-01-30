@@ -16,7 +16,7 @@ func main() {
 	printMontlyChurnRate()
 }
 func printWeeklyChrunRate() {
-	var churnRate [52]float32
+	var churnRate [60]float32
 	for i := range churnRate {
 		subsThisWeek := 0
 		cancelsThisWeek := 0
