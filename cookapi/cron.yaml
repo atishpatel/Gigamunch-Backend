@@ -18,18 +18,18 @@ cron:
   schedule: every day 9:30
   timezone: America/Chicago
   target: cookapi
-- description: "Send Monday Quantity sms"
+- description: "Send Monday Quantity sms 1"
   url: /task/send-quantity-sms
-  schedule: every friday 18:00
+  schedule: every friday 16:00
   timezone: America/Chicago
   target: cookapi
-- description: "Send Monday Quantity sms"
+- description: "Send Monday Quantity sms 2"
   url: /task/send-quantity-sms
   schedule: every sunday 12:00
   timezone: America/Chicago
   target: cookapi
-- description: "Send Monday Quantity sms"
+- description: "Send Monday Quantity sms 3"
   url: /task/send-quantity-sms
-  schedule: every monday 09:00
+  schedule: every monday 15:00
   timezone: America/Chicago
   target: cookapi
