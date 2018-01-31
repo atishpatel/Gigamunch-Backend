@@ -97,7 +97,7 @@ func setupWithContext(ctx context.Context) error {
 		return fmt.Errorf("failed to setup logging: %+v", err)
 	}
 	// Setup mail
-	err = mail.Setup(ctx, true, projID, config.DripAPIKey, config.DripAccountID)
+	err = mail.Setup(ctx, true, projID, config.DripAPIKey, config.DripAccountID, config.MailgunAPIKey, config.MailgunPublicAPIKey)
 	if err != nil {
 		return fmt.Errorf("failed to setup mail: %+v", err)
 	}

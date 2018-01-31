@@ -45,6 +45,8 @@ type Config struct {
 	SendGridKey               string   `json:"send_grid_key" datastore:",noindex"`
 	DripAPIKey                string   `json:"drip_api_key"`
 	DripAccountID             string   `json:"drip_account_id"`
+	MailgunAPIKey             string   `json:"mailgun_api_key"`
+	MailgunPublicAPIKey       string   `json:"mailgun_public_api_key"`
 }
 
 // BTEnvironment is the environment type for braintree

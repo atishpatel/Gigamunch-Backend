@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"gopkg.in/mailgun/mailgun-go.v1"
+
 	"cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -16,10 +18,12 @@ import (
 // TODO: Logging
 
 var (
-	standAppEngine bool
-	key            string
-	acctID         string
-	projID         string
+	standAppEngine      bool
+	dripAPIKey          string
+	mailgunAPIKey       string
+	mailgunPublicAPIKey string
+	dripAcctID          string
+	projID              string
 )
 
 var (
@@ -53,8 +57,7 @@ const (
 	// FourServings if they are 4 servings.
 	FourServings Tag = "FOUR_SERVINGS"
 	// Dev if they are development server customers.
-	Dev          Tag = "DEV"
-	ignoreDomain     = "@test.com"
+	Dev Tag = "DEV"
 )
 
 // GetPreviewEmailTag returns the tag that needs to be added to get the preview email based on date provided. Date should be date the person is recieving their meal.
@@ -74,20 +77,21 @@ func GetReceivedJourneyTag(numJourneys int) Tag {
 
 // Client is a client for manipulating subscribers.
 type Client struct {
-	ctx   context.Context
-	log   *logging.Client
-	dripC *drip.Client
+	ctx      context.Context
+	log      *logging.Client
+	dripC    *drip.Client
+	mailgunC mailgun.Mailgun
 }
 
 // NewClient gives you a new client.
 func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 	var err error
-	dripClient, err := drip.New(key, acctID)
+	if dripAPIKey == "" {
+		return nil, errInternal.Annotate("setup not called or dripAPIKey is empty")
+	}
+	dripClient, err := drip.New(dripAPIKey, dripAcctID)
 	if err != nil {
 		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
-	}
-	if key == "" {
-		return nil, errInternal.Annotate("setup not called or key is empty")
 	}
 	if standAppEngine {
 		dripClient.HTTPClient = urlfetch.Client(ctx)
@@ -102,6 +106,16 @@ func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 	}, nil
 }
 
+// Send sends a plain text email.
+func (c *Client) Send(from, subject, message string, to ...string) error {
+	msg := mailgun.NewMessage(from, subject, message, to...)
+	_, _, err := c.mailgunC.Send(msg)
+	if err != nil {
+		return errInternal.WithError(err).Wrap("failed to send mailgun email")
+	}
+	return nil
+}
+
 // UserFields contain all the possible fields a user can have.
 type UserFields struct {
 	Email             string    `json:"email"`
@@ -114,7 +128,7 @@ type UserFields struct {
 
 // UpdateUser updates the user custom fields.
 func (c *Client) UpdateUser(req *UserFields) error {
-	if strings.Contains(req.Email, ignoreDomain) {
+	if ignoreEmail(req.Email) {
 		return nil
 	}
 	// resp, err := c.dripC.FetchSubscriber(req.Email)
@@ -171,7 +185,7 @@ func (c *Client) UpdateUser(req *UserFields) error {
 
 // AddTag adds a tag to a customer. This often triggers a workflow.
 func (c *Client) AddTag(email string, tag Tag) error {
-	if strings.Contains(email, ignoreDomain) {
+	if ignoreEmail(email) {
 		return nil
 	}
 	req := &drip.TagsReq{
@@ -194,7 +208,7 @@ func (c *Client) AddTag(email string, tag Tag) error {
 
 // RemoveTag removes a tag from a customer. This often triggers a workflow.
 func (c *Client) RemoveTag(email string, tag Tag) error {
-	if strings.Contains(email, ignoreDomain) {
+	if ignoreEmail(email) {
 		return nil
 	}
 	req := &drip.TagReq{
@@ -221,7 +235,7 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 	subs := make([]drip.UpdateSubscriber, len(emails))
 	i := 0
 	for _, email := range emails {
-		if !strings.Contains(email, ignoreDomain) {
+		if !ignoreEmail(email) {
 			subs[i].Email = email
 			subs[i].Tags = tagsString
 			i++
@@ -247,11 +261,20 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 	return nil
 }
 
+func ignoreEmail(email string) bool {
+	if strings.Contains(email, "@test.com") || strings.Contains(email, "@apartment.com") {
+		return true
+	}
+	return false
+}
+
 // Setup sets up the logging package.
-func Setup(ctx context.Context, standardAppEngine bool, projectID, apiKey, accountID string) error {
+func Setup(ctx context.Context, standardAppEngine bool, projectID, dripAPIkey, dripAccountID, mailgunAPIkey, mailgunPublicAPIkey string) error {
 	standAppEngine = standardAppEngine
-	key = apiKey
-	acctID = accountID
+	dripAPIKey = dripAPIkey
+	dripAcctID = dripAccountID
+	mailgunAPIKey = mailgunAPIkey
+	mailgunPublicAPIKey = mailgunPublicAPIkey
 	return nil
 }
 
