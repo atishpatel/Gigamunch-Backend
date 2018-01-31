@@ -354,6 +354,16 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		if err != nil {
 			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
 		}
+		// add to task queue
+		taskC := tasks.New(ctx)
+		r := &tasks.ProcessSubscriptionParams{
+			SubEmail: entry.Email,
+			Date:     firstBoxDate,
+		}
+		err = taskC.AddProcessSubscription(firstBoxDate.Add(-24*time.Hour), r)
+		if err != nil {
+			return errors.Wrap("failed to tasks.AddProcessSubscription", err)
+		}
 	}
 	return resp
 }

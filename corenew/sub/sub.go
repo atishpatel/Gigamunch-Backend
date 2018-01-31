@@ -716,7 +716,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 	}
 	utils.Infof(c.ctx, "adding %d subscribers to SubLog", len(subs))
 	taskC := tasks.New(c.ctx)
-	dayBeforeBox := date.Add(-2 * time.Hour)
+	dayBeforeBox := date.Add(-2 * time.Hour) // TODO: change cron to timezone to make code easier to understand
 	for _, v := range subs {
 		if (!v.FirstBoxDate.IsZero() && v.FirstBoxDate.After(dayBeforeBox)) || (!v.SubscriptionDate.IsZero() && v.SubscriptionDate.After(dayBeforeBox)) {
 			continue
