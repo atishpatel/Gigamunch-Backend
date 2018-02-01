@@ -46,6 +46,9 @@ if [[ $1 == "build" ]]; then
     protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
     # Typescript
     gulp build
+    # Copy Typescript definitions to folder
+    cp Gigamunch-Proto/admin/*.d.ts admin/app/ts/prototypes
+    cp Gigamunch-Proto/shared/*.d.ts admin/app/ts/prototypes
   fi
   exit 0
 fi
