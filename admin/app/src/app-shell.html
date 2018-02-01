@@ -358,6 +358,11 @@
                            service="[[serviceold]]"
                            user="{{user}}">
           </email-list-page>
+          <unpaid-page name="unpaid"
+                       id="unpaidPage"
+                       service="[[service]]"
+                       user="{{user}}">
+          </unpaid-page>
           <sublog-page name="sublog"
                        id="sublogPage"
                        service="[[serviceold]]"
@@ -406,8 +411,7 @@
             notify: true,
             value: function() {
               if (!APP.IsDev && !APP.User.IsAdmin()) {
-                // window.location = '/login';
-                // TODO: redirect
+                window.location = '/login';
               }
               return APP.User;
             }
@@ -452,24 +456,18 @@
         // Load page import on demand. Show 404 page if fails
         let el;
         let resolvedPageURL, elementName, title;
+        elementName = page + '-page';
+        resolvedPageURL = this.resolveUrl( page + '-page.html');
+        title = page.charAt(0).toUpperCase() + page.slice(1);
         switch (page) {
           case 'skip':
-            elementName = 'skip-page';
-            resolvedPageURL = this.resolveUrl('skip-page.html');
             el = this.$.skipPage;
-            title = 'Skip';
             break;
           case 'cancel':
-            elementName = 'cancel-page';
-            resolvedPageURL = this.resolveUrl('cancel-page.html');
             el = this.$.cancelPage;
-            title = 'Cancel';
             break
           case 'discount':
-            elementName = 'discount-page';
-            resolvedPageURL = this.resolveUrl('discount-page.html');
             el = this.$.discountPage;
-            title = 'Discount';
             break;
           case 'change-servings':
             elementName = 'change-servings-page';
@@ -489,11 +487,11 @@
             el = this.$.emailList;
             title = 'Email list';
             break;
+          case 'unpaid':
+            el = this.$.unpaidPage;
+            break;
           case 'sublog':
-            elementName = 'sublog-page';
-            resolvedPageURL = this.resolveUrl('sublog-page.html');
             el = this.$.sublogPage;
-            title = 'Sublog';
             break;
           case 'sublogdetail':
             elementName = 'sublog-detail-page';
@@ -501,9 +499,6 @@
             el = this.$.sublogdetailPage;
             title = 'Sublog detailed';
             break;
-          default:
-            elementName = page + '-page';
-            resolvedPageURL = this.resolveUrl(page + '-page.html');
         }
         this.set('title', title);
         // import element
