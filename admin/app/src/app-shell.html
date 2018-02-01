@@ -403,7 +403,7 @@
           service: {
             type: Object,
             value: function() {
-              return APP.Service;
+              return APP.Service ? APP.Service : Service;
             }
           },
           user: {
@@ -435,6 +435,9 @@
         super();
         this.addEventListener('toast', this.toastEvent.bind(this));
         this.addEventListener('error', this.errorEvent.bind(this));
+        if (this.service === undefined) {
+          this.service = APP.Service ? APP.Service : Service;
+        }
         if (this.page === undefined) {
           this.page = 'sublog';
         }
@@ -459,16 +462,8 @@
         elementName = page + '-page';
         resolvedPageURL = this.resolveUrl( page + '-page.html');
         title = page.charAt(0).toUpperCase() + page.slice(1);
+        el = this.shadowRoot.querySelector('#'+page+'Page');
         switch (page) {
-          case 'skip':
-            el = this.$.skipPage;
-            break;
-          case 'cancel':
-            el = this.$.cancelPage;
-            break
-          case 'discount':
-            el = this.$.discountPage;
-            break;
           case 'change-servings':
             elementName = 'change-servings-page';
             resolvedPageURL = this.resolveUrl('change-servings-page.html');
@@ -486,12 +481,6 @@
             resolvedPageURL = this.resolveUrl('email-list-page.html');
             el = this.$.emailList;
             title = 'Email list';
-            break;
-          case 'unpaid':
-            el = this.$.unpaidPage;
-            break;
-          case 'sublog':
-            el = this.$.sublogPage;
             break;
           case 'sublogdetail':
             elementName = 'sublog-detail-page';
