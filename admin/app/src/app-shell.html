@@ -329,43 +329,43 @@
                     role="main">
           <skip-page name="skip"
                      id="skipPage"
-                     service="[[service]]"
+                     service="[[serviceold]]"
                      user="{{user}}">
           </skip-page>
           <cancel-page name="cancel"
                        id="cancelPage"
-                       service="[[service]]"
+                       service="[[serviceold]]"
                        user="{{user}}">
           </cancel-page>
           <discount-page name="discount"
                          id="discountPage"
-                         service="[[service]]"
+                         service="[[serviceold]]"
                          user="{{user}}">
           </discount-page>
           <change-servings-page name="change-servings"
                                 id="changeServingsPage"
-                                service="[[service]]"
+                                service="[[serviceold]]"
                                 user="{{user}}">
           </change-servings-page>
           <change-servings-permanently-page name="change-servings-permanently"
                                             id="changeServingsPermanentlyPage"
-                                            service="[[service]]"
+                                            service="[[serviceold]]"
                                             user="{{user}}">
           </change-servings-permanently-page>
 
           <email-list-page name="email-list"
                            id="emailList"
-                           service="[[service]]"
+                           service="[[serviceold]]"
                            user="{{user}}">
           </email-list-page>
           <sublog-page name="sublog"
                        id="sublogPage"
-                       service="[[service]]"
+                       service="[[serviceold]]"
                        user="{{user}}">
           </sublog-page>
           <sublog-detail-page name="sublogdetail"
                               id="sublogdetailPage"
-                              service="[[service]]"
+                              service="[[serviceold]]"
                               user="{{user}}"
                               route="[[subroute]]">
           </sublog-detail-page>
@@ -389,10 +389,16 @@
             reflectToAttribute: true,
             observer: '_pageChanged',
           },
-          service: {
+          serviceold: {
             type: Object,
             value: function() {
               return COOK.Service;
+            }
+          },
+          service: {
+            type: Object,
+            value: function() {
+              return APP.Service;
             }
           },
           user: {
