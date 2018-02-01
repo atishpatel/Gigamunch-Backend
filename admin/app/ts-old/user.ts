@@ -2,7 +2,7 @@ declare var COOK: any;
 
 COOK = COOK || {};
 
-class User {
+class UserOld {
   isLoggedIn: boolean;
   token: string;
   isCook: boolean;
@@ -62,12 +62,19 @@ class User {
   }
 
   getTokenCookie() {
-    const name = 'GIGATKN=';
-    const ca = document.cookie.split(';');
+    let name = 'GIGATKN=';
+    let ca = document.cookie.split(';');
     for (let i = 0; i < ca.length; i++) {
       let c = ca[i];
       while (c.charAt(0) === ' ') { c = c.substring(1); }
-      if (c.indexOf(name) === 0) { return c.substring(name.length, c.length); }
+      if (c.indexOf(name) === 0) { return c.substring(name.length, c.length).replace(/\n/g,''); }
+    }
+    name = 'AUTHTKN=';
+    ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') { c = c.substring(1); }
+      if (c.indexOf(name) === 0) { return c.substring(name.length, c.length).replace(/\n/g,''); }
     }
     return '';
   }
@@ -83,9 +90,26 @@ class User {
   }
 }
 
-COOK.User = new User();
+COOK.User = new UserOld();
 
-// redirect if token is empty
-if (!COOK.User.isLoggedIn && !COOK.isDev) {
-  window.location.href = '/login';
+function getTokenCookie(cookieName: string) {
+  const name = cookieName+'=';
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') { c = c.substring(1); }
+    if (c.indexOf(name) === 0) { return c.substring(name.length, c.length); }
+  }
+  return '';
 }
+ 
+if (!getTokenCookie('AUTHTKN')) {
+  const tmptkn = getTokenCookie('GIGATKN')
+  if (tmptkn) {
+    const exptime = 1522623345;
+    const d = new Date(0);
+    d.setUTCSeconds(exptime);
+    document.cookie = `AUTHTKN=${tmptkn}; expires=${d.toUTCString()}; path=/`;
+  }
+}
+

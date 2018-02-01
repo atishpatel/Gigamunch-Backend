@@ -7,7 +7,7 @@ export function GetToken(): string {
       c = c.substring(1);
     }
     if (c.indexOf(name) === 0) {
-      return c.substring(name.length, c.length);
+      return c.substring(name.length, c.length).replace(/\n/g,'');
     }
   }
   if (location.hostname === 'localhost') {
@@ -40,7 +40,10 @@ interface JWT {
   exp: number;
 }
 
-export function GetJWT(tkn: string): JWT {
+export function GetJWT(tkn: string): JWT | null {
+  if (!tkn) {
+    return null;
+  }
   const tknConv = tkn.replace(/[+\/]/g, (m0) => {
     return m0 === '+' ? '-' : '_';
   }).replace(/=/g, '');

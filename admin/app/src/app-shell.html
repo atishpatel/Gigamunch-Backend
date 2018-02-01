@@ -382,7 +382,6 @@
         return 'app-shell';
       }
 
-
       static get properties() {
         return {
           page: {
@@ -400,20 +399,17 @@
             type: Object,
             notify: true,
             value: function() {
-              if (!COOK.User.isAdmin && !COOK.isDev) {
-                window.location = '/cook';
-                // TODO redirect
+              if (!APP.IsDev && !APP.User.IsAdmin()) {
+                // window.location = '/login';
+                // TODO: redirect
               }
-              return COOK.User;
+              return APP.User;
             }
           },
           cookAPIURL: {
             type: String,
             value: function() {
-              // if (COOK.isDev) {
-              //   return 'localhost:8080/_ah/api/explorer';
-              // }
-              return COOK.isProd ? 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api/explorer' : 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api/explorer';
+              return APP.IsProd ? 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api/explorer' : 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api/explorer';
             }
           },
         }

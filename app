@@ -20,7 +20,7 @@ if [[ $1 == "build" ]]; then
   if [[ $* == *admin* ]]; then
     echo "Building admin/app:"
     cd admin/app
-    gulp build
+    gulp watch
     cd ../..
   fi
   if [[ $* == *cook* ]]; then
@@ -77,6 +77,7 @@ if [[ $1 == "deploy" ]]; then
   fi
   if [[ $* == *admin* ]]; then
     echo "Deploying admin:"
+    cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     gcloud app deploy admin/app.yaml --project=$project --version=1 --quiet
   fi
   if [[ $* == *server* ]]; then

@@ -6,12 +6,24 @@ handlers:
   - url: /admin/api/.*
     script: _go_app
 
-  - url: /admin/build
-    static_dir: app/build
+  - url: /admin/src
+    static_dir: app/src
     secure: always
   
   - url: /admin/node_modules
     static_dir: app/node_modules
+    secure: always
+  
+  - url: /admin/bower_components
+    static_dir: app/bower_components
+    secure: always
+
+  - url: /admin/js
+    static_dir: app/js
+    secure: always
+
+  - url: /admin/js-old
+    static_dir: app/js-old
     secure: always
 
   # TODO: set meta data on server side
@@ -40,6 +52,5 @@ skip_files:
   - ^(.*/)?.*\.gitignore$
   - ^(.*/)?.*\.lock$
   - ^(.*/)?.*/LICENSE$
-  - ^(app/src/.*)
   - ^(app/types/.*)
   - ^(app/node_modules/@types/.*)

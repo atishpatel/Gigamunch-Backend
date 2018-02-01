@@ -6,7 +6,7 @@ declare var gapi: any;
 
 COOK = COOK || {};
 
-class Service {
+class ServiceOld {
   loaded: boolean;
   callQueue: Function[];
   service: any;
@@ -705,23 +705,23 @@ class Service {
         exDescription: desc,
         exFatal: false,
       });
-      if (err.code && err.code === 452 && !COOK.isDev) { // code signout
-        window.location.href = '/signout';
-      }
+      // if (err.code && err.code === 452 && !COOK.isDev) { // code signout
+      //   window.location.href = '/signout';
+      // }
       return true;
     }
     return false;
   }
 }
 
-COOK.Service = new Service();
+COOK.Service = new ServiceOld();
 
 function initService() {
   let apiRoot = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api';
-  if (COOK.isDev) {
+  if (APP.IsDev) {
     //apiRoot = 'http://localhost:8080/_ah/api';
     apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
-  } else if (COOK.isStage) {
+  } else if (APP.IsStage) {
     apiRoot = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api';
   }
   gapi.client.load('cookservice', 'v1', () => {

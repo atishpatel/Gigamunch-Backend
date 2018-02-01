@@ -11,24 +11,6 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
-# Admin
-- url: /admin/bower_components
-  static_dir: admin/bower_components
-  secure: always
-
-- url: /admin/src
-  static_dir: admin/src
-  secure: always
-
-- url: /admin/js
-  static_dir: admin/js
-  secure: always  
-
-- url: /admin.*
-  static_files: admin/index.html
-  upload: admin/index.html
-  secure: always
-
 # Website app
 - url: /cooksignup
   script: _go_app

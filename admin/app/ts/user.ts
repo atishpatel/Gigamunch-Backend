@@ -18,12 +18,24 @@ export let LastName = '';
 export let PhotoURL = '';
 
 export function UpdateUser() {
-  const jwt = GetJWT(GetToken());
+  const tkn = GetToken()
+  if (!tkn) {
+    return;
+  }
+  const jwt = GetJWT(tkn);
+  if (!jwt) {
+    return;
+  }
   ID = jwt.id;
   Email = jwt.email;
   FirstName = jwt.first_name;
   LastName = jwt.last_name;
   PhotoURL = jwt.photo_url;
+}
+
+export function IsAdmin(): boolean {
+  const jwt = GetJWT(GetToken());
+  return getKthBit(jwt.perm, 2);
 }
 
 export function HasCreditCard(): boolean {
