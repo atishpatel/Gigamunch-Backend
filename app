@@ -46,6 +46,9 @@ if [[ $1 == "build" ]]; then
     protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
     # Typescript
     gulp build
+    # Copy Typescript definitions to folder
+    cp Gigamunch-Proto/admin/*.d.ts admin/app/ts/prototypes
+    cp Gigamunch-Proto/shared/*.d.ts admin/app/ts/prototypes
   fi
   exit 0
 fi
@@ -117,9 +120,12 @@ if [[ $1 == "serve" ]]; then
   fi
   if [[ $2 == "server" ]]; then
     echo "Starting server:"
-    cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g" > cookapi/app.yaml
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore server/app.yaml
+    dev_appserver.py --datastore_path ./.datastore server/app.yaml&
+    cd server
+    gulp build&
+    gulp watch
+    cd ..
   fi
   # stop mysql
 

@@ -30,6 +30,7 @@ const (
 	selectSubLogStatement                    = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date='%s' AND sub_email='%s'"
 	selectSubscriberSubLogsStatement         = "SELECT date,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent, refunded FROM `sub` WHERE sub_email='%s'"
 	selectAllSubLogStatement                 = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` ORDER BY date DESC LIMIT %d"
+	selectUnpaidSubLogStatement              = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE paid=0 ORDER BY date DESC LIMIT %d"
 	selectSubLogFromDateStatement            = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
 	updatePaidSubLogStatement                = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
 	updateSkipSubLogStatement                = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
@@ -126,6 +127,41 @@ func (c *Client) GetAll(limit int32) ([]*SubscriptionLog, error) {
 	rows, err := mysqlDB.Query(st)
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to query selectAllSubLogStatement statement:")
+	}
+	defer handleCloser(c.ctx, rows)
+	var subLogs []*SubscriptionLog
+	for rows.Next() {
+		subLog := new(SubscriptionLog)
+		var date mysql.NullTime
+		var createdNulltime mysql.NullTime
+		var paidNulltime mysql.NullTime
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.DeliveryTime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
+		}
+		if date.Valid {
+			subLog.Date = date.Time
+		}
+		if createdNulltime.Valid {
+			subLog.CreatedDatetime = createdNulltime.Time
+		}
+		if paidNulltime.Valid {
+			subLog.PaidDatetime = paidNulltime.Time
+		}
+		subLogs = append(subLogs, subLog)
+	}
+	return subLogs, nil
+}
+
+// GetUnpaidSublogs gets unpaid SubLogs.
+func (c *Client) GetUnpaidSublogs(limit int32) ([]*SubscriptionLog, error) {
+	if limit <= 0 {
+		limit = 1000
+	}
+	st := fmt.Sprintf(selectUnpaidSubLogStatement, limit)
+	rows, err := mysqlDB.Query(st)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrap("failed to query selectUnpaidSubLogStatement statement:")
 	}
 	defer handleCloser(c.ctx, rows)
 	var subLogs []*SubscriptionLog

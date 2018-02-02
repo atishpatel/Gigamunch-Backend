@@ -7,11 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 
+	authold "github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
@@ -53,6 +55,8 @@ func init() {
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", handler(systemsAdmin(GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", handler(systemsAdmin(GetLogs)))
+	// Sublogs
+	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	//
@@ -69,6 +73,9 @@ func setup() error {
 	sqlConnectionString := os.Getenv("MYSQL_CONNECTION")
 	if sqlConnectionString == "" {
 		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
+	}
+	if appengine.IsDevAppServer() {
+		sqlConnectionString = "root@/gigamunch"
 	}
 	sqlC, err = sqlx.Connect("mysql", sqlConnectionString)
 	if err != nil {
@@ -112,7 +119,7 @@ func setupWithContext(ctx context.Context) error {
 func userAdmin(f handle) handle {
 	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
 		user, err := getUserFromRequest(ctx, r, log)
-		if !err.IsNil() {
+		if err != nil {
 			return err
 		}
 		if !user.IsUserAdmin() {
@@ -125,7 +132,7 @@ func userAdmin(f handle) handle {
 func driverAdmin(f handle) handle {
 	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
 		user, err := getUserFromRequest(ctx, r, log)
-		if !err.IsNil() {
+		if err != nil {
 			return err
 		}
 		if !user.IsDriverAdmin() {
@@ -138,7 +145,7 @@ func driverAdmin(f handle) handle {
 func systemsAdmin(f handle) handle {
 	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
 		user, err := getUserFromRequest(ctx, r, log)
-		if !err.IsNil() {
+		if err != nil {
 			return err
 		}
 		if !user.IsSystemsAdmin() {
@@ -148,34 +155,60 @@ func systemsAdmin(f handle) handle {
 	}
 }
 
-func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Client) (*common.User, errors.ErrorWithCode) {
+func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Client) (*common.User, *errors.ErrorWithCode) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
-		return nil, errBadRequest.Annotate("auth-token is empty")
+		e := errBadRequest.Annotate("auth-token is empty")
+		return nil, &e
 	}
-	authC, err := auth.NewClient(ctx, log)
+	// TODO: use new auth client
+	// authC, err := auth.NewClient(ctx, log)
+	// if err != nil {
+	// 	return nil, errors.Annotate(err, "failed to get auth.NewClient")
+	// }
+	// user, err := authC.GetUser(ctx, token)
+	// if err != nil {
+	// 	return nil, errors.Annotate(err, "failed to get auth.GetUser")
+	// }
+	userold, err := authold.GetUserFromToken(ctx, token)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to get auth.NewClient")
+		e := errors.Annotate(err, "failed to authold.GetUserFromToken")
+		return nil, &e
 	}
-	user, err := authC.GetUser(ctx, token)
-	if err != nil {
-		return nil, errors.Annotate(err, "failed to get auth.GetUser")
+	first := ""
+	last := ""
+	name := strings.Title(strings.TrimSpace(userold.Name))
+	lastSpace := strings.LastIndex(name, " ")
+	if lastSpace == -1 {
+		first = name
+	} else {
+		first = name[:lastSpace]
+		last = name[lastSpace:]
 	}
-	return user, errors.NoError
+	user := &common.User{
+		FirstName:   first,
+		LastName:    last,
+		Email:       userold.Email,
+		PhotoURL:    userold.PhotoURL,
+		Permissions: userold.Permissions,
+	}
+	return user, nil
 }
 
 func handler(f func(context.Context, *http.Request, *logging.Client) Response) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		// get context
 		ctx := appengine.NewContext(r)
 		if !setupDone {
 			err = setupWithContext(ctx)
 			if err != nil {
 				// TODO: Alert but send friendly error back
-				log.Fatal("failed to setup: %+v", err)
+				log.Fatalf("failed to setup: %+v", err)
 				return
 			}
 		}
+		// create logging client
 		loggingC, err := logging.NewClient(ctx, r.URL.Path)
 		if err != nil {
 			errString := fmt.Sprintf("failed to get new logging client: %+v", err)

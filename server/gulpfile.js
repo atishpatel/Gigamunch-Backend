@@ -9,26 +9,20 @@ const watch = require('gulp-watch');
 const rollup = require('gulp-better-rollup');
 let rename = require("gulp-rename");
 
-
-
 // Additional plugins can be used to optimize your source files after splitting.
 // Before using each plugin, install with `npm i --save-dev <package-name>`
 const uglify = require('gulp-uglify-es').default;
-// const cssSlam = require('css-slam').gulp;
 const htmlMinifier = require('html-minifier').minify;
 
-// const swPrecacheConfig = require('./sw-precache-config.js');
 const buildDirectory = 'js';
-const protoDirectory = '../../Gigamunch-Proto';
 
-function buildApp() {
-  return new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
-    // Okay, so first thing we do is clear the build directory
+function buildTS() {
+  return new Promise((resolve, reject) => {
     console.log(`Deleting ${buildDirectory} directory...`);
     del([buildDirectory])
       .then(() => {
         console.log(`Compiling typescript...`);
-        let stream = gulp.src('./ts/*.ts')
+        let stream = gulp.src('./ts/**/*.ts')
           .pipe(importsInliner({
             parserOptions: {
               allowImportExportEverywhere: true,
@@ -53,7 +47,6 @@ function buildApp() {
             target: 'ES2015',
             module: 'es2015',
             removeComments: true,
-            typeRoots: [`${protoDirectory}/shared`, `${protoDirectory}/admin`, `${protoDirectory}/driver`, `${protoDirectory}/sub`],
           }))
           .pipe(
             gulp.dest(buildDirectory)
@@ -67,10 +60,7 @@ function buildApp() {
         console.log(`Rolling up...`);
         let stream = gulp.src(`${buildDirectory}/app.js`)
           .pipe(
-            rollup({
-              treeshake: false,
-              format: 'es',
-            })
+            rollup('es')
           )
           .pipe(
             gulp.dest(buildDirectory)
@@ -105,8 +95,8 @@ function buildApp() {
   });
 }
 
-gulp.task('build', buildApp);
+gulp.task('build', buildTS);
 
 gulp.task('watch', () => {
-  return watch(['src/**/*.ts', 'src/**/*.html'], gulp.parallel('build'));
+  return watch(['ts/**/*.ts'], gulp.parallel('build'));
 });

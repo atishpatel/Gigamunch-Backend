@@ -30,10 +30,16 @@ export function UpdateUser() {
 }
 export function IsAdmin() {
     const jwt = GetJWT(GetToken());
+    if (!jwt) {
+        return false;
+    }
     return getKthBit(jwt.perm, 2);
 }
 export function HasCreditCard() {
     const jwt = GetJWT(GetToken());
+    if (!jwt) {
+        return false;
+    }
     return getKthBit(jwt.perm, 0);
 }
 function getKthBit(x, k) {

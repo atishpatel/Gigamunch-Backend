@@ -9,7 +9,7 @@ const baseURL = '/api/v1/';
 
 // Auth
 export function Login(token: string): Promise < any > {
-  const url: string = baseURL + 'Login';
+  const url: string = '/api/v1/Login';
   const req: TokenOnlyReq = {
     token,
   };

@@ -1,7 +1,7 @@
 import { GetToken, SetToken, } from './token';
 const baseURL = '/api/v1/';
 export function Login(token) {
-    const url = baseURL + 'Login';
+    const url = '/api/v1/Login';
     const req = {
         token,
     };
