@@ -8,6 +8,14 @@ export function GetUnpaidSublogs(limit) {
     };
     return callFetch(url, 'GET', req);
 }
+export function ProcessSublog(date, email) {
+    const url = baseURL + 'ProcessSublog';
+    const req = {
+        date,
+        email,
+    };
+    return callFetch(url, 'POST', req);
+}
 export function Login(token) {
     const url = baseURL + 'Login';
     const req = {
