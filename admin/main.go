@@ -198,15 +198,17 @@ func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Clien
 func handler(f func(context.Context, *http.Request, *logging.Client) Response) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		// get context
 		ctx := appengine.NewContext(r)
 		if !setupDone {
 			err = setupWithContext(ctx)
 			if err != nil {
 				// TODO: Alert but send friendly error back
-				log.Fatal("failed to setup: %+v", err)
+				log.Fatalf("failed to setup: %+v", err)
 				return
 			}
 		}
+		// create logging client
 		loggingC, err := logging.NewClient(ctx, r.URL.Path)
 		if err != nil {
 			errString := fmt.Sprintf("failed to get new logging client: %+v", err)

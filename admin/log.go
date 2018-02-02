@@ -11,6 +11,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/gorilla/schema"
 )
 
 // GetLog gets a log.
@@ -18,12 +19,21 @@ func GetLog(ctx context.Context, r *http.Request, log *logging.Client) Response 
 	req := new(pb.GetLogReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
-	defer closeRequestBody(r)
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 	l, err := log.GetLog(req.Id)
 	if err != nil {
@@ -40,12 +50,21 @@ func GetLogs(ctx context.Context, r *http.Request, log *logging.Client) Response
 	req := new(pb.GetLogsReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
-	defer closeRequestBody(r)
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 	logs, err := log.GetLogs(int(req.Start), int(req.Limit))
 	if err != nil {

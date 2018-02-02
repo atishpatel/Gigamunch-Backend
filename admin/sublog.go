@@ -20,7 +20,7 @@ func GetUnpaidSublogs(ctx context.Context, r *http.Request, log *logging.Client)
 	// decode request
 	if r.Method == "GET" {
 		decoder := schema.NewDecoder()
-		err := decoder.Decode(req, r.PostForm)
+		err := decoder.Decode(req, r.URL.Query())
 		if err != nil {
 			return failedToDecode(err)
 		}
@@ -32,6 +32,7 @@ func GetUnpaidSublogs(ctx context.Context, r *http.Request, log *logging.Client)
 		}
 		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 	subC := subold.New(ctx)
 	sublogs, err := subC.GetUnpaidSublogs(req.Limit)
