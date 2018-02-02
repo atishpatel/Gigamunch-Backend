@@ -67,6 +67,7 @@
                 <div class="table-cell">Name</div>
                 <div class="table-cell">Email</div>
                 <div class="table-cell">Servings</div>
+                <div class="table-cell">Amount</div>
                 <div class="table-cell">Status</div>
                 <div class="table-cell">Action</div>
               </div>
@@ -74,12 +75,17 @@
                           as="sublog">
                 <template>
                   <div class="table-row">
-                      <div class="table-cell">[[sublog.name]]</div>
+                    <div class="table-cell">[[sublog.name]]</div>
                     <div class="table-cell">[[sublog.sub_email]]</div>
                     <div class="table-cell">[[sublog.servings]]</div>
+                    <div class="table-cell">[[sublog.amount]]</div>
                     <div class="table-cell">[[sublog.status]]</div>
                     <div class="table-cell">
-                      <paper-button>TODO: Try Charging</paper-button>
+                      <paper-button disabled="[[sublog.disableButton]]" on-click="tryCharging">
+                        Try Charging
+                        <paper-spinner hidden$="[[!sublog.loading]]" active="[[sublog.loading]]">
+                        </paper-spinner>
+                      </paper-button>
                     </div>
                   </div>
                 </template>
@@ -107,6 +113,9 @@
           user: {
             type: Object,
             notify: true,
+          },
+          event: {
+            type: Object,
           },
           sublogsByDates: {
             type: Array,
@@ -146,15 +155,62 @@
                 sublogs: [],
               };
             }
+            slogs[i].status = this.getStatus(slogs[i]);
             sublogDay.sublogs.push(slogs[i]);
           }
           this.sublogsByDates = sublogs;
         });
       }
 
+      tryCharging(e) {
+        console.log(e);
+        e.model.set( 'sublog.loading', true);
+        e.model.set('sublog.disableButton', true);
+        this.processSublog(e.model.sublog.date, e.model.sublog.sub_email, function(err) {
+          e.model.set( 'sublog.loading', false);
+          e.model.set('sublog.disableButton', false);
+          if (err && (err.code !== 0 || err.code !== 200)) {
+            return;
+          }
+          e.model.set('sublog.status', '?');
+          e.model.set('sublog.disableButton', true);
+        });
+      }
+
+      processSublog(date, email, callback) {
+        this.service.ProcessSublog(date, email).then((resp) => {
+          let err = resp.error;
+          let event;
+          if (err && (err.code !== 0 || err.code !== 200)) {
+            this.event.FireToast(this, {
+                message: `Failed ${err.message}: ${err.detail}`,
+                error: true,
+            });
+          } else {
+            this.event.FireToast(this, {
+                message: `Process successful.`,
+              });
+          }
+          callback(err);
+        });
+      }
+
       getDateString(dateString) {
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
+      }
+
+      getStatus(sublog) {
+        if (sublog.refunded) {
+          return 'Refunded';
+        } else if (sublog.free) {
+          return 'Free';
+        } else if (sublog.paid) {
+          return 'Paid';
+        } else if (sublog.skip) {
+          return 'Skipped';
+        }
+        return 'Unpaid';
       }
     }
     window.customElements.define(UnpaidPage.is, UnpaidPage);
