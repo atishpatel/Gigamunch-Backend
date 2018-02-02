@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -57,6 +58,7 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetLogs", handler(systemsAdmin(GetLogs)))
 	// Sublogs
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
+	http.HandleFunc("/admin/api/v1/ProcessSublog", handler(userAdmin(ProcessSublog)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	//
@@ -260,3 +262,11 @@ func test(w http.ResponseWriter, r *http.Request) {
 }
 
 type handle func(context.Context, *http.Request, *logging.Client) Response
+
+func getTime(s string) (time.Time, error) {
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		return t, errBadRequest.Annotatef("failed to decode time: %+v", err)
+	}
+	return t, nil
+}

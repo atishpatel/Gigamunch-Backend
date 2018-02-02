@@ -13,6 +13,40 @@ import (
 	"github.com/gorilla/schema"
 )
 
+// ProcessSublog runs sub.Process.
+func ProcessSublog(ctx context.Context, r *http.Request, log *logging.Client) Response {
+	req := new(pb.ProcessSublogsReq)
+	var err error
+	// decode request
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
+	}
+	logging.Infof(ctx, "Request: %+v", req)
+	// end decode request
+	date, err := getTime(req.Date)
+	if err != nil {
+		return errors.Annotate(err, "failed to decode date")
+	}
+	subC := subold.New(ctx)
+	err = subC.Process(date, req.Email)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
+	}
+	resp := &pb.ProcessSublogsResp{}
+	return resp
+}
+
 // GetUnpaidSublogs gets a list of unpaid sublogs log.
 func GetUnpaidSublogs(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetUnpaidSublogsReq)
