@@ -68,6 +68,33 @@
         ]
       }
     },
+    "/admin/api/v1/GetUnpaidSublogs": {
+      "post": {
+        "summary": "Sublogs",
+        "operationId": "GetUnpaidSublogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetUnpaidSublogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetUnpaidSublogsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/Login": {
       "post": {
         "summary": "Auth",
@@ -170,6 +197,92 @@
           }
         }
       }
+    },
+    "AdminAPIGetUnpaidSublogsReq": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIGetUnpaidSublogsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "sublogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPISublog"
+          }
+        }
+      }
+    },
+    "AdminAPISublog": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "sub_email": {
+          "type": "string"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "skip": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "servings": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "amount_paid": {
+          "type": "number",
+          "format": "float"
+        },
+        "paid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "paid_datetime": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "transaction_id": {
+          "type": "string"
+        },
+        "free": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "customer_id": {
+          "type": "string"
+        },
+        "refunded": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "Sublogs"
     },
     "AdminAPITokenOnlyReq": {
       "type": "object",

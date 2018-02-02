@@ -52,6 +52,13 @@ function GetJWT(tkn) {
 }
 
 const baseURL = '/admin/api/v1/';
+function GetUnpaidSublogs(limit) {
+    const url = baseURL + 'GetUnpaidSublogs';
+    const req = {
+        limit,
+    };
+    return callFetch(url, 'GET', req);
+}
 function Login(token) {
     const url = baseURL + 'Login';
     const req = {
@@ -86,32 +93,55 @@ function GetLogs(start, limit) {
         start,
         limit,
     };
-    return callFetch(url, 'POST', req);
+    return callFetch(url, 'GET', req);
 }
 function GetLog(id) {
     const url = baseURL + 'GetLog';
     const req = {
         id,
     };
-    return callFetch(url, 'POST', req);
+    return callFetch(url, 'GET', req);
 }
 function callFetch(url, method, body) {
-    return fetch(url, {
+    const config = {
         method,
         headers: {
             'Content-Type': 'application/json',
             'auth-token': GetToken(),
         },
-        body: JSON.stringify(body),
-    }).then((resp) => {
+    };
+    let URL = url;
+    if (method === 'GET') {
+        URL += '?' + serializeParams(body);
+    }
+    else {
+        config.body = JSON.stringify(body);
+    }
+    return fetch(URL, config).then((resp) => {
         return resp.json();
     }).catch((err) => {
         console.error('failed to callFetch', err);
     });
 }
+function serializeParams(obj) {
+    const str = [];
+    let p;
+    p = 0;
+    for (p in obj) {
+        if (obj.hasOwnProperty(p)) {
+            const k = p;
+            const v = obj[p];
+            str.push((v !== null && typeof v === 'object') ?
+                serializeParams(v) :
+                encodeURIComponent(k) + '=' + encodeURIComponent(v));
+        }
+    }
+    return str.join('&');
+}
 
 
 var Service = Object.freeze({
+	GetUnpaidSublogs: GetUnpaidSublogs,
 	Login: Login,
 	Refresh: Refresh,
 	GetActivityForDate: GetActivityForDate,
