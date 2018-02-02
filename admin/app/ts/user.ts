@@ -18,7 +18,7 @@ export let LastName = '';
 export let PhotoURL = '';
 
 export function UpdateUser() {
-  const tkn = GetToken()
+  const tkn = GetToken();
   if (!tkn) {
     return;
   }
@@ -34,12 +34,20 @@ export function UpdateUser() {
 }
 
 export function IsAdmin(): boolean {
-  const jwt = GetJWT(GetToken());
+  const tkn = GetToken();
+  if (!tkn) {
+    return false;
+  }
+  const jwt = GetJWT(tkn);
   return getKthBit(jwt.perm, 2);
 }
 
 export function HasCreditCard(): boolean {
-  const jwt = GetJWT(GetToken());
+  const tkn = GetToken();
+  if (!tkn) {
+    return false;
+  }
+  const jwt = GetJWT(tkn);
   return getKthBit(jwt.perm, 0);
 }
 

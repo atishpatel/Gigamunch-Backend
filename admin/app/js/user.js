@@ -29,11 +29,19 @@ export function UpdateUser() {
     PhotoURL = jwt.photo_url;
 }
 export function IsAdmin() {
-    const jwt = GetJWT(GetToken());
+    const tkn = GetToken();
+    if (!tkn) {
+        return false;
+    }
+    const jwt = GetJWT(tkn);
     return getKthBit(jwt.perm, 2);
 }
 export function HasCreditCard() {
-    const jwt = GetJWT(GetToken());
+    const tkn = GetToken();
+    if (!tkn) {
+        return false;
+    }
+    const jwt = GetJWT(tkn);
     return getKthBit(jwt.perm, 0);
 }
 function getKthBit(x, k) {
