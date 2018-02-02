@@ -54,7 +54,7 @@ func (user *User) SetIsDriverAdmin(x bool) {
 
 // IsUserAdmin returns true if a user is a user admin.
 func (user *User) IsUserAdmin() bool {
-	return getKthBit(user.Permissions, 3)
+	return getKthBit(user.Permissions, 2) // TODO: change to 3 at new system stage
 }
 
 // SetUserAdmin updates the permission of the user.
@@ -64,7 +64,7 @@ func (user *User) SetUserAdmin(x bool) {
 
 // IsSystemsAdmin returns true if a user is a systems admin.
 func (user *User) IsSystemsAdmin() bool {
-	return getKthBit(user.Permissions, 3)
+	return getKthBit(user.Permissions, 2) // TODO: change to 3 or 4 at new system stage
 }
 
 // SetSystemsAdmin updates the permission of the user.
