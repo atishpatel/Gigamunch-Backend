@@ -34,20 +34,18 @@ export function UpdateUser() {
 }
 
 export function IsAdmin(): boolean {
-  const tkn = GetToken();
-  if (!tkn) {
+  const jwt = GetJWT(GetToken());
+  if (!jwt) {
     return false;
   }
-  const jwt = GetJWT(tkn);
   return getKthBit(jwt.perm, 2);
 }
 
 export function HasCreditCard(): boolean {
-  const tkn = GetToken();
-  if (!tkn) {
+  const jwt = GetJWT(GetToken());
+  if (!jwt) {
     return false;
   }
-  const jwt = GetJWT(tkn);
   return getKthBit(jwt.perm, 0);
 }
 
