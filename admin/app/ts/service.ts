@@ -18,7 +18,7 @@ export function GetUnpaidSublogs(limit: number): Promise < any > {
   return callFetch(url, 'GET', req);
 }
 
-export function ProcessSublogs(date: string, email: string): Promise < any > {
+export function ProcessSublog(date: string, email: string): Promise < any > {
   const url: string = baseURL + 'ProcessSublog';
   const req: ProcessSublogsReq = {
     date,
