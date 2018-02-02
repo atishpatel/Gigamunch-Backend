@@ -1,6 +1,8 @@
 import * as user from './user';
 import * as service from './service';
 
-let _s = service;
-let _u = user;
+declare var APP: any;
+
+APP.Service = service;
+APP.User = user;
 console.log('app.js loaded');
