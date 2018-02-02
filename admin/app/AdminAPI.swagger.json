@@ -122,6 +122,32 @@
         ]
       }
     },
+    "/admin/api/v1/ProcessSublogs": {
+      "post": {
+        "operationId": "ProcessSublogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessSublogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessSublogsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/Refresh": {
       "post": {
         "operationId": "Refresh",
@@ -218,6 +244,25 @@
           "items": {
             "$ref": "#/definitions/AdminAPISublog"
           }
+        }
+      }
+    },
+    "AdminAPIProcessSublogsReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIProcessSublogsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
         }
       }
     },

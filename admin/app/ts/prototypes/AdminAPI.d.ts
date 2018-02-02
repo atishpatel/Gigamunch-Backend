@@ -48,3 +48,10 @@ interface GetUnpaidSublogsResp {
     error: Error
     sublogs: Sublog[]
 }
+interface ProcessSublogsReq {
+    email: string
+    date: string
+}
+interface ProcessSublogsResp {
+    error: Error
+}

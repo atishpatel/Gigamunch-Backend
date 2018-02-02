@@ -7,13 +7,13 @@ export function Fire(eventName, detail = {}) {
     });
     window.dispatchEvent(event);
 }
-export function FireTost(detail) {
+export function FireToast(t, detail) {
     const event = new CustomEvent('toast', {
         detail,
         bubbles: true,
         composed: true,
     });
-    window.dispatchEvent(event);
+    t.dispatchEvent(event);
 }
 export function FireError() {
 }
