@@ -6,6 +6,7 @@ const gulp = require('gulp');
 const importsInliner = require('gulp-js-text-imports');
 const ts = require('gulp-typescript');
 const watch = require('gulp-watch');
+const babel = require('gulp-babel');
 const rollup = require('gulp-better-rollup');
 let rename = require("gulp-rename");
 
@@ -73,6 +74,11 @@ function buildTS() {
       .then(() => {
         console.log(`Minifying...`);
         let stream = gulp.src(`${buildDirectory}/app.js`)
+          .pipe(
+            babel({
+              presets: ['env']
+          })
+          )
           .pipe(
             uglify()
           )
