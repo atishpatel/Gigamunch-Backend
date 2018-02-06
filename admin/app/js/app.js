@@ -7,6 +7,24 @@ function Fire(eventName, detail = {}) {
     });
     window.dispatchEvent(event);
 }
+function FireToast(t, detail) {
+    const event = new CustomEvent('toast', {
+        detail,
+        bubbles: true,
+        composed: true,
+    });
+    t.dispatchEvent(event);
+}
+function FireError() {
+}
+
+
+var EventUtil = Object.freeze({
+	UserUpdated: UserUpdated,
+	Fire: Fire,
+	FireToast: FireToast,
+	FireError: FireError
+});
 
 function GetToken() {
     const name = 'AUTHTKN=';
@@ -58,6 +76,14 @@ function GetUnpaidSublogs(limit) {
         limit,
     };
     return callFetch(url, 'GET', req);
+}
+function ProcessSublog(date, email) {
+    const url = baseURL + 'ProcessSublog';
+    const req = {
+        date,
+        email,
+    };
+    return callFetch(url, 'POST', req);
 }
 function Login(token) {
     const url = baseURL + 'Login';
@@ -142,6 +168,7 @@ function serializeParams(obj) {
 
 var Service = Object.freeze({
 	GetUnpaidSublogs: GetUnpaidSublogs,
+	ProcessSublog: ProcessSublog,
 	Login: Login,
 	Refresh: Refresh,
 	GetActivityForDate: GetActivityForDate,
@@ -211,3 +238,4 @@ var User = Object.freeze({
 
 APP.Service = Service;
 APP.User = User;
+APP.Event = EventUtil;

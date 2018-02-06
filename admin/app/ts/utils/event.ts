@@ -10,13 +10,15 @@ export function Fire(eventName: string, detail: Object = {}) {
   window.dispatchEvent(event);
 }
 
-export function FireTost(detail: Object) {
+// FirstToast dispatches a 'toast' event. 
+// First parameter is element doing the dispatch and second param is the detail of the event.
+export function FireToast(t: Element, detail: Object) {
   const event = new CustomEvent('toast', {
     detail,
     bubbles: true,
     composed: true,
   });
-  window.dispatchEvent(event);
+  t.dispatchEvent(event);
 }
 
 export function FireError() {

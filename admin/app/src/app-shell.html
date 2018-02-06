@@ -280,9 +280,9 @@
              href="change-servings-permanently">
             <paper-item>Change Servings Permanently</paper-item>
           </a>
-          <a name="email-list"
-             href="email-list">
-            <paper-item>Email List</paper-item>
+          <a name="unpaid"
+             href="unpaid">
+            <paper-item>Unpaid</paper-item>
           </a>
           <a target="_blank"
              href="[[cookAPIURL]]">
@@ -361,7 +361,8 @@
           <unpaid-page name="unpaid"
                        id="unpaidPage"
                        service="[[service]]"
-                       user="{{user}}">
+                       user="{{user}}"
+                       event="[[event]]">
           </unpaid-page>
           <sublog-page name="sublog"
                        id="sublogPage"
@@ -405,6 +406,12 @@
             value: function() {
               return APP.Service ? APP.Service : Service;
             }
+          },
+          event: {
+            type: Object,
+            value: function() {
+              return APP.Event;
+            },
           },
           user: {
             type: Object,
