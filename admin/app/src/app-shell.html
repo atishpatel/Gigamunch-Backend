@@ -564,11 +564,13 @@
 
       copyAPIDate() {
         const d = new Date();
-        this.copyToClipboard(d.toISOString().substr(0, 10) + 'T01:01:01.000Z');
+        // fix bug where date is off because of converting from local to UTC.
+        d.setTime(d.getTime() + d.getTimezoneOffset() * 60 * 1000 * -1)
+        this.copyToClipboard(d.toISOString().substr(0, 10) + 'T12:12:12.000Z');
       }
 
       copyGigatoken() {
-        this.copyToClipboard(this.user.token);
+        this.copyToClipboard(APP.Token.GetToken());
       }
 
       copyToClipboard(s) {

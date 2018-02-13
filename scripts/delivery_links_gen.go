@@ -14,7 +14,15 @@ var (
 	docSheet = ""
 	input    = []nameAndAddresses{
 		nameAndAddresses{
+			Name:      "Alandreia",
+			Addresses: ``,
+		},
+		nameAndAddresses{
 			Name:      "David",
+			Addresses: ``,
+		},
+		nameAndAddresses{
+			Name:      "Kimberly",
 			Addresses: ``,
 		},
 		nameAndAddresses{
@@ -26,10 +34,6 @@ var (
 			Addresses: ``,
 		},
 		// Founders
-		nameAndAddresses{
-			Name:      "Hanako",
-			Addresses: ``,
-		},
 		nameAndAddresses{
 			Name:      "Piyush",
 			Addresses: ``,

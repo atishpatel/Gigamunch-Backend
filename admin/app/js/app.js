@@ -69,6 +69,13 @@ function GetJWT(tkn) {
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
 }
 
+
+var TokenUtil = Object.freeze({
+	GetToken: GetToken,
+	SetToken: SetToken,
+	GetJWT: GetJWT
+});
+
 const baseURL = '/admin/api/v1/';
 function GetUnpaidSublogs(limit) {
     const url = baseURL + 'GetUnpaidSublogs';
@@ -239,3 +246,4 @@ var User = Object.freeze({
 APP.Service = Service;
 APP.User = User;
 APP.Event = EventUtil;
+APP.Token = TokenUtil;
