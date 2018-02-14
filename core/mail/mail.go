@@ -8,8 +8,8 @@ import (
 
 	"gopkg.in/mailgun/mailgun-go.v1"
 
-	"cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/drip-go"
 	"google.golang.org/appengine/urlfetch"
