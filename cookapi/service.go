@@ -430,7 +430,11 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	fourVegBags := 0
 	moreThanFourBags := 0
 	moreThanFourVegBags := 0
-	var specialNames []string
+	specialTwoBags := 0
+	specialTwoVegBags := 0
+	specialFourBags := 0
+	specialFourVegBags := 0
+	specialOther := 0
 	var listOfMoreThanFourBags []int8
 	var listOfMoreThanFourVegBags []int8
 	for i, sublog := range nonSkippers {
@@ -460,19 +464,21 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 		if sublog.Free {
-			var name string
-			if veg {
-				name = fmt.Sprintf("%s %d veg", subs[i].Name, sublog.Servings)
-			} else {
-				name = fmt.Sprintf("%s %d non-veg", subs[i].Name, sublog.Servings)
-			}
-			if subs[i].NumGiftDinners > 0 {
-				gifter, err := subC.GetSubscriber(subs[i].ReferenceEmail)
-				if err == nil {
-					name += " gifted from " + gifter.Name
+			if sublog.Servings == 2 {
+				if veg {
+					specialTwoVegBags++
+				} else {
+					specialTwoBags++
 				}
+			} else if sublog.Servings == 4 {
+				if veg {
+					specialFourVegBags++
+				} else {
+					specialFourBags++
+				}
+			} else {
+				specialOther++
 			}
-			specialNames = append(specialNames, name)
 		}
 	}
 	totalStandardBags := twoBags + twoVegBags + fourBags + fourVegBags
@@ -489,9 +495,12 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	4+ veg bags: %d
 	4+ veg bags list: %v
 	
-	New Customers: %d 
-	%v`
-	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, twoVegBags, fourBags, fourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, len(specialNames), common.CommaSeperate(specialNames))
+	First 2 bags: %d 
+	First 4 bags: %d 
+	First 2 veg bags: %d
+	First 4 veg bags: %d
+	First Other: %d`
+	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, twoVegBags, fourBags, fourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, specialTwoBags, specialFourBags, specialTwoVegBags, specialFourVegBags, specialOther)
 	messageC := message.New(ctx)
 	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
 	for _, number := range numbers {

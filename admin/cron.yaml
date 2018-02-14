@@ -30,6 +30,6 @@ cron:
   target: cookapi
 - description: "Send Monday Quantity sms 3"
   url: /task/send-quantity-sms
-  schedule: every monday 15:00
+  schedule: every monday 8:30
   timezone: America/Chicago
   target: cookapi
