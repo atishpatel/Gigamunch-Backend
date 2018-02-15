@@ -41,6 +41,7 @@ const (
 	updateServingsPermanentlySubLogStatement = "UPDATE sub SET servings=?, amount=? WHERE date>? AND sub_email=? AND servings=?"
 	deleteSubLogStatment                     = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
 	updateUnpaidPayment                      = "UPDATE sub SET payment_method_token=? WHERE free=0 AND paid=0 AND skip=0 AND sub_email=?"
+	updateEmailAddress                       = "UPDATE `sub` SET sub_email='%s' WHERE sub_email='%s'"
 	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
 	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
 )
@@ -829,4 +830,15 @@ func DerivePrice(servings int8) float32 {
 	default:
 		return 15 * float32(servings) * 1.0975
 	}
+}
+
+// UpdateEmail changes all instances of a customer email to new email.
+func (c *Client) UpdateEmail(oldEmail, newEmail string) error {
+	utils.Infof(c.ctx, "changed email from %s to %s in sql db", oldEmail, newEmail)
+	st := fmt.Sprintf(updateEmailAddress, newEmail, oldEmail)
+	_, err := mysqlDB.Exec(st)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateEmailAddress statement")
+	}
+	return nil
 }
