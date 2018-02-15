@@ -6,6 +6,10 @@ handlers:
   - url: /admin/api/.*
     script: _go_app
 
+  - url: /admin/task/.*
+    script: _go_app
+    login: admin
+
   - url: /admin/src
     static_dir: app/src
     secure: always

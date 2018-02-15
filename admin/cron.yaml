@@ -2,12 +2,19 @@
 cron:
 - description: "Process Subscribers"
   url: /task/process-subscribers
-  schedule: every day 00:00
+  schedule: every day 20:00
+  timezone: America/Chicago
   target: cookapi
 - description: "Bag reminder"
   url: /send-bag-reminder
-  schedule: every day 01:00
+  schedule: every day 18:00
+  timezone: America/Chicago
   target: cookapi
+- description: "Setup Preview and Culture Tags"
+  url: /admin/task/SetupTags
+  schedule: every day 01:00
+  timezone: America/Chicago
+  target: admin
 - description: "Send Preview Culture Email"
   url: /task/send-preview-culture-email
   schedule: every day 11:00

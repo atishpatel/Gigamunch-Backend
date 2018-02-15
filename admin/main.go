@@ -63,6 +63,7 @@ func init() {
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	//
 	http.HandleFunc("/admin/api/v1/Test", test)
+	setupTasksHandlers()
 }
 
 func setup() error {
@@ -227,8 +228,9 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 				Code: shared.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success {
+		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
 			loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
+			w.WriteHeader(int(sharedErr.Code))
 		}
 		// encode
 		w.Header().Set("Content-Type", "application/json")
