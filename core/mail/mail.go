@@ -175,6 +175,9 @@ func (c *Client) UpdateUser(req *UserFields) error {
 	}
 	resp, err := c.dripC.UpdateSubscriber(dripReq)
 	if err != nil {
+		if strings.Contains(err.Error(), "<html>") {
+			err = fmt.Errorf("drip returned an html page")
+		}
 		return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
 	}
 	if len(resp.Errors) > 0 {
@@ -198,6 +201,9 @@ func (c *Client) AddTag(email string, tag Tag) error {
 	}
 	resp, err := c.dripC.TagSubscriber(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "<html>") {
+			err = fmt.Errorf("drip returned an html page")
+		}
 		return errDrip.WithError(err).Annotate("failed to drip.TagSubscriber")
 	}
 	if len(resp.Errors) > 0 {
@@ -217,6 +223,9 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 	}
 	resp, err := c.dripC.RemoveSubscriberTag(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "<html>") {
+			err = fmt.Errorf("drip returned an html page")
+		}
 		return errDrip.WithError(err).Annotate("failed to drip.TagSubscriber")
 	}
 	if len(resp.Errors) > 0 {
@@ -253,6 +262,9 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 	}
 	resp, err := c.dripC.UpdateBatchSubscribers(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "<html>") {
+			err = fmt.Errorf("drip returned an html page")
+		}
 		return errDrip.WithError(err).Annotate("failed to drip.UpdateBatchSubscribers")
 	}
 	if len(resp.Errors) > 0 {
