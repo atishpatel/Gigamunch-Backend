@@ -14,6 +14,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
@@ -37,6 +38,7 @@ func addAPIRoutes(r *httprouter.Router) {
 	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
 	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
 	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
+	http.HandleFunc("/api/v1/DeviceCheckin", handler(DeviceCheckin))
 }
 
 func validateSubmitCheckoutReq(r *pb.SubmitCheckoutReq) error {
@@ -708,6 +710,29 @@ func getNasvilleGeopoint(ctx context.Context) (*geofence.Geofence, error) {
 		}
 	}
 	return fence, nil
+}
+
+// DeviceCheckin updates a user's payment.
+func DeviceCheckin(ctx context.Context, r *http.Request) Response {
+	req := new(healthcheck.Device)
+	var err error
+	// decode request
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	defer closeRequestBody(r)
+	// end decode request
+	resp := &pb.ErrorOnlyResp{}
+
+	healthC := healthcheck.New(ctx)
+	err = healthC.Update(req)
+	if err != nil {
+		resp.Error = errors.GetSharedError(err)
+		return resp
+	}
+	return resp
 }
 
 // Response is a response to a rpc call. All responses contain an error.

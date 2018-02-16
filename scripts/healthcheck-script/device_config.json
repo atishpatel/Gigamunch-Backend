@@ -1,0 +1,7 @@
+{
+    "id": "pi-ragnar-dannadil",
+    "is_power_sensor": true,
+    "interval_mins": 1,
+    "url": "https://gigamunch-omninexus-dev.appspot.com/api/v1/DeviceCheckin",
+    "log_file": "/home/atish/Desktop/device_log.txt"
+}

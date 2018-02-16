@@ -229,7 +229,8 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 			}
 		}
 		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
-			loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
+			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
+			// loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
 			w.WriteHeader(int(sharedErr.Code))
 		}
 		// encode
