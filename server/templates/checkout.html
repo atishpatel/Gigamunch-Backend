@@ -319,6 +319,7 @@
       flex: 2;
       margin-left: 12px;
     }
+
     /* Review section */
 
     .review-order {
@@ -386,6 +387,7 @@
     }
 
     @media (max-width: 600px) {}
+
     /* Selector */
 
     .select-package-container {
@@ -1271,7 +1273,9 @@
 
     function updateOrderInfo() {
       var deliveryDayElement = document.getElementById('delivery-date');
-      document.getElementById('first_date').innerHTML = (new Date(deliveryDayElement.value)).toLocaleDateString();
+      var firstChargeDate = new Date(deliveryDayElement.value);
+      firstChargeDate.setDate(firstChargeDate.getDate() + 5);
+      document.getElementById('first_date').innerHTML = firstChargeDate.toLocaleDateString();
       var oneBoxPrice = 0.0;
       var servingsPerBox = 0;
 
@@ -1316,6 +1320,7 @@
       document.getElementById('total').innerHTML = total.toFixed(2);
     }
 
+    document.getElementById('delivery-date').addEventListener('change', updateOrderInfo);
     document.getElementById('meal-option-2').addEventListener('change', updateOrderInfo);
     document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
 
