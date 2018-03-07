@@ -24,7 +24,7 @@ func SetupTags(ctx context.Context, r *http.Request, log *logging.Client) Respon
 	for nextCultureDate.Weekday() != time.Monday {
 		nextCultureDate = nextCultureDate.Add(24 * time.Hour)
 	}
-	nextPreviewDate := nextCultureDate.Add(24 * time.Hour)
+	nextPreviewDate := nextCultureDate
 	mailC, err := mail.NewClient(ctx, log)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.NewClient")
