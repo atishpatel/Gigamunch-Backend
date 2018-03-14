@@ -145,7 +145,7 @@ fi
 if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo "Here are the commands supported by the script:"
   echo -e "\tapp [help|serve|build|deploy]"
-  echo -e "\tapp serve [eater|*]"
+  echo -e "\tapp serve [eater|admin|*]"
   echo -e "\tapp build [app|admin|cook|proto]"
   echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|]"
   exit 0
