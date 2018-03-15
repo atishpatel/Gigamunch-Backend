@@ -231,6 +231,8 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 			loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
 		}
 		// encode
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
 		err = encoder.Encode(resp)
