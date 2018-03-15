@@ -69,6 +69,7 @@ function GetJWT(tkn) {
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
 }
 
+<<<<<<< HEAD
 
 var TokenUtil = Object.freeze({
 	GetToken: GetToken,
@@ -77,6 +78,12 @@ var TokenUtil = Object.freeze({
 });
 
 const baseURL = '/admin/api/v1/';
+=======
+let baseURL = '/admin/api/v1/';
+if (location.hostname === 'localhost') {
+    baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
+}
+>>>>>>> set up dev workspace
 function GetUnpaidSublogs(limit) {
     const url = baseURL + 'GetUnpaidSublogs';
     const req = {
@@ -141,6 +148,7 @@ function callFetch(url, method, body) {
         headers: {
             'Content-Type': 'application/json',
             'auth-token': GetToken(),
+            'Access-Control-Allow-Origin': '*',
         },
     };
     let URL = url;

@@ -12,7 +12,7 @@
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
           padding: 10px;
         }
@@ -48,6 +48,7 @@
         .table-body {
           display: table-row-group;
         }
+
       </style>
     </shared-styles>
 
@@ -81,9 +82,11 @@
                     <div class="table-cell">[[sublog.amount]]</div>
                     <div class="table-cell">[[sublog.status]]</div>
                     <div class="table-cell">
-                      <paper-button disabled="[[sublog.disableButton]]" on-click="tryCharging">
+                      <paper-button disabled="[[sublog.disableButton]]"
+                                    on-click="tryCharging">
                         Try Charging
-                        <paper-spinner hidden$="[[!sublog.loading]]" active="[[sublog.loading]]">
+                        <paper-spinner hidden$="[[!sublog.loading]]"
+                                       active="[[sublog.loading]]">
                         </paper-spinner>
                       </paper-button>
                     </div>
@@ -91,12 +94,12 @@
                 </template>
               </dom-repeat>
             </div>
-          </template>
-  
-          </div>
         </template>
-      </dom-repeat>
-    </div>
+
+        </div>
+  </template>
+  </dom-repeat>
+  </div>
   </template>
 
   <script>
@@ -164,10 +167,10 @@
 
       tryCharging(e) {
         console.log(e);
-        e.model.set( 'sublog.loading', true);
+        e.model.set('sublog.loading', true);
         e.model.set('sublog.disableButton', true);
         this.processSublog(e.model.sublog.date, e.model.sublog.sub_email, function(err) {
-          e.model.set( 'sublog.loading', false);
+          e.model.set('sublog.loading', false);
           e.model.set('sublog.disableButton', false);
           if (err && (err.code !== 0 || err.code !== 200)) {
             return;
@@ -183,13 +186,13 @@
           let event;
           if (err && (err.code !== 0 || err.code !== 200)) {
             this.event.FireToast(this, {
-                message: `Failed ${err.message}: ${err.detail}`,
-                error: true,
+              message: `Failed ${err.message}: ${err.detail}`,
+              error: true,
             });
           } else {
             this.event.FireToast(this, {
-                message: `Process successful.`,
-              });
+              message: `Process successful.`,
+            });
           }
           callback(err);
         });

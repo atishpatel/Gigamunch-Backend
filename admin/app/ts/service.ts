@@ -7,10 +7,14 @@ import {
   SetToken,
 } from './utils/token';
 
-const baseURL = '/admin/api/v1/';
+let baseURL = '/admin/api/v1/';
+if (location.hostname === 'localhost') {
+  baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
+}
+
 
 // SubLog
-export function GetUnpaidSublogs(limit: number): Promise < any > {
+export function GetUnpaidSublogs(limit: number): Promise<any> {
   const url: string = baseURL + 'GetUnpaidSublogs';
   const req: GetUnpaidSublogsReq = {
     limit,
@@ -18,7 +22,7 @@ export function GetUnpaidSublogs(limit: number): Promise < any > {
   return callFetch(url, 'GET', req);
 }
 
-export function ProcessSublog(date: string, email: string): Promise < any > {
+export function ProcessSublog(date: string, email: string): Promise<any> {
   const url: string = baseURL + 'ProcessSublog';
   const req: ProcessSublogsReq = {
     date,
@@ -28,7 +32,7 @@ export function ProcessSublog(date: string, email: string): Promise < any > {
 }
 
 // Auth
-export function Login(token: string): Promise < any > {
+export function Login(token: string): Promise<any> {
   const url: string = baseURL + 'Login';
   const req: TokenOnlyReq = {
     token,
@@ -42,7 +46,7 @@ export function Login(token: string): Promise < any > {
   });
 }
 
-export function Refresh(token: string): Promise < any > {
+export function Refresh(token: string): Promise<any> {
   const url: string = baseURL + 'Refresh';
   const req: TokenOnlyReq = {
     token,
@@ -62,7 +66,7 @@ export function GetActivityForDate() {
 }
 
 // Logs
-export function GetLogs(start: number, limit: number): Promise < any > {
+export function GetLogs(start: number, limit: number): Promise<any> {
   const url: string = baseURL + 'GetLogs';
   const req: GetLogsReq = {
     start,
@@ -71,7 +75,7 @@ export function GetLogs(start: number, limit: number): Promise < any > {
   return callFetch(url, 'GET', req);
 }
 
-export function GetLog(id: number): Promise < any > {
+export function GetLog(id: number): Promise<any> {
   const url: string = baseURL + 'GetLog';
   const req: GetLogReq = {
     id,
@@ -80,12 +84,13 @@ export function GetLog(id: number): Promise < any > {
   return callFetch(url, 'GET', req);
 }
 
-function callFetch(url: string, method: string, body: object): Promise < APIResponse > {
+function callFetch(url: string, method: string, body: object): Promise<APIResponse> {
   const config: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
       'auth-token': GetToken(),
+      'Access-Control-Allow-Origin': '*',
     },
   };
   let URL = url;
@@ -101,16 +106,16 @@ function callFetch(url: string, method: string, body: object): Promise < APIResp
   });
 }
 
-function serializeParams(obj: any):string {
+function serializeParams(obj: any): string {
   const str = [];
   let p: any;
   p = 0;
   for (p in obj) {
     if (obj.hasOwnProperty(p)) {
-      const k:any = p;
-      const v:any = obj[p];
+      const k: any = p;
+      const v: any = obj[p];
       str.push((v !== null && typeof v === 'object') ?
-      serializeParams(v) :
+        serializeParams(v) :
         encodeURIComponent(k) + '=' + encodeURIComponent(v));
     }
   }
