@@ -325,11 +325,17 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
 
 func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
-	in6days := time.Now().Add(144 * time.Hour)
+	in6days := time.Now().Add(24 * 6 * time.Hour)
+	in4days := time.Now().Add(24 * 4 * time.Hour)
 	subC := sub.New(ctx)
 	err := subC.SetupSubLogs(in6days)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in6days, err)
+		return
+	}
+	err = subC.SetupSubLogs(in4days)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in4days, err)
 		return
 	}
 }
@@ -642,7 +648,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 		tag := mail.GetReceivedJourneyTag(numNonSkips)
 		utils.Infof(ctx, "Applying Tag(%s) to Email(%s)", tag, params.Email)
 
-		err := mailC.AddTag(params.Email, tag)
+		err = mailC.AddTag(params.Email, tag)
 		if err != nil {
 			logging.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.AddTag: %+v", err)
 			w.WriteHeader(500)
