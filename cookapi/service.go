@@ -325,12 +325,12 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
 
 func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
-	in6days := time.Now().Add(24 * 6 * time.Hour)
+	in7days := time.Now().Add(24 * 7 * time.Hour)
 	in4days := time.Now().Add(24 * 4 * time.Hour)
 	subC := sub.New(ctx)
-	err := subC.SetupSubLogs(in6days)
+	err := subC.SetupSubLogs(in7days)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in6days, err)
+		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in7days, err)
 		return
 	}
 	err = subC.SetupSubLogs(in4days)
