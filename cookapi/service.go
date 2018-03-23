@@ -399,7 +399,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	cultureDate := time.Now()
-	if cultureDate.Weekday() != time.Monday {
+	for cultureDate.Weekday() != time.Monday {
 		cultureDate = cultureDate.Add(24 * time.Hour)
 	}
 	subC := sub.New(ctx)
@@ -481,22 +481,42 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
+	for _, special := range listOfMoreThanFourBags {
+		for special >= 4 {
+			fourBags++
+			special -= 4
+		}
+		for special >= 2 {
+			twoBags++
+			special -= 2
+		}
+	}
+	for _, special := range listOfMoreThanFourVegBags {
+		for special >= 4 {
+			fourVegBags++
+			special -= 4
+		}
+		for special >= 2 {
+			twoVegBags++
+			special -= 2
+		}
+	}
 	totalStandardBags := twoBags + twoVegBags + fourBags + fourVegBags
-	msg := `%s culture execution: 
-	2 bags: %d 
+	msg := `%s culture execution:
+	2 bags: %d
 	2 veg bags: %d
-	4 bags: %d 
+	4 bags: %d
 	4 veg bags: %d
 
-	Total bags: %d + 4+ bags below
-	
-	4+ bags: %d 
-	4+ bags list: %v 
+	Total bags: %d
+
+	4+ bags: %d
+	4+ bags list: %v
 	4+ veg bags: %d
 	4+ veg bags list: %v
-	
-	First 2 bags: %d 
-	First 4 bags: %d 
+
+	First 2 bags: %d
+	First 4 bags: %d
 	First 2 veg bags: %d
 	First 4 veg bags: %d
 	First Other: %d`
