@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Define a timestamp function
-timestamp() { 
-  date +"%T" 
+timestamp() {
+  date +"%T"
 }
 timestamp
 
 ################################################################################
-# build 
+# build
 ################################################################################
 if [[ $1 == "build" ]]; then
   if [[ $* == *app* ]]; then
@@ -54,9 +54,9 @@ if [[ $1 == "build" ]]; then
 fi
 
 ################################################################################
-# deploy 
+# deploy
 ################################################################################
-if [[ $1 == "deploy" ]]; then 
+if [[ $1 == "deploy" ]]; then
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
   domain="gigamunch-omninexus-dev.appspot"
@@ -65,7 +65,7 @@ if [[ $1 == "deploy" ]]; then
     sqlip="104.154.236.200"
     domain="eatgigamunch"
   fi
-  echo "Deploying the following to $project" 
+  echo "Deploying the following to $project"
   if [[ $* == *eater* ]]; then
     echo "Deploying eater:"
     cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > eaterapi/app.yaml
@@ -88,6 +88,14 @@ if [[ $1 == "deploy" ]]; then
     cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
     gcloud app deploy server/app.yaml  --project=$project --version=2 --quiet
   fi
+  if [[ $* == *queue* ]]; then
+    echo "Deploying queue.yaml:"
+    gcloud app deploy admin/queue.yaml  --project=$project
+  fi
+  if [[ $* == *cron* ]]; then
+    echo "Deploying cron.yaml:"
+    gcloud app deploy admin/cron.yaml  --project=$project
+  fi
   exit 0
 fi
 
@@ -96,7 +104,7 @@ fi
 ################################################################################
 if [[ $1 == "serve" ]]; then
   # setup mysql
-  if [[ $OSTYPE == "linux-gnu" ]]; then 
+  if [[ $OSTYPE == "linux-gnu" ]]; then
     service mysql start&
   else
     /usr/local/opt/mysql@5.6/bin/mysql.server start
@@ -129,7 +137,7 @@ if [[ $1 == "serve" ]]; then
   fi
   # stop mysql
 
-  if [[ $OSTYPE == "linux-gnu" ]]; then 
+  if [[ $OSTYPE == "linux-gnu" ]]; then
     service mysql stop&
   else
     /usr/local/opt/mysql@5.6/bin/mysql.server stop
@@ -147,7 +155,7 @@ if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo -e "\tapp [help|serve|build|deploy]"
   echo -e "\tapp serve [eater|admin|*]"
   echo -e "\tapp build [app|admin|cook|proto]"
-  echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|]"
+  echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|queue|cron]"
   exit 0
 fi
 
