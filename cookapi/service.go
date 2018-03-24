@@ -317,8 +317,8 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
 	subC := sub.New(ctx)
 	err = subC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). \n\nErr:%+v", parms.Date.Format("2006-01-02"), parms.SubEmail, err)
-		// TODO schedule for later?
+		utils.Errorf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). \n\nErr:%+v", parms.Date.Format("2006-01-02"), parms.SubEmail, err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
