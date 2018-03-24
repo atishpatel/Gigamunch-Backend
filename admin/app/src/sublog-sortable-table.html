@@ -297,6 +297,15 @@
         </template>
       </vaadin-grid-column>
     </vaadin-grid>
+    <div>
+      <div><strong>With extra:</strong></div>
+      <div>Total Non Veg servings: <strong>[[totalNoVegServingsExtra]]</strong></div>
+      <div>Total Veg servings: <strong>[[totalVegServingsExtra]]</strong></div>
+      <div>Total Non Veg containers: <strong>[[totalNoVegContainersExtra]]</strong></div>
+      <div>Total Veg conatiners: <strong>[[totalVegContainersExtra]]</strong></div>
+    </div>
+    <br>
+    <br>
     <div>Total Non Veg servings: <strong>[[totalNoVegServings]]</strong></div>
     <div>Total Veg servings: <strong>[[totalVegServings]]</strong></div>
     <div>Total Non Veg containers: <strong>[[totalNoVegContainers]]</strong></div>
@@ -446,7 +455,7 @@
             sublogs[i].status = this.getStatus(sublogs[i]);
             sublogs[i].addressString = this.getAddress(sublogs[i].address);
             sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
-            // calculate revenue 
+            // calculate revenue
             if (sublogs[i].free) {
               totalCost += sublogs[i].amount;
             } else {
@@ -473,6 +482,10 @@
           this.totalVegServings = totalVegServings;
           this.totalNoVegContainers = totalNoVegServings / 2;
           this.totalVegContainers = totalVegServings / 2;
+          this.totalNoVegServingsExtra = totalNoVegServings + 6;
+          this.totalVegServingsExtra = totalVegServings + 2;
+          this.totalNoVegContainersExtra = this.totalNoVegServingsExtra / 2;
+          this.totalVegContainersExtra = this.totalVegServingsExtra / 2;
           this.predictedRevenue = predictedRevenue.toFixed(2);
           this.totalRevenue = totalRevenue.toFixed(2);
           this.totalCost = totalCost.toFixed(2);
