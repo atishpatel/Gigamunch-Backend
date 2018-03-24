@@ -138,7 +138,6 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
 		return resp
 	}
-
 	subC := sub.New(ctx)
 	err = subC.UpdatePaymentToken(req.Email, paymenttkn)
 	if err != nil {
@@ -149,6 +148,27 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Credit card updated. $$$ \nName: %s\nEmail: %s", entry.Name, entry.Email))
 	if err != nil {
 		utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+	}
+	unpaidSublogs, err := subC.GetSubscriberUnpaidSublogs(req.Email)
+	if err != nil {
+		utils.Errorf(ctx, "failed to GetSubscriberUnpaidSublogs: %+v", err)
+		return resp
+	}
+	tasksC := tasks.New(ctx)
+	t := time.Now()
+	for _, sublog := range unpaidSublogs {
+		if sublog.Date.After(t) {
+			continue
+		}
+		req := &tasks.ProcessSubscriptionParams{
+			SubEmail: req.Email,
+			Date:     sublog.Date,
+		}
+		err = tasksC.AddProcessSubscription(t, req)
+		if err != nil {
+			utils.Errorf(ctx, "failed to AddProcessSubscription: %+v", err)
+		}
+		t = t.Add(time.Minute * 5)
 	}
 	return resp
 }
