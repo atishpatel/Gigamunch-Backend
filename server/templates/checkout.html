@@ -1091,7 +1091,7 @@
       });
     }
 
-    // BrainTree 
+    // BrainTree
     var authorization = 'production_fzp6pdxg_wsgmypp8c46cnbpc';
     if (!APP.IsProd) {
       authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
@@ -1170,7 +1170,7 @@
             // with AJAX.
             document.querySelector('input[name="payment_method_nonce"]').value = payload.nonce;
 
-            // submit form 
+            // submit form
             var firstName = form.elements['first_name'].value;
             var lastName = form.elements['last_name'].value;
             var email = form.elements['email'].value;
@@ -1249,7 +1249,7 @@
             xhr.send(JSON.stringify(req));
           });
         }, false);
-        // add listeners to log events 
+        // add listeners to log events
         hostedFieldsInstance.on('focus', function(e) {
           switch (e.emittedBy) {
             case 'number':
@@ -1326,7 +1326,7 @@
 
     function generateDeliveryDays() {
       var d = new Date();
-      d.setTime(d.getTime() + 81 * 3600 * 1000); // Friday at 3 PM
+      d.setTime(d.getTime() + (24*4 + 8) * 3600 * 1000); // Thursday at 4 PM
       while (d.getDay() !== 1) { // while not Monday
         d.setDate(d.getDate() + 1);
       }
