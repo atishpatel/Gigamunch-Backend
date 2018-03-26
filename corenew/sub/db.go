@@ -2,6 +2,7 @@ package sub
 
 import (
 	"errors"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -56,6 +57,20 @@ func getSubscribers(ctx context.Context, subDay string) ([]SubscriptionSignUp, e
 		Filter("SubscriptionDay=", subDay).
 		Limit(1000)
 	var results []SubscriptionSignUp
+	_, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// getHasSubscribed returns the list of people how have subscribed
+func getHasSubscribed(ctx context.Context) ([]*SubscriptionSignUp, error) {
+	t, _ := time.Parse(time.RFC3339, "2017-01-01T01:01:01.825Z")
+	query := datastore.NewQuery(kindSubscriptionSignUp).
+		Filter("SubscriptionDate>", t).
+		Limit(1000)
+	var results []*SubscriptionSignUp
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err

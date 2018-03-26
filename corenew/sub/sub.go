@@ -120,6 +120,15 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 	return subs, nil
 }
 
+// GetHasSubscribered returns a list of SubscriptionSignUp.
+func (c *Client) GetHasSubscribed() ([]*SubscriptionSignUp, error) {
+	subs, err := getHasSubscribed(c.ctx)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
+	}
+	return subs, nil
+}
+
 // GetAll gets all the SubLogs.
 func (c *Client) GetAll(limit int32) ([]*SubscriptionLog, error) {
 	if limit <= 0 {
