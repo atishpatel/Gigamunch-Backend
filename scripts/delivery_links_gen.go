@@ -13,16 +13,13 @@ type nameAndAddresses struct {
 var (
 	docSheet = ""
 	input    = []nameAndAddresses{
+		// JoyDriv
 		nameAndAddresses{
-			Name:      "Alandreia",
+			Name:      "Wofford",
 			Addresses: ``,
 		},
 		nameAndAddresses{
-			Name:      "David",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Kimberly",
+			Name:      "Todd",
 			Addresses: ``,
 		},
 		nameAndAddresses{
@@ -30,7 +27,16 @@ var (
 			Addresses: ``,
 		},
 		nameAndAddresses{
-			Name:      "Traci",
+			Name:      "Kimberly",
+			Addresses: ``,
+		},
+		nameAndAddresses{
+			Name:      "David",
+			Addresses: ``,
+		},
+		// Other
+		nameAndAddresses{
+			Name:      "Theo",
 			Addresses: ``,
 		},
 		// Founders
