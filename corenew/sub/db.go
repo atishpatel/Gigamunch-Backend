@@ -2,9 +2,9 @@ package sub
 
 import (
 	"errors"
+	"time"
 
 	"golang.org/x/net/context"
-
 	"google.golang.org/appengine/datastore"
 )
 
@@ -54,6 +54,20 @@ func getSubscribers(ctx context.Context, subDay string) ([]SubscriptionSignUp, e
 	query := datastore.NewQuery(kindSubscriptionSignUp).
 		Filter("IsSubscribed=", true).
 		Filter("SubscriptionDay=", subDay).
+		Limit(1000)
+	var results []SubscriptionSignUp
+	_, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// getAllSubscribers returns the list of all Subscribers
+func getAllSubscribers(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
+	query := datastore.NewQuery(kindSubscriptionSignUp).
+		Filter("SubscriptionDate>", 0).
+		Filter("SubscriptionDate<", date).
 		Limit(1000)
 	var results []SubscriptionSignUp
 	_, err := query.GetAll(ctx, &results)
