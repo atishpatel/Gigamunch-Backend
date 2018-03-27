@@ -15,6 +15,33 @@
     "application/json"
   ],
   "paths": {
+    "/admin/api/v1/GetAllSubscribers": {
+      "post": {
+        "summary": "Subscribers",
+        "operationId": "GetAllSubscribers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetAllSubscribersResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetAllSubscribersReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetLog": {
       "post": {
         "summary": "Activities\nrpc GetActivities (GetActivitiesReq) returns (GetActivitiesResp) {\n    option (google.api.http) = {\n        post: \"/admin/api/v1/GetActivities\"\n        body: \"*\"\n    };\n}\nLogs",
@@ -176,6 +203,63 @@
     }
   },
   "definitions": {
+    "AddressAddress": {
+      "type": "object",
+      "properties": {
+        "apt": {
+          "type": "string"
+        },
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "full_address": {
+          "type": "string"
+        }
+      },
+      "title": "The error object that gets returned with every"
+    },
+    "AdminAPIGetAllSubscribersReq": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIGetAllSubscribersResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "subscribers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPISubscriber"
+          }
+        }
+      }
+    },
     "AdminAPIGetLogReq": {
       "type": "object",
       "properties": {
@@ -328,6 +412,118 @@
         }
       },
       "title": "Sublogs"
+    },
+    "AdminAPISubscriber": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/AddressAddress"
+        },
+        "customer_id": {
+          "type": "string"
+        },
+        "subscription_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "first_payment_date": {
+          "type": "string"
+        },
+        "is_subscribed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "subscription_date": {
+          "type": "string"
+        },
+        "unsubscribed_date": {
+          "type": "string"
+        },
+        "first_box_date": {
+          "type": "string"
+        },
+        "servings": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vegetarian_servings": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "delivery_time": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "subscription_day": {
+          "type": "string"
+        },
+        "weekly_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "phone_number": {
+          "type": "string"
+        },
+        "delivery_tips": {
+          "type": "string"
+        },
+        "bag_reminder_sms": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "num_gift_dinners": {
+          "type": "integer",
+          "format": "int32",
+          "title": "gift"
+        },
+        "reference_email": {
+          "type": "string"
+        },
+        "gift_reveal_date": {
+          "type": "string"
+        },
+        "referral_page_opens": {
+          "type": "integer",
+          "format": "int32",
+          "title": "stats"
+        },
+        "referred_page_opens": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "gift_page_opens": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "gifted_page_opens": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "Subscriber"
     },
     "AdminAPITokenOnlyReq": {
       "type": "object",
