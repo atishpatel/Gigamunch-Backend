@@ -71,33 +71,85 @@ func SendStatsSMS(ctx context.Context, r *http.Request, log *logging.Client) Res
 	for date.Weekday() != time.Saturday {
 		date = date.Add(-1 * time.Hour)
 	}
-	dateMinus7Days := date.Add(-1 * time.Hour * 24 * 7)
 
-	totalSubs := 0
+	totalSubs := -1
+	// week
+	dateMinus7Days := date.Add(-1 * time.Hour * 24 * 7)
 	newSubsLastWeek := 0
 	cancelsLastWeek := 0
+	cancelsLessThan4WeekRetention := 0
+	cancels4To8WeekRetention := 0
+	cancelsMoreThan8WeekRetention := 0
+	totalSubsLastWeek := 0
+	sumDaysWithUs := 0
+	// month
+	dateMinus30Days := date.Add(-1 * time.Hour * 24 * 30)
+	newSubs30Days := 0
+	cancelsLast30Days := 0
+	totalSubs30DaysAgo := 0
 	for _, sub := range subs {
 		if sub.IsSubscribed {
 			totalSubs++
-			if sub.SubscriptionDate.After(dateMinus7Days) && sub.SubscriptionDate.Before(date) {
-				newSubsLastWeek++
-			}
-		} else {
-			if sub.UnSubscribedDate.After(dateMinus7Days) && sub.UnSubscribedDate.Before(date) {
-				cancelsLastWeek++
+		}
+		// week
+		if sub.SubscriptionDate.After(dateMinus7Days) && sub.SubscriptionDate.Before(date) {
+			newSubsLastWeek++
+		}
+		if sub.UnSubscribedDate.After(dateMinus7Days) && sub.UnSubscribedDate.Before(date) {
+			cancelsLastWeek++
+			daysWithUs := int(sub.UnSubscribedDate.Sub(sub.SubscriptionDate) / (time.Hour * 24))
+			sumDaysWithUs += daysWithUs
+			if daysWithUs > 7*8 {
+				cancelsMoreThan8WeekRetention++
+			} else if daysWithUs < 7*4 {
+				cancelsLessThan4WeekRetention++
+			} else {
+				cancels4To8WeekRetention++
 			}
 		}
+		if sub.SubscriptionDate.Before(dateMinus7Days) {
+			totalSubsLastWeek++
+		}
+		// month
+		if sub.SubscriptionDate.After(dateMinus30Days) && sub.SubscriptionDate.Before(date) {
+			newSubs30Days++
+		}
+		if sub.UnSubscribedDate.After(dateMinus30Days) && sub.UnSubscribedDate.Before(date) {
+			cancelsLast30Days++
+		}
+		if sub.SubscriptionDate.Before(dateMinus30Days) {
+			totalSubs30DaysAgo++
+		}
 	}
-	msg := `%s stats:
+	weeklyChurn := (float32(cancelsLastWeek) / float32(totalSubsLastWeek)) * 100
+	monthlyChurn := (float32(cancelsLast30Days) / float32(totalSubs30DaysAgo)) * 100
+	avgWeeksWithUs := (float32(sumDaysWithUs) / float32(cancelsLastWeek)) / 7
+	msg := `📈 %s stats: 
 	Total Subs: %d
 
-	Stats for last week:
-	New Subs: %d
-	Cancel Subs: %d`
-	msg = fmt.Sprintf(msg, date.Add(time.Hour*25).Format("Jan 2"), totalSubs, newSubsLastWeek, cancelsLastWeek)
+🐉
+Stats for last week:
+	New Subs:       %d
+	Cancel Subs:   %d
+	Weekly Churn: %.2f %%
+	
+🚧
+Number of weeks with us:
+	>8 weeks:    %d
+	4-8 weeks:  %d
+	<4 weeks:    %d
+	Avg weeks: %.2f
+	
+🗓️
+Stats for last 30 days:
+	New Subs:          %d
+	Cancel Subs:      %d
+	Monthly Churn:  %.2f %%
+	`
+	msg = fmt.Sprintf(msg, date.Add(time.Hour*25).Format("Jan 2"), totalSubs, newSubsLastWeek, cancelsLastWeek, weeklyChurn, cancelsMoreThan8WeekRetention, cancels4To8WeekRetention, cancelsLessThan4WeekRetention, avgWeeksWithUs, newSubs30Days, cancelsLast30Days, monthlyChurn)
 	messageC := message.New(ctx)
-	// "9316446755",
-	numbers := []string{"6155454989"}
+	numbers := []string{"6155454989", "9316445311", "9316446755", "6153975516"}
+	// numbers := []string{"9316445311"}
 	for _, number := range numbers {
 		err = messageC.SendDeliverySMS(number, msg)
 		if err != nil {
