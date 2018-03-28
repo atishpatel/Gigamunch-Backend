@@ -11,8 +11,10 @@ type ExecutionStats struct {
 	OtherCosts float32
 }
 
+// Payroll is the payroll.
 type Payroll struct {
-	Name    string
-	Hours   string
+	Name string
+	// TODO: hours as time slots?
+	Hours   int
 	Postion string // Headcook, Linecook, Prepcook, etc
 }
