@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-
 	"google.golang.org/appengine/datastore"
 )
 
@@ -64,13 +63,13 @@ func getSubscribers(ctx context.Context, subDay string) ([]SubscriptionSignUp, e
 	return results, nil
 }
 
-// getHasSubscribed returns the list of people how have subscribed
-func getHasSubscribed(ctx context.Context) ([]*SubscriptionSignUp, error) {
-	t, _ := time.Parse(time.RFC3339, "2017-01-01T01:01:01.825Z")
+// getAllSubscribers returns the list of all Subscribers
+func getAllSubscribers(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
 	query := datastore.NewQuery(kindSubscriptionSignUp).
-		Filter("SubscriptionDate>", t).
+		Filter("SubscriptionDate>", 0).
+		Filter("SubscriptionDate<", date).
 		Limit(1000)
-	var results []*SubscriptionSignUp
+	var results []SubscriptionSignUp
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err

@@ -59,6 +59,7 @@ func init() {
 	// Sublogs
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", handler(userAdmin(ProcessSublog)))
+	http.HandleFunc("/admin/api/v1/GetAllSubscribers", handler(userAdmin(GetAllSubscribers)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	//
@@ -237,6 +238,8 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 			w.WriteHeader(int(sharedErr.Code))
 		}
 		// encode
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
 		err = encoder.Encode(resp)

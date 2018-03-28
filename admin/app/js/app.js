@@ -76,7 +76,17 @@ var TokenUtil = Object.freeze({
 	GetJWT: GetJWT
 });
 
-const baseURL = '/admin/api/v1/';
+let baseURL = '/admin/api/v1/';
+if (location.hostname === 'localhost') {
+    baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
+}
+function GetAllSubscribers(date) {
+    const url = baseURL + 'GetAllSubscribers';
+    const req = {
+        date: date.toISOString(),
+    };
+    return callFetch(url, 'GET', req);
+}
 function GetUnpaidSublogs(limit) {
     const url = baseURL + 'GetUnpaidSublogs';
     const req = {
@@ -141,6 +151,7 @@ function callFetch(url, method, body) {
         headers: {
             'Content-Type': 'application/json',
             'auth-token': GetToken(),
+            'Access-Control-Allow-Origin': '*',
         },
     };
     let URL = url;
@@ -150,9 +161,11 @@ function callFetch(url, method, body) {
     else {
         config.body = JSON.stringify(body);
     }
-    return fetch(URL, config).then((resp) => {
+    return fetch(URL, config)
+        .then((resp) => {
         return resp.json();
-    }).catch((err) => {
+    })
+        .catch((err) => {
         console.error('failed to callFetch', err);
     });
 }
@@ -174,6 +187,7 @@ function serializeParams(obj) {
 
 
 var Service = Object.freeze({
+	GetAllSubscribers: GetAllSubscribers,
 	GetUnpaidSublogs: GetUnpaidSublogs,
 	ProcessSublog: ProcessSublog,
 	Login: Login,

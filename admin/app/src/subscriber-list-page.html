@@ -1,0 +1,153 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="subscriber-list-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Subscriber List Page</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <div class="table-container">
+        <h2 class="table-date">
+              [[getDateString(item.date)]]
+            </h2>
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell">Email</div>
+            <div class="table-cell">Name</div>
+            <div class="table-cell">Number</div>
+            <div class="table-cell">Subscribed?</div>
+          </div>
+          <dom-repeat items="[[subscribers]]"
+                      as="subscriber">
+            <template>
+              <div class="table-row">
+                <div class="table-cell">
+                  <a target="_blank"
+                     href="subscriber/[[subscriber.email]]">[[subscriber.email]]</a>
+                </div>
+                <div class="table-cell">[[subscriber.name]]</div>
+                <div class="table-cell">[[subscriber.phone_number]]</div>
+                <div class="table-cell">[[subscriber.is_subscribed]]</div>
+              </div>
+            </template>
+          </dom-repeat>
+        </div>
+      </div>
+
+    </div>
+  </template>
+
+  <script>
+    class SubscriberListPage extends Polymer.Element {
+      static get is() {
+        return 'subscriber-list-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          event: {
+            type: Object,
+          },
+          subscribers: {
+            type: Array,
+            notify: true,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        console.log("in selected");
+        this.getAllSubscribers();
+      }
+
+      getAllSubscribers() {
+        console.log("made it to getAllSubscribers");
+        var today = new Date();
+        this.service.GetAllSubscribers(today).then((resp) => {
+          let subscribers = resp.subscribers;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            console.log("error in getAllSubscribers", err);
+            return;
+          }
+          for (let i = 0; i < subscribers.length; i++) {
+            if (subscribers[i].is_subscribed === undefined) {
+              subscribers[i].is_subscribed = false;
+            }
+
+          }
+          this.subscribers = subscribers;
+        });
+      }
+
+    }
+    window.customElements.define(SubscriberListPage.is, SubscriberListPage);
+
+  </script>
+</dom-module>
