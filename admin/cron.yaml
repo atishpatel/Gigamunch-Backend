@@ -17,7 +17,12 @@ cron:
   target: admin
 - description: "Check power sensors"
   url: /admin/task/CheckPowerSensors
-  schedule: every 1 hours
+  schedule: every 30 mins
+  target: admin
+- description: "Send Stats SMS"
+  url: /admin/task/SendStatsSMS
+  schedule: every tuesday 08:30
+  timezone: America/Chicago
   target: admin
 - description: "Send Preview Culture Email"
   url: /task/send-preview-culture-email

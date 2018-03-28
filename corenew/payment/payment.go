@@ -59,8 +59,8 @@ func (c *Client) GenerateToken(customerID string) (string, error) {
 	_, err := customerGateway.Find(c.ctx, customerID)
 	if err != nil {
 		// create customer
-		cust := &braintree.Customer{
-			Id: customerID,
+		cust := &braintree.CustomerRequest{
+			ID: customerID,
 		}
 		_, err = customerGateway.Create(c.ctx, cust)
 		if err != nil {
@@ -199,8 +199,8 @@ func (c *Client) CreateCustomer(req *CreateCustomerReq) (string, error) {
 	if req == nil {
 		return "", errInvalidParameter.Wrap("CreateCustomerReq is nil.")
 	}
-	cstNew := &braintree.Customer{
-		Id:        req.CustomerID,
+	cstNew := &braintree.CustomerRequest{
+		ID:        req.CustomerID,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,

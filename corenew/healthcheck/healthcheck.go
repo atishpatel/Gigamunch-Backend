@@ -71,6 +71,7 @@ func (c *Client) CheckPowerSensors() error {
 			d.NumAlerts++
 			if d.NumAlerts >= 3 {
 				d.Disable = true
+				d.NumAlerts = 0
 			}
 			err = put(c.ctx, d.ID, d)
 			if err != nil {

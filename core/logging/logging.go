@@ -164,6 +164,11 @@ func (c *Client) Debugf(ctx context.Context, format string, args ...interface{})
 	Debugf(ctx, format, args...)
 }
 
+// Errorf logs error messages.
+func (c *Client) Errorf(ctx context.Context, format string, args ...interface{}) {
+	Errorf(ctx, format, args...)
+}
+
 // GetLogs gets logs.
 func (c *Client) GetLogs(start, limit int) ([]*Entry, error) {
 	var dst []*Entry
