@@ -12,6 +12,14 @@ if (location.hostname === 'localhost') {
   baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
 
+// Subscriber
+export function GetAllSubscribers(date: Date): Promise<any> {
+  const url: string = baseURL + 'GetAllSubscribers';
+  const req: GetAllSubscribersReq = {
+    date: date.toISOString(),
+  };
+  return callFetch(url, 'GET', req);
+}
 
 // SubLog
 export function GetUnpaidSublogs(limit: number): Promise<any> {
@@ -99,11 +107,13 @@ function callFetch(url: string, method: string, body: object): Promise<APIRespon
   } else {
     config.body = JSON.stringify(body);
   }
-  return fetch(URL, config).then((resp: Response) => {
-    return resp.json();
-  }).catch((err: any) => {
-    console.error('failed to callFetch', err);
-  });
+  return fetch(URL, config)
+    .then((resp: Response) => {
+      return resp.json();
+    })
+    .catch((err: any) => {
+      console.error('failed to callFetch', err);
+    });
 }
 
 function serializeParams(obj: any): string {
