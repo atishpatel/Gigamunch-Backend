@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/schema"
 )
 
-// ProcessSublog runs sub.Process.
+// GetAllSubscribers gets all subscribers.
 func GetAllSubscribers(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetAllSubscribersReq)
 	var err error
