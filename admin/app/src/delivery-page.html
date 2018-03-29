@@ -1,112 +1,132 @@
 <link rel="import"
       href="../bower_components/polymer/polymer-element.html">
 <link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
       href="../bower_components/google-map/google-map.html">
 <link rel="import"
       href="../bower_components/google-map/google-map-marker.html">
 <link rel="import"
       href="shared-styles.html">
 
-      <dom-module id="delivery-page">
-        <template>
-          <shared-styles>
-            <style include="shared-styles">
-              :host {
-                display: block;
-                padding: 10px;
-              }
-      
-              .table-container {
-                padding: 12px 0;
-              }
-      
-              .table-title {
-                font-size: 14px;
-              }
-      
-              google-map {
-                height: 800px;
-              }
-      
-              .table {
-                display: table;
-                width: 100%;
-                border: 1px solid #000;
-              }
-      
-              .table-header-row {
-                background-color: #ccc;
-                display: table-header-group;
-                font-weight: bold;
-              }
-      
-              .table-row {
-                display: table-row;
-                width: auto;
-                clear: both;
-              }
-      
-              .table-cell {
-                border: 1px solid #999999;
-                padding: 3px 10px;
-                display: table-cell;
-                flex: 1;
-                /*display: flex;*/
-                justify-content: space-between;
-                align-items: center;
-              }
-      
-              .table-body {
-                display: table-row-group;
-              }
-      
-            </style>
-          </shared-styles>
-      
-          <h1 class="">[[sublogsByDate.dateString]]</h1>
-          <div class="table-container">
-            <h2>Delivery Tools</h2>
-            <div>
-              <div class="table">
-                <div class="table-row table-header-row">
-                  <div class="table-cell">Driver</div>
-                  <div class="table-cell">Name</div>
-                  <div class="table-cell">Delivery Tip</div>
-                  <div class="table-cell">APT</div>
-                  <div class="table-cell">Address</div>
-                  <div class="table-cell">Phone Number</div>
-                  <div class="table-cell">Servings</div>
-                  <div class="table-cell">Veg Servings</div>
-                  <div class="table-cell">Status</div>
-                  <div class="table-cell">Email</div>
-                </div>
-                <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
-                            as="sublog">
-                  <template>
-                    <div class="table-row">
-                      <div class="table-cell">[[sublog.driver]]</div>
-                      <div class="table-cell">[[sublog.name]]</div>
-                      <div class="table-cell">[[sublog.delivery_tips]]</div>
-                      <div class="table-cell">[[sublog.apt]]</div>
-                      <div class="table-cell">[[sublog.addressStr]]</div>
-                      <div class="table-cell">[[sublog.phone_number]]</div>
-                      <div class="table-cell">[[sublog.servings]]</div>
-                      <div class="table-cell">[[sublog.vegetarian_servings]]</div>
-                      <div class="table-cell">[[sublog.status]]</div>
-                      <div class="table-cell">[[sublog.sub_email]]</div>
-                    </div>
-                  </template>
-                </dom-repeat>
-              </div>
-              <br>
-              <google-map id="map"
-                          map="{{map}}"
-                          fit-to-marker
-                          disable-street-view-control
-                          latitude="36.16"
-                          longitude="-86.78"
-                          api-key="[[apiKey]]">
-                <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
+<dom-module id="delivery-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .table-container {
+          padding: 12px 0;
+        }
+
+        .table-title {
+          font-size: 14px;
+        }
+
+        google-map {
+          height: 800px;
+        }
+
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
+      </style>
+    </shared-styles>
+
+    <h1 class="">[[dateString]]</h1>
+    <div>
+      <select id="driverSelect"
+              value="{{driverName::change}}"
+              required>
+          <option disabled selected value> -- select an driver -- </option>
+          <template is="dom-repeat"
+                    items="[[drivers]]"
+                    as="driver">
+            <option value="[[driver.name]]">[[driver.name]]</option>
+          </template>
+        </select>
+      <paper-button on-click="optimizeDriverRoute">Optimize driver route</paper-button>
+    </div>
+    <div class="table-container">
+      <h2>Delivery Tools</h2>
+      <div>
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell">Driver</div>
+            <div class="table-cell">Name</div>
+            <div class="table-cell">Delivery Tip</div>
+            <div class="table-cell">APT</div>
+            <div class="table-cell">Address</div>
+            <div class="table-cell">Phone Number</div>
+            <div class="table-cell">Servings</div>
+            <div class="table-cell">Veg Servings</div>
+            <div class="table-cell">Status</div>
+            <div class="table-cell">Email</div>
+          </div>
+          <dom-repeat items="[[drivers]]"
+                      as="driver">
+            <template>
+              <dom-repeat items="[[driver.deliveries]]"
+                          as="delivery">
+                <template>
+                  <div class="table-row">
+                    <div class="table-cell">[[driver.name]]</div>
+                    <div class="table-cell">[[delivery.name]]</div>
+                    <div class="table-cell">[[delivery.delivery_tips]]</div>
+                    <div class="table-cell">[[delivery.apt]]</div>
+                    <div class="table-cell">[[delivery.addressStr]]</div>
+                    <div class="table-cell">[[delivery.phone_number]]</div>
+                    <div class="table-cell">[[delivery.servings]]</div>
+                    <div class="table-cell">[[delivery.vegetarian_servings]]</div>
+                    <div class="table-cell">[[delivery.status]]</div>
+                    <div class="table-cell">[[delivery.sub_email]]</div>
+                  </div>
+                </template>
+              </dom-repeat>
+            </template>
+          </dom-repeat>
+        </div>
+        <br>
+        <google-map id="map"
+                    map="{{map}}"
+                    fit-to-marker
+                    disable-street-view-control
+                    latitude="36.16"
+                    longitude="-86.78"
+                    api-key="[[apiKey]]">
+          <!-- <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
                             as="sublog">
                   <template>
                     <google-map-marker label="[[sublog.name]]"
@@ -114,315 +134,428 @@
                                        longitude="[[sublog.address.longitude]]"
                                        draggable></google-map-marker>
                   </template>
-                </dom-repeat>
-      
-              </google-map>
-            </div>
-          </div>
-        </template>
-        <script src="js/dep/BpTspSolver.js"></script>
-        <script>
-          class DeliveryPage extends Polymer.Element {
-            static get is() {
-              return 'delivery-page';
-            }
-      
-            static get properties() {
-              return {
-                serviceold: {
-                  type: Object,
-                },
-                user: {
-                  type: Object,
-                  notify: true,
-                },
-                apiKey: {
-                  type: String,
-                  value: () => {
-                    return APP.IsProd ? 'AIzaSyApF3OWhumB5GeD20vQn_9NmToR0glkkOA' : 'AIzaSyAQOn9gsSWBu9nImfATaPKkSFp2I5MxbuU';
-                  },
-                },
-                sublogsByDate: {
-                  type: Array,
-                  notify: true,
-                },
-                polys: {
-                  type: Object,
-                },
-                map: {
-                  type: Object,
-                },
-              }
-            }
-      
-            static get observers() {
-              return [ /* observer descriptors */ ]
-            }
-      
-            constructor() {
-              super();
-            }
-      
-            connectedCallback() {
-              super.connectedCallback();
-            }
-      
-            selected() {
-              const tmp = window.location.pathname.split('/delivery/');
-              const dateString = decodeURIComponent(tmp[1]);
-              let d;
-              if (dateString === 'next') {
-                d = new Date();
-                while (d.getDay() !== 1) {
-                  d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
-                }
-              } else {
-                d = new Date(dateString);
-              }
-              this.getSubLogsForDate(d);
-            }
-      
-            inside(point, vs) {
-              // ray-casting algorithm based on
-              // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-      
-              var x = point[1],
-                y = point[0];
-      
-              var inside = false;
-              for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-                var xi = vs[i][0],
-                  yi = vs[i][1];
-                var xj = vs[j][0],
-                  yj = vs[j][1];
-      
-                var intersect = ((yi > y) != (yj > y)) &&
-                  (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
-              }
-      
-              return inside;
-            };
-      
-            setPolygons() {
-              var geofences = this.getGeofences();
-              geofences.forEach((geofence) => {
-                var path = [];
-                geofence.Path.forEach((point) => {
-                  path.push(new google.maps.LatLng(point[1], point[0]));
-                });
-                var polyline = new google.maps.Polyline({
-                  path: path,
-                  strokeColor: geofence.Color,
-                  strokeOpacity: .5,
-                  strokeWeight: 2,
-                });
-                polyline.setMap(this.map);
-              });
-            }
-      
-            getDriver(latLng) {
-              var geofences = this.getGeofences();
-              var name = '-';
-              geofences.forEach((geofence) => {
-                if (this.inside(latLng, geofence.Path)) {
-                  name = geofence.Name;
-                  return
-                }
-              });
-              return name;
-            }
-      
-            getSubLogsForDate(d) {
-              this.serviceold.getSubLogsForDate(d, (slogs, err) => {
-                if (err.code !== 0) {
-                  return;
-                }
-                let sublogDay = {
-                  date: slogs[0].date,
-                  dateString: this.getDateString(slogs[0].date),
-                  sublogs: [],
-                  unskippedSublogs: [],
-                };
-                for (let i = 0; i < slogs.length; i++) {
-                  sublogDay.sublogs.push(slogs[i]);
-                  if (!slogs[i].skip) {
-                    slogs[i].apt = slogs[i].address.apt;
-                    function getAddress(a) {
-                      if (a && a.street) {
-                        if (/\d/.test(a.street)) {
-                          return a.street + ', ' + a.city;
-                        }
-                        let apt = '';
-                        if (a.apt) {
-                          apt = a.apt + ' ';
-                        }
-                        return apt + a.street + ', ' + a.city;
-                      }
-                      return '';
-                    }
-                    slogs[i].addressStr = getAddress(slogs[i].address);
-                    var latLng = [
-                      Number(slogs[i].address.latitude),
-                      Number(slogs[i].address.longitude),
-                    ];
-                    slogs[i].driver = this.getDriver(latLng);
-                    sublogDay.unskippedSublogs.push(slogs[i]);
+                </dom-repeat> -->
+
+        </google-map>
+      </div>
+    </div>
+  </template>
+  <script src="../js/dep/BpTspSolver.js"></script>
+  <script>
+    class DeliveryPage extends Polymer.Element {
+      static get is() {
+        return 'delivery-page';
+      }
+
+      static get properties() {
+        return {
+          serviceold: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          apiKey: {
+            type: String,
+            value: () => {
+              return APP.IsProd ? 'AIzaSyApF3OWhumB5GeD20vQn_9NmToR0glkkOA' : 'AIzaSyAQOn9gsSWBu9nImfATaPKkSFp2I5MxbuU';
+            },
+          },
+          drivers: {
+            type: Array,
+          },
+          driverName: {
+            type: String,
+          },
+          dateString: {
+            type: String,
+          },
+          polys: {
+            type: Object,
+          },
+          map: {
+            type: Object,
+          },
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      selected() {
+        const tmp = window.location.pathname.split('/delivery/');
+        const dateString = decodeURIComponent(tmp[1]);
+        let d;
+        if (dateString === 'next') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
+          }
+        } else {
+          d = new Date(dateString);
+        }
+        this.getSubLogsForDate(d);
+      }
+
+      getSubLogsForDate(d) {
+        this.serviceold.getSubLogsForDate(d, (slogs, err) => {
+          if (err.code !== 0) {
+            return;
+          }
+          // process sublogs
+          let unskippedSublogs = [];
+          for (let i = 0; i < slogs.length; i++) {
+            if (!slogs[i].skip) {
+              slogs[i].apt = slogs[i].address.apt;
+
+              function getAddress(a) {
+                if (a && a.street) {
+                  if (/\d/.test(a.street)) {
+                    return a.street + ', ' + a.city;
                   }
+                  let apt = '';
+                  if (a.apt) {
+                    apt = a.apt + ' ';
+                  }
+                  return apt + a.street + ', ' + a.city;
                 }
-                try {
-                  sublogDay.unskippedSublogs = this.optomizeRoute(sublogDay.unskippedSublogs);
-                } finally {
-                  this.sublogsByDate = sublogDay;
-                  this.setPolygons();
-                }
-              });
-            }
-      
-            optomizeRoute(sublogs) {
-              sublogs = sublogs.sort(function(a, b) {
-                if (a.driver < b.driver) return -1;
-                if (a.driver > b.driver) return 1;
-                if (a.name < b.name) return -1;
-                if (a.name > b.name) return 1;
-                return 0;
-              });
-              return sublogs
-            }
-      
-            getDateString(dateString) {
-              const d = new Date(dateString);
-              return d.toUTCString().substring(0, 16);
-            }
-      
-            getGeofences() {
-              return [{
-                  Name: 'Atish',
-                  Color: '#0000FF',
-                  Path: [
-                    [-86.6917419, 36.0035625],
-                    [-86.8263245, 35.9735608],
-                    [-86.9413376, 35.9771727],
-                    [-86.9554008, 35.8976451],
-                    [-86.9059753, 35.8322883],
-                    [-86.7274475, 35.8222673],
-                    [-86.6546631, 35.8501003],
-                    [-86.6917419, 36.0035625],
-                  ],
-                },
-                {
-                  Name: 'Chris',
-                  Color: '#000FF0',
-                  Path: [
-                    [-86.602478, 36.2542406],
-                    [-86.5756989, 36.2647604],
-                    [-86.583252, 36.316785],
-                    [-86.8798828, 36.359375],
-                    [-86.8661499, 36.2487033],
-                    [-86.6872834, 36.2922329],
-                    [-86.602478, 36.2542406],
-                  ],
-                },
-                {
-                  Name: 'Piyush',
-                  Color: '#00FF00',
-                  Path: [
-                    [-86.5612793, 36.0446575],
-                    [-86.4733887, 36.1622705],
-                    [-86.5180206, 36.2791537],
-                    [-86.6278839, 36.2398428],
-                    [-86.6580963, 36.1971875],
-                    [-86.7034149, 36.2370737],
-                    [-86.6986084, 36.1434199],
-                    [-86.7336273, 36.1162449],
-                    [-86.7023539, 36.0257448],
-                    [-86.6704559, 35.9613345],
-                    [-86.5612793, 36.0446575],
-                  ],
-                },
-                {
-                  Name: 'Enis',
-                  Color: '#FF0000',
-                  Path: [
-                    [-86.8709564, 36.1001572],
-                    [-87.0611572, 36.078517],
-                    [-87.0206452, 35.9518857],
-                    [-86.9551308, 35.9917881],
-                    [-86.8490327, 36.0177396],
-                    [-86.8458938, 36.0474335],
-                    [-86.8359374, 36.0693597],
-                    [-86.8709564, 36.1001572],
-                  ],
-                },
-                {
-                  Name: 'JoyDriv1',
-                  Color: '#000F0F',
-                  Path: [
-                    [-86.6855622, 36.2542407],
-                    [-86.6883162, 36.2766773],
-                    [-86.7707257, 36.2674092],
-                    [-86.8064117, 36.2348583],
-                    [-86.8173981, 36.1982958],
-                    [-86.8046929, 36.1714086],
-                    [-86.7950821, 36.1514597],
-                    [-86.782727, 36.1450846],
-                    [-86.7576599, 36.154509],
-                    [-86.7521667, 36.1628248],
-                    [-86.7020416, 36.1750198],
-                    [-86.6972351, 36.1938628],
-                    [-86.7113089, 36.240388],
-                    [-86.6855622, 36.2542407],
-                  ],
-                },
-                {
-                  Name: 'JoyDriv2',
-                  Color: '#00F00F',
-                  Path: [
-                    [-86.8445205, 36.1711398],
-                    [-86.8874439, 36.1529848],
-                    [-86.9197083, 36.1131941],
-                    [-86.874551, 36.1019597],
-                    [-86.8414306, 36.0746322],
-                    [-86.8240928, 36.1032086],
-                    [-86.849583, 36.115896],
-                    [-86.8220302, 36.1355157],
-                    [-86.8445205, 36.1711398],
-                  ],
-                },
-                {
-                  Name: 'JoyDriv3',
-                  Color: '#0F000F',
-                  Path: [
-                    [-86.7360306, 36.0296659],
-                    [-86.732254, 36.078517],
-                    [-86.7590332, 36.1112525],
-                    [-86.7751694, 36.1129167],
-                    [-86.8081284, 36.1184635],
-                    [-86.8297577, 36.0893379],
-                    [-86.8232346, 36.0285553],
-                    [-86.7360306, 36.0296659],
-                  ],
-                },
-                {
-                  Name: 'JoyDriv4',
-                  Color: '#F0000F',
-                  Path: [
-                    [-86.8160248, 36.1874899],
-                    [-86.839714, 36.1672596],
-                    [-86.8192818, 36.1359318],
-                    [-86.8440887, 36.1177692],
-                    [-86.8215179, 36.1059825],
-                    [-86.782727, 36.1450846],
-                    [-86.7950821, 36.1514597],
-                    [-86.8160248, 36.1874899],
-                  ],
-                },
-              ]
+                return '';
+              }
+              slogs[i].addressStr = getAddress(slogs[i].address);
+              slogs[i].latlng = this._createGoogleLatlng(slogs[i].address.latitude, slogs[i].address.longitude);
+              unskippedSublogs.push(slogs[i]);
             }
           }
-      
-          customElements.define(DeliveryPage.is, DeliveryPage);
-      
-        </script>
-      </dom-module>
-      
+          // convert to driver struct
+          this.drivers = this.getDrivers(unskippedSublogs);
+          this.dateString = this.getDateString(slogs[0].date);
+          this.setPolygons();
+        });
+      }
+
+      // route optimize code
+      optimizeDriverRoute() {
+        const name = this.driverName;
+        if (name === '' || name === '-'){
+          return;
+        }
+        this.drivers.forEach((driver) => {
+          if (driver.name === name) {
+            let tsp = new BpTspSolver(this.map, null);
+            // tsp.startOver();
+            tsp.setOnProgressCallback(this.onProgressCallback);
+            tsp.setTravelMode(google.maps.DirectionsTravelMode.DRIVING);
+            google.maps.event.addListener(tsp.getGDirectionsService(), "error", function() {
+              alert("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
+            });
+            driver.deliveries.forEach((delivery) => {
+              tsp.addWaypointWithLabel( this._createGoogleLatlng(delivery.address.latitude,delivery.address.longitude), delivery.name, null);
+            });
+            const startLatlng = this._createGoogleLatlng(driver.start_latlng);
+            tsp.addWaypointWithLabel(startLatlng, 'Start');
+            tsp.setAsStart(startLatlng);
+            if (driver.round_trip) {
+              tsp.solveRoundTrip(this.onSuccessCallback);
+            } else {
+              const endLatlng = this._createGoogleLatlng(driver.end_latlng);
+              tsp.addWaypointWithLabel(endLatlng, 'End');
+              tsp.setAsStop(endLatlng);
+              tsp.solveAtoZ(this.onSuccessCallback);
+            }
+          }
+        });
+      }
+
+      _createGoogleLatlng(lat, lng) {
+        let latitude, longitude;
+        if (typeof lat === 'object') {
+          latitude = lat.lat;
+          longitude = lat.lng;
+        } else {
+          latitude = lat;
+          longitude = lng;
+        }
+        return new google.maps.LatLng(Number(latitude), Number(longitude));
+      }
+
+      onProgressCallback(tsp) {
+        console.log('progress: ', 100 * tsp.getNumDirectionsComputed() / tsp.getNumDirectionsNeeded());
+      }
+
+      onSuccessCallback(tsp) {
+        console.log('getOrder:');
+        console.log(tsp.getOrder());
+        console.log('getGDirections:');
+        console.log(tsp.getGDirections());
+      }
+
+      getDateString(dateString) {
+        const d = new Date(dateString);
+        return d.toUTCString().substring(0, 16);
+      }
+
+      // Driver code
+      getDrivers(sublogs) {
+        if (!sublogs.length) {
+          return;
+        }
+        let drivers = this.getGeofences();
+        let indexOfNoDriver = drivers.length;
+        drivers.push({
+          name: '-',
+          color: '#607D8B',
+        });
+
+        for (let i = 0; i < drivers.length; i++) {
+          drivers[i].deliveries = [];
+          drivers[i].markerURL = 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|' + drivers[i].color.substr(1);
+          drivers[i].markerImage = new google.maps.MarkerImage(drivers[i].markerURL,
+          new google.maps.Size(21, 34),
+          new google.maps.Point(0,0),
+          new google.maps.Point(10, 34));
+        }
+
+        sublogs.forEach((sublog) => {
+          let found = false;
+          for (let i = 0; i < drivers.length; i++) {
+            const driver = drivers[i];
+            if(driver.name === '-') {
+              continue;
+            }
+            if (this.inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence)) {
+              // in driver's geofence
+              sublog.marker = new google.maps.Marker({
+                position: {lat: Number(sublog.address.latitude), lng: Number(sublog.address.longitude)},
+                map: this.map,
+                icon: driver.markerImage,
+                title: sublog.name,
+              });
+              driver.deliveries.push(sublog);
+              found = true;
+              break;
+            }
+          }
+          // if not in a driver's geofence
+          if (!found) {
+
+            drivers[indexOfNoDriver].deliveries.push(sublog);
+          }
+        });
+        return drivers;
+      }
+
+      updateMarker(driver, lat, long) {
+        // TODO:
+        
+        
+        
+      }
+
+      inside(lat, long, vs) {
+        // ray-casting algorithm based on
+        // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+
+        var x = long,
+          y = lat;
+
+        var inside = false;
+        for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+          var xi = vs[i][0],
+            yi = vs[i][1];
+          var xj = vs[j][0],
+            yj = vs[j][1];
+
+          var intersect = ((yi > y) != (yj > y)) &&
+            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+          if (intersect) inside = !inside;
+        }
+
+        return inside;
+      };
+
+      getGeofences() {
+        return [{
+            name: 'Theo',
+            desc: 'Franklin',
+            color: '#0000FF',
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.118228, lng: -86.755293},
+            geofence: [
+              [-86.6917419, 36.0035625],
+              [-86.8263245, 35.9735608],
+              [-86.9413376, 35.9771727],
+              [-86.9554008, 35.8976451],
+              [-86.9059753, 35.8322883],
+              [-86.7274475, 35.8222673],
+              [-86.6546631, 35.8501003],
+              [-86.6917419, 36.0035625],
+            ],
+          },
+          {
+            name: 'Atish',
+            desc: 'Hendersonville',
+            color: '#000FF0',
+            round_trip: true,
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.268554, lng: -86.628631},
+            geofence: [
+              [-86.602478, 36.2542406],
+              [-86.5756989, 36.2647604],
+              [-86.583252, 36.316785],
+              [-86.8798828, 36.359375],
+              [-86.8661499, 36.2487033],
+              [-86.6872834, 36.2922329],
+              [-86.602478, 36.2542406],
+            ],
+          },
+          {
+            name: 'Piyush',
+            desc: 'Hermitage',
+            color: '#00FF00',
+            round_trip: true,
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.268554, lng: -86.628631},
+            geofence: [
+              [-86.5612793, 36.0446575],
+              [-86.4733887, 36.1622705],
+              [-86.5180206, 36.2791537],
+              [-86.6278839, 36.2398428],
+              [-86.6580963, 36.1971875],
+              [-86.7034149, 36.2370737],
+              [-86.6986084, 36.1434199],
+              [-86.7336273, 36.1162449],
+              [-86.7023539, 36.0257448],
+              [-86.6704559, 35.9613345],
+              [-86.5612793, 36.0446575],
+            ],
+          },
+          {
+            name: 'Wofford',
+            desc: 'Bellevue',
+            color: '#FF0000',
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.118228, lng: -86.755293},
+            geofence: [
+              [-86.8657207, 36.1026538],
+              [-87.0611572, 36.078517],
+              [-87.0206452, 35.9518857],
+              [-86.9551308, 35.9917881],
+              [-86.8490327, 36.0177396],
+              [-86.8458938, 36.0474335],
+              [-86.8237494, 36.1023764],
+              [-86.8445634, 36.1148599],
+              [-86.8657207, 36.1026538],
+            ],
+          },
+          {
+            name: 'Kimberly',
+            desc: 'EastNashville',
+            color: '#000F0F',
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.118228, lng: -86.755293},
+            geofence: [
+              [-86.6855622, 36.2542407],
+              [-86.6883162, 36.2766773],
+              [-86.7707257, 36.2674092],
+              [-86.8064117, 36.2348583],
+              [-86.8173981, 36.1982958],
+              [-86.8046929, 36.1714086],
+              [-86.7950821, 36.1514597],
+              [-86.782727, 36.1450846],
+              [-86.7576599, 36.154509],
+              [-86.7521667, 36.1628248],
+              [-86.7020416, 36.1750198],
+              [-86.6972351, 36.1938628],
+              [-86.7113089, 36.240388],
+              [-86.6855622, 36.2542407],
+            ],
+          },
+          {
+            name: 'Todd',
+            desc: 'Vanderbilt',
+            color: '#00F00F',
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.118228, lng: -86.755293},
+            geofence: [
+              [-86.8198014, 36.1978802],
+              [-86.839714, 36.1672596],
+              [-86.8228867, 36.1368329],
+              [-86.8330165, 36.1179772],
+              [-86.8154239, 36.1112525],
+              [-86.7968474, 36.1278924],
+              [-86.782727, 36.1450846],
+              [-86.7950821, 36.1514597],
+              [-86.8198014, 36.1978802],
+            ],
+          },
+          {
+            name: 'David',
+            desc: 'Sylvan',
+            color: '#0F000F',
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.118228, lng: -86.755293},
+            geofence: [
+              [-86.8405723, 36.1670517],
+              [-86.8852101, 36.1939336],
+              [-86.8874439, 36.1529848],
+              [-86.9138718, 36.1167996],
+              [-86.8669121, 36.103208],
+              [-86.8536185, 36.1123619],
+              [-86.8340476, 36.1164507],
+              [-86.8242618, 36.1368327],
+              [-86.8405723, 36.1670517],
+            ],
+          },
+          {
+            name: 'Tim',
+            desc: 'Brentwood',
+            color: '#F0000F',
+            start_latlng: {lat: 36.268554, lng: -86.628631},
+            end_latlng: {lat: 36.118228, lng: -86.755293},
+            geofence: [
+              [-86.7118263, 36.0084229],
+              [-86.732254, 36.078517],
+              [-86.7701911, 36.1400235],
+              [-86.791563, 36.1321905],
+              [-86.8081284, 36.1184635],
+              [-86.8297577, 36.0893379],
+              [-86.8376542, 36.0049512],
+              [-86.7118263, 36.0084229],
+            ],
+          },
+        ]
+      }
+
+      // set polygons
+      setPolygons() {
+        var geofences = this.getGeofences();
+        geofences.forEach((geofence) => {
+          var path = [];
+          geofence.geofence.forEach((point) => {
+            path.push(new google.maps.LatLng(point[1], point[0]));
+          });
+          var polyline = new google.maps.Polyline({
+            path: path,
+            strokeColor: geofence.Color,
+            strokeOpacity: .5,
+            strokeWeight: 2,
+          });
+          polyline.setMap(this.map);
+        });
+      }
+    }
+
+    customElements.define(DeliveryPage.is, DeliveryPage);
+
+  </script>
+</dom-module>
