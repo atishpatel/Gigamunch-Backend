@@ -5,8 +5,6 @@
 <link rel="import"
       href="../bower_components/google-map/google-map.html">
 <link rel="import"
-      href="../bower_components/google-map/google-map-marker.html">
-<link rel="import"
       href="shared-styles.html">
 
 <dom-module id="delivery-page">
@@ -60,6 +58,10 @@
 
         .table-body {
           display: table-row-group;
+        }
+
+        .span-link {
+            
         }
 
       </style>
@@ -126,16 +128,6 @@
                     latitude="36.16"
                     longitude="-86.78"
                     api-key="[[apiKey]]">
-          <!-- <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
-                            as="sublog">
-                  <template>
-                    <google-map-marker label="[[sublog.name]]"
-                                       latitude="[[sublog.address.latitude]]"
-                                       longitude="[[sublog.address.longitude]]"
-                                       draggable></google-map-marker>
-                  </template>
-                </dom-repeat> -->
-
         </google-map>
       </div>
     </div>
@@ -186,6 +178,7 @@
 
       constructor() {
         super();
+        window.addEventListener('updateDriver', this.updateDriverHandler.bind(this));
       }
 
       connectedCallback() {
@@ -246,7 +239,7 @@
       // route optimize code
       optimizeDriverRoute() {
         const name = this.driverName;
-        if (name === '' || name === '-'){
+        if (name === '' || name === '-') {
           return;
         }
         this.drivers.forEach((driver) => {
@@ -259,7 +252,7 @@
               alert("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
             });
             driver.deliveries.forEach((delivery) => {
-              tsp.addWaypointWithLabel( this._createGoogleLatlng(delivery.address.latitude,delivery.address.longitude), delivery.name, null);
+              tsp.addWaypointWithLabel(this._createGoogleLatlng(delivery.address.latitude, delivery.address.longitude), delivery.name, null);
             });
             const startLatlng = this._createGoogleLatlng(driver.start_latlng);
             tsp.addWaypointWithLabel(startLatlng, 'Start');
@@ -318,15 +311,16 @@
 
         for (let i = 0; i < drivers.length; i++) {
           drivers[i].deliveries = [];
+
           function pinSymbol(color) {
-              return {
-                  path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z M -2,-30 a 2,2 0 1,1 4,0 2,2 0 1,1 -4,0',
-                  fillColor: color,
-                  fillOpacity: 1,
-                  strokeColor: '#000',
-                  strokeWeight: 2,
-                  scale: 1,
-                  labelOrigin: new google.maps.Point(0,10)
+            return {
+              path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z M -2,-30 a 2,2 0 1,1 4,0 2,2 0 1,1 -4,0',
+              fillColor: color,
+              fillOpacity: 1,
+              strokeColor: '#000',
+              strokeWeight: 2,
+              scale: 1,
+              labelOrigin: new google.maps.Point(0, 10)
             };
           }
           drivers[i].pinSymbol = pinSymbol(drivers[i].color);
@@ -336,17 +330,38 @@
           let found = false;
           for (let i = 0; i < drivers.length; i++) {
             const driver = drivers[i];
-            if(driver.name === '-') {
+            if (driver.name === '-') {
               continue;
             }
             if (this.inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence)) {
               // in driver's geofence
+              // add map marker
               sublog.marker = new google.maps.Marker({
-                position: {lat: Number(sublog.address.latitude), lng: Number(sublog.address.longitude)},
+                position: {
+                  lat: Number(sublog.address.latitude),
+                  lng: Number(sublog.address.longitude)
+                },
                 map: this.map,
                 icon: driver.pinSymbol,
                 label: sublog.name,
+                dragable: true,
               });
+              // add map marker popup window
+              google.maps.event.addListener(sublog.marker, 'click', function(event) {
+                const addrStr = sublog.addressStr + '<br>';
+                const labelStr = '<b>' + sublog.name + '</b><br>';
+                let changeDriverList = '';
+                for (let i = 0; i < drivers.length; i++) {
+                  changeDriverList += `<span onclick="APP.Event.Fire(\'updateDriver\', {driverName:\'${drivers[i].name }\', deliveryEmail:\'${sublog.sub_email}\'})" style="color: #899BA3;cursor: pointer;text-decoration: underline;">Set driver to ${drivers[i].name}</span><br>`
+                }
+                const infoWindow = new google.maps.InfoWindow({
+                  content: labelStr + addrStr + changeDriverList,
+                  position: sublog.marker.getPosition()
+                });
+                sublog.marker.infoWindow = infoWindow;
+                infoWindow.open(this.map);
+              });
+              // add delivery to driver
               driver.deliveries.push(sublog);
               found = true;
               break;
@@ -354,18 +369,19 @@
           }
           // if not in a driver's geofence
           if (!found) {
-
             drivers[indexOfNoDriver].deliveries.push(sublog);
           }
         });
         return drivers;
       }
 
-      updateMarker(driver, lat, long) {
+      updateDriverHandler(e) {
+        this.updateDriver(e.detail.driverName, e.detail.deliveryEmail)
+      }
+
+      updateDriver(driverName, deliveryEmail) {
         // TODO:
-        
-        
-        
+        console.log('TODO:' , driverName, deliveryEmail);
       }
 
       inside(lat, long, vs) {
@@ -395,8 +411,14 @@
             name: 'Theo',
             desc: 'Franklin',
             color: '#3F51B5',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.118228, lng: -86.755293},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
             geofence: [
               [-86.6917419, 36.0035625],
               [-86.8263245, 35.9735608],
@@ -413,8 +435,14 @@
             desc: 'Hendersonville',
             color: '#009688',
             round_trip: true,
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.268554, lng: -86.628631},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
             geofence: [
               [-86.602478, 36.2542406],
               [-86.5756989, 36.2647604],
@@ -430,8 +458,14 @@
             desc: 'Hendersonville2',
             color: '#03A9F4',
             round_trip: true,
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.268554, lng: -86.628631},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
             geofence: [
               [-86.602478, 36.2542406],
               [-86.5756989, 36.2647604],
@@ -443,8 +477,14 @@
             desc: 'Hermitage',
             color: '#4CAF50',
             round_trip: true,
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.268554, lng: -86.628631},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
             geofence: [
               [-86.5612793, 36.0446575],
               [-86.4733887, 36.1622705],
@@ -463,8 +503,14 @@
             name: 'Enis',
             desc: 'Downtown',
             color: '#F44336',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.268554, lng: -86.628631},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
             geofence: [
               [-86.7118263, 36.0084229],
               [-86.732254, 36.078517],
@@ -480,8 +526,14 @@
             name: 'Wofford',
             desc: 'Bellevue',
             color: '#E91E63',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.118228, lng: -86.755293},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
             geofence: [
               [-86.8657207, 36.1026538],
               [-87.0611572, 36.078517],
@@ -498,8 +550,14 @@
             name: 'Kimberly',
             desc: 'EastNashville',
             color: '#FFC107',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.118228, lng: -86.755293},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
             geofence: [
               [-86.6855622, 36.2542407],
               [-86.6883162, 36.2766773],
@@ -521,8 +579,14 @@
             name: 'Todd',
             desc: 'Vanderbilt',
             color: '#CDDC39',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.118228, lng: -86.755293},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
             geofence: [
               [-86.8198014, 36.1978802],
               [-86.839714, 36.1672596],
@@ -539,8 +603,14 @@
             name: 'David',
             desc: 'Sylvan',
             color: '#FF5722',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.118228, lng: -86.755293},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
             geofence: [
               [-86.8405723, 36.1670517],
               [-86.8852101, 36.1939336],
@@ -557,20 +627,26 @@
             name: 'Tim',
             desc: 'Brentwood',
             color: '#673AB7',
-            start_latlng: {lat: 36.268554, lng: -86.628631},
-            end_latlng: {lat: 36.118228, lng: -86.755293},
+            start_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
             geofence: [
-              [-86.7118263,36.0084229],
-              [-86.732254,36.078517],
-              [-86.7701911,36.1400235],
-              [-86.791563,36.1321905],
-              [-86.8081284,36.1184635],
-              [-86.8297577,36.0893379],
-              [-86.8376542,36.0049512],
-              [-86.7118263,36.0084229],
+              [-86.7118263, 36.0084229],
+              [-86.732254, 36.078517],
+              [-86.7701911, 36.1400235],
+              [-86.791563, 36.1321905],
+              [-86.8081284, 36.1184635],
+              [-86.8297577, 36.0893379],
+              [-86.8376542, 36.0049512],
+              [-86.7118263, 36.0084229],
             ],
           },
-          
+
         ]
       }
 
