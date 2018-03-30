@@ -328,26 +328,22 @@
 
         sublogs.forEach((sublog) => {
           let found = false;
-          for (let i = 0; i < drivers.length; i++) {
-            const driver = drivers[i];
-            if (driver.name === '-') {
-              continue;
-            }
-            if (this.inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence)) {
-              // in driver's geofence
-              // add map marker
-              sublog.marker = new google.maps.Marker({
+
+          function makeMarker(t, sublog, driver) {
+            return new google.maps.Marker({
                 position: {
                   lat: Number(sublog.address.latitude),
                   lng: Number(sublog.address.longitude)
                 },
-                map: this.map,
+                map: t.map,
                 icon: driver.pinSymbol,
                 label: sublog.name,
-                dragable: true,
+                draggable: true,
               });
-              // add map marker popup window
-              google.maps.event.addListener(sublog.marker, 'click', function(event) {
+          }
+
+          function addMarkerPopup(sublog, driver) {
+            google.maps.event.addListener(sublog.marker, 'click', function(event) {
                 const addrStr = sublog.addressStr + '<br>';
                 const labelStr = '<b>' + sublog.name + '</b><br>';
                 let changeDriverList = '';
@@ -361,6 +357,19 @@
                 sublog.marker.infoWindow = infoWindow;
                 infoWindow.open(this.map);
               });
+          }
+
+          for (let i = 0; i < drivers.length; i++) {
+            const driver = drivers[i];
+            if (driver.name === '-') {
+              continue;
+            }
+            if (this.inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence)) {
+              // in driver's geofence
+              // add map marker
+              sublog.marker = makeMarker(this, sublog, driver);
+              // add map marker popup window
+              addMarkerPopup(sublog, driver)
               // add delivery to driver
               driver.deliveries.push(sublog);
               found = true;
@@ -370,6 +379,10 @@
           // if not in a driver's geofence
           if (!found) {
             drivers[indexOfNoDriver].deliveries.push(sublog);
+            // add map marker
+            sublog.marker = makeMarker(this, sublog, drivers[indexOfNoDriver]);
+            // add map marker popup window
+            addMarkerPopup(sublog, drivers[indexOfNoDriver])
           }
         });
         return drivers;
