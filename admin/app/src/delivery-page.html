@@ -3,6 +3,8 @@
 <link rel="import"
       href="../bower_components/paper-button/paper-button.html">
 <link rel="import"
+      href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import"
       href="../bower_components/google-map/google-map.html">
 <link rel="import"
       href="shared-styles.html">
@@ -14,6 +16,11 @@
         :host {
           display: block;
           padding: 10px;
+        }
+
+        paper-progress {
+          padding: 12px;
+          width: auto;
         }
 
         .table-container {
@@ -60,16 +67,13 @@
           display: table-row-group;
         }
 
-        .span-link {
-            
-        }
-
       </style>
     </shared-styles>
 
     <h1 class="">[[dateString]]</h1>
     <div>
       <select id="driverSelect"
+              disabled="[[optimizeInProgress]]"
               value="{{driverName::change}}"
               required>
           <option disabled selected value> -- select an driver -- </option>
@@ -79,7 +83,9 @@
             <option value="[[driver.name]]">[[driver.name]]</option>
           </template>
         </select>
-      <paper-button on-click="optimizeDriverRoute">Optimize driver route</paper-button>
+      <paper-button disabled="[[optimizeInProgress]]"
+                    on-click="optimizeDriverRoute">Optimize driver route</paper-button>
+      <paper-progress hidden$="[[!optimizeInProgress]]" value="[[routeOptimizeProgress]]"></paper-progress>
     </div>
     <div class="table-container">
       <h2>Delivery Tools</h2>
@@ -97,7 +103,8 @@
             <div class="table-cell">Status</div>
             <div class="table-cell">Email</div>
           </div>
-          <dom-repeat items="[[drivers]]"
+          <dom-repeat id="drivers-repeat"
+                      items="[[drivers]]"
                       as="driver">
             <template>
               <dom-repeat items="[[driver.deliveries]]"
@@ -169,6 +176,14 @@
           map: {
             type: Object,
           },
+          optimizeInProgress: {
+            type: Boolean,
+            value: false,
+          },
+          routeOptimizeProgress: {
+            type: Number,
+            value: 0,
+          }
         }
       }
 
@@ -239,17 +254,24 @@
       // route optimize code
       optimizeDriverRoute() {
         const name = this.driverName;
-        if (name === '' || name === '-') {
-          return;
-        }
+        function errorCallback(e, e2) {
+          console.error('tsp solver error: ',e,e2);
+          alert('tsp solver error: ',e,e2);
+        } 
         this.drivers.forEach((driver) => {
-          if (driver.name === name) {
-            let tsp = new BpTspSolver(this.map, null);
-            // tsp.startOver();
-            tsp.setOnProgressCallback(this.onProgressCallback);
+          if (driver.name === name && driver.deliveries.length > 1) {
+            this.optimizeInProgress = true;
+            if (!this.tsp) {
+              this.tsp = new BpTspSolver(this.map, null, errorCallback, errorCallback);
+            }
+            let tsp = this.tsp;
+            tsp.startOver();
+            tsp.setOnProgressCallback(this.onProgressCallback.bind(this));
             tsp.setTravelMode(google.maps.DirectionsTravelMode.DRIVING);
             google.maps.event.addListener(tsp.getGDirectionsService(), "error", function() {
+              this.optimizeInProgress = false;
               alert("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
+              console.error("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
             });
             driver.deliveries.forEach((delivery) => {
               tsp.addWaypointWithLabel(this._createGoogleLatlng(delivery.address.latitude, delivery.address.longitude), delivery.name, null);
@@ -258,12 +280,12 @@
             tsp.addWaypointWithLabel(startLatlng, 'Start');
             tsp.setAsStart(startLatlng);
             if (driver.round_trip) {
-              tsp.solveRoundTrip(this.onSuccessCallback);
+              tsp.solveRoundTrip(this.onSuccessCallback.bind(this));
             } else {
               const endLatlng = this._createGoogleLatlng(driver.end_latlng);
               tsp.addWaypointWithLabel(endLatlng, 'End');
               tsp.setAsStop(endLatlng);
-              tsp.solveAtoZ(this.onSuccessCallback);
+              tsp.solveAtoZ(this.onSuccessCallback.bind(this));
             }
           }
         });
@@ -282,14 +304,35 @@
       }
 
       onProgressCallback(tsp) {
-        console.log('progress: ', 100 * tsp.getNumDirectionsComputed() / tsp.getNumDirectionsNeeded());
+        const progress = 100 * tsp.getNumDirectionsComputed() / tsp.getNumDirectionsNeeded();
+        let diff = progress - this.routeOptimizeProgress;
+        diff = diff < 0 ? diff * -1 : diff;
+        if (diff > 1) {
+          this.routeOptimizeProgress = progress;
+        }
       }
 
       onSuccessCallback(tsp) {
-        console.log('getOrder:');
-        console.log(tsp.getOrder());
-        console.log('getGDirections:');
-        console.log(tsp.getGDirections());
+        this.optimizeInProgress = false;
+        const drivers = this.drivers.slice();
+        this.set('drivers', []);
+        for (let i = 0; i < drivers.length; i++) {
+          const driver = drivers[i];
+          if (driver.name === this.driverName) {
+            console.log('old delivery route: ', driver.deliveries);
+            const newRoute = [];
+            const order = tsp.getOrder();
+            for (let j = 1; j < order.length - 1; j++) {
+              newRoute.push(driver.deliveries[order[j]-1]);
+            }
+            console.log('new delivery route: ', newRoute);
+            drivers[i].deliveries = newRoute;
+            break;
+          }
+        }
+        setTimeout(() => {
+          this.set('drivers', drivers);
+        }, 1000);
       }
 
       getDateString(dateString) {
@@ -307,6 +350,16 @@
         drivers.push({
           name: '-',
           color: '#607D8B',
+          desc: 'Catch All',
+          round_trip: true,
+          start_latlng: {
+            lat: 36.268554,
+            lng: -86.628631
+          },
+          end_latlng: {
+            lat: 36.268554,
+            lng: -86.628631
+          },
         });
 
         for (let i = 0; i < drivers.length; i++) {
@@ -331,32 +384,33 @@
 
           function makeMarker(t, sublog, driver) {
             return new google.maps.Marker({
-                position: {
-                  lat: Number(sublog.address.latitude),
-                  lng: Number(sublog.address.longitude)
-                },
-                map: t.map,
-                icon: driver.pinSymbol,
-                label: sublog.name,
-                draggable: true,
-              });
+              position: {
+                lat: Number(sublog.address.latitude),
+                lng: Number(sublog.address.longitude)
+              },
+              map: t.map,
+              icon: driver.pinSymbol,
+              label: sublog.name,
+              draggable: true,
+            });
           }
 
           function addMarkerPopup(sublog, driver) {
             google.maps.event.addListener(sublog.marker, 'click', function(event) {
-                const addrStr = sublog.addressStr + '<br>';
-                const labelStr = '<b>' + sublog.name + '</b><br>';
-                let changeDriverList = '';
-                for (let i = 0; i < drivers.length; i++) {
-                  changeDriverList += `<span onclick="APP.Event.Fire(\'updateDriver\', {driverName:\'${drivers[i].name }\', deliveryEmail:\'${sublog.sub_email}\'})" style="color: #899BA3;cursor: pointer;text-decoration: underline;">Set driver to ${drivers[i].name}</span><br>`
-                }
-                const infoWindow = new google.maps.InfoWindow({
-                  content: labelStr + addrStr + changeDriverList,
-                  position: sublog.marker.getPosition()
-                });
-                sublog.marker.infoWindow = infoWindow;
-                infoWindow.open(this.map);
+              const labelStr = '<b>' + sublog.name + '</b><br>';
+              const driverStr = `Driver: ${driver.name}<br>`;
+              const addrStr = sublog.addressStr + '<br>';
+              let changeDriverList = '<hr>';
+              for (let i = 0; i < drivers.length; i++) {
+                changeDriverList += `<span onclick="APP.Event.Fire(\'updateDriver\', {driverName:\'${drivers[i].name }\', deliveryEmail:\'${sublog.sub_email}\'})" style="color: #899BA3;cursor: pointer;text-decoration: underline;">Set driver to ${drivers[i].name}</span><br>`
+              }
+              const infoWindow = new google.maps.InfoWindow({
+                content: labelStr + addrStr + changeDriverList,
+                position: sublog.marker.getPosition()
               });
+              sublog.marker.infoWindow = infoWindow;
+              infoWindow.open(this.map);
+            });
           }
 
           for (let i = 0; i < drivers.length; i++) {
@@ -394,7 +448,7 @@
 
       updateDriver(driverName, deliveryEmail) {
         // TODO:
-        console.log('TODO:' , driverName, deliveryEmail);
+        console.log('TODO:', driverName, deliveryEmail);
       }
 
       inside(lat, long, vs) {
