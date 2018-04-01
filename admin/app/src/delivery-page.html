@@ -67,6 +67,10 @@
           display: table-row-group;
         }
 
+        .delivery-count {
+          padding: 12px 0;
+        }
+
       </style>
     </shared-styles>
 
@@ -87,6 +91,7 @@
                     on-click="optimizeDriverRoute">Optimize driver route</paper-button>
       <paper-progress hidden$="[[!optimizeInProgress]]" value="[[routeOptimizeProgress]]"></paper-progress>
     </div>
+    
     <div class="table-container">
       <h2>Delivery Tools</h2>
       <div>
@@ -126,6 +131,24 @@
               </dom-repeat>
             </template>
           </dom-repeat>
+        </div>
+        <div class="delivery-count">
+            <div class="table">
+                <div class="table-row table-header-row">
+                  <div class="table-cell">Driver</div>
+                  <div class="table-cell">Number of Deliveries</div>
+                </div>
+          <dom-repeat id="drivers-repeat"
+                          items="[[drivers]]"
+                          as="driver">
+                <template>
+                    <div class="table-row">
+                        <div class="table-cell">[[driver.name]]</div>
+                        <div class="table-cell">[[driver.deliveries.length]]</div>
+                    </div>
+                </template>
+          </dom-repeat>
+            </div>
         </div>
         <br>
         <google-map id="map"
