@@ -46,7 +46,7 @@
     var numDirectionsComputed = 0;
     var numDirectionsNeeded = 0;
     var cachedDirections = false;
-    var requestLimitWait = 1000;
+    var requestLimitWait = 500;
     var fakeDirResult;
     var onSolveCallback = function () { };
     var onProgressCallback = null;
@@ -562,7 +562,7 @@
                 travelMode: travelMode
             }, function (directionsResult, directionsStatus) {
                 if (directionsStatus == google.maps.DirectionsStatus.OK) {
-                    requestLimitWait = 1000;
+                    requestLimitWait = 500;
                     fakeDirResult = directionsResult;
                     for (var i = 0; i < directionsResult.routes[0].legs.length; ++i) {
                         ++numDirectionsComputed;

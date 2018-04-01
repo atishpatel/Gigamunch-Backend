@@ -67,7 +67,7 @@
   var numDirectionsComputed = 0;
   var numDirectionsNeeded = 0;
   var cachedDirections = false;
-  var requestLimitWait = 1000;
+  var requestLimitWait = 500;
   var fakeDirResult; // Object used to store travel info like travel mode etc. Needed for route renderer.
 
   var onSolveCallback = function(){};
@@ -657,7 +657,7 @@
 			}, 
 			function(directionsResult, directionsStatus) {
 			  if (directionsStatus == google.maps.DirectionsStatus.OK) {
-			    requestLimitWait = 1000;
+			    requestLimitWait = 500;
 			    //alert("Request completed!");
 			    // Save legs, distances and durations
 			    fakeDirResult = directionsResult;
