@@ -1,7 +1,6 @@
 # Google App Engine generated folder
 appengine-generated/
 .tags*
-.vscode
 tags
 dump.rdb
 node_modules
