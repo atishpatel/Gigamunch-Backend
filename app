@@ -20,7 +20,7 @@ if [[ $1 == "build" ]]; then
   if [[ $* == *admin* ]]; then
     echo "Building admin/app:"
     cd admin/app
-    gulp watch
+    gulp build
     cd ../..
   fi
   if [[ $* == *cook* ]]; then
