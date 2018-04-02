@@ -47,7 +47,7 @@ interface Subscriber {
     name: string
     first_name: string
     last_name: string
-    address: Address.Address
+    address: Address
     customer_id: string
     subscription_ids: string[]
     first_payment_date: string

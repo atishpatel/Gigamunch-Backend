@@ -1,5 +1,5 @@
 interface Error {
-    code: Code
+    code: number
     message: string
     detail: string
 }

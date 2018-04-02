@@ -4,13 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	shared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/gorilla/schema"
 )
 
@@ -86,17 +84,11 @@ func pbLog(l *logging.Entry) *shared.Log {
 	return &shared.Log{
 		Id:        l.ID,
 		LogName:   l.LogName,
-		Timestamp: getPBTimestamp(l.Timestamp),
+		Timestamp: l.Timestamp.String(),
 		Type:      string(l.Type),
 		// Path: l.Path,
 		Labels:   labels,
 		Severity: int32(l.Severity),
 		Payload:  l.Payload,
-	}
-}
-
-func getPBTimestamp(t time.Time) *google_protobuf.Timestamp {
-	return &google_protobuf.Timestamp{
-		Seconds: t.Unix(),
 	}
 }

@@ -586,8 +586,7 @@
           "type": "string"
         },
         "timestamp": {
-          "type": "string",
-          "format": "date-time"
+          "type": "string"
         },
         "type": {
           "type": "string"
