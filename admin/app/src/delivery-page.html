@@ -149,6 +149,10 @@
                 </div>
               </template>
             </dom-repeat>
+            <div class="table-row table-header-row">
+              <div class="table-cell">Total</div>
+              <div class="table-cell">[[totalDeliveries]]</div>
+            </div>
           </div>
         </div>
         <br>
@@ -187,6 +191,9 @@
           },
           drivers: {
             type: Array,
+          },
+          totalDeliveries: {
+            type: Number,
           },
           driverName: {
             type: String,
@@ -271,6 +278,7 @@
           }
           // convert to driver struct
           this.drivers = this.getDrivers(unskippedSublogs);
+          this.totalDeliveries = unskippedSublogs.length;
           this.dateString = this.getDateString(slogs[0].date);
           this.setPolygons();
         });
