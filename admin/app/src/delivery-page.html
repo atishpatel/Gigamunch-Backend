@@ -353,6 +353,14 @@
             }
             console.log('new delivery route: ', newRoute);
             drivers[i].deliveries = newRoute;
+            if (drivers[i].directionsRenderer) {
+              drivers[i].directionsRenderer.setMap(null);
+            }
+            drivers[i].directionsRenderer = new google.maps.DirectionsRenderer({
+              directions: tsp.getGDirections(),
+              map: this.map,
+              suppressMarkers: true,
+            });
             break;
           }
         }
