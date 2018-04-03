@@ -50,9 +50,13 @@
     var fakeDirResult;
     var onSolveCallback = function () { };
     var onProgressCallback = null;
-    var originalOnFatalErrorCallback = function (tsp, errMsg) { alert("Request failed: " + errMsg); };
+    var originalOnFatalErrorCallback = function (tsp, errMsg) {
+        alert("Request failed: " + errMsg);
+    };
     var onFatalErrorCallback = originalOnFatalErrorCallback;
-    var originalOnErrorCallback = function (tsp, errMsg, errCode) { alert("Request failed: " + errMsg); };
+    var originalOnErrorCallback = function (tsp, errMsg, errCode) {
+        alert("Request failed: " + errMsg);
+    };
     var onErrorCallback = originalOnErrorCallback;
     var doNotContinue = false;
     var onLoadListener = null;
@@ -266,8 +270,8 @@
                         var tmp, nowCost, newCost;
                         for (var j = i + 2; j < lastStep && !changed; ++j) {
                             nowCost = cost + iCost + dur[currPath[j]][currPath[j + 1]];
-                            newCost = revCost + dur[currPath[i]][currPath[j]]
-                                + dur[currPath[i + 1]][currPath[j + 1]];
+                            newCost = revCost + dur[currPath[i]][currPath[j]] +
+                                dur[currPath[i + 1]][currPath[j + 1]];
                             if (nowCost > newCost) {
                                 currDist += newCost - nowCost;
                                 for (var k = 0; k < Math.floor((j - i) / 2); ++k) {
@@ -444,9 +448,14 @@
     }
     function makeDirWp(latLng, address) {
         if (address != null && address != "")
-            return ({ location: address, stopover: true });
-        return ({ location: latLng,
-            stopover: true });
+            return ({
+                location: address,
+                stopover: true
+            });
+        return ({
+            location: latLng,
+            stopover: true
+        });
     }
     function getWayArr(curr) {
         var nextAbove = -1;
@@ -578,7 +587,9 @@
                 }
                 else if (directionsStatus == google.maps.DirectionsStatus.OVER_QUERY_LIMIT) {
                     requestLimitWait *= 2;
-                    setTimeout(function () { nextChunk(mode); }, requestLimitWait);
+                    setTimeout(function () {
+                        nextChunk(mode);
+                    }, requestLimitWait);
                 }
                 else {
                     var errorMsg = DIR_STATUS_MSG[directionsStatus];
@@ -735,7 +746,9 @@
     }
     function addAddress(address, label, callback) {
         addressProcessing = true;
-        gebGeocoder.geocode({ address: address }, function (results, status) {
+        gebGeocoder.geocode({
+            address: address
+        }, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 addressProcessing = false;
                 --addressRequests;
@@ -751,7 +764,9 @@
                 }
             }
             else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-                setTimeout(function () { addAddress(address, label, callback); }, 100);
+                setTimeout(function () {
+                    addAddress(address, label, callback);
+                }, 100);
             }
             else {
                 --addressRequests;
@@ -855,7 +870,9 @@
     };
     BpTspSolver.prototype.addAddressAgain = function (address, label, callback, queueNum) {
         if (addressProcessing || queueNum > currQueueNum) {
-            setTimeout(function () { tsp.addAddressAgain(address, label, callback, queueNum); }, 100);
+            setTimeout(function () {
+                tsp.addAddressAgain(address, label, callback, queueNum);
+            }, 100);
             return;
         }
         addAddress(address, label, callback);
@@ -869,7 +886,9 @@
     };
     BpTspSolver.prototype.addWaypointAgain = function (latLng, label, callback, queueNum) {
         if (addressProcessing || queueNum > currQueueNum) {
-            setTimeout(function () { tsp.addWaypointAgain(latLng, label, callback, queueNum); }, 100);
+            setTimeout(function () {
+                tsp.addWaypointAgain(latLng, label, callback, queueNum);
+            }, 100);
             return;
         }
         addWaypoint(latLng, label);
@@ -990,7 +1009,9 @@
             return;
         }
         if (!this.isReady()) {
-            setTimeout(function () { tsp.solveRoundTrip(callback); }, 20);
+            setTimeout(function () {
+                tsp.solveRoundTrip(callback);
+            }, 20);
             return;
         }
         if (typeof callback == 'function')
@@ -1002,7 +1023,9 @@
             return;
         }
         if (!this.isReady()) {
-            setTimeout(function () { tsp.solveAtoZ(callback); }, 20);
+            setTimeout(function () {
+                tsp.solveAtoZ(callback);
+            }, 20);
             return;
         }
         if (typeof callback == 'function')

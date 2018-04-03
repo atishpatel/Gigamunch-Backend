@@ -21,15 +21,15 @@
 (function() {
 
   var tsp; // singleton
-  var gebMap;           // The map DOM object
-  var directionsPanel;  // The driving directions DOM object
-  var gebDirectionsResult;    // The driving directions returned from GMAP API
+  var gebMap; // The map DOM object
+  var directionsPanel; // The driving directions DOM object
+  var gebDirectionsResult; // The driving directions returned from GMAP API
   var gebDirectionsService;
-  var gebGeocoder;      // The geocoder for addresses
-  var maxTspSize = 100;  // A limit on the size of the problem, mostly to save Google servers from undue load.
-  var maxTspBF = 0;     // Max size for brute force, may seem conservative, but ma
-  var maxTspDynamic = 15;     // Max size for brute force, may seem conservative, but many browsers have limitations on run-time.
-  var maxSize = 10;     // Max number of waypoints in one Google driving directions request.
+  var gebGeocoder; // The geocoder for addresses
+  var maxTspSize = 100; // A limit on the size of the problem, mostly to save Google servers from undue load.
+  var maxTspBF = 0; // Max size for brute force, may seem conservative, but ma
+  var maxTspDynamic = 15; // Max size for brute force, may seem conservative, but many browsers have limitations on run-time.
+  var maxSize = 10; // Max number of waypoints in one Google driving directions request.
   var maxTripSentry = 2000000000; // Approx. 63 years., this long a route should not be reached...
   var avoidHighways = false; // Whether to avoid highways. False by default.
   var avoidTolls = false; // Whether to avoid toll roads. False by default.
@@ -70,11 +70,15 @@
   var requestLimitWait = 500;
   var fakeDirResult; // Object used to store travel info like travel mode etc. Needed for route renderer.
 
-  var onSolveCallback = function(){};
+  var onSolveCallback = function() {};
   var onProgressCallback = null;
-  var originalOnFatalErrorCallback = function(tsp, errMsg) { alert("Request failed: " + errMsg); }
+  var originalOnFatalErrorCallback = function(tsp, errMsg) {
+    alert("Request failed: " + errMsg);
+  }
   var onFatalErrorCallback = originalOnFatalErrorCallback;
-  var originalOnErrorCallback = function(tsp, errMsg, errCode) { alert("Request failed: " + errMsg); }
+  var originalOnErrorCallback = function(tsp, errMsg, errCode) {
+    alert("Request failed: " + errMsg);
+  }
   var onErrorCallback = originalOnErrorCallback;
   var doNotContinue = false;
   var onLoadListener = null;
@@ -101,10 +105,10 @@
       var nearest = maxTripSentry;
       var nearI = -1;
       for (var next = 1; next < numToVisit; ++next) {
-				if (!visited[next] && dur[curr][next] < nearest) {
-				  nearest = dur[curr][next];
-				  nearI = next;
-				}
+        if (!visited[next] && dur[curr][next] < nearest) {
+          nearest = dur[curr][next];
+          nearI = next;
+        }
       }
       currDist += dur[curr][nearI];
       curr = nearI;
@@ -150,13 +154,13 @@
 
     costForward[0] = 0.0;
     for (var i = 1; i < currPath.length; ++i) {
-      costForward[i] = costForward[i-1] + dur[currPath[i-1]][currPath[i]];
+      costForward[i] = costForward[i - 1] + dur[currPath[i - 1]][currPath[i]];
     }
-    bestTrip = costForward[currPath.length-1];
+    bestTrip = costForward[currPath.length - 1];
 
-    costBackward[currPath.length-1] = 0.0;
+    costBackward[currPath.length - 1] = 0.0;
     for (var i = currPath.length - 2; i >= 0; --i) {
-      costBackward[i] = costBackward[i+1] + dur[currPath[i+1]][currPath[i]];
+      costBackward[i] = costBackward[i + 1] + dur[currPath[i + 1]][currPath[i]];
     }
   }
 
@@ -170,21 +174,21 @@
     nextPath[offset++] = currPath[b];
     if (b < c) {
       for (var i = b + 1; i <= c; ++i) {
-				nextPath[offset++] = currPath[i];
+        nextPath[offset++] = currPath[i];
       }
     } else {
       for (var i = b - 1; i >= c; --i) {
-				nextPath[offset++] = currPath[i];
+        nextPath[offset++] = currPath[i];
       }
     }
     nextPath[offset++] = currPath[d];
     if (d < e) {
       for (var i = d + 1; i <= e; ++i) {
-				nextPath[offset++] = currPath[i];
+        nextPath[offset++] = currPath[i];
       }
     } else {
       for (var i = d - 1; i >= e; --i) {
-				nextPath[offset++] = currPath[i];
+        nextPath[offset++] = currPath[i];
       }
     }
     nextPath[offset++] = currPath[f];
@@ -205,24 +209,24 @@
     while (improved) {
       improved = false;
       for (var i = 0; i < currPath.length - 3; ++i) {
-				for (var j = i+1; j < currPath.length - 2; ++j) {
-				  for (var k = j+1; k < currPath.length - 1; ++k) {
-				    if (costPerm(i, i+1, j, k, j+1, k+1) < bestTrip)
-				      updatePerm(i, i+1, j, k, j+1, k+1);
-				    if (costPerm(i, j, i+1, j+1, k, k+1) < bestTrip)
-				      updatePerm(i, j, i+1, j+1, k, k+1);
-				    if (costPerm(i, j, i+1, k, j+1, k+1) < bestTrip)
-				      updatePerm(i, j, i+1, k, j+1, k+1);
-				    if (costPerm(i, j+1, k, i+1, j, k+1) < bestTrip)
-				      updatePerm(i, j+1, k, i+1, j, k+1);
-				    if (costPerm(i, j+1, k, j, i+1, k+1) < bestTrip)
-				      updatePerm(i, j+1, k, j, i+1, k+1);
-				    if (costPerm(i, k, j+1, i+1, j, k+1) < bestTrip)
-				      updatePerm(i, k, j+1, i+1, j, k+1);
-				    if (costPerm(i, k, j+1, j, i+1, k+1) < bestTrip)
-				      updatePerm(i, k, j+1, j, i+1, k+1);
-				  }
-				}
+        for (var j = i + 1; j < currPath.length - 2; ++j) {
+          for (var k = j + 1; k < currPath.length - 1; ++k) {
+            if (costPerm(i, i + 1, j, k, j + 1, k + 1) < bestTrip)
+              updatePerm(i, i + 1, j, k, j + 1, k + 1);
+            if (costPerm(i, j, i + 1, j + 1, k, k + 1) < bestTrip)
+              updatePerm(i, j, i + 1, j + 1, k, k + 1);
+            if (costPerm(i, j, i + 1, k, j + 1, k + 1) < bestTrip)
+              updatePerm(i, j, i + 1, k, j + 1, k + 1);
+            if (costPerm(i, j + 1, k, i + 1, j, k + 1) < bestTrip)
+              updatePerm(i, j + 1, k, i + 1, j, k + 1);
+            if (costPerm(i, j + 1, k, j, i + 1, k + 1) < bestTrip)
+              updatePerm(i, j + 1, k, j, i + 1, k + 1);
+            if (costPerm(i, k, j + 1, i + 1, j, k + 1) < bestTrip)
+              updatePerm(i, k, j + 1, i + 1, j, k + 1);
+            if (costPerm(i, k, j + 1, j, i + 1, k + 1) < bestTrip)
+              updatePerm(i, k, j + 1, j, i + 1, k + 1);
+          }
+        }
       }
     }
     for (var i = 0; i < bestPath.length; ++i) bestPath[i] = currPath[i];
@@ -239,7 +243,7 @@
   function tspAntColonyK2(mode) {
     var alfa = 0.1; // The importance of the previous trails
     var beta = 2.0; // The importance of the durations
-    var rho = 0.1;  // The decay rate of the pheromone trails
+    var rho = 0.1; // The decay rate of the pheromone trails
     var asymptoteFactor = 0.9; // The sharpness of the reward as the solutions approach the best solution
     var pher = new Array();
     var nextPher = new Array();
@@ -252,8 +256,8 @@
     }
     for (var i = 0; i < numActive; ++i) {
       for (var j = 0; j < numActive; ++j) {
-	pher[i][j] = 1;
-	nextPher[i][j] = 0.0;
+        pher[i][j] = 1;
+        nextPher[i][j] = 0.0;
       }
     }
 
@@ -268,89 +272,89 @@
     }
     for (var wave = 0; wave < numWaves; ++wave) {
       for (var ant = 0; ant < numAnts; ++ant) {
-	var curr = startNode;
-	var currDist = 0;
-	for (var i = 0; i < numActive; ++i) {
-	  visited[i] = false;
-	}
-	currPath[0] = curr;
-	for (var step = 0; step < numSteps; ++step) {
-	  visited[curr] = true;
-	  var cumProb = 0.0;
-	  for (var next = 1; next < numValidDests; ++next) {
-	    if (!visited[next]) {
-	      prob[next] = Math.pow(pher[curr][next], alfa) * 
-		Math.pow(dur[curr][next], 0.0 - beta);
-	      cumProb += prob[next];
-	    }
-	  }
-	  var guess = Math.random() * cumProb;
-	  var nextI = -1;
-	  for (var next = 1; next < numValidDests; ++next) {
-	    if (!visited[next]) {
-	      nextI = next;
-	      guess -= prob[next];
-	      if (guess < 0) {
-		nextI = next;
-		break;
-	      }
-	    }
-	  }
-	  currDist += dur[curr][nextI];
-	  currPath[step+1] = nextI;
-	  curr = nextI;
-	}
-	currPath[numSteps+1] = lastNode;
-	currDist += dur[curr][lastNode];
-		
-	// k2-rewire:
-	var lastStep = numActive;
-	if (mode == 1) {
-	  lastStep = numActive - 1;
-	}
-	var changed = true;
-	var i = 0;
-	while (changed) {
-	  changed = false;
-	  for (; i < lastStep - 2 && !changed; ++i) {
-	    var cost = dur[currPath[i+1]][currPath[i+2]];
-	    var revCost = dur[currPath[i+2]][currPath[i+1]];
-	    var iCost = dur[currPath[i]][currPath[i+1]];
-	    var tmp, nowCost, newCost;
-	    for (var j = i+2; j < lastStep && !changed; ++j) {
-	      nowCost = cost + iCost + dur[currPath[j]][currPath[j+1]];
-	      newCost = revCost + dur[currPath[i]][currPath[j]]
-		+ dur[currPath[i+1]][currPath[j+1]];
-	      if (nowCost > newCost) {
-		currDist += newCost - nowCost;
-		// Reverse the detached road segment.
-		for (var k = 0; k < Math.floor((j-i)/2); ++k) {
-		  tmp = currPath[i+1+k];
-		  currPath[i+1+k] = currPath[j-k];
-		  currPath[j-k] = tmp;
-		}
-		changed = true;
-		--i;
-	      }
-	      cost += dur[currPath[j]][currPath[j+1]];
-	      revCost += dur[currPath[j+1]][currPath[j]];
-	    }
-	  }
-	}
+        var curr = startNode;
+        var currDist = 0;
+        for (var i = 0; i < numActive; ++i) {
+          visited[i] = false;
+        }
+        currPath[0] = curr;
+        for (var step = 0; step < numSteps; ++step) {
+          visited[curr] = true;
+          var cumProb = 0.0;
+          for (var next = 1; next < numValidDests; ++next) {
+            if (!visited[next]) {
+              prob[next] = Math.pow(pher[curr][next], alfa) *
+                Math.pow(dur[curr][next], 0.0 - beta);
+              cumProb += prob[next];
+            }
+          }
+          var guess = Math.random() * cumProb;
+          var nextI = -1;
+          for (var next = 1; next < numValidDests; ++next) {
+            if (!visited[next]) {
+              nextI = next;
+              guess -= prob[next];
+              if (guess < 0) {
+                nextI = next;
+                break;
+              }
+            }
+          }
+          currDist += dur[curr][nextI];
+          currPath[step + 1] = nextI;
+          curr = nextI;
+        }
+        currPath[numSteps + 1] = lastNode;
+        currDist += dur[curr][lastNode];
 
-	if (currDist < bestTrip) {
-	  bestPath = currPath;
-	  bestTrip = currDist;
-	}
-	for (var i = 0; i <= numSteps; ++i) {
-	  nextPher[currPath[i]][currPath[i+1]] += (bestTrip - asymptoteFactor * bestTrip) / (numAnts * (currDist - asymptoteFactor * bestTrip));
-	}
+        // k2-rewire:
+        var lastStep = numActive;
+        if (mode == 1) {
+          lastStep = numActive - 1;
+        }
+        var changed = true;
+        var i = 0;
+        while (changed) {
+          changed = false;
+          for (; i < lastStep - 2 && !changed; ++i) {
+            var cost = dur[currPath[i + 1]][currPath[i + 2]];
+            var revCost = dur[currPath[i + 2]][currPath[i + 1]];
+            var iCost = dur[currPath[i]][currPath[i + 1]];
+            var tmp, nowCost, newCost;
+            for (var j = i + 2; j < lastStep && !changed; ++j) {
+              nowCost = cost + iCost + dur[currPath[j]][currPath[j + 1]];
+              newCost = revCost + dur[currPath[i]][currPath[j]] +
+                dur[currPath[i + 1]][currPath[j + 1]];
+              if (nowCost > newCost) {
+                currDist += newCost - nowCost;
+                // Reverse the detached road segment.
+                for (var k = 0; k < Math.floor((j - i) / 2); ++k) {
+                  tmp = currPath[i + 1 + k];
+                  currPath[i + 1 + k] = currPath[j - k];
+                  currPath[j - k] = tmp;
+                }
+                changed = true;
+                --i;
+              }
+              cost += dur[currPath[j]][currPath[j + 1]];
+              revCost += dur[currPath[j + 1]][currPath[j]];
+            }
+          }
+        }
+
+        if (currDist < bestTrip) {
+          bestPath = currPath;
+          bestTrip = currDist;
+        }
+        for (var i = 0; i <= numSteps; ++i) {
+          nextPher[currPath[i]][currPath[i + 1]] += (bestTrip - asymptoteFactor * bestTrip) / (numAnts * (currDist - asymptoteFactor * bestTrip));
+        }
       }
       for (var i = 0; i < numActive; ++i) {
-	for (var j = 0; j < numActive; ++j) {
-	  pher[i][j] = pher[i][j] * (1.0 - rho) + rho * nextPher[i][j];
-	  nextPher[i][j] = 0.0;
-	}
+        for (var j = 0; j < numActive; ++j) {
+          pher[i][j] = pher[i][j] * (1.0 - rho) + rho * nextPher[i][j];
+          nextPher[i][j] = 0.0;
+        }
       }
     }
   }
@@ -383,23 +387,23 @@
 
       // If this is the last node:
       if (currStep == numSteps) {
-	currLen += dur[currNode][lastNode];
-	currPath[currStep] = lastNode;
-	bestTrip = currLen;
-	for (var i = 0; i <= numSteps; ++i) {
-	  bestPath[i] = currPath[i];
-	}
+        currLen += dur[currNode][lastNode];
+        currPath[currStep] = lastNode;
+        bestTrip = currLen;
+        for (var i = 0; i <= numSteps; ++i) {
+          bestPath[i] = currPath[i];
+        }
       } else {
 
-	// Try all possible routes:
-	for (var i = 1; i < numToVisit; ++i) {
-	  if (!visited[i]) {
-	    visited[i] = true;
-	    currPath[currStep] = i;
-	    tspBruteForce(mode, i, currLen+dur[currNode][i], currStep+1);
-	    visited[i] = false;
-	  }
-	}
+        // Try all possible routes:
+        for (var i = 1; i < numToVisit; ++i) {
+          if (!visited[i]) {
+            visited[i] = true;
+            currPath[currStep] = i;
+            tspBruteForce(mode, i, currLen + dur[currNode][i], currStep + 1);
+            visited[i] = false;
+          }
+        }
       }
     }
   }
@@ -414,44 +418,44 @@
     }
     if (count < num) {
       for (var i = 0; i < num; ++i) {
-	nextSet[i] = 1;
+        nextSet[i] = 1;
       }
       for (var i = num; i < numActive; ++i) {
-	nextSet[i] = 0;
+        nextSet[i] = 0;
       }
     } else {
       // Find first 1
       var firstOne = -1;
       for (var i = 0; i < numActive; ++i) {
-	if (nextSet[i]) {
-	  firstOne = i;
-	  break;
-	}
+        if (nextSet[i]) {
+          firstOne = i;
+          break;
+        }
       }
       // Find first 0 greater than firstOne
       var firstZero = -1;
       for (var i = firstOne + 1; i < numActive; ++i) {
-	if (!nextSet[i]) {
-	  firstZero = i;
-	  break;
-	}
+        if (!nextSet[i]) {
+          firstZero = i;
+          break;
+        }
       }
       if (firstZero < 0) {
-	return -1;
+        return -1;
       }
       // Increment the first zero with ones behind it
       nextSet[firstZero] = 1;
       // Set the part behind that one to its lowest possible value
       for (var i = 0; i < firstZero - firstOne - 1; ++i) {
-	nextSet[i] = 1;
+        nextSet[i] = 1;
       }
       for (var i = firstZero - firstOne - 1; i < firstZero; ++i) {
-	nextSet[i] = 0;
+        nextSet[i] = 0;
       }
     }
     // Return the index for this set
     for (var i = 0; i < numActive; ++i) {
-      ret += (nextSet[i]<<i);
+      ret += (nextSet[i] << i);
     }
     return ret;
   }
@@ -460,91 +464,96 @@
    * O(numActive * 2^numActive)
    */
   function tspDynamic(mode) {
-    var numCombos = 1<<numActive;
+    var numCombos = 1 << numActive;
     var C = new Array();
     var parent = new Array();
     for (var i = 0; i < numCombos; ++i) {
       C[i] = new Array();
       parent[i] = new Array();
       for (var j = 0; j < numActive; ++j) {
-	C[i][j] = 0.0;
-	parent[i][j] = 0;
+        C[i][j] = 0.0;
+        parent[i][j] = 0;
       }
     }
     for (var k = 1; k < numActive; ++k) {
-      var index = 1 + (1<<k);
+      var index = 1 + (1 << k);
       C[index][k] = dur[0][k];
     }
     for (var s = 3; s <= numActive; ++s) {
       for (var i = 0; i < numActive; ++i) {
-	nextSet[i] = 0;
+        nextSet[i] = 0;
       }
       var index = nextSetOf(s);
       while (index >= 0) {
-	for (var k = 1; k < numActive; ++k) {
-	  if (nextSet[k]) {
-	    var prevIndex = index - (1<<k);
-	    C[index][k] = maxTripSentry;
-	    for (var m = 1; m < numActive; ++m) {
-	      if (nextSet[m] && m != k) {
-		if (C[prevIndex][m] + dur[m][k] < C[index][k]) {
-		  C[index][k] = C[prevIndex][m] + dur[m][k];
-		  parent[index][k] = m;
-		}
-	      }
-	    }
-	  }
-	}
-	index = nextSetOf(s);
+        for (var k = 1; k < numActive; ++k) {
+          if (nextSet[k]) {
+            var prevIndex = index - (1 << k);
+            C[index][k] = maxTripSentry;
+            for (var m = 1; m < numActive; ++m) {
+              if (nextSet[m] && m != k) {
+                if (C[prevIndex][m] + dur[m][k] < C[index][k]) {
+                  C[index][k] = C[prevIndex][m] + dur[m][k];
+                  parent[index][k] = m;
+                }
+              }
+            }
+          }
+        }
+        index = nextSetOf(s);
       }
     }
     for (var i = 0; i < numActive; ++i) {
       bestPath[i] = 0;
     }
-    var index = (1<<numActive)-1;
+    var index = (1 << numActive) - 1;
     if (mode == 0) {
       var currNode = -1;
       bestPath[numActive] = 0;
       for (var i = 1; i < numActive; ++i) {
-	if (C[index][i] + dur[i][0] < bestTrip) {
-	  bestTrip = C[index][i] + dur[i][0];
-	  currNode = i;
-	}
+        if (C[index][i] + dur[i][0] < bestTrip) {
+          bestTrip = C[index][i] + dur[i][0];
+          currNode = i;
+        }
       }
-      bestPath[numActive-1] = currNode;
+      bestPath[numActive - 1] = currNode;
     } else {
       var currNode = numActive - 1;
-      bestPath[numActive-1] = numActive - 1;
-      bestTrip = C[index][numActive-1];
+      bestPath[numActive - 1] = numActive - 1;
+      bestTrip = C[index][numActive - 1];
     }
     for (var i = numActive - 1; i > 0; --i) {
       currNode = parent[index][currNode];
-      index -= (1<<bestPath[i]);
-      bestPath[i-1] = currNode;
+      index -= (1 << bestPath[i]);
+      bestPath[i - 1] = currNode;
     }
-  }  
+  }
 
   function makeLatLng(latLng) {
-    return(latLng.toString().substr(1,latLng.toString().length-2));
+    return (latLng.toString().substr(1, latLng.toString().length - 2));
   }
 
   function makeDirWp(latLng, address) {
     if (address != null && address != "")
-      return ({ location: address, stopover: true });
-    return ({ location: latLng,
-	  stopover: true });
+      return ({
+        location: address,
+        stopover: true
+      });
+    return ({
+      location: latLng,
+      stopover: true
+    });
   }
 
   function getWayArr(curr) {
     var nextAbove = -1;
     for (var i = curr + 1; i < waypoints.length; ++i) {
       if (wpActive[i]) {
-	if (nextAbove == -1) {
-	  nextAbove = i;
-	} else {
-	  wayArr.push(makeDirWp(waypoints[i], addresses[i]));
-	  wayArr.push(makeDirWp(waypoints[curr], addresses[curr]));
-	}
+        if (nextAbove == -1) {
+          nextAbove = i;
+        } else {
+          wayArr.push(makeDirWp(waypoints[i], addresses[i]));
+          wayArr.push(makeDirWp(waypoints[curr], addresses[curr]));
+        }
       }
     }
     if (nextAbove != -1) {
@@ -559,27 +568,27 @@
     var index = currInd;
     for (var i = curr + 1; i < waypoints.length; ++i) {
       if (wpActive[i]) {
-	index++;
-	if (nextAbove == -1) {
-	  nextAbove = i;
-	} else {
-	  legs[currInd][index] = legsTmp[distIndex];
-	  dist[currInd][index] = distances[distIndex];
-	  dur[currInd][index] = durations[distIndex++];
-	  legs[index][currInd] = legsTmp[distIndex];
-	  dist[index][currInd] = distances[distIndex];
-	  dur[index][currInd] = durations[distIndex++];
-	}
+        index++;
+        if (nextAbove == -1) {
+          nextAbove = i;
+        } else {
+          legs[currInd][index] = legsTmp[distIndex];
+          dist[currInd][index] = distances[distIndex];
+          dur[currInd][index] = durations[distIndex++];
+          legs[index][currInd] = legsTmp[distIndex];
+          dist[index][currInd] = distances[distIndex];
+          dur[index][currInd] = durations[distIndex++];
+        }
       }
     }
     if (nextAbove != -1) {
-      legs[currInd][currInd+1] = legsTmp[distIndex];
-      dist[currInd][currInd+1] = distances[distIndex];
-      dur[currInd][currInd+1] = durations[distIndex++];
-      getDistTable(nextAbove, currInd+1);
-      legs[currInd+1][currInd] = legsTmp[distIndex];
-      dist[currInd+1][currInd] = distances[distIndex];
-      dur[currInd+1][currInd] = durations[distIndex++];
+      legs[currInd][currInd + 1] = legsTmp[distIndex];
+      dist[currInd][currInd + 1] = distances[distIndex];
+      dur[currInd][currInd + 1] = durations[distIndex++];
+      getDistTable(nextAbove, currInd + 1);
+      legs[currInd + 1][currInd] = legsTmp[distIndex];
+      dist[currInd + 1][currInd] = distances[distIndex];
+      dur[currInd + 1][currInd] = durations[distIndex++];
     }
   }
 
@@ -599,9 +608,9 @@
 
     for (var i = 0; i < waypoints.length; ++i) {
       if (wpActive[i]) {
-	wayArr.push(makeDirWp(waypoints[i], addresses[i]));
-	getWayArr(i);
-	break;
+        wayArr.push(makeDirWp(waypoints[i], addresses[i]));
+        getWayArr(i);
+        break;
       }
     }
 
@@ -617,7 +626,7 @@
       chunkNode = 0;
       okChunkNode = 0;
       if (typeof onProgressCallback == 'function') {
-	onProgressCallback(tsp);
+        onProgressCallback(tsp);
       }
       nextChunk(mode);
     }
@@ -629,60 +638,62 @@
     if (chunkNode < wayArr.length) {
       var wayArrChunk = new Array();
       for (var i = 0; i < maxSize && i + chunkNode < wayArr.length; ++i) {
-	wayArrChunk.push(wayArr[chunkNode+i]);
+        wayArrChunk.push(wayArr[chunkNode + i]);
       }
       var origin;
       var destination;
       origin = wayArrChunk[0].location;
-      destination = wayArrChunk[wayArrChunk.length-1].location;
+      destination = wayArrChunk[wayArrChunk.length - 1].location;
       var wayArrChunk2 = new Array();
       for (var i = 1; i < wayArrChunk.length - 1; i++) {
-	wayArrChunk2[i-1] = wayArrChunk[i];
+        wayArrChunk2[i - 1] = wayArrChunk[i];
       }
       chunkNode += maxSize;
-      if (chunkNode < wayArr.length-1) {
-	chunkNode--;
+      if (chunkNode < wayArr.length - 1) {
+        chunkNode--;
       }
-	    
+
       var myGebDirections = new google.maps.DirectionsService();
-	    
+
       myGebDirections.route({
-				origin: origin,
-	    	destination: destination,
-	    	waypoints: wayArrChunk2,
-	    	avoidHighways: avoidHighways,
-	    	avoidTolls: avoidTolls,
-	    	unitSystem: directionunits,
-	    	travelMode: travelMode 
-			}, 
-			function(directionsResult, directionsStatus) {
-			  if (directionsStatus == google.maps.DirectionsStatus.OK) {
-			    requestLimitWait = 500;
-			    //alert("Request completed!");
-			    // Save legs, distances and durations
-			    fakeDirResult = directionsResult;
-			    for (var i = 0; i < directionsResult.routes[0].legs.length; ++i) {
-			      ++numDirectionsComputed;
-			      legsTmp.push(directionsResult.routes[0].legs[i]);
-			      durations.push(directionsResult.routes[0].legs[i].duration.value);
-			      distances.push(directionsResult.routes[0].legs[i].distance.value);
-			    }
-			    if (typeof onProgressCallback == 'function') {
-			      onProgressCallback(tsp);
-			    }
-			    okChunkNode = chunkNode;
-			    nextChunk(mode);
-			  } else if (directionsStatus == google.maps.DirectionsStatus.OVER_QUERY_LIMIT) {
-			    requestLimitWait *= 2;
-			    setTimeout(function(){ nextChunk(mode) }, requestLimitWait);
-		 	  } else {
-			    var errorMsg = DIR_STATUS_MSG[directionsStatus];
-			    var doNotContinue = true;
-			    if (typeof onErrorCallback == 'function') {
-			      onErrorCallback(tsp, errorMsg, directionsStatus);
-			    }
-			  }
-			});
+          origin: origin,
+          destination: destination,
+          waypoints: wayArrChunk2,
+          avoidHighways: avoidHighways,
+          avoidTolls: avoidTolls,
+          unitSystem: directionunits,
+          travelMode: travelMode
+        },
+        function(directionsResult, directionsStatus) {
+          if (directionsStatus == google.maps.DirectionsStatus.OK) {
+            requestLimitWait = 500;
+            //alert("Request completed!");
+            // Save legs, distances and durations
+            fakeDirResult = directionsResult;
+            for (var i = 0; i < directionsResult.routes[0].legs.length; ++i) {
+              ++numDirectionsComputed;
+              legsTmp.push(directionsResult.routes[0].legs[i]);
+              durations.push(directionsResult.routes[0].legs[i].duration.value);
+              distances.push(directionsResult.routes[0].legs[i].distance.value);
+            }
+            if (typeof onProgressCallback == 'function') {
+              onProgressCallback(tsp);
+            }
+            okChunkNode = chunkNode;
+            nextChunk(mode);
+          } else if (directionsStatus == google.maps.DirectionsStatus.OVER_QUERY_LIMIT) {
+            requestLimitWait *= 2;
+            setTimeout(function() {
+              nextChunk(mode)
+            }, requestLimitWait);
+          } else {
+            var errorMsg = DIR_STATUS_MSG[directionsStatus];
+            var doNotContinue = true;
+            if (typeof onErrorCallback == 'function') {
+              onErrorCallback(tsp, errorMsg, directionsStatus);
+            }
+          }
+        });
     } else {
       readyTsp(mode);
     }
@@ -698,11 +709,11 @@
     numActive = 0;
     for (var i = 0; i < waypoints.length; ++i) {
       if (wpActive[i]) {
-				legs.push(new Array());
-				dist.push(new Array());
-				dur.push(new Array());
-				addr[numActive] = addresses[i];
-				numActive++;
+        legs.push(new Array());
+        dist.push(new Array());
+        dur.push(new Array());
+        addr[numActive] = addresses[i];
+        numActive++;
       }
     }
     for (var i = 0; i < numActive; ++i) {
@@ -712,8 +723,8 @@
     }
     for (var i = 0; i < waypoints.length; ++i) {
       if (wpActive[i]) {
-				getDistTable(i, 0);
-				break;
+        getDistTable(i, 0);
+        break;
       }
     }
 
@@ -750,7 +761,7 @@
     var wpIndices = new Array();
     for (var i = 0; i < waypoints.length; ++i) {
       if (wpActive[i]) {
-				wpIndices.push(i);
+        wpIndices.push(i);
       }
     }
     var bestPathLatLngStr = "";
@@ -759,23 +770,23 @@
     var directionsResultOverview = new Array();
     var directionsResultBounds = new google.maps.LatLngBounds();
     for (var i = 1; i < bestPath.length; ++i) {
-      directionsResultLegs.push(legs[bestPath[i-1]][bestPath[i]]);
+      directionsResultLegs.push(legs[bestPath[i - 1]][bestPath[i]]);
     }
     for (var i = 0; i < bestPath.length; ++i) {
       bestPathLatLngStr += makeLatLng(waypoints[wpIndices[bestPath[i]]]) + "\n";
       directionsResultBounds.extend(waypoints[wpIndices[bestPath[i]]]);
       directionsResultOverview.push(waypoints[wpIndices[bestPath[i]]]);
     }
-    directionsResultRoutes.push({ 
+    directionsResultRoutes.push({
       legs: directionsResultLegs,
-	  bounds: directionsResultBounds,
-	  copyrights: "Map data Â©2012 Google",
-	  overview_path: directionsResultOverview,
-	  warnings: new Array(),
-	  });
+      bounds: directionsResultBounds,
+      copyrights: "Map data Â©2012 Google",
+      overview_path: directionsResultOverview,
+      warnings: new Array(),
+    });
     gebDirectionsResult = fakeDirResult;
-    gebDirectionsResult.routes = directionsResultRoutes; 
-			
+    gebDirectionsResult.routes = directionsResultRoutes;
+
     if (onFatalErrorListener)
       google.maps.event.removeListener(onFatalErrorListener);
     onFatalErrorListener = google.maps.event.addListener(gebDirectionsService, 'error', onFatalErrorCallback);
@@ -787,8 +798,8 @@
 
   function reverseSolution() {
     for (var i = 0; i < bestPath.length / 2; ++i) {
-      var tmp = bestPath[bestPath.length-1-i];
-      bestPath[bestPath.length-1-i] = bestPath[i];
+      var tmp = bestPath[bestPath.length - 1 - i];
+      bestPath[bestPath.length - 1 - i] = bestPath[i];
       bestPath[i] = tmp;
     }
     prepareSolution();
@@ -807,7 +818,7 @@
     var newBestPath = new Array(bestPath.length - 1);
     for (var i = 0; i < bestPath.length; ++i) {
       if (i != number) {
-	newBestPath[i - (i > number ? 1 : 0)] = bestPath[i];
+        newBestPath[i - (i > number ? 1 : 0)] = bestPath[i];
       }
     }
     bestPath = newBestPath;
@@ -818,55 +829,59 @@
     var freeInd = -1;
     for (var i = 0; i < waypoints.length; ++i) {
       if (!wpActive[i]) {
-	freeInd = i;
-	break;
+        freeInd = i;
+        break;
       }
     }
     if (freeInd == -1) {
       if (waypoints.length < maxTspSize) {
-				waypoints.push(latLng);
-				labels.push(label);
-				wpActive.push(true);
-				freeInd = waypoints.length-1;
+        waypoints.push(latLng);
+        labels.push(label);
+        wpActive.push(true);
+        freeInd = waypoints.length - 1;
       } else {
-				return(-1);
+        return (-1);
       }
     } else {
       waypoints[freeInd] = latLng;
       labels[freeInd] = label;
       wpActive[freeInd] = true;
     }
-    return(freeInd);
+    return (freeInd);
   }
 
   function addAddress(address, label, callback) {
     addressProcessing = true;
-    gebGeocoder.geocode({ address: address }, function(results, status) {
-			if (status == google.maps.GeocoderStatus.OK) {
-			  addressProcessing = false;
-			  --addressRequests;
-			  ++currQueueNum;
-			  if (results.length >= 1) {
-			    var latLng = results[0].geometry.location;
-			    var freeInd = addWaypoint(latLng, label);
-			    address = address.replace("'", "");
-			    address = address.replace("\"", "");
-			    addresses[freeInd] = address;
-			    if (typeof callback == 'function')
-			      callback(address, latLng);
-			  }
-			} else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-			  setTimeout(function(){ addAddress(address, label, callback) }, 100); 
-			} else {
-			  --addressRequests;
-			  if (typeof onErrorCallback == 'function') {
-			    onErrorCallback(tsp, "Failed to geocode address: " + address + ". Reason: " + GEO_STATUS_MSG[status], tsp.Status.GEOCODE_FAILED);
-			  }
-			  ++currQueueNum;
-			  addressProcessing = false;
-			  if (typeof(callback) == 'function')
-			    callback(address);
-			}
+    gebGeocoder.geocode({
+      address: address
+    }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        addressProcessing = false;
+        --addressRequests;
+        ++currQueueNum;
+        if (results.length >= 1) {
+          var latLng = results[0].geometry.location;
+          var freeInd = addWaypoint(latLng, label);
+          address = address.replace("'", "");
+          address = address.replace("\"", "");
+          addresses[freeInd] = address;
+          if (typeof callback == 'function')
+            callback(address, latLng);
+        }
+      } else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+        setTimeout(function() {
+          addAddress(address, label, callback)
+        }, 100);
+      } else {
+        --addressRequests;
+        if (typeof onErrorCallback == 'function') {
+          onErrorCallback(tsp, "Failed to geocode address: " + address + ". Reason: " + GEO_STATUS_MSG[status], tsp.Status.GEOCODE_FAILED);
+        }
+        ++currQueueNum;
+        addressProcessing = false;
+        if (typeof(callback) == 'function')
+          callback(address);
+      }
     });
   }
 
@@ -912,7 +927,7 @@
     requestNum = 0;
     currQueueNum = 0;
     cachedDirections = false;
-    onSolveCallback = function(){};
+    onSolveCallback = function() {};
     onProgressCallback = null;
     doNotContinue = false;
     directionunits = google.maps.UnitSystem.METRIC;
@@ -932,7 +947,7 @@
     DIR_STATUS_MSG[google.maps.DirectionsStatus.UNKNOWN_ERROR] = "A directions request could not be processed due to a server error. The request may succeed if you try again.";
     DIR_STATUS_MSG[google.maps.DirectionsStatus.ZERO_RESULTS] = "No route could be found between the origin and destination.";
   }
-    
+
   /* end (edited) OptiMap code */
   /* start public interface */
 
@@ -944,24 +959,24 @@
       return;
     }
 
-    gebMap               = map;
-    directionsPanel      = panel;
-    gebGeocoder          = new google.maps.Geocoder();
+    gebMap = map;
+    directionsPanel = panel;
+    gebGeocoder = new google.maps.Geocoder();
     gebDirectionsService = new google.maps.DirectionsService();
     onFatalErrorCallback = onFatalError; // only for fatal errors, not geocoding errors
-    onErrorCallback      = onError; // for geocoding errors
-    tsp                  = this;
+    onErrorCallback = onError; // for geocoding errors
+    tsp = this;
   }
 
   BpTspSolver.prototype.Status = {
-    ONLY_ONE:       'ONLY_ONE',
+    ONLY_ONE: 'ONLY_ONE',
     GEOCODE_FAILED: 'GEOCODE_FAILED'
   };
 
   BpTspSolver.prototype.addAddressWithLabel = function(address, label, callback) {
     ++addressRequests;
     ++requestNum;
-    tsp.addAddressAgain(address, label, callback, requestNum - 1);	
+    tsp.addAddressAgain(address, label, callback, requestNum - 1);
   }
 
   BpTspSolver.prototype.addAddress = function(address, callback) {
@@ -970,7 +985,9 @@
 
   BpTspSolver.prototype.addAddressAgain = function(address, label, callback, queueNum) {
     if (addressProcessing || queueNum > currQueueNum) {
-      setTimeout(function(){ tsp.addAddressAgain(address, label, callback, queueNum) }, 100);
+      setTimeout(function() {
+        tsp.addAddressAgain(address, label, callback, queueNum)
+      }, 100);
       return;
     }
     addAddress(address, label, callback);
@@ -987,7 +1004,9 @@
 
   BpTspSolver.prototype.addWaypointAgain = function(latLng, label, callback, queueNum) {
     if (addressProcessing || queueNum > currQueueNum) {
-      setTimeout(function(){ tsp.addWaypointAgain(latLng, label, callback, queueNum) }, 100);
+      setTimeout(function() {
+        tsp.addWaypointAgain(latLng, label, callback, queueNum)
+      }, 100);
       return;
     }
     addWaypoint(latLng, label);
@@ -1001,7 +1020,7 @@
     var wp = [];
     for (var i = 0; i < waypoints.length; i++) {
       if (wpActive[i]) {
-	wp.push(waypoints[i]);
+        wp.push(waypoints[i]);
       }
     }
     return wp;
@@ -1011,7 +1030,7 @@
     var addrs = [];
     for (var i = 0; i < addresses.length; i++) {
       if (wpActive[i])
-	addrs.push(addresses[i]);
+        addrs.push(addresses[i]);
     }
     return addrs;
   };
@@ -1020,7 +1039,7 @@
     var labs = [];
     for (var i = 0; i < labels.length; i++) {
       if (wpActive[i])
-	labs.push(labels[i]);
+        labs.push(labels[i]);
     }
     return labs;
   };
@@ -1028,8 +1047,8 @@
   BpTspSolver.prototype.removeWaypoint = function(latLng) {
     for (var i = 0; i < waypoints.length; ++i) {
       if (wpActive[i] && waypoints[i].equals(latLng)) {
-	wpActive[i] = false;
-	return true;
+        wpActive[i] = false;
+        return true;
       }
     }
     return false;
@@ -1038,8 +1057,8 @@
   BpTspSolver.prototype.removeAddress = function(addr) {
     for (var i = 0; i < addresses.length; ++i) {
       if (wpActive[i] && addresses[i] == addr) {
-	wpActive[i] = false;
-	return true;
+        wpActive[i] = false;
+        return true;
       }
     }
     return false;
@@ -1049,13 +1068,13 @@
     var j = -1;
     for (var i = waypoints.length - 1; i >= 0; --i) {
       if (j == -1 && wpActive[i]) {
-	j = i;
+        j = i;
       }
       if (wpActive[i] && waypoints[i].equals(latLng)) {
-	for (var k = i; k < j; ++k) {
-	  swapWaypoints(k, k + 1);
-	}
-	break;
+        for (var k = i; k < j; ++k) {
+          swapWaypoints(k, k + 1);
+        }
+        break;
       }
     }
   }
@@ -1064,13 +1083,13 @@
     var j = -1;
     for (var i = 0; i < waypoints.length; ++i) {
       if (j == -1 && wpActive[i]) {
-	j = i;
+        j = i;
       }
       if (wpActive[i] && waypoints[i].equals(latLng)) {
-	for (var k = i; k > j; --k) {
-	  swapWaypoints(k, k - 1);
-	}
-	break;
+        for (var k = i; k > j; --k) {
+          swapWaypoints(k, k - 1);
+        }
+        break;
       }
     }
   }
@@ -1136,7 +1155,9 @@
     }
 
     if (!this.isReady()) {
-      setTimeout(function(){ tsp.solveRoundTrip(callback) }, 20);
+      setTimeout(function() {
+        tsp.solveRoundTrip(callback)
+      }, 20);
       return;
     }
     if (typeof callback == 'function')
@@ -1151,7 +1172,9 @@
     }
 
     if (!this.isReady()) {
-      setTimeout(function(){ tsp.solveAtoZ(callback) }, 20);
+      setTimeout(function() {
+        tsp.solveAtoZ(callback)
+      }, 20);
       return;
     }
 
@@ -1164,8 +1187,7 @@
   BpTspSolver.prototype.setDirectionUnits = function(mOrKm) {
     if (mOrKm == "m") {
       directionunits = google.maps.UnitSystem.IMPERIAL;
-    }
-    else {
+    } else {
       directionunits = google.maps.UnitSystem.METRIC;
     }
   }
@@ -1174,15 +1196,15 @@
     onProgressCallback = callback;
   }
 
-  BpTspSolver.prototype.getNumDirectionsComputed = function () {
+  BpTspSolver.prototype.getNumDirectionsComputed = function() {
     return numDirectionsComputed;
   }
 
-  BpTspSolver.prototype.getNumDirectionsNeeded = function () {
+  BpTspSolver.prototype.getNumDirectionsNeeded = function() {
     return numDirectionsNeeded;
   }
 
-  BpTspSolver.prototype.reverseSolution = function () {
+  BpTspSolver.prototype.reverseSolution = function() {
     reverseSolution();
   }
 
@@ -1201,5 +1223,5 @@
   }
 
   window.BpTspSolver = BpTspSolver;
-    
- })();
+
+})();
