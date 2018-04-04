@@ -2,7 +2,7 @@ package executionstats
 
 // ExecutionStats is the status related to a culture execution.
 type ExecutionStats struct {
-	Payroll         Payroll
+	Payroll         []Payroll
 	Revenue         float32
 	FoodCosts       float32
 	DeliveryCosts   float32
