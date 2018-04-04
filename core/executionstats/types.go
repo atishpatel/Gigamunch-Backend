@@ -6,8 +6,12 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 )
 
-// Kind is the kind for datastore.
-const Kind = "ExecutionStats"
+const (
+	// DateFormat is the format used by date.
+	DateFormat = "2006-01-02"
+	// Kind is the kind for datastore.
+	Kind = "ExecutionStats"
+)
 
 // ExecutionStats is the status related to a culture execution.
 type ExecutionStats struct {
