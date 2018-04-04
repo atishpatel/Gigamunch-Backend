@@ -116,7 +116,18 @@ CREATE TABLE IF NOT EXISTS `sub`(
 -- create coupon
 -- create promo
 -- create driver_assignment
-
+CREATE TABLE IF NOT EXISTS deliveries (
+	created_dt DATETIME NOT NULL DEFAULT NOW(),
+	date DATE NOT NULL,
+	driver_id BIGINT NOT NULL,
+	driver_email VARCHAR(175) NOT NULL,
+	driver_name VARCHAR(125) NOT NULL,
+	sub_id BIGINT NOT NULL,
+	sub_email VARCHAR(175) NOT NULL,
+	order INT NOT NULL DEFAULT -1,
+	delivered BOOLEAN DEFAULT 0,
+	PRIMARY KEY (date, sub_email)
+)
 -- create activity
 CREATE TABLE IF NOT EXISTS activity (
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
@@ -155,10 +166,5 @@ CREATE TABLE IF NOT EXISTS activity (
 	gift_from_user_id BIGINT,
 	deviant BOOLEAN NOT NULL DEFAULT 0,
 	deviant_reason VARCHAR(225) NOT NULL DEFAULT '',
-	assigned_driver_id BIGINT,
-	assigned_driver_changed BOOLEAN NOT NULL DEFAULT 0,
-	delivered BOOLEAN NOT NULL DEFAULT 0,
-	delivery_dt DATETIME,
-	delivery_note_to_customer VARCHAR(225) NOT NULL DEFAULT '',
 	PRIMARY KEY (date, user_id)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
