@@ -50,9 +50,16 @@ func (c *Client) GetAll(start, limit int) ([]*Execution, error) {
 // Update updates an Execution.
 func (c *Client) Update(exe *Execution) error {
 	key := db.IDKey(c.ctx, Kind, exe.ID)
-	_, err := db.Put(c.ctx, key, exe)
+	key, err := db.Put(c.ctx, key, exe)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to put")
+	}
+	if exe.ID == 0 {
+		exe.ID = key.IntID()
+		_, err = db.Put(c.ctx, key, exe)
+		if err != nil {
+			return errDatastore.WithError(err).Annotate("failed to put")
+		}
 	}
 	return nil
 }
