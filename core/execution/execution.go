@@ -26,6 +26,24 @@ type Client struct {
 	log *logging.Client
 }
 
+// NewClient gives you a new client.
+func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
+	var err error
+	if standAppEngine {
+		err = setup(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if log == nil {
+		return nil, errInternal.Annotate("failed to get logging client")
+	}
+	return &Client{
+		ctx: ctx,
+		log: log,
+	}, nil
+}
+
 // Get gets a culture Execution.
 func (c *Client) Get(id int64) (*Execution, error) {
 	key := db.IDKey(c.ctx, Kind, id)
@@ -62,24 +80,6 @@ func (c *Client) Update(exe *Execution) error {
 		}
 	}
 	return nil
-}
-
-// NewClient gives you a new client.
-func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
-	var err error
-	if standAppEngine {
-		err = setup(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if log == nil {
-		return nil, errInternal.Annotate("failed to get logging client")
-	}
-	return &Client{
-		ctx: ctx,
-		log: log,
-	}, nil
 }
 
 // Setup sets up the logging package.
