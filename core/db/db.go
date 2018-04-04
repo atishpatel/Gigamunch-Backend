@@ -138,6 +138,19 @@ func (c *Client) GetMulti(ctx context.Context, keys []common.Key, dst interface{
 	return datastore.GetMulti(ctx, dsKeys, dst)
 }
 
+// QueryOrdered runs a query with order parameter.
+func (c *Client) QueryOrdered(ctx context.Context, kind string, offset, limit int, orderFieldName string, dst interface{}) ([]common.Key, error) {
+	dsKeys, err := datastore.NewQuery(kind).Offset(offset).Limit(limit).Order(orderFieldName).GetAll(ctx, dst)
+	if err != nil {
+		return nil, err
+	}
+	keys := make([]common.Key, len(dsKeys))
+	for i := range dsKeys {
+		keys[i] = &Key{key: dsKeys[i]}
+	}
+	return keys, nil
+}
+
 // QueryFilterOrdered runs a query with filter parameter.
 func (c *Client) QueryFilterOrdered(ctx context.Context, kind string, offset, limit int, orderFieldName string, filterString string, filterValue interface{}, dst interface{}) ([]common.Key, error) {
 	dsKeys, err := datastore.NewQuery(kind).Offset(offset).Limit(limit).Filter(filterString, filterValue).Order(orderFieldName).GetAll(ctx, dst)
