@@ -6,11 +6,15 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 )
 
-// DateFormat is the format used by date.
-const DateFormat = "2006-01-02"
+const (
+	// DateFormat is the format used by date.
+	DateFormat = "2006-01-02"
+	// Kind is a datastore kind.
+	Kind = "Execution"
+)
 
-// CultureExecution is an execution of a culture.
-type CultureExecution struct {
+// Execution is an execution of a culture.
+type Execution struct {
 	ID              int64           `json:"id,omitempty" datastore:",noindex"`
 	Date            string          `json:"date,omitempty" datastore:",index"`
 	Location        common.Location `json:"location,omitempty"`
