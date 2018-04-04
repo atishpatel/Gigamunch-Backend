@@ -497,8 +497,32 @@
       }
 
       updateDriver(driverName, deliveryEmail) {
-        // TODO:
-        console.log('TODO:', driverName, deliveryEmail);
+        let delivery;
+        let drivers = this.drivers;
+        this.set('drivers', []);
+        for (let i = 0; i < drivers.length; i++) {
+          for (let j = 0; j < drivers[i].deliveries.length; j++) {
+            if (drivers[i].deliveries[j].sub_email === deliveryEmail) {
+              console.log(`removing ${deliveryEmail} from ${drivers[i].name}`);
+              delivery = drivers[i].deliveries.splice(j, 1);
+            }
+          }
+        }
+        if (!delivery.length) {
+          console.error(`no delivery with email(${deliveryEmail}) found`);
+          return
+        }
+        for (let i = 0; i < drivers.length; i++) {
+          if (drivers[i].name === driverName) {
+            console.log(`adding ${deliveryEmail} to ${drivers[i].name}`);
+            delivery[0].marker.setIcon(drivers[i].pinSymbol);
+            drivers[i].deliveries.push(delivery[0]);
+            drivers[i].optimized = false;
+          }
+        }
+        setTimeout(() => {
+          this.set('drivers', drivers);
+        }, 1000);
       }
 
       inside(lat, long, vs) {
