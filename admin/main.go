@@ -59,7 +59,9 @@ func init() {
 	// Sublogs
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", handler(userAdmin(ProcessSublog)))
+	// Subscriber
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", handler(userAdmin(GetHasSubscribed)))
+	http.HandleFunc("/admin/api/v1/GetSubscriber", handler(userAdmin(GetSubscriber)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	//

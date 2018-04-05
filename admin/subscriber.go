@@ -16,10 +16,11 @@ import (
 	"github.com/gorilla/schema"
 )
 
-// GetHasSubscribed gets all subscribers.
-func GetHasSubscribed(ctx context.Context, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetHasSubscribedReq)
+// GetSubscriber gets all info about a subscriber from their email address
+func GetSubscriber(ctx context.Context, r *http.Request, log *logging.Client) Response {
+	req := new(pb.GetSubscriberReq)
 	var err error
+
 	// decode request
 	if r.Method == "GET" {
 		decoder := schema.NewDecoder()
@@ -37,6 +38,46 @@ func GetHasSubscribed(ctx context.Context, r *http.Request, log *logging.Client)
 	}
 	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
+
+	email := req.Email
+
+	subC := subold.New(ctx)
+	subscriber, err := subC.GetSubscriber(email)
+
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to get subscriber")
+	}
+
+	resp := &pb.GetSubscriberResp{
+		Subscriber: pbSubscriber(subscriber),
+	}
+
+	return resp
+}
+
+// GetHasSubscribed gets all subscribers.
+func GetHasSubscribed(ctx context.Context, r *http.Request, log *logging.Client) Response {
+	req := new(pb.GetHasSubscribedReq)
+	var err error
+
+	// decode request
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
+	}
+	logging.Infof(ctx, "Request: %+v", req)
+	// end decode request
+
 	date, err := getTime(req.Date)
 	if err != nil {
 		return errors.Annotate(err, "failed to decode date")

@@ -96,6 +96,13 @@ interface GetHasSubscribedResp {
     error: Error
     subscribers: Subscriber[]
 }
+interface GetSubscriberReq {
+    email: string
+}
+interface GetSubscriberResp {
+    error: Error
+    subscriber: Subscriber
+}
 interface Execution {
     id: number
     date: string
