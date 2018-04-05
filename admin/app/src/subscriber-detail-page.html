@@ -49,20 +49,136 @@
           display: table-row-group;
         }
 
+        .subscriber-section {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .subscriber-email {
+          flex: 1;
+          font-weight: 300;
+        }
+
+        .subscriber-name {
+          flex: 1;
+          font-weight: 300;
+        }
+
+        .subscriber-number {
+          flex: 1;
+          font-weight: 300;
+        }
+
+        .info-row {
+          display: flex;
+          flex-direction: row;
+          background-color: rgb(243, 243, 243);
+          border: 1px solid #d6d6d6;
+          padding: 6px 10px;
+        }
+
+        .info-label {
+          min-width: 200px;
+          font-weight: 600;
+        }
+
+        .info-value {
+          min-width: 200px;
+          font-weight: 400;
+        }
+
       </style>
     </shared-styles>
 
     <div>
-      <h1 class="page-title">Subscriber Detail Page</h1>
+      <h1 class="page-title">[[subscriber.name]]</h1>
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
 
       <div class="table-container">
-        <h2 class="table-date">
-              [[subscriber.name]]
-        </h2>
+        <div class="subscriber-section">
+          <div class="info-row">
+            <div class="info-label">Email:</div>
+            <div class="info-value email">
+              [[subscriber.email]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Phone number:</div>
+            <div class="info-value phone-number">
+              [[subscriber.phone_number]]
+            </div>
+          </div>
 
+          <div class="info-row">
+            <div class="info-label">Address:</div>
+            <div class="info-value address">
+              [[subscriber.address.street]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Delivery Tip:</div>
+            <div class="info-value delivery-tip">
+              [[subscriber.delivery_tips]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Servings:</div>
+            <div class="info-value servings">
+              [[subscriber.servings]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Vegetarian:</div>
+            <div class="info-value vegetarian">
+              [[subscriber.isVegetarian]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Customer ID:</div>
+            <div class="info-value customer-id">
+              [[subscriber.customer_id]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Delivery:</div>
+            <div class="info-value first-delivery">
+              [[subscriber.first_box_date]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Payment:</div>
+            <div class="info-value first-payment">
+              [[subscriber.first_payment_date]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-value status">
+              [[subscriber.is_subscribed]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Date:</div>
+            <div class="info-value subscription-date">
+              [[subscriber.subscription_date]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Day:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.subscription_day]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Unsubscribed Date:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.unsubscribed_date]]
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -112,6 +228,15 @@
           let err = resp.error;
           if (err && err.code !== 0) {
             return;
+          }
+          if (subscriber.vegetarian_servings > 0) {
+            subscriber.isVegetarian = true;
+            subscriber.servings = subscriber.vegetarian_servings;
+          } else {
+            subscriber.isVegetarian = false;
+          }
+          if (!subscriber.is_subscribed) {
+            subscriber.is_subscribed = false;
           }
 
           this.subscriber = subscriber;
