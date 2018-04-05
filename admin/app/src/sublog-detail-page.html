@@ -189,7 +189,15 @@
       selected() {
         const tmp = window.location.pathname.split('/sublogdetail/');
         const dateString = decodeURIComponent(tmp[1]);
-        const d = new Date(dateString);
+        let d;
+        if (dateString === 'next') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
+          }
+        } else {
+          d = new Date(dateString);
+        }
         this.getSubLogsForDate(d);
       }
 
