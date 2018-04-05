@@ -1,0 +1,125 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="subscriber-detail-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Subscriber Detail Page</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <div class="table-container">
+        <h2 class="table-date">
+              [[subscriber.name]]
+        </h2>
+
+      </div>
+
+    </div>
+  </template>
+
+  <script>
+    class SubscriberDetailPage extends Polymer.Element {
+      static get is() {
+        return 'subscriber-detail-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          event: {
+            type: Object,
+          },
+          subscriber: {
+            type: Object,
+            notify: true,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        const tmp = window.location.pathname.split('/subscriber/');
+        const subscriberEmail = decodeURIComponent(tmp[1]);
+        this.getSubscriber(subscriberEmail);
+      }
+
+      getSubscriber(subscriberEmail) {
+        this.service.GetSubscriber(subscriberEmail).then((resp) => {
+          let subscriber = resp.subscriber;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          this.subscriber = subscriber;
+        });
+      }
+
+    }
+    window.customElements.define(SubscriberDetailPage.is, SubscriberDetailPage);
+
+  </script>
+</dom-module>
