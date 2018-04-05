@@ -123,17 +123,17 @@
 
       selected() {
         console.log("in selected");
-        this.getAllSubscribers();
+        this.getHasSubscribed();
       }
 
-      getAllSubscribers() {
-        console.log("made it to getAllSubscribers");
+      getHasSubscribed() {
+        console.log("made it to getHasSubscribed");
         var today = new Date();
-        this.service.GetAllSubscribers(today).then((resp) => {
+        this.service.GetHasSubscribed(today).then((resp) => {
           let subscribers = resp.subscribers;
           let err = resp.error;
           if (err && err.code !== 0) {
-            console.log("error in getAllSubscribers", err);
+            console.log("error in getHasSubscribed", err);
             return;
           }
           for (let i = 0; i < subscribers.length; i++) {

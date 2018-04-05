@@ -13,9 +13,9 @@ if (location.hostname === 'localhost') {
 }
 
 // Subscriber
-export function GetAllSubscribers(date: Date): Promise<any> {
-  const url: string = baseURL + 'GetAllSubscribers';
-  const req: GetAllSubscribersReq = {
+export function GetHasSubscribed(date: Date): Promise<any> {
+  const url: string = baseURL + 'GetHasSubscribed';
+  const req: GetHasSubscribedReq = {
     date: date.toISOString(),
   };
   return callFetch(url, 'GET', req);

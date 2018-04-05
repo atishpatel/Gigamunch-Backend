@@ -15,15 +15,15 @@
     "application/json"
   ],
   "paths": {
-    "/admin/api/v1/GetAllSubscribers": {
+    "/admin/api/v1/GetAllExecutionStats": {
       "post": {
-        "summary": "Subscribers",
-        "operationId": "GetAllSubscribers",
+        "summary": "ExecutionStats",
+        "operationId": "GetAllExecutionStats",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/AdminAPIGetAllSubscribersResp"
+              "$ref": "#/definitions/AdminAPIGetAllExecutionStatsResp"
             }
           }
         },
@@ -33,7 +33,113 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/AdminAPIGetAllSubscribersReq"
+              "$ref": "#/definitions/AdminAPIGetAllExecutionStatsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetAllExecutions": {
+      "post": {
+        "summary": "Executions",
+        "operationId": "GetAllExecutions",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetAllExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetAllExecutionsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetExecution": {
+      "post": {
+        "operationId": "GetExecution",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetExecutionResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetExecutionReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetExecutionStats": {
+      "post": {
+        "operationId": "GetExecutionStats",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetExecutionStatsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetExecutionStatsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetHasSubscribed": {
+      "post": {
+        "summary": "Subscribers",
+        "operationId": "GetHasSubscribed",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetHasSubscribedResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetHasSubscribedReq"
             }
           }
         ],
@@ -200,6 +306,58 @@
           "Admin"
         ]
       }
+    },
+    "/admin/api/v1/UpdateExecution": {
+      "post": {
+        "operationId": "UpdateExecution",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateExecutionResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateExecutionReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/UpdateExecutionStats": {
+      "post": {
+        "operationId": "UpdateExecutionStats",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateExecutionStatsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateExecutionStatsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
     }
   },
   "definitions": {
@@ -238,7 +396,327 @@
       },
       "title": "The error object that gets returned with every"
     },
-    "AdminAPIGetAllSubscribersReq": {
+    "AdminAPIContent": {
+      "type": "object",
+      "properties": {
+        "hero_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "hands_plate_image_url": {
+          "type": "string"
+        },
+        "dinner_image_url": {
+          "type": "string"
+        },
+        "spotify_url": {
+          "type": "string"
+        },
+        "youtube_url": {
+          "type": "string"
+        }
+      },
+      "description": "Content is a collection of urls pointing to content realted to the execution."
+    },
+    "AdminAPICulture": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "greeting": {
+          "type": "string"
+        },
+        "flag_emoji": {
+          "type": "string"
+        }
+      },
+      "description": "Culture is the country in a culture execution."
+    },
+    "AdminAPICultureCook": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "story": {
+          "type": "string"
+        }
+      },
+      "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "AdminAPIDish": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "is_for_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "Dish is a dish in a culture execution."
+    },
+    "AdminAPIExecution": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "date": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "publish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "culture": {
+          "$ref": "#/definitions/AdminAPICulture",
+          "title": "Info"
+        },
+        "content": {
+          "$ref": "#/definitions/AdminAPIContent"
+        },
+        "culture_cook": {
+          "$ref": "#/definitions/AdminAPICultureCook"
+        },
+        "dishes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIDish"
+          }
+        },
+        "has_pork": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "Diet"
+        },
+        "has_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_chicken": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_weird_meat": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_fish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_other_seafood": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "Execution"
+    },
+    "AdminAPIExecutionStats": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "revenue": {
+          "type": "number",
+          "format": "float"
+        },
+        "payroll": {
+          "$ref": "#/definitions/AdminAPIPayroll"
+        },
+        "payroll_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "food_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "delivery_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "onboarding_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "processing_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "tax_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "packaging_costs": {
+          "type": "number",
+          "format": "float"
+        },
+        "other_costs": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "title": "ExecutionStats"
+    },
+    "AdminAPIGetAllExecutionStatsReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIGetAllExecutionStatsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "execution_stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIExecutionStats"
+          }
+        }
+      }
+    },
+    "AdminAPIGetAllExecutionsReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIGetAllExecutionsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "execution": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIExecution"
+          }
+        }
+      }
+    },
+    "AdminAPIGetExecutionReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "AdminAPIGetExecutionResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "execution": {
+          "$ref": "#/definitions/AdminAPIExecution"
+        }
+      }
+    },
+    "AdminAPIGetExecutionStatsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "AdminAPIGetExecutionStatsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "execution_stats": {
+          "$ref": "#/definitions/AdminAPIExecutionStats"
+        }
+      }
+    },
+    "AdminAPIGetHasSubscribedReq": {
       "type": "object",
       "properties": {
         "date": {
@@ -246,7 +724,7 @@
         }
       }
     },
-    "AdminAPIGetAllSubscribersResp": {
+    "AdminAPIGetHasSubscribedResp": {
       "type": "object",
       "properties": {
         "error": {
@@ -330,6 +808,26 @@
           }
         }
       }
+    },
+    "AdminAPIPayroll": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "hours": {
+          "type": "number",
+          "format": "float"
+        },
+        "wage": {
+          "type": "number",
+          "format": "float"
+        },
+        "postion": {
+          "type": "string"
+        }
+      },
+      "description": "Payroll is the payroll."
     },
     "AdminAPIProcessSublogsReq": {
       "type": "object",
@@ -542,6 +1040,44 @@
         },
         "token": {
           "type": "string"
+        }
+      }
+    },
+    "AdminAPIUpdateExecutionReq": {
+      "type": "object",
+      "properties": {
+        "execution": {
+          "$ref": "#/definitions/AdminAPIExecution"
+        }
+      }
+    },
+    "AdminAPIUpdateExecutionResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "execution": {
+          "$ref": "#/definitions/AdminAPIExecution"
+        }
+      }
+    },
+    "AdminAPIUpdateExecutionStatsReq": {
+      "type": "object",
+      "properties": {
+        "execution_stats": {
+          "$ref": "#/definitions/AdminAPIExecution"
+        }
+      }
+    },
+    "AdminAPIUpdateExecutionStatsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "execution_stats": {
+          "$ref": "#/definitions/AdminAPIExecution"
         }
       }
     },
