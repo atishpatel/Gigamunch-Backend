@@ -56,7 +56,7 @@ type Culture struct {
 
 // Dish is a dish in a culture execution.
 type Dish struct {
-	Number             int      `json:"number,omitempty" datastore:",noindex"`
+	Number             int32    `json:"number,omitempty" datastore:",noindex"`
 	Color              string   `json:"color,omitempty"`
 	Name               string   `json:"name,omitempty"`
 	Description        string   `json:"description,omitempty" datastore:",noindex"`
