@@ -18,16 +18,20 @@ type Execution struct {
 	ID              int64           `json:"id,omitempty" datastore:",noindex"`
 	Date            string          `json:"date,omitempty" datastore:",index"`
 	Location        common.Location `json:"location,omitempty"`
-	Publish         bool            `json:"publish"`
+	Publish         bool            `json:"publish,omitempty"`
 	CreatedDatetime time.Time       `json:"created_datetime,omitempty" datastore:",noindex"`
 	// Info
-	Country     Country     `json:"country,omitempty"`
+	Culture     Culture     `json:"culture,omitempty"`
 	Content     Content     `json:"content,omitempty"`
 	CultureCook CultureCook `json:"culture_cook,omitempty"`
 	Dishes      []Dish      `json:"dishes,omitempty"`
 	// Diet
-	HasPork bool `json:"has_pork,omitempty"`
-	HasBeef bool `json:"has_beef,omitempty"`
+	HasPork         bool `json:"has_pork,omitempty"`
+	HasBeef         bool `json:"has_beef,omitempty"`
+	HasChicken      bool `json:"has_chicken,omitempty"`
+	HasWeirdMeat    bool `json:"has_weird_meat,omitempty"`
+	HasFish         bool `json:"has_fish,omitempty"`
+	HasOtherSeafood bool `json:"has_other_seafood,omitempty"`
 }
 
 // Content is a collection of urls pointing to content realted to the execution.
@@ -40,20 +44,20 @@ type Content struct {
 	YoutubeURL         string `json:"youtube_url,omitempty" datastore:",noindex"`
 }
 
-// Country is the country in a culture execution.
-type Country struct {
+// Culture is the culture in a culture execution.
+type Culture struct {
 	Country     string `json:"country,omitempty"`
 	City        string `json:"city,omitempty"`
 	Description string `json:"description,omitempty" datastore:",noindex"`
-	// ??
-	Adjective string `json:"adjective,omitempty" datastore:",noindex"`
-	Hello     string `json:"hello,omitempty" datastore:",noindex"`
-	FlagEmoji string `json:"flag_emoji,omitempty" datastore:",noindex"`
+	Nationality string `json:"nationality,omitempty" datastore:",noindex"`
+	Greeting    string `json:"greeting,omitempty" datastore:",noindex"`
+	FlagEmoji   string `json:"flag_emoji,omitempty" datastore:",noindex"`
 }
 
 // Dish is a dish in a culture execution.
 type Dish struct {
 	Number             int      `json:"number,omitempty" datastore:",noindex"`
+	Color              string   `json:"color,omitempty"`
 	Name               string   `json:"name,omitempty"`
 	Description        string   `json:"description,omitempty" datastore:",noindex"`
 	Ingredients        []string `json:"ingredients,omitempty" datastore:",noindex"`
