@@ -63,8 +63,8 @@ func getSubscribers(ctx context.Context, subDay string) ([]SubscriptionSignUp, e
 	return results, nil
 }
 
-// getAllSubscribers returns the list of all Subscribers
-func getAllSubscribers(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
+// getHasSubscribed returns the list of all Subscribers
+func getHasSubscribed(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
 	query := datastore.NewQuery(kindSubscriptionSignUp).
 		Filter("SubscriptionDate>", 0).
 		Filter("SubscriptionDate<", date).

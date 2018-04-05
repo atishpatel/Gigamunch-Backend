@@ -80,8 +80,8 @@ let baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
-function GetAllSubscribers(date) {
-    const url = baseURL + 'GetAllSubscribers';
+function GetHasSubscribed(date) {
+    const url = baseURL + 'GetHasSubscribed';
     const req = {
         date: date.toISOString(),
     };
@@ -187,7 +187,7 @@ function serializeParams(obj) {
 
 
 var Service = Object.freeze({
-	GetAllSubscribers: GetAllSubscribers,
+	GetHasSubscribed: GetHasSubscribed,
 	GetUnpaidSublogs: GetUnpaidSublogs,
 	ProcessSublog: ProcessSublog,
 	Login: Login,

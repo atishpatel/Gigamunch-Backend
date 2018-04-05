@@ -120,12 +120,12 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 	return subs, nil
 }
 
-// GetAllSubscribers returns a list of all SubscriptionSignUp.
-func (c *Client) GetAllSubscribers(date time.Time) ([]SubscriptionSignUp, error) {
+// GetHasSubscribed returns a list of all SubscriptionSignUp.
+func (c *Client) GetHasSubscribed(date time.Time) ([]SubscriptionSignUp, error) {
 
-	subs, err := getAllSubscribers(c.ctx, date)
+	subs, err := getHasSubscribed(c.ctx, date)
 	if err != nil {
-		return nil, errDatastore.WithError(err).Wrap("failed to getAllSubscribers")
+		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
 	}
 	return subs, nil
 }

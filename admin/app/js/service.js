@@ -4,8 +4,8 @@ let baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
-export function GetAllSubscribers(date) {
-    const url = baseURL + 'GetAllSubscribers';
+export function GetHasSubscribed(date) {
+    const url = baseURL + 'GetHasSubscribed';
     const req = {
         date: date.toISOString(),
     };

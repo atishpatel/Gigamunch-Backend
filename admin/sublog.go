@@ -16,9 +16,9 @@ import (
 	"github.com/gorilla/schema"
 )
 
-// GetAllSubscribers gets all subscribers.
-func GetAllSubscribers(ctx context.Context, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetAllSubscribersReq)
+// GetHasSubscribed gets all subscribers.
+func GetHasSubscribed(ctx context.Context, r *http.Request, log *logging.Client) Response {
+	req := new(pb.GetHasSubscribedReq)
 	var err error
 	// decode request
 	if r.Method == "GET" {
@@ -43,13 +43,13 @@ func GetAllSubscribers(ctx context.Context, r *http.Request, log *logging.Client
 	}
 
 	subC := subold.New(ctx)
-	subscribers, err := subC.GetAllSubscribers(date)
+	subscribers, err := subC.GetHasSubscribed(date)
 
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get all subscribers")
 	}
 
-	resp := &pb.GetAllSubscribersResp{
+	resp := &pb.GetHasSubscribedResp{
 		Subscribers: pbSubscribers(subscribers),
 	}
 
