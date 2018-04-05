@@ -64,7 +64,7 @@ func SendStatsSMS(ctx context.Context, r *http.Request, log *logging.Client) Res
 	subC := sub.New(ctx)
 	subs, err := subC.GetHasSubscribed(time.Now())
 	if err != nil {
-		log.Errorf(ctx, "failed to SendStatsSMS: failed to sub.GetHasSubscribed: %s", err)
+		log.Errorf(ctx, "failed to SendStatsSMS: failed to sub.GetAllSubscribers: %s", err)
 		return nil
 	}
 	date := time.Now()
