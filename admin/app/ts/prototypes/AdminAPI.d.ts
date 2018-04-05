@@ -151,7 +151,7 @@ interface GetAllExecutionsReq {
 }
 interface GetAllExecutionsResp {
     error: Error
-    execution: Execution[]
+    executions: Execution[]
 }
 interface GetExecutionReq {
    id: number

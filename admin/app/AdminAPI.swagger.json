@@ -671,7 +671,7 @@
         "error": {
           "$ref": "#/definitions/ErrorError"
         },
-        "execution": {
+        "executions": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/AdminAPIExecution"
