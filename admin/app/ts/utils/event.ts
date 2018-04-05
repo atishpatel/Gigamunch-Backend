@@ -24,3 +24,11 @@ export function FireToast(t: Element, detail: Object) {
 export function FireError() {
 
 }
+
+
+// removes composed error
+declare global {
+  interface CustomEventInit {
+    readonly composed: boolean;
+  }
+}

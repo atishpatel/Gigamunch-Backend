@@ -76,7 +76,7 @@ function buildTS() {
     del([buildTSDirectory])
       .then(() => {
         console.log(`Compiling typescript...`);
-        let stream = gulp.src('./ts/**/*.ts')
+        let stream = gulp.src('./ts/**/*s')
           .pipe(importsInliner({
             parserOptions: {
               allowImportExportEverywhere: true,
