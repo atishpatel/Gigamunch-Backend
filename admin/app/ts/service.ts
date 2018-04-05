@@ -13,6 +13,14 @@ if (location.hostname === 'localhost') {
 }
 
 // Subscriber
+export function GetSubscriber(email: string): Promise<any> {
+  const url: string = baseURL + 'GetSubscriber';
+  const req: GetSubscriberReq = {
+    email,
+  };
+  return callFetch(url, 'GET', req);
+}
+
 export function GetHasSubscribed(date: Date): Promise<any> {
   const url: string = baseURL + 'GetHasSubscribed';
   const req: GetHasSubscribedReq = {
