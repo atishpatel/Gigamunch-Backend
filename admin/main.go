@@ -202,6 +202,13 @@ func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Clien
 func handler(f func(context.Context, *http.Request, *logging.Client) Response) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		// get context
 		ctx := appengine.NewContext(r)
 		if !setupDone {
@@ -238,9 +245,6 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 			w.WriteHeader(int(sharedErr.Code))
 		}
 		// encode
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
 		err = encoder.Encode(resp)
 		if err != nil {
