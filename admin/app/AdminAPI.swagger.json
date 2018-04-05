@@ -476,7 +476,10 @@
           "type": "string"
         },
         "ingredients": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "is_for_vegetarian": {
           "type": "boolean",
