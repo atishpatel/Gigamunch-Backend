@@ -19,6 +19,7 @@ type ExecutionStats struct {
 	CreatedDatetime time.Time       `json:"created_datetime,omitempty"`
 	Date            string          `json:"date,omitempty"`
 	Location        common.Location `json:"location,omitempty"`
+	Nationality     string          `json:"nationality,omitempty"`
 	Country         string          `json:"country,omitempty"`
 	City            string          `json:"city,omitempty"`
 	Revenue         float32         `json:"revenue,omitempty"`

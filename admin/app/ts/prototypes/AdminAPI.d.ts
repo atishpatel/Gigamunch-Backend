@@ -103,13 +103,17 @@ interface Execution {
     publish: boolean
     created_datetime: string
     // Info
-    country: Country
+    culture: Culture
     content: Content
     culture_cook: CultureCook
     dishes: Dish[]
     // Diet
     has_pork: boolean
     has_beef: boolean
+    has_chicken: boolean
+    has_weird_meat: boolean
+    has_fish: boolean
+    has_other_seafood: boolean
 }
 interface Content {
     hero_image_url: string
@@ -119,16 +123,17 @@ interface Content {
     spotify_url: string
     youtube_url: string
 }
-interface Country {
+interface Culture {
     country: string
     city: string
     description: string
-    adjective: string
-    hello: string
+    nationality: string
+    greeting: string
     flag_emoji: string
 }
 interface Dish {
     number: number
+    color: string
     name: string
     description: string
     ingredients: string
@@ -167,6 +172,7 @@ interface ExecutionStats {
     created_datetime: string
     date: string
     location: number
+    nationality: string
     country: string
     city: string
     revenue: number

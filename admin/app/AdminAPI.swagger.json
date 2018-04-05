@@ -420,7 +420,7 @@
       },
       "description": "Content is a collection of urls pointing to content realted to the execution."
     },
-    "AdminAPICountry": {
+    "AdminAPICulture": {
       "type": "object",
       "properties": {
         "country": {
@@ -432,17 +432,17 @@
         "description": {
           "type": "string"
         },
-        "adjective": {
+        "nationality": {
           "type": "string"
         },
-        "hello": {
+        "greeting": {
           "type": "string"
         },
         "flag_emoji": {
           "type": "string"
         }
       },
-      "description": "Country is the country in a culture execution."
+      "description": "Culture is the country in a culture execution."
     },
     "AdminAPICultureCook": {
       "type": "object",
@@ -465,6 +465,9 @@
         "number": {
           "type": "integer",
           "format": "int32"
+        },
+        "color": {
+          "type": "string"
         },
         "name": {
           "type": "string"
@@ -507,8 +510,8 @@
         "created_datetime": {
           "type": "string"
         },
-        "country": {
-          "$ref": "#/definitions/AdminAPICountry",
+        "culture": {
+          "$ref": "#/definitions/AdminAPICulture",
           "title": "Info"
         },
         "content": {
@@ -531,6 +534,22 @@
         "has_beef": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "has_chicken": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_weird_meat": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_fish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_other_seafood": {
+          "type": "boolean",
+          "format": "boolean"
         }
       },
       "title": "Execution"
@@ -551,6 +570,9 @@
         "location": {
           "type": "integer",
           "format": "int32"
+        },
+        "nationality": {
+          "type": "string"
         },
         "country": {
           "type": "string"
