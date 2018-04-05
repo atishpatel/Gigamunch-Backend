@@ -62,7 +62,10 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", handler(userAdmin(GetHasSubscribed)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
-	//
+	// Execution
+	http.HandleFunc("/admin/api/v1/GetAllExecutions", handler(userAdmin(GetAllExecutions)))
+	http.HandleFunc("/admin/api/v1/UpdateExecution", handler(userAdmin(UpdateExecution)))
+
 	http.HandleFunc("/admin/api/v1/Test", test)
 	setupTasksHandlers()
 }
@@ -276,10 +279,10 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 type handle func(context.Context, *http.Request, *logging.Client) Response
 
-func getTime(s string) (time.Time, error) {
+func getDatetime(s string) time.Time {
 	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
-		return t, errBadRequest.Annotatef("failed to decode time: %+v", err)
+		return time.Time{}
 	}
-	return t, nil
+	return t
 }

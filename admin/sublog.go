@@ -37,10 +37,7 @@ func GetHasSubscribed(ctx context.Context, r *http.Request, log *logging.Client)
 	}
 	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	date, err := getTime(req.Date)
-	if err != nil {
-		return errors.Annotate(err, "failed to decode date")
-	}
+	date := getDatetime(req.Date)
 
 	subC := subold.New(ctx)
 	subscribers, err := subC.GetHasSubscribed(date)
@@ -77,10 +74,7 @@ func ProcessSublog(ctx context.Context, r *http.Request, log *logging.Client) Re
 	}
 	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	date, err := getTime(req.Date)
-	if err != nil {
-		return errors.Annotate(err, "failed to decode date")
-	}
+	date := getDatetime(req.Date)
 	subC := subold.New(ctx)
 	err = subC.Process(date, req.Email)
 	if err != nil {
