@@ -143,7 +143,7 @@ interface Dish {
     color: string
     name: string
     description: string
-    ingredients: string
+    ingredients: string[]
     is_for_vegetarian: boolean
     is_for_non_vegetarian: boolean
 }
@@ -158,7 +158,7 @@ interface GetAllExecutionsReq {
 }
 interface GetAllExecutionsResp {
     error: Error
-    execution: Execution[]
+    executions: Execution[]
 }
 interface GetExecutionReq {
    id: number

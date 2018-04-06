@@ -476,7 +476,10 @@
           "type": "string"
         },
         "ingredients": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "is_for_vegetarian": {
           "type": "boolean",
@@ -668,7 +671,7 @@
         "error": {
           "$ref": "#/definitions/ErrorError"
         },
-        "execution": {
+        "executions": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/AdminAPIExecution"
