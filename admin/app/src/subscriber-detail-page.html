@@ -114,7 +114,8 @@
           <div class="info-row">
             <div class="info-label">Address:</div>
             <div class="info-value address">
-              [[subscriber.address.street]]
+              <a target="_blank"
+                 href="[[subscriber.address_link]]">[[subscriber.pretty_address]]</a>
             </div>
           </div>
           <div class="info-row">
@@ -132,7 +133,7 @@
           <div class="info-row">
             <div class="info-label">Vegetarian:</div>
             <div class="info-value vegetarian">
-              [[subscriber.isVegetarian]]
+              [[subscriber.is_vegetarian]]
             </div>
           </div>
 
@@ -222,6 +223,24 @@
         this.getSubscriber(subscriberEmail);
       }
 
+      _getAddress(a) {
+        if (a && a.street) {
+          let apt = '';
+          if (a.apt !== undefined && a.apt !== '') {
+            apt = '#' + a.apt + ' ';
+          }
+          return apt + a.street + ', ' + a.city;
+        }
+        return '';
+      }
+
+      _getAddressLink(a) {
+        if (a && a.street) {
+          return 'https://maps.google.com/?q=' + encodeURIComponent(a.apt + ' ' + a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+        }
+        return '';
+      }
+
       getSubscriber(subscriberEmail) {
         this.service.GetSubscriber(subscriberEmail).then((resp) => {
           let subscriber = resp.subscriber;
@@ -229,15 +248,20 @@
           if (err && err.code !== 0) {
             return;
           }
+          // veg check
           if (subscriber.vegetarian_servings > 0) {
-            subscriber.isVegetarian = true;
+            subscriber.is_vegetarian = true;
             subscriber.servings = subscriber.vegetarian_servings;
           } else {
-            subscriber.isVegetarian = false;
+            subscriber.is_vegetarian = false;
           }
+          // issubscribed check
           if (!subscriber.is_subscribed) {
             subscriber.is_subscribed = false;
           }
+          //make address pretty
+          subscriber.pretty_address = this._getAddress(subscriber.address);
+          subscriber.address_link = this._getAddressLink(subscriber.address);
 
           this.subscriber = subscriber;
         });
