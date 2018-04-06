@@ -22,88 +22,8 @@
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
-        }
-
-        vaadin-grid#material {
-          font-family: Roboto, sans-serif;
-          --divider-color: rgba(0, 0, 0, .54);
-          --vaadin-grid-cell: {
-            padding: 0;
-          }
-          ;
-          --vaadin-grid-header-cell: {
-            height: 64px;
-            color: rgba(0, 0, 0, var(--secondary-text-opacity));
-            font-size: 12px;
-          }
-          ;
-          --vaadin-grid-body-cell: {
-            height: 48px;
-            color: rgba(0, 0, 0, var(--primary-text-opacity));
-            font-size: 13px;
-          }
-          ;
-          --vaadin-grid-body-row-hover-cell: {
-            background-color: var(--paper-grey-200);
-          }
-          ;
-          --vaadin-grid-body-row-selected-cell: {
-            background-color: var(--paper-grey-100);
-          }
-          ;
-          --vaadin-grid-focused-cell: {
-            box-shadow: none;
-            font-weight: bold;
-          }
-          ;
-        }
-
-        vaadin-grid#material .cell {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          padding-right: 24px;
-          text-align: center;
-        }
-
-        vaadin-grid#material .cell.numeric {
-          text-align: right;
-        }
-
-        vaadin-grid#material paper-checkbox {
-          --primary-color: var(--paper-indigo-500);
-          margin: 0 24px;
-        }
-
-        vaadin-grid#material vaadin-grid-sorter {
-          --vaadin-grid-sorter-arrow: {
-            display: none !important;
-          }
-          ;
-        }
-
-        vaadin-grid#material vaadin-grid-sorter .cell {
-          flex: 1;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        vaadin-grid#material vaadin-grid-sorter iron-icon {
-          transform: scale(0.8);
-        }
-
-        vaadin-grid#material vaadin-grid-sorter:not([direction]) iron-icon {
-          color: rgba(0, 0, 0, var(--dark-disabled-opacity));
-        }
-
-        vaadin-grid#material vaadin-grid-sorter[direction] {
-          color: rgba(0, 0, 0, var(--primary-text-opacity));
-        }
-
-        vaadin-grid#material vaadin-grid-sorter[direction=desc] iron-icon {
-          transform: scale(0.8) rotate(180deg);
         }
 
       </style>
@@ -113,7 +33,8 @@
                     style="margin: 20px 0px">Transactions Mode</paper-checkbox>
 
     <vaadin-grid id="material"
-                 items="[[sublogs]]">
+                 items="[[sublogs]]"
+                 height-by-rows="true">
 
       <vaadin-grid-column resizable>
         <template class="header">
