@@ -1,0 +1,191 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="executions-page">
+  <template>
+    <materialize-styles>
+      <style include="materialize-styles"></style>
+    </materialize-styles>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 10px;
+        }
+
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Culture Exections</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <ul id="list"
+          class="collapsible">
+        <li>
+          <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+      </ul>
+
+      <dom-repeat items="[[executions]]">
+        <template>
+          <div class="table">
+            <div class="table-row table-header-row">
+              <div class="table-cell">Location</div>
+              <div class="table-cell">Nationality</div>
+              <div class="table-cell">Servings</div>
+              <div class="table-cell">Amount</div>
+              <div class="table-cell">Edit</div>
+              <div class="table-cell">Action</div>
+            </div>
+            <dom-repeat items="[[item.sublogs]]"
+                        as="sublog">
+              <template>
+                <div class="table-row">
+                  <div class="table-cell">[[sublog.name]]</div>
+                  <div class="table-cell">[[sublog.sub_email]]</div>
+                  <div class="table-cell">[[sublog.servings]]</div>
+                  <div class="table-cell">[[sublog.amount]]</div>
+                  <div class="table-cell">[[sublog.status]]</div>
+                  <div class="table-cell">
+                    <paper-button disabled="[[sublog.disableButton]]"
+                                  on-click="tryCharging">
+                      Try Charging
+                      <paper-spinner hidden$="[[!sublog.loading]]"
+                                     active="[[sublog.loading]]">
+                      </paper-spinner>
+                    </paper-button>
+                  </div>
+                </div>
+              </template>
+            </dom-repeat>
+          </div>
+        </template>
+
+  </template>
+  </dom-repeat>
+  </div>
+  </template>
+
+  <script>
+    class ExecutionsPage extends Polymer.Element {
+      static get is() {
+        return 'executions-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          event: {
+            type: Object,
+          },
+          sublogsByDates: {
+            type: Array,
+            notify: true,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        this.getExecutions();
+        const list = this.$.list;
+        const listInstance = M.Collapsible.init(list, {
+          accordian: true
+        });
+      }
+
+      getExecutions() {
+        this.service.GetUnpaidSublogs(2000).then((resp) => {
+          let slogs = resp.sublogs;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+          let sublogs = [];
+          let sublogDay = {
+            date: slogs[0].date,
+            sublogs: [],
+          };
+          for (let i = 0; i < slogs.length; i++) {
+            if (sublogDay.date !== slogs[i].date) {
+              sublogs.push(sublogDay);
+              sublogDay = {
+                date: slogs[i].date,
+                sublogs: [],
+              };
+            }
+            slogs[i].status = this.getStatus(slogs[i]);
+            sublogDay.sublogs.push(slogs[i]);
+          }
+          this.sublogsByDates = sublogs;
+        });
+      }
+    }
+    window.customElements.define(ExecutionsPage.is, ExecutionsPage);
+
+  </script>
+</dom-module>

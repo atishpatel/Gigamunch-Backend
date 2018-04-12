@@ -389,12 +389,17 @@
                               route="[[subroute]]">
           </sublog-detail-page>
           <delivery-page name="delivery"
-                              id="deliveryPage"
-                              serviceold="[[serviceold]]"
-                              service="[[service]]"
-                              user="{{user}}"
-                              route="[[subroute]]">
+                         id="deliveryPage"
+                         serviceold="[[serviceold]]"
+                         service="[[service]]"
+                         user="{{user}}"
+                         route="[[subroute]]">
           </delivery-page>
+          <executions-page name="executions"
+                           id="executionsPage"
+                           service="[[service]]"
+                           user="{{user}}">
+          </executions-page>
           <my-view404 name="view404">
           </my-view404>
         </iron-pages>
