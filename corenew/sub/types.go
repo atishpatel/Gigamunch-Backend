@@ -79,14 +79,14 @@ type SubscriptionLog struct {
 
 // SublogSummary is a summary of sublogs for a email;
 type SublogSummary struct {
-	MinDate             time.Time `json:"min_date"`
-	MaxDate             time.Time `json:"max_date"`
-	Email               string    `json:"email"`
-	NumTotal            int       `json:"num_total"`
-	NumSkip             int       `json:"num_skip"`
-	NumPaid             int
-	NumRefunded         int
-	TotalAmount         float32
-	TotalAmountPaid     float32
-	TotalDiscountAmount float32
+	MinDate             time.Time `json:"min_date,omitempty"`
+	MaxDate             time.Time `json:"max_date,omitempty"`
+	Email               string    `json:"email,omitempty"`
+	NumTotal            int       `json:"num_total,omitempty"`
+	NumSkip             int       `json:"num_skip,omitempty"`
+	NumPaid             int       `json:"num_paid,omitempty"`
+	NumRefunded         int       `json:"num_refunded,omitempty"`
+	TotalAmount         float32   `json:"total_amount,omitempty"`
+	TotalAmountPaid     float32   `json:"total_amount_paid,omitempty"`
+	TotalDiscountAmount float32   `json:"total_discount_amount,omitempty"`
 }
