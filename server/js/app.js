@@ -97,13 +97,13 @@ function callFetch(url, method, body) {
         method,
         headers: {
             'Content-Type': 'application/json',
-            'auth-token': GetToken(),
         },
         body: JSON.stringify(body),
     }).then((resp) => {
         return resp.json();
     }).catch((err) => {
         console.error('failed to callFetch', err);
+        console.error('details: ', err.code, err.name, err.message, err.detail);
     });
 }
 
