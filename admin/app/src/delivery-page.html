@@ -283,9 +283,9 @@
             }
           }
           // convert to driver struct
+          this.dateString = this._getDateString(slogs[0].date);
           this.drivers = this.getDrivers(unskippedSublogs);
           this.totalDeliveries = unskippedSublogs.length;
-          this.dateString = this._getDateString(slogs[0].date);
           this.setPolygons();
         });
       }
@@ -438,7 +438,10 @@
           }
           drivers[i].pinSymbol = pinSymbol(drivers[i].color);
         }
-
+        let cache = JSON.parse(window.localStorage.getItem(this.dateString));
+        if (!cache) {
+          cache = {};
+        }
         sublogs.forEach((sublog) => {
           let found = false;
 
@@ -480,7 +483,13 @@
             if (driver.name === '-') {
               continue;
             }
-            if (this._inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence)) {
+            let isDriver = false;
+            if (cache[sublog.sub_email]) {
+              isDriver = cache[sublog.sub_email] === driver.name;
+            } else {
+              isDriver = this._inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence);
+            }
+            if (isDriver) {
               // in driver's geofence
               // add map marker
               sublog.marker = makeMarker(this, sublog, driver);
@@ -513,6 +522,10 @@
         let delivery;
         let drivers = this.drivers;
         this.set('drivers', []);
+        let cache = JSON.parse(window.localStorage.getItem(this.dateString));
+        if (!cache) {
+          cache = {};
+        }
         // remove from old driver
         for (let i = 0; i < drivers.length; i++) {
           for (let j = 0; j < drivers[i].deliveries.length; j++) {
@@ -535,6 +548,8 @@
             drivers[i].optimized = false;
           }
         }
+        cache[deliveryEmail] = driverName;
+        window.localStorage.setItem(this.dateString, JSON.stringify(cache));
         setTimeout(() => {
           this.set('drivers', drivers);
         }, 1000);
@@ -802,7 +817,6 @@
               [-86.7882156, 36.1966334],
             ],
           },
-
         ]
       }
 
