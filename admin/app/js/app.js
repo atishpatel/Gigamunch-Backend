@@ -50,7 +50,9 @@ function GetToken() {
 function SetToken(cvalue) {
     const jwt = GetJWT(cvalue);
     const d = new Date(0);
-    d.setUTCSeconds(jwt.exp);
+    if (jwt) {
+        d.setUTCSeconds(jwt.exp);
+    }
     document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
