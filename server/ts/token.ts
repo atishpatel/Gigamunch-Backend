@@ -23,7 +23,9 @@ export function GetToken(): string {
 export function SetToken(cvalue: string) {
   const jwt = GetJWT(cvalue);
   const d = new Date(0);
-  d.setUTCSeconds(jwt.exp);
+  if (jwt) {
+    d.setUTCSeconds(jwt.exp);
+  }
   document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
   if (location.hostname === 'localhost') {
     window.localStorage.setItem('AUTHTKN', cvalue);
@@ -40,7 +42,10 @@ interface JWT {
   exp: number;
 }
 
-export function GetJWT(tkn: string): JWT {
+export function GetJWT(tkn: string): JWT | null {
+  if (!tkn) {
+    return null;
+  }
   const tknConv = tkn.replace(/[+\/]/g, (m0) => {
     return m0 === '+' ? '-' : '_';
   }).replace(/=/g, '');

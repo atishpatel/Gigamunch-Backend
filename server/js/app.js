@@ -22,13 +22,18 @@ function GetToken() {
 function SetToken(cvalue) {
     const jwt = GetJWT(cvalue);
     const d = new Date(0);
-    d.setUTCSeconds(jwt.exp);
+    if (jwt) {
+        d.setUTCSeconds(jwt.exp);
+    }
     document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
     }
 }
 function GetJWT(tkn) {
+    if (!tkn) {
+        return null;
+    }
     const tknConv = tkn.replace(/[+\/]/g, (m0) => {
         return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');
@@ -52,15 +57,32 @@ let FirstName = '';
 let LastName = '';
 let PhotoURL = '';
 function UpdateUser() {
-    const jwt = GetJWT(GetToken());
+    const tkn = GetToken();
+    if (!tkn) {
+        return;
+    }
+    const jwt = GetJWT(tkn);
+    if (!jwt) {
+        return;
+    }
     ID = jwt.id;
     Email = jwt.email;
     FirstName = jwt.first_name;
     LastName = jwt.last_name;
     PhotoURL = jwt.photo_url;
 }
+function IsAdmin() {
+    const jwt = GetJWT(GetToken());
+    if (!jwt) {
+        return false;
+    }
+    return getKthBit(jwt.perm, 2);
+}
 function HasCreditCard() {
     const jwt = GetJWT(GetToken());
+    if (!jwt) {
+        return false;
+    }
     return getKthBit(jwt.perm, 0);
 }
 function getKthBit(x, k) {
@@ -77,6 +99,7 @@ var user = Object.freeze({
 	get LastName () { return LastName; },
 	get PhotoURL () { return PhotoURL; },
 	UpdateUser: UpdateUser,
+	IsAdmin: IsAdmin,
 	HasCreditCard: HasCreditCard
 });
 
