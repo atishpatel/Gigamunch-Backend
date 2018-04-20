@@ -21,7 +21,7 @@
         src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
       }*/
 
-       :host {
+      :host {
         font-family: 'FontRegular', 'Roboto';
         font-smoothing: antialiased;
         -webkit-font-smoothing: antialiased;
@@ -84,6 +84,10 @@
         --paper-slider-active-color: var(--dark-primary-color);
         --paper-slider-knob-color: var(--dark-primary-color);
         --paper-slider-pin-color: var(--dark-primary-color);
+      }
+
+      [hidden] {
+        display: none !important;
       }
 
       paper-checkbox,
