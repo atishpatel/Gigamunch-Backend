@@ -9,6 +9,8 @@
 
 <link rel="import"
       href="sublog-sortable-table.html">
+<link rel="import"
+      href="sublog-stats.html">
 
 <dom-module id="sublog-detail-page">
   <template>
@@ -71,9 +73,11 @@
       <h2 class="table-title">
         Unskipped
       </h2>
+      <sublog-stats sublogs="[[sublogsByDate.sublogs]]"
+                    details>
+      </sublog-stats>
       <sublog-sortable-table id="unskipped"
-                             sublogs="[[sublogsByDate.unskippedSublogs]]"
-                             percent-skip="[[percentSkip]]">
+                             sublogs="[[sublogsByDate.unskippedSublogs]]">
       </sublog-sortable-table>
       <h2 class="table-title">
         Skipped
@@ -137,9 +141,6 @@
             type: Array,
             notify: true,
           },
-          percentSkip: {
-            type: String,
-          },
           urlDate: {
             type: String,
           },
@@ -184,7 +185,7 @@
           }
           let sublogDay = {
             date: slogs[0].date,
-            dateString: this.getDateString(slogs[0].date),
+            dateString: this._getDateString(slogs[0].date),
             sublogs: [],
             skippedSublogs: [],
             unskippedSublogs: [],
@@ -219,13 +220,10 @@
             }
           }
           this.sublogsByDate = sublogDay;
-          this.percentSkip = (sublogDay.skippedSublogs.length / slogs.length * 100).toFixed(2);
         });
       }
 
-
-
-      getDateString(dateString) {
+      _getDateString(dateString) {
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
       }
