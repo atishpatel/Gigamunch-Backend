@@ -89,6 +89,6 @@ func pbLog(l *logging.Entry) *shared.Log {
 		// Path: l.Path,
 		Labels:   labels,
 		Severity: int32(l.Severity),
-		Payload:  l.Payload,
+		// Payload:  l.Payload,
 	}
 }
