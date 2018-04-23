@@ -11,21 +11,22 @@ import (
 
 // CohortCell is a cell.
 type CohortCell struct {
-	AmountLeft       int     `json:"amount_left,omitempty"`
-	AmountLost       int     `json:"amount_lost,omitempty"`
-	RetentionPercent float32 `json:"retention_percent,omitempty"`
+	AmountLeft       int     `json:"amount_left"`
+	AmountLost       int     `json:"amount_lost"`
+	RetentionPercent float32 `json:"retention_percent"`
 }
 
 // CohortRow is a row.
 type CohortRow struct {
-	Label      string        `json:"label,omitempty"`
-	CohortCell []*CohortCell `json:"cohort_cell,omitempty"`
+	Label       string        `json:"label,omitempty"`
+	CohortCells []*CohortCell `json:"cohort_cells"`
 }
 
 // CohortAnalysis is a full cohortAnalysis.
 type CohortAnalysis struct {
-	CohortRows []*CohortRow `json:"cohort_rows,omitempty"`
-	Interval   int16        `json:"interval,omitempty"`
+	AverageRetention []float32    `json:"average_retention"`
+	CohortRows       []*CohortRow `json:"cohort_rows,omitempty"`
+	Interval         int16        `json:"interval,omitempty"`
 }
 
 // GetGeneralStatsResp is a response for GetGeneralStats.
@@ -76,10 +77,11 @@ func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 	if len(activities) == 0 {
 		return analysis
 	}
+	const labelFormat = "2006-01-02"
 	// setup for first row
 	lastMinDate := activities[0].MinDate
 	row := &CohortRow{
-		Label: lastMinDate.String(),
+		Label: lastMinDate.Format(labelFormat),
 	}
 	// for every activity
 	for i := 0; i < len(activities); i++ {
@@ -92,22 +94,42 @@ func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 			analysis.CohortRows = append(analysis.CohortRows, row)
 			lastMinDate = activities[i].MinDate
 			row = &CohortRow{
-				Label: lastMinDate.String(),
+				Label: lastMinDate.Format(labelFormat),
+			}
+			since := time.Since(lastMinDate)
+			totalCells := int(since / (time.Duration(analysis.Interval) * time.Hour * 24))
+			for z := 0; z < totalCells; z++ {
+				row.CohortCells = append(row.CohortCells, new(CohortCell))
 			}
 		}
 		for j := 0; j < activities[i].NumTotal; j++ {
-			if len(row.CohortCell)-1 < j {
-				row.CohortCell = append(row.CohortCell, new(CohortCell))
+			if len(row.CohortCells)-1 < j {
+				row.CohortCells = append(row.CohortCells, new(CohortCell))
 			}
-			row.CohortCell[j].AmountLeft++
+			row.CohortCells[j].AmountLeft++
 		}
 	}
 	// fill in amount lost and retention percent
 	for _, r := range analysis.CohortRows {
-		startAmount := r.CohortCell[0].AmountLeft
-		for _, c := range r.CohortCell {
+		startAmount := r.CohortCells[0].AmountLeft
+		for _, c := range r.CohortCells {
 			c.AmountLost = startAmount - c.AmountLeft
 			c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+		}
+	}
+	// calculate average retention
+	analysis.AverageRetention = make([]float32, len(analysis.CohortRows[0].CohortCells))
+	for i := 0; i < len(analysis.AverageRetention); i++ {
+		numTotal := 0
+		var sumTotal float32
+		for _, row := range analysis.CohortRows {
+			if i < len(row.CohortCells)-1 {
+				sumTotal += row.CohortCells[i].RetentionPercent
+				numTotal++
+			}
+		}
+		if numTotal > 0 {
+			analysis.AverageRetention[i] = sumTotal / float32(numTotal)
 		}
 	}
 	return analysis
@@ -137,20 +159,41 @@ func getMonthlyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 			row = &CohortRow{
 				Label: lastMonthYear,
 			}
+			since := time.Since(activities[i].MinDate)
+			totalCells := int(since / (time.Duration(analysis.Interval) * time.Hour * 24))
+			for z := 0; z < totalCells; z++ {
+				row.CohortCells = append(row.CohortCells, new(CohortCell))
+			}
 		}
 		for j := 0; j < activities[i].NumTotal; j++ {
-			if len(row.CohortCell)-1 < j {
-				row.CohortCell = append(row.CohortCell, new(CohortCell))
+			if len(row.CohortCells)-1 < j {
+				row.CohortCells = append(row.CohortCells, new(CohortCell))
 			}
-			row.CohortCell[j].AmountLeft++
+			row.CohortCells[j].AmountLeft++
 		}
 	}
 	// fill in amount lost and retention percent
 	for _, r := range analysis.CohortRows {
-		startAmount := r.CohortCell[0].AmountLeft
-		for _, c := range r.CohortCell {
+		startAmount := r.CohortCells[0].AmountLeft
+		for _, c := range r.CohortCells {
 			c.AmountLost = startAmount - c.AmountLeft
 			c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+		}
+		r.CohortCells = r.CohortCells[:len(r.CohortCells)-3]
+	}
+	// calculate average retention
+	analysis.AverageRetention = make([]float32, len(analysis.CohortRows[0].CohortCells))
+	for i := 0; i < len(analysis.AverageRetention); i++ {
+		numTotal := 0
+		var sumTotal float32
+		for _, row := range analysis.CohortRows {
+			if i < len(row.CohortCells)-1 {
+				sumTotal += row.CohortCells[i].RetentionPercent
+				numTotal++
+			}
+		}
+		if numTotal > 0 {
+			analysis.AverageRetention[i] = sumTotal / float32(numTotal)
 		}
 	}
 	return analysis

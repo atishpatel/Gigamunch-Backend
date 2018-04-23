@@ -26,13 +26,19 @@
           border: 1px solid rgba(0, 0, 0, .12);
         }
 
+        .cell {
+          color: black;
+          padding: 8px;
+          text-align: center;
+        }
+
       </style>
     </shared-styles>
     <table class="striped cohort-table">
       <thead>
         <tr>
-          <th>Label</th>
-          <th>Start Amount</th>
+          <th>Week</th>
+          <th>0</th>
         </tr>
       </thead>
       <tbody>
@@ -43,9 +49,10 @@
           <tr>
             <td>[[rows.label]]</td>
             <template is="dom-repeat"
-                      items="[[rows.cohort_cell]]"
+                      items="[[rows.cohort_cells]]"
                       as="cell">
-              <td>[[cell.amount_left]]</td>
+              <td class="cell"
+                  style="background-color: [[cell.backgroundColor]]">[[cell.amount_left]]</td>
             </template>
           </tr>
         </template>
@@ -74,7 +81,39 @@
         super.connectedCallback();
       }
       cohortObserver() {
-        if (this.cohort) {}
+        if (this.cohort) {
+          const cohort = this.cohort;
+          for (let i = 0; i < cohort.cohort_rows.length; i++) {
+            const row = cohort.cohort_rows[i];
+            for (let j = 0; j < row.cohort_cells.length; j++) {
+              const cell = row.cohort_cells[j];
+              cell.backgroundColor = this._getColor(cell.retention_percent);
+            }
+          }
+          this.cohort = cohort;
+        }
+      }
+
+      _getColor(precent) {
+        if (precent < .20) {
+          return '#F4F8FD';
+        } else if (precent < .40) {
+          return '#D8E6FF';
+        } else if (precent < .60) {
+          return '#A6CAFF';
+        } else if (precent < .80) {
+          return '#8FA4F8';
+        }
+        return '#3963DD';
+      }
+
+      _hsl_col_perc(percent, start, end) {
+        var a = percent,
+          b = (end - start) * a,
+          c = b + start;
+
+        // Return a CSS HSL string
+        return 'hsl(' + c + ', 80%, 50%)';
       }
     }
     customElements.define(CohortTable.is, CohortTable);
