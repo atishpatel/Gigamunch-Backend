@@ -1,0 +1,92 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<link rel="import"
+      href="cohort-table.html">
+
+<dom-module id="dashboard-page">
+  <template>
+    <shared-styles>
+      <style include="materialize-styles shared-styles">
+        :host {
+          display: block;
+          padding: 12px;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+      <h2>Monthly</h2>
+      <cohort-table cohort="[[monthlyCohort]]"></cohort-table>
+      <h2>Weekly</h2>
+      <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
+    </div>
+  </template>
+
+  <script>
+    class DashboardPage extends Polymer.Element {
+      static get is() {
+        return 'dashboard-page';
+      }
+
+      static get properties() {
+        return {
+          serviceold: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          weeklyCohort: {
+            type: Object,
+            notify: true,
+          },
+          monthlyCohort: {
+            type: Object,
+            notify: true,
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        this.getDashboardStats();
+      }
+
+      getDashboardStats() {
+        this.loading = true;
+        this.serviceold.GetGeneralStats((resp) => {
+          this.loading = false;
+          const err = resp.err;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          this.weeklyCohort = resp.weekly_cohort_analysis;
+          this.monthlyCohort = resp.monthly_cohort_analysis;
+        });
+      }
+
+    }
+    window.customElements.define(DashboardPage.is, DashboardPage);
+
+  </script>
+</dom-module>
