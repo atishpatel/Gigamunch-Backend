@@ -1,0 +1,83 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import"
+      href="../bower_components/paper-styles/color.html">
+<link rel="import"
+      href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="cohort-table">
+  <template>
+    <shared-styles>
+      <style include="materialize-styles shared-styles">
+        :host {
+          display: block;
+        }
+
+        .cohort-table {
+          padding: 12px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+          border: 1px solid rgba(0, 0, 0, .12);
+        }
+
+      </style>
+    </shared-styles>
+    <table class="striped cohort-table">
+      <thead>
+        <tr>
+          <th>Label</th>
+          <th>Start Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template is="dom-repeat"
+                  items="[[cohort.cohort_rows]]"
+                  as="rows">
+
+          <tr>
+            <td>[[rows.label]]</td>
+            <template is="dom-repeat"
+                      items="[[rows.cohort_cell]]"
+                      as="cell">
+              <td>[[cell.amount_left]]</td>
+            </template>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </template>
+
+  <script>
+    class CohortTable extends Polymer.Element {
+      static get is() {
+        return 'cohort-table';
+      }
+      static get properties() {
+        return {
+          cohort: {
+            type: Array,
+            notify: true,
+            observer: 'cohortObserver',
+          },
+        }
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+      cohortObserver() {
+        if (this.cohort) {}
+      }
+    }
+    customElements.define(CohortTable.is, CohortTable);
+
+  </script>
+</dom-module>
