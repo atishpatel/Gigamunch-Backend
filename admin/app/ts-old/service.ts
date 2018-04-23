@@ -56,10 +56,10 @@ class ServiceOld {
       .service
       .schedulePhoneCall(request)
       .execute(
-      (resp: Response) => {
-        this.logError('schedulePhoneCall', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('schedulePhoneCall', resp.err);
+          callback(resp.err);
+        });
   }
 
   finishOnboarding(cook: Cook, submerchant: SubMerchant, callback: (err: ErrorWithCode) => void) {
@@ -78,11 +78,11 @@ class ServiceOld {
       .service
       .finishOnboarding(request)
       .execute(
-      (resp: Response) => {
-        this.logError('finishOnboarding', resp.err);
-        COOK.User.update(resp.gigatoken);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('finishOnboarding', resp.err);
+          COOK.User.update(resp.gigatoken);
+          callback(resp.err);
+        });
   }
 
   /*
@@ -103,10 +103,10 @@ class ServiceOld {
       .service
       .getCook(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getCook', resp.err);
-        callback(resp.cook, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getCook', resp.err);
+          callback(resp.cook, resp.err);
+        });
   }
 
   updateCook(cook: Cook, callback: (cook: Cook, err: ErrorWithCode) => void) {
@@ -125,13 +125,13 @@ class ServiceOld {
       .service
       .updateCook(request)
       .execute(
-      (resp: Response) => {
-        this.logError('updateCook', resp.err);
-        callback(resp.cook, resp.err);
-        setTimeout(() => {
-          this.refreshToken();
-        }, 1);
-      });
+        (resp: Response) => {
+          this.logError('updateCook', resp.err);
+          callback(resp.cook, resp.err);
+          setTimeout(() => {
+            this.refreshToken();
+          }, 1);
+        });
   }
 
   /*
@@ -152,10 +152,10 @@ class ServiceOld {
       .service
       .getSubMerchant(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getSubMerchant', resp.err);
-        callback(resp.sub_merchant, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getSubMerchant', resp.err);
+          callback(resp.sub_merchant, resp.err);
+        });
   }
 
   updateSubMerchant(submerchant: SubMerchant, callback: (cook: any, err: ErrorWithCode) => void) {
@@ -173,13 +173,13 @@ class ServiceOld {
       .service
       .updateSubMerchant(request)
       .execute(
-      (resp: Response) => {
-        this.logError('updateSubMerchant', resp.err);
-        callback(resp.cook, resp.err);
-        setTimeout(() => {
-          this.refreshToken();
-        }, 1);
-      });
+        (resp: Response) => {
+          this.logError('updateSubMerchant', resp.err);
+          callback(resp.cook, resp.err);
+          setTimeout(() => {
+            this.refreshToken();
+          }, 1);
+        });
   }
 
   /*
@@ -202,10 +202,10 @@ class ServiceOld {
       .service
       .getMessageToken(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getMessageToken', resp.err);
-        callback(resp.token, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getMessageToken', resp.err);
+          callback(resp.token, resp.err);
+        });
   }
 
   /*
@@ -228,10 +228,10 @@ class ServiceOld {
       .service
       .getInquiry(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getInquiry', resp.err);
-        callback(resp.inquiry, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getInquiry', resp.err);
+          callback(resp.inquiry, resp.err);
+        });
   }
 
   getInquiries(startIndex: number, endIndex: number, callback: (inquiries: any, err: ErrorWithCode) => void) {
@@ -251,14 +251,14 @@ class ServiceOld {
       .service
       .getInquiries(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getInquiries', resp.err);
-        // if (window.COOK.isDev) {
-        //   callback(this.getFakeInquiries(), resp.err);
-        //   return;
-        // }
-        callback(resp.inquiries, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getInquiries', resp.err);
+          // if (window.COOK.isDev) {
+          //   callback(this.getFakeInquiries(), resp.err);
+          //   return;
+          // }
+          callback(resp.inquiries, resp.err);
+        });
   }
 
   acceptInquiry(id: string, callback: (inquiry: any, err: ErrorWithCode) => void) {
@@ -277,10 +277,10 @@ class ServiceOld {
       .service
       .acceptInquiry(request)
       .execute(
-      (resp: Response) => {
-        this.logError('acceptInquiry', resp.err);
-        callback(resp.inquiry, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('acceptInquiry', resp.err);
+          callback(resp.inquiry, resp.err);
+        });
   }
 
   declineInquiry(id: string, callback: (inquiries: any, err: ErrorWithCode) => void) {
@@ -299,10 +299,10 @@ class ServiceOld {
       .service
       .declineInquiry(request)
       .execute(
-      (resp: Response) => {
-        this.logError('declineInquiry', resp.err);
-        callback(resp.inquiry, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('declineInquiry', resp.err);
+          callback(resp.inquiry, resp.err);
+        });
   }
 
 
@@ -325,10 +325,10 @@ class ServiceOld {
       .service
       .getMenus(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getMenus', resp.err);
-        callback(resp.menus, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getMenus', resp.err);
+          callback(resp.menus, resp.err);
+        });
   }
 
   saveMenu(menu: Menu, callback: (cook: any, err: ErrorWithCode) => void) {
@@ -349,10 +349,10 @@ class ServiceOld {
       .service
       .saveMenu(request)
       .execute(
-      (resp: Response) => {
-        this.logError('saveMenu', resp.err);
-        callback(resp.menu, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('saveMenu', resp.err);
+          callback(resp.menu, resp.err);
+        });
   }
 
   /*
@@ -376,10 +376,10 @@ class ServiceOld {
       .service
       .getItem(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getItem', resp.err);
-        callback(resp.item, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getItem', resp.err);
+          callback(resp.item, resp.err);
+        });
   }
 
   saveItem(item: Item, callback: (item: Item, err: ErrorWithCode) => void) {
@@ -402,10 +402,10 @@ class ServiceOld {
       .service
       .saveItem(request)
       .execute(
-      (resp: Response) => {
-        this.logError('saveItem', resp.err);
-        callback(resp.item, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('saveItem', resp.err);
+          callback(resp.item, resp.err);
+        });
   }
 
   activateItem(id: string, callback: (err: ErrorWithCode) => void) {
@@ -425,10 +425,10 @@ class ServiceOld {
       .service
       .activateItem(request)
       .execute(
-      (resp: Response) => {
-        this.logError('activateItem', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('activateItem', resp.err);
+          callback(resp.err);
+        });
   }
 
   deactivateItem(id: string, callback: (err: ErrorWithCode) => void) {
@@ -448,10 +448,10 @@ class ServiceOld {
       .service
       .deactivateItem(request)
       .execute(
-      (resp: Response) => {
-        this.logError('deactivateItem', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('deactivateItem', resp.err);
+          callback(resp.err);
+        });
   }
 
   /*
@@ -473,10 +473,10 @@ class ServiceOld {
       .service
       .getSubLogs(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getSubLogs', resp.err);
-        callback(resp.sublogs, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getSubLogs', resp.err);
+          callback(resp.sublogs, resp.err);
+        });
   }
 
   getSubLogsForDate(date: Date, callback: (sublogs: SubLogs, err: ErrorWithCode) => void) {
@@ -495,10 +495,10 @@ class ServiceOld {
       .service
       .getSubLogsForDate(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getSubLogsForDate', resp.err);
-        callback(resp.sublogs, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getSubLogsForDate', resp.err);
+          callback(resp.sublogs, resp.err);
+        });
   }
 
   getSubEmails(callback: (subEmails: String[], err: ErrorWithCode) => void) {
@@ -517,10 +517,10 @@ class ServiceOld {
       .service
       .getSubEmails(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getSubEmails', resp.err);
-        callback(resp.sub_emails, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getSubEmails', resp.err);
+          callback(resp.sub_emails, resp.err);
+        });
   }
 
   getSubEmailsAndSubs(callback: (subEmails: String[], subs: Object[], err: ErrorWithCode) => void) {
@@ -539,10 +539,10 @@ class ServiceOld {
       .service
       .getSubEmails(request)
       .execute(
-      (resp: Response) => {
-        this.logError('getSubEmails', resp.err);
-        callback(resp.sub_emails,resp.subscribers, resp.err);
-      });
+        (resp: Response) => {
+          this.logError('getSubEmails', resp.err);
+          callback(resp.sub_emails, resp.subscribers, resp.err);
+        });
   }
 
   skipSubLog(date: Date, subEmail: string, callback: (err: ErrorWithCode) => void) {
@@ -563,10 +563,10 @@ class ServiceOld {
       .service
       .skipSubLog(request)
       .execute(
-      (resp: Response) => {
-        this.logError('skipSubLog', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('skipSubLog', resp.err);
+          callback(resp.err);
+        });
   }
 
   CancelSub(email: string, callback: (err: ErrorWithCode) => void) {
@@ -586,10 +586,10 @@ class ServiceOld {
       .service
       .CancelSub(request)
       .execute(
-      (resp: Response) => {
-        this.logError('CancelSub', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('CancelSub', resp.err);
+          callback(resp.err);
+        });
   }
 
   discountSubLog(date: Date, subEmail: string, amount: number, percent: number, overrideDiscount: boolean, callback: (err: ErrorWithCode) => void) {
@@ -613,10 +613,10 @@ class ServiceOld {
       .service
       .DiscountSubLog(request)
       .execute(
-      (resp: Response) => {
-        this.logError('DiscountSubLog', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('DiscountSubLog', resp.err);
+          callback(resp.err);
+        });
   }
 
   ChangeServingsForDate(date: Date, subEmail: string, servings: number, callback: (err: ErrorWithCode) => void) {
@@ -638,10 +638,10 @@ class ServiceOld {
       .service
       .ChangeServingsForDate(request)
       .execute(
-      (resp: Response) => {
-        this.logError('ChangeServingForDate', resp.err);
-        callback(resp.err);
-      });
+        (resp: Response) => {
+          this.logError('ChangeServingForDate', resp.err);
+          callback(resp.err);
+        });
   }
 
   ChangeServingsPermanently(email: string, servings: number, vegetarian: boolean, callback: (err: ErrorWithCode) => void) {
@@ -663,10 +663,32 @@ class ServiceOld {
       .service
       .ChangeServingsPermanently(request)
       .execute(
-      (resp: Response) => {
-        this.logError('ChangeServingsPermanently', resp.err);
-        callback(resp.err);
+        (resp: Response) => {
+          this.logError('ChangeServingsPermanently', resp.err);
+          callback(resp.err);
+        });
+  }
+
+  GetGeneralStats(callback: (resp: Response) => void) {
+    // if api is not loaded, add to callQueue
+    if (!this.loaded) {
+      this.callQueue.push(() => {
+        this.GetGeneralStats(callback);
       });
+      return;
+    }
+    const request = {
+      gigatoken: this.getToken(),
+    };
+
+    this
+      .service
+      .GetGeneralStats(request)
+      .execute(
+        (resp: Response) => {
+          this.logError('GetGeneralStats', resp.err);
+          callback(resp);
+        });
   }
 
   refreshToken() {
@@ -682,11 +704,11 @@ class ServiceOld {
       .service
       .refreshToken(request)
       .execute(
-      (resp: Response) => {
-        if (!this.logError('refreshToken', resp.err)) {
-          COOK.User.update(resp.gigatoken);
-        }
-      });
+        (resp: Response) => {
+          if (!this.logError('refreshToken', resp.err)) {
+            COOK.User.update(resp.gigatoken);
+          }
+        });
   }
 
   /*

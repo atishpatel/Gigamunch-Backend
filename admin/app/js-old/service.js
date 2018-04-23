@@ -535,6 +535,24 @@ class ServiceOld {
             callback(resp.err);
         });
     }
+    GetGeneralStats(callback) {
+        if (!this.loaded) {
+            this.callQueue.push(() => {
+                this.GetGeneralStats(callback);
+            });
+            return;
+        }
+        const request = {
+            gigatoken: this.getToken(),
+        };
+        this
+            .service
+            .GetGeneralStats(request)
+            .execute((resp) => {
+            this.logError('GetGeneralStats', resp.err);
+            callback(resp);
+        });
+    }
     refreshToken() {
         if (!this.loaded) {
             this.callQueue.push(this.refreshToken);
