@@ -22,6 +22,11 @@
           padding: 12px;
         }
 
+        .chart {
+          height: 500px;
+          padding: 12px;
+        }
+
       </style>
     </shared-styles>
 
@@ -31,8 +36,12 @@
                      active="[[loading]]">
       </paper-spinner>
       <h2>Monthly</h2>
+      <div id="monthlyAvgChart"
+           class="chart"></div>
       <cohort-table cohort="[[monthlyCohort]]"></cohort-table>
       <h2>Weekly</h2>
+      <div id="weeklyAvgChart"
+           class="chart"></div>
       <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
     </div>
   </template>
@@ -82,7 +91,31 @@
 
           this.weeklyCohort = resp.weekly_cohort_analysis;
           this.monthlyCohort = resp.monthly_cohort_analysis;
+          this._drawCohortChart(this.monthlyCohort, this.$.monthlyAvgChart);
+          this._drawCohortChart(this.weeklyCohort, this.$.weeklyAvgChart);
         });
+      }
+
+      _drawCohortChart(cohort, element) {
+        var dataArray = [
+          ['Week', 'Retention']
+        ];
+        for (let i = 0; i < cohort.average_retention.length; i++) {
+          const point = [i, cohort.average_retention[i]];
+          dataArray.push(point)
+        }
+        var data = google.visualization.arrayToDataTable(dataArray);
+
+        var options = {
+          title: 'Average Retention',
+          legend: {
+            position: 'bottom'
+          }
+        };
+
+        var chart = new google.visualization.LineChart(element);
+
+        chart.draw(data, options);
       }
 
     }
