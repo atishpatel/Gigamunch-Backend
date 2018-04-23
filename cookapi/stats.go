@@ -31,10 +31,11 @@ type CohortAnalysis struct {
 
 // GetGeneralStatsResp is a response for GetGeneralStats.
 type GetGeneralStatsResp struct {
-	Activities            []*sub.SublogSummary `json:"activities"`
-	WeeklyCohortAnalysis  *CohortAnalysis      `json:"weekly_cohort_analysis"`
-	MonthlyCohortAnalysis *CohortAnalysis      `json:"monthly_cohort_analysis"`
-	PercentCohortAnalysis *CohortAnalysis      `json:"percent_cohort_analysis"`
+	Activities               []*sub.SublogSummary `json:"activities"`
+	WeeklyCohortAnalysis     *CohortAnalysis      `json:"weekly_cohort_analysis"`
+	WeeklyPaidCohortAnalysis *CohortAnalysis      `json:"weekly_paid_cohort_analysis"`
+	MonthlyCohortAnalysis    *CohortAnalysis      `json:"monthly_cohort_analysis"`
+	PercentCohortAnalysis    *CohortAnalysis      `json:"percent_cohort_analysis"`
 	ErrorOnlyResp
 }
 
@@ -66,6 +67,7 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) 
 	}
 	// resp.Activities = activities
 	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
+	resp.WeeklyPaidCohortAnalysis = getWeeklyPaidCohort(activities)
 	resp.MonthlyCohortAnalysis = getMonthlyCohort(activities)
 	return resp, nil
 }
@@ -103,6 +105,71 @@ func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 			}
 		}
 		for j := 0; j < activities[i].NumTotal; j++ {
+			if len(row.CohortCells)-1 < j {
+				row.CohortCells = append(row.CohortCells, new(CohortCell))
+			}
+			row.CohortCells[j].AmountLeft++
+		}
+	}
+	// fill in amount lost and retention percent
+	for _, r := range analysis.CohortRows {
+		startAmount := r.CohortCells[0].AmountLeft
+		for _, c := range r.CohortCells {
+			c.AmountLost = startAmount - c.AmountLeft
+			c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+		}
+	}
+	// calculate average retention
+	analysis.AverageRetention = make([]float32, len(analysis.CohortRows[0].CohortCells))
+	for i := 0; i < len(analysis.AverageRetention); i++ {
+		numTotal := 0
+		var sumTotal float32
+		for _, row := range analysis.CohortRows {
+			if i < len(row.CohortCells)-1 {
+				sumTotal += row.CohortCells[i].RetentionPercent
+				numTotal++
+			}
+		}
+		if numTotal > 0 {
+			analysis.AverageRetention[i] = sumTotal / float32(numTotal)
+		}
+	}
+	return analysis
+}
+
+func getWeeklyPaidCohort(activities []*sub.SublogSummary) *CohortAnalysis {
+	analysis := &CohortAnalysis{
+		Interval: 7,
+	}
+	if len(activities) == 0 {
+		return analysis
+	}
+	const labelFormat = "2006-01-02"
+	// setup for first row
+	lastMinDate := activities[0].MinDate
+	row := &CohortRow{
+		Label: lastMinDate.Format(labelFormat),
+	}
+	// for every activity
+	for i := 0; i < len(activities); i++ {
+		// next cohort row
+		diff := activities[i].MinDate.Sub(lastMinDate)
+		if diff < time.Duration(0) {
+			diff *= -1
+		}
+		if diff > 12*time.Hour {
+			analysis.CohortRows = append(analysis.CohortRows, row)
+			lastMinDate = activities[i].MinDate
+			row = &CohortRow{
+				Label: lastMinDate.Format(labelFormat),
+			}
+			since := time.Since(lastMinDate)
+			totalCells := int(since / (time.Duration(analysis.Interval) * time.Hour * 24))
+			for z := 0; z < totalCells; z++ {
+				row.CohortCells = append(row.CohortCells, new(CohortCell))
+			}
+		}
+		for j := 0; j < activities[i].NumPaid; j++ {
 			if len(row.CohortCells)-1 < j {
 				row.CohortCells = append(row.CohortCells, new(CohortCell))
 			}

@@ -40,9 +40,15 @@
            class="chart"></div>
       <cohort-table cohort="[[monthlyCohort]]"></cohort-table>
       <h2>Weekly</h2>
+      <p>How long people are with us based on week. This doesn't account for skip at all.</p>
       <div id="weeklyAvgChart"
            class="chart"></div>
       <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
+      <h2>Weekly Paid</h2>
+      <p>This is an imprefect cohort that basically says. The person did not skip from the day they started the service for the same number of times they have recieved Gigamunch in total.</p>
+      <div id="weeklyPaidAvgChart"
+           class="chart"></div>
+      <cohort-table cohort="[[weeklyPaidCohort]]"></cohort-table>
     </div>
   </template>
 
@@ -62,6 +68,10 @@
             notify: true,
           },
           weeklyCohort: {
+            type: Object,
+            notify: true,
+          },
+          weeklyPaidCohort: {
             type: Object,
             notify: true,
           },
@@ -90,9 +100,11 @@
           }
 
           this.weeklyCohort = resp.weekly_cohort_analysis;
+          this.weeklyPaidCohort = resp.weekly_paid_cohort_analysis;
           this.monthlyCohort = resp.monthly_cohort_analysis;
           this._drawCohortChart(this.monthlyCohort, this.$.monthlyAvgChart);
           this._drawCohortChart(this.weeklyCohort, this.$.weeklyAvgChart);
+          this._drawCohortChart(this.weeklyPaidCohort, this.$.weeklyPaidAvgChart);
         });
       }
 
@@ -108,9 +120,6 @@
 
         var options = {
           title: 'Average Retention',
-          legend: {
-            position: 'bottom'
-          }
         };
 
         var chart = new google.visualization.LineChart(element);
