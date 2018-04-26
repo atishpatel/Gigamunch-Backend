@@ -12,7 +12,7 @@ import (
 // CohortCell is a cell.
 type CohortCell struct {
 	AmountLeft       int     `json:"amount_left"`
-	AmountLost       int     `json:"amount_lost"`
+	AmountLost       int     `json:"amount_lost,omitempty"`
 	RetentionPercent float32 `json:"retention_percent"`
 }
 
@@ -116,7 +116,9 @@ func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 		startAmount := r.CohortCells[0].AmountLeft
 		for _, c := range r.CohortCells {
 			c.AmountLost = startAmount - c.AmountLeft
-			c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+			if startAmount > 0 {
+				c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+			}
 		}
 	}
 	// calculate average retention
@@ -130,7 +132,7 @@ func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 				numTotal++
 			}
 		}
-		if numTotal > 0 {
+		if numTotal > 0 && sumTotal > 0.01 {
 			analysis.AverageRetention[i] = sumTotal / float32(numTotal)
 		}
 	}
@@ -181,7 +183,9 @@ func getWeeklyPaidCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 		startAmount := r.CohortCells[0].AmountLeft
 		for _, c := range r.CohortCells {
 			c.AmountLost = startAmount - c.AmountLeft
-			c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+			if startAmount > 0 {
+				c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+			}
 		}
 	}
 	// calculate average retention
@@ -195,7 +199,7 @@ func getWeeklyPaidCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 				numTotal++
 			}
 		}
-		if numTotal > 0 {
+		if numTotal > 0 && sumTotal > 0.01 {
 			analysis.AverageRetention[i] = sumTotal / float32(numTotal)
 		}
 	}
@@ -244,7 +248,9 @@ func getMonthlyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 		startAmount := r.CohortCells[0].AmountLeft
 		for _, c := range r.CohortCells {
 			c.AmountLost = startAmount - c.AmountLeft
-			c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+			if startAmount > 0 {
+				c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
+			}
 		}
 		r.CohortCells = r.CohortCells[:len(r.CohortCells)-3]
 	}
@@ -259,7 +265,7 @@ func getMonthlyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 				numTotal++
 			}
 		}
-		if numTotal > 0 {
+		if numTotal > 0 && sumTotal > 0.01 {
 			analysis.AverageRetention[i] = sumTotal / float32(numTotal)
 		}
 	}

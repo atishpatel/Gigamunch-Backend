@@ -32,18 +32,37 @@
           text-align: center;
         }
 
+        .average-retention {
+          border-bottom: 1px solid white !important;
+        }
+
       </style>
     </shared-styles>
+    <paper-checkbox checked={{retention}}
+                    "">Retention Percent View</paper-checkbox>
     <table class="striped cohort-table">
       <thead>
         <tr>
           <th>Week</th>
-          <th>0</th>
+          <template is="dom-repeat"
+                    items="[[_cohort.averageRetention]]"
+                    as="ret">
+            <th>[[ret.index]]</th>
+          </template>
         </tr>
       </thead>
       <tbody>
+        <tr class="average-retention">
+          <td>Average</td>
+          <template is="dom-repeat"
+                    items="[[_cohort.averageRetention]]"
+                    as="ret">
+            <td class="cell"
+                style="background-color: [[ret.backgroundColor]]">[[ret.value]]</td>
+          </template>
+        </tr>
         <template is="dom-repeat"
-                  items="[[cohort.cohort_rows]]"
+                  items="[[_cohort.cohort_rows]]"
                   as="rows">
 
           <tr>
@@ -51,8 +70,13 @@
             <template is="dom-repeat"
                       items="[[rows.cohort_cells]]"
                       as="cell">
+
               <td class="cell"
+                  hidden="[[retention]]"
                   style="background-color: [[cell.backgroundColor]]">[[cell.amount_left]]</td>
+              <td class="cell"
+                  hidden$="[[!retention]]"
+                  style="background-color: [[cell.backgroundColor]]">[[cell.retentionPercent]]</td>
             </template>
           </tr>
         </template>
@@ -72,6 +96,14 @@
             notify: true,
             observer: 'cohortObserver',
           },
+          _cohort: {
+            type: Array,
+            notify: true,
+          },
+          retention: {
+            type: Boolean,
+            notify: true,
+          }
         }
       }
       constructor() {
@@ -88,9 +120,19 @@
             for (let j = 0; j < row.cohort_cells.length; j++) {
               const cell = row.cohort_cells[j];
               cell.backgroundColor = this._getColor(cell.retention_percent);
+              cell.retentionPercent = (cell.retention_percent * 100).toFixed(1) + '%';
             }
           }
+          cohort.averageRetention = [];
+          for (let i = 0; i < cohort.average_retention.length; i++) {
+            cohort.averageRetention.push({
+              index: i,
+              value: (cohort.average_retention[i] * 100).toFixed(1) + '%',
+              backgroundColor: this._getColor(cohort.average_retention[i]),
+            });
+          }
           this.cohort = cohort;
+          this._cohort = cohort;
         }
       }
 

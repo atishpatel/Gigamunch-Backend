@@ -13,9 +13,6 @@ class ServiceOld {
             }
             this.callQueue = [];
         }
-        setTimeout(() => {
-            this.refreshToken();
-        }, 3000);
         ga('send', {
             hitType: 'timing',
             timingCategory: 'endpoint',
@@ -40,27 +37,6 @@ class ServiceOld {
             .schedulePhoneCall(request)
             .execute((resp) => {
             this.logError('schedulePhoneCall', resp.err);
-            callback(resp.err);
-        });
-    }
-    finishOnboarding(cook, submerchant, callback) {
-        if (!this.loaded) {
-            this.callQueue.push(() => {
-                this.finishOnboarding(cook, submerchant, callback);
-            });
-            return;
-        }
-        const request = {
-            gigatoken: this.getToken(),
-            cook,
-            sub_merchant: submerchant,
-        };
-        this
-            .service
-            .finishOnboarding(request)
-            .execute((resp) => {
-            this.logError('finishOnboarding', resp.err);
-            COOK.User.update(resp.gigatoken);
             callback(resp.err);
         });
     }

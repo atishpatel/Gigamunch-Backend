@@ -25,9 +25,6 @@ class ServiceOld {
       }
       this.callQueue = [];
     }
-    setTimeout(() => {
-      this.refreshToken();
-    }, 3000);
     ga('send', {
       hitType: 'timing',
       timingCategory: 'endpoint',
@@ -62,28 +59,6 @@ class ServiceOld {
         });
   }
 
-  finishOnboarding(cook: Cook, submerchant: SubMerchant, callback: (err: ErrorWithCode) => void) {
-    if (!this.loaded) {
-      this.callQueue.push(() => {
-        this.finishOnboarding(cook, submerchant, callback);
-      });
-      return;
-    }
-    const request = {
-      gigatoken: this.getToken(),
-      cook,
-      sub_merchant: submerchant,
-    };
-    this
-      .service
-      .finishOnboarding(request)
-      .execute(
-        (resp: Response) => {
-          this.logError('finishOnboarding', resp.err);
-          COOK.User.update(resp.gigatoken);
-          callback(resp.err);
-        });
-  }
 
   /*
    * Cook
