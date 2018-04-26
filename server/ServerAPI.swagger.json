@@ -161,6 +161,29 @@
       },
       "title": "The error object that gets returned with every"
     },
+    "ServerAPICampaign": {
+      "type": "object",
+      "properties": {
+        "Source": {
+          "type": "string"
+        },
+        "Medium": {
+          "type": "string"
+        },
+        "Campaign": {
+          "type": "string"
+        },
+        "Term": {
+          "type": "string"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "Timestamp": {
+          "type": "string"
+        }
+      }
+    },
     "ServerAPIErrorOnlyResp": {
       "type": "object",
       "properties": {
@@ -204,6 +227,15 @@
           "type": "string"
         },
         "first_delivery_date": {
+          "type": "string"
+        },
+        "campaigns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ServerAPICampaign"
+          }
+        },
+        "reference_email": {
           "type": "string"
         }
       },

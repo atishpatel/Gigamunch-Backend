@@ -6,6 +6,16 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
+// Campaign is a campaign a subscriber was a part of.
+type Campaign struct {
+	Source    string    `json:"source"`
+	Medium    string    `json:"medium"`
+	Campaign  string    `json:"campaign"`
+	Term      string    `json:"term" datastore:",noindex"`
+	Content   string    `json:"content" datastore:",noindex"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
 type SubscriptionSignUp struct {
 	Email              string        `json:"email"`
 	Date               time.Time     `json:"date"` // CreatedDate
@@ -39,6 +49,8 @@ type SubscriptionSignUp struct {
 	ReferredPageOpens int `json:"referred_page_opens" datastore:",noindex"`
 	GiftPageOpens     int `json:"gift_page_opens" datastore:",noindex"`
 	GiftedPageOpens   int `json:"gifted_page_opens" datastore:",noindex"`
+	// Campaign
+	Campaigns []Campaign `json:"campaigns"`
 }
 
 // GetName returns the name of subscriber.

@@ -1179,6 +1179,18 @@
             var reference = form.elements['reference'].value;
             var phoneNumber = form.elements['phone_number'].value;
             var paymentNonce = payload.nonce;
+            var campaigns;
+            var referenceEmail;
+            if (window.localStorage) {
+              var campaignsString = window.localStorage.getItem(APP.CampaignsKey);
+              if (campaignsString) {
+                campaigns = JSON.parse(campaignsString);
+              }
+              var referenceEmailString = window.localStorage.getItem(APP.ReferenceEmailKey);
+              if (referenceEmailString) {
+                referenceEmail = referenceEmailString;
+              }
+            }
             // get value of checked radio button
             var servings;
             var radios = form.elements['servings'];
@@ -1211,6 +1223,8 @@
               'vegetarian_servings': vegServings,
               'reference': reference,
               'phone_number': phoneNumber,
+              'campaigns': campaigns,
+              'reference_email': referenceEmail,
             };
 
             var xhr = new XMLHttpRequest();
@@ -1326,7 +1340,7 @@
 
     function generateDeliveryDays() {
       var d = new Date();
-      d.setTime(d.getTime() + (24*4 + 8) * 3600 * 1000); // Thursday at 4 PM
+      d.setTime(d.getTime() + (24 * 4 + 8) * 3600 * 1000); // Thursday at 4 PM
       while (d.getDay() !== 1) { // while not Monday
         d.setDate(d.getDate() + 1);
       }

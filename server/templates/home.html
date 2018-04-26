@@ -115,6 +115,7 @@
         margin: 0;
       }
     }
+
     /* Intro */
 
     .intro-section {
@@ -146,6 +147,7 @@
         min-width: 225px;
       }
     }
+
     /* Features */
 
     .features-section {
@@ -216,6 +218,7 @@
         margin-bottom: 12px;
       }
     }
+
     /* How It Works */
 
     .hiw-section {
@@ -283,6 +286,7 @@
         text-align: left;
       }
     }
+
     /* Testimonial */
 
     .testimonial-section {
@@ -348,6 +352,7 @@
         padding-top: 18px;
       }
     }
+
     /* As seen on */
 
     .as-seen-on-section {
@@ -395,6 +400,7 @@
         height: 52px;
       }
     }
+
     /* Checklist section */
 
     .checklist-section {
@@ -454,9 +460,7 @@
     [[ template "nav" .]]
   </header>
   <main>
-      [[if eq .ID "passport"]] [[template "passport-section" .]] [[end]]
-    [[if eq .ID "referred"]] [[template "referred-section" .]] [[end]]
-    [[if eq .ID "gifted"]] [[template "gifted-section" .]] [[end]]
+    [[if eq .ID "passport"]] [[template "passport-section" .]] [[end]] [[if eq .ID "referred"]] [[template "referred-section" .]] [[end]] [[if eq .ID "gifted"]] [[template "gifted-section" .]] [[end]]
     <header class="hero">
       <h1 class="hero-title">Where will<br class="br-md-hide"/> your<br class="br-md-show"/> dinner<br class="br-md-hide"/> take you?</h1>
     </header>
@@ -672,7 +676,7 @@
     document.getElementById('checklistButton').addEventListener('click', openGetStartedDialog);
 
   </script>
-  [[template "footer" .]]
+  [[template "campaign-logger" .]] [[template "footer" .]]
 </body>
 
 </html>

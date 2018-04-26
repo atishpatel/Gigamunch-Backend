@@ -1,0 +1,44 @@
+ [[define "campaign-logger"]]
+<!-- TODO: add logging of url params utm campaigns -->
+<!-- Page campaigns -->
+[[if .CampaignName]]
+<div id="CampaignName">[[.CampaignName]]</div>
+<script>
+  if (window.localStorage) {
+    // add campaigns tag
+    var campaignName = document.getElementById('CampaignName').innerHTML;
+    if (campaignName) {
+      var campaignsString = window.localStorage.getItem(APP.CampaignsKey);
+      var campaigns;
+      if (!campaignsString) {
+        campaigns = [];
+      } else {
+        campaigns = JSON.parse(campaignsString);
+      }
+      var d = new Date();
+      campaign = {
+        Campaign: campaignName,
+        Timestamp: d.toISOString(),
+      }
+      campaigns.push(campaign);
+      window.localStorage.setItem(APP.CampaignsKey, JSON.stringify(campaigns));
+    }
+    // add email
+  }
+
+</script>
+[[end]]
+<!-- Referred Email  -->
+[[if .ReferenceEmail]]
+<div id="ReferenceEmail">[[.ReferenceEmail]]</div>
+<script>
+  if (window.localStorage) {
+    // add referrer email
+    var ReferenceEmail = document.getElementById('ReferenceEmail').innerHTML;
+    if (ReferenceEmail) {
+      window.localStorage.setItem(APP.ReferenceEmailKey, ReferenceEmail);
+    }
+  }
+
+</script>
+[[end]] [[end]]

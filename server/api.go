@@ -302,6 +302,27 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	entry.PhoneNumber = req.PhoneNumber
 	entry.PaymentMethodToken = paymenttkn
 	entry.Reference = req.Reference
+	entry.ReferenceEmail = req.ReferenceEmail
+	for _, c := range req.Campaigns {
+		found := false
+		var timeStamp time.Time
+		timeStamp, _ = time.Parse(time.RFC3339, c.Timestamp)
+		for _, loggedC := range entry.Campaigns {
+			if loggedC.Campaign != c.Campaign {
+				continue
+			}
+			diff := timeStamp.Sub(loggedC.Timestamp)
+			if diff < 0 {
+				diff *= -1
+			}
+			if diff < time.Hour {
+				found = true
+			}
+		}
+		if !found {
+			entry.Campaigns = append(entry.Campaigns, campaingFromPB(c))
+		}
+	}
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
 		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
@@ -388,6 +409,18 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		}
 	}
 	return resp
+}
+
+func campaingFromPB(c *pb.Campaign) sub.Campaign {
+	t, _ := time.Parse(time.RFC3339, c.Timestamp)
+	return sub.Campaign{
+		Timestamp: t,
+		Source:    c.Source,
+		Campaign:  c.Campaign,
+		Term:      c.Term,
+		Content:   c.Content,
+		Medium:    c.Medium,
+	}
 }
 
 type giftCheckout struct {

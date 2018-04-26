@@ -25,7 +25,9 @@ var (
 
 // Page is the basic info required for a template page.
 type Page struct {
-	ID string
+	ID             string
+	ReferenceEmail string
+	CampaignName   string
 }
 
 func addTemplateRoutes(r *httprouter.Router) {
@@ -248,7 +250,8 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 	ctx := appengine.NewContext(req)
 	page := &homePage{
 		Page: Page{
-			ID: "referred",
+			ID:           "referred",
+			CampaignName: "Referred",
 		},
 	}
 	defer display(ctx, w, "home", page)
@@ -273,6 +276,7 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		if entry.FirstName != "" {
 			page.ReferrerName = entry.FirstName + " " + entry.LastName
 		}
+		page.ReferenceEmail = entry.Email
 		entry.ReferredPageOpens++
 		_, err = datastore.Put(ctx, key, entry)
 		if err != nil {
@@ -320,7 +324,8 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 	ctx := appengine.NewContext(req)
 	page := &homePage{
 		Page: Page{
-			ID: "gifted",
+			ID:           "gifted",
+			CampaignName: "Gifted",
 		},
 	}
 	defer display(ctx, w, "home", page)
@@ -345,6 +350,7 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 		if entry.FirstName != "" {
 			page.ReferrerName = entry.FirstName + " " + entry.LastName
 		}
+		page.ReferenceEmail = entry.Email
 		entry.GiftedPageOpens++
 		_, err = datastore.Put(ctx, key, entry)
 		if err != nil {
@@ -378,7 +384,8 @@ func handlePassport(w http.ResponseWriter, req *http.Request, params httprouter.
 	ctx := appengine.NewContext(req)
 	page := &homePage{
 		Page: Page{
-			ID: "passport",
+			ID:           "passport",
+			CampaignName: "Passport",
 		},
 	}
 	defer display(ctx, w, "home", page)
@@ -386,10 +393,8 @@ func handlePassport(w http.ResponseWriter, req *http.Request, params httprouter.
 
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	ctx := appengine.NewContext(req)
-	page := &homePage{
-		Page: Page{
-			ID: "login",
-		},
+	page := &Page{
+		ID: "login",
 	}
 	defer display(ctx, w, "login", page)
 }
