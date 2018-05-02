@@ -325,7 +325,7 @@ https://eatgigamunch.com/referred/[[.Email]]
   </div>
 </div>
 <script async
-        src="https://unpkg.com/clipboard@1.7.1/dist/clipboard.min.js"></script>
+        src="https://unpkg.com/clipboard@2.0.1/dist/clipboard.min.js"></script>
 <script>
   var clips = [];
 
@@ -360,7 +360,7 @@ https://eatgigamunch.com/referred/[[.Email]]
           e.id = e.getAttribute('data-id');
         });
         dialog.querySelectorAll('[data-clipboard-target]').forEach(function(e) {
-          var clip = new Clipboard('#' + e.getAttribute('data-id'));
+          var clip = new ClipboardJS('#' + e.getAttribute('data-id'));
           clip.on('success', function() {
             var event = new CustomEvent(
               'toast', {
@@ -380,6 +380,7 @@ https://eatgigamunch.com/referred/[[.Email]]
     };
     if (window.innerWidth > 700) {
       config.width = 700;
+      config.padding = 0;
     }
     swal(config).catch(dialogClosed);
   }

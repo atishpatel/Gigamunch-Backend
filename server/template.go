@@ -224,7 +224,7 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 		email = params.ByName("email")
 	}
 	var err error
-	if email != "" {
+	if strings.Contains(email, "@") {
 		page.Email = email
 		logging.Infof(ctx, "email: %s", email)
 		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
@@ -260,7 +260,7 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		email = params.ByName("email")
 	}
 	var err error
-	if email != "" {
+	if strings.Contains(email, "@") {
 		logging.Infof(ctx, "email: %s", email)
 		page.ReferrerName = email
 		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
