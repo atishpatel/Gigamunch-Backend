@@ -23,6 +23,15 @@ interface GetLogsResp {
     error: Error
     logs: Log[]
 }
+interface GetLogsByEmailReq {
+    start: number
+    limit: number
+    email: string
+}
+interface GetLogsByEmailResp {
+    error: Error
+    logs: Log[]
+}
 interface Sublog {
     date: string
     sub_email: string

@@ -56,6 +56,7 @@ func init() {
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", handler(systemsAdmin(GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", handler(systemsAdmin(GetLogs)))
+	http.HandleFunc("/admin/api/v1/GetLogsByEmail", handler(systemsAdmin(GetLogsByEmail)))
 	// Sublogs
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", handler(userAdmin(ProcessSublog)))
@@ -129,6 +130,8 @@ func userAdmin(f handle) handle {
 		if !user.IsUserAdmin() {
 			return errPermissionDenied
 		}
+		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
 		return f(ctx, r, log)
 	}
 }
@@ -142,6 +145,8 @@ func driverAdmin(f handle) handle {
 		if !user.IsDriverAdmin() {
 			return errPermissionDenied
 		}
+		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
 		return f(ctx, r, log)
 	}
 }
@@ -155,6 +160,8 @@ func systemsAdmin(f handle) handle {
 		if !user.IsSystemsAdmin() {
 			return errPermissionDenied
 		}
+		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
 		return f(ctx, r, log)
 	}
 }

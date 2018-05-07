@@ -201,6 +201,32 @@
         ]
       }
     },
+    "/admin/api/v1/GetLogsByEmail": {
+      "post": {
+        "operationId": "GetLogsByEmail",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByEmailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByEmailReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetUnpaidSublogs": {
       "post": {
         "summary": "Sublogs",
@@ -762,6 +788,36 @@
         }
       }
     },
+    "AdminAPIGetLogsByEmailReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIGetLogsByEmailResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogLog"
+          }
+        }
+      }
+    },
     "AdminAPIGetLogsReq": {
       "type": "object",
       "properties": {
@@ -1114,6 +1170,17 @@
       },
       "title": "The error object that gets returned with every"
     },
+    "LogBasicPayload": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
     "LogLog": {
       "type": "object",
       "properties": {
@@ -1130,18 +1197,32 @@
         "type": {
           "type": "string"
         },
-        "labels": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "action": {
+          "type": "string"
+        },
+        "action_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "action_user_email": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "user_email": {
+          "type": "string"
         },
         "severity": {
           "type": "integer",
           "format": "int32"
         },
-        "payload": {
+        "path": {
           "type": "string"
+        },
+        "basic_payload": {
+          "$ref": "#/definitions/LogBasicPayload"
         }
       }
     }
