@@ -66,6 +66,7 @@ func init() {
 	//
 	http.HandleFunc("/admin/api/v1/Test", test)
 	setupTasksHandlers()
+	setupWebhooksHandlers()
 }
 
 func setup() error {

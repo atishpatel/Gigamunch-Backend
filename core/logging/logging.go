@@ -360,25 +360,27 @@ func (c *Client) SubCardUpdated(oldPaymentMethodToken, newPaymentMethodToken str
 type SkipPayload struct {
 	UserID          int64  `json:"user_id,omitempty"`
 	UserEmail       string `json:"user_email,omitempty"`
+	Reason          string `json:"reason,omitempty"`
 	ActionUserID    int64  `json:"action_user_id,omitempty"`
 	ActionUserEmail string `json:"action_user_email,omitempty"`
 	Date            string `json:"date,omitempty"`
 }
 
 // SubSkip logs a skip.
-func (c *Client) SubSkip(date string, userID int64, userEmail string) {
+func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
 	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
 	e := &Entry{
 		Type:     Subscriber,
 		Severity: SeverityInfo,
 		BasicPayload: BasicPayload{
 			Title:       "Skip for " + date,
-			Description: fmt.Sprintf("%s was skipped for %s by %s", userEmail, date, actionUserEmail),
+			Description: fmt.Sprintf("%s was skipped for %s by %s because %s", userEmail, date, actionUserEmail, reason),
 		},
 		SkipPayload: &SkipPayload{
 			Date:            date,
 			UserID:          userID,
 			UserEmail:       userEmail,
+			Reason:          reason,
 			ActionUserID:    c.ctx.Value(common.ContextUserID).(int64),
 			ActionUserEmail: actionUserEmail,
 		},
