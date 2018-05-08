@@ -266,13 +266,13 @@
               function getAddress(a) {
                 if (a && a.street) {
                   if (/\d/.test(a.street)) {
-                    return a.street + ', ' + a.city;
+                    return `${a.street}, ${a.city}, ${a.state} ${a.zip}`;
                   }
                   let apt = '';
                   if (a.apt) {
                     apt = a.apt + ' ';
                   }
-                  return apt + a.street + ', ' + a.city;
+                  return `${apt} ${a.street}, ${a.city}, ${a.state} ${a.zip}`;
                 }
                 return '';
               }
