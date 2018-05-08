@@ -4,113 +4,121 @@
       href="../bower_components/paper-button/paper-button.html">
 <link rel="import"
       href="../bower_components/paper-spinner/paper-spinner.html">
-
 <link rel="import"
       href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
 
 <dom-module id="subscriber-detail-page">
   <template>
+    <materialize-styles>
+      <style include="materialize-styles"></style>
+    </materialize-styles>
     <shared-styles>
-      <style include="shared-styles">
-        :host {
-          display: block;
-          padding: 10px;
-        }
-
-        .table {
-          display: table;
-          width: 100%;
-          border: 1px solid #000;
-        }
-
-        .table-header-row {
-          background-color: #ccc;
-          display: table-header-group;
-          font-weight: bold;
-        }
-
-        .table-row {
-          display: table-row;
-          width: auto;
-          clear: both;
-        }
-
-        .table-cell {
-          border: 1px solid #999999;
-          padding: 3px 10px;
-          display: table-cell;
-          flex: 1;
-          /*display: flex;*/
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .table-body {
-          display: table-row-group;
-        }
-
-        .subscriber-section {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .subscriber-email {
-          flex: 1;
-          font-weight: 300;
-        }
-
-        .subscriber-name {
-          font-size: 3em;
-          font-weight: 600;
-        }
-
-        .subscriber-number {
-          flex: 1;
-          font-weight: 300;
-        }
-
-        .info-row {
-          display: flex;
-          flex-direction: row;
-          background-color: rgb(243, 243, 243);
-          border: 1px solid #d6d6d6;
-          padding: 6px 10px;
-        }
-
-        .info-label {
-          min-width: 200px;
-          font-weight: 600;
-        }
-
-        .info-value {
-          min-width: 200px;
-          font-weight: 400;
-        }
-
-      </style>
+      <style include="shared-styles"></style>
     </shared-styles>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      .table {
+        display: table;
+        width: 100%;
+        border: 1px solid #000;
+      }
+
+      .table-header-row {
+        background-color: #ccc;
+        display: table-header-group;
+        font-weight: bold;
+      }
+
+      .table-row {
+        display: table-row;
+        width: auto;
+        clear: both;
+      }
+
+      .table-cell {
+        border: 1px solid #999999;
+        padding: 3px 10px;
+        display: table-cell;
+        flex: 1;
+        /*display: flex;*/
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-body {
+        display: table-row-group;
+      }
+
+      .subscriber-table-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .subscriber-email {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-name {
+        font-size: 3em;
+        font-weight: 600;
+      }
+
+      .subscriber-number {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .info-row {
+        display: flex;
+        flex-direction: row;
+        background-color: rgb(243, 243, 243);
+        border: 1px solid #d6d6d6;
+        padding: 6px 10px;
+      }
+
+      .info-label {
+        min-width: 200px;
+        font-weight: 600;
+      }
+
+      .info-value {
+        min-width: 200px;
+        font-weight: 400;
+      }
+
+      .subscriber-profile-container {
+        margin: 10px 50px;
+      }
+
+    </style>
 
     <div>
-      <div class="profile-container">
-
+      <!-- Subscriber Profile -->
+      <div class="subscriber-profile-container">
         <h1 class="subscriber-name">[[subscriber.name]]</h1>
         <paper-spinner hidden$="[[!loading]]"
                        active="[[loading]]">
         </paper-spinner>
 
-        <div class="table-container">
-          <div class="subscriber-section">
-            <div class="info-row">
-              <div class="info-label">Email:</div>
-              <div class="info-value email">
-                [[subscriber.email]]
-              </div>
+        <!-- Subsriber Info Table -->
+        <div class="subscriber-table-info">
+          <div class="info-row">
+            <div class="info-label">Email:</div>
+            <div class="info-value email">
+              [[subscriber.email]]
             </div>
-            <div class="info-row">
-              <div class="info-label">Phone number:</div>
-              <div class="info-value phone-number">
-                [[subscriber.phone_number]]
-              </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Phone number:</div>
+            <div class="info-value phone-number">
+              [[subscriber.phone_number]]
             </div>
 
             <div class="info-row">
@@ -184,8 +192,33 @@
           </div>
         </div>
       </div>
-      <<<<<<< HEAD=======< /div>
-        >>>>>>> updated css
+      <<<<<<< HEAD
+              <<<<<<<
+              HEAD=======< /div>
+        >>>>>>> updated css =======
+
+        <!-- Subsriber Activities -->
+        <div>
+          <ul class="collapsible"
+              id="activitiesTable">
+            <li>
+              <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
+              <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+            </li>
+            <li>
+              <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
+              <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+            </li>
+            <li>
+              <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
+              <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+            </li>
+          </ul>
+        </div>
+
+    </div>
+
+    >>>>>>> updated sub detail page
   </template>
 
   <script>
@@ -224,6 +257,8 @@
         const tmp = window.location.pathname.split('/subscriber/');
         const subscriberEmail = decodeURIComponent(tmp[1]);
         this.getSubscriber(subscriberEmail);
+        var activitiesTable = this.$.activitiesTable;
+        var instance = M.Collapsible.init(activitiesTable, null);
       }
 
       _getAddress(a) {
