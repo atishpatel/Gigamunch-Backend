@@ -44,6 +44,8 @@ type Config struct {
 	CompanyCardCVV            string   `json:"company_card_cvv" datastore:",noindex"`
 	SendGridKey               string   `json:"send_grid_key" datastore:",noindex"`
 	DripAPIKey                string   `json:"drip_api_key"`
+	TypeformAPIKey            string   `json:"typeform_api_key" datastore:",noindex"`
+	TypeformToken             string   `json:"typeform_token" datastore:",noindex"`
 	DripAccountID             string   `json:"drip_account_id"`
 	MailgunAPIKey             string   `json:"mailgun_api_key"`
 	MailgunPublicAPIKey       string   `json:"mailgun_public_api_key"`
