@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -584,9 +585,24 @@ func handleTwilioSMS(w http.ResponseWriter, req *http.Request) {
 	var name, email string
 	// TODO: auto get name and email
 	messageC := message.New(ctx)
-	err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
-	if err != nil {
-		utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+	if from == "+1615-545-4989" {
+		splitBody := strings.Split(body, "::")
+		if len(splitBody) < 2 {
+			return
+		}
+		err = messageC.SendDeliverySMS(splitBody[0], splitBody[1])
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to sub. Err: %+v", err)
+		}
+		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Message successfuly send to %s.", splitBody[0]))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+		}
+	} else {
+		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+		}
 	}
 }
 

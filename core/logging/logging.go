@@ -54,6 +54,11 @@ const (
 	// ======================
 	// User only Actions
 	// ======================
+
+	// Message Action.
+	Message = Action("message")
+	// Review Action.
+	Review = Action("review")
 	// ======================
 	// System Actions
 	// ======================
