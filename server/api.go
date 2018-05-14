@@ -112,16 +112,18 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
-
-	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
+	email := strings.TrimSpace(strings.ToLower(req.Email))
+	key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
 	entry := &sub.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err == datastore.ErrNoSuchEntity {
-		resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", req.Email)).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", email)).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
 		return resp
 	}
 	if err != nil {
 		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
 		return resp
 	}
 	paymentC := payment.New(ctx)
@@ -129,18 +131,20 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 		CustomerID: entry.CustomerID,
 		FirstName:  entry.FirstName,
 		LastName:   entry.LastName,
-		Email:      req.Email,
+		Email:      email,
 		Nonce:      req.PaymentMethodNonce,
 	}
 
 	paymenttkn, err := paymentC.CreateCustomer(paymentReq)
 	if err != nil {
+		utils.Criticalf(ctx, "failed to update payment: failed to sub.CreateCustomer: email(%s) %+v", email, err)
 		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
 		return resp
 	}
 	subC := sub.New(ctx)
-	err = subC.UpdatePaymentToken(req.Email, paymenttkn)
+	err = subC.UpdatePaymentToken(email, paymenttkn)
 	if err != nil {
+		utils.Criticalf(ctx, "failed to update payment: failed to sub.UpdatePaymentToken: email(%s) tkn(%s) %+v", email, paymenttkn, err)
 		resp.Error = errors.Wrap("failed to sub.UpdatePaymentToken", err).SharedError()
 		return resp
 	}
@@ -149,7 +153,7 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	if err != nil {
 		utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
 	}
-	unpaidSublogs, err := subC.GetSubscriberUnpaidSublogs(req.Email)
+	unpaidSublogs, err := subC.GetSubscriberUnpaidSublogs(email)
 	if err != nil {
 		utils.Errorf(ctx, "failed to GetSubscriberUnpaidSublogs: %+v", err)
 		return resp
