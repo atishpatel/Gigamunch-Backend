@@ -879,6 +879,26 @@
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
       }
+
+      saveOptimizedRoutes() {
+        const key = this.dateString + "-optimized";
+        let cache = JSON.parse(window.localStorage.getItem(key));
+        if (!cache) {
+          cache = new Array(this.drivers.length);
+        }
+        for (var i = 0; i < this.drivers.length; i++) {
+          if (this.drivers[i].optimized) {
+            let driver = this.drivers[i];
+            for (let j = 0; j < driver.deliveries.length; j++) {
+              driver.deliveries[j].marker = null;
+            }
+            driver.directionsRenderer = null;
+            cache[i] = driver;
+            console.log(driver);
+          }
+        }
+        window.localStorage.setItem(key, JSON.stringify(cache));
+      }
     }
 
     customElements.define(DeliveryPage.is, DeliveryPage);

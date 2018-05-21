@@ -1,0 +1,300 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import"
+      href="../bower_components/google-map/google-map.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="driverlist-page">
+  <template>
+    <materialize-styles>
+      <style include="materialize-styles"></style>
+    </materialize-styles>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 12px;
+        }
+
+        paper-progress {
+          padding: 12px;
+          width: auto;
+        }
+
+        select {
+          display: block;
+        }
+
+        .delivery-item {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .nav-button {
+          margin: auto 0 auto auto;
+        }
+
+        .nav-icon {
+          padding: 8px;
+          font-size: 36px;
+          border-style: solid;
+          border-radius: 50%;
+        }
+
+        .tag-icon {
+          border-radius: 5px;
+          padding: 12px;
+          margin: 12px;
+        }
+
+        .gray {
+          background: gray;
+        }
+
+        .gray-orange {
+          background: linear-gradient(90deg, gray 50%, orange 50%);
+        }
+
+        .blue {
+          background: blue;
+        }
+
+        .blue-orange {
+          background: linear-gradient(90deg, blue 50%, orange 50%);
+        }
+
+        .green {
+          background: green;
+        }
+
+        .green-orange {
+          background: linear-gradient(90deg, green 50%, orange 50%);
+        }
+
+        .purple {
+          background: purple;
+        }
+
+        .purple-orange {
+          background: linear-gradient(90deg, purple 50%, orange 50%);
+        }
+
+      </style>
+    </shared-styles>
+
+    <h1 class="">[[dateString]] - [[driverName]]</h1>
+    <div>
+      <select id="driverSelect"
+              disabled="[[optimizeInProgress]]"
+              value="{{driverName::change}}"
+              required>
+          <option disabled value> -- select an driver -- </option>
+          <template is="dom-repeat"
+                    items="[[drivers]]"
+                    as="driver">
+            <option value="[[driver.name]]">[[driver.name]]</option>
+          </template>
+        </select>
+    </div>
+
+    <ul class="collection">
+      <dom-repeat items="[[driver.deliveries]]"
+                  as="delivery">
+        <template>
+          <!-- <div class="table-row">
+          <div class="table-cell">[[driver.name]]</div>
+          <div class="table-cell">[[delivery.name]]</div>
+          <div class="table-cell">[[delivery.delivery_tips]]</div>
+          <div class="table-cell">[[delivery.apt]]</div>
+          <div class="table-cell">[[delivery.addressStr]]</div>
+          <div class="table-cell">[[delivery.phone_number]]</div>
+          <div class="table-cell">[[delivery.servings]]</div>
+          <div class="table-cell">[[delivery.vegetarian_servings]]</div>
+          <div class="table-cell">[[delivery.status]]</div>
+          <div class="table-cell">[[delivery.sub_email]]</div>
+        </div> -->
+
+
+          <li class="collection-item delivery-item">
+            <div><i class$="material-icons tag-icon [[delivery.tagColor]]">shop</i></div>
+            <div>
+              <p>
+                <span class="delivery-title">[[delivery.name]]</span>
+                <br>
+                <a href="[[delivery.addressLink]]"
+                   target="_blank">[[delivery.addressStr]]</a>
+              </p>
+            </div>
+            <div class="nav-button">
+              <a href="[[delivery.addressLink]]"
+                 target="_blank"
+                 class="secondary-content"><i class="material-icons nav-icon">navigation</i></a>
+            </div>
+          </li>
+
+        </template>
+      </dom-repeat>
+    </ul>
+
+  </template>
+  <script>
+    class DriverListPage extends Polymer.Element {
+      static get is() {
+        return 'driverlist-page';
+      }
+
+      static get properties() {
+        return {
+          serviceold: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          apiKey: {
+            type: String,
+            value: () => {
+              return APP.IsProd ? 'AIzaSyApF3OWhumB5GeD20vQn_9NmToR0glkkOA' : 'AIzaSyAQOn9gsSWBu9nImfATaPKkSFp2I5MxbuU';
+            },
+          },
+          drivers: {
+            type: Array,
+          },
+          driver: {
+            type: Object,
+          },
+          totalDeliveries: {
+            type: Number,
+          },
+          driverName: {
+            type: String,
+            observer: 'onDriverNameChanged'
+          },
+          dateString: {
+            type: String,
+          },
+          map: {
+            type: Object,
+          },
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      selected() {
+        let tmp = window.location.pathname.split('/driverlist/');
+        let encodedDate;
+        if (tmp[1].includes('/')) {
+          tmp = tmp[1].split('/');
+          this.driverName = tmp[1];
+          encodedDate = tmp[0];
+        } else {
+          encodedDate = tmp[1];
+        }
+        const dateString = decodeURIComponent(encodedDate);
+        let d;
+        if (dateString === 'next') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
+          }
+        } else {
+          d = new Date(dateString);
+        }
+        this.dateString = this._getDateString(d);
+        this.getDeliveries(d);
+      }
+
+      getDeliveries(d) {
+        const key = this.dateString + "-optimized";
+        let cache = JSON.parse(window.localStorage.getItem(key));
+        if (!cache) {
+          alert('Deliveries not found.')
+          return;
+        }
+        this.drivers = cache;
+        if (this.driverName) {
+          this.onDriverNameChanged();
+        }
+      }
+
+      onDriverNameChanged() {
+        const name = this.driverName;
+        if (name && this.drivers) {
+          for (let i = 0; i < this.drivers.length; i++) {
+            if (this.drivers[i] && this.drivers[i].name === name) {
+              const driver = this.drivers[i];
+              for (let j = 0; j < driver.deliveries.length; j++) {
+                driver.deliveries[j].addressLink = this._getAddressLink(driver.deliveries[j].addressStr);
+                const d = driver.deliveries[j];
+                let color = 'red';
+                if (d.servings === 2) {
+                  color = 'gray';
+                }
+                if (d.servings === 4) {
+                  color = 'blue';
+                }
+                if (d.vegetarian_servings === 2) {
+                  color = 'green';
+                }
+                if (d.vegetarian_servings === 4) {
+                  color = 'purple'
+                }
+                if (driver.deliveries[j].free) {
+                  color = color + '-orange';
+                }
+                driver.deliveries[j].tagColor = color;
+              }
+              this.driver = driver;
+            }
+          }
+        }
+      }
+
+      _getAddressLink(addressStr) {
+        const str = addressStr.replace(/ /g, '+');
+        return `https://www.google.com/maps/place/${str}/`;
+      }
+
+      // drivers.push({
+      //   name: '-',
+      //   color: '#607D8B',
+      //   desc: 'Catch All',
+      //   round_trip: true,
+      //   start_latlng: {
+      //     lat: 36.268554,
+      //     lng: -86.628631
+      //   },
+      //   end_latlng: {
+      //     lat: 36.268554,
+      //     lng: -86.628631
+      //   },
+      // });
+
+      _getDateString(d) {
+        return d.toUTCString().substring(0, 16);
+      }
+    }
+
+    customElements.define(DriverListPage.is, DriverListPage);
+
+  </script>
+</dom-module>

@@ -334,6 +334,10 @@
                     attr-for-selected="name"
                     fallback-selection="view404"
                     role="main">
+          <driverlist-page name="driverlist"
+                           id="driverlistPage"
+                           user="[[user]]">
+          </driverlist-page>
           <subscriber-list-page name="subscriber-list"
                                 id="subscriberListPage"
                                 service="[[service]]"
@@ -389,11 +393,11 @@
                               route="[[subroute]]">
           </sublog-detail-page>
           <delivery-page name="delivery"
-                              id="deliveryPage"
-                              serviceold="[[serviceold]]"
-                              service="[[service]]"
-                              user="{{user}}"
-                              route="[[subroute]]">
+                         id="deliveryPage"
+                         serviceold="[[serviceold]]"
+                         service="[[service]]"
+                         user="{{user}}"
+                         route="[[subroute]]">
           </delivery-page>
           <my-view404 name="view404">
           </my-view404>
