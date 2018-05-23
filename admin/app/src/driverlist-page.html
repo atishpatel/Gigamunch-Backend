@@ -37,6 +37,15 @@
           flex-direction: row;
         }
 
+        .delivery-text {
+          padding: 0 24px;
+        }
+
+        .delivery-title {
+          font-weight: 600;
+        }
+
+
         .nav-button {
           margin: auto 0 auto auto;
         }
@@ -51,7 +60,7 @@
         .tag-icon {
           border-radius: 5px;
           padding: 12px;
-          margin: 12px;
+          margin: 12px 0;
         }
 
         .gray {
@@ -124,7 +133,7 @@
 
           <li class="collection-item delivery-item">
             <div><i class$="material-icons tag-icon [[delivery.tagColor]]">shop</i></div>
-            <div>
+            <div class="delivery-text">
               <p>
                 <span class="delivery-title">[[delivery.name]]</span>
                 <br>
