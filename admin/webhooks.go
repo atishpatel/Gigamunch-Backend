@@ -65,8 +65,8 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		// check for phone number if yes, text them, if no, text me
 		subscriber, err := subC.GetSubscriber(email)
 		if err != nil {
-			utils.Criticalf(ctx, "failed to get subscriber Err: %+v", err)
-			return errBadRequest.WithError(err).Annotate("failed to get subscriber")
+			utils.Criticalf(ctx, "tried to skip subscriber %s, but they're probably not in our system: %+v", email, err)
+			return nil
 		}
 		if subscriber.PhoneNumber == "" {
 			messageC := message.New(ctx)
