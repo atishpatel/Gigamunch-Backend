@@ -87,6 +87,7 @@
         </div>
       </div>
 
+      <!-- Canceled Subscribers -->
       <div class="table-container">
         <h2 class="table-date">
               [[getDateString(item.date)]]
@@ -184,8 +185,12 @@
             }
           }
           this.subscribers = subscribers;
-          this.activeSubscribers = activeSubscribers;
-          this.canceledSubscribers = canceledSubscribers;
+          this.activeSubscribers = activeSubscribers.sort(function(a, b) {
+            return a.email - b.email
+          });
+          this.canceledSubscribers = canceledSubscribers.sort(function(a, b) {
+            return a.email - b.email
+          });
         });
       }
     }
