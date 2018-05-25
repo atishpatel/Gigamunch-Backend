@@ -220,7 +220,7 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 		}
 		// get context
 		ctx := appengine.NewContext(r)
-		ctx = context.WithValue(ctx, common.ContextUserID, 0)
+		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		if !setupDone {
 			err = setupWithContext(ctx)
