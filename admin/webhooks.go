@@ -46,6 +46,13 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		if answer.Type == "choice" {
 			reason = answer.Choice.Label + answer.Choice.Other
 		}
+		if email == "" && answer.Type == "email" {
+			email = answer.Email
+		}
+	}
+	if email == "" {
+		utils.Criticalf(ctx, "failed to get subscriber email from typeform: %+v", err)
+		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
 	date := req.FormResponse.SubmittedAt
 	skipDate := date
@@ -111,6 +118,7 @@ type HiddenField struct {
 type TypeformAnswer struct {
 	Type   string         `json:"type,omitempty"`
 	Text   string         `json:"text,omitempty"`
+	Email  string         `json:"email,omitempty"`
 	Choice TypeformChoice `json:"choice,omitempty"`
 	Field  TypeformField  `json:"field,omitempty"`
 }
