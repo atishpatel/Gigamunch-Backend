@@ -185,10 +185,10 @@
             }
           }
           activeSubscribers.sort(function(a, b) {
-            return a.email - b.email
+            return a.email.localeCompare(b.email);
           });
           canceledSubscribers.sort(function(a, b) {
-            return a.email - b.email
+            return a.email.localeCompare(b.email);
           });
 
           this.subscribers = subscribers;
