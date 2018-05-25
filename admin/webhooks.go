@@ -94,6 +94,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		return errors.GetErrorWithCode(err)
 	}
 	// TODO: caused error, will look into later
+	_ = reason
 	// log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
 	return nil
 }
