@@ -43,6 +43,7 @@ var (
 	errPermissionDenied = errors.PermissionDeniedError
 	errUnauthenticated  = errors.UnauthenticatedError
 	errBadRequest       = errors.BadRequestError
+	errInternalError    = errors.InternalServerError
 )
 
 func init() {
