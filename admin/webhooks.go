@@ -61,13 +61,13 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 	}
 
 	subC := sub.New(ctx)
+	subscriber, err := subC.GetSubscriber(email)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to find subscriber: %s, they're probably not in our system: %+v", email, err)
+		return nil
+	}
 	if date.Weekday() == time.Monday || date.Weekday() == time.Sunday {
 		// check for phone number if yes, text them, if no, text me
-		subscriber, err := subC.GetSubscriber(email)
-		if err != nil {
-			utils.Criticalf(ctx, "tried to skip subscriber %s, but they're probably not in our system: %+v", email, err)
-			return nil
-		}
 		if subscriber.PhoneNumber == "" {
 			messageC := message.New(ctx)
 			err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("What up Chris. Looking fresh today. Nice. 🤠 %s just tried to skip, but it's too late. ", subscriber.Email))
