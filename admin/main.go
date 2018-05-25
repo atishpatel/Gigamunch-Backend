@@ -43,6 +43,7 @@ var (
 	errPermissionDenied = errors.PermissionDeniedError
 	errUnauthenticated  = errors.UnauthenticatedError
 	errBadRequest       = errors.BadRequestError
+	errInternalError    = errors.InternalServerError
 )
 
 func init() {
@@ -219,6 +220,8 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 		}
 		// get context
 		ctx := appengine.NewContext(r)
+		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		if !setupDone {
 			err = setupWithContext(ctx)
 			if err != nil {

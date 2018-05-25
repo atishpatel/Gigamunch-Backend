@@ -23,28 +23,41 @@ func setupWebhooksHandlers() {
 func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	var err error
 	var req TypefromWebhookRequest
+	// payload, err := ioutil.ReadAll(r.Body)
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&req)
 	if err != nil {
-		log.Errorf(ctx, "failed to decode: %+v", err)
+		log.Errorf(ctx, "failed to read body: %+v", err)
 	}
 	logging.Infof(ctx, "decoded req: %+v", req)
-	// probably wrong, need pro plan to tell
-	var email string
+	// logging.Infof(ctx, "decoded req: %s", string(payload))
+	// json.Unmarshal(payload, req)
+	// if err != nil {
+	// 	log.Errorf(ctx, "failed to decode: %+v", err)
+	// }
+
+	// var email string
 	var reason string
+	email := req.FormResponse.Hidden.ID
+
+	// get pass reason
 	answers := req.FormResponse.Answers
 	for _, answer := range answers {
-		if answer.Type == "hidden_field" || answer.Type == "text" {
-			email = answer.Text
-		}
 		if answer.Type == "choice" {
 			reason = answer.Choice.Label + answer.Choice.Other
 		}
+		if email == "" && answer.Type == "email" {
+			email = answer.Email
+		}
+	}
+	if email == "" {
+		utils.Criticalf(ctx, "failed to get subscriber email from typeform: %+v", err)
+		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
 	date := req.FormResponse.SubmittedAt
 	skipDate := date
 	for skipDate.Weekday() != time.Monday {
-		skipDate.Add(time.Hour * 24)
+		skipDate = skipDate.Add(time.Hour * 24)
 	}
 
 	subC := sub.New(ctx)
@@ -52,13 +65,15 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		// check for phone number if yes, text them, if no, text me
 		subscriber, err := subC.GetSubscriber(email)
 		if err != nil {
-			//handle that shit
+			utils.Criticalf(ctx, "failed to get subscriber Err: %+v", err)
+			return errBadRequest.WithError(err).Annotate("failed to get subscriber")
 		}
 		if subscriber.PhoneNumber == "" {
 			messageC := message.New(ctx)
 			err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("What up Chris. Looking fresh today. Nice. 🤠 %s just tried to skip, but it's too late. ", subscriber.Email))
 			if err != nil {
 				utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+				return nil
 			}
 			return nil
 		}
@@ -67,6 +82,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		err = messageC.SendAdminSMS(subscriber.PhoneNumber, fmt.Sprintf("Hey %s, this is Chris from Gigamunch. It looks like you tried to skip a Gigamunch dinner, but we've already started making your meal. 🙊 Your skip was not processed, and you will receive a dinner this Monday.  Feel free to respond directly if you have any questions.", subscriber.FirstName))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to %s. Err: %+v", subscriber.Email, err)
+			return errInternalError.WithError(err).Annotatef("failed to send subscriber sms: %s", subscriber.Email)
 		}
 		return nil
 	}
@@ -77,7 +93,9 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		utils.Criticalf(ctx, "Typeform webhook: %+v", err)
 		return errors.GetErrorWithCode(err)
 	}
-	log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
+	// TODO: caused error, will look into later
+	_ = reason
+	// log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
 	return nil
 }
 
@@ -91,12 +109,18 @@ type TypeformResponse struct {
 	FormID      string           `json:"form_id,omitempty"`
 	Token       string           `json:"token,omitempty"`
 	SubmittedAt time.Time        `json:"submitted_at,omitempty"`
+	Hidden      HiddenField      `json:"hidden,omitempty"`
 	Answers     []TypeformAnswer `json:"answers,omitempty"`
+}
+
+type HiddenField struct {
+	ID string `json:"id,omitempty"`
 }
 
 type TypeformAnswer struct {
 	Type   string         `json:"type,omitempty"`
 	Text   string         `json:"text,omitempty"`
+	Email  string         `json:"email,omitempty"`
 	Choice TypeformChoice `json:"choice,omitempty"`
 	Field  TypeformField  `json:"field,omitempty"`
 }
