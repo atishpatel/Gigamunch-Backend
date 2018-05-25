@@ -29,6 +29,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 	if err != nil {
 		log.Errorf(ctx, "failed to read body: %+v", err)
 	}
+	logging.Infof(ctx, "decoded req: %+v", req)
 	// logging.Infof(ctx, "decoded req: %s", string(payload))
 	// json.Unmarshal(payload, req)
 	// if err != nil {
@@ -49,7 +50,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 	date := req.FormResponse.SubmittedAt
 	skipDate := date
 	for skipDate.Weekday() != time.Monday {
-		skipDate.Add(time.Hour * 24)
+		skipDate = skipDate.Add(time.Hour * 24)
 	}
 
 	subC := sub.New(ctx)
