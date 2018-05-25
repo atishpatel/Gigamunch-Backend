@@ -59,16 +59,14 @@
       </paper-spinner>
 
       <!-- Active Subscribers -->
+
+      <h2> Active Subscribers </h2>
       <div class="table-container">
-        <h2 class="table-date">
-              [[getDateString(item.date)]]
-            </h2>
         <div class="table">
           <div class="table-row table-header-row">
             <div class="table-cell">Email</div>
             <div class="table-cell">Name</div>
             <div class="table-cell">Number</div>
-            <div class="table-cell">Subscribed?</div>
           </div>
           <dom-repeat items="[[activeSubscribers]]"
                       as="activeSubscriber">
@@ -80,7 +78,6 @@
                 </div>
                 <div class="table-cell">[[activeSubscriber.name]]</div>
                 <div class="table-cell">[[activeSubscriber.phone_number]]</div>
-                <div class="table-cell">[[activeSubscriber.is_subscribed]]</div>
               </div>
             </template>
           </dom-repeat>
@@ -88,16 +85,13 @@
       </div>
 
       <!-- Canceled Subscribers -->
+      <h2> Canceled Subscribers </h2>
       <div class="table-container">
-        <h2 class="table-date">
-              [[getDateString(item.date)]]
-            </h2>
         <div class="table">
           <div class="table-row table-header-row">
             <div class="table-cell">Email</div>
             <div class="table-cell">Name</div>
             <div class="table-cell">Number</div>
-            <div class="table-cell">Subscribed?</div>
           </div>
           <dom-repeat items="[[canceledSubscribers]]"
                       as="canceledSubscriber">
@@ -109,7 +103,6 @@
                 </div>
                 <div class="table-cell">[[canceledSubscriber.name]]</div>
                 <div class="table-cell">[[canceledSubscriber.phone_number]]</div>
-                <div class="table-cell">[[canceledSubscriber.is_subscribed]]</div>
               </div>
             </template>
           </dom-repeat>
