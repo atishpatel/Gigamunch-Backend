@@ -184,13 +184,16 @@
               activeSubscribers.push(subscribers[i]);
             }
           }
+          activeSubscribers.sort(function(a, b) {
+            return a.email - b.email
+          });
+          canceledSubscribers.sort(function(a, b) {
+            return a.email - b.email
+          });
+
           this.subscribers = subscribers;
-          this.activeSubscribers = activeSubscribers.sort(function(a, b) {
-            return a.email - b.email
-          });
-          this.canceledSubscribers = canceledSubscribers.sort(function(a, b) {
-            return a.email - b.email
-          });
+          this.activeSubscribers = activeSubscribers;
+          this.canceledSubscribers = canceledSubscribers;
         });
       }
     }
