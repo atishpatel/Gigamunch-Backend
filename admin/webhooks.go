@@ -93,7 +93,8 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		utils.Criticalf(ctx, "Typeform webhook: %+v", err)
 		return errors.GetErrorWithCode(err)
 	}
-	log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
+	// TODO: caused error, will look into later
+	// log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
 	return nil
 }
 
