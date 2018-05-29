@@ -60,19 +60,29 @@
         flex-direction: column;
       }
 
-      .subscriber-email {
-        flex: 1;
-        font-weight: 300;
-      }
-
       .subscriber-name {
         font-size: 3em;
         font-weight: 600;
       }
 
-      .subscriber-number {
+      .subscriber-email {
         flex: 1;
         font-weight: 300;
+      }
+
+      .subscriber-phone-number {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-address {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-delivery-tip {
+        font-size: 3em;
+        font-weight: 600;
       }
 
       .info-row {
@@ -109,108 +119,114 @@
 
         <!-- Subsriber Info Table -->
         <div class="subscriber-table-info">
+
           <div class="info-row">
             <div class="info-label">Email:</div>
-            <div class="info-value email">
+            <div class="info-value subscriber-email">
               [[subscriber.email]]
             </div>
           </div>
+
           <div class="info-row">
             <div class="info-label">Phone number:</div>
-            <div class="info-value phone-number">
+            <div class="info-value subscriber-phone-number">
               [[subscriber.phone_number]]
             </div>
+          </div>
 
-            <div class="info-row">
-              <div class="info-label">Address:</div>
-              <div class="info-value address">
-                <a target="_blank"
-                   href="[[subscriber.address_link]]">[[subscriber.pretty_address]]</a>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Delivery Tip:</div>
-                <div class="info-value delivery-tip">
-                  [[subscriber.delivery_tips]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Servings:</div>
-                <div class="info-value servings">
-                  [[subscriber.servings]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Vegetarian:</div>
-                <div class="info-value vegetarian">
-                  [[subscriber.is_vegetarian]]
-                </div>
-              </div>
+          <div class="info-row">
+            <div class="info-label">Address:</div>
+            <div class="info-value subscriber-address">
+              <a target="_blank"
+                 href="[[subscriber.address_link]]">[[subscriber.address_string]]</a>
+            </div>
+          </div>
 
-              <div class="info-row">
-                <div class="info-label">Customer ID:</div>
-                <div class="info-value customer-id">
-                  [[subscriber.customer_id]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">First Delivery:</div>
-                <div class="info-value first-delivery">
-                  [[subscriber.first_box_date]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">First Payment:</div>
-                <div class="info-value first-payment">
-                  [[subscriber.first_payment_date]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Status:</div>
-                <div class="info-value status">
-                  [[subscriber.is_subscribed]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Subscription Date:</div>
-                <div class="info-value subscription-date">
-                  [[subscriber.subscription_date]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Subscription Day:</div>
-                <div class="info-value subscription-day">
-                  [[subscriber.subscription_day]]
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">Unsubscribed Date:</div>
-                <div class="info-value subscription-day">
-                  [[subscriber.unsubscribed_date]]
-                </div>
-              </div>
+          <div class="info-row">
+            <div class="info-label">Delivery Tip:</div>
+            <div class="info-value subscriber-delivery-tip">
+              [[subscriber.delivery_tips]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Servings:</div>
+            <div class="info-value servings">
+              [[subscriber.servings]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Vegetarian:</div>
+            <div class="info-value vegetarian">
+              [[subscriber.is_vegetarian]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Customer ID:</div>
+            <div class="info-value customer-id">
+              [[subscriber.customer_id]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Delivery:</div>
+            <div class="info-value first-delivery">
+              [[subscriber.first_box_date]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Payment:</div>
+            <div class="info-value first-payment">
+              [[subscriber.first_payment_date]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-value status">
+              [[subscriber.is_subscribed]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Date:</div>
+            <div class="info-value subscription-date">
+              [[subscriber.subscription_date]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Day:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.subscription_day]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Unsubscribed Date:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.unsubscribed_date]]
             </div>
           </div>
         </div>
       </div>
+    </div>
+    </div>
 
-      <!-- Subsriber Activities -->
-      <div>
-        <ul class="collapsible"
-            id="activitiesTable">
-          <li>
-            <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
-            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-          </li>
-          <li>
-            <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
-            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-          </li>
-          <li>
-            <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
-            <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-          </li>
-        </ul>
-      </div>
+    <!-- Subsriber Activities -->
+    <div>
+      <ul class="collapsible"
+          id="activitiesTable">
+        <li>
+          <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+      </ul>
+    </div>
 
     </div>
 
@@ -293,7 +309,7 @@
             subscriber.is_subscribed = false;
           }
           //make address pretty
-          subscriber.pretty_address = this._getAddress(subscriber.address);
+          subscriber.address_string = this._getAddress(subscriber.address);
           subscriber.address_link = this._getAddressLink(subscriber.address);
 
           this.subscriber = subscriber;
