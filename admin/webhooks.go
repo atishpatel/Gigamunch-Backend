@@ -23,18 +23,12 @@ func setupWebhooksHandlers() {
 func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	var err error
 	var req TypefromWebhookRequest
-	// payload, err := ioutil.ReadAll(r.Body)
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&req)
 	if err != nil {
 		log.Errorf(ctx, "failed to read body: %+v", err)
 	}
 	logging.Infof(ctx, "decoded req: %+v", req)
-	// logging.Infof(ctx, "decoded req: %s", string(payload))
-	// json.Unmarshal(payload, req)
-	// if err != nil {
-	// 	log.Errorf(ctx, "failed to decode: %+v", err)
-	// }
 
 	// var email string
 	var reason string
@@ -50,24 +44,30 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 			email = answer.Email
 		}
 	}
+	// check if subscriber email is legit
 	if email == "" {
 		utils.Criticalf(ctx, "failed to get subscriber email from typeform: %+v", err)
 		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
-	date := req.FormResponse.SubmittedAt
+	subC := sub.New(ctx)
+	subscriber, err := subC.GetSubscriber(email)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to get subscriber Err: %+v", err)
+		return errBadRequest.WithError(err).Annotate("failed to get subscriber")
+	}
+	if !subscriber.IsSubscribed {
+		utils.Criticalf(ctx, "user %s isn't  subscriber and tried to skip.", subscriber.Email)
+		return nil
+	}
+
+	date := req.FormResponse.SubmittedAt.Add(time.Hour * -5)
 	skipDate := date
 	for skipDate.Weekday() != time.Monday {
 		skipDate = skipDate.Add(time.Hour * 24)
 	}
 
-	subC := sub.New(ctx)
 	if date.Weekday() == time.Monday || date.Weekday() == time.Sunday {
 		// check for phone number if yes, text them, if no, text me
-		subscriber, err := subC.GetSubscriber(email)
-		if err != nil {
-			utils.Criticalf(ctx, "failed to get subscriber Err: %+v", err)
-			return errBadRequest.WithError(err).Annotate("failed to get subscriber")
-		}
 		if subscriber.PhoneNumber == "" {
 			messageC := message.New(ctx)
 			err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("What up Chris. Looking fresh today. Nice. 🤠 %s just tried to skip, but it's too late. ", subscriber.Email))
@@ -79,7 +79,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		}
 
 		messageC := message.New(ctx)
-		err = messageC.SendAdminSMS(subscriber.PhoneNumber, fmt.Sprintf("Hey %s, this is Chris from Gigamunch. It looks like you tried to skip a Gigamunch dinner, but we've already started making your meal. 🙊 Your skip was not processed, and you will receive a dinner this Monday.  Feel free to respond directly if you have any questions.", subscriber.FirstName))
+		err = messageC.SendAdminSMS(subscriber.PhoneNumber, fmt.Sprintf("Hey %s, this is Chris from Gigamunch. It looks like you tried to pass a Gigamunch dinner, but we've already started making your meal. 🙊 You need to submit your pass form before Sunday in order for it to work. You will still receive a dinner this Monday.  Feel free to respond directly if you have any questions.", subscriber.FirstName))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to %s. Err: %+v", subscriber.Email, err)
 			return errInternalError.WithError(err).Annotatef("failed to send subscriber sms: %s", subscriber.Email)
@@ -93,7 +93,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		utils.Criticalf(ctx, "Typeform webhook: %+v", err)
 		return errors.GetErrorWithCode(err)
 	}
-	// TODO: caused error, will look into later
+	// TODO: logging caused error, will look into later
 	_ = reason
 	// log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
 	return nil
