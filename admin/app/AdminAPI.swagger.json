@@ -69,6 +69,33 @@
         ]
       }
     },
+    "/admin/api/v1/GetDeliveries": {
+      "post": {
+        "summary": "Deliveries",
+        "operationId": "GetDeliveries",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetDeliveriesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetDeliveriesReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetExecution": {
       "post": {
         "operationId": "GetExecution",
@@ -333,6 +360,32 @@
         ]
       }
     },
+    "/admin/api/v1/UpdateDeliveries": {
+      "post": {
+        "operationId": "UpdateDeliveries",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateDeliveriesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateDeliveriesReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/UpdateExecution": {
       "post": {
         "operationId": "UpdateExecution",
@@ -484,6 +537,60 @@
         }
       },
       "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "AdminAPIDelivery": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "driver_name": {
+          "type": "string"
+        },
+        "driver_email": {
+          "type": "string"
+        },
+        "sub_email": {
+          "type": "string"
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "fail": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "sub_name": {
+          "type": "string"
+        },
+        "phone_number": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/AddressAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
+        },
+        "servings": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "Deliveries"
     },
     "AdminAPIDish": {
       "type": "object",
@@ -701,6 +808,31 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/AdminAPIExecution"
+          }
+        }
+      }
+    },
+    "AdminAPIGetDeliveriesReq": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "driver_email": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIGetDeliveriesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "deliveries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIDelivery"
           }
         }
       }
@@ -1099,6 +1231,25 @@
         },
         "token": {
           "type": "string"
+        }
+      }
+    },
+    "AdminAPIUpdateDeliveriesReq": {
+      "type": "object",
+      "properties": {
+        "deliveries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIDelivery"
+          }
+        }
+      }
+    },
+    "AdminAPIUpdateDeliveriesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
         }
       }
     },

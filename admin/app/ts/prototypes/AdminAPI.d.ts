@@ -230,3 +230,33 @@ interface UpdateExecutionStatsResp {
     error: Error
     execution_stats: Execution
 }
+interface Delivery {
+    date: string
+    driver_name: string
+    driver_email: string
+    sub_email: string
+    order: number
+    success: boolean
+    fail: boolean
+    sub_name: string
+    phone_number: string
+    address: Address
+    delivery_notes: string
+    servings: number
+    vegetarian: boolean
+    first: boolean
+}
+interface GetDeliveriesReq {
+    date: string
+    driver_email: string
+}
+interface GetDeliveriesResp {
+    error: Error
+    deliveries: Delivery[]
+}
+interface UpdateDeliveriesReq {
+    deliveries: Delivery[]
+}
+interface UpdateDeliveriesResp {
+    error: Error
+}
