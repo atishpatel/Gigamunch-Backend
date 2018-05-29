@@ -23,6 +23,7 @@ func setupWebhooksHandlers() {
 func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	var err error
 	var req TypefromWebhookRequest
+	// payload, err := ioutil.ReadAll(r.Body)
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&req)
 	if err != nil {
@@ -66,6 +67,14 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		skipDate = skipDate.Add(time.Hour * 24)
 	}
 
+
+	subC := sub.New(ctx)
+	subscriber, err := subC.GetSubscriber(email)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to find subscriber: %s, they're probably not in our system: %+v", email, err)
+		return nil
+	}
+
 	if date.Weekday() == time.Monday || date.Weekday() == time.Sunday {
 		// check for phone number if yes, text them, if no, text me
 		if subscriber.PhoneNumber == "" {
@@ -93,6 +102,7 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		utils.Criticalf(ctx, "Typeform webhook: %+v", err)
 		return errors.GetErrorWithCode(err)
 	}
+
 	// TODO: logging caused error, will look into later
 	_ = reason
 	// log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
