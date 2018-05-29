@@ -115,19 +115,22 @@ CREATE TABLE IF NOT EXISTS `sub`(
 ) ENGINE = InnoDB;
 -- create coupon
 -- create promo
--- create driver_assignment
+-- create deliveries
 CREATE TABLE IF NOT EXISTS deliveries (
-	created_dt DATETIME NOT NULL DEFAULT NOW(),
 	date DATE NOT NULL,
-	driver_id BIGINT NOT NULL,
+	sub_email VARCHAR(175) NOT NULL,
+	created_dt  DATETIME NOT NULL DEFAULT NOW(),
+	updated_dt DATETIME NOT NULL DEFAULT NOW(),
+	driver_id BIGINT NOT NULL DEFAULT -1,
 	driver_email VARCHAR(175) NOT NULL,
 	driver_name VARCHAR(125) NOT NULL,
-	sub_id BIGINT NOT NULL,
-	sub_email VARCHAR(175) NOT NULL,
-	order INT NOT NULL DEFAULT -1,
-	delivered BOOLEAN DEFAULT 0,
+	sub_id BIGINT NOT NULL DEFAULT -1,
+	delivery_order SMALLINT NOT NULL DEFAULT -1,
+	success BOOLEAN DEFAULT 0,
+	fail BOOLEAN DEFAULT 0,
 	PRIMARY KEY (date, sub_email)
 )
+INSERT INTO deliveries (driver_email, driver_name, sub_email,date) VALUES ('d1', 'd1n', 'sub1', '2018-06-28')
 -- create activity
 CREATE TABLE IF NOT EXISTS activity (
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
