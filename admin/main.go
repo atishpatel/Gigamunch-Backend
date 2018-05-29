@@ -18,6 +18,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
+	"github.com/atishpatel/Gigamunch-Backend/core/deliveries"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
@@ -63,6 +64,9 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", handler(userAdmin(GetHasSubscribed)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
+	// Deliveries
+	http.HandleFunc("/admin/api/v1/GetDeliveries", handler(GetDeliveries))
+	http.HandleFunc("/admin/api/v1/UpdateDeliveries", handler(userAdmin(UpdateDeliveries)))
 	//
 	http.HandleFunc("/admin/api/v1/Test", test)
 	setupTasksHandlers()
@@ -118,6 +122,11 @@ func setupWithContext(ctx context.Context) error {
 	err = sub.Setup(ctx, true, projID, sqlC, dbC)
 	if err != nil {
 		return fmt.Errorf("failed to setup sub: %+v", err)
+	}
+	// Setup Deliveries
+	err = deliveries.Setup(ctx, true, projID, sqlC, dbC)
+	if err != nil {
+		return fmt.Errorf("failed to setup deliveries: %+v", err)
 	}
 	return nil
 }
