@@ -53,8 +53,8 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 	subC := sub.New(ctx)
 	subscriber, err := subC.GetSubscriber(email)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to get subscriber Err: %+v", err)
-		return errBadRequest.WithError(err).Annotate("failed to get subscriber")
+		utils.Criticalf(ctx, "failed to find subscriber: %s, they're probably not in our system: %+v", email, err)
+		return nil
 	}
 	if !subscriber.IsSubscribed {
 		utils.Criticalf(ctx, "user %s isn't  subscriber and tried to skip.", subscriber.Email)
@@ -65,14 +65,6 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 	skipDate := date
 	for skipDate.Weekday() != time.Monday {
 		skipDate = skipDate.Add(time.Hour * 24)
-	}
-
-
-	subC := sub.New(ctx)
-	subscriber, err := subC.GetSubscriber(email)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to find subscriber: %s, they're probably not in our system: %+v", email, err)
-		return nil
 	}
 
 	if date.Weekday() == time.Monday || date.Weekday() == time.Sunday {
