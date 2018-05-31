@@ -65,6 +65,18 @@
         font-weight: 600;
       }
 
+      .subscriber-status {
+        margin-bottom: 15px;
+      }
+
+      .subscriber-status-canceled {
+        color: #a1a1a1;
+      }
+
+      .subscriber-status-active {
+        color: #26cc6e;
+      }
+
       .edit-button {
         font-size: 3em;
         font-weight: 600;
@@ -129,12 +141,15 @@
         </paper-spinner>
 
         <div class="name-container">
-          <h1 class="subscriber-name">[[subscriber.name]]</h1>
+          <div class="subscriber-name">[[subscriber.name]]</div>
           <div class="edit-button">
             <a target="_blank"
                href="[[subscriber.datastore_link]]"> <i class="material-icons" style="font-size: 42px;">edit</i>
             </a>
           </div>
+        </div>
+        <div class$="subscriber-status [[subscriber.is_subscribed_class]]">
+          [[subscriber.is_subscribed_string]]
         </div>
 
         <!-- Subsriber Info Table -->
@@ -171,13 +186,7 @@
           <div class="info-row">
             <div class="info-label">Servings:</div>
             <div class="info-value servings">
-              [[subscriber.servings]]
-            </div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Vegetarian:</div>
-            <div class="info-value vegetarian">
-              [[subscriber.is_vegetarian]]
+              [[subscriber.servings]], [[subscriber.is_vegetarian]]
             </div>
           </div>
           <div class="info-row">
@@ -185,6 +194,12 @@
             <div class="info-value customer-id">
               <a target="_blank"
                  href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[subscriber.customer_id]]">[[subscriber.customer_id]]</a>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Date:</div>
+            <div class="info-value subscription-date">
+              [[subscriber.subscription_date_string]]
             </div>
           </div>
           <div class="info-row">
@@ -197,18 +212,6 @@
             <div class="info-label">First Payment:</div>
             <div class="info-value first-payment">
               [[subscriber.first_payment_date_string]]
-            </div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Status:</div>
-            <div class="info-value status">
-              [[subscriber.is_subscribed]]
-            </div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Subscription Date:</div>
-            <div class="info-value subscription-date">
-              [[subscriber.subscription_date_string]]
             </div>
           </div>
           <div class="info-row">
@@ -309,10 +312,24 @@
         return '';
       }
 
+      _getDateString(dateString) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
+        const d = new Date(dateString);
+        let day = d.getDay();
+        let month = d.getMonth();
+        let date = d.getDate();
+        let year = d.getFullYear();
+        return `${dayNames[day]}, ${monthNames[month]} ${date} ${year}`
+      }
+
       _getDatetimeString(dateString) {
         const d = new Date(dateString);
-        return d.toLocaleString();
+        let date = this._getDateString(d);
+        let time = d.toLocaleTimeString(d);
+        return `${date}, ${time}`
       }
+
 
       getSubscriber(subscriberEmail) {
         this.service.GetSubscriber(subscriberEmail).then((resp) => {
@@ -321,31 +338,44 @@
           if (err && err.code !== 0) {
             return;
           }
+
           // veg check
           if (subscriber.vegetarian_servings > 0) {
-            subscriber.is_vegetarian = true;
+            subscriber.is_vegetarian = "vegetarian 🌱";
             subscriber.servings = subscriber.vegetarian_servings;
           } else {
-            subscriber.is_vegetarian = false;
+            subscriber.is_vegetarian = "non-veg 🍖";
           }
-          // issubscribed check
+
+          // is_subscribed 
           if (!subscriber.is_subscribed) {
             subscriber.is_subscribed = false;
+            subscriber.is_subscribed_string = "• Canceled Subscriber"
+            subscriber.is_subscribed_class = "subscriber-status-canceled"
+          } else {
+            subscriber.is_subscribed_string = "• Active Subscriber"
+            subscriber.is_subscribed_class = "subscriber-status-active"
           }
-          //make address pretty
+
+
+          // make address pretty
           subscriber.address_string = this._getAddress(subscriber.address);
           subscriber.address_link = this._getAddressLink(subscriber.address);
 
-          //make dates pretty
-          subscriber.unsubscribed_date_string = this._getDatetimeString(subscriber.unsubscribed_date)
-          subscriber.subscription_date_string = this._getDatetimeString(subscriber.subscription_date)
-          subscriber.first_box_date_string = this._getDatetimeString(subscriber.first_box_date)
-          subscriber.first_payment_date_string = this._getDatetimeString(subscriber.first_payment_date)
+          // make dates pretty
+          subscriber.subscription_date_string = this._getDatetimeString(subscriber.subscription_date);
+          subscriber.first_box_date_string = this._getDateString(subscriber.first_box_date);
+          subscriber.first_payment_date_string = this._getDateString(subscriber.first_payment_date);
+          if (!subscriber.is_subscribed) {
+            subscriber.unsubscribed_date_string = this._getDatetimeString(subscriber.unsubscribed_date);
+          } else {
+            subscriber.unsubscribed_date_string = "–––";
+          }
 
-          subscriber.datastore_link = `https://console.cloud.google.com/datastore/entities/edit?key=0%2F%7C14%2FScheduleSignUp%7C36%2Fname:${subscriber.email}&project=gigamunch-omninexus&ns=&kind=ScheduleSignUp&filter=5%2FEmail%7CSTR%7CEQ%7C31%2F${subscriber.email}`
+          // edit link
+          subscriber.datastore_link = `https://console.cloud.google.com/datastore/entities/edit?key=0%2F%7C14%2FScheduleSignUp%7C36%2Fname:${subscriber.email}&project=gigamunch-omninexus&ns=&kind=ScheduleSignUp&filter=5%2FEmail%7CSTR%7CEQ%7C31%2F${subscriber.email}`;
 
           this.subscriber = subscriber;
-          var p = `blah is ${subscriber.subscriberEmai} bla`
         });
       }
 
