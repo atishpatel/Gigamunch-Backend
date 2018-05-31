@@ -81,8 +81,8 @@
       }
 
       .subscriber-delivery-tip {
-        font-size: 3em;
-        font-weight: 600;
+        flex: 1;
+        font-weight: 300;
       }
 
       .info-row {
@@ -171,13 +171,13 @@
           <div class="info-row">
             <div class="info-label">First Delivery:</div>
             <div class="info-value first-delivery">
-              [[subscriber.first_box_date]]
+              [[subscriber.first_box_date_string]]
             </div>
           </div>
           <div class="info-row">
             <div class="info-label">First Payment:</div>
             <div class="info-value first-payment">
-              [[subscriber.first_payment_date]]
+              [[subscriber.first_payment_date_string]]
             </div>
           </div>
           <div class="info-row">
@@ -189,7 +189,7 @@
           <div class="info-row">
             <div class="info-label">Subscription Date:</div>
             <div class="info-value subscription-date">
-              [[subscriber.subscription_date]]
+              [[subscriber.subscription_date_string]]
             </div>
           </div>
           <div class="info-row">
@@ -201,7 +201,7 @@
           <div class="info-row">
             <div class="info-label">Unsubscribed Date:</div>
             <div class="info-value subscription-day">
-              [[subscriber.unsubscribed_date]]
+              [[subscriber.unsubscribed_date_string]]
             </div>
           </div>
         </div>
@@ -290,6 +290,11 @@
         return '';
       }
 
+      _getDatetimeString(dateString) {
+        const d = new Date(dateString);
+        return d.toLocaleString();
+      }
+
       getSubscriber(subscriberEmail) {
         this.service.GetSubscriber(subscriberEmail).then((resp) => {
           let subscriber = resp.subscriber;
@@ -311,6 +316,13 @@
           //make address pretty
           subscriber.address_string = this._getAddress(subscriber.address);
           subscriber.address_link = this._getAddressLink(subscriber.address);
+
+          //make dates pretty
+          subscriber.unsubscribed_date_string = this._getDatetimeString(subscriber.unsubscribed_date)
+          subscriber.subscription_date_string = this._getDatetimeString(subscriber.subscription_date)
+          subscriber.first_box_date_string = this._getDatetimeString(subscriber.first_box_date)
+          subscriber.first_payment_date_string = this._getDatetimeString(subscriber.first_payment_date)
+
 
           this.subscriber = subscriber;
         });
