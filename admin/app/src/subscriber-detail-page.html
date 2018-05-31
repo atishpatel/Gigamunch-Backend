@@ -65,6 +65,11 @@
         font-weight: 600;
       }
 
+      .edit-button {
+        font-size: 3em;
+        font-weight: 600;
+      }
+
       .subscriber-email {
         flex: 1;
         font-weight: 300;
@@ -83,6 +88,13 @@
       .subscriber-delivery-tip {
         flex: 1;
         font-weight: 300;
+      }
+
+      .name-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
       }
 
       .info-row {
@@ -112,14 +124,21 @@
     <div>
       <!-- Subscriber Profile -->
       <div class="subscriber-profile-container">
-        <h1 class="subscriber-name">[[subscriber.name]]</h1>
         <paper-spinner hidden$="[[!loading]]"
                        active="[[loading]]">
         </paper-spinner>
 
+        <div class="name-container">
+          <h1 class="subscriber-name">[[subscriber.name]]</h1>
+          <div class="edit-button">
+            <a target="_blank"
+               href="[[subscriber.datastore_link]]"> <i class="material-icons" style="font-size: 42px;">edit</i>
+            </a>
+          </div>
+        </div>
+
         <!-- Subsriber Info Table -->
         <div class="subscriber-table-info">
-
           <div class="info-row">
             <div class="info-label">Email:</div>
             <div class="info-value subscriber-email">
@@ -323,8 +342,10 @@
           subscriber.first_box_date_string = this._getDatetimeString(subscriber.first_box_date)
           subscriber.first_payment_date_string = this._getDatetimeString(subscriber.first_payment_date)
 
+          subscriber.datastore_link = `https://console.cloud.google.com/datastore/entities/edit?key=0%2F%7C14%2FScheduleSignUp%7C36%2Fname:${subscriber.email}&project=gigamunch-omninexus&ns=&kind=ScheduleSignUp&filter=5%2FEmail%7CSTR%7CEQ%7C31%2F${subscriber.email}`
 
           this.subscriber = subscriber;
+          var p = `blah is ${subscriber.subscriberEmai} bla`
         });
       }
 
