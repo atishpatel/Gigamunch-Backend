@@ -1,0 +1,335 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="subscriber-detail-page">
+  <template>
+    <materialize-styles>
+      <style include="materialize-styles"></style>
+    </materialize-styles>
+    <shared-styles>
+      <style include="shared-styles"></style>
+    </shared-styles>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      .table {
+        display: table;
+        width: 100%;
+        border: 1px solid #000;
+      }
+
+      .table-header-row {
+        background-color: #ccc;
+        display: table-header-group;
+        font-weight: bold;
+      }
+
+      .table-row {
+        display: table-row;
+        width: auto;
+        clear: both;
+      }
+
+      .table-cell {
+        border: 1px solid #999999;
+        padding: 3px 10px;
+        display: table-cell;
+        flex: 1;
+        /*display: flex;*/
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-body {
+        display: table-row-group;
+      }
+
+      .subscriber-table-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .subscriber-name {
+        font-size: 3em;
+        font-weight: 600;
+      }
+
+      .subscriber-email {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-phone-number {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-address {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-delivery-tip {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .info-row {
+        display: flex;
+        flex-direction: row;
+        background-color: rgb(243, 243, 243);
+        border: 1px solid #d6d6d6;
+        padding: 6px 10px;
+      }
+
+      .info-label {
+        min-width: 200px;
+        font-weight: 600;
+      }
+
+      .info-value {
+        min-width: 200px;
+        font-weight: 400;
+      }
+
+      .subscriber-profile-container {
+        margin: 10px 50px;
+      }
+
+    </style>
+
+    <div>
+      <!-- Subscriber Profile -->
+      <div class="subscriber-profile-container">
+        <h1 class="subscriber-name">[[subscriber.name]]</h1>
+        <paper-spinner hidden$="[[!loading]]"
+                       active="[[loading]]">
+        </paper-spinner>
+
+        <!-- Subsriber Info Table -->
+        <div class="subscriber-table-info">
+
+          <div class="info-row">
+            <div class="info-label">Email:</div>
+            <div class="info-value subscriber-email">
+              [[subscriber.email]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Phone number:</div>
+            <div class="info-value subscriber-phone-number">
+              [[subscriber.phone_number]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Address:</div>
+            <div class="info-value subscriber-address">
+              <a target="_blank"
+                 href="[[subscriber.address_link]]">[[subscriber.address_string]]</a>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Delivery Tip:</div>
+            <div class="info-value subscriber-delivery-tip">
+              [[subscriber.delivery_tips]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Servings:</div>
+            <div class="info-value servings">
+              [[subscriber.servings]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Vegetarian:</div>
+            <div class="info-value vegetarian">
+              [[subscriber.is_vegetarian]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Customer ID:</div>
+            <div class="info-value customer-id">
+              <a target="_blank"
+                 href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[subscriber.customer_id]]">[[subscriber.customer_id]]</a>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Delivery:</div>
+            <div class="info-value first-delivery">
+              [[subscriber.first_box_date_string]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Payment:</div>
+            <div class="info-value first-payment">
+              [[subscriber.first_payment_date_string]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-value status">
+              [[subscriber.is_subscribed]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Date:</div>
+            <div class="info-value subscription-date">
+              [[subscriber.subscription_date_string]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Day:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.subscription_day]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Unsubscribed Date:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.unsubscribed_date_string]]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Subsriber Activities -->
+    <div>
+      <ul class="collapsible"
+          id="activitiesTable">
+        <li>
+          <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        <li>
+          <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+      </ul>
+    </div>
+
+    </div>
+
+  </template>
+
+  <script>
+    class SubscriberDetailPage extends Polymer.Element {
+      static get is() {
+        return 'subscriber-detail-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          event: {
+            type: Object,
+          },
+          subscriber: {
+            type: Object,
+            notify: true,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        const tmp = window.location.pathname.split('/subscriber/');
+        const subscriberEmail = decodeURIComponent(tmp[1]);
+        this.getSubscriber(subscriberEmail);
+        var activitiesTable = this.$.activitiesTable;
+        var instance = M.Collapsible.init(activitiesTable, null);
+      }
+
+      _getAddress(a) {
+        if (a && a.street) {
+          let apt = '';
+          if (a.apt !== undefined && a.apt !== '') {
+            apt = '#' + a.apt + ' ';
+          }
+          return apt + a.street + ', ' + a.city;
+        }
+        return '';
+      }
+
+      _getAddressLink(a) {
+        if (a && a.street) {
+          return 'https://maps.google.com/?q=' + encodeURIComponent(a.apt + ' ' + a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+        }
+        return '';
+      }
+
+      _getDatetimeString(dateString) {
+        const d = new Date(dateString);
+        return d.toLocaleString();
+      }
+
+      getSubscriber(subscriberEmail) {
+        this.service.GetSubscriber(subscriberEmail).then((resp) => {
+          let subscriber = resp.subscriber;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+          // veg check
+          if (subscriber.vegetarian_servings > 0) {
+            subscriber.is_vegetarian = true;
+            subscriber.servings = subscriber.vegetarian_servings;
+          } else {
+            subscriber.is_vegetarian = false;
+          }
+          // issubscribed check
+          if (!subscriber.is_subscribed) {
+            subscriber.is_subscribed = false;
+          }
+          //make address pretty
+          subscriber.address_string = this._getAddress(subscriber.address);
+          subscriber.address_link = this._getAddressLink(subscriber.address);
+
+          //make dates pretty
+          subscriber.unsubscribed_date_string = this._getDatetimeString(subscriber.unsubscribed_date)
+          subscriber.subscription_date_string = this._getDatetimeString(subscriber.subscription_date)
+          subscriber.first_box_date_string = this._getDatetimeString(subscriber.first_box_date)
+          subscriber.first_payment_date_string = this._getDatetimeString(subscriber.first_payment_date)
+
+
+          this.subscriber = subscriber;
+        });
+      }
+
+    }
+    window.customElements.define(SubscriberDetailPage.is, SubscriberDetailPage);
+
+  </script>
+</dom-module>
