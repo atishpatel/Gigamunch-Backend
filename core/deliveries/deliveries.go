@@ -83,6 +83,12 @@ func (c *Client) Update(deliveries []*Delivery) error {
 	now := time.Now()
 	for _, delivery := range deliveries {
 		statement += "(?,?,?,?,?,?,?,?,?,?),"
+		if delivery.DriverID == 0 {
+			delivery.DriverID = -1
+		}
+		if delivery.SubID == 0 {
+			delivery.SubID = -1
+		}
 		vals = append(vals, delivery.Date, delivery.SubEmail, now, delivery.DriverID, delivery.DriverEmail, delivery.SubID, delivery.Order, delivery.Success, delivery.Fail)
 	}
 	// remove end comma
