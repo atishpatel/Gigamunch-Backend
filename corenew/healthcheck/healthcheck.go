@@ -18,8 +18,9 @@ const (
 )
 
 var (
-	errDatastore  = errors.InternalServerError
-	errBadRequest = errors.BadRequestError
+	managerNumbers = [...]string{"9316445311", "6155454989", "6153975516", "9316446755"}
+	errDatastore   = errors.InternalServerError
+	errBadRequest  = errors.BadRequestError
 )
 
 // Device is a device that is reporting in for healthcheck.
@@ -43,12 +44,28 @@ func New(ctx context.Context) *Client {
 	}
 }
 
-// Update updates the device.
-func (c *Client) Update(d *Device) error {
+// Checkin updates the device.
+func (c *Client) Checkin(d *Device) error {
 	if d.ID == "" {
 		return errBadRequest.Annotate("id cannot be empty")
 	}
-	err := put(c.ctx, d.ID, d)
+	oldDevice, err := get(c.ctx, d.ID)
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to get")
+	}
+	if oldDevice.Disable {
+		msg := fmt.Sprintf("Baby I'm back! The following device is back online:\n %+v", d.ID)
+		messageC := message.New(c.ctx)
+		numbers := managerNumbers
+		for _, number := range numbers {
+			err = messageC.SendDeliverySMS(number, msg)
+			if err != nil {
+				logging.Errorf(c.ctx, "failed to message.SendAdminSMS: %+v", err)
+			}
+		}
+	}
+
+	err = put(c.ctx, d.ID, d)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to put")
 	}
@@ -82,7 +99,7 @@ func (c *Client) CheckPowerSensors() error {
 	if len(failingDevices) != 0 {
 		msg := fmt.Sprintf("ALERT! POWER OUTAGE! The following devices don't have power:\n %+v", failingDevices)
 		messageC := message.New(c.ctx)
-		numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755"}
+		numbers := managerNumbers
 		for _, number := range numbers {
 			err = messageC.SendDeliverySMS(number, msg)
 			if err != nil {
