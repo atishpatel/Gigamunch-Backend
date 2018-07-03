@@ -113,6 +113,9 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 	if len(emails) == 0 {
 		return nil, errInvalidParameter.Wrap("emails cannot be of length 0.")
 	}
+	for i := range emails {
+		emails[i] = strings.TrimSpace(emails[i])
+	}
 	subs, err := getMulti(c.ctx, emails)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to getMulti")
@@ -122,7 +125,6 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 
 // GetHasSubscribed returns a list of all SubscriptionSignUp.
 func (c *Client) GetHasSubscribed(date time.Time) ([]SubscriptionSignUp, error) {
-
 	subs, err := getHasSubscribed(c.ctx, date)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
