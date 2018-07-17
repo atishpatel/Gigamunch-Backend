@@ -860,37 +860,3 @@ func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmai
 	}
 	return resp, nil
 }
-
-// GetGeneralStatsResp is a response for GetGeneralStats.
-// type GetGeneralStatsResp struct {
-// 	AverageUser
-// }
-
-// GetGeneralStats returns general stats.
-// func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) (*GetGeneralStatsResp, error) {
-// 	resp := new(GetGeneralStatsResp)
-// 	defer handleResp(ctx, "GetGeneralStats", resp.Err)
-// 	user, err := validateRequestAndGetUser(ctx, req)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err)
-// 		return resp, nil
-// 	}
-// 	if !user.IsAdmin() {
-// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-// 		return resp, nil
-// 	}
-
-// 	subC := sub.New(ctx)
-// 	err = subC.Get(req.Email)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
-// 		return resp, nil
-// 	}
-
-// 	err = subC.GetSubscribers(req.Email)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
-// 		return resp, nil
-// 	}
-// 	return resp, nil
-// }
