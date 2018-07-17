@@ -463,26 +463,39 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 				fourBags++
 			}
 		} else {
-			if veg {
-				moreThanFourVegBags++
-				listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, sublog.Servings)
+			if subs[i].VegetarianServings > 0 && subs[i].Servings > 0 {
+				// veg and non-veg split delivery
+				vegRatio := float32(subs[i].VegetarianServings) / float32(subs[i].VegetarianServings+subs[i].Servings)
+				vegServings := int8(float32(sublog.Servings) * vegRatio)
+				nonVegServings := sublog.Servings - vegServings
+				listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, vegServings)
+				listOfMoreThanFourBags = append(listOfMoreThanFourBags, nonVegServings)
 			} else {
-				moreThanFourBags++
-				listOfMoreThanFourBags = append(listOfMoreThanFourBags, sublog.Servings)
+				if veg {
+					moreThanFourVegBags++
+					listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, sublog.Servings)
+				} else {
+					moreThanFourBags++
+					listOfMoreThanFourBags = append(listOfMoreThanFourBags, sublog.Servings)
+				}
 			}
 		}
 		if sublog.Free {
 			if sublog.Servings == 2 {
 				if veg {
 					specialTwoVegBags++
+					twoVegBags--
 				} else {
 					specialTwoBags++
+					twoBags--
 				}
 			} else if sublog.Servings == 4 {
 				if veg {
 					specialFourVegBags++
+					fourVegBags--
 				} else {
 					specialFourBags++
+					fourBags--
 				}
 			} else {
 				specialOther++
@@ -512,9 +525,13 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	totalStandardBags := twoBags + twoVegBags + fourBags + fourVegBags
 	msg := `%s culture execution:
 	2 bags: %d
+	2 special bags: %d
 	2 veg bags: %d
+	2 special veg bags: %d
 	4 bags: %d
+	4 special bags: %d
 	4 veg bags: %d
+	4 special veg bags: %d
 
 	Total bags: %d
 
@@ -528,7 +545,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	First 2 veg bags: %d
 	First 4 veg bags: %d
 	First Other: %d`
-	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, twoVegBags, fourBags, fourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, specialTwoBags, specialFourBags, specialTwoVegBags, specialFourVegBags, specialOther)
+	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, specialTwoBags, twoVegBags, specialTwoVegBags, fourBags, specialFourBags, fourVegBags, specialFourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, specialTwoBags, specialFourBags, specialTwoVegBags, specialFourVegBags, specialOther)
 	messageC := message.New(ctx)
 	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
 	for _, number := range numbers {
