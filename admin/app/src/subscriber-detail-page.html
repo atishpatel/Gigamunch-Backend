@@ -286,7 +286,7 @@
         const tmp = window.location.pathname.split('/subscriber/');
         const subscriberEmail = decodeURIComponent(tmp[1]);
         this.getSubscriber(subscriberEmail);
-        this.GetSubscriberSublogs(subscriberEmail);
+        this.getSubscriberSublogs(subscriberEmail);
         var activitiesTable = this.$.activitiesTable;
         var instance = M.Collapsible.init(activitiesTable, null);
       }
@@ -379,7 +379,7 @@
       }
 
       getSubscriberSublogs(subscriberEmail) {
-        this.service.GetSubscriberSublogs(subscriberEmail).then((resp) => {
+        this.service.getSubscriberSublogs(subscriberEmail).then((resp) => {
           let err = resp.error;
           if (err && err.code !== 0) {
             return;
