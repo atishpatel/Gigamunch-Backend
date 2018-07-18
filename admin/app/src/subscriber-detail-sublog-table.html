@@ -110,12 +110,12 @@
       _getStatusString(sublog) {
         if (sublog.refundeed) {
           return 'Refunded';
+        } else if (sublog.skip) {
+          return 'Skipped';
         } else if (sublog.free) {
           return 'Free';
         } else if (sublog.paid) {
           return 'Paid $' + sublog.amount;
-        } else if (sublog.skip) {
-          return 'Skipped';
         }
         const today = new Date();
         const sublogDate = new Date(sublog.date);
