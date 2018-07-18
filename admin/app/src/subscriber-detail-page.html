@@ -7,6 +7,8 @@
 <link rel="import"
       href="shared-styles.html">
 <link rel="import"
+      href="subscriber-detail-sublog-table.html">
+<link rel="import"
       href="materialize-styles.html">
 
 <dom-module id="subscriber-detail-page">
@@ -227,30 +229,20 @@
             </div>
           </div>
         </div>
+
+
+        <!-- Subsriber Activities -->
+        <div>
+          <subscriber-detail-sublog-table id="sublogs"
+                                          sublogs="[[sublogs]]">
+          </subscriber-detail-sublog-table>
+        </div>
       </div>
-    </div>
-    </div>
 
-    <!-- Subsriber Activities -->
-    <div>
-      <ul class="collapsible"
-          id="activitiesTable">
-        <li>
-          <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-        </li>
-        <li>
-          <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-        </li>
-        <li>
-          <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-        </li>
-      </ul>
-    </div>
 
     </div>
+
+
 
   </template>
 
@@ -276,6 +268,10 @@
             type: Object,
             notify: true,
           },
+          sublogs: {
+            type: Array,
+            notify: true,
+          },
           loading: {
             type: Boolean
           }
@@ -290,6 +286,7 @@
         const tmp = window.location.pathname.split('/subscriber/');
         const subscriberEmail = decodeURIComponent(tmp[1]);
         this.getSubscriber(subscriberEmail);
+        this.GetSubscriberSublogs(subscriberEmail);
         var activitiesTable = this.$.activitiesTable;
         var instance = M.Collapsible.init(activitiesTable, null);
       }
@@ -357,7 +354,6 @@
             subscriber.is_subscribed_class = "subscriber-status-active"
           }
 
-
           // make address pretty
           subscriber.address_string = this._getAddress(subscriber.address);
           subscriber.address_link = this._getAddressLink(subscriber.address);
@@ -376,6 +372,16 @@
           subscriber.datastore_link = `https://console.cloud.google.com/datastore/entities/edit?key=0%2F%7C14%2FScheduleSignUp%7C36%2Fname:${subscriber.email}&project=gigamunch-omninexus&ns=&kind=ScheduleSignUp&filter=5%2FEmail%7CSTR%7CEQ%7C31%2F${subscriber.email}`;
 
           this.subscriber = subscriber;
+        });
+      }
+
+      GetSubscriberSublogs(subscriberEmail) {
+        this.service.GetSubscriberSublogs(subscriberEmail).then((resp) => {
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+          this.sublogs = resp.sublogs
         });
       }
 
