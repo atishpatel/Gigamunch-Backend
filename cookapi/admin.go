@@ -162,6 +162,63 @@ func (service *Service) SendSMS(ctx context.Context, req *SendSMSReq) (*ErrorOnl
 	return resp, nil
 }
 
+// SendCustomerSMSReq is the request for CreateFakeSubmerchant.
+type SendCustomerSMSReq struct {
+	GigatokenReq
+	Emails  string `json:"emails"`
+	Message string `json:"message"`
+}
+
+// SendCustomerSMS sends an CustomerSMS from Gigamunch to number.
+func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSMSReq) (*ErrorOnlyResp, error) {
+	resp := new(ErrorOnlyResp)
+	defer handleResp(ctx, "SendCustomerSMS", resp.Err)
+	user, err := validateRequestAndGetUser(ctx, req)
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
+	if !user.IsAdmin() {
+		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+		return resp, nil
+	}
+	dilm := "{{name}}"
+	if !strings.Contains(req.Message, dilm) {
+		resp.Err = errors.BadRequestError.WithMessage("Message requires {{name}}.")
+		return resp, nil
+	}
+	messageC := message.New(ctx)
+	var emails []string
+	if strings.Contains(req.Emails, ",") {
+		emails = strings.Split(req.Emails, ",")
+	} else {
+		emails = []string{req.Emails}
+	}
+	subC := sub.New(ctx)
+	subs, err := subC.GetSubscribers(emails)
+	if err != nil {
+		resp.Err = errors.Wrap("failed to sub.GetSubscribers", err)
+		return resp, nil
+	}
+	for _, s := range subs {
+		if s.PhoneNumber == "" {
+			continue
+		}
+		name := s.FirstName
+		if name == "" {
+			name = s.Name
+		}
+		name = strings.Title(name)
+		msg := strings.Replace(req.Message, dilm, name, -1)
+		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
+		if err != nil {
+			resp.Err = errors.Wrap("failed to message.SendSMS", err)
+			return resp, nil
+		}
+	}
+	return resp, nil
+}
+
 // CreatePromoCodeReq is the request for CreatePromoCode.
 type CreatePromoCodeReq struct {
 	GigatokenReq
@@ -560,7 +617,15 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
 					resp.SubLogs[i].Date = subLogs[i].Date
 					resp.SubLogs[i].CustomerID = subs[j].CustomerID
-					if subs[j].VegetarianServings > 0 {
+					if subs[j].VegetarianServings > 0 && subs[j].Servings > 0 {
+						if subLogs[i].Servings == subs[j].VegetarianServings+subs[j].Servings {
+							resp.SubLogs[i].VegetarianServings = subs[j].VegetarianServings
+							resp.SubLogs[i].Servings = subs[j].Servings
+						} else {
+							resp.SubLogs[i].VegetarianServings = subLogs[i].Servings / 2
+							resp.SubLogs[i].Servings = subLogs[i].Servings / 2
+						}
+					} else if subs[j].VegetarianServings > 0 {
 						resp.SubLogs[i].VegetarianServings = subLogs[i].Servings
 					} else {
 						resp.SubLogs[i].Servings = subLogs[i].Servings
@@ -803,37 +868,3 @@ func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmai
 	}
 	return resp, nil
 }
-
-// GetGeneralStatsResp is a response for GetGeneralStats.
-// type GetGeneralStatsResp struct {
-// 	AverageUser
-// }
-
-// GetGeneralStats returns general stats.
-// func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) (*GetGeneralStatsResp, error) {
-// 	resp := new(GetGeneralStatsResp)
-// 	defer handleResp(ctx, "GetGeneralStats", resp.Err)
-// 	user, err := validateRequestAndGetUser(ctx, req)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err)
-// 		return resp, nil
-// 	}
-// 	if !user.IsAdmin() {
-// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-// 		return resp, nil
-// 	}
-
-// 	subC := sub.New(ctx)
-// 	err = subC.Get(req.Email)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
-// 		return resp, nil
-// 	}
-
-// 	err = subC.GetSubscribers(req.Email)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
-// 		return resp, nil
-// 	}
-// 	return resp, nil
-// }

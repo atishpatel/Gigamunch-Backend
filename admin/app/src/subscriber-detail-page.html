@@ -337,7 +337,10 @@
           }
 
           // veg check
-          if (subscriber.vegetarian_servings > 0) {
+          if (subscriber.vegetarian_servings > 0 && subscriber.servings > 0) {
+            subscriber.is_vegetarian = "both vegetarian 🌱 & non-veg 🍖";
+            subscriber.servings += subscriber.vegetarian_servings;
+          } else if (subscriber.vegetarian_servings > 0) {
             subscriber.is_vegetarian = "vegetarian 🌱";
             subscriber.servings = subscriber.vegetarian_servings;
           } else {

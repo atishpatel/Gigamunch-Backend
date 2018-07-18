@@ -784,7 +784,7 @@ func DeviceCheckin(ctx context.Context, r *http.Request) Response {
 	resp := &pb.ErrorOnlyResp{}
 
 	healthC := healthcheck.New(ctx)
-	err = healthC.Update(req)
+	err = healthC.Checkin(req)
 	if err != nil {
 		resp.Error = errors.GetSharedError(err)
 		return resp
