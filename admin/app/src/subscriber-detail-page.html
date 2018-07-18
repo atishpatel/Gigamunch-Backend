@@ -378,7 +378,7 @@
         });
       }
 
-      GetSubscriberSublogs(subscriberEmail) {
+      getSubscriberSublogs(subscriberEmail) {
         this.service.GetSubscriberSublogs(subscriberEmail).then((resp) => {
           let err = resp.error;
           if (err && err.code !== 0) {
