@@ -38,6 +38,14 @@ export function GetUnpaidSublogs(limit: number): Promise<any> {
   return callFetch(url, 'GET', req);
 }
 
+export function GetSubscriberSublogs(email: string): Promise<any> {
+  const url: string = baseURL + 'GetSubscriberSublogs';
+  const req: GetSubscriberSublogsReq = {
+    email,
+  };
+  return callFetch(url, 'GET', req);
+}
+
 export function ProcessSublog(date: string, email: string): Promise<any> {
   const url: string = baseURL + 'ProcessSublog';
   const req: ProcessSublogsReq = {

@@ -103,6 +103,13 @@ function GetUnpaidSublogs(limit) {
     };
     return callFetch(url, 'GET', req);
 }
+function GetSubscriberSublogs(email) {
+    const url = baseURL + 'GetSubscriberSublogs';
+    const req = {
+        email,
+    };
+    return callFetch(url, 'GET', req);
+}
 function ProcessSublog(date, email) {
     const url = baseURL + 'ProcessSublog';
     const req = {
@@ -199,6 +206,7 @@ var Service = Object.freeze({
 	GetSubscriber: GetSubscriber,
 	GetHasSubscribed: GetHasSubscribed,
 	GetUnpaidSublogs: GetUnpaidSublogs,
+	GetSubscriberSublogs: GetSubscriberSublogs,
 	ProcessSublog: ProcessSublog,
 	Login: Login,
 	Refresh: Refresh,

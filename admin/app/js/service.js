@@ -25,6 +25,13 @@ export function GetUnpaidSublogs(limit) {
     };
     return callFetch(url, 'GET', req);
 }
+export function GetSubscriberSublogs(email) {
+    const url = baseURL + 'GetSubscriberSublogs';
+    const req = {
+        email,
+    };
+    return callFetch(url, 'GET', req);
+}
 export function ProcessSublog(date, email) {
     const url = baseURL + 'ProcessSublog';
     const req = {
