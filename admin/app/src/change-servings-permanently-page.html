@@ -21,7 +21,7 @@
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
           padding: 10px;
         }
@@ -134,26 +134,30 @@
           if (err.code !== 0) {
             return;
           }
-          for(var i = 0; i < emails.length;i++) {
+          for (var i = 0; i < emails.length; i++) {
             var servings = subs[i].servings + subs[i].vegetarian_servings;
             var bagType = ' non-veg';
             if (subs[i].vegetarian_servings > 0) {
               bagType = ' veg';
+            }
+            if (subs[i].vegetarian_servings > 0 && subs[i].servings > 0) {
+              bagType = ' both';
             }
             emails[i] += this.delim + servings + bagType;
           }
           emails.sort(function(a, b) {
             return a.localeCompare(b);
           });
+
           function addLetterSeps(s) {
             var previous = s[s.length - 1][0];
             for (var i = s.length - 1; i >= 0; i--) {
-                if (s[i][0] !== previous) {
-                    s.splice(i+1, 0, '---- '+previous+' ----')
-                    previous = s[i][0] 
-                  }
-                }
-              return s; 
+              if (s[i][0] !== previous) {
+                s.splice(i + 1, 0, '---- ' + previous + ' ----')
+                previous = s[i][0]
+              }
+            }
+            return s;
           }
           this.subEmails = addLetterSeps(emails);
         });

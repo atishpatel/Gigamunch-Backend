@@ -1,0 +1,164 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import"
+      href="../bower_components/paper-styles/color.html">
+<link rel="import"
+      href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="cohort-table">
+  <template>
+    <shared-styles>
+      <style include="materialize-styles shared-styles">
+        :host {
+          display: block;
+        }
+
+        .cohort-table {
+          padding: 12px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+          border: 1px solid rgba(0, 0, 0, .12);
+        }
+
+        .cell {
+          color: black;
+          padding: 8px;
+          text-align: center;
+        }
+
+        .average-retention {
+          border-bottom: 1px solid white !important;
+        }
+
+      </style>
+    </shared-styles>
+    <paper-checkbox checked={{retention}}
+                    "">Retention Percent View</paper-checkbox>
+    <table class="striped cohort-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <template is="dom-repeat"
+                    items="[[_cohort.averageRetention]]"
+                    as="ret">
+            <th>[[ret.index]]</th>
+          </template>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="average-retention">
+          <td>Average</td>
+          <template is="dom-repeat"
+                    items="[[_cohort.averageRetention]]"
+                    as="ret">
+            <td class="cell"
+                style="background-color: [[ret.backgroundColor]]">[[ret.value]]</td>
+          </template>
+        </tr>
+        <template is="dom-repeat"
+                  items="[[_cohort.cohort_rows]]"
+                  as="rows">
+
+          <tr>
+            <td>[[rows.label]]</td>
+            <template is="dom-repeat"
+                      items="[[rows.cohort_cells]]"
+                      as="cell">
+
+              <td class="cell"
+                  hidden="[[retention]]"
+                  style="background-color: [[cell.backgroundColor]]">[[cell.amount_left]]</td>
+              <td class="cell"
+                  hidden$="[[!retention]]"
+                  style="background-color: [[cell.backgroundColor]]">[[cell.retentionPercent]]</td>
+            </template>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </template>
+
+  <script>
+    class CohortTable extends Polymer.Element {
+      static get is() {
+        return 'cohort-table';
+      }
+      static get properties() {
+        return {
+          cohort: {
+            type: Array,
+            notify: true,
+            observer: 'cohortObserver',
+          },
+          _cohort: {
+            type: Array,
+            notify: true,
+          },
+          retention: {
+            type: Boolean,
+            notify: true,
+          }
+        }
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+      cohortObserver() {
+        if (this.cohort) {
+          const cohort = this.cohort;
+          for (let i = 0; i < cohort.cohort_rows.length; i++) {
+            const row = cohort.cohort_rows[i];
+            for (let j = 0; j < row.cohort_cells.length; j++) {
+              const cell = row.cohort_cells[j];
+              cell.backgroundColor = this._getColor(cell.retention_percent);
+              cell.retentionPercent = (cell.retention_percent * 100).toFixed(1) + '%';
+            }
+          }
+          cohort.averageRetention = [];
+          for (let i = 0; i < cohort.average_retention.length; i++) {
+            cohort.averageRetention.push({
+              index: i,
+              value: (cohort.average_retention[i] * 100).toFixed(1) + '%',
+              backgroundColor: this._getColor(cohort.average_retention[i]),
+            });
+          }
+          this.cohort = cohort;
+          this._cohort = cohort;
+        }
+      }
+
+      _getColor(precent) {
+        if (precent < .20) {
+          return '#F4F8FD';
+        } else if (precent < .40) {
+          return '#D8E6FF';
+        } else if (precent < .60) {
+          return '#A6CAFF';
+        } else if (precent < .80) {
+          return '#8FA4F8';
+        }
+        return '#3963DD';
+      }
+
+      _hsl_col_perc(percent, start, end) {
+        var a = percent,
+          b = (end - start) * a,
+          c = b + start;
+
+        // Return a CSS HSL string
+        return 'hsl(' + c + ', 80%, 50%)';
+      }
+    }
+    customElements.define(CohortTable.is, CohortTable);
+
+  </script>
+</dom-module>

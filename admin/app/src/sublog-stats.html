@@ -208,9 +208,9 @@
             }
             totalRevenue += unskippedSublogs[i].amount_paid;
             // calculate number Subscribers
-            if (unskippedSublogs[i].servings === 2 || unskippedSublogs[i].vegetarian_servings === 2) {
+            if (unskippedSublogs[i].servings + unskippedSublogs[i].vegetarian_servings === 2) {
               num2Customers++;
-            } else if (unskippedSublogs[i].servings === 4 || unskippedSublogs[i].vegetarian_servings === 4) {
+            } else if (unskippedSublogs[i].servings + unskippedSublogs[i].vegetarian_servings === 4) {
               num4Customers++;
             } else {
               num4PlusCustomers++;

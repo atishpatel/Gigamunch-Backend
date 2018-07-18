@@ -617,7 +617,15 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
 					resp.SubLogs[i].Date = subLogs[i].Date
 					resp.SubLogs[i].CustomerID = subs[j].CustomerID
-					if subs[j].VegetarianServings > 0 {
+					if subs[j].VegetarianServings > 0 && subs[j].Servings > 0 {
+						if subLogs[i].Servings == subs[j].VegetarianServings+subs[j].Servings {
+							resp.SubLogs[i].VegetarianServings = subs[j].VegetarianServings
+							resp.SubLogs[i].Servings = subs[j].Servings
+						} else {
+							resp.SubLogs[i].VegetarianServings = subLogs[i].Servings / 2
+							resp.SubLogs[i].Servings = subLogs[i].Servings / 2
+						}
+					} else if subs[j].VegetarianServings > 0 {
 						resp.SubLogs[i].VegetarianServings = subLogs[i].Servings
 					} else {
 						resp.SubLogs[i].Servings = subLogs[i].Servings
@@ -860,37 +868,3 @@ func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmai
 	}
 	return resp, nil
 }
-
-// GetGeneralStatsResp is a response for GetGeneralStats.
-// type GetGeneralStatsResp struct {
-// 	AverageUser
-// }
-
-// GetGeneralStats returns general stats.
-// func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) (*GetGeneralStatsResp, error) {
-// 	resp := new(GetGeneralStatsResp)
-// 	defer handleResp(ctx, "GetGeneralStats", resp.Err)
-// 	user, err := validateRequestAndGetUser(ctx, req)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err)
-// 		return resp, nil
-// 	}
-// 	if !user.IsAdmin() {
-// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-// 		return resp, nil
-// 	}
-
-// 	subC := sub.New(ctx)
-// 	err = subC.Get(req.Email)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
-// 		return resp, nil
-// 	}
-
-// 	err = subC.GetSubscribers(req.Email)
-// 	if err != nil {
-// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
-// 		return resp, nil
-// 	}
-// 	return resp, nil
-// }

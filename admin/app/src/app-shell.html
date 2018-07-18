@@ -334,6 +334,11 @@
                     attr-for-selected="name"
                     fallback-selection="view404"
                     role="main">
+          <dashboard-page name="dashboard"
+                          id="dashboardPage"
+                          serviceold="[[serviceold]]"
+                          user="{{user}}">
+          </dashboard-page>
           <subscriber-list-page name="subscriber-list"
                                 id="subscriberListPage"
                                 service="[[service]]"

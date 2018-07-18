@@ -68,6 +68,7 @@ func (s *SubscriptionSignUp) GetFirstDinnerDate() time.Time {
 	return s.FirstBoxDate
 }
 
+// SubscriptionLog is an activity done by a sub.
 type SubscriptionLog struct {
 	Date               time.Time `json:"date"`      // Primary Key
 	SubEmail           string    `json:"sub_email"` // Primary Key
@@ -86,4 +87,18 @@ type SubscriptionLog struct {
 	DiscountPercent    int8      `json:"discount_percent"`
 	CustomerID         string    `json:"customer_id"`
 	Refunded           bool      `json:"refunded"`
+}
+
+// SublogSummary is a summary of sublogs for a email;
+type SublogSummary struct {
+	MinDate             time.Time `json:"min_date,omitempty"`
+	MaxDate             time.Time `json:"max_date,omitempty"`
+	Email               string    `json:"email,omitempty"`
+	NumTotal            int       `json:"num_total,omitempty"`
+	NumSkip             int       `json:"num_skip,omitempty"`
+	NumPaid             int       `json:"num_paid,omitempty"`
+	NumRefunded         int       `json:"num_refunded,omitempty"`
+	TotalAmount         float32   `json:"total_amount,omitempty"`
+	TotalAmountPaid     float32   `json:"total_amount_paid,omitempty"`
+	TotalDiscountAmount float32   `json:"total_discount_amount,omitempty"`
 }
