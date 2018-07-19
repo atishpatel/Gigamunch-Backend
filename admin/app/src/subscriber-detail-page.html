@@ -379,7 +379,7 @@
       }
 
       getSubscriberSublogs(subscriberEmail) {
-        this.service.getSubscriberSublogs(subscriberEmail).then((resp) => {
+        this.service.GetSubscriberSublogs(subscriberEmail).then((resp) => {
           let err = resp.error;
           if (err && err.code !== 0) {
             return;
