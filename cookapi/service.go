@@ -523,7 +523,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 			special -= 2
 		}
 	}
-	totalStandardBags := twoBags + twoVegBags + fourBags + fourVegBags
+	totalStandardBags := twoBags + twoVegBags + fourBags + fourVegBags + specialTwoBags + specialFourBags + specialTwoVegBags + specialFourVegBags
 	msg := `%s culture execution:
 	2 bags: %d
 	2 special bags: %d
