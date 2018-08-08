@@ -1,0 +1,204 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import"
+      href="../bower_components/paper-styles/color.html">
+<link rel="import"
+      href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+<link rel="import"
+      href="app-icons.html">
+
+<dom-module id="subscriber-detail-sublog-table">
+  <template>
+    <shared-styles>
+      <style include="materialize-styles shared-styles">
+        :host {
+          display: block;
+        }
+
+        .sublog-table {
+          margin: 40px 0;
+          padding: 12px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+          border: 1px solid rgba(0, 0, 0, .12);
+        }
+
+      </style>
+    </shared-styles>
+
+    <div class="table-container">
+      <table class="striped sublog-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Serving Size</th>
+            <!-- <th>Address</th> -->
+            <th>Transaction ID</th>
+            <th>Discount</th>
+            <th>Status</th>
+            <th>Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template is="dom-repeat"
+                    items="[[sublogs]]"
+                    as="sublog">
+            <tr>
+              <td>[[sublog.dateString]]</td>
+              <td>[[sublog.servings]]</td>
+              <!-- <td>
+                <a target="_blank"
+                   href="[[sublog.addressLink]]">[[sublog.addressString]]</a>
+              </td> -->
+              <td>[[sublog.transaction_id]]</td>
+              <td>[[sublog.discount_string]]</td>
+              <td>
+                <div>
+                  [[sublog.statusString]] <br>
+                  <div style="color: #bbbbbb">[[sublog.paidDateString]]</div>
+                </div>
+              </td>
+              <td><i class="material-icons"
+                   style="font-size: 42px;">more</i>
+                </a>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+  </template>
+
+  <script>
+    class SubscriberDetailSublogSortableTable extends Polymer.Element {
+      static get is() {
+        return 'subscriber-detail-sublog-table';
+      }
+
+      static get properties() {
+        return {
+          sublogs: {
+            type: Array,
+            notify: true,
+            observer: 'sublogsObserver',
+          },
+          detailed: {
+            type: Boolean,
+            notify: true,
+            value: false,
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      _getStatusString(sublog) {
+        if (sublog.refundeed) {
+          return 'Refunded';
+        } else if (sublog.skip) {
+          return 'Skipped';
+        } else if (sublog.free) {
+          return 'Free';
+        } else if (sublog.paid) {
+          return 'Paid $' + sublog.amount;
+        }
+        const today = new Date();
+        const sublogDate = new Date(sublog.date);
+        if (today < sublogDate) {
+          return 'Pending'
+        }
+        return 'Owe $' + sublog.amount;
+      }
+
+      _getAddress(a) {
+        if (a && a.street) {
+          let apt = '';
+          if (a.apt !== undefined && a.apt !== '') {
+            apt = '#' + a.apt + ' ';
+          }
+          return apt + a.street + ', ' + a.city;
+        }
+        return '';
+      }
+
+      _getAddressLink(a) {
+        if (a && a.street) {
+          return 'https://maps.google.com/?q=' + encodeURIComponent(a.apt + ' ' + a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+        }
+        return '';
+      }
+
+      sublogsObserver() {
+        if (this.sublogs) {
+          const sublogs = this.sublogs;
+          for (var i = 0; i < sublogs.length; i++) {
+            sublogs[i].statusString = this._getStatusString(sublogs[i]);
+            sublogs[i].addressString = this._getAddress(sublogs[i].address);
+            sublogs[i].addressLink = this._getAddressLink(sublogs[i].address);
+            sublogs[i].dateString = this._getDateString(sublogs[i].date);
+            sublogs[i].paidDateString = this._getPaidDateString(sublogs[i].date);
+            sublogs[i].discount_string = this._getDiscountString(sublogs[i].discount_amount, sublogs[i].discount_percent);
+          }
+          this.sublogs = sublogs;
+        }
+      }
+
+      _getDateString(dateString) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
+        const d = new Date(dateString);
+        let day = d.getDay();
+        let month = d.getMonth();
+        let date = d.getDate();
+        let year = d.getFullYear();
+        return `${dayNames[day]}, ${monthNames[month]} ${date} ${year}`
+      }
+
+      _getPaidDateString(dateString) {
+        const today = new Date();
+        const sublogDate = new Date(dateString);
+        if (today < sublogDate) {
+          return ' '
+        }
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const d = new Date(dateString);
+        let day = d.getDay();
+        let month = d.getMonth();
+        let date = d.getDate();
+        let year = d.getFullYear();
+        return `${monthNames[month]} ${date} ${year}`
+      }
+
+      _getDiscountString(discountAmount, discountPercent) {
+        if (discountAmount > 0 && discountPercent > 0) {
+          return `$${discountAmount} | ${discountPercent}%`
+        } else if (discountAmount > 0) {
+          return `$${discountAmount}`
+        } else if (discountPercent > 0) {
+          return `${discountPercent}%`
+        } else {
+          return "–"
+        }
+      }
+
+    }
+
+    customElements.define(SubscriberDetailSublogSortableTable.is, SubscriberDetailSublogSortableTable);
+
+  </script>
+</dom-module>

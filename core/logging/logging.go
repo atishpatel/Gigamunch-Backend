@@ -2,7 +2,6 @@ package logging
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,34 +19,54 @@ const (
 	kind = "logging"
 )
 
-// Label of log.
-type Label string
+// Action of log.
+type Action string
 
 const (
-	// Paid Label.
-	Paid = Label("paid")
-	// Decline Label.
-	Decline = Label("decline")
-	// Refund Label.
-	Refund = Label("refund")
-	// Forgiven Label.
-	Forgiven = Label("forgiven")
-	// DeliveryStarted Label.
-	DeliveryStarted = Label("delivery_started")
-	// DeliveryEnded Label.
-	DeliveryEnded = Label("delivery_ended")
-	// Delivered Label.
-	Delivered = Label("delivered")
-	// Update Label.
-	Update = Label("update")
-	// Cancel Label.
-	Cancel = Label("cancel")
-	// Signup Label.
-	Signup = Label("signup")
-	// Activate Label.
-	Activate = Label("activate")
-	// Deactivate Label.
-	Deactivate = Label("deactivate")
+	// ======================
+	// Admin only Actions
+	// ======================
+
+	// Delivered Action.
+	Delivered = Action("delivered")
+	// ======================
+	// User or Admin Actions
+	// ======================
+
+	// Update Action.
+	Update = Action("update")
+	// Cancel Action.
+	Cancel = Action("cancel")
+	// Activate Action.
+	Activate = Action("activate")
+	// Deactivate Action.
+	Deactivate = Action("deactivate")
+	// Refund Action.
+	Refund = Action("refund")
+	// Forgiven Action.
+	Forgiven = Action("forgiven")
+	// CardUpdated Action.
+	CardUpdated = Action("card_updated")
+	// ServingsChanged Action.
+	ServingsChanged = Action("servings_changed")
+	// ServingsChangedPermanently Action.
+	ServingsChangedPermanently = Action("servings_changed_permanently")
+	// ======================
+	// User only Actions
+	// ======================
+
+	// Message Action.
+	Message = Action("message")
+	// Review Action.
+	Review = Action("review")
+	// ======================
+	// System Actions
+	// ======================
+
+	// Paid Action.
+	Paid = Action("paid")
+	// Decline Action.
+	Decline = Action("decline")
 )
 
 // Type of log.
@@ -60,42 +79,25 @@ func (t *Type) isNil() bool {
 const (
 	// Unknown type.
 	Unknown = Type("unknown")
-	// Request type.
-	Request = Type("request")
-	// Sale type.
-	Sale = Type("sale")
-	// Activity type.
-	Activity = Type("activity")
-	// Subscriber Type.
+	// Subscriber type.
 	Subscriber = Type("subscriber")
-	// Delivery Type.
-	Delivery = Type("delivery")
 	// System type.
 	System = Type("system")
-	// CultureExecution Type.
-	// CultureExecution = Type("culture_execution")
-	// Notification Type.
-	// Notification = Type("notification")
+	// Error type.
+	Error = Type("error")
 )
 
 const (
-	// Default means the log entry has no assigned severity level.
-	Default = sdlogging.Default
-	// Debug means debug or trace information.
-	Debug = sdlogging.Debug
-	// Info means routine information, such as ongoing status or performance.
-	Info = sdlogging.Info
-	// Warning means events that might cause problems.
-	Warning = sdlogging.Warning
-	// Error means events that are likely to cause problems.
-	Error = sdlogging.Error
-	// Critical means events that cause more severe problems or brief outages.
-	Critical = sdlogging.Critical
-	// Alert means a person must take an action immediately.
-	Alert = sdlogging.Alert
-	// Emergency means one or more systems are unusable.
-	// Emergency = sdlogging.Emergency
-
+	// SeverityInfo means routine information, such as ongoing status or performance.
+	SeverityInfo = sdlogging.Info
+	// SeverityWarning means events that might cause problems.
+	SeverityWarning = sdlogging.Warning
+	// SeverityError means events that are likely to cause problems.
+	SeverityError = sdlogging.Error
+	// SeverityCritical means events that cause more severe problems or brief outages.
+	SeverityCritical = sdlogging.Critical
+	// SeverityAlert means a person must take an action immediately.
+	SeverityAlert = sdlogging.Alert
 )
 
 var (
@@ -108,11 +110,6 @@ var (
 
 var (
 	// Errors
-	errFailedToEncodeJSON = errors.ErrorWithCode{
-		Code:    errors.CodeBadRequest,
-		Message: "Failed to log.",
-		Detail:  "failed to encode log json",
-	}
 	errDatastore = errors.InternalServerError
 	errInternal  = errors.InternalServerError
 )
@@ -195,6 +192,19 @@ func (c *Client) GetUserLogs(userID int64, start, limit int) ([]*Entry, error) {
 	return dst, nil
 }
 
+// GetUserLogsByEmail gets logs with UserEmail.
+func (c *Client) GetUserLogsByEmail(userEmail string, start, limit int) ([]*Entry, error) {
+	var dst []*Entry
+	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserEmail=", userEmail, dst)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to db.QueryFilterOrdered")
+	}
+	for i := range dst {
+		dst[i].ID = keys[i].IntID()
+	}
+	return dst, nil
+}
+
 // GetLog gets a log.
 func (c *Client) GetLog(id int64) (*Entry, error) {
 	var entry *Entry
@@ -209,137 +219,268 @@ func (c *Client) GetLog(id int64) (*Entry, error) {
 
 // SalePayload is a sales payload.
 type SalePayload struct {
-	Amount float32 `json:"amount"`
+	Date           string  `json:"date,omitempty"`
+	AmountDue      float32 `json:"amount_due,omitempty"`
+	AmountPaid     float32 `json:"amount_paid,omitempty"`
+	AmountDeclined float32 `json:"amount_declined,omitempty"`
+	AmountRefunded float32 `json:"amount_refunded,omitempty"`
+	AmountForgiven float32 `json:"amount_forgiven,omitempty"`
+	TransactionID  string  `json:"transaction_id,omitempty"`
 }
 
-// LogPaid is when a transaction is paid.
-func (c *Client) LogPaid(e *SalePayload) {
-
-}
-
-// LogRefund is when a transaction is refunded.
-func (c *Client) LogRefund(e *SalePayload) {
-
-}
-
-// LogDeclined is when a transaction is declined.
-func (c *Client) LogDeclined(e *SalePayload) {
-
-}
-
-// LogForgiven is when a transaction is forgiven.
-func (c *Client) LogForgiven(e *SalePayload) {
-
-}
-
-// SubPayload is a subscriber entry.
-type SubPayload struct {
-	ID        string `json:"id,omitempty"`
-	FirstName string `json:"first_name,omitempty"`
-}
-
-func (c *Client) LogSubActivate(e *SubPayload) {
-
-}
-
-func (c *Client) LogSubDeactivate(e *SubPayload) {
-
-}
-
-func (c *Client) LogSubCancel(e *SubPayload) {
-
-}
-
-func (c *Client) LogSubSignup(e *SubPayload) {
-
-}
-
-func (c *Client) LogSubUpdate(e *SubPayload) {
-
-}
-
-// ActivityPayload is a Activity entry.
-type ActivityPayload struct {
-	ActionUserID   string    `json:"action_user_id"`
-	ActionUserName string    `json:"action_user_name"`
-	Date           time.Time `json:"date"`
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-}
-
-// LogSkip logs a skip.
-func (c *Client) LogSkip(e *ActivityPayload) {
-
-}
-
-// LogUnskip logs a unskip.
-func (c *Client) LogUnskip(e *ActivityPayload) {
-
-}
-
-// LogServingsChanged logs a servings change.
-func (c *Client) LogServingsChanged(e *ActivityPayload) {
-
-}
-
-// SystemPayload is a System payload.
-type SystemPayload struct {
-	ID        string    `json:"id"`
-	Timestamp time.Time `json:"timestamp"`
-}
-
-// LogActivitySetup is a log of when the cron job for activity setup runs.
-func (c *Client) LogActivitySetup(e *SystemPayload) {
-
-}
-
-// ErrorPayload is an error entry assocted with LogRequestError.
-type ErrorPayload struct {
-	Request http.Request
-	errors.ErrorWithCode
-}
-
-// LogRequestError is used to log an error at the end of a request.
-func (c *Client) LogRequestError(r *http.Request, ewc errors.ErrorWithCode) {
-	errPayload := &ErrorPayload{
-		Request:       *r,
-		ErrorWithCode: ewc,
-	}
+// Paid is when a transaction is paid.
+func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPaid float32, transactionID string) {
 	e := &Entry{
-		Type:     Request,
-		Severity: Error,
-		Path:     r.URL.Path,
-	}
-	err := e.setPayload(errPayload)
-	if err != nil {
-		Errorf(c.ctx, "failed to setPayload: %+v", err)
+		Type:      Subscriber,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Paid for " + date,
+			Description: fmt.Sprintf("%s successfully paid %.2f for %s", userEmail, amountPaid, date),
+		},
+		SalePayload: &SalePayload{
+			Date:          date,
+			AmountDue:     amountDue,
+			AmountPaid:    amountPaid,
+			TransactionID: transactionID,
+		},
 	}
 	c.Log(e)
 }
 
-// Entry is a log entry.
-type Entry struct {
-	ID        int64              `json:"id" datastore:",noindex"`
-	Type      Type               `json:"type" datastore:",index"`
-	UserID    int64              `json:"user_id" datastore:",index"`
-	Severity  sdlogging.Severity `json:"serverity" datastore:",noindex"`
-	Path      string             `json:"path" datastore:",noindex"`
-	Labels    []Label            `json:"labels" datastore:",noindex"`
-	LogName   string             `json:"log_name" datastore:",noindex"`
-	Timestamp time.Time          `json:"timestamp" datastore:",index"`
-	Payload   string             `json:"payload" datastore:",noindex"`
+// Refund is when a transaction is refunded.
+func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountRefunded float32, transactionID string) {
+	e := &Entry{
+		Type:      Subscriber,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Refunded for " + date,
+			Description: fmt.Sprintf("%s was refunded %.2f", userEmail, amountRefunded),
+		},
+		SalePayload: &SalePayload{
+			Date:           date,
+			AmountDue:      amountDue,
+			AmountRefunded: amountRefunded,
+			TransactionID:  transactionID,
+		},
+	}
+	c.Log(e)
 }
 
-func (e *Entry) setPayload(payload interface{}) error {
-	if payload == nil {
-		return errFailedToEncodeJSON.Annotate("payload is empty")
+// Forgiven is when a transaction is forgiven.
+func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amountForgiven float32) {
+	e := &Entry{
+		Type:      Subscriber,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Forgiven for " + date,
+			Description: fmt.Sprintf("%s was forgiven for %.2f", userEmail, amountForgiven),
+		},
+		SalePayload: &SalePayload{
+			Date:           date,
+			AmountDue:      amountDue,
+			AmountForgiven: amountForgiven,
+		},
 	}
-	b, err := json.Marshal(payload)
-	if err != nil {
-		return errFailedToEncodeJSON.WithError(err)
+	c.Log(e)
+}
+
+// CardDeclined is when a transaction is declined.
+func (c *Client) CardDeclined(userID int64, userEmail, date string, amountDue, amountDeclined float32, transactionID string) {
+	e := &Entry{
+		Type:      Subscriber,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Card declined for " + date,
+			Description: fmt.Sprintf("%s's card was declined for %.2f", userEmail, amountDeclined),
+		},
+		SalePayload: &SalePayload{
+			Date:           date,
+			AmountDue:      amountDue,
+			AmountDeclined: amountDeclined,
+			TransactionID:  transactionID,
+		},
 	}
-	e.Payload = string(b)
-	return nil
+	c.Log(e)
+}
+
+// CreditCardPayload is the payload related to CreditCards.
+type CreditCardPayload struct {
+	OldPaymentMethodToken string `json:"old_payment_method_token,omitempty"`
+	NewPaymentMethodToken string `json:"new_payment_method_token,omitempty"`
+}
+
+// SubCardUpdated is when a credit card is Updated.
+func (c *Client) SubCardUpdated(oldPaymentMethodToken, newPaymentMethodToken string) {
+	e := &Entry{
+		Type:     Subscriber,
+		Severity: SeverityInfo,
+		BasicPayload: BasicPayload{
+			Title:       "Changed Credit Card",
+			Description: fmt.Sprintf("Changed card from %s to %s", oldPaymentMethodToken, newPaymentMethodToken),
+		},
+		CreditCardPayload: &CreditCardPayload{
+			OldPaymentMethodToken: oldPaymentMethodToken,
+			NewPaymentMethodToken: newPaymentMethodToken,
+		},
+	}
+	c.Log(e)
+}
+
+// func (c *Client) SubActivate() {
+
+// }
+
+// func (c *Client) SubDeactivate() {
+
+// }
+
+// func (c *Client) SubUpdate() {
+
+// }
+
+// SubServingsChangedPermanently logs a servings change.
+// func (c *Client) SubServingsChangedPermanently(date string) {
+
+// }
+
+// // SubServingsChanged logs a servings change.
+// func (c *Client) SubServingsChanged(date string) {
+
+// }
+
+// SkipPayload is a Skip entry.
+type SkipPayload struct {
+	UserID          int64  `json:"user_id,omitempty"`
+	UserEmail       string `json:"user_email,omitempty"`
+	Reason          string `json:"reason,omitempty"`
+	ActionUserID    int64  `json:"action_user_id,omitempty"`
+	ActionUserEmail string `json:"action_user_email,omitempty"`
+	Date            string `json:"date,omitempty"`
+}
+
+// SubSkip logs a skip.
+func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
+	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
+	e := &Entry{
+		Type:     Subscriber,
+		Severity: SeverityInfo,
+		BasicPayload: BasicPayload{
+			Title:       "Skip for " + date,
+			Description: fmt.Sprintf("%s was skipped for %s by %s because %s", userEmail, date, actionUserEmail, reason),
+		},
+		SkipPayload: &SkipPayload{
+			Date:            date,
+			UserID:          userID,
+			UserEmail:       userEmail,
+			Reason:          reason,
+			ActionUserID:    c.ctx.Value(common.ContextUserID).(int64),
+			ActionUserEmail: actionUserEmail,
+		},
+	}
+	c.Log(e)
+}
+
+// SubUnskip logs a unskip.
+func (c *Client) SubUnskip(date string, userID int64, userEmail string) {
+	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
+	e := &Entry{
+		Type:     Subscriber,
+		Severity: SeverityInfo,
+		BasicPayload: BasicPayload{
+			Title:       "Unskip for " + date,
+			Description: fmt.Sprintf("%s was unskipped for %s by %s", userEmail, date, actionUserEmail),
+		},
+		SkipPayload: &SkipPayload{
+			Date:            date,
+			UserID:          userID,
+			UserEmail:       userEmail,
+			ActionUserID:    c.ctx.Value(common.ContextUserID).(int64),
+			ActionUserEmail: actionUserEmail,
+		},
+	}
+	c.Log(e)
+}
+
+// ActivitySetupPayload is a System payload.
+type ActivitySetupPayload struct {
+	BasicPayload `json:"basic_payload,omitempty"`
+	Date         string `json:"date,omitempty"`
+	NumSetup     int    `json:"num_setup,omitempty"`
+}
+
+// ActivitySetup is a log of when the cron job for activity setup runs or admin runs activity setup.
+func (c *Client) ActivitySetup(date string, numSetup int) {
+	e := &Entry{
+		Type:     System,
+		Severity: SeverityInfo,
+		BasicPayload: BasicPayload{
+			Title:       date,
+			Description: fmt.Sprintf("Activity setup for %s", date),
+		},
+		ActivitySetupPayload: &ActivitySetupPayload{
+			Date:     date,
+			NumSetup: numSetup,
+		},
+	}
+	c.Log(e)
+}
+
+// ErrorPayload is an error entry assocted with RequestError.
+type ErrorPayload struct {
+	Request http.Request // TODO: change this
+	errors.ErrorWithCode
+}
+
+// RequestError is used to log an error at the end of a request.
+// TODO: log body?
+func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode, userID int64, userEmail string) {
+	e := &Entry{
+		Type:      Error,
+		Severity:  SeverityError,
+		Path:      r.URL.Path,
+		UserID:    userID,
+		UserEmail: userEmail,
+		ErrorPayload: &ErrorPayload{
+			Request:       *r,
+			ErrorWithCode: ewc,
+		},
+	}
+	c.Log(e)
+}
+
+// BasicPayload is in every payload.
+type BasicPayload struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+// Entry is a log entry.
+type Entry struct {
+	ID                   int64                 `json:"id" datastore:",noindex"`
+	Type                 Type                  `json:"type" datastore:",index"`
+	Action               Action                `json:"action" datastore:",index"`
+	ActionUserID         int64                 `json:"action_user_id,omitempty" datastore:",index"`
+	ActionUserEmail      string                `json:"action_user_email,omitempty" datastore:",index"`
+	UserID               int64                 `json:"user_id,omitempty" datastore:",index"`
+	UserEmail            string                `json:"user_email,omitempty" datastore:",index"`
+	Severity             sdlogging.Severity    `json:"serverity" datastore:",noindex"`
+	Path                 string                `json:"path" datastore:",noindex"`
+	LogName              string                `json:"log_name" datastore:",noindex"`
+	Timestamp            time.Time             `json:"timestamp" datastore:",index"`
+	BasicPayload         BasicPayload          `json:"basic_payload" datastore:",noindex"`
+	ErrorPayload         *ErrorPayload         `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
+	ActivitySetupPayload *ActivitySetupPayload `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
+	SkipPayload          *SkipPayload          `json:"skip_payload,omitempty" datastore:",omitempty,noindex"`
+	CreditCardPayload    *CreditCardPayload    `json:"credit_card_payload,omitempty" datastore:",omitempty,noindex"`
+	SalePayload          *SalePayload          `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
 }
 
 // Log logs a random entry.
@@ -353,6 +494,12 @@ func (c *Client) Log(e *Entry) {
 	}
 	if e.Path == "" {
 		e.Path = c.path
+	}
+	if e.ActionUserID == 0 {
+		e.ActionUserID = c.ctx.Value(common.ContextUserID).(int64)
+	}
+	if e.ActionUserEmail == "" {
+		e.ActionUserEmail = c.ctx.Value(common.ContextUserEmail).(string)
 	}
 	key := db.IncompleteKey(c.ctx, kind)
 	_, err := db.Put(c.ctx, key, e)

@@ -43,6 +43,7 @@ var (
 	errPermissionDenied = errors.PermissionDeniedError
 	errUnauthenticated  = errors.UnauthenticatedError
 	errBadRequest       = errors.BadRequestError
+	errInternalError    = errors.InternalServerError
 )
 
 func init() {
@@ -56,10 +57,14 @@ func init() {
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", handler(systemsAdmin(GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", handler(systemsAdmin(GetLogs)))
+	http.HandleFunc("/admin/api/v1/GetLogsByEmail", handler(systemsAdmin(GetLogsByEmail)))
 	// Sublogs
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", handler(userAdmin(ProcessSublog)))
+	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", handler(userAdmin(GetSubscriberSublogs)))
+	// Subscriber
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", handler(userAdmin(GetHasSubscribed)))
+	http.HandleFunc("/admin/api/v1/GetSubscriber", handler(userAdmin(GetSubscriber)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
 	// Execution
@@ -68,6 +73,7 @@ func init() {
 
 	http.HandleFunc("/admin/api/v1/Test", test)
 	setupTasksHandlers()
+	setupWebhooksHandlers()
 }
 
 func setup() error {
@@ -132,6 +138,8 @@ func userAdmin(f handle) handle {
 		if !user.IsUserAdmin() {
 			return errPermissionDenied
 		}
+		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
 		return f(ctx, r, log)
 	}
 }
@@ -145,6 +153,8 @@ func driverAdmin(f handle) handle {
 		if !user.IsDriverAdmin() {
 			return errPermissionDenied
 		}
+		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
 		return f(ctx, r, log)
 	}
 }
@@ -158,6 +168,8 @@ func systemsAdmin(f handle) handle {
 		if !user.IsSystemsAdmin() {
 			return errPermissionDenied
 		}
+		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
 		return f(ctx, r, log)
 	}
 }
@@ -214,6 +226,8 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 		}
 		// get context
 		ctx := appengine.NewContext(r)
+		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		if !setupDone {
 			err = setupWithContext(ctx)
 			if err != nil {

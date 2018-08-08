@@ -23,6 +23,15 @@ interface GetLogsResp {
     error: Error
     logs: Log[]
 }
+interface GetLogsByEmailReq {
+    start: number
+    limit: number
+    email: string
+}
+interface GetLogsByEmailResp {
+    error: Error
+    logs: Log[]
+}
 interface Sublog {
     date: string
     sub_email: string
@@ -92,9 +101,23 @@ interface ProcessSublogsResp {
 interface GetHasSubscribedReq {
     date: string
 }
+interface GetSubscriberSublogsReq {
+    email: string
+}
+interface GetSubscriberSublogsResp {
+    error: Error
+    sublogs: Sublog[]
+}
 interface GetHasSubscribedResp {
     error: Error
     subscribers: Subscriber[]
+}
+interface GetSubscriberReq {
+    email: string
+}
+interface GetSubscriberResp {
+    error: Error
+    subscriber: Subscriber
 }
 interface Execution {
     id: number
@@ -213,4 +236,34 @@ interface UpdateExecutionStatsReq {
 interface UpdateExecutionStatsResp {
     error: Error
     execution_stats: Execution
+}
+interface Delivery {
+    date: string
+    driver_name: string
+    driver_email: string
+    sub_email: string
+    order: number
+    success: boolean
+    fail: boolean
+    sub_name: string
+    phone_number: string
+    address: Address
+    delivery_notes: string
+    servings: number
+    vegetarian: boolean
+    first: boolean
+}
+interface GetDeliveriesReq {
+    date: string
+    driver_email: string
+}
+interface GetDeliveriesResp {
+    error: Error
+    deliveries: Delivery[]
+}
+interface UpdateDeliveriesReq {
+    deliveries: Delivery[]
+}
+interface UpdateDeliveriesResp {
+    error: Error
 }

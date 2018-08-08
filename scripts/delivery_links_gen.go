@@ -27,11 +27,19 @@ var (
 			Addresses: ``,
 		},
 		nameAndAddresses{
-			Name:      "Kimberly",
+			Name:      "Eric",
 			Addresses: ``,
 		},
 		nameAndAddresses{
 			Name:      "David",
+			Addresses: ``,
+		},
+		nameAndAddresses{
+			Name:      "Libby",
+			Addresses: ``,
+		},
+		nameAndAddresses{
+			Name:      "Brea",
 			Addresses: ``,
 		},
 		// Other
@@ -61,7 +69,7 @@ var (
 
 func main() {
 	fmt.Printf("Doc link:\n%s\n----------\n", docSheet)
-	startAddress := []string{"166+Chesapeake+Harbor+Blvd,+Hendersonville"}
+	startAddress := []string{"1001+Thompson+Pl,+Nashville,+TN+37217"}
 	del := "\n"
 	replacer := strings.NewReplacer("\t", "", " ", "+")
 	for _, i := range input {

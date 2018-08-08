@@ -334,12 +334,23 @@
                     attr-for-selected="name"
                     fallback-selection="view404"
                     role="main">
+          <dashboard-page name="dashboard"
+                          id="dashboardPage"
+                          serviceold="[[serviceold]]"
+                          user="{{user}}">
+          </dashboard-page>
           <subscriber-list-page name="subscriber-list"
                                 id="subscriberListPage"
                                 service="[[service]]"
                                 user="{{user}}"
                                 event="[[event]]">
           </subscriber-list-page>
+          <subscriber-detail-page name="subscriber"
+                                  id="subscriberDetailPage"
+                                  service="[[service]]"
+                                  user="{{user}}"
+                                  event="[[event]]">
+          </subscriber-detail-page>
           <skip-page name="skip"
                      id="skipPage"
                      service="[[serviceold]]"
@@ -525,6 +536,12 @@
             resolvedPageURL = this.resolveUrl('subscriber-list-page.html');
             el = this.$.subscriberListPage;
             title = 'Subscriber List';
+            break;
+          case 'subscriber':
+            elementName = 'subscriber-detail-page';
+            resolvedPageURL = this.resolveUrl('subscriber-detail-page.html');
+            el = this.$.subscriberDetailPage;
+            title = 'Subscriber Detail';
             break;
         }
         this.set('title', title);

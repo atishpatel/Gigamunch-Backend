@@ -6,6 +6,16 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
+// Campaign is a campaign a subscriber was a part of.
+type Campaign struct {
+	Source    string    `json:"source"`
+	Medium    string    `json:"medium"`
+	Campaign  string    `json:"campaign"`
+	Term      string    `json:"term" datastore:",noindex"`
+	Content   string    `json:"content" datastore:",noindex"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
 type SubscriptionSignUp struct {
 	Email              string        `json:"email"`
 	Date               time.Time     `json:"date"` // CreatedDate
@@ -39,6 +49,8 @@ type SubscriptionSignUp struct {
 	ReferredPageOpens int `json:"referred_page_opens" datastore:",noindex"`
 	GiftPageOpens     int `json:"gift_page_opens" datastore:",noindex"`
 	GiftedPageOpens   int `json:"gifted_page_opens" datastore:",noindex"`
+	// Campaign
+	Campaigns []Campaign `json:"campaigns"`
 }
 
 // GetName returns the name of subscriber.
@@ -56,6 +68,7 @@ func (s *SubscriptionSignUp) GetFirstDinnerDate() time.Time {
 	return s.FirstBoxDate
 }
 
+// SubscriptionLog is an activity done by a sub.
 type SubscriptionLog struct {
 	Date               time.Time `json:"date"`      // Primary Key
 	SubEmail           string    `json:"sub_email"` // Primary Key
@@ -74,4 +87,18 @@ type SubscriptionLog struct {
 	DiscountPercent    int8      `json:"discount_percent"`
 	CustomerID         string    `json:"customer_id"`
 	Refunded           bool      `json:"refunded"`
+}
+
+// SublogSummary is a summary of sublogs for a email;
+type SublogSummary struct {
+	MinDate             time.Time `json:"min_date,omitempty"`
+	MaxDate             time.Time `json:"max_date,omitempty"`
+	Email               string    `json:"email,omitempty"`
+	NumTotal            int       `json:"num_total,omitempty"`
+	NumSkip             int       `json:"num_skip,omitempty"`
+	NumPaid             int       `json:"num_paid,omitempty"`
+	NumRefunded         int       `json:"num_refunded,omitempty"`
+	TotalAmount         float32   `json:"total_amount,omitempty"`
+	TotalAmountPaid     float32   `json:"total_amount_paid,omitempty"`
+	TotalDiscountAmount float32   `json:"total_discount_amount,omitempty"`
 }

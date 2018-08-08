@@ -4,6 +4,13 @@ let baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
+export function GetSubscriber(email) {
+    const url = baseURL + 'GetSubscriber';
+    const req = {
+        email,
+    };
+    return callFetch(url, 'GET', req);
+}
 export function GetHasSubscribed(date) {
     const url = baseURL + 'GetHasSubscribed';
     const req = {
@@ -15,6 +22,13 @@ export function GetUnpaidSublogs(limit) {
     const url = baseURL + 'GetUnpaidSublogs';
     const req = {
         limit,
+    };
+    return callFetch(url, 'GET', req);
+}
+export function GetSubscriberSublogs(email) {
+    const url = baseURL + 'GetSubscriberSublogs';
+    const req = {
+        email,
     };
     return callFetch(url, 'GET', req);
 }

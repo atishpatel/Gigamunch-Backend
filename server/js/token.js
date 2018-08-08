@@ -22,13 +22,18 @@ export function GetToken() {
 export function SetToken(cvalue) {
     const jwt = GetJWT(cvalue);
     const d = new Date(0);
-    d.setUTCSeconds(jwt.exp);
+    if (jwt) {
+        d.setUTCSeconds(jwt.exp);
+    }
     document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
     }
 }
 export function GetJWT(tkn) {
+    if (!tkn) {
+        return null;
+    }
     const tknConv = tkn.replace(/[+\/]/g, (m0) => {
         return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');

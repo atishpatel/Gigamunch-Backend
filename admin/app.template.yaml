@@ -1,6 +1,6 @@
 service: admin
 runtime: go
-api_version: go1.8
+api_version: go1
 
 handlers:
   - url: /admin/api/.*
@@ -9,6 +9,9 @@ handlers:
   - url: /admin/task/.*
     script: _go_app
     login: admin
+
+  - url: /admin/webhook/.*
+    script: _go_app
 
   - url: /admin/src
     static_dir: app/src

@@ -5,12 +5,14 @@
 
 <link rel="import"
       href="sublog-table.html">
+<link rel="import"
+      href="sublog-stats.html">
 
 <dom-module id="sublog-page">
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
           padding: 10px;
         }
@@ -19,8 +21,20 @@
           padding: 12px 0;
         }
 
+        .individual-date {
+          padding-left: 24px;
+          border-left: 3px solid #889ba3;
+        }
+
         .table-title {
-          font-size: 14px;
+          font-size: 16px;
+          font-weight: 600;
+          text-decoration: underline;
+          padding-top: 12px;
+        }
+
+        sublog-stats {
+          padding: 0 0 24px 0;
         }
 
       </style>
@@ -35,19 +49,28 @@
             [[getDateString(item.date)]]
             </a>
           </h2>
-          <div class="table-title">
-            Unskipped
+          <div class="individual-date">
+            <sublog-stats sublogs="[[item.sublogs]]"></sublog-stats>
+            <div class="table-title">
+              Free
+            </div>
+            <sublog-table class="table"
+                          sublogs="[[item.freeSublogs]]"
+                          show="true">
+            </sublog-table>
+            <div class="table-title">
+              Unskipped
+            </div>
+            <sublog-table class="table"
+                          sublogs="[[item.unskippedSublogs]]">
+            </sublog-table>
+            <div class="table-title">
+              Skipped
+            </div>
+            <sublog-table class="table"
+                          sublogs="[[item.skippedSublogs]]">
+            </sublog-table>
           </div>
-          <sublog-table class="table"
-                        sublogs="[[item.unskippedSublogs]]">
-          </sublog-table>
-          <div class="table-title">
-            Skipped
-          </div>
-          <sublog-table class="table"
-                        sublogs="[[item.skippedSublogs]]">
-          </sublog-table>
-
         </div>
       </template>
     </dom-repeat>
@@ -100,15 +123,19 @@
           let sublogDay = {
             date: slogs[0].date,
             sublogs: [],
+            freeSublogs: [],
             skippedSublogs: [],
             unskippedSublogs: [],
           };
           for (let i = 0; i < slogs.length; i++) {
             if (sublogDay.date !== slogs[i].date) {
-              sublogs.push(sublogDay);
+              if (sublogDay.sublogs.length > 1 || sublogDay.sublogs[0].amount > 1) {
+                sublogs.push(sublogDay);
+              }
               sublogDay = {
                 date: slogs[i].date,
                 sublogs: [],
+                freeSublogs: [],
                 skippedSublogs: [],
                 unskippedSublogs: [],
               };
@@ -118,7 +145,11 @@
             if (slogs[i].skip || slogs[i].refunded) {
               sublogDay.skippedSublogs.push(slogs[i]);
             } else {
-              sublogDay.unskippedSublogs.push(slogs[i]);
+              if (slogs[i].free) {
+                sublogDay.freeSublogs.push(slogs[i]);
+              } else {
+                sublogDay.unskippedSublogs.push(slogs[i]);
+              }
             }
           }
           this.sublogsByDates = sublogs;

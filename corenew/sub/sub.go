@@ -28,11 +28,13 @@ const (
 	insertSubLogStatement                    = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
 	selectSubLogEmails                       = "SELECT DISTINCT sub_email from sub where date>? and date<?"
 	selectSubLogStatement                    = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date='%s' AND sub_email='%s'"
-	selectSubscriberSubLogsStatement         = "SELECT date,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent, refunded FROM `sub` WHERE sub_email='%s'"
+	selectSubscriberSubLogsStatement         = "SELECT date,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent, refunded FROM `sub` WHERE sub_email=? ORDER BY date DESC"
 	selectAllSubLogStatement                 = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` ORDER BY date DESC LIMIT %d"
 	selectUnpaidSubLogStatement              = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE paid=0 AND free=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
 	selectSubscriberUnpaidSubLogStatement    = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE paid=0 AND free=0 AND skip=0 AND refunded=0 AND sub_email=?"
 	selectSubLogFromDateStatement            = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
+	selectSubLogFromSubscriberStatement      = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE sub_email=? ORDER BY date DESC"
+	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),sub_email,count(sub_email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount) FROM sub WHERE date>'2017-04-08' AND date<? GROUP BY sub_email ORDER BY mn"
 	updatePaidSubLogStatement                = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
 	updateSkipSubLogStatement                = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
 	updateRefundedAndSkipSubLogStatement     = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
@@ -113,6 +115,9 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 	if len(emails) == 0 {
 		return nil, errInvalidParameter.Wrap("emails cannot be of length 0.")
 	}
+	for i := range emails {
+		emails[i] = strings.TrimSpace(emails[i])
+	}
 	subs, err := getMulti(c.ctx, emails)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to getMulti")
@@ -122,10 +127,36 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 
 // GetHasSubscribed returns a list of all SubscriptionSignUp.
 func (c *Client) GetHasSubscribed(date time.Time) ([]SubscriptionSignUp, error) {
-
 	subs, err := getHasSubscribed(c.ctx, date)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
+	}
+	return subs, nil
+}
+
+// GetSublogSummaries gets a summary of SubLogs.
+func (c *Client) GetSublogSummaries() ([]*SublogSummary, error) {
+	rows, err := mysqlDB.Query(selectSublogSummaryStatement, time.Now().Format(dateFormat))
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSublogSummaryStatement statement:")
+	}
+	defer handleCloser(c.ctx, rows)
+	var subs []*SublogSummary
+	for rows.Next() {
+		sub := new(SublogSummary)
+		var minDate mysql.NullTime
+		var maxDate mysql.NullTime
+		err = rows.Scan(&minDate, &maxDate, &sub.Email, &sub.NumTotal, &sub.NumSkip, &sub.NumPaid, &sub.NumRefunded, &sub.TotalAmount, &sub.TotalAmountPaid, &sub.TotalDiscountAmount)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
+		}
+		if minDate.Valid {
+			sub.MinDate = minDate.Time
+		}
+		if maxDate.Valid {
+			sub.MaxDate = maxDate.Time
+		}
+		subs = append(subs, sub)
 	}
 	return subs, nil
 }
@@ -262,6 +293,37 @@ func (c *Client) GetForDate(date time.Time) ([]*SubscriptionLog, error) {
 	return subLogs, nil
 }
 
+// GetSubscriberSublogs gets all the SubLogs of a subscriber.
+func (c *Client) GetSubscriberSublogs(email string) ([]*SubscriptionLog, error) {
+	rows, err := mysqlDB.Query(selectSubLogFromSubscriberStatement, email)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Wrap("failed to query statement:" + selectSubLogFromSubscriberStatement)
+	}
+	defer handleCloser(c.ctx, rows)
+	var subLogs []*SubscriptionLog
+	for rows.Next() {
+		subLog := new(SubscriptionLog)
+		var date mysql.NullTime
+		var createdNulltime mysql.NullTime
+		var paidNulltime mysql.NullTime
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.DeliveryTime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		if err != nil {
+			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
+		}
+		if date.Valid {
+			subLog.Date = date.Time
+		}
+		if createdNulltime.Valid {
+			subLog.CreatedDatetime = createdNulltime.Time
+		}
+		if paidNulltime.Valid {
+			subLog.PaidDatetime = paidNulltime.Time
+		}
+		subLogs = append(subLogs, subLog)
+	}
+	return subLogs, nil
+}
+
 // Get gets a SubLog.
 func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) {
 	if date.IsZero() || subEmail == "" {
@@ -300,8 +362,7 @@ func (c *Client) GetSubscriberActivities(email string) ([]*SubscriptionLog, erro
 	if email == "" {
 		return nil, errInvalidParameter.Wrapf("expected(actual): subEmail(%s) ", email)
 	}
-	st := fmt.Sprintf(selectSubscriberSubLogsStatement, email)
-	rows, err := mysqlDB.Query(st)
+	rows, err := mysqlDB.Query(selectSubscriberSubLogsStatement, email)
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSubscriberSubLogsStatement statement.")
 	}

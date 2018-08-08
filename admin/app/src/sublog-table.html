@@ -1,5 +1,7 @@
 <link rel="import"
       href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-checkbox/paper-checkbox.html">
 
 <link rel="import"
       href="shared-styles.html">
@@ -8,7 +10,7 @@
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
         }
 
@@ -46,12 +48,13 @@
 
       </style>
     </shared-styles>
-
-    <div class="table">
+    <paper-checkbox checked="{{show}}"
+                    style="margin: 20px 0px">Show</paper-checkbox>
+    <div hidden$="{{!show}}"
+         class="table">
       <div class="table-row table-header-row">
         <div class="table-cell">Email</div>
         <div class="table-cell">Servings</div>
-        <div class="table-cell">Delivery Time</div>
         <div class="table-cell">Status</div>
       </div>
       <dom-repeat items="[[sublogs]]"
@@ -60,7 +63,6 @@
           <div class="table-row">
             <div class="table-cell">[[sublog.sub_email]]</div>
             <div class="table-cell">[[sublog.servings]]</div>
-            <div class="table-cell">[[sublog.delivery_time]]</div>
             <div class="table-cell">[[sublog.status]]</div>
           </div>
         </template>
@@ -83,6 +85,11 @@
           },
           totalServings: {
             type: Number,
+            notify: true,
+          },
+          show: {
+            type: Boolean,
+            value: false,
             notify: true,
           },
         }

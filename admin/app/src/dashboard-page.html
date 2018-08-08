@@ -1,0 +1,134 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<link rel="import"
+      href="cohort-table.html">
+
+<dom-module id="dashboard-page">
+  <template>
+    <shared-styles>
+      <style include="materialize-styles shared-styles">
+        :host {
+          display: block;
+          padding: 12px;
+        }
+
+        .chart {
+          height: 500px;
+          padding: 12px;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+      <h2>Monthly</h2>
+      <div id="monthlyAvgChart"
+           class="chart"></div>
+      <cohort-table cohort="[[monthlyCohort]]"></cohort-table>
+      <h2>Weekly</h2>
+      <p>How long people are with us based on week. This doesn't account for skip at all.</p>
+      <div id="weeklyAvgChart"
+           class="chart"></div>
+      <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
+      <h2>Weekly Paid</h2>
+      <p>This is an imprefect cohort that basically says. The person did not skip from the day they started the service for the same number of times they have recieved Gigamunch in total.</p>
+      <div id="weeklyPaidAvgChart"
+           class="chart"></div>
+      <cohort-table cohort="[[weeklyPaidCohort]]"></cohort-table>
+    </div>
+  </template>
+
+  <script>
+    class DashboardPage extends Polymer.Element {
+      static get is() {
+        return 'dashboard-page';
+      }
+
+      static get properties() {
+        return {
+          serviceold: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          weeklyCohort: {
+            type: Object,
+            notify: true,
+          },
+          weeklyPaidCohort: {
+            type: Object,
+            notify: true,
+          },
+          monthlyCohort: {
+            type: Object,
+            notify: true,
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        this.getDashboardStats();
+      }
+
+      getDashboardStats() {
+        this.loading = true;
+        this.serviceold.GetGeneralStats((resp) => {
+          this.loading = false;
+          const err = resp.err;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          this.weeklyCohort = resp.weekly_cohort_analysis;
+          this.weeklyPaidCohort = resp.weekly_paid_cohort_analysis;
+          this.monthlyCohort = resp.monthly_cohort_analysis;
+          this._drawCohortChart(this.monthlyCohort, this.$.monthlyAvgChart);
+          this._drawCohortChart(this.weeklyCohort, this.$.weeklyAvgChart);
+          this._drawCohortChart(this.weeklyPaidCohort, this.$.weeklyPaidAvgChart);
+        });
+      }
+
+      _drawCohortChart(cohort, element) {
+        var dataArray = [
+          ['Week', 'Retention']
+        ];
+        for (let i = 0; i < cohort.average_retention.length; i++) {
+          const point = [i, cohort.average_retention[i]];
+          dataArray.push(point)
+        }
+        var data = google.visualization.arrayToDataTable(dataArray);
+
+        var options = {
+          title: 'Average Retention',
+        };
+
+        var chart = new google.visualization.LineChart(element);
+
+        chart.draw(data, options);
+      }
+
+    }
+    window.customElements.define(DashboardPage.is, DashboardPage);
+
+  </script>
+</dom-module>

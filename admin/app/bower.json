@@ -39,7 +39,6 @@
     "paper-slider": "PolymerElements/paper-slider#^2.0.0",
     "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^2.0.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.0.0",
-    "vaadin-grid": "vaadin/vaadin-grid#^5.0.0",
     "google-map": "GoogleWebComponents/google-map#^2.0.2"
   }
 }

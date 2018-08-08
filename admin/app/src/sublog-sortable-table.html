@@ -1,12 +1,6 @@
 <link rel="import"
       href="../bower_components/polymer/polymer-element.html">
 <link rel="import"
-      href="../bower_components/vaadin-grid/vaadin-grid.html">
-<link rel="import"
-      href="../bower_components/vaadin-grid/vaadin-grid-column.html">
-<link rel="import"
-      href="../bower_components/vaadin-grid/vaadin-grid-sorter.html">
-<link rel="import"
       href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import"
       href="../bower_components/paper-styles/color.html">
@@ -16,14 +10,22 @@
 <link rel="import"
       href="shared-styles.html">
 <link rel="import"
+      href="materialize-styles.html">
+<link rel="import"
       href="app-icons.html">
 
 <dom-module id="sublog-sortable-table">
   <template>
     <shared-styles>
-      <style include="shared-styles">
+      <style include="materialize-styles shared-styles">
         :host {
           display: block;
+        }
+
+        .sublog-table {
+          padding: 12px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+          border: 1px solid rgba(0, 0, 0, .12);
         }
 
       </style>
@@ -31,219 +33,60 @@
 
     <paper-checkbox checked="{{detailed}}"
                     style="margin: 20px 0px">Transactions Mode</paper-checkbox>
-
-    <vaadin-grid id="material"
-                 items="[[sublogs]]"
-                 height-by-rows="true">
-
-      <vaadin-grid-column resizable>
-        <template class="header">
-          <vaadin-grid-sorter path="name">
-            <div class="cell">Name
-              <iron-icon icon="app:arrow-upward"></iron-icon>
-            </div>
-          </vaadin-grid-sorter>
-        </template>
-        <template>
-          <div class="cell">[[item.name]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column resizable>
-        <template class="header">
-          <vaadin-grid-sorter path="sub_email">
-            <div class="cell">Email
-              <iron-icon icon="app:arrow-upward"></iron-icon>
-            </div>
-          </vaadin-grid-sorter>
-        </template>
-        <template>
-          <div class="cell">[[item.sub_email]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden=[[detailed]]
-                          resizable
-                          width="60px">
-        <template class="header">
-          <vaadin-grid-sorter path="servings">
-            <div class="cell">Servings
-              <iron-icon icon="app:arrow-upward"></iron-icon>
-            </div>
-          </vaadin-grid-sorter>
-        </template>
-        <template>
-          <div class="cell numeric">[[item.servings]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden=[[detailed]]
-                          resizable
-                          width="60px">
-        <template class="header">
-          <vaadin-grid-sorter path="vegetarian_servings">
-            <div class="cell">Veg<br>Servings
-              <iron-icon icon="app:arrow-upward"></iron-icon>
-            </div>
-          </vaadin-grid-sorter>
-        </template>
-        <template>
-          <div class="cell numeric">[[item.vegetarian_servings]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden=[[detailed]]
-                          resizable
-                          width="60px">
-        <template class="header">
-          <vaadin-grid-sorter path="delivery_time">
-            <div class="cell">Delivery<br>Time
-              <iron-icon icon="app:arrow-upward"></iron-icon>
-            </div>
-          </vaadin-grid-sorter>
-        </template>
-        <template>
-          <div class="cell numeric">[[item.delivery_time]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column resizable>
-        <template class="header">
-          <vaadin-grid-sorter path="status">
-            <div class="cell">Status
-              <iron-icon icon="app:arrow-upward"></iron-icon>
-            </div>
-          </vaadin-grid-sorter>
-        </template>
-        <template>
-          <div class="cell">[[item.status]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden=[[detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Address
-          </div>
-        </template>
-        <template>
-          <div class="cell">
-            <a target="_blank"
-               href="[[item.addressLink]]">[[item.addressString]]</a>
-          </div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden=[[detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Phone<br>Number
-          </div>
-        </template>
-        <template>
-          <div class="cell">[[item.phone_number]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden=[[detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Delivery<br>Tip
-          </div>
-        </template>
-        <template>
-          <div class="cell">[[item.delivery_tips]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden$=[[!detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            TransactionID
-          </div>
-        </template>
-        <template>
-          <div class="cell">[[item.transaction_id]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden$=[[!detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            CustomerID
-          </div>
-        </template>
-        <template>
-          <div class="cell"><a target="_blank"
-               href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[item.customer_id]]">[[item.customer_id]]</a></div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden$=[[!detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Refunded
-          </div>
-        </template>
-        <template>
-          <div class="cell">[[item.refunded]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden$=[[!detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Discount <br>Amount|Percent
-          </div>
-        </template>
-        <template>
-          <div class="cell">$[[item.discount_amount]] | [[item.discount_percent]]%</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden$=[[!detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Amount
-          </div>
-        </template>
-        <template>
-          <div class="cell">$[[item.amount]]</div>
-        </template>
-      </vaadin-grid-column>
-      <vaadin-grid-column hidden$=[[!detailed]]
-                          resizable>
-        <template class="header">
-          <div class="cell">
-            Amount Paid
-          </div>
-        </template>
-        <template>
-          <div class="cell">$[[item.amount_paid]]</div>
-        </template>
-      </vaadin-grid-column>
-    </vaadin-grid>
-    <div>
-      <div><strong>With extra:</strong></div>
-      <div>Total Non Veg servings: <strong>[[totalNoVegServingsExtra]]</strong></div>
-      <div>Total Veg servings: <strong>[[totalVegServingsExtra]]</strong></div>
-      <div>Total Non Veg containers: <strong>[[totalNoVegContainersExtra]]</strong></div>
-      <div>Total Veg conatiners: <strong>[[totalVegContainersExtra]]</strong></div>
+    <div class="table-container">
+      <table class="striped sublog-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th hidden="[[detailed]]">Servings</th>
+            <th hidden="[[detailed]]">Veg Servings</th>
+            <th hidden="[[detailed]]">Status</th>
+            <th hidden="[[detailed]]">Address</th>
+            <th hidden="[[detailed]]">Phone #</th>
+            <th hidden="[[detailed]]">Delivery Tip</th>
+            <th hidden$="[[!detailed]]">Transaction ID</th>
+            <th hidden$="[[!detailed]]">Customer ID</th>
+            <th hidden$="[[!detailed]]">Refunded</th>
+            <th hidden$="[[!detailed]]">Discount <br>Amount | Percent</th>
+            <th hidden$="[[!detailed]]">Amount</th>
+            <th hidden$="[[!detailed]]">Amount Paid</th>
+            <th hidden$="[[!detailed]]">Paid Datetime</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template is="dom-repeat"
+                    items="[[sublogs]]"
+                    as="sublog">
+            <tr>
+              <td>[[sublog.name]]</td>
+              <td>[[sublog.sub_email]]</td>
+              <td hidden="[[detailed]]">[[sublog.servings]]</td>
+              <td hidden="[[detailed]]">[[sublog.vegetarian_servings]]</td>
+              <td hidden="[[detailed]]">[[sublog.status]]</td>
+              <td hidden="[[detailed]]">
+                <a target="_blank"
+                   href="[[sublog.addressLink]]">[[sublog.addressString]]</a>
+              </td>
+              <td hidden="[[detailed]]">[[sublog.phone_number]]</td>
+              <td hidden="[[detailed]]"
+                  style="max-width:200px">[[sublog.delivery_tips]]</td>
+              <td hidden$="[[!detailed]]">[[sublog.transaction_id]]</td>
+              <td hidden$="[[!detailed]]">
+                <a target="_blank"
+                   href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[sublog.customer_id]]">[[sublog.customer_id]]</a>
+              </td>
+              <td hidden$="[[!detailed]]">[[sublog.refunded]]</td>
+              <td hidden$="[[!detailed]]">$[[sublog.discount_amount]] | [[sublog.discount_percent]]%</td>
+              <td hidden$="[[!detailed]]">[[sublog.amount]]</td>
+              <td hidden$="[[!detailed]]">[[sublog.amount_paid]]</td>
+              <td hidden$="[[!detailed]]">[[sublog.paidDateString]]</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
     </div>
-    <br>
-    <br>
-    <div>Total Non Veg servings: <strong>[[totalNoVegServings]]</strong></div>
-    <div>Total Veg servings: <strong>[[totalVegServings]]</strong></div>
-    <div>Total Non Veg containers: <strong>[[totalNoVegContainers]]</strong></div>
-    <div>Total Veg conatiners: <strong>[[totalVegContainers]]</strong></div>
-    <br>
-    <div>Number of Customers: <strong>[[numCustomers]]</strong></div>
-    <div>Number of 2 Serving Customers: <strong>[[num2Customers]]</strong></div>
-    <div>Number of 4 Serving Customers: <strong>[[num4Customers]]</strong></div>
-    <div>Number of 4+ Serving Customers: <strong>[[num4PlusCustomers]]</strong></div>
-    <br>
-    <div>Predicted Revenue: <strong>$[[predictedRevenue]]</strong></div>
-    <div>Total Revenue: <strong>$[[totalRevenue]]</strong></div>
-    <div>Total Tax: <strong>$[[totalTax]]</strong></div>
-    <div>Total Processing Cost: <strong>$[[totalProcessingCost]]</strong></div>
-    <div>Total Free + Discount Cost: <strong>$[[totalCost]]</strong></div>
-    <br>
-    <div>Percent skip: <strong>[[percentSkip]] %</strong></div>
+
   </template>
 
   <script>
@@ -258,54 +101,6 @@
             type: Array,
             notify: true,
             observer: 'sublogsObserver',
-          },
-          totalNoVegServings: {
-            type: Number,
-            notify: true,
-          },
-          totalVegServings: {
-            type: Number,
-            notify: true,
-          },
-          totalNoVegContainers: {
-            type: Number,
-            notify: true,
-          },
-          totalVegContainers: {
-            type: Number,
-            notify: true,
-          },
-          numCustomers: {
-            type: Number,
-          },
-          num2Customers: {
-            type: Number,
-          },
-          num4Customers: {
-            type: Number,
-          },
-          num4PlusCustomers: {
-            type: Number,
-          },
-          predictedRevenue: {
-            type: String,
-            notify: true,
-          },
-          totalRevenue: {
-            type: String,
-            notify: true,
-          },
-          totalCost: {
-            type: String,
-            notify: true,
-          },
-          totalTax: {
-            type: String,
-            notify: true,
-          },
-          totalProcessingCost: {
-            type: String,
-            notify: true,
           },
           detailed: {
             type: Boolean,
@@ -359,64 +154,19 @@
       sublogsObserver() {
         if (this.sublogs) {
           const sublogs = this.sublogs;
-          let numCustomers = 0;
-          let num2Customers = 0;
-          let num4Customers = 0;
-          let num4PlusCustomers = 0;
-          let totalNoVegServings = 0;
-          let totalVegServings = 0;
-          let predictedRevenue = 0.0;
-          let totalRevenue = 0.0;
-          let totalCost = 0.0;
-          let totalTax = 0.0;
-          let totalProcessingCost = 0.0;
           for (var i = 0; i < sublogs.length; i++) {
-            totalNoVegServings += sublogs[i].servings;
-            totalVegServings += sublogs[i].vegetarian_servings;
             sublogs[i].status = this.getStatus(sublogs[i]);
             sublogs[i].addressString = this.getAddress(sublogs[i].address);
             sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
-            // calculate revenue
-            if (sublogs[i].free) {
-              totalCost += sublogs[i].amount;
-            } else {
-              predictedRevenue += sublogs[i].amount;
-            }
-            if (sublogs[i].paid) {
-              totalCost += sublogs[i].amount_paid - sublogs[i].amount;
-            }
-            totalRevenue += sublogs[i].amount_paid;
-            // calculate number customers
-            numCustomers++;
-            if (sublogs[i].servings === 2 || sublogs[i].vegetarian_servings === 2) {
-              num2Customers++;
-            } else if (sublogs[i].servings === 4 || sublogs[i].vegetarian_servings === 4) {
-              num4Customers++;
-            } else {
-              num4PlusCustomers++;
-            }
-            totalTax += sublogs[i].amount_paid * .0975;
-            totalProcessingCost += sublogs[i].amount_paid * .029 + .3;
+            sublogs[i].paidDateString = this._getDatetimeString(sublogs[i].paid_datetime);
           }
           this.sublogs = sublogs;
-          this.totalNoVegServings = totalNoVegServings;
-          this.totalVegServings = totalVegServings;
-          this.totalNoVegContainers = totalNoVegServings / 2;
-          this.totalVegContainers = totalVegServings / 2;
-          this.totalNoVegServingsExtra = totalNoVegServings + 6;
-          this.totalVegServingsExtra = totalVegServings + 2;
-          this.totalNoVegContainersExtra = this.totalNoVegServingsExtra / 2;
-          this.totalVegContainersExtra = this.totalVegServingsExtra / 2;
-          this.predictedRevenue = predictedRevenue.toFixed(2);
-          this.totalRevenue = totalRevenue.toFixed(2);
-          this.totalCost = totalCost.toFixed(2);
-          this.numCustomers = numCustomers;
-          this.num2Customers = num2Customers;
-          this.num4Customers = num4Customers;
-          this.num4PlusCustomers = num4PlusCustomers;
-          this.totalTax = totalTax.toFixed(2);
-          this.totalProcessingCost = totalProcessingCost.toFixed(2);
         }
+      }
+
+      _getDatetimeString(dateString) {
+        const d = new Date(dateString);
+        return d.toLocaleString();
       }
 
     }

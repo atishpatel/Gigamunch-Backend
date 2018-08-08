@@ -266,13 +266,13 @@
               function getAddress(a) {
                 if (a && a.street) {
                   if (/\d/.test(a.street)) {
-                    return a.street + ', ' + a.city;
+                    return `${a.street}, ${a.city}, ${a.state} ${a.zip}`;
                   }
                   let apt = '';
                   if (a.apt) {
                     apt = a.apt + ' ';
                   }
-                  return apt + a.street + ', ' + a.city;
+                  return `${apt} ${a.street}, ${a.city}, ${a.state} ${a.zip}`;
                 }
                 return '';
               }
@@ -283,9 +283,9 @@
             }
           }
           // convert to driver struct
+          this.dateString = this._getDateString(slogs[0].date);
           this.drivers = this.getDrivers(unskippedSublogs);
           this.totalDeliveries = unskippedSublogs.length;
-          this.dateString = this._getDateString(slogs[0].date);
           this.setPolygons();
         });
       }
@@ -438,7 +438,10 @@
           }
           drivers[i].pinSymbol = pinSymbol(drivers[i].color);
         }
-
+        let cache = JSON.parse(window.localStorage.getItem(this.dateString));
+        if (!cache) {
+          cache = {};
+        }
         sublogs.forEach((sublog) => {
           let found = false;
 
@@ -480,7 +483,13 @@
             if (driver.name === '-') {
               continue;
             }
-            if (this._inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence)) {
+            let isDriver = false;
+            if (cache[sublog.sub_email]) {
+              isDriver = cache[sublog.sub_email] === driver.name;
+            } else {
+              isDriver = this._inside(Number(sublog.address.latitude), Number(sublog.address.longitude), driver.geofence);
+            }
+            if (isDriver) {
               // in driver's geofence
               // add map marker
               sublog.marker = makeMarker(this, sublog, driver);
@@ -513,6 +522,10 @@
         let delivery;
         let drivers = this.drivers;
         this.set('drivers', []);
+        let cache = JSON.parse(window.localStorage.getItem(this.dateString));
+        if (!cache) {
+          cache = {};
+        }
         // remove from old driver
         for (let i = 0; i < drivers.length; i++) {
           for (let j = 0; j < drivers[i].deliveries.length; j++) {
@@ -535,6 +548,8 @@
             drivers[i].optimized = false;
           }
         }
+        cache[deliveryEmail] = driverName;
+        window.localStorage.setItem(this.dateString, JSON.stringify(cache));
         setTimeout(() => {
           this.set('drivers', drivers);
         }, 1000);
@@ -565,16 +580,17 @@
 
       _getGeofences() {
         return [{
-            name: 'Theo',
+            name: 'Enis',
             desc: 'Franklin',
             color: '#3F51B5',
+            round_trip: false,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
+              lat: 36.268554,
+              lng: -86.628631
             },
             geofence: [
               [-86.6917419, 36.0035625],
@@ -591,10 +607,10 @@
             name: 'Atish',
             desc: 'Hendersonville',
             color: '#009688',
-            round_trip: true,
+            round_trip: false,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.268554,
@@ -603,7 +619,7 @@
             geofence: [
               [-86.602478, 36.2542406],
               [-86.5756989, 36.2647604],
-              [-86.583252, 36.316785],
+              [-86.4390565, 36.4361992],
               [-86.8798828, 36.359375],
               [-86.8661499, 36.2487033],
               [-86.6872834, 36.2922329],
@@ -614,10 +630,10 @@
             name: 'Chris',
             desc: 'Hendersonville2',
             color: '#03A9F4',
-            round_trip: true,
+            round_trip: false,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.268554,
@@ -633,10 +649,10 @@
             name: 'Piyush',
             desc: 'Hermitage',
             color: '#4CAF50',
-            round_trip: true,
+            round_trip: false,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.268554,
@@ -657,35 +673,37 @@
             ],
           },
           {
-            name: 'Enis',
-            desc: 'Downtown',
-            color: '#F44336',
+            name: 'Tim',
+            desc: 'Brentwood',
+            color: '#673AB7',
+            round_trip: true,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.268554,
               lng: -86.628631
             },
             geofence: [
-              [-86.7118263, 36.0084229],
+              [-86.7087364, 36.003146],
               [-86.732254, 36.078517],
-              [-86.7701911, 36.1400235],
-              [-86.791563, 36.1321905],
+              [-86.7725944, 36.1146501],
+              [-86.8040943, 36.1194342],
               [-86.8081284, 36.1184635],
               [-86.8297577, 36.0893379],
-              [-86.8376542, 36.0049512],
-              [-86.7118263, 36.0084229],
+              [-86.8386842, 35.9949521],
+              [-86.7087364, 36.003146],
             ],
           },
           {
             name: 'Wofford',
             desc: 'Bellevue',
             color: '#E91E63',
+            round_trip: true,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.118228,
@@ -704,12 +722,13 @@
             ],
           },
           {
-            name: 'Kimberly',
+            name: 'Eric',
             desc: 'EastNashville',
             color: '#FFC107',
+            round_trip: true,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.118228,
@@ -722,9 +741,9 @@
               [-86.8064117, 36.2348583],
               [-86.8173981, 36.1982958],
               [-86.8046929, 36.1714086],
-              [-86.7950821, 36.1514597],
-              [-86.782727, 36.1450846],
-              [-86.7576599, 36.154509],
+              [-86.7784309, 36.1708627],
+              [-86.7713974, 36.1631032],
+              [-86.7574882, 36.1592214],
               [-86.7521667, 36.1628248],
               [-86.7020416, 36.1750198],
               [-86.6972351, 36.1938628],
@@ -736,9 +755,10 @@
             name: 'Todd',
             desc: 'Vanderbilt',
             color: '#CDDC39',
+            round_trip: true,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.118228,
@@ -748,21 +768,22 @@
               [-86.8198014, 36.1978802],
               [-86.839714, 36.1672596],
               [-86.8228867, 36.1368329],
-              [-86.8330165, 36.1179772],
-              [-86.8154239, 36.1112525],
-              [-86.7968474, 36.1278924],
-              [-86.782727, 36.1450846],
+              [-86.8344756, 36.1147878],
+              [-86.8161106, 36.1079934],
+              [-86.8022118, 36.1291403],
+              [-86.7957733, 36.144946],
               [-86.7950821, 36.1514597],
               [-86.8198014, 36.1978802],
             ],
           },
           {
-            name: 'David',
+            name: 'Libby',
             desc: 'Sylvan',
             color: '#FF5722',
+            round_trip: true,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.118228,
@@ -781,29 +802,51 @@
             ],
           },
           {
-            name: 'Tim',
-            desc: 'Brentwood',
-            color: '#673AB7',
+            name: 'Brea',
+            desc: 'Downtown',
+            color: '#795548',
+            round_trip: true,
             start_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
+              lat: 36.127325,
+              lng: -86.710504
             },
             end_latlng: {
               lat: 36.118228,
               lng: -86.755293
             },
             geofence: [
-              [-86.7118263, 36.0084229],
-              [-86.732254, 36.078517],
-              [-86.7701911, 36.1400235],
-              [-86.791563, 36.1321905],
-              [-86.8081284, 36.1184635],
-              [-86.8297577, 36.0893379],
-              [-86.8376542, 36.0049512],
-              [-86.7118263, 36.0084229],
+              [-86.7504501, 36.1231782],
+              [-86.7689896, 36.1610231],
+              [-86.7792892, 36.1694768],
+              [-86.8043518, 36.1703083],
+              [-86.7938421, 36.1484807],
+              [-86.8064975, 36.120509],
+              [-86.7782168, 36.1162655],
+              [-86.7504501, 36.1231782],
             ],
           },
-
+          // {
+          //   name: 'Enis',
+          //   desc: 'Downtown',
+          //   color: '#F44336',
+          //   start_latlng: {
+          //     lat: 36.127325,
+          //     lng: -86.710504
+          //   },
+          //   end_latlng: {
+          //     lat: 36.118228,
+          //     lng: -86.755293
+          //   },
+          //   geofence: [
+          //     [-86.7882156, 36.1966334],
+          //     [-86.8134499, 36.1881826],
+          //     [-86.7938805, 36.1511824],
+          //     [-86.782727, 36.1450846],
+          //     [-86.765213, 36.1583898],
+          //     [-86.775341, 36.1632406],
+          //     [-86.7882156, 36.1966334],
+          //   ],
+          // },
         ]
       }
 

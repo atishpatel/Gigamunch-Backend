@@ -1,0 +1,274 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+<link rel="import"
+      href="app-icons.html">
+
+<dom-module id="sublog-stats">
+  <template>
+    <shared-styles>
+      <style include="materialize-styles shared-styles">
+        :host {
+          display: block;
+          padding: 24px 0;
+        }
+
+      </style>
+    </shared-styles>
+    <div hidden$="[[!details]]">
+      <div>Total Non Veg servings: <strong>[[totalNoVegServings]]</strong></div>
+      <div>Total Veg servings: <strong>[[totalVegServings]]</strong></div>
+      <div>Total Non Veg containers: <strong>[[totalNoVegContainers]]</strong></div>
+      <div>Total Veg conatiners: <strong>[[totalVegContainers]]</strong></div>
+      <br>
+    </div>
+    <div>Number of Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
+    <div>Number of 🍖 NonVeg Subscribers: <strong>[[numNonvegCustomers]]</strong></div>
+    <div>Number of 🌱 Veg Subscribers: <strong>[[numVegCustomers]]</strong></div>
+    <div>Number of 2 Serving Subscribers: <strong>[[num2Customers]]</strong></div>
+    <div>Number of 4 Serving Subscribers: <strong>[[num4Customers]]</strong></div>
+    <div>Number of 4+ Serving Subscribers: <strong>[[num4PlusCustomers]]</strong></div>
+    <br>
+    <div>Predicted Revenue: <strong>$[[predictedRevenue]]</strong></div>
+    <div>Total Revenue: <strong>$[[totalRevenue]]</strong></div>
+    <div>Total Unpaid Revenue: <strong>$[[totalUnpaidRevenue]]</strong></div>
+    <div>Total Tax: <strong>$[[totalTax]]</strong></div>
+    <div>Total Processing Cost: <strong>$[[totalProcessingCost]]</strong></div>
+    <div>Total Free + Discount Cost: <strong>$[[totalCost]]</strong></div>
+    <br>
+    <div>Percent skip: <strong>[[percentSkipped]] %</strong></div>
+    <div>Percent Paying unskipped: <strong>[[percentPayingUnskipped]] %</strong></div>
+    <br>
+    <div>Num Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
+    <div>Num Paying Subscribers: <strong>[[numPayingCustomers]]</strong></div>
+    <div>Num Free Subscribers: <strong>[[numFreeCustomers]]</strong></div>
+    <div>Num Skipped Subscribers: <strong>[[numSkipCustomers]]</strong></div>
+    <div>Num Subscribers: <strong>[[numCustomers]]</strong></div>
+  </template>
+
+  <script>
+    class SublogStats extends Polymer.Element {
+      static get is() {
+        return 'sublog-stats';
+      }
+
+      static get properties() {
+        return {
+          sublogs: {
+            type: Array,
+            notify: true,
+            observer: 'sublogsObserver',
+          },
+          details: {
+            type: Boolean,
+            value: false,
+          },
+          totalNoVegServings: {
+            type: Number,
+            notify: true,
+          },
+          totalVegServings: {
+            type: Number,
+            notify: true,
+          },
+          totalNoVegContainers: {
+            type: Number,
+            notify: true,
+          },
+          totalVegContainers: {
+            type: Number,
+            notify: true,
+          },
+          numCustomers: {
+            type: Number,
+          },
+          numSkipCustomers: {
+            type: Number,
+          },
+          numUnskipCustomers: {
+            type: Number,
+          },
+          numPayingCustomers: {
+            type: Number,
+          },
+          numFreeCustomers: {
+            type: Number,
+          },
+          num2Customers: {
+            type: Number,
+          },
+          num4Customers: {
+            type: Number,
+          },
+          num4PlusCustomers: {
+            type: Number,
+          },
+          numNonvegCustomers: {
+            type: Number,
+          },
+          numVegCustomers: {
+            type: Number,
+          },
+          predictedRevenue: {
+            type: String,
+            notify: true,
+          },
+          totalRevenue: {
+            type: String,
+            notify: true,
+          },
+          totalUnpaidRevenue: {
+            type: String,
+            notify: true,
+          },
+          totalCost: {
+            type: String,
+            notify: true,
+          },
+          totalTax: {
+            type: String,
+            notify: true,
+          },
+          totalProcessingCost: {
+            type: String,
+            notify: true,
+          },
+          percentSkipped: {
+            type: String,
+          },
+          percentPayingUnskipped: {
+            type: String,
+          },
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+      constructor() {
+        super();
+      }
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+
+
+      sublogsObserver() {
+        if (this.sublogs) {
+          const sublogs = this.sublogs;
+          const unskippedSublogs = [];
+          const skipSublogs = [];
+          for (let i = 0; i < sublogs.length; i++) {
+            if (sublogs[i].skip) {
+              skipSublogs.push(sublogs[i]);
+            } else {
+              unskippedSublogs.push(sublogs[i]);
+            }
+          }
+          let numCustomers = 0;
+          let num2Customers = 0;
+          let num4Customers = 0;
+          let num4PlusCustomers = 0;
+          let numNonvegCustomers = 0;
+          let numVegCustomers = 0;
+          let numPayingCustomers = 0;
+          let numFreeCustomers = 0;
+          let totalNoVegServings = 0;
+          let totalVegServings = 0;
+          let predictedRevenue = 0.0;
+          let totalRevenue = 0.0;
+          let totalUnpaidRevenue = 0.0;
+          let totalCost = 0.0;
+          let totalTax = 0.0;
+          let totalProcessingCost = 0.0;
+          for (var i = 0; i < unskippedSublogs.length; i++) {
+            totalNoVegServings += unskippedSublogs[i].servings;
+            totalVegServings += unskippedSublogs[i].vegetarian_servings;
+            unskippedSublogs[i].status = this._getStatus(unskippedSublogs[i]);
+            // calculate revenue
+            if (unskippedSublogs[i].free) {
+              totalCost += unskippedSublogs[i].amount;
+              numFreeCustomers++;
+            } else {
+              predictedRevenue += unskippedSublogs[i].amount;
+              numPayingCustomers++;
+            }
+            if (unskippedSublogs[i].paid) {
+              totalCost += unskippedSublogs[i].amount_paid - unskippedSublogs[i].amount;
+            }
+            if (!unskippedSublogs[i].paid && !unskippedSublogs[i].free) {
+              totalUnpaidRevenue += unskippedSublogs[i].amount - (unskippedSublogs[i].discount_amount + (unskippedSublogs[i].discount_percent * unskippedSublogs[i].amount));
+            }
+            totalRevenue += unskippedSublogs[i].amount_paid;
+            // calculate number Subscribers
+            if (unskippedSublogs[i].servings + unskippedSublogs[i].vegetarian_servings === 2) {
+              num2Customers++;
+            } else if (unskippedSublogs[i].servings + unskippedSublogs[i].vegetarian_servings === 4) {
+              num4Customers++;
+            } else {
+              num4PlusCustomers++;
+            }
+            if (unskippedSublogs[i].vegetarian_servings) {
+              numVegCustomers++;
+            } else {
+              numNonvegCustomers++;
+            }
+            totalTax += unskippedSublogs[i].amount_paid * .095;
+            totalProcessingCost += unskippedSublogs[i].amount_paid * .029 + .3;
+          }
+          this.totalNoVegServings = totalNoVegServings;
+          this.totalVegServings = totalVegServings;
+          this.totalNoVegContainers = totalNoVegServings / 2;
+          this.totalVegContainers = totalVegServings / 2;
+          this.totalNoVegServingsExtra = totalNoVegServings + 6;
+          this.totalVegServingsExtra = totalVegServings + 2;
+          this.totalNoVegContainersExtra = this.totalNoVegServingsExtra / 2;
+          this.totalVegContainersExtra = this.totalVegServingsExtra / 2;
+          this.predictedRevenue = predictedRevenue.toFixed(2);
+          this.totalRevenue = totalRevenue.toFixed(2);
+          this.totalUnpaidRevenue = totalUnpaidRevenue.toFixed(2);
+          this.totalCost = totalCost.toFixed(2);
+          this.numCustomers = sublogs.length;
+          this.numSkipCustomers = skipSublogs.length;
+          this.numUnskipCustomers = unskippedSublogs.length;
+          this.numPayingCustomers = numPayingCustomers;
+          this.numFreeCustomers = numFreeCustomers;
+          this.num2Customers = num2Customers;
+          this.num4Customers = num4Customers;
+          this.numNonvegCustomers = numNonvegCustomers;
+          this.numVegCustomers = numVegCustomers;
+          this.num4PlusCustomers = num4PlusCustomers;
+          this.totalTax = totalTax.toFixed(2);
+          this.totalProcessingCost = totalProcessingCost.toFixed(2);
+          const percentUnskipped = (unskippedSublogs.length / sublogs.length) * 100;
+          this.percentSkipped = (100 - percentUnskipped).toFixed(2);
+          this.percentPayingUnskipped = ((numPayingCustomers / sublogs.length) * 100).toFixed(2);
+        }
+      }
+
+      _getStatus(sublog) {
+        if (sublog.refunded) {
+          return 'Refunded';
+        } else if (sublog.free) {
+          return 'Free';
+        } else if (sublog.paid) {
+          return 'Paid';
+        } else if (sublog.skip) {
+          return 'Skipped';
+        }
+        return 'Unpaid';
+      }
+
+    }
+
+    customElements.define(SublogStats.is, SublogStats);
+
+  </script>
+</dom-module>

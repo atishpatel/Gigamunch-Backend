@@ -11,8 +11,8 @@
 
   <style>
     *,
-     ::after,
-     ::before {
+    ::after,
+    ::before {
       box-sizing: border-box;
     }
 
@@ -364,11 +364,14 @@
   <!-- Email Body : END -->
 
 
-
-
-
-
   [[template "footer" .]]
+  <script>
+    if (window.localStorage) {
+      window.localStorage.removeItem(APP.CampaignsKey);
+      window.localStorage.removeItem(APP.ReferenceEmailKey);
+    }
+
+  </script>
 </body>
 
 </html>

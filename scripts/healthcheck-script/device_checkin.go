@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+// Add to .bashrc script to autorun program
+// cd ~/Desktop
+// go run
+
 // Config is the config.
 type Config struct {
 	ID            string `json:"id"`

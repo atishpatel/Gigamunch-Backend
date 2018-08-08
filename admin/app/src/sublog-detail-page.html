@@ -9,6 +9,8 @@
 
 <link rel="import"
       href="sublog-sortable-table.html">
+<link rel="import"
+      href="sublog-stats.html">
 
 <dom-module id="sublog-detail-page">
   <template>
@@ -24,7 +26,7 @@
         }
 
         .table-title {
-          font-size: 14px;
+          font-size: 22px;
         }
 
         google-map {
@@ -71,9 +73,11 @@
       <h2 class="table-title">
         Unskipped
       </h2>
+      <sublog-stats sublogs="[[sublogsByDate.sublogs]]"
+                    details>
+      </sublog-stats>
       <sublog-sortable-table id="unskipped"
-                             sublogs="[[sublogsByDate.unskippedSublogs]]"
-                             percent-skip="[[percentSkip]]">
+                             sublogs="[[sublogsByDate.unskippedSublogs]]">
       </sublog-sortable-table>
       <h2 class="table-title">
         Skipped
@@ -81,39 +85,14 @@
       <sublog-sortable-table id="skipped"
                              sublogs="[[sublogsByDate.skippedSublogs]]">
       </sublog-sortable-table>
-      <h2>Delivery Tools</h2>
+      <h2>Delivery Tool</h2>
+      <p>
+        <a href="delivery/[[urlDate]]">
+          Link to new delivery tool
+      </a>
+      </p>
       <div>
-        <div class="table">
-          <div class="table-row table-header-row">
-            <div class="table-cell">Driver</div>
-            <div class="table-cell">Name</div>
-            <div class="table-cell">Delivery Tip</div>
-            <div class="table-cell">APT</div>
-            <div class="table-cell">Address</div>
-            <div class="table-cell">Phone Number</div>
-            <div class="table-cell">Servings</div>
-            <div class="table-cell">Veg Servings</div>
-            <div class="table-cell">Status</div>
-            <div class="table-cell">Email</div>
-          </div>
-          <dom-repeat items="[[sublogsByDate.unskippedSublogs]]"
-                      as="sublog">
-            <template>
-              <div class="table-row">
-                <div class="table-cell">[[sublog.driver]]</div>
-                <div class="table-cell">[[sublog.name]]</div>
-                <div class="table-cell">[[sublog.delivery_tips]]</div>
-                <div class="table-cell">[[sublog.apt]]</div>
-                <div class="table-cell">[[sublog.addressStr]]</div>
-                <div class="table-cell">[[sublog.phone_number]]</div>
-                <div class="table-cell">[[sublog.servings]]</div>
-                <div class="table-cell">[[sublog.vegetarian_servings]]</div>
-                <div class="table-cell">[[sublog.status]]</div>
-                <div class="table-cell">[[sublog.sub_email]]</div>
-              </div>
-            </template>
-          </dom-repeat>
-        </div>
+
         <br>
         <google-map id="map"
                     map="{{map}}"
@@ -128,7 +107,7 @@
               <google-map-marker label="[[sublog.name]]"
                                  latitude="[[sublog.address.latitude]]"
                                  longitude="[[sublog.address.longitude]]"
-                                 draggable></google-map-marker>
+                                 draggable="true"></google-map-marker>
             </template>
           </dom-repeat>
 
@@ -162,11 +141,8 @@
             type: Array,
             notify: true,
           },
-          percentSkip: {
+          urlDate: {
             type: String,
-          },
-          polys: {
-            type: Object,
           },
           map: {
             type: Object,
@@ -189,6 +165,7 @@
       selected() {
         const tmp = window.location.pathname.split('/sublogdetail/');
         const dateString = decodeURIComponent(tmp[1]);
+        this.urlDate = dateString;
         let d;
         if (dateString === 'next') {
           d = new Date();
@@ -201,57 +178,6 @@
         this.getSubLogsForDate(d);
       }
 
-      inside(point, vs) {
-        // ray-casting algorithm based on
-        // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-
-        var x = point[1],
-          y = point[0];
-
-        var inside = false;
-        for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-          var xi = vs[i][0],
-            yi = vs[i][1];
-          var xj = vs[j][0],
-            yj = vs[j][1];
-
-          var intersect = ((yi > y) != (yj > y)) &&
-            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-          if (intersect) inside = !inside;
-        }
-
-        return inside;
-      };
-
-      setPolygons() {
-        var geofences = this.getGeofences();
-        geofences.forEach((geofence) => {
-          var path = [];
-          geofence.Path.forEach((point) => {
-            path.push(new google.maps.LatLng(point[1], point[0]));
-          });
-          var polyline = new google.maps.Polyline({
-            path: path,
-            strokeColor: geofence.Color,
-            strokeOpacity: .5,
-            strokeWeight: 2,
-          });
-          polyline.setMap(this.map);
-        });
-      }
-
-      getDriver(latLng) {
-        var geofences = this.getGeofences();
-        var name = '-';
-        geofences.forEach((geofence) => {
-          if (this.inside(latLng, geofence.Path)) {
-            name = geofence.Name;
-            return
-          }
-        });
-        return name;
-      }
-
       getSubLogsForDate(d) {
         this.service.getSubLogsForDate(d, (slogs, err) => {
           if (err.code !== 0) {
@@ -259,7 +185,7 @@
           }
           let sublogDay = {
             date: slogs[0].date,
-            dateString: this.getDateString(slogs[0].date),
+            dateString: this._getDateString(slogs[0].date),
             sublogs: [],
             skippedSublogs: [],
             unskippedSublogs: [],
@@ -290,160 +216,18 @@
                 Number(slogs[i].address.latitude),
                 Number(slogs[i].address.longitude),
               ];
-              slogs[i].driver = this.getDriver(latLng);
               sublogDay.unskippedSublogs.push(slogs[i]);
             }
           }
-          try {
-            sublogDay.unskippedSublogs = this.optomizeRoute(sublogDay.unskippedSublogs);
-          } finally {
-            this.sublogsByDate = sublogDay;
-            this.percentSkip = (sublogDay.skippedSublogs.length / slogs.length * 100).toFixed(2);
-            this.setPolygons();
-          }
+          this.sublogsByDate = sublogDay;
         });
       }
 
-      optomizeRoute(sublogs) {
-        sublogs = sublogs.sort(function(a, b) {
-          if (a.driver < b.driver) return -1;
-          if (a.driver > b.driver) return 1;
-          if (a.name < b.name) return -1;
-          if (a.name > b.name) return 1;
-          return 0;
-        })
-        return sublogs
-      }
-
-      getDateString(dateString) {
+      _getDateString(dateString) {
         const d = new Date(dateString);
         return d.toUTCString().substring(0, 16);
       }
 
-      getGeofences() {
-        return [{
-            Name: 'Atish',
-            Color: '#0000FF',
-            Path: [
-              [-86.6917419, 36.0035625],
-              [-86.8263245, 35.9735608],
-              [-86.9413376, 35.9771727],
-              [-86.9554008, 35.8976451],
-              [-86.9059753, 35.8322883],
-              [-86.7274475, 35.8222673],
-              [-86.6546631, 35.8501003],
-              [-86.6917419, 36.0035625],
-            ],
-          },
-          {
-            Name: 'Chris',
-            Color: '#000FF0',
-            Path: [
-              [-86.602478, 36.2542406],
-              [-86.5756989, 36.2647604],
-              [-86.583252, 36.316785],
-              [-86.8798828, 36.359375],
-              [-86.8661499, 36.2487033],
-              [-86.6872834, 36.2922329],
-              [-86.602478, 36.2542406],
-            ],
-          },
-          {
-            Name: 'Piyush',
-            Color: '#00FF00',
-            Path: [
-              [-86.5612793, 36.0446575],
-              [-86.4733887, 36.1622705],
-              [-86.5180206, 36.2791537],
-              [-86.6278839, 36.2398428],
-              [-86.6580963, 36.1971875],
-              [-86.7034149, 36.2370737],
-              [-86.6986084, 36.1434199],
-              [-86.7336273, 36.1162449],
-              [-86.7023539, 36.0257448],
-              [-86.6704559, 35.9613345],
-              [-86.5612793, 36.0446575],
-            ],
-          },
-          {
-            Name: 'Enis',
-            Color: '#FF0000',
-            Path: [
-              [-86.8709564, 36.1001572],
-              [-87.0611572, 36.078517],
-              [-87.0206452, 35.9518857],
-              [-86.9551308, 35.9917881],
-              [-86.8490327, 36.0177396],
-              [-86.8458938, 36.0474335],
-              [-86.8359374, 36.0693597],
-              [-86.8709564, 36.1001572],
-            ],
-          },
-          {
-            Name: 'JoyDriv1',
-            Color: '#000F0F',
-            Path: [
-              [-86.6855622, 36.2542407],
-              [-86.6883162, 36.2766773],
-              [-86.7707257, 36.2674092],
-              [-86.8064117, 36.2348583],
-              [-86.8173981, 36.1982958],
-              [-86.8046929, 36.1714086],
-              [-86.7950821, 36.1514597],
-              [-86.782727, 36.1450846],
-              [-86.7576599, 36.154509],
-              [-86.7521667, 36.1628248],
-              [-86.7020416, 36.1750198],
-              [-86.6972351, 36.1938628],
-              [-86.7113089, 36.240388],
-              [-86.6855622, 36.2542407],
-            ],
-          },
-          {
-            Name: 'JoyDriv2',
-            Color: '#00F00F',
-            Path: [
-              [-86.8445205, 36.1711398],
-              [-86.8874439, 36.1529848],
-              [-86.9197083, 36.1131941],
-              [-86.874551, 36.1019597],
-              [-86.8414306, 36.0746322],
-              [-86.8240928, 36.1032086],
-              [-86.849583, 36.115896],
-              [-86.8220302, 36.1355157],
-              [-86.8445205, 36.1711398],
-            ],
-          },
-          {
-            Name: 'JoyDriv3',
-            Color: '#0F000F',
-            Path: [
-              [-86.7360306, 36.0296659],
-              [-86.732254, 36.078517],
-              [-86.7590332, 36.1112525],
-              [-86.7751694, 36.1129167],
-              [-86.8081284, 36.1184635],
-              [-86.8297577, 36.0893379],
-              [-86.8232346, 36.0285553],
-              [-86.7360306, 36.0296659],
-            ],
-          },
-          {
-            Name: 'JoyDriv4',
-            Color: '#F0000F',
-            Path: [
-              [-86.8160248, 36.1874899],
-              [-86.839714, 36.1672596],
-              [-86.8192818, 36.1359318],
-              [-86.8440887, 36.1177692],
-              [-86.8215179, 36.1059825],
-              [-86.782727, 36.1450846],
-              [-86.7950821, 36.1514597],
-              [-86.8160248, 36.1874899],
-            ],
-          },
-        ]
-      }
     }
 
     customElements.define(SublogDetailPage.is, SublogDetailPage);

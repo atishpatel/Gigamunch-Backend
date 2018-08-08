@@ -50,7 +50,9 @@ function GetToken() {
 function SetToken(cvalue) {
     const jwt = GetJWT(cvalue);
     const d = new Date(0);
-    d.setUTCSeconds(jwt.exp);
+    if (jwt) {
+        d.setUTCSeconds(jwt.exp);
+    }
     document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
@@ -80,6 +82,13 @@ let baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
+function GetSubscriber(email) {
+    const url = baseURL + 'GetSubscriber';
+    const req = {
+        email,
+    };
+    return callFetch(url, 'GET', req);
+}
 function GetHasSubscribed(date) {
     const url = baseURL + 'GetHasSubscribed';
     const req = {
@@ -91,6 +100,13 @@ function GetUnpaidSublogs(limit) {
     const url = baseURL + 'GetUnpaidSublogs';
     const req = {
         limit,
+    };
+    return callFetch(url, 'GET', req);
+}
+function GetSubscriberSublogs(email) {
+    const url = baseURL + 'GetSubscriberSublogs';
+    const req = {
+        email,
     };
     return callFetch(url, 'GET', req);
 }
@@ -187,8 +203,10 @@ function serializeParams(obj) {
 
 
 var Service = Object.freeze({
+	GetSubscriber: GetSubscriber,
 	GetHasSubscribed: GetHasSubscribed,
 	GetUnpaidSublogs: GetUnpaidSublogs,
+	GetSubscriberSublogs: GetSubscriberSublogs,
 	ProcessSublog: ProcessSublog,
 	Login: Login,
 	Refresh: Refresh,

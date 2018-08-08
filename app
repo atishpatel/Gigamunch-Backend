@@ -10,18 +10,17 @@ timestamp
 # build
 ################################################################################
 if [[ $1 == "build" ]]; then
-  if [[ $* == *app* ]]; then
-    echo "Building server/app:"
-    cd server/app
-    polymer build
-    rm -rf build/unbundled
-    cd ../..
-  fi
   if [[ $* == *admin* ]]; then
     echo "Building admin/app:"
     cd admin/app
     gulp build
     cd ../..
+  fi
+  if [[ $* == *server* ]]; then
+    echo "Building server:"
+    cd server
+    gulp build
+    cd ..
   fi
   if [[ $* == *cook* ]]; then
     echo "Building server/cook:"
@@ -154,7 +153,7 @@ if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo "Here are the commands supported by the script:"
   echo -e "\tapp [help|serve|build|deploy]"
   echo -e "\tapp serve [eater|admin|*]"
-  echo -e "\tapp build [app|admin|cook|proto]"
+  echo -e "\tapp build [server|admin|cook|proto]"
   echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|queue|cron]"
   exit 0
 fi

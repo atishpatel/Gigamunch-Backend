@@ -69,6 +69,33 @@
         ]
       }
     },
+    "/admin/api/v1/GetDeliveries": {
+      "post": {
+        "summary": "Deliveries",
+        "operationId": "GetDeliveries",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetDeliveriesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetDeliveriesReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetExecution": {
       "post": {
         "operationId": "GetExecution",
@@ -201,6 +228,58 @@
         ]
       }
     },
+    "/admin/api/v1/GetLogsByEmail": {
+      "post": {
+        "operationId": "GetLogsByEmail",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByEmailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByEmailReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetSubscriberSublogs": {
+      "post": {
+        "operationId": "GetSubscriberSublogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberSublogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberSublogsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetUnpaidSublogs": {
       "post": {
         "summary": "Sublogs",
@@ -299,6 +378,32 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPITokenOnlyReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/UpdateDeliveries": {
+      "post": {
+        "operationId": "UpdateDeliveries",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateDeliveriesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateDeliveriesReq"
             }
           }
         ],
@@ -458,6 +563,60 @@
         }
       },
       "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "AdminAPIDelivery": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "driver_name": {
+          "type": "string"
+        },
+        "driver_email": {
+          "type": "string"
+        },
+        "sub_email": {
+          "type": "string"
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "fail": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "sub_name": {
+          "type": "string"
+        },
+        "phone_number": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/AddressAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
+        },
+        "servings": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "Deliveries"
     },
     "AdminAPIDish": {
       "type": "object",
@@ -679,6 +838,31 @@
         }
       }
     },
+    "AdminAPIGetDeliveriesReq": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "driver_email": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIGetDeliveriesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "deliveries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIDelivery"
+          }
+        }
+      }
+    },
     "AdminAPIGetExecutionReq": {
       "type": "object",
       "properties": {
@@ -762,6 +946,36 @@
         }
       }
     },
+    "AdminAPIGetLogsByEmailReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIGetLogsByEmailResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogLog"
+          }
+        }
+      }
+    },
     "AdminAPIGetLogsReq": {
       "type": "object",
       "properties": {
@@ -785,6 +999,28 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/LogLog"
+          }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberSublogsReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIGetSubscriberSublogsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "sublogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPISublog"
           }
         }
       }
@@ -1046,6 +1282,25 @@
         }
       }
     },
+    "AdminAPIUpdateDeliveriesReq": {
+      "type": "object",
+      "properties": {
+        "deliveries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIDelivery"
+          }
+        }
+      }
+    },
+    "AdminAPIUpdateDeliveriesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        }
+      }
+    },
     "AdminAPIUpdateExecutionReq": {
       "type": "object",
       "properties": {
@@ -1114,6 +1369,17 @@
       },
       "title": "The error object that gets returned with every"
     },
+    "LogBasicPayload": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
     "LogLog": {
       "type": "object",
       "properties": {
@@ -1130,18 +1396,32 @@
         "type": {
           "type": "string"
         },
-        "labels": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "action": {
+          "type": "string"
+        },
+        "action_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "action_user_email": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "user_email": {
+          "type": "string"
         },
         "severity": {
           "type": "integer",
           "format": "int32"
         },
-        "payload": {
+        "path": {
           "type": "string"
+        },
+        "basic_payload": {
+          "$ref": "#/definitions/LogBasicPayload"
         }
       }
     }

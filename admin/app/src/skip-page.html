@@ -11,8 +11,6 @@
 <link rel="import"
       href="../bower_components/paper-spinner/paper-spinner.html">
 
-<!--<link rel="import"
-      href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">-->
 
 <link rel="import"
       href="paper-select.html">
@@ -25,7 +23,7 @@
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
           padding: 10px;
         }
@@ -62,13 +60,10 @@
       </template>
       </paper-listbox>
       </paper-dropdown-menu-light>-->
-      <!--<vaadin-date-picker id="date"
-                          label="Skip date">
-      </vaadin-date-picker>-->
       <input id="date"
              type="date"
              placeholder="Skip date">
-             <br>
+      <br>
       <paper-button on-tap="submitSkip">Submit Skip</paper-button>
     </div>
   </template>
@@ -119,15 +114,16 @@
           emails.sort(function(a, b) {
             return a.localeCompare(b);
           });
+
           function addLetterSeps(s) {
             var previous = s[s.length - 1][0];
             for (var i = s.length - 1; i >= 0; i--) {
-                if (s[i][0] !== previous) {
-                    s.splice(i+1, 0, '---- '+previous+' ----')
-                    previous = s[i][0] 
-                  }
-                }
-              return s; 
+              if (s[i][0] !== previous) {
+                s.splice(i + 1, 0, '---- ' + previous + ' ----')
+                previous = s[i][0]
+              }
+            }
+            return s;
           }
           this.subEmails = addLetterSeps(emails);
         });

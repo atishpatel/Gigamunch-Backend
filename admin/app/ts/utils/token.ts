@@ -7,7 +7,7 @@ export function GetToken(): string {
       c = c.substring(1);
     }
     if (c.indexOf(name) === 0) {
-      return c.substring(name.length, c.length).replace(/\n/g,'');
+      return c.substring(name.length, c.length).replace(/\n/g, '');
     }
   }
   if (location.hostname === 'localhost') {
@@ -23,7 +23,9 @@ export function GetToken(): string {
 export function SetToken(cvalue: string) {
   const jwt = GetJWT(cvalue);
   const d = new Date(0);
-  d.setUTCSeconds(jwt.exp);
+  if (jwt) {
+    d.setUTCSeconds(jwt.exp);
+  }
   document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
   if (location.hostname === 'localhost') {
     window.localStorage.setItem('AUTHTKN', cvalue);

@@ -1,0 +1,395 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="subscriber-detail-sublog-table.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="subscriber-detail-page">
+  <template>
+    <materialize-styles>
+      <style include="materialize-styles"></style>
+    </materialize-styles>
+    <shared-styles>
+      <style include="shared-styles"></style>
+    </shared-styles>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      .table {
+        display: table;
+        width: 100%;
+        border: 1px solid #000;
+      }
+
+      .table-header-row {
+        background-color: #ccc;
+        display: table-header-group;
+        font-weight: bold;
+      }
+
+      .table-row {
+        display: table-row;
+        width: auto;
+        clear: both;
+      }
+
+      .table-cell {
+        border: 1px solid #999999;
+        padding: 3px 10px;
+        display: table-cell;
+        flex: 1;
+        /*display: flex;*/
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-body {
+        display: table-row-group;
+      }
+
+      .subscriber-table-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .subscriber-name {
+        font-size: 3em;
+        font-weight: 600;
+      }
+
+      .subscriber-status {
+        margin-bottom: 15px;
+      }
+
+      .subscriber-status-canceled {
+        color: #a1a1a1;
+      }
+
+      .subscriber-status-active {
+        color: #26cc6e;
+      }
+
+      .edit-button {
+        font-size: 3em;
+        font-weight: 600;
+      }
+
+      .subscriber-email {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-phone-number {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-address {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .subscriber-delivery-tip {
+        flex: 1;
+        font-weight: 300;
+      }
+
+      .name-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .info-row {
+        display: flex;
+        flex-direction: row;
+        background-color: rgb(243, 243, 243);
+        border: 1px solid #d6d6d6;
+        padding: 6px 10px;
+      }
+
+      .info-label {
+        min-width: 200px;
+        font-weight: 600;
+      }
+
+      .info-value {
+        min-width: 200px;
+        font-weight: 400;
+      }
+
+      .subscriber-profile-container {
+        margin: 10px 50px;
+      }
+
+    </style>
+
+    <div>
+      <!-- Subscriber Profile -->
+      <div class="subscriber-profile-container">
+        <paper-spinner hidden$="[[!loading]]"
+                       active="[[loading]]">
+        </paper-spinner>
+
+        <div class="name-container">
+          <div class="subscriber-name">[[subscriber.name]]</div>
+          <div class="edit-button">
+            <a target="_blank"
+               href="[[subscriber.datastore_link]]"> <i class="material-icons" style="font-size: 42px;">edit</i>
+            </a>
+          </div>
+        </div>
+        <div class$="subscriber-status [[subscriber.is_subscribed_class]]">
+          [[subscriber.is_subscribed_string]]
+        </div>
+
+        <!-- Subsriber Info Table -->
+        <div class="subscriber-table-info">
+          <div class="info-row">
+            <div class="info-label">Email:</div>
+            <div class="info-value subscriber-email">
+              [[subscriber.email]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Phone number:</div>
+            <div class="info-value subscriber-phone-number">
+              [[subscriber.phone_number]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Address:</div>
+            <div class="info-value subscriber-address">
+              <a target="_blank"
+                 href="[[subscriber.address_link]]">[[subscriber.address_string]]</a>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Delivery Tip:</div>
+            <div class="info-value subscriber-delivery-tip">
+              [[subscriber.delivery_tips]]
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Servings:</div>
+            <div class="info-value servings">
+              [[subscriber.servings]], [[subscriber.is_vegetarian]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Customer ID:</div>
+            <div class="info-value customer-id">
+              <a target="_blank"
+                 href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[subscriber.customer_id]]">[[subscriber.customer_id]]</a>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Date:</div>
+            <div class="info-value subscription-date">
+              [[subscriber.subscription_date_string]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Delivery:</div>
+            <div class="info-value first-delivery">
+              [[subscriber.first_box_date_string]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Payment:</div>
+            <div class="info-value first-payment">
+              [[subscriber.first_payment_date_string]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Subscription Day:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.subscription_day]]
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Unsubscribed Date:</div>
+            <div class="info-value subscription-day">
+              [[subscriber.unsubscribed_date_string]]
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Subsriber Activities -->
+        <div>
+          <subscriber-detail-sublog-table id="sublogs"
+                                          sublogs="[[sublogs]]">
+          </subscriber-detail-sublog-table>
+        </div>
+      </div>
+
+
+    </div>
+
+
+
+  </template>
+
+  <script>
+    class SubscriberDetailPage extends Polymer.Element {
+      static get is() {
+        return 'subscriber-detail-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          user: {
+            type: Object,
+            notify: true,
+          },
+          event: {
+            type: Object,
+          },
+          subscriber: {
+            type: Object,
+            notify: true,
+          },
+          sublogs: {
+            type: Array,
+            notify: true,
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        const tmp = window.location.pathname.split('/subscriber/');
+        const subscriberEmail = decodeURIComponent(tmp[1]);
+        this.getSubscriber(subscriberEmail);
+        this.getSubscriberSublogs(subscriberEmail);
+        var activitiesTable = this.$.activitiesTable;
+        var instance = M.Collapsible.init(activitiesTable, null);
+      }
+
+      _getAddress(a) {
+        if (a && a.street) {
+          let apt = '';
+          if (a.apt !== undefined && a.apt !== '') {
+            apt = '#' + a.apt + ' ';
+          }
+          return apt + a.street + ', ' + a.city;
+        }
+        return '';
+      }
+
+      _getAddressLink(a) {
+        if (a && a.street) {
+          return 'https://maps.google.com/?q=' + encodeURIComponent(a.apt + ' ' + a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+        }
+        return '';
+      }
+
+      _getDateString(dateString) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
+        const d = new Date(dateString);
+        let day = d.getDay();
+        let month = d.getMonth();
+        let date = d.getDate();
+        let year = d.getFullYear();
+        return `${dayNames[day]}, ${monthNames[month]} ${date} ${year}`
+      }
+
+      _getDatetimeString(dateString) {
+        const d = new Date(dateString);
+        let date = this._getDateString(d);
+        let time = d.toLocaleTimeString(d);
+        return `${date}, ${time}`
+      }
+
+
+      getSubscriber(subscriberEmail) {
+        this.service.GetSubscriber(subscriberEmail).then((resp) => {
+          let subscriber = resp.subscriber;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          // veg check
+          if (subscriber.vegetarian_servings > 0 && subscriber.servings > 0) {
+            subscriber.is_vegetarian = "both vegetarian 🌱 & non-veg 🍖";
+            subscriber.servings += subscriber.vegetarian_servings;
+          } else if (subscriber.vegetarian_servings > 0) {
+            subscriber.is_vegetarian = "vegetarian 🌱";
+            subscriber.servings = subscriber.vegetarian_servings;
+          } else {
+            subscriber.is_vegetarian = "non-veg 🍖";
+          }
+
+          // is_subscribed 
+          if (!subscriber.is_subscribed) {
+            subscriber.is_subscribed = false;
+            subscriber.is_subscribed_string = "• Canceled Subscriber"
+            subscriber.is_subscribed_class = "subscriber-status-canceled"
+          } else {
+            subscriber.is_subscribed_string = "• Active Subscriber"
+            subscriber.is_subscribed_class = "subscriber-status-active"
+          }
+
+          // make address pretty
+          subscriber.address_string = this._getAddress(subscriber.address);
+          subscriber.address_link = this._getAddressLink(subscriber.address);
+
+          // make dates pretty
+          subscriber.subscription_date_string = this._getDatetimeString(subscriber.subscription_date);
+          subscriber.first_box_date_string = this._getDateString(subscriber.first_box_date);
+          subscriber.first_payment_date_string = this._getDateString(subscriber.first_payment_date);
+          if (!subscriber.is_subscribed) {
+            subscriber.unsubscribed_date_string = this._getDatetimeString(subscriber.unsubscribed_date);
+          } else {
+            subscriber.unsubscribed_date_string = "–––";
+          }
+
+          // edit link
+          subscriber.datastore_link = `https://console.cloud.google.com/datastore/entities/edit?key=0%2F%7C14%2FScheduleSignUp%7C36%2Fname:${subscriber.email}&project=gigamunch-omninexus&ns=&kind=ScheduleSignUp&filter=5%2FEmail%7CSTR%7CEQ%7C31%2F${subscriber.email}`;
+
+          this.subscriber = subscriber;
+        });
+      }
+
+      getSubscriberSublogs(subscriberEmail) {
+        this.service.GetSubscriberSublogs(subscriberEmail).then((resp) => {
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+          this.sublogs = resp.sublogs
+        });
+      }
+
+    }
+    window.customElements.define(SubscriberDetailPage.is, SubscriberDetailPage);
+
+  </script>
+</dom-module>
