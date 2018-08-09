@@ -171,12 +171,12 @@ func (c *Client) Errorf(ctx context.Context, format string, args ...interface{})
 	Errorf(ctx, format, args...)
 }
 
-// GetLogs gets logs.
-func (c *Client) GetLogs(start, limit int) ([]*Entry, error) {
+// GetAll gets logs.
+func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := db.Query(c.ctx, kind, start, limit, "-Timestamp", dst)
+	keys, err := db.Query(c.ctx, kind, start, limit, "-Timestamp", &dst)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to db.Query")
+		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
 	for i := range dst {
 		dst[i].ID = keys[i].IntID()
@@ -184,12 +184,12 @@ func (c *Client) GetLogs(start, limit int) ([]*Entry, error) {
 	return dst, nil
 }
 
-// GetUserLogs gets logs with UserID.
-func (c *Client) GetUserLogs(userID int64, start, limit int) ([]*Entry, error) {
+// GetAllByID gets logs with UserID.
+func (c *Client) GetAllByID(userID int64, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, dst)
+	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, &dst)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to db.QueryFilterOrdered")
+		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
 	for i := range dst {
 		dst[i].ID = keys[i].IntID()
@@ -197,12 +197,12 @@ func (c *Client) GetUserLogs(userID int64, start, limit int) ([]*Entry, error) {
 	return dst, nil
 }
 
-// GetUserLogsByEmail gets logs with UserEmail.
-func (c *Client) GetUserLogsByEmail(userEmail string, start, limit int) ([]*Entry, error) {
+// GetAllByEmail gets logs with UserEmail.
+func (c *Client) GetAllByEmail(userEmail string, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserEmail=", userEmail, dst)
+	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserEmail=", userEmail, &dst)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to db.QueryFilterOrdered")
+		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
 	for i := range dst {
 		dst[i].ID = keys[i].IntID()
@@ -210,16 +210,16 @@ func (c *Client) GetUserLogsByEmail(userEmail string, start, limit int) ([]*Entr
 	return dst, nil
 }
 
-// GetLog gets a log.
-func (c *Client) GetLog(id int64) (*Entry, error) {
-	var entry *Entry
+// Get gets a log.
+func (c *Client) Get(id int64) (*Entry, error) {
+	var entry Entry
 	key := db.IDKey(c.ctx, kind, id)
-	err := db.Get(c.ctx, key, entry)
+	err := db.Get(c.ctx, key, &entry)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to db.Get")
 	}
 	entry.ID = id
-	return entry, nil
+	return &entry, nil
 }
 
 // SalePayload is a sales payload.

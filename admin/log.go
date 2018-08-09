@@ -33,7 +33,7 @@ func GetLog(ctx context.Context, r *http.Request, log *logging.Client) Response 
 	}
 	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	l, err := log.GetLog(req.Id)
+	l, err := log.Get(req.Id)
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
@@ -64,7 +64,7 @@ func GetLogs(ctx context.Context, r *http.Request, log *logging.Client) Response
 	}
 	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	logs, err := log.GetLogs(int(req.Start), int(req.Limit))
+	logs, err := log.GetAll(int(req.Start), int(req.Limit))
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
@@ -97,7 +97,7 @@ func GetLogsByEmail(ctx context.Context, r *http.Request, log *logging.Client) R
 	}
 	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	logs, err := log.GetUserLogsByEmail(req.Email, int(req.Start), int(req.Limit))
+	logs, err := log.GetAllByEmail(req.Email, int(req.Start), int(req.Limit))
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetUserLogsByEmail")
 	}
