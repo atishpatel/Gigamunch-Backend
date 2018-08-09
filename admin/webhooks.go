@@ -9,6 +9,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -50,7 +51,8 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		utils.Criticalf(ctx, "failed to get subscriber email from typeform: %+v", err)
 		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
-	subC := sub.New(ctx)
+	ctx = context.WithValue(ctx, common.ContextUserEmail, email)
+	subC := sub.NewWithLogging(ctx, log)
 	subscriber, err := subC.GetSubscriber(email)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to find subscriber: %s, they're probably not in our system: %+v", email, err)
@@ -88,16 +90,12 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 		return nil
 	}
 	//if it's Tuesday - Saturday, skip them
-	err = subC.Skip(skipDate, email)
+	err = subC.Skip(skipDate, email, reason)
 	if err != nil {
 		err = errors.GetErrorWithCode(err).Annotate("failed to sub.Skip")
 		utils.Criticalf(ctx, "Typeform webhook: %+v", err)
 		return errors.GetErrorWithCode(err)
 	}
-
-	// TODO: logging caused error, will look into later
-	_ = reason
-	// log.SubSkip(skipDate.Format(time.RFC3339), 0, email, reason)
 	return nil
 }
 

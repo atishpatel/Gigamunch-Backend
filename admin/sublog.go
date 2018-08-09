@@ -39,7 +39,7 @@ func ProcessSublog(ctx context.Context, r *http.Request, log *logging.Client) Re
 	if err != nil {
 		return errors.Annotate(err, "failed to decode date")
 	}
-	subC := subold.New(ctx)
+	subC := subold.NewWithLogging(ctx, log)
 	err = subC.Process(date, req.Email)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
