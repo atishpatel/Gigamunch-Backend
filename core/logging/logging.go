@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -33,6 +34,10 @@ const (
 	// User or Admin Actions
 	// ======================
 
+	// Skip Action.
+	Skip = Action("skip")
+	// Unskip Action.
+	Unskip = Action("unskip")
 	// Update Action.
 	Update = Action("update")
 	// Cancel Action.
@@ -232,6 +237,7 @@ type SalePayload struct {
 func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPaid float32, transactionID string) {
 	e := &Entry{
 		Type:      Subscriber,
+		Action:    Paid,
 		Severity:  SeverityInfo,
 		UserID:    userID,
 		UserEmail: userEmail,
@@ -239,7 +245,7 @@ func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPai
 			Title:       "Paid for " + date,
 			Description: fmt.Sprintf("%s successfully paid %.2f for %s", userEmail, amountPaid, date),
 		},
-		SalePayload: &SalePayload{
+		SalePayload: SalePayload{
 			Date:          date,
 			AmountDue:     amountDue,
 			AmountPaid:    amountPaid,
@@ -253,6 +259,7 @@ func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPai
 func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountRefunded float32, transactionID string) {
 	e := &Entry{
 		Type:      Subscriber,
+		Action:    Refund,
 		Severity:  SeverityInfo,
 		UserID:    userID,
 		UserEmail: userEmail,
@@ -260,7 +267,7 @@ func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountR
 			Title:       "Refunded for " + date,
 			Description: fmt.Sprintf("%s was refunded %.2f", userEmail, amountRefunded),
 		},
-		SalePayload: &SalePayload{
+		SalePayload: SalePayload{
 			Date:           date,
 			AmountDue:      amountDue,
 			AmountRefunded: amountRefunded,
@@ -274,6 +281,7 @@ func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountR
 func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amountForgiven float32) {
 	e := &Entry{
 		Type:      Subscriber,
+		Action:    Forgiven,
 		Severity:  SeverityInfo,
 		UserID:    userID,
 		UserEmail: userEmail,
@@ -281,7 +289,7 @@ func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amoun
 			Title:       "Forgiven for " + date,
 			Description: fmt.Sprintf("%s was forgiven for %.2f", userEmail, amountForgiven),
 		},
-		SalePayload: &SalePayload{
+		SalePayload: SalePayload{
 			Date:           date,
 			AmountDue:      amountDue,
 			AmountForgiven: amountForgiven,
@@ -293,7 +301,8 @@ func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amoun
 // CardDeclined is when a transaction is declined.
 func (c *Client) CardDeclined(userID int64, userEmail, date string, amountDue, amountDeclined float32, transactionID string) {
 	e := &Entry{
-		Type:      Subscriber,
+		Type: Subscriber,
+		// TODO: Action?
 		Severity:  SeverityInfo,
 		UserID:    userID,
 		UserEmail: userEmail,
@@ -301,7 +310,7 @@ func (c *Client) CardDeclined(userID int64, userEmail, date string, amountDue, a
 			Title:       "Card declined for " + date,
 			Description: fmt.Sprintf("%s's card was declined for %.2f", userEmail, amountDeclined),
 		},
-		SalePayload: &SalePayload{
+		SalePayload: SalePayload{
 			Date:           date,
 			AmountDue:      amountDue,
 			AmountDeclined: amountDeclined,
@@ -318,15 +327,18 @@ type CreditCardPayload struct {
 }
 
 // SubCardUpdated is when a credit card is Updated.
-func (c *Client) SubCardUpdated(oldPaymentMethodToken, newPaymentMethodToken string) {
+func (c *Client) SubCardUpdated(userID int64, userEmail, oldPaymentMethodToken, newPaymentMethodToken string) {
 	e := &Entry{
-		Type:     Subscriber,
-		Severity: SeverityInfo,
+		Type:      Subscriber,
+		Action:    CardUpdated,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Changed Credit Card",
 			Description: fmt.Sprintf("Changed card from %s to %s", oldPaymentMethodToken, newPaymentMethodToken),
 		},
-		CreditCardPayload: &CreditCardPayload{
+		CreditCardPayload: CreditCardPayload{
 			OldPaymentMethodToken: oldPaymentMethodToken,
 			NewPaymentMethodToken: newPaymentMethodToken,
 		},
@@ -346,15 +358,59 @@ func (c *Client) SubCardUpdated(oldPaymentMethodToken, newPaymentMethodToken str
 
 // }
 
+// ServingsChangedPayload is a ServingsChanged entry.
+type ServingsChangedPayload struct {
+	Date              string `json:"date,omniempty"`
+	OldNonVegServings int8   `json:"old_non_veg_servings,omitempty"`
+	NewNonVegServings int8   `json:"new_non_veg_servings,omitempty"`
+	OldVegServings    int8   `json:"old_veg_servings,omitempty"`
+	NewVegServings    int8   `json:"new_veg_servings,omitempty"`
+}
+
 // SubServingsChangedPermanently logs a servings change.
-// func (c *Client) SubServingsChangedPermanently(date string) {
+func (c *Client) SubServingsChangedPermanently(userID int64, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+	e := &Entry{
+		Type:      Subscriber,
+		Action:    ServingsChangedPermanently,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Servings changed permanently",
+			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
+		},
+		ServingsChangedPayload: ServingsChangedPayload{
+			OldNonVegServings: oldNonVegServings,
+			NewNonVegServings: newNonVegServings,
+			OldVegServings:    oldVegServings,
+			NewVegServings:    newVegServings,
+		},
+	}
+	c.Log(e)
+}
 
-// }
-
-// // SubServingsChanged logs a servings change.
-// func (c *Client) SubServingsChanged(date string) {
-
-// }
+// SubServingsChanged logs a servings change.
+func (c *Client) SubServingsChanged(userID int64, userEmail string, date string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+	e := &Entry{
+		Type:      Subscriber,
+		Action:    ServingsChangedPermanently,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Servings changed for " + date,
+			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
+		},
+		ServingsChangedPayload: ServingsChangedPayload{
+			Date:              date,
+			OldNonVegServings: oldNonVegServings,
+			NewNonVegServings: newNonVegServings,
+			OldVegServings:    oldVegServings,
+			NewVegServings:    newVegServings,
+		},
+	}
+	c.Log(e)
+}
 
 // SkipPayload is a Skip entry.
 type SkipPayload struct {
@@ -370,13 +426,16 @@ type SkipPayload struct {
 func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
 	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
 	e := &Entry{
-		Type:     Subscriber,
-		Severity: SeverityInfo,
+		Type:      Subscriber,
+		Action:    Skip,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Skip for " + date,
 			Description: fmt.Sprintf("%s was skipped for %s by %s because %s", userEmail, date, actionUserEmail, reason),
 		},
-		SkipPayload: &SkipPayload{
+		SkipPayload: SkipPayload{
 			Date:            date,
 			UserID:          userID,
 			UserEmail:       userEmail,
@@ -392,13 +451,16 @@ func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
 func (c *Client) SubUnskip(date string, userID int64, userEmail string) {
 	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
 	e := &Entry{
-		Type:     Subscriber,
-		Severity: SeverityInfo,
+		Type:      Subscriber,
+		Action:    Unskip,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Unskip for " + date,
 			Description: fmt.Sprintf("%s was unskipped for %s by %s", userEmail, date, actionUserEmail),
 		},
-		SkipPayload: &SkipPayload{
+		SkipPayload: SkipPayload{
 			Date:            date,
 			UserID:          userID,
 			UserEmail:       userEmail,
@@ -425,7 +487,7 @@ func (c *Client) ActivitySetup(date string, numSetup int) {
 			Title:       date,
 			Description: fmt.Sprintf("Activity setup for %s", date),
 		},
-		ActivitySetupPayload: &ActivitySetupPayload{
+		ActivitySetupPayload: ActivitySetupPayload{
 			Date:     date,
 			NumSetup: numSetup,
 		},
@@ -435,8 +497,14 @@ func (c *Client) ActivitySetup(date string, numSetup int) {
 
 // ErrorPayload is an error entry assocted with RequestError.
 type ErrorPayload struct {
-	Request http.Request // TODO: change this
-	errors.ErrorWithCode
+	Method        string               `json:"method,omitempty" datastore:",omitempty,noindex"`
+	URL           string               `json:"url,omitempty" datastore:",omitempty,noindex"`
+	Proto         string               `json:"proto,omitempty" datastore:",omitempty,noindex"`
+	Header        http.Header          `json:"header,omitempty" datastore:",omitempty,noindex"`
+	ContentLength int64                `json:"content_length,omitempty" datastore:",omitempty,noindex"`
+	Host          string               `json:"host,omitempty" datastore:",omitempty,noindex"`
+	Form          url.Values           `json:"form,omitempty" datastore:",omitempty,noindex"`
+	Error         errors.ErrorWithCode `json:"error,omitempty" datastore:",omitempty,noindex"`
 }
 
 // RequestError is used to log an error at the end of a request.
@@ -448,9 +516,15 @@ func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode, userID 
 		Path:      r.URL.Path,
 		UserID:    userID,
 		UserEmail: userEmail,
-		ErrorPayload: &ErrorPayload{
-			Request:       *r,
-			ErrorWithCode: ewc,
+		ErrorPayload: ErrorPayload{
+			Method:        r.Method,
+			URL:           r.URL.String(),
+			Header:        r.Header,
+			Proto:         r.Proto,
+			ContentLength: r.ContentLength,
+			Host:          r.Host,
+			Form:          r.Form,
+			Error:         ewc,
 		},
 	}
 	c.Log(e)
@@ -464,23 +538,24 @@ type BasicPayload struct {
 
 // Entry is a log entry.
 type Entry struct {
-	ID                   int64                 `json:"id" datastore:",noindex"`
-	Type                 Type                  `json:"type" datastore:",index"`
-	Action               Action                `json:"action" datastore:",index"`
-	ActionUserID         int64                 `json:"action_user_id,omitempty" datastore:",index"`
-	ActionUserEmail      string                `json:"action_user_email,omitempty" datastore:",index"`
-	UserID               int64                 `json:"user_id,omitempty" datastore:",index"`
-	UserEmail            string                `json:"user_email,omitempty" datastore:",index"`
-	Severity             sdlogging.Severity    `json:"serverity" datastore:",noindex"`
-	Path                 string                `json:"path" datastore:",noindex"`
-	LogName              string                `json:"log_name" datastore:",noindex"`
-	Timestamp            time.Time             `json:"timestamp" datastore:",index"`
-	BasicPayload         BasicPayload          `json:"basic_payload" datastore:",noindex"`
-	ErrorPayload         *ErrorPayload         `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
-	ActivitySetupPayload *ActivitySetupPayload `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
-	SkipPayload          *SkipPayload          `json:"skip_payload,omitempty" datastore:",omitempty,noindex"`
-	CreditCardPayload    *CreditCardPayload    `json:"credit_card_payload,omitempty" datastore:",omitempty,noindex"`
-	SalePayload          *SalePayload          `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
+	ID                     int64                  `json:"id,omitempty" datastore:",noindex"`
+	Type                   Type                   `json:"type,omitempty" datastore:",index"`
+	Action                 Action                 `json:"action,omitempty" datastore:",index"`
+	ActionUserID           int64                  `json:"action_user_id,omitempty" datastore:",index"`
+	ActionUserEmail        string                 `json:"action_user_email,omitempty" datastore:",index"`
+	UserID                 int64                  `json:"user_id,omitempty" datastore:",index"`
+	UserEmail              string                 `json:"user_email,omitempty" datastore:",index"`
+	Severity               sdlogging.Severity     `json:"serverity,omitempty" datastore:",noindex"`
+	Path                   string                 `json:"path,omitempty" datastore:",noindex"`
+	LogName                string                 `json:"log_name,omitempty" datastore:",noindex"`
+	Timestamp              time.Time              `json:"timestamp,omitempty" datastore:",index"`
+	BasicPayload           BasicPayload           `json:"basic_payload,omitempty" datastore:",noindex"`
+	ErrorPayload           ErrorPayload           `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
+	ActivitySetupPayload   ActivitySetupPayload   `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
+	SkipPayload            SkipPayload            `json:"skip_payload,omitempty" datastore:",omitempty,noindex"`
+	CreditCardPayload      CreditCardPayload      `json:"credit_card_payload,omitempty" datastore:",omitempty,noindex"`
+	SalePayload            SalePayload            `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
+	ServingsChangedPayload ServingsChangedPayload `json:"servings_changed_payload,omitempty" datastore:",omitempty,noindex"`
 }
 
 // Log logs a random entry.
