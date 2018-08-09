@@ -440,6 +440,9 @@ func (c *Client) UpdatePaymentToken(subEmail string, paymentMethodToken string) 
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateUnpaidPayment statement")
 	}
+	if c.log != nil {
+		c.log.SubCardUpdated(0, subEmail, oldPMT, paymentMethodToken)
+	}
 	return nil
 }
 
