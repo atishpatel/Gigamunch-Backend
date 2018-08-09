@@ -161,6 +161,15 @@ function GetLog(id) {
     };
     return callFetch(url, 'GET', req);
 }
+function GetLogsByEmail(start, limit, email) {
+    const url = baseURL + 'GetLogsByEmail';
+    const req = {
+        email,
+        start,
+        limit,
+    };
+    return callFetch(url, 'GET', req);
+}
 function callFetch(url, method, body) {
     const config = {
         method,
@@ -212,7 +221,8 @@ var Service = Object.freeze({
 	Refresh: Refresh,
 	GetActivityForDate: GetActivityForDate,
 	GetLogs: GetLogs,
-	GetLog: GetLog
+	GetLog: GetLog,
+	GetLogsByEmail: GetLogsByEmail
 });
 
 addEventListener(UserUpdated, UpdateUser);
