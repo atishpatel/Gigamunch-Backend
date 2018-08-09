@@ -16,6 +16,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -65,6 +66,7 @@ var (
 // Client is the client fro this package.
 type Client struct {
 	ctx context.Context
+	log *logging.Client
 }
 
 // New returns a new Client.
@@ -73,6 +75,17 @@ func New(ctx context.Context) *Client {
 		connectSQL(ctx)
 	})
 	return &Client{ctx: ctx}
+}
+
+// NewWithLogging returns a new Client.
+func NewWithLogging(ctx context.Context, log *logging.Client) *Client {
+	connectOnce.Do(func() {
+		connectSQL(ctx)
+	})
+	return &Client{
+		ctx: ctx,
+		log: log,
+	}
 }
 
 func getProjID() string {
@@ -501,6 +514,9 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}
+	if c.log != nil {
+		c.log.SubServingsChangedPermanently(0, subEmail, oldServings, nonvegServings, oldVegServings, vegServings)
+	}
 
 	mailC := mail.New(c.ctx)
 	mailReq := &mail.UserFields{
@@ -518,6 +534,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 	if err != nil {
 		return errors.Annotate(err, "failed to mail.UpdateUser")
 	}
+
 	return nil
 }
 
@@ -527,7 +544,7 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 	if date.IsZero() || subEmail == "" {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) amountPaid(%f) transactionID(%s)", date, subEmail, amountPaid, transactionID)
 	}
-	_, err := c.Get(date, subEmail)
+	oldEntry, err := c.Get(date, subEmail)
 	if err != nil {
 		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
 			return errors.Wrap("failed to sub.Get", err)
@@ -549,11 +566,14 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updatePaidSubLogStatement statement.")
 	}
+	if c.log != nil {
+		c.log.Paid(0, subEmail, date.Format(time.RFC3339), oldEntry.Amount, amountPaid, transactionID)
+	}
 	return nil
 }
 
 // Skip skips that subscription for that day.
-func (c *Client) Skip(date time.Time, subEmail string) error {
+func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 	s, err := c.GetSubscriber(subEmail)
 	if err != nil {
 		return errors.Wrap("failed to sub.GetSubscriber", err)
@@ -607,6 +627,12 @@ func (c *Client) Skip(date time.Time, subEmail string) error {
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateSkipSubLogStatement statement.")
+	}
+	if c.log != nil {
+		utils.Infof(c.ctx, "log not nil. logging skip")
+		c.log.SubSkip(date.Format(time.RFC3339), 0, subEmail, reason)
+	} else {
+		utils.Infof(c.ctx, "log nil")
 	}
 	return nil
 }

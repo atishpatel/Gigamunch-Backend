@@ -357,7 +357,7 @@ func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	}
 
 	subC := sub.New(ctx)
-	err = subC.Skip(req.Date, req.SubEmail)
+	err = subC.Skip(req.Date, req.SubEmail, "Admin skip.")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Skip")
 		return resp, nil
