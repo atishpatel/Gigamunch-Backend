@@ -303,7 +303,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	entry.DeliveryTips = req.DeliveryNotes
 	entry.Servings = servings
 	entry.VegetarianServings = vegetarianServings
-	entry.PhoneNumber = req.PhoneNumber
+	entry.UpdatePhoneNumber(req.PhoneNumber)
 	entry.PaymentMethodToken = paymenttkn
 	entry.Reference = req.Reference
 	entry.ReferenceEmail = req.ReferenceEmail
@@ -566,7 +566,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	entry.DeliveryTips = req.DeliveryNotes
 	entry.Servings = servings
 	entry.VegetarianServings = vegetarianServings
-	entry.PhoneNumber = req.PhoneNumber
+	entry.UpdatePhoneNumber(req.PhoneNumber)
 	entry.PaymentMethodToken = paymenttkn
 	entry.Reference = req.Reference
 	entry.ReferenceEmail = req.ReferenceEmail

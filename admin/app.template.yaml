@@ -13,6 +13,9 @@ handlers:
   - url: /admin/webhook/.*
     script: _go_app
 
+  - url: /admin/batch/.*
+    script: _go_app
+
   - url: /admin/src
     static_dir: app/src
     secure: always
