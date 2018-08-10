@@ -62,8 +62,8 @@ const (
 
 	// Message Action.
 	Message = Action("message")
-	// Review Action.
-	Review = Action("review")
+	// Rating Action.
+	Rating = Action("rating")
 	// ======================
 	// System Actions
 	// ======================
@@ -411,9 +411,56 @@ func (c *Client) SubUpdated(userID int64, userEmail string, payload *SubUpdatedP
 
 // }
 
-// func (c *Client) SubUpdate() {
+// MessagePayload is realted to a subscriber message interaction.
+type MessagePayload struct {
+	Platform string `json:"platform,omitempty" datastore:",omitempty,noindex"`
+	Subject  string `json:"subject,omitempty" datastore:",omitempty,noindex"`
+	Body     string `json:"body,omitempty" datastore:",omitempty,noindex"`
+	From     string `json:"from,omitempty" datastore:",omitempty,noindex"`
+	To       string `json:"to,omitempty" datastore:",omitempty,noindex"`
+}
 
-// }
+// SubMessage is a message interaction with a sub.
+func (c *Client) SubMessage(userID int64, userEmail string, payload *MessagePayload) {
+	e := &Entry{
+		Type:      Subscriber,
+		Action:    Message,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Message from(" + payload.From + ") to(" + payload.To + ")",
+			Description: "Body: '" + payload.Body + "'",
+		},
+		MessagePayload: *payload,
+	}
+	c.Log(e)
+}
+
+// RatingPayload is realted to a subscriber rating.
+type RatingPayload struct {
+	Rating      int8   `json:"rating,omitempty" datastore:",omitempty,noindex"`
+	CultureDate string `json:"culture_date,omitempty" datastore:",omitempty,noindex"`
+	Culture     string `json:"culture,omitempty" datastore:",omitempty,noindex"`
+	Comments    string `json:"comments,omitempty" datastore:",omitempty,noindex"`
+}
+
+// SubRating is a message interaction with a sub.
+func (c *Client) SubRating(userID int64, userEmail string, payload *RatingPayload) {
+	e := &Entry{
+		Type:      Subscriber,
+		Action:    Rating,
+		Severity:  SeverityInfo,
+		UserID:    userID,
+		UserEmail: userEmail,
+		BasicPayload: BasicPayload{
+			Title:       fmt.Sprintf("Rating %d", payload.Rating),
+			Description: "Comments: '" + payload.Comments + "'",
+		},
+		RatingPayload: *payload,
+	}
+	c.Log(e)
+}
 
 // ServingsChangedPayload is a ServingsChanged entry.
 type ServingsChangedPayload struct {
@@ -490,7 +537,7 @@ func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
 		UserEmail: userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Skip for " + date,
-			Description: fmt.Sprintf("%s was skipped for %s by %s because %s", userEmail, date, actionUserEmail, reason),
+			Description: fmt.Sprintf("%s was skipped for %s by %s because '%s'", userEmail, date, actionUserEmail, reason),
 		},
 		SkipPayload: SkipPayload{
 			Date:            date,
@@ -614,6 +661,8 @@ type Entry struct {
 	SalePayload            SalePayload            `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
 	ServingsChangedPayload ServingsChangedPayload `json:"servings_changed_payload,omitempty" datastore:",omitempty,noindex"`
 	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"`
+	MessagePayload         MessagePayload         `json:"message_payload,omitempty" datastore:",omitempty,noindex"`
+	RatingPayload          RatingPayload          `json:"rating_payload,omitempty" datastore:",omitempty,noindex"`
 }
 
 // Log logs a random entry.
