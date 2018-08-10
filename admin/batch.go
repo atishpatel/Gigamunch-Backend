@@ -33,9 +33,19 @@ func UpdatePhoneNumbers(ctx context.Context, r *http.Request, log *logging.Clien
 			updatedSubs = append(updatedSubs, &subs[i])
 		}
 	}
-	err = subC.Update(updatedSubs)
-	if err != nil {
-		return errors.Annotate(err, "failed to sub.Update")
+	lastIndex := 0
+	for i := 0; i < len(updatedSubs); i += 100 {
+		if i == 0 {
+			i += 100
+		}
+		if i > len(updatedSubs) {
+			i = len(updatedSubs)
+		}
+		err = subC.Update(updatedSubs[lastIndex:i])
+		if err != nil {
+			return errors.Annotate(err, "failed to sub.Update")
+		}
+		lastIndex = i
 	}
 	return errors.NoError.WithMessage(fmt.Sprintf("%d subs updated out of %d", len(updatedSubs), len(subs)))
 }
