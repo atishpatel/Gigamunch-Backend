@@ -307,7 +307,7 @@ func handleScheduleSubscription(w http.ResponseWriter, req *http.Request) {
 	entry.DeliveryTime = sReq.DeliveryTime
 	entry.Servings = servings
 	entry.VegetarianServings = vegetarianServings
-	entry.PhoneNumber = sReq.PhoneNumber
+	entry.UpdatePhoneNumber(sReq.PhoneNumber)
 	entry.SubscriptionDay = time.Monday.String()
 	entry.PaymentMethodToken = paymenttkn
 	entry.WeeklyAmount = weeklyAmount
