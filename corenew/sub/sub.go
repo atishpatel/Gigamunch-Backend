@@ -138,6 +138,19 @@ func (c *Client) GetSubscribers(emails []string) ([]*SubscriptionSignUp, error) 
 	return subs, nil
 }
 
+// GetSubscribersByPhoneNumber returns a SubscriptionSignUp.
+func (c *Client) GetSubscribersByPhoneNumber(number string) ([]*SubscriptionSignUp, error) {
+	if number == "" {
+		return nil, errInvalidParameter.Wrap("number cannot be empty.")
+	}
+	cleanNumber := GetCleanPhoneNumber(number)
+	subs, err := getSubscribersByPhoneNumber(c.ctx, cleanNumber)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
+	}
+	return subs, nil
+}
+
 // GetHasSubscribed returns a list of all SubscriptionSignUp.
 func (c *Client) GetHasSubscribed(date time.Time) ([]SubscriptionSignUp, error) {
 	subs, err := getHasSubscribed(c.ctx, date)
@@ -403,6 +416,48 @@ func (c *Client) GetSubscriberActivities(email string) ([]*SubscriptionLog, erro
 		subLogs = append(subLogs, subLog)
 	}
 	return subLogs, nil
+}
+
+// Update updates all the subs info.
+func (c *Client) Update(subs []*SubscriptionSignUp) error {
+	if len(subs) == 0 {
+		return nil
+	}
+	emails := make([]string, len(subs))
+	for i, sub := range subs {
+		emails[i] = sub.Email
+	}
+	oldSubs, err := getMulti(c.ctx, emails)
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to getMulti")
+	}
+	err = putMulti(c.ctx, subs)
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to putMulti")
+	}
+	logging.Infof(c.ctx, "after putMulti(%d) %s", len(subs), err)
+	if c.log != nil {
+		for i := range subs {
+			payload := &logging.SubUpdatedPayload{
+				OldEmail:          oldSubs[i].Email,
+				Email:             subs[i].Email,
+				OldFirstName:      oldSubs[i].FirstName,
+				FirstName:         subs[i].FirstName,
+				OldLastName:       oldSubs[i].LastName,
+				LastName:          subs[i].LastName,
+				OldAddress:        oldSubs[i].Address.String(),
+				Address:           subs[i].Address.String(),
+				OldRawPhoneNumber: oldSubs[i].RawPhoneNumber,
+				RawPhoneNumber:    subs[i].RawPhoneNumber,
+				OldPhoneNumber:    oldSubs[i].PhoneNumber,
+				PhoneNumber:       subs[i].PhoneNumber,
+				OldDeliveryNotes:  oldSubs[i].DeliveryTips,
+				DeliveryNotes:     subs[i].DeliveryTips,
+			}
+			c.log.SubUpdated(0, subs[i].Email, payload)
+		}
+	}
+	return nil
 }
 
 // Setup sets up a SubLog.
