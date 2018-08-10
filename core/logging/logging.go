@@ -678,10 +678,16 @@ func (c *Client) Log(e *Entry) {
 		e.Path = c.path
 	}
 	if e.ActionUserID == 0 {
-		e.ActionUserID = c.ctx.Value(common.ContextUserID).(int64)
+		tmp := c.ctx.Value(common.ContextUserID)
+		if tmp != nil {
+			e.ActionUserID = tmp.(int64)
+		}
 	}
 	if e.ActionUserEmail == "" {
-		e.ActionUserEmail = c.ctx.Value(common.ContextUserEmail).(string)
+		tmp := c.ctx.Value(common.ContextUserEmail)
+		if tmp != nil {
+			e.ActionUserEmail = tmp.(string)
+		}
 	}
 	key := db.IncompleteKey(c.ctx, kind)
 	_, err := db.Put(c.ctx, key, e)

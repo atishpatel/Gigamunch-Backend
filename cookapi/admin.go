@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/db"
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
@@ -182,11 +185,12 @@ func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSM
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
+	log, _ := setupLogging(ctx, "/cookapi/api/SendCusomterSMS")
 	dilm := "{{name}}"
-	if !strings.Contains(req.Message, dilm) {
-		resp.Err = errors.BadRequestError.WithMessage("Message requires {{name}}.")
-		return resp, nil
-	}
+	// if !strings.Contains(req.Message, dilm) {
+	// 	resp.Err = errors.BadRequestError.WithMessage("Message requires {{name}}.")
+	// 	return resp, nil
+	// }
 	messageC := message.New(ctx)
 	var emails []string
 	if strings.Contains(req.Emails, ",") {
@@ -214,6 +218,16 @@ func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSM
 		if err != nil {
 			resp.Err = errors.Wrap("failed to message.SendSMS", err)
 			return resp, nil
+		}
+		// log
+		if log != nil {
+			payload := &logging.MessagePayload{
+				Platform: "SMS",
+				Body:     msg,
+				From:     "Gigamunch",
+				To:       s.PhoneNumber,
+			}
+			log.SubMessage(0, s.Email, payload)
 		}
 	}
 	return resp, nil
@@ -867,4 +881,17 @@ func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmai
 		return resp, nil
 	}
 	return resp, nil
+}
+
+func setupLogging(ctx context.Context, path string) (*logging.Client, error) {
+	dbC, err := db.NewClient(ctx, projectID, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get database client: %+v", err)
+	}
+	// Setup logging
+	err = logging.Setup(ctx, true, projectID, "admin", nil, dbC)
+	if err != nil {
+		return nil, fmt.Errorf("failed to setup logging: %+v", err)
+	}
+	return logging.NewClient(ctx, path)
 }
