@@ -99,6 +99,7 @@ func handleCheckout(w http.ResponseWriter, req *http.Request, params httprouter.
 	if email == "" {
 		email = params.ByName("email")
 	}
+	email = strings.TrimSpace(strings.ToLower(email))
 	// TODO: add referred email address
 	var err error
 	if email != "" && terp == "" && strings.Contains(email, "@") {
