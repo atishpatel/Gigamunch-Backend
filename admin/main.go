@@ -246,7 +246,7 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 		resp := f(ctx, r, loggingC)
 		// Log errors
 		if resp == nil {
-			return
+			resp = errors.NoError
 		}
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
