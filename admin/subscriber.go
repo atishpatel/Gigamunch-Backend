@@ -20,7 +20,7 @@ func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *ht
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -48,7 +48,7 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}

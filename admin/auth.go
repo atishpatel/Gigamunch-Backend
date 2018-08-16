@@ -16,7 +16,7 @@ func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -42,7 +42,7 @@ func (s *server) Refresh(ctx context.Context, w http.ResponseWriter, r *http.Req
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}

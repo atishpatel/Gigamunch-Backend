@@ -16,7 +16,7 @@ func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -38,7 +38,7 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -62,7 +62,7 @@ func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *h
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}

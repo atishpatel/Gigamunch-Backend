@@ -18,7 +18,7 @@ func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *ht
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -43,7 +43,7 @@ func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r 
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -65,7 +65,7 @@ func (s *server) GetSubscriberSublogs(ctx context.Context, w http.ResponseWriter
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, &req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
