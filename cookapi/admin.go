@@ -11,6 +11,7 @@ import (
 	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
@@ -889,9 +890,9 @@ func setupLogging(ctx context.Context, path string) (*logging.Client, error) {
 		return nil, fmt.Errorf("failed to get database client: %+v", err)
 	}
 	// Setup logging
-	err = logging.Setup(ctx, true, projectID, "admin", nil, dbC)
-	if err != nil {
-		return nil, fmt.Errorf("failed to setup logging: %+v", err)
+	serverInfo := &common.ServerInfo{
+		ProjectID:           projectID,
+		IsStandardAppEngine: true,
 	}
-	return logging.NewClient(ctx, path)
+	return logging.NewClient(ctx, "admin", path, dbC, serverInfo)
 }
