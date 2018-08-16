@@ -16,14 +16,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-func setupTasksHandlers() {
-	http.HandleFunc("/admin/task/SetupTags", handler(SetupTags))
-	http.HandleFunc("/admin/task/CheckPowerSensors", handler(CheckPowerSensors))
-	http.HandleFunc("/admin/task/SendStatsSMS", handler(SendStatsSMS))
-}
-
 // SetupTags sets up tags for culture preview email and culture email 2 weeks in advance.
-func SetupTags(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	nextCultureDate := time.Now().Add(time.Hour * 7 * 24)
 	for nextCultureDate.Weekday() != time.Monday {
@@ -46,7 +40,7 @@ func SetupTags(ctx context.Context, r *http.Request, log *logging.Client) Respon
 }
 
 // CheckPowerSensors checks all the PowerSensors.
-func CheckPowerSensors(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) CheckPowerSensors(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	healthC := healthcheck.New(ctx)
 	err = healthC.CheckPowerSensors()
@@ -57,8 +51,8 @@ func CheckPowerSensors(ctx context.Context, r *http.Request, log *logging.Client
 }
 
 // SendStatsSMS sends the stats on new and cancel sms to Chris and Piyush.
-func SendStatsSMS(ctx context.Context, r *http.Request, log *logging.Client) Response {
-	if !common.IsProd(projID) {
+func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	if !common.IsProd(s.serverInfo.ProjectID) {
 		return nil
 	}
 	subC := sub.New(ctx)

@@ -19,13 +19,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-func setupWebhooksHandlers() {
-	http.HandleFunc("/admin/webhook/typeform-skip", handler(TypeformSkip))
-	http.HandleFunc("/admin/webhook/twilio-sms", handler(TwilioSMS))
-}
-
 // TwilioSMS is a webhook for twilio messages.
-func TwilioSMS(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	err := r.ParseForm()
 	logging.Infof(ctx, "req body: %s err: %s", r.Form, err)
 	from := r.FormValue("From")
@@ -108,13 +103,14 @@ func TwilioSMS(ctx context.Context, r *http.Request, log *logging.Client) Respon
 			}
 		}
 	}
+	w.Header().Set("Content-Type", "text/plain")
 	return nil
 }
 
 // TypeformSkip is the webhook for the skip typeform.
-func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
-	var req TypefromWebhookRequest
+	var req typefromWebhookRequest
 	// payload, err := ioutil.ReadAll(r.Body)
 	dec := json.NewDecoder(r.Body)
 	err = dec.Decode(&req)
@@ -190,38 +186,38 @@ func TypeformSkip(ctx context.Context, r *http.Request, log *logging.Client) Res
 	return nil
 }
 
-type TypefromWebhookRequest struct {
+type typefromWebhookRequest struct {
 	EventID      string           `json:"event_id,omitempty"`
 	EventType    string           `json:"event_type,omitempty"`
-	FormResponse TypeformResponse `json:"form_response,omitempty"`
+	FormResponse typeformResponse `json:"form_response,omitempty"`
 }
 
-type TypeformResponse struct {
+type typeformResponse struct {
 	FormID      string           `json:"form_id,omitempty"`
 	Token       string           `json:"token,omitempty"`
 	SubmittedAt time.Time        `json:"submitted_at,omitempty"`
-	Hidden      HiddenField      `json:"hidden,omitempty"`
-	Answers     []TypeformAnswer `json:"answers,omitempty"`
+	Hidden      hiddenField      `json:"hidden,omitempty"`
+	Answers     []typeformAnswer `json:"answers,omitempty"`
 }
 
-type HiddenField struct {
+type hiddenField struct {
 	ID string `json:"id,omitempty"`
 }
 
-type TypeformAnswer struct {
+type typeformAnswer struct {
 	Type   string         `json:"type,omitempty"`
 	Text   string         `json:"text,omitempty"`
 	Email  string         `json:"email,omitempty"`
-	Choice TypeformChoice `json:"choice,omitempty"`
-	Field  TypeformField  `json:"field,omitempty"`
+	Choice typeformChoice `json:"choice,omitempty"`
+	Field  typeformField  `json:"field,omitempty"`
 }
 
-type TypeformField struct {
+type typeformField struct {
 	Type string `json:"type,omitempty"`
 	ID   string `json:"id,omitempty"`
 }
 
-type TypeformChoice struct {
+type typeformChoice struct {
 	Label string `json:"label,omitempty"`
 	Other string `json:"other,omitempty"`
 }

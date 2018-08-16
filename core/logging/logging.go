@@ -106,11 +106,7 @@ const (
 )
 
 var (
-	standAppEngine bool
-	projID         string
-	loggerID       string
-	sdClient       *sdlogging.Client
-	db             common.DB
+	sdClient *sdlogging.Client
 )
 
 var (
@@ -136,28 +132,34 @@ func Debugf(ctx context.Context, format string, args ...interface{}) {
 
 // Client is a logging client.
 type Client struct {
-	ctx      context.Context
-	sdLogger *sdlogging.Logger
-	path     string
+	ctx        context.Context
+	sdLogger   *sdlogging.Logger
+	loggerID   string
+	path       string
+	db         common.DB
+	serverInfo *common.ServerInfo
 }
 
 // NewClient returns a new logging client.
-func NewClient(ctx context.Context, path string) (*Client, error) {
-	if db == nil {
-		return nil, errInternal.Annotate("setup not called")
+func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB, serverInfo *common.ServerInfo) (*Client, error) {
+	if dbC == nil {
+		return nil, errInternal.Annotate("dbC cannot be nil")
 	}
-	if standAppEngine {
+	if serverInfo.IsStandardAppEngine {
 		httpClient := urlfetch.Client(ctx)
-		setup(ctx, httpClient)
+		setup(ctx, httpClient, serverInfo.ProjectID)
 	}
 	var sdLogger *sdlogging.Logger
 	if sdClient != nil {
 		sdLogger = sdClient.Logger(loggerID)
 	}
 	return &Client{
-		ctx:      ctx,
-		sdLogger: sdLogger,
-		path:     path,
+		ctx:        ctx,
+		sdLogger:   sdLogger,
+		loggerID:   loggerID,
+		path:       path,
+		db:         dbC,
+		serverInfo: serverInfo,
 	}, nil
 }
 
@@ -174,7 +176,7 @@ func (c *Client) Errorf(ctx context.Context, format string, args ...interface{})
 // GetAll gets logs.
 func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := db.Query(c.ctx, kind, start, limit, "-Timestamp", &dst)
+	keys, err := c.db.Query(c.ctx, kind, start, limit, "-Timestamp", &dst)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
@@ -187,7 +189,7 @@ func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 // GetAllByID gets logs with UserID.
 func (c *Client) GetAllByID(userID int64, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, &dst)
+	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, &dst)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
@@ -200,7 +202,7 @@ func (c *Client) GetAllByID(userID int64, start, limit int) ([]*Entry, error) {
 // GetAllByEmail gets logs with UserEmail.
 func (c *Client) GetAllByEmail(userEmail string, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserEmail=", userEmail, &dst)
+	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserEmail=", userEmail, &dst)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
@@ -213,8 +215,8 @@ func (c *Client) GetAllByEmail(userEmail string, start, limit int) ([]*Entry, er
 // Get gets a log.
 func (c *Client) Get(id int64) (*Entry, error) {
 	var entry Entry
-	key := db.IDKey(c.ctx, kind, id)
-	err := db.Get(c.ctx, key, &entry)
+	key := c.db.IDKey(c.ctx, kind, id)
+	err := c.db.Get(c.ctx, key, &entry)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to db.Get")
 	}
@@ -670,7 +672,7 @@ func (c *Client) Log(e *Entry) {
 	if e.Type.isNil() {
 		e.Type = Unknown
 	}
-	e.LogName = projID + "/" + loggerID
+	e.LogName = c.serverInfo.ProjectID + "/" + c.loggerID
 	if e.Timestamp.IsZero() {
 		e.Timestamp = time.Now()
 	}
@@ -689,29 +691,14 @@ func (c *Client) Log(e *Entry) {
 			e.ActionUserEmail = tmp.(string)
 		}
 	}
-	key := db.IncompleteKey(c.ctx, kind)
-	_, err := db.Put(c.ctx, key, e)
+	key := c.db.IncompleteKey(c.ctx, kind)
+	_, err := c.db.Put(c.ctx, key, e)
 	if err != nil {
 		Errorf(c.ctx, "failed to log entry(%+v) error: %+v", e, err)
 	}
 }
 
-// Setup sets up the logging package.
-func Setup(ctx context.Context, standardAppEngine bool, projectID, logID string, httpClient *http.Client, dbC common.DB) error {
-	projID = projectID
-	loggerID = logID
-	standAppEngine = standardAppEngine
-	if dbC == nil {
-		return fmt.Errorf("db cannot be nil for logging")
-	}
-	db = dbC
-	if !standAppEngine {
-		setup(ctx, httpClient)
-	}
-	return nil
-}
-
-func setup(ctx context.Context, httpClient *http.Client) error {
+func setup(ctx context.Context, httpClient *http.Client, projID string) error {
 	var ops option.ClientOption
 	if httpClient != nil {
 		ops = option.WithHTTPClient(httpClient)

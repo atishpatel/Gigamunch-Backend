@@ -4,40 +4,38 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/gorilla/schema"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/atishpatel/Gigamunch-Backend/config"
-
 	authold "github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
-	"github.com/atishpatel/Gigamunch-Backend/core/mail"
-	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/urlfetch"
 
 	// driver for mysql
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var (
-	projID    string
-	dbC       *db.Client
-	sqlC      *sqlx.DB
-	setupDone = false
-)
+type server struct {
+	once       sync.Once
+	serverInfo *common.ServerInfo
+	db         *db.Client
+	sqlDB      *sqlx.DB
+	log        *logging.Client
+}
 
 var (
 	errPermissionDenied = errors.PermissionDeniedError
@@ -47,36 +45,45 @@ var (
 )
 
 func init() {
-	err := setup()
+	s := new(server)
+	err := s.setup()
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
 	// Auth
-	http.HandleFunc("/admin/api/v1/Login", handler(Login))
-	http.HandleFunc("/admin/api/v1/Refresh", handler(Refresh))
+	http.HandleFunc("/admin/api/v1/Login", s.handler(s.Login))
+	http.HandleFunc("/admin/api/v1/Refresh", s.handler(s.Refresh))
 	// Logs
-	http.HandleFunc("/admin/api/v1/GetLog", handler(systemsAdmin(GetLog)))
-	http.HandleFunc("/admin/api/v1/GetLogs", handler(systemsAdmin(GetLogs)))
-	http.HandleFunc("/admin/api/v1/GetLogsByEmail", handler(systemsAdmin(GetLogsByEmail)))
+	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.systemsAdmin(s.GetLog)))
+	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.systemsAdmin(s.GetLogs)))
+	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.systemsAdmin(s.GetLogsByEmail)))
 	// Sublogs
-	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", handler(userAdmin(GetUnpaidSublogs)))
-	http.HandleFunc("/admin/api/v1/ProcessSublog", handler(userAdmin(ProcessSublog)))
-	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", handler(userAdmin(GetSubscriberSublogs)))
+	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
+	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
+	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
 	// Subscriber
-	http.HandleFunc("/admin/api/v1/GetHasSubscribed", handler(userAdmin(GetHasSubscribed)))
-	http.HandleFunc("/admin/api/v1/GetSubscriber", handler(userAdmin(GetSubscriber)))
+	http.HandleFunc("/admin/api/v1/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribed)))
+	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
 	// Zone
-	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(AddGeofence)))
+	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
+	// Tasks
+	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
+	http.HandleFunc("/admin/task/CheckPowerSensors", s.handler(s.CheckPowerSensors))
+	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
+	// Webhooks
+	http.HandleFunc("/admin/webhook/typeform-skip", s.handler(s.TypeformSkip))
+	http.HandleFunc("/admin/webhook/twilio-sms", s.handler(s.TwilioSMS))
+	// Batch
+	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
 	//
-	http.HandleFunc("/admin/api/v1/Test", test)
-	setupTasksHandlers()
-	setupWebhooksHandlers()
-	setupBatchHandlers()
+	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("success"))
+	})
 }
 
-func setup() error {
+func (s *server) setup() error {
 	var err error
-	projID = os.Getenv("PROJECT_ID")
+	projID := os.Getenv("PROJECT_ID")
 	if projID == "" {
 		log.Fatal(`You need to set the environment variable "PROJECT_ID"`)
 	}
@@ -88,48 +95,20 @@ func setup() error {
 	if appengine.IsDevAppServer() {
 		sqlConnectionString = "root@/gigamunch"
 	}
-	sqlC, err = sqlx.Connect("mysql", sqlConnectionString)
+	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString)
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}
-	return nil
-}
-
-// setupWithContext can be called in main for flex but needs to be called with each method on standard.
-func setupWithContext(ctx context.Context) error {
-	var err error
-	dbC, err = db.NewClient(ctx, projID, nil)
-	if err != nil {
-		return fmt.Errorf("failed to get database client: %+v", err)
-	}
-	// Setup auth
-	httpClient := urlfetch.Client(ctx)
-	config := config.GetConfig(ctx)
-	err = auth.Setup(ctx, true, projID, httpClient, dbC, config.JWTSecret)
-	if err != nil {
-		return fmt.Errorf("failed to setup auth: %+v", err)
-	}
-	// Setup logging
-	err = logging.Setup(ctx, true, projID, "admin", nil, dbC)
-	if err != nil {
-		return fmt.Errorf("failed to setup logging: %+v", err)
-	}
-	// Setup mail
-	err = mail.Setup(ctx, true, projID, config.DripAPIKey, config.DripAccountID, config.MailgunAPIKey, config.MailgunPublicAPIKey)
-	if err != nil {
-		return fmt.Errorf("failed to setup mail: %+v", err)
-	}
-	// Setup Sub
-	err = sub.Setup(ctx, true, projID, sqlC, dbC)
-	if err != nil {
-		return fmt.Errorf("failed to setup sub: %+v", err)
+	s.serverInfo = &common.ServerInfo{
+		ProjectID:           projID,
+		IsStandardAppEngine: true,
 	}
 	return nil
 }
 
-func userAdmin(f handle) handle {
-	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
-		user, err := getUserFromRequest(ctx, r, log)
+func (s *server) userAdmin(f handle) handle {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+		user, err := getUserFromRequest(ctx, w, r, log)
 		if err != nil {
 			return err
 		}
@@ -138,13 +117,13 @@ func userAdmin(f handle) handle {
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
 		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
-		return f(ctx, r, log)
+		return f(ctx, w, r, log)
 	}
 }
 
-func driverAdmin(f handle) handle {
-	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
-		user, err := getUserFromRequest(ctx, r, log)
+func (s *server) driverAdmin(f handle) handle {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+		user, err := getUserFromRequest(ctx, w, r, log)
 		if err != nil {
 			return err
 		}
@@ -153,13 +132,13 @@ func driverAdmin(f handle) handle {
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
 		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
-		return f(ctx, r, log)
+		return f(ctx, w, r, log)
 	}
 }
 
-func systemsAdmin(f handle) handle {
-	return func(ctx context.Context, r *http.Request, log *logging.Client) Response {
-		user, err := getUserFromRequest(ctx, r, log)
+func (s *server) systemsAdmin(f handle) handle {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+		user, err := getUserFromRequest(ctx, w, r, log)
 		if err != nil {
 			return err
 		}
@@ -168,11 +147,11 @@ func systemsAdmin(f handle) handle {
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
 		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
-		return f(ctx, r, log)
+		return f(ctx, w, r, log)
 	}
 }
 
-func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Client) (*common.User, *errors.ErrorWithCode) {
+func getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, *errors.ErrorWithCode) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
 		e := errBadRequest.Annotate("auth-token is empty")
@@ -212,7 +191,7 @@ func getUserFromRequest(ctx context.Context, r *http.Request, log *logging.Clien
 	return user, nil
 }
 
-func handler(f func(context.Context, *http.Request, *logging.Client) Response) func(http.ResponseWriter, *http.Request) {
+func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
@@ -226,16 +205,15 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
-		if !setupDone {
-			err = setupWithContext(ctx)
-			if err != nil {
-				// TODO: Alert but send friendly error back
-				log.Fatalf("failed to setup: %+v", err)
-				return
-			}
+		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			// TODO:
+			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
+			return
 		}
 		// create logging client
-		loggingC, err := logging.NewClient(ctx, r.URL.Path)
+		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
 			errString := fmt.Sprintf("failed to get new logging client: %+v", err)
 			logging.Errorf(ctx, errString)
@@ -243,11 +221,11 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 			_, _ = w.Write([]byte(errString))
 		}
 		// call function
-		resp := f(ctx, r, loggingC)
-		// Log errors
+		resp := f(ctx, w, r, log)
 		if resp == nil {
-			resp = errors.NoError
+			return
 		}
+		// Log errors
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
 			sharedErr = &shared.Error{
@@ -270,9 +248,27 @@ func handler(f func(context.Context, *http.Request, *logging.Client) Response) f
 	}
 }
 
-// Response is a response to a rpc call. All responses contain an error.
-type Response interface {
-	GetError() *shared.Error
+// Request helpers
+func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(v, r.URL.Query())
+		logging.Infof(ctx, "Query: %+v", r.URL.Query())
+		if err != nil {
+			return err
+		}
+	} else {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			return err
+		}
+		logging.Infof(ctx, "Body: %s", body)
+		err = json.Unmarshal(body, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func failedToDecode(err error) *pb.ErrorOnlyResp {
@@ -281,15 +277,12 @@ func failedToDecode(err error) *pb.ErrorOnlyResp {
 	}
 }
 
-func closeRequestBody(r *http.Request) {
-	_ = r.Body.Close()
+// Response is a response to a rpc call. All responses contain an error.
+type Response interface {
+	GetError() *shared.Error
 }
 
-func test(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("success"))
-}
-
-type handle func(context.Context, *http.Request, *logging.Client) Response
+type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getTime(s string) (time.Time, error) {
 	t, err := time.Parse(time.RFC3339, s)
