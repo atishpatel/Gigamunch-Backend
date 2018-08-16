@@ -2,38 +2,27 @@ package admin
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/gorilla/schema"
 )
 
 // Login takes a Firebase Token and returns an auth token.
-func Login(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.TokenOnlyReq)
 	var err error
+
 	// decode request
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(req, r.URL.Query())
-		if err != nil {
-			return failedToDecode(err)
-		}
-	} else {
-		decoder := json.NewDecoder(r.Body)
-		err = decoder.Decode(&req)
-		if err != nil {
-			return failedToDecode(err)
-		}
-		defer closeRequestBody(r)
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
 	}
-	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	authC, err := auth.NewClient(ctx, log)
+
+	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to get auth.NewClient")
 	}
@@ -48,27 +37,18 @@ func Login(ctx context.Context, r *http.Request, log *logging.Client) Response {
 }
 
 // Refresh refreshs an auth token.
-func Refresh(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) Refresh(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.TokenOnlyReq)
 	var err error
+
 	// decode request
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(req, r.URL.Query())
-		if err != nil {
-			return failedToDecode(err)
-		}
-	} else {
-		decoder := json.NewDecoder(r.Body)
-		err = decoder.Decode(&req)
-		if err != nil {
-			return failedToDecode(err)
-		}
-		defer closeRequestBody(r)
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
 	}
-	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-	authC, err := auth.NewClient(ctx, log)
+
+	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to get auth.NewClient")
 	}

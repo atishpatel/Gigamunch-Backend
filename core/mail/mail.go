@@ -8,6 +8,7 @@ import (
 
 	"gopkg.in/mailgun/mailgun-go.v1"
 
+	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -87,7 +88,11 @@ type Client struct {
 func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 	var err error
 	if dripAPIKey == "" {
-		return nil, errInternal.Annotate("setup not called or dripAPIKey is empty")
+		cnfg := config.GetConfig(ctx)
+		dripAPIKey = cnfg.DripAPIKey
+		dripAcctID = cnfg.DripAccountID
+		mailgunAPIKey = cnfg.MailgunAPIKey
+		mailgunPublicAPIKey = cnfg.MailgunPublicAPIKey
 	}
 	dripClient, err := drip.New(dripAPIKey, dripAcctID)
 	if err != nil {
@@ -278,16 +283,6 @@ func ignoreEmail(email string) bool {
 		return true
 	}
 	return false
-}
-
-// Setup sets up the logging package.
-func Setup(ctx context.Context, standardAppEngine bool, projectID, dripAPIkey, dripAccountID, mailgunAPIkey, mailgunPublicAPIkey string) error {
-	standAppEngine = standardAppEngine
-	dripAPIKey = dripAPIkey
-	dripAcctID = dripAccountID
-	mailgunAPIKey = mailgunAPIkey
-	mailgunPublicAPIKey = mailgunPublicAPIkey
-	return nil
 }
 
 // DateString formates the date into a "Monday, January 1st" format.

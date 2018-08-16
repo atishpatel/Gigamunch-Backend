@@ -12,13 +12,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-func setupBatchHandlers() {
-	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", handler(UpdatePhoneNumbers))
-}
-
 // UpdatePhoneNumbers updates phonenumbers for subscribers.
-func UpdatePhoneNumbers(ctx context.Context, r *http.Request, log *logging.Client) Response {
-	subC := sub.NewWithLogging(ctx, log)
+func (s *server) UpdatePhoneNumbers(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	subC := sub.NewWithLogging(ctx, s.log)
 	subs, err := subC.GetHasSubscribed(time.Now())
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.GetHasSubscribed")

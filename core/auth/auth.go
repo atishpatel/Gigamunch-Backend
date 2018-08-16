@@ -2,10 +2,10 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	fb "firebase.google.com/go"
@@ -14,17 +14,17 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
 
+	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/jmoiron/sqlx"
 )
 
 var (
-	standAppEngine bool
-	projID         string
-	fbAuth         *fba.Client
-	db             common.DB
-	jwtKey         []byte
+	once   sync.Once
+	fbAuth *fba.Client
+	jwtKey []byte
 )
 
 var (
@@ -36,20 +36,26 @@ var (
 
 // Client is a client for manipulating auth.
 type Client struct {
-	ctx context.Context
-	log *logging.Client
+	ctx        context.Context
+	log        *logging.Client
+	db         common.DB
+	sqlDB      *sqlx.DB
+	serverInfo *common.ServerInfo
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
+func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sqlx.DB, serverInfo *common.ServerInfo) (*Client, error) {
 	var err error
-	if standAppEngine {
+	if serverInfo.IsStandardAppEngine {
 		httpClient := urlfetch.Client(ctx)
-		err = setupFBApp(ctx, httpClient, projID)
+		err = setupFBApp(ctx, httpClient, serverInfo.ProjectID)
 		if err != nil {
 			return nil, err
 		}
 	}
+	once.Do(func() {
+		setup(ctx, serverInfo)
+	})
 	if fbAuth == nil {
 		return nil, errInternal.Annotate("setup not called")
 	}
@@ -57,12 +63,30 @@ func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	return &Client{
-		ctx: ctx,
-		log: log,
+		ctx:        ctx,
+		log:        log,
+		db:         dbC,
+		sqlDB:      sqlC,
+		serverInfo: serverInfo,
 	}, nil
 }
 
-func createSessionToken(ctx context.Context, fbID, name, email, photoURL, provider, firebase string) (*Token, error) {
+func setup(ctx context.Context, serverInfo *common.ServerInfo) {
+	rand.Seed(time.Now().Unix())
+	if !serverInfo.IsStandardAppEngine {
+		httpClient := http.DefaultClient
+		err := setupFBApp(ctx, httpClient, serverInfo.ProjectID)
+		if err != nil {
+			// TODO:
+			// return err
+		}
+	}
+	// Get JWT Secret
+	config := config.GetConfig(ctx)
+	jwtKey = []byte(config.JWTSecret)
+}
+
+func createSessionToken(ctx context.Context, db common.DB, fbID, name, email, photoURL, provider, firebase string) (*Token, error) {
 	var err error
 	firstTime := false
 	var multiUserSessions []*UserSessions
@@ -145,7 +169,7 @@ func (c *Client) GetFromFBToken(ctx context.Context, fbToken string) (*common.Us
 	provider, ok := claims["sign_in_provider"].(string)
 	firebase, ok := claims["firebase"].(string)
 	c.log.Debugf(ctx, "claims: %+v", claims)
-	token, err := createSessionToken(ctx, fbTKN.UID, name, email, picture, provider, firebase)
+	token, err := createSessionToken(ctx, c.db, fbTKN.UID, name, email, picture, provider, firebase)
 	if err != nil {
 		return nil, "", errors.Wrap("failed to create session token", err)
 	}
@@ -226,29 +250,6 @@ func splitName(name string) (string, string) {
 		last = name[lastSpace:]
 	}
 	return first, last
-}
-
-// Setup sets up auth.
-func Setup(ctx context.Context, standardAppEngine bool, projectID string, httpClient *http.Client, dbC common.DB, jwtSecret string) error {
-	rand.Seed(time.Now().Unix())
-	var err error
-	standAppEngine = standardAppEngine
-	projID = projectID
-	if !standAppEngine {
-		err = setupFBApp(ctx, httpClient, projectID)
-		if err != nil {
-			return err
-		}
-	}
-	if dbC == nil {
-		return fmt.Errorf("db cannot be nil for sub")
-	}
-	db = dbC
-	if jwtSecret == "" {
-		return fmt.Errorf("jwt secret is empty")
-	}
-	jwtKey = []byte(jwtSecret)
-	return nil
 }
 
 func setupFBApp(ctx context.Context, httpClient *http.Client, projectID string) error {
