@@ -362,7 +362,7 @@ func handleSendPreviewCultureEmail(w http.ResponseWriter, req *http.Request) {
 	if len(nonSkippers) != 0 {
 		if common.IsProd(projectID) {
 			// hard code emails that should be sent email
-			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "befutter@gmail.com")
+			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
 		}
 		tag := mail.GetPreviewEmailTag(cultureDate)
 		mailC := mail.New(ctx)
@@ -391,7 +391,7 @@ func handleSendCultureEmail(w http.ResponseWriter, req *http.Request) {
 	if len(nonSkippers) != 0 {
 		if common.IsProd(projectID) {
 			// hard code emails that should be sent email
-			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "befutter@gmail.com")
+			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
 		}
 		tag := mail.GetCultureEmailTag(cultureDate)
 		mailC := mail.New(ctx)
