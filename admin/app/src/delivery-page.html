@@ -246,6 +246,7 @@
           while (d.getDay() !== 1) {
             d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else {
           d = new Date(dateString);
         }
