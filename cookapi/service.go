@@ -437,70 +437,53 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	twoVegBags := 0
 	fourBags := 0
 	fourVegBags := 0
-	moreThanFourBags := 0
-	moreThanFourVegBags := 0
 	specialTwoBags := 0
 	specialTwoVegBags := 0
 	specialFourBags := 0
 	specialFourVegBags := 0
-	specialOther := 0
 	var listOfMoreThanFourBags []int8
 	var listOfMoreThanFourVegBags []int8
 	for i, sublog := range nonSkippers {
-		veg := false
-		if subs[i].VegetarianServings > 0 {
-			veg = true
-		}
-		if sublog.Servings == 2 {
-			if veg {
+		vegRatio := float32(subs[i].VegetarianServings) / float32(subs[i].VegetarianServings+subs[i].Servings)
+		vegServings := int8(float32(sublog.Servings) * vegRatio)
+		nonVegServings := sublog.Servings - vegServings
+
+		switch vegServings {
+		case 0:
+			// break
+		case 2:
+			if sublog.Free {
+				specialTwoVegBags++
+			} else {
 				twoVegBags++
+			}
+		case 4:
+			if sublog.Free {
+				specialFourVegBags++
+			} else {
+				fourVegBags++
+			}
+		default:
+			listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, vegServings)
+		}
+
+		switch nonVegServings {
+		case 0:
+			// break
+		case 2:
+			if sublog.Free {
+				specialTwoBags++
 			} else {
 				twoBags++
 			}
-		} else if sublog.Servings == 4 {
-			if veg {
-				fourVegBags++
+		case 4:
+			if sublog.Free {
+				specialFourBags++
 			} else {
 				fourBags++
 			}
-		} else {
-			if subs[i].VegetarianServings > 0 && subs[i].Servings > 0 {
-				// veg and non-veg split delivery
-				vegRatio := float32(subs[i].VegetarianServings) / float32(subs[i].VegetarianServings+subs[i].Servings)
-				vegServings := int8(float32(sublog.Servings) * vegRatio)
-				nonVegServings := sublog.Servings - vegServings
-				listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, vegServings)
-				listOfMoreThanFourBags = append(listOfMoreThanFourBags, nonVegServings)
-			} else {
-				if veg {
-					moreThanFourVegBags++
-					listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, sublog.Servings)
-				} else {
-					moreThanFourBags++
-					listOfMoreThanFourBags = append(listOfMoreThanFourBags, sublog.Servings)
-				}
-			}
-		}
-		if sublog.Free {
-			if sublog.Servings == 2 {
-				if veg {
-					specialTwoVegBags++
-					twoVegBags--
-				} else {
-					specialTwoBags++
-					twoBags--
-				}
-			} else if sublog.Servings == 4 {
-				if veg {
-					specialFourVegBags++
-					fourVegBags--
-				} else {
-					specialFourBags++
-					fourBags--
-				}
-			} else {
-				specialOther++
-			}
+		default:
+			listOfMoreThanFourBags = append(listOfMoreThanFourBags, nonVegServings)
 		}
 	}
 	for _, special := range listOfMoreThanFourBags {
@@ -527,26 +510,20 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	msg := `%s culture execution:
 	2 bags: %d
 	2 special bags: %d
-	2 veg bags: %d
-	2 special veg bags: %d
 	4 bags: %d
 	4 special bags: %d
+
+	2 veg bags: %d
+	2 special veg bags: %d
 	4 veg bags: %d
 	4 special veg bags: %d
 
 	Total bags: %d
 
-	4+ bags: %d
+	Accounted for above:
 	4+ bags list: %v
-	4+ veg bags: %d
-	4+ veg bags list: %v
-
-	First 2 bags: %d
-	First 4 bags: %d
-	First 2 veg bags: %d
-	First 4 veg bags: %d
-	First Other: %d`
-	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, specialTwoBags, twoVegBags, specialTwoVegBags, fourBags, specialFourBags, fourVegBags, specialFourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, specialTwoBags, specialFourBags, specialTwoVegBags, specialFourVegBags, specialOther)
+	4+ veg bags list: %v`
+	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, specialTwoBags, fourBags, specialFourBags, twoVegBags, specialTwoVegBags, fourVegBags, specialFourVegBags, totalStandardBags, listOfMoreThanFourBags, listOfMoreThanFourVegBags)
 	messageC := message.New(ctx)
 	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
 	for _, number := range numbers {
