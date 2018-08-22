@@ -1,13 +1,20 @@
 package admin
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
+
+	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"google.golang.org/appengine"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -50,7 +57,7 @@ func (s *server) CheckPowerSensors(ctx context.Context, w http.ResponseWriter, r
 	return nil
 }
 
-// SendStatsSMS sends the stats on new and cancel sms to Chris and Piyush.
+// SendStatsSMS sends the general stats on new and cancel.
 func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	if !common.IsProd(s.serverInfo.ProjectID) {
 		return nil
@@ -150,5 +157,64 @@ Stats for last 30 days:
 			log.Errorf(ctx, "failed to send quantity sms: %+v", err)
 		}
 	}
+	return nil
+}
+
+// BackupDatastore creates a back-up datastore in cloud storage.
+func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	// Decode Request
+	req := struct {
+		Kinds      string `json:"kinds"`
+		BucketName string `json:"bucketname"`
+	}{}
+	decodeRequest(ctx, r, &req)
+	log.Infof(ctx, "req: %+v", req)
+
+	projID := s.serverInfo.ProjectID
+	// Get Access Token
+	accessToken, _, err := appengine.AccessToken(ctx, "https://www.googleapis.com/auth/datastore")
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to appengine.AccessToken")
+	}
+	// Create Request
+	if req.BucketName == "" {
+		req.BucketName = fmt.Sprintf("gs://%s-datastore-backups", projID)
+	}
+	backupPrefix := req.BucketName
+	kinds := strings.Split(req.Kinds, ",")
+	type EntityFilter struct {
+		Kinds        []string `json:"kinds"`
+		NamespaceIDs []string `json:"namespace_ids"`
+	}
+	entityFilter := EntityFilter{
+		Kinds: kinds,
+	}
+	body := struct {
+		ProjectID       string       `json:"project_id"`
+		OutputURLPrefix string       `json:"output_url_prefix"`
+		EntityFilter    EntityFilter `json:"entity_filter"`
+	}{
+		ProjectID:       projID,
+		OutputURLPrefix: backupPrefix,
+		EntityFilter:    entityFilter,
+	}
+	bodyBytes, err := json.Marshal(body)
+	log.Infof(ctx, "backup req: %s", bodyBytes)
+	bodyBuffer := bytes.NewBuffer(bodyBytes)
+	url := fmt.Sprintf("https://datastore.googleapis.com/v1/projects/%s:export", projID)
+	// Make Request
+	backupReq, err := http.NewRequest(http.MethodPost, url, bodyBuffer)
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to http.NewRequest")
+	}
+	backupReq.Header.Add("Content-Type", "application/json")
+	backupReq.Header.Add("Authorization", "Bearer "+accessToken)
+	// Results
+	result, err := urlfetch.Client(ctx).Do(backupReq)
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to urlfetch.Client.Do")
+	}
+	reply, _ := ioutil.ReadAll(result.Body)
+	log.Infof(ctx, "Reply: %s", reply)
 	return nil
 }

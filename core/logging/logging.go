@@ -163,6 +163,11 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 	}, nil
 }
 
+// Infof logs info.
+func (c *Client) Infof(ctx context.Context, format string, args ...interface{}) {
+	Infof(ctx, format, args...)
+}
+
 // Debugf logs debug messages. Only logs on development servers.
 func (c *Client) Debugf(ctx context.Context, format string, args ...interface{}) {
 	Debugf(ctx, format, args...)

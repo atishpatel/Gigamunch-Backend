@@ -49,3 +49,13 @@ cron:
   schedule: every monday 8:30
   timezone: America/Chicago
   target: cookapi
+- description: "Backup ScheduleSignUp"
+  url: /admin/task/BackupDatastore?kinds=ScheduleSignUp
+  schedule: every day 02:00
+  timezone: America/Chicago
+  target: admin
+- description: "Backup Logging"
+  url: /admin/task/BackupDatastore?kinds=Logging
+  schedule: every friday 02:00
+  timezone: America/Chicago
+  target: admin

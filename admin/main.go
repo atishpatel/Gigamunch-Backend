@@ -70,6 +70,7 @@ func init() {
 	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
 	http.HandleFunc("/admin/task/CheckPowerSensors", s.handler(s.CheckPowerSensors))
 	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
+	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
 	// Webhooks
 	http.HandleFunc("/admin/webhook/typeform-skip", s.handler(s.TypeformSkip))
 	http.HandleFunc("/admin/webhook/twilio-sms", s.handler(s.TwilioSMS))
