@@ -92,7 +92,7 @@ func (c *Client) Verify(token string) (*common.User, error) {
 	if token == "" {
 		return nil, errInvalidFBToken.Annotate("token is empty")
 	}
-	tkn, err := fbAuth.VerifyIDToken(token)
+	tkn, err := fbAuth.VerifyIDToken(c.ctx, token)
 	if err != nil {
 		return nil, errInvalidFBToken.WithError(err).Annotate("failed to fbauth.VerifyIDToken")
 	}
