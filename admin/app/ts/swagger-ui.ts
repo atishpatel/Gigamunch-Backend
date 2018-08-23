@@ -1,5 +1,4 @@
-const url = new URL(window.location.href);
-const authTkn = url.searchParams.get("auth-token");
+const authTkn = GetToken();
 
 declare let ui: SwaggerUI;
 
@@ -12,4 +11,26 @@ setTimeout(() => {
 
 interface SwaggerUI {
     preauthorizeApiKey(key: string, value: string | null): void;
+}
+
+function GetToken(): string {
+    const name = 'AUTHTKN=';
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length).replace(/\n/g, '');
+        }
+    }
+    if (location.hostname === 'localhost') {
+        const tnk = window.localStorage.getItem('AUTHTKN');
+        if (!tnk) {
+            return '';
+        }
+        return tnk;
+    }
+    return '';
 }
