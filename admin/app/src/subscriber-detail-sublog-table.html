@@ -151,7 +151,7 @@
             sublogs[i].addressString = this._getAddress(sublogs[i].address);
             sublogs[i].addressLink = this._getAddressLink(sublogs[i].address);
             sublogs[i].dateString = this._getDateString(sublogs[i].date);
-            sublogs[i].paidDateString = this._getPaidDateString(sublogs[i].date);
+            sublogs[i].paidDateString = this._getPaidDateString(sublogs[i].paid_datetime);
             sublogs[i].discount_string = this._getDiscountString(sublogs[i].discount_amount, sublogs[i].discount_percent);
           }
           this.sublogs = sublogs;
