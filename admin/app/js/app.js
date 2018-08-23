@@ -238,6 +238,7 @@ let Email = '';
 let FirstName = '';
 let LastName = '';
 let PhotoURL = '';
+let Token = '';
 function UpdateUser() {
     const tkn = GetToken();
     if (!tkn) {
@@ -252,6 +253,7 @@ function UpdateUser() {
     FirstName = jwt.first_name;
     LastName = jwt.last_name;
     PhotoURL = jwt.photo_url;
+    Token = tkn;
 }
 function IsAdmin() {
     const jwt = GetJWT(GetToken());
@@ -280,6 +282,7 @@ var User = Object.freeze({
 	get FirstName () { return FirstName; },
 	get LastName () { return LastName; },
 	get PhotoURL () { return PhotoURL; },
+	get Token () { return Token; },
 	UpdateUser: UpdateUser,
 	IsAdmin: IsAdmin,
 	HasCreditCard: HasCreditCard

@@ -51,12 +51,12 @@ func init() {
 		log.Fatal("failed to setup", err)
 	}
 	// Auth
-	http.HandleFunc("/admin/api/v1/Login", s.handler(s.Login))
-	http.HandleFunc("/admin/api/v1/Refresh", s.handler(s.Refresh))
+	// http.HandleFunc("/admin/api/v1/Login", s.handler(s.Login))
+	// http.HandleFunc("/admin/api/v1/Refresh", s.handler(s.Refresh))
 	// Logs
-	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.systemsAdmin(s.GetLog)))
-	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.systemsAdmin(s.GetLogs)))
-	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.systemsAdmin(s.GetLogsByEmail)))
+	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
+	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
+	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsByEmail)))
 	// Sublogs
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
@@ -113,7 +113,7 @@ func (s *server) userAdmin(f handle) handle {
 		if err != nil {
 			return err
 		}
-		if !user.IsUserAdmin() {
+		if !user.Admin {
 			return errPermissionDenied
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
@@ -128,22 +128,7 @@ func (s *server) driverAdmin(f handle) handle {
 		if err != nil {
 			return err
 		}
-		if !user.IsDriverAdmin() {
-			return errPermissionDenied
-		}
-		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
-		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
-		return f(ctx, w, r, log)
-	}
-}
-
-func (s *server) systemsAdmin(f handle) handle {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-		user, err := getUserFromRequest(ctx, w, r, log)
-		if err != nil {
-			return err
-		}
-		if !user.IsSystemsAdmin() {
+		if !user.Admin {
 			return errPermissionDenied
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
@@ -183,11 +168,11 @@ func getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		last = name[lastSpace:]
 	}
 	user := &common.User{
-		FirstName:   first,
-		LastName:    last,
-		Email:       userold.Email,
-		PhotoURL:    userold.PhotoURL,
-		Permissions: userold.Permissions,
+		FirstName: first,
+		LastName:  last,
+		Email:     userold.Email,
+		PhotoURL:  userold.PhotoURL,
+		Admin:     userold.IsAdmin(),
 	}
 	return user, nil
 }

@@ -1,11 +1,12 @@
 {
   "swagger": "2.0",
+"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": {"auth-token": []},
   "info": {
     "title": "AdminAPI.proto",
     "version": "version not set"
   },
   "schemes": [
-    "http",
+    
     "https"
   ],
   "consumes": [
