@@ -115,7 +115,7 @@
         } else if (sublog.free) {
           return 'Free';
         } else if (sublog.paid) {
-          return 'Paid $' + sublog.amount;
+          return 'Paid $' + sublog.amount_paid;
         }
         const today = new Date();
         const sublogDate = new Date(sublog.date);
