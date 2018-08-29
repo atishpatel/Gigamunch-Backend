@@ -686,6 +686,7 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Rachel Woods picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/rachel_woods.jpg">
+
                     </div>
                   </div>
                   <div class="checkout-trust-review">
@@ -693,6 +694,7 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Paige Orr Clancy picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/paige_orr_clancy.jpg">
+
                     </div>
                   </div>
 
@@ -701,6 +703,7 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Barbara Futter picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/barbara_futter.jpg">
+
                     </div>
                   </div>
                 </div>
@@ -711,6 +714,7 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/certificate-icon.png">
+
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -724,6 +728,7 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/shield-icon.png">
+
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -737,6 +742,7 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/lock-icon.png">
+
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -768,6 +774,7 @@
                          size="1"
                          value="[[.FirstName]]"
                          required />
+
                 </div>
               </div>
               <div>
@@ -780,6 +787,7 @@
                          onfocus="nameInputFocused()"
                          value="[[.LastName]]"
                          required />
+
                 </div>
               </div>
             </div>
@@ -794,6 +802,7 @@
                          placeholder="Email"
                          size="1"
                          value="[[.Email]]" />
+
                 </div>
               </div>
               <div class="input-label">
@@ -805,6 +814,7 @@
                          size="1"
                          placeholder="615-123-1234"
                          value="[[.PhoneNumber]]" />
+
                 </div>
               </div>
             </div>
@@ -826,6 +836,7 @@
                        id="apt"
                        placeholder="APT/Unit"
                        value="[[.APT]]" />
+
               </div>
             </div>
             <div>
@@ -836,6 +847,7 @@
                        id="delivery_notes"
                        placeholder="Gate code: # or any other delivery tips"
                        value="[[.DeliveryNotes]]" />
+
               </div>
             </div>
             <div>
@@ -846,6 +858,7 @@
                        id="reference"
                        placeholder="My friend Joe Shmoe."
                        value="[[.Reference]]" />
+
               </div>
             </div>
             <div class="form-section-title">
@@ -961,12 +974,14 @@
                 <div class="item-image">
                   <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/product_shot_checkout.jpg"
                        alt="A bag with an international meal.">
+
                 </div>
                 <div class="item-detail">
                   <div class="item-text">
                     <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
                     <div class="item-desc">
-                      Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime with
+                      Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime
+                      with
                       a 4 day notice.
                     </div>
                   </div>
@@ -1005,6 +1020,7 @@
                    value="Subscribe"
                    onclick="subscribeClick()"
                    disabled/>
+
           </form>
         </div>
       </div>
@@ -1021,7 +1037,7 @@
     }
 
     function logRespError(err) {
-      var desc = 'Function: startsubscription | Message: ' + err.message + '| Details: ' + err.detail;
+      var desc = 'Function: SubmitCheckout | Message: ' + err.message + '| Details: ' + err.detail;
       logError(desc);
     }
 
