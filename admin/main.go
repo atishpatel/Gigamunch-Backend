@@ -63,6 +63,9 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
+  // Culture Executions
+  http.HandleFunc("/admin/api/v1/GetAllExecutions", handler(userAdmin(GetAllExecutions)))
+	http.HandleFunc("/admin/api/v1/UpdateExecution", handler(userAdmin(UpdateExecution)))
 	// Tasks
 	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
 	http.HandleFunc("/admin/task/SendPreviewCultureEmail", s.handler(s.SendPreviewCultureEmail))
@@ -79,6 +82,9 @@ func init() {
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("success"))
 	})
+
+	
+
 }
 
 func (s *server) setup() error {
@@ -269,10 +275,10 @@ type Response interface {
 
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
-func getTime(s string) (time.Time, error) {
+func getDatetime(s string) time.Time {
 	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
-		return t, errBadRequest.Annotatef("failed to decode time: %+v", err)
+		return time.Time{}
 	}
-	return t, nil
+	return t
 }
