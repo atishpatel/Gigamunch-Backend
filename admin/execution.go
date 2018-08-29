@@ -2,7 +2,6 @@ package admin
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
@@ -11,29 +10,17 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/gorilla/schema"
 )
 
 // GetAllExecutions gets all executions.
-func GetAllExecutions(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) GetAllExecutions(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetAllExecutionsReq)
 	var err error
 	// decode request
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(req, r.URL.Query())
-		if err != nil {
-			return failedToDecode(err)
-		}
-	} else {
-		decoder := json.NewDecoder(r.Body)
-		err = decoder.Decode(&req)
-		if err != nil {
-			return failedToDecode(err)
-		}
-		defer closeRequestBody(r)
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
 	}
-	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 
 	exeC, err := execution.NewClient(ctx, log)
@@ -52,25 +39,14 @@ func GetAllExecutions(ctx context.Context, r *http.Request, log *logging.Client)
 }
 
 // UpdateExecution updates or creates an execution.
-func UpdateExecution(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.UpdateExecutionReq)
 	var err error
 	// decode request
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(req, r.URL.Query())
-		if err != nil {
-			return failedToDecode(err)
-		}
-	} else {
-		decoder := json.NewDecoder(r.Body)
-		err = decoder.Decode(&req)
-		if err != nil {
-			return failedToDecode(err)
-		}
-		defer closeRequestBody(r)
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
 	}
-	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 
 	exeC, err := execution.NewClient(ctx, log)
