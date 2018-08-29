@@ -120,7 +120,7 @@ func NewClient(ctx context.Context, log *logging.Client, serverInfo *common.Serv
 	if err != nil {
 		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
 	}
-	dripMarketingClient, err := drip.New(dripSubAPIKey, dripSubAcctID)
+	dripMarketingClient, err := drip.New(dripMarketingAPIKey, dripMarketingAcctID)
 	if err != nil {
 		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
 	}
