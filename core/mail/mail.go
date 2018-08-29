@@ -20,10 +20,12 @@ import (
 
 var (
 	standAppEngine      bool
-	dripAPIKey          string
+	dripSubAPIKey       string
+	dripSubAcctID       string
+	dripMarketingAPIKey string
+	dripMarketingAcctID string
 	mailgunAPIKey       string
 	mailgunPublicAPIKey string
-	dripAcctID          string
 	projID              string
 )
 
@@ -41,14 +43,26 @@ func (t Tag) String() string {
 }
 
 const (
+	// ==================
+	// For Marketing drip
+	// ==================
+
 	// LeftWebsiteEmail if they left email on website.
 	LeftWebsiteEmail Tag = "LEFT_WEBSITE_EMAIL"
-	// Customer if they are a customer and is removed when they unsubscribe.
-	Customer Tag = "CUSTOMER"
-	// Subscribed is applied when a someone subscribers and is never removed.
+	// ==================
+	// Both drip
+	// ==================
+
+	// Subscribed is applied when the user first subscribed and is never removed.
 	Subscribed Tag = "HAS_SUBSCRIBED"
-	// Canceled is applied when a subscribers cancels.
-	Canceled Tag = "CANCELED"
+	// Subscriber is applied when the user subscribers or when a user reactivates the account. It is removed when the user unsubscribes.
+	Subscriber Tag = "SUBSCRIBER"
+	// DeactivatedSubscriber is applied when the user suspends their account. It is removed when the user reactivates their account.
+	Deactivated Tag = "DEACTIVATED"
+	// ==================
+	// For Sub drip
+	// ==================
+
 	// Vegetarian if they are a vegetarian.
 	Vegetarian Tag = "VEGETARIAN"
 	// NonVegetarian if they a non-vegetarian.
@@ -78,47 +92,104 @@ func GetReceivedJourneyTag(numJourneys int) Tag {
 
 // Client is a client for manipulating subscribers.
 type Client struct {
-	ctx      context.Context
-	log      *logging.Client
-	dripC    *drip.Client
-	mailgunC mailgun.Mailgun
+	ctx            context.Context
+	log            *logging.Client
+	dripSubC       *drip.Client
+	dripMarketingC *drip.Client
+	mailgunC       mailgun.Mailgun
+	serverInfo     *common.ServerInfo
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
+func NewClient(ctx context.Context, log *logging.Client, serverInfo *common.ServerInfo) (*Client, error) {
 	var err error
-	if dripAPIKey == "" {
+	if dripSubAPIKey == "" {
 		cnfg := config.GetConfig(ctx)
-		dripAPIKey = cnfg.DripAPIKey
-		dripAcctID = cnfg.DripAccountID
+		dripSubAPIKey = cnfg.DripAPIKey
+		dripSubAcctID = cnfg.DripAccountID
+		dripMarketingAPIKey = cnfg.DripMarketingAPIKey
+		dripMarketingAcctID = cnfg.DripMarketingAccountID
 		mailgunAPIKey = cnfg.MailgunAPIKey
 		mailgunPublicAPIKey = cnfg.MailgunPublicAPIKey
 	}
-	dripClient, err := drip.New(dripAPIKey, dripAcctID)
+	dripSubClient, err := drip.New(dripSubAPIKey, dripSubAcctID)
 	if err != nil {
 		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
 	}
-	if standAppEngine {
-		dripClient.HTTPClient = urlfetch.Client(ctx)
+	dripMarketingClient, err := drip.New(dripSubAPIKey, dripSubAcctID)
+	if err != nil {
+		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
+	}
+	if serverInfo.IsStandardAppEngine {
+		httpClient := urlfetch.Client(ctx)
+		dripSubClient.HTTPClient = httpClient
+		dripMarketingClient.HTTPClient = httpClient
 	}
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	return &Client{
-		ctx:   ctx,
-		log:   log,
-		dripC: dripClient,
+		ctx:            ctx,
+		log:            log,
+		dripSubC:       dripSubClient,
+		dripMarketingC: dripMarketingClient,
+		serverInfo:     serverInfo,
 	}, nil
 }
 
-// Send sends a plain text email.
-func (c *Client) Send(from, subject, message string, to ...string) error {
-	msg := mailgun.NewMessage(from, subject, message, to...)
-	_, _, err := c.mailgunC.Send(msg)
-	if err != nil {
-		return errInternal.WithError(err).Wrap("failed to send mailgun email")
+// LeftEmail is when user leaves an email.
+func (c *Client) LeftEmail(email, firstName, lastName string) error {
+	req := &UserFields{
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+		AddTags:   []Tag{LeftWebsiteEmail},
 	}
-	return nil
+	return c.updateUser(req, c.dripMarketingC)
+}
+
+// SubActivated is when a subscriber account is activated.
+func (c *Client) SubActivated(email, firstName, lastName string) error {
+	var err error
+	req := &UserFields{
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+	}
+	// For Sub Drip account
+	req.AddTags = []Tag{Subscriber, Subscribed}
+	req.RemoveTags = []Tag{Deactivated}
+	err = c.updateUser(req, c.dripSubC)
+	if err != nil {
+		return err
+	}
+	// For Marketing Drip account
+	req.AddTags = []Tag{Subscriber, Subscribed}
+	req.RemoveTags = []Tag{Deactivated}
+	err = c.updateUser(req, c.dripMarketingC)
+	return err
+}
+
+// SubDeactivated is when a subscriber account is deactivated.
+func (c *Client) SubDeactivated(email, firstName, lastName string) error {
+	var err error
+	req := &UserFields{
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+	}
+	// For Sub Drip account
+	req.AddTags = []Tag{Deactivated}
+	req.RemoveTags = []Tag{Subscriber}
+	err = c.updateUser(req, c.dripSubC)
+	if err != nil {
+		return err
+	}
+	// For Marketing Drip account
+	req.AddTags = []Tag{Deactivated}
+	req.RemoveTags = []Tag{Subscriber}
+	err = c.updateUser(req, c.dripMarketingC)
+	return err
 }
 
 // UserFields contain all the possible fields a user can have.
@@ -133,19 +204,13 @@ type UserFields struct {
 
 // UpdateUser updates the user custom fields.
 func (c *Client) UpdateUser(req *UserFields) error {
+	return c.updateUser(req, c.dripSubC)
+}
+
+func (c *Client) updateUser(req *UserFields, dripClient *drip.Client) error {
 	if ignoreEmail(req.Email) {
 		return nil
 	}
-	// resp, err := c.dripC.FetchSubscriber(req.Email)
-	// if err != nil {
-	// 	return errDrip.WithError(err).Annotate("failed to drip.FetchSubscriber")
-	// }
-	// if len(resp.Errors) > 0 {
-	// 	return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.FetchSubscriber")
-	// }
-	// if len(resp.Subscribers) != 1 {
-	// 	return errBadRequest.Annotate("failed to find subscriber")
-	// }
 	sub := drip.UpdateSubscriber{
 		Email:        req.Email,
 		CustomFields: make(map[string]string),
@@ -170,7 +235,7 @@ func (c *Client) UpdateUser(req *UserFields) error {
 		}
 	}
 	// Add Dev tag to customers in non-prod env.
-	if !common.IsProd(projID) {
+	if !common.IsProd(c.serverInfo.ProjectID) {
 		sub.Tags = append(sub.Tags, Dev.String())
 	}
 	dripReq := &drip.UpdateSubscribersReq{
@@ -178,7 +243,7 @@ func (c *Client) UpdateUser(req *UserFields) error {
 			sub,
 		},
 	}
-	resp, err := c.dripC.UpdateSubscriber(dripReq)
+	resp, err := dripClient.UpdateSubscriber(dripReq)
 	if err != nil {
 		if strings.Contains(err.Error(), "<html>") {
 			err = fmt.Errorf("drip returned an html page")
@@ -204,7 +269,7 @@ func (c *Client) AddTag(email string, tag Tag) error {
 			},
 		},
 	}
-	resp, err := c.dripC.TagSubscriber(req)
+	resp, err := c.dripSubC.TagSubscriber(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "<html>") {
 			err = fmt.Errorf("drip returned an html page")
@@ -226,7 +291,7 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 		Email: email,
 		Tag:   tag.String(),
 	}
-	resp, err := c.dripC.RemoveSubscriberTag(req)
+	resp, err := c.dripSubC.RemoveSubscriberTag(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "<html>") {
 			err = fmt.Errorf("drip returned an html page")
@@ -265,7 +330,7 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 			},
 		},
 	}
-	resp, err := c.dripC.UpdateBatchSubscribers(req)
+	resp, err := c.dripSubC.UpdateBatchSubscribers(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "<html>") {
 			err = fmt.Errorf("drip returned an html page")
@@ -274,6 +339,16 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 	}
 	if len(resp.Errors) > 0 {
 		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.UpdateBatchSubscribers")
+	}
+	return nil
+}
+
+// Send sends a plain text email.
+func (c *Client) Send(from, subject, message string, to ...string) error {
+	msg := mailgun.NewMessage(from, subject, message, to...)
+	_, _, err := c.mailgunC.Send(msg)
+	if err != nil {
+		return errInternal.WithError(err).Wrap("failed to send mailgun email")
 	}
 	return nil
 }
