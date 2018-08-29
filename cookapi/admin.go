@@ -16,7 +16,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
@@ -186,7 +185,7 @@ func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSM
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-	log, _ := setupLogging(ctx, "/cookapi/api/SendCusomterSMS")
+	log, _, _ := setupLoggingAndServerInfo(ctx, "/cookapi/api/SendCusomterSMS")
 	dilm := "{{name}}"
 	// if !strings.Contains(req.Message, dilm) {
 	// 	resp.Err = errors.BadRequestError.WithMessage("Message requires {{name}}.")
@@ -440,7 +439,7 @@ type ChangeServingsPermanentlyReq struct {
 	Vegetarian bool `json:"vegetarian"`
 }
 
-// ChangeServingForDate gives a changes the serving count for a user permanently.
+// ChangeServingsPermanently gives a changes the serving count for a user permanently.
 func (service *Service) ChangeServingsPermanently(ctx context.Context, req *ChangeServingsPermanentlyReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "ChangeServingsPermanently", resp.Err)
@@ -453,9 +452,9 @@ func (service *Service) ChangeServingsPermanently(ctx context.Context, req *Chan
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-
+	log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/cookapi/ChangeServingsPermanently")
 	subC := sub.New(ctx)
-	err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian)
+	err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian, log, serverInfo)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.ChangeServingsPermanently")
 		return resp, nil
@@ -469,7 +468,7 @@ type UpdatePaymentMethodTokenReq struct {
 	PaymentMethodToken string `json:"payment_method_token"`
 }
 
-// ChangeServingForDate gives a changes the serving count for a user permanently.
+// UpdatePaymentMethodToken updates a uesr payment token.
 func (service *Service) UpdatePaymentMethodToken(ctx context.Context, req *UpdatePaymentMethodTokenReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "UpdatePaymentMethodToken", resp.Err)
@@ -492,13 +491,13 @@ func (service *Service) UpdatePaymentMethodToken(ctx context.Context, req *Updat
 	return resp, nil
 }
 
-// ChangeServingForDateReq is a request for ChangeServingForDate.
+// ChangeServingsForDateReq is a request for ChangeServingForDate.
 type ChangeServingsForDateReq struct {
 	SubLogReq
 	Servings int8 `json:"servings"`
 }
 
-// ChangeServingForDate gives a changes the serving count for a user for a specific week.
+// ChangeServingsForDate gives a changes the serving count for a user for a specific week.
 func (service *Service) ChangeServingsForDate(ctx context.Context, req *ChangeServingsForDateReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "ChangeServingsForDateSubLog", resp.Err)
@@ -540,9 +539,13 @@ func (service *Service) CancelSub(ctx context.Context, req *EmailReq) (*ErrorOnl
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-
+	log, serverInfo, err := setupLoggingAndServerInfo(ctx, "cookapi/CancelSub")
+	if err != nil {
+		resp.Err = errors.GetErrorWithCode(err)
+		return resp, nil
+	}
 	subC := sub.New(ctx)
-	err = subC.Cancel(req.Email)
+	err = subC.Cancel(req.Email, log, serverInfo)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.Cancel")
 		return resp, nil
@@ -762,77 +765,6 @@ func (e *SendEmailReq) GetFirstDinnerDate() time.Time {
 	return e.FirstDinnerDate
 }
 
-func (service *Service) SendWelcomeEmail(ctx context.Context, req *SendEmailReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "SendWelcomeEmail", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.IsAdmin() {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	mailC := mail.New(ctx)
-	err = mailC.SendWelcomeEmail(req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to mail.SendWelcomeEmail")
-		return resp, nil
-	}
-
-	return resp, nil
-}
-
-func (service *Service) SendIntroEmail(ctx context.Context, req *SendEmailReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "SendWelcomeEmail", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.IsAdmin() {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	mailC := mail.New(ctx)
-	err = mailC.SendIntroEmail(req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to mail.SendIntroEmail")
-		return resp, nil
-	}
-
-	return resp, nil
-}
-
-// UpdateMailCustomerFields updates the custom fields in Drip.
-func (service *Service) UpdateMailCustomerFields(ctx context.Context, req *SendEmailReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "UpdateMailCustomerFields", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.IsAdmin() {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	r := &mail.UserFields{
-		Email:             req.Email,
-		Name:              req.Name,
-		FirstDeliveryDate: req.FirstDinnerDate,
-	}
-	mailC := mail.New(ctx)
-	err = mailC.UpdateUser(r, projectID)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to mail.UpdateUser")
-		return resp, nil
-	}
-	return resp, nil
-}
-
 type ReplaceSubEmailReq struct {
 	GigatokenReq
 	OldEmail string `json:"old_email"`
@@ -884,15 +816,19 @@ func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmai
 	return resp, nil
 }
 
-func setupLogging(ctx context.Context, path string) (*logging.Client, error) {
+func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, error) {
 	dbC, err := db.NewClient(ctx, projectID, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get database client: %+v", err)
+		return nil, nil, fmt.Errorf("failed to get database client: %+v", err)
 	}
 	// Setup logging
 	serverInfo := &common.ServerInfo{
 		ProjectID:           projectID,
 		IsStandardAppEngine: true,
 	}
-	return logging.NewClient(ctx, "admin", path, dbC, serverInfo)
+	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
+	if err != nil {
+		return nil, nil, err
+	}
+	return log, serverInfo, nil
 }

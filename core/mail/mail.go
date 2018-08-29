@@ -57,21 +57,25 @@ const (
 	Subscribed Tag = "HAS_SUBSCRIBED"
 	// Subscriber is applied when the user subscribers or when a user reactivates the account. It is removed when the user unsubscribes.
 	Subscriber Tag = "SUBSCRIBER"
-	// DeactivatedSubscriber is applied when the user suspends their account. It is removed when the user reactivates their account.
+	// Deactivated is applied when the user suspends their account. It is removed when the user reactivates their account.
 	Deactivated Tag = "DEACTIVATED"
 	// ==================
 	// For Sub drip
 	// ==================
 
+	// NonVegAndVeg if they are a half non-veg and half veg subscriber.
+	NonVegAndVeg Tag = "NON_VEG_AND_VEG"
 	// Vegetarian if they are a vegetarian.
 	Vegetarian Tag = "VEGETARIAN"
-	// NonVegetarian if they a non-vegetarian.
+	// NonVegetarian if they are a non-vegetarian.
 	NonVegetarian Tag = "NON_VEGETARIAN"
 	// TwoServings if they are 2 servings.
 	TwoServings Tag = "TWO_SERVINGS"
 	// FourServings if they are 4 servings.
 	FourServings Tag = "FOUR_SERVINGS"
-	// Dev if they are development server customers.
+	// Gifted if tehy were given Gigamunch as a gift
+	Gifted Tag = "GIFTED"
+	// Dev if they are development server subscriber.
 	Dev Tag = "DEV"
 )
 
@@ -149,45 +153,31 @@ func (c *Client) LeftEmail(email, firstName, lastName string) error {
 }
 
 // SubActivated is when a subscriber account is activated.
-func (c *Client) SubActivated(email, firstName, lastName string) error {
+func (c *Client) SubActivated(req *UserFields) error {
 	var err error
-	req := &UserFields{
-		Email:     email,
-		FirstName: firstName,
-		LastName:  lastName,
-	}
+	req.AddTags = append(req.AddTags, Subscriber, Subscribed)
+	req.RemoveTags = append(req.RemoveTags, Deactivated)
 	// For Sub Drip account
-	req.AddTags = []Tag{Subscriber, Subscribed}
-	req.RemoveTags = []Tag{Deactivated}
 	err = c.updateUser(req, c.dripSubC)
 	if err != nil {
 		return err
 	}
 	// For Marketing Drip account
-	req.AddTags = []Tag{Subscriber, Subscribed}
-	req.RemoveTags = []Tag{Deactivated}
 	err = c.updateUser(req, c.dripMarketingC)
 	return err
 }
 
 // SubDeactivated is when a subscriber account is deactivated.
-func (c *Client) SubDeactivated(email, firstName, lastName string) error {
+func (c *Client) SubDeactivated(req *UserFields) error {
 	var err error
-	req := &UserFields{
-		Email:     email,
-		FirstName: firstName,
-		LastName:  lastName,
-	}
+	req.AddTags = append(req.AddTags, Deactivated)
+	req.RemoveTags = append(req.RemoveTags, Subscriber)
 	// For Sub Drip account
-	req.AddTags = []Tag{Deactivated}
-	req.RemoveTags = []Tag{Subscriber}
 	err = c.updateUser(req, c.dripSubC)
 	if err != nil {
 		return err
 	}
 	// For Marketing Drip account
-	req.AddTags = []Tag{Deactivated}
-	req.RemoveTags = []Tag{Subscriber}
 	err = c.updateUser(req, c.dripMarketingC)
 	return err
 }
@@ -198,6 +188,10 @@ type UserFields struct {
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
+	GifterName        string    `json:"gifter_name"`
+	GifterEmail       string    `json:"gifter_email"`
+	VegServings       int8      `json:"veg_servings"`
+	NonVegServings    int8      `json:"non_veg_servings"`
 	AddTags           []Tag     `json:"add_tags"`
 	RemoveTags        []Tag     `json:"remove_tags"`
 }
@@ -223,6 +217,21 @@ func (c *Client) updateUser(req *UserFields, dripClient *drip.Client) error {
 	}
 	if !req.FirstDeliveryDate.IsZero() {
 		sub.CustomFields["FIRST_DELIVERY_DATE"] = DateString(req.FirstDeliveryDate)
+	}
+	if req.GifterName != "" {
+		sub.CustomFields["GIFTER_NAME"] = req.GifterName
+	}
+	if req.GifterEmail != "" {
+		sub.CustomFields["GIFTER_EMAIL"] = req.GifterEmail
+	}
+	if req.VegServings > 0 && req.NonVegServings > 0 {
+		req.AddTags = append(req.AddTags, Vegetarian, NonVegetarian, NonVegAndVeg)
+	} else if req.VegServings > 0 {
+		req.AddTags = append(req.AddTags, Vegetarian)
+		req.RemoveTags = append(req.RemoveTags, NonVegetarian, NonVegAndVeg)
+	} else if req.NonVegServings > 0 {
+		req.AddTags = append(req.AddTags, NonVegetarian)
+		req.RemoveTags = append(req.RemoveTags, Vegetarian, NonVegAndVeg)
 	}
 	if len(req.AddTags) > 0 {
 		for _, v := range req.AddTags {

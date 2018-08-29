@@ -18,9 +18,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -148,7 +148,6 @@ func main() {
 	// register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Give free meal to a customer for a date. Admin func.")
 	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
 	register("ChangeServingsForDate", "ChangeServingsForDate", "POST", "cookservice/ChangeServingsForDate", "Change number of servings for a week. Admin func.")
-	register("UpdateMailCustomerFields", "UpdateMailCustomerFields", "POST", "cookservice/UpdateMailCustomerFields", "Updates the custom filds in Drip. Admin func.")
 	register("UpdatePaymentMethodToken", "UpdatePaymentMethodToken", "POST", "cookservice/UpdatePaymentMethodToken", "Updates the payment method token. Admin func.")
 	register("ChangeServingsPermanently", "ChangeServingsPermanently", "POST", "cookservice/ChangeServingsPermanently", "Change number of servings permanently. Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Get all subscription activty. Admin func.")
@@ -548,7 +547,16 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	logging.Infof(ctx, "Params: %+v", params)
 	subC := sub.New(ctx)
-	mailC := mail.New(ctx)
+	log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/cookapi/UpdateDrip")
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
+		return
+	}
+	mailC, err := mail.NewClient(ctx, log, serverInfo)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
+		return
+	}
 	// make subscriber if date is same as give reveal date
 	sub, err := subC.GetSubscriber(params.Email)
 	if err != nil {
@@ -560,25 +568,19 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	if sub.IsSubscribed && !sub.GiftRevealDate.IsZero() && timeTillGiftReveal < time.Hour*12 {
 		mailReq := &mail.UserFields{
 			Email:             sub.Email,
-			Name:              sub.Name,
 			FirstName:         sub.FirstName,
 			LastName:          sub.LastName,
 			FirstDeliveryDate: sub.FirstBoxDate,
 			GifterName:        sub.Reference,
 			GifterEmail:       sub.ReferenceEmail,
-			AddTags:           []mail.Tag{mail.Subscribed, mail.Customer, mail.Gifted},
-		}
-		if sub.VegetarianServings > 0 {
-			mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
-			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
-		} else {
-			mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
-			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
+			AddTags:           []mail.Tag{mail.Subscribed, mail.Subscriber, mail.Gifted},
+			VegServings:       sub.VegetarianServings,
+			NonVegServings:    sub.Servings,
 		}
 		mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
-		err = mailC.UpdateUser(mailReq, projectID)
+		err = mailC.SubActivated(mailReq)
 		if err != nil {
-			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", sub.Email, err)
+			utils.Criticalf(ctx, "Failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
 		}
 	}
 	// add num meals recieved

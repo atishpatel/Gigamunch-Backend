@@ -10,10 +10,10 @@ cron:
   schedule: every day 18:00
   timezone: America/Chicago
   target: cookapi
-- description: "Check power sensors"
-  url: /admin/task/CheckPowerSensors
-  schedule: every 30 mins
-  target: admin
+# - description: "Check power sensors"
+#   url: /admin/task/CheckPowerSensors
+#   schedule: every 30 mins
+#   target: admin
 # Drip tags
 - description: "Setup Preview and Culture Tags"
   url: /admin/task/SetupTags
