@@ -1,13 +1,20 @@
 package admin
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
+
+	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"google.golang.org/appengine"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -16,21 +23,15 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-func setupTasksHandlers() {
-	http.HandleFunc("/admin/task/SetupTags", handler(SetupTags))
-	http.HandleFunc("/admin/task/CheckPowerSensors", handler(CheckPowerSensors))
-	http.HandleFunc("/admin/task/SendStatsSMS", handler(SendStatsSMS))
-}
-
 // SetupTags sets up tags for culture preview email and culture email 2 weeks in advance.
-func SetupTags(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	nextCultureDate := time.Now().Add(time.Hour * 7 * 24)
 	for nextCultureDate.Weekday() != time.Monday {
 		nextCultureDate = nextCultureDate.Add(24 * time.Hour)
 	}
 	nextPreviewDate := nextCultureDate
-	mailC, err := mail.NewClient(ctx, log)
+	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.NewClient")
 	}
@@ -45,8 +46,77 @@ func SetupTags(ctx context.Context, r *http.Request, log *logging.Client) Respon
 	return errors.NoError
 }
 
+// SendPreviewCultureEmail sends the preview email to all subscribers who are not skipped.
+func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	cultureDate := time.Now().Add(6 * 24 * time.Hour)
+	log.Infof(ctx, "culture date:%s", cultureDate)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to sub.GetForDate")
+		return nil
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(s.serverInfo.ProjectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
+		}
+		tag := mail.GetPreviewEmailTag(cultureDate)
+		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+		if err != nil {
+			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
+		}
+		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.AddBatchTag")
+		}
+	}
+	return nil
+}
+
+// SendCultureEmail sends the culture email to all subscribers who are not skipped.
+func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	cultureDate := time.Now()
+	log.Infof(ctx, "culture date:%s", cultureDate)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		errors.Annotate(err, "failed to SendCultureEmail: failed to sub.GetForDate")
+		return nil
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(s.serverInfo.ProjectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
+		}
+		tag := mail.GetCultureEmailTag(cultureDate)
+		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+		if err != nil {
+			errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
+			return nil
+		}
+		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
+		}
+	}
+	return nil
+}
+
 // CheckPowerSensors checks all the PowerSensors.
-func CheckPowerSensors(ctx context.Context, r *http.Request, log *logging.Client) Response {
+func (s *server) CheckPowerSensors(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	healthC := healthcheck.New(ctx)
 	err = healthC.CheckPowerSensors()
@@ -56,9 +126,9 @@ func CheckPowerSensors(ctx context.Context, r *http.Request, log *logging.Client
 	return nil
 }
 
-// SendStatsSMS sends the stats on new and cancel sms to Chris and Piyush.
-func SendStatsSMS(ctx context.Context, r *http.Request, log *logging.Client) Response {
-	if !common.IsProd(projID) {
+// SendStatsSMS sends the general stats on new and cancel.
+func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	if !common.IsProd(s.serverInfo.ProjectID) {
 		return nil
 	}
 	subC := sub.New(ctx)
@@ -156,5 +226,64 @@ Stats for last 30 days:
 			log.Errorf(ctx, "failed to send quantity sms: %+v", err)
 		}
 	}
+	return nil
+}
+
+// BackupDatastore creates a back-up datastore in cloud storage.
+func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	// Decode Request
+	req := struct {
+		Kinds      string `json:"kinds"`
+		BucketName string `json:"bucketname"`
+	}{}
+	decodeRequest(ctx, r, &req)
+	log.Infof(ctx, "req: %+v", req)
+
+	projID := s.serverInfo.ProjectID
+	// Get Access Token
+	accessToken, _, err := appengine.AccessToken(ctx, "https://www.googleapis.com/auth/datastore")
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to appengine.AccessToken")
+	}
+	// Create Request
+	if req.BucketName == "" {
+		req.BucketName = fmt.Sprintf("gs://%s-datastore-backups", projID)
+	}
+	backupPrefix := req.BucketName
+	kinds := strings.Split(req.Kinds, ",")
+	type EntityFilter struct {
+		Kinds        []string `json:"kinds"`
+		NamespaceIDs []string `json:"namespace_ids"`
+	}
+	entityFilter := EntityFilter{
+		Kinds: kinds,
+	}
+	body := struct {
+		ProjectID       string       `json:"project_id"`
+		OutputURLPrefix string       `json:"output_url_prefix"`
+		EntityFilter    EntityFilter `json:"entity_filter"`
+	}{
+		ProjectID:       projID,
+		OutputURLPrefix: backupPrefix,
+		EntityFilter:    entityFilter,
+	}
+	bodyBytes, err := json.Marshal(body)
+	log.Infof(ctx, "backup req: %s", bodyBytes)
+	bodyBuffer := bytes.NewBuffer(bodyBytes)
+	url := fmt.Sprintf("https://datastore.googleapis.com/v1/projects/%s:export", projID)
+	// Make Request
+	backupReq, err := http.NewRequest(http.MethodPost, url, bodyBuffer)
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to http.NewRequest")
+	}
+	backupReq.Header.Add("Content-Type", "application/json")
+	backupReq.Header.Add("Authorization", "Bearer "+accessToken)
+	// Results
+	result, err := urlfetch.Client(ctx).Do(backupReq)
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to urlfetch.Client.Do")
+	}
+	reply, _ := ioutil.ReadAll(result.Body)
+	log.Infof(ctx, "Reply: %s", reply)
 	return nil
 }

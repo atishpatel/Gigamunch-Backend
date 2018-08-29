@@ -2,10 +2,11 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	fb "firebase.google.com/go"
@@ -17,35 +18,52 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/jmoiron/sqlx"
+)
+
+const (
+	userIDClaim = "userID"
+	delim       = ";%~&~%;"
 )
 
 var (
-	standAppEngine bool
-	projID         string
-	fbAuth         *fba.Client
-	db             common.DB
-	jwtKey         []byte
+	once   sync.Once
+	fbAuth *fba.Client
 )
 
 var (
-	errDatastore      = errors.InternalServerError
-	errInternal       = errors.InternalServerError
-	errInvalidToken   = errors.SignOutError.WithMessage("Invalid token.")
-	errInvalidFBToken = errors.SignOutError.WithMessage("Invalid Firebase token.")
+	errDatastore       = errors.InternalServerError
+	errInternal        = errors.InternalServerError
+	errInvalidArgument = errors.BadRequestError
+	errInvalidToken    = errors.SignOutError.WithMessage("Invalid token.")
+	errInvalidFBToken  = errors.SignOutError.WithMessage("Invalid Firebase token.")
 )
 
 // Client is a client for manipulating auth.
 type Client struct {
-	ctx context.Context
-	log *logging.Client
+	ctx        context.Context
+	log        *logging.Client
+	db         common.DB
+	sqlDB      *sqlx.DB
+	serverInfo *common.ServerInfo
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
+func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sqlx.DB, serverInfo *common.ServerInfo) (*Client, error) {
 	var err error
-	if standAppEngine {
+	if serverInfo.IsStandardAppEngine {
 		httpClient := urlfetch.Client(ctx)
-		err = setupFBApp(ctx, httpClient, projID)
+		err = setupFBApp(ctx, httpClient, serverInfo.ProjectID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		once.Do(func() {
+			if !serverInfo.IsStandardAppEngine {
+				httpClient := http.DefaultClient
+				err = setupFBApp(ctx, httpClient, serverInfo.ProjectID)
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -57,161 +75,112 @@ func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	return &Client{
-		ctx: ctx,
-		log: log,
+		ctx:        ctx,
+		log:        log,
+		db:         dbC,
+		sqlDB:      sqlC,
+		serverInfo: serverInfo,
 	}, nil
 }
 
-func createSessionToken(ctx context.Context, fbID, name, email, photoURL, provider, firebase string) (*Token, error) {
-	var err error
-	firstTime := false
-	var multiUserSessions []*UserSessions
-	keys, err := db.QueryFilter(ctx, kind, 0, 1, "User.AuthID=", fbID, &multiUserSessions)
-	if err != nil {
-		if err == db.ErrNoSuchEntity() {
-			firstTime = true
-		} else {
-			return nil, errDatastore.WithError(err).Annotate("failed to QueryFilter")
-		}
-	}
-	if len(keys) > 1 {
-		return nil, errDatastore.Annotate("two users with same AuthID")
-	}
-	var userSessions *UserSessions
-	var userID int64
-	if len(multiUserSessions) == 0 {
-		userSessions = new(UserSessions)
-	} else {
-		userSessions = multiUserSessions[0]
-		userID = keys[0].IntID()
-	}
-	if firstTime {
-		firstName, lastName := splitName(name)
-		// create UserSessions kind
-		userSessions.Provider = provider
-		// userSessions.Firsbase = firebase
-		userSessions.User = common.User{
-			AuthID:      fbID,
-			FirstName:   firstName,
-			LastName:    lastName,
-			Email:       email,
-			PhotoURL:    photoURL,
-			Permissions: 0,
-		}
-		// update PhotoURL given by Google so it's higher resolution
-		userSessions.User.PhotoURL = strings.Replace(userSessions.User.PhotoURL, "s96-c", "s250-c", -1)
-	}
-	userSessions.User.ID = userID
-	// create the token
-	token := &Token{
-		User:   userSessions.User,
-		IAT:    getIATTime(),
-		JTI:    getNewJTI(),
-		Expire: GetExpTime(),
-	}
-	userSessions.TokenIDs = append(userSessions.TokenIDs, TokenID{JTI: token.JTI, Expire: token.Expire})
-	var key common.Key
-	if firstTime {
-		key = db.IncompleteKey(ctx, kind)
-	} else {
-		key = db.IDKey(ctx, kind, userID)
-	}
-
-	key, err = db.Put(ctx, key, userSessions)
-	if err != nil {
-		return nil, errDatastore.WithError(err).Annotatef("failed to put for userID(%s)", userID)
-	}
-	// make sure new users have new ids
-	token.User.ID = key.IntID()
-	return token, nil
+func init() {
+	rand.Seed(time.Now().Unix())
 }
 
-// GetFromFBToken gets a User and token from a Firebase token.
-func (c *Client) GetFromFBToken(ctx context.Context, fbToken string) (*common.User, string, error) {
-	if fbToken == "" {
-		return nil, "", errInvalidFBToken.Annotate("FBToken is empty")
+// Verify verifies the token.
+func (c *Client) Verify(token string) (*common.User, error) {
+	if token == "" {
+		return nil, errInvalidFBToken.Annotate("token is empty")
 	}
-	fbTKN, err := fbAuth.VerifyIDToken(fbToken)
-	if err != nil || time.Since(time.Unix(fbTKN.IssuedAt, 0)) > 15*time.Minute {
-		return nil, "", errInvalidFBToken.WithError(err).Annotate("FBToken is too old")
+	tkn, err := fbAuth.VerifyIDToken(c.ctx, token)
+	if err != nil {
+		return nil, errInvalidFBToken.WithError(err).Annotate("failed to fbauth.VerifyIDToken")
 	}
-	claims := fbTKN.Claims
+	claims := tkn.Claims
 	picture := claims["picture"].(string)
 	name := claims["name"].(string)
 	email, ok := claims["email"].(string)
 	if !ok {
-		return nil, "", errInvalidFBToken.WithMessage("User must have email.").Annotate("firebase token does not have email")
+		return nil, errInvalidFBToken.WithMessage("User must have email.").Annotate("firebase token does not have email")
 	}
-	provider, ok := claims["sign_in_provider"].(string)
-	firebase, ok := claims["firebase"].(string)
-	c.log.Debugf(ctx, "claims: %+v", claims)
-	token, err := createSessionToken(ctx, fbTKN.UID, name, email, picture, provider, firebase)
+	var userID int64
+	userIDTmp, ok := claims[userIDClaim]
+	if ok {
+		userID, _ = strconv.ParseInt(userIDTmp.(string), 2, 64)
+	}
+	admin := claims["admin"].(bool)
+	nameSplit := strings.Split(name, delim)
+	var firstName, lastName string
+	if len(nameSplit) >= 1 {
+		firstName = nameSplit[0]
+	}
+	if len(nameSplit) >= 2 {
+		lastName = nameSplit[1]
+	}
+	user := &common.User{
+		ID:        userID,
+		AuthID:    tkn.UID,
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+		PhotoURL:  picture,
+		Admin:     admin,
+	}
+	return user, nil
+}
+
+// MakeAdmin makes a user an admin
+func (c *Client) MakeAdmin(userEmail string) error {
+	return c.AddCustomClaim(userEmail, "admin", true)
+}
+
+// UpdateUserID sets the user id for a token.
+func (c *Client) UpdateUserID(authID string, userID int64) error {
+	return c.AddCustomClaim(authID, userIDClaim, userID)
+}
+
+// UpdateUserName updates the user name in token.
+func (c *Client) UpdateUserName(authID, firstName, lastName string) error {
+	var userRecord *fba.UserRecord
+	var err error
+	if strings.Contains(authID, "@") {
+		userRecord, err = fbAuth.GetUserByEmail(c.ctx, authID)
+	} else {
+		userRecord, err = fbAuth.GetUser(c.ctx, authID)
+	}
 	if err != nil {
-		return nil, "", errors.Wrap("failed to create session token", err)
+		return errInvalidArgument.WithMessage("Invalid email")
 	}
-	// TODO: log
-	jwtString, err := token.JWTString()
+	userToUpdate := new(fba.UserToUpdate)
+	userToUpdate.DisplayName(firstName + delim + lastName)
+	_, err = fbAuth.UpdateUser(c.ctx, userRecord.UID, userToUpdate)
 	if err != nil {
-		return nil, "", errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Failed to encode user."}
+		return errInternal.WithError(err).Annotate("failed to fbAuth.UpdateUser")
 	}
-	return &token.User, jwtString, nil
-}
-
-// GetUser gets a User. If the token is fresh, it doesn't make a database call.
-func (c *Client) GetUser(ctx context.Context, tkn string) (*common.User, error) {
-	// TODO: implement
-	return nil, nil
-}
-
-// Refresh returns a fresh token and invalidates the old one.
-func (c *Client) Refresh(ctx context.Context, tkn string) (string, error) {
-	// TODO: implement
-	return "", nil
-}
-
-// CreateReq is a req for Create.
-type CreateReq struct {
-	AuthID          string
-	Email           string
-	FirstName       string
-	LastName        string
-	PaymentProvider common.PaymentProvider
-}
-
-// Create creates a new User.
-func (c *Client) Create(ctx context.Context, req *CreateReq) (*common.User, error) {
-	return nil, nil
-}
-
-// func (c *Client) LinkViaEmail(ctx context.Context, email string, fbID string) (*common.User, error) {
-// 	return nil, nil
-// }
-
-// func (c *Client) LinkViaUserID(ctx context.Context, email string, userID int64, fbID string) (*common.User, error) {
-// 	return nil, nil
-// }
-
-// Update updates a user.
-func (c *Client) Update(ctx context.Context, userID int64, ops ...func(*common.User)) (*common.User, error) {
-	return nil, nil
-}
-
-// InvalidateSessions invalidates all sessions for an User.
-func (c *Client) InvalidateSessions(ctx context.Context, userID int64) error {
 	return nil
 }
 
-// GetExpTime returns the time a token should expire from now
-func GetExpTime() time.Time {
-	return time.Now().UTC().Add(time.Hour * 24 * 60)
-}
-
-func getNewJTI() int32 {
-	return rand.Int31()
-}
-
-func getIATTime() time.Time {
-	return time.Now().UTC()
+// AddCustomClaim adds a custom claim to a user token.
+func (c *Client) AddCustomClaim(userIDOrEmail, key string, value interface{}) error {
+	var userRecord *fba.UserRecord
+	var err error
+	if strings.Contains(userIDOrEmail, "@") {
+		userRecord, err = fbAuth.GetUserByEmail(c.ctx, userIDOrEmail)
+	} else {
+		userRecord, err = fbAuth.GetUser(c.ctx, userIDOrEmail)
+	}
+	if err != nil {
+		return errInvalidArgument.WithMessage("Invalid email")
+	}
+	claims := userRecord.CustomClaims
+	claims[key] = value
+	userToUpdate := new(fba.UserToUpdate)
+	userToUpdate.CustomClaims(claims)
+	_, err = fbAuth.UpdateUser(c.ctx, userRecord.UID, userToUpdate)
+	if err != nil {
+		return errInternal.WithError(err).Annotate("failed to fbAuth.UpdateUser")
+	}
+	return nil
 }
 
 func splitName(name string) (string, string) {
@@ -226,29 +195,6 @@ func splitName(name string) (string, string) {
 		last = name[lastSpace:]
 	}
 	return first, last
-}
-
-// Setup sets up auth.
-func Setup(ctx context.Context, standardAppEngine bool, projectID string, httpClient *http.Client, dbC common.DB, jwtSecret string) error {
-	rand.Seed(time.Now().Unix())
-	var err error
-	standAppEngine = standardAppEngine
-	projID = projectID
-	if !standAppEngine {
-		err = setupFBApp(ctx, httpClient, projectID)
-		if err != nil {
-			return err
-		}
-	}
-	if dbC == nil {
-		return fmt.Errorf("db cannot be nil for sub")
-	}
-	db = dbC
-	if jwtSecret == "" {
-		return fmt.Errorf("jwt secret is empty")
-	}
-	jwtKey = []byte(jwtSecret)
-	return nil
 }
 
 func setupFBApp(ctx context.Context, httpClient *http.Client, projectID string) error {

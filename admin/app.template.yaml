@@ -13,6 +13,17 @@ handlers:
   - url: /admin/webhook/.*
     script: _go_app
 
+  - url: /admin/batch/.*
+    script: _go_app
+
+  - url: /admin/swagger
+    static_dir: app/swagger-ui/dist
+    secure: always
+
+  - url: /admin/swagger.json
+    static_files: app/AdminAPI.swagger.json
+    upload: app/AdminAPI.swagger.json
+
   - url: /admin/src
     static_dir: app/src
     secure: always
@@ -38,10 +49,6 @@ handlers:
     static_files: app/index.html
     upload: app/index.html
     secure: always
-
-  - url: /swagger.json
-    static_files: app/AdminAPI.swagger.json
-    upload: app/AdminAPI.swagger.json
 
   - url: /.*
     script: _go_app

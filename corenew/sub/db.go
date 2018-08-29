@@ -44,9 +44,36 @@ func getMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) 
 
 func put(ctx context.Context, id string, i *SubscriptionSignUp) error {
 	var err error
+	// process entity
+	if i.RawPhoneNumber == "" && i.PhoneNumber != "" {
+		i.UpdatePhoneNumber(i.PhoneNumber)
+	}
+	// end process
 	key := datastore.NewKey(ctx, kindSubscriptionSignUp, id, 0, nil)
 	_, err = datastore.Put(ctx, key, i)
 	return err
+}
+
+func putMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
+	keys := make([]*datastore.Key, len(subs))
+	for i := range subs {
+		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
+	}
+	_, err := datastore.PutMulti(ctx, keys, subs)
+	return err
+}
+
+// getSubscribersByPhoneNumber returns the subscribers via phone number.
+func getSubscribersByPhoneNumber(ctx context.Context, number string) ([]*SubscriptionSignUp, error) {
+	query := datastore.NewQuery(kindSubscriptionSignUp).
+		Filter("PhoneNumber=", number)
+	var results []*SubscriptionSignUp
+	_, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 // getSubscribers returns the list of Subscribers for that day.

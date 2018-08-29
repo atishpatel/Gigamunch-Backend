@@ -246,6 +246,7 @@
           while (d.getDay() !== 1) {
             d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else {
           d = new Date(dateString);
         }
@@ -823,6 +824,44 @@
               [-86.8064975, 36.120509],
               [-86.7782168, 36.1162655],
               [-86.7504501, 36.1231782],
+            ],
+          },
+          {
+            name: 'Aaron',
+            desc: 'Unknown',
+            color: '#03A9F4',
+            round_trip: true,
+            start_latlng: {
+              lat: 36.127325,
+              lng: -86.710504
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
+            geofence: [
+              [-86.7504501, 36.1231782],
+              [-86.7689896, 36.1610231],
+              [-86.7792892, 36.1694768],
+            ],
+          },
+          {
+            name: 'Extra Driver',
+            desc: 'Unknown',
+            color: '#000000',
+            round_trip: true,
+            start_latlng: {
+              lat: 36.127325,
+              lng: -86.710504
+            },
+            end_latlng: {
+              lat: 36.118228,
+              lng: -86.755293
+            },
+            geofence: [
+              [-86.7504501, 36.1231782],
+              [-86.7689896, 36.1610231],
+              [-86.7792892, 36.1694768],
             ],
           },
           // {
