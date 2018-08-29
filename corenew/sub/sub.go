@@ -16,8 +16,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"golang.org/x/net/context"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
+	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"google.golang.org/appengine"
@@ -539,7 +540,7 @@ func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, 
 }
 
 // ChangeServingsPermanently changes a subscriber's servings permanently for all bags from now onwards.
-func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, vegetarian bool) error {
+func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, vegetarian bool, log *logging.Client, serverInfo *common.ServerInfo) error {
 	// insert or update
 	if subEmail == "" || servings < 1 {
 		return errInvalidParameter.Wrapf("expected(actual): subEmail(%s) servings(%f)", subEmail, servings)
@@ -576,19 +577,16 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		c.log.SubServingsChangedPermanently(0, subEmail, oldServings, nonvegServings, oldVegServings, vegServings)
 	}
 
-	mailC := mail.New(c.ctx)
+	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
 	mailReq := &mail.UserFields{
-		Email: subEmail,
+		Email:          subEmail,
+		VegServings:    s.VegetarianServings,
+		NonVegServings: s.Servings,
 	}
-	// TODO: add 2 serving 4 serving tag
-	if vegServings > 0 {
-		mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
-		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
-	} else {
-		mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
-		mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
-	}
-	err = mailC.UpdateUser(mailReq, getProjID())
+	err = mailC.UpdateUser(mailReq)
 	if err != nil {
 		return errors.Annotate(err, "failed to mail.UpdateUser")
 	}
@@ -804,22 +802,12 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 }
 
 // Cancel cancels an user's subscription.
-func (c *Client) Cancel(subEmail string) error {
+func (c *Client) Cancel(subEmail string, log *logging.Client, serverInfo *common.ServerInfo) error {
 	if subEmail == "" {
 		return errInvalidParameter.Wrap("sub email cannot be empty.")
 	}
-	mailC := mail.New(c.ctx)
-	mailReq := &mail.UserFields{
-		Email:      subEmail,
-		AddTags:    []mail.Tag{mail.Canceled},
-		RemoveTags: []mail.Tag{mail.Customer},
-	}
-	err := mailC.UpdateUser(mailReq, getProjID())
-	if err != nil {
-		return errors.Annotate(err, "failed to mail.UpdateUser")
-	}
 	// remove any SubLog that are > now
-	_, err = mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
+	_, err := mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrapf("failed to execute statement: %s", deleteSubLogStatment)
 	}
@@ -837,7 +825,19 @@ func (c *Client) Cancel(subEmail string) error {
 	if err != nil {
 		return errors.Wrap("failed to put sub", err)
 	}
-
+	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
+	mailReq := &mail.UserFields{
+		Email:     subEmail,
+		FirstName: sub.FirstName,
+		LastName:  sub.LastName,
+	}
+	err = mailC.SubDeactivated(mailReq)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.SubDeactivated")
+	}
 	return nil
 }
 

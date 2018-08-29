@@ -50,9 +50,6 @@ func init() {
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
-	// Auth
-	// http.HandleFunc("/admin/api/v1/Login", s.handler(s.Login))
-	// http.HandleFunc("/admin/api/v1/Refresh", s.handler(s.Refresh))
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
@@ -68,6 +65,8 @@ func init() {
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
 	// Tasks
 	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
+	http.HandleFunc("/admin/task/SendPreviewCultureEmail", s.handler(s.SendPreviewCultureEmail))
+	http.HandleFunc("/admin/task/SendCultureEmail", s.handler(s.SendCultureEmail))
 	http.HandleFunc("/admin/task/CheckPowerSensors", s.handler(s.CheckPowerSensors))
 	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
 	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
