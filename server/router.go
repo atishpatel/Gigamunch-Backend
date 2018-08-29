@@ -30,6 +30,8 @@ func init() {
 		log.Fatalf("Failed to read cookSignup page %#v", err)
 	}
 
+	projID = os.Getenv("PROJECTID")
+
 	r := httprouter.New()
 
 	r.GET(signOutURL, handleSignout)
@@ -44,8 +46,8 @@ func init() {
 	// // admin stuff
 	// adminChain := alice.New(middlewareAdmin)
 	// r.Handler("GET", adminHomeURL, adminChain.ThenFunc(handleAdminHome))
-	http.HandleFunc("/get-upload-url", handleGetUploadURL)
-	http.HandleFunc("/upload", handleUpload)
+	// http.HandleFunc("/get-upload-url", handleGetUploadURL)
+	// http.HandleFunc("/upload", handleUpload)
 	// http.HandleFunc("/get-feed", handleGetFeed)
 	// http.HandleFunc("/get-item", handleGetItem)
 	http.HandleFunc("/signedup", handleCookSignup)
@@ -53,11 +55,7 @@ func init() {
 	addTemplateRoutes(r)
 	addAPIRoutes(r)
 	http.Handle("/", r)
-}
 
-func getProjID() string {
-	projID = os.Getenv("PROJECTID")
-	return projID
 }
 
 func handleSignout(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
