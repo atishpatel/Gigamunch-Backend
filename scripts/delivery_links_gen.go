@@ -42,10 +42,6 @@ var (
 			Name:      "Brea",
 			Addresses: ``,
 		},
-		nameAndAddresses{
-			Name:      "Aaron",
-			Addresses: ``,
-		},
 		// Other
 		nameAndAddresses{
 			Name:      "Theo",

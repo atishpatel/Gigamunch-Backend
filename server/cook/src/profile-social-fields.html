@@ -1,0 +1,74 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+
+<link rel="import"
+      href="../bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../bower_components/paper-input/paper-textarea.html">
+
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="profile-social-fields">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        label {
+          line-height: 20px;
+        }
+
+      </style>
+    </shared-styles>
+    <paper-textarea label="Describe Yourself"
+                    value="{{bio}}"
+                    autocorrect>
+    </paper-textarea>
+    <div class="row">
+      <paper-input class="flex-1"
+                   label="Instagram Username"
+                   value="{{instagramId}}">
+        <div prefix>/&nbsp;</div>
+      </paper-input>
+      <paper-input class="flex-1"
+                   label="Twitter Username"
+                   value="{{twitterId}}">
+        <div prefix>@&nbsp;</div>
+      </paper-input>
+    </div>
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'profile-social-fields',
+
+      properties: {
+        bio: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        instagramId: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        twitterId: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        snapchatId: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+        },
+      },
+    });
+
+  </script>
+</dom-module>

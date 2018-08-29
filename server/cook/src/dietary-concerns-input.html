@@ -1,0 +1,120 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-checkbox/paper-checkbox.html">
+
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="dietary-concerns-input">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        .list {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+        
+        .list>* {
+          margin: 10px 10px 10px 0;
+          width: 125px
+        }
+        
+        label {
+          font-size: 12px;
+        }
+
+      </style>
+    </shared-styles>
+    <label>Dietary Tags</label>
+    <div class="list">
+      <paper-checkbox checked="{{vegan}}">Vegan</paper-checkbox>
+      <paper-checkbox checked="{{vegetarian}}">Vegetarian</paper-checkbox>
+      <paper-checkbox checked="{{paleo}}">Paleo</paper-checkbox>
+      <paper-checkbox checked="{{glutenFree}}">Gluten-Free</paper-checkbox>
+      <paper-checkbox checked="{{kosher}}">Kosher</paper-checkbox>
+    </div>
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'dietary-concerns-input',
+      properties: {
+        dietaryConcerns: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          observer: 'dietaryConcernsChanged',
+        },
+        vegan: {
+          type: Boolean,
+          observer: 'checkUpdated'
+        },
+        vegetarian: {
+          type: Boolean,
+          observer: 'checkUpdated'
+        },
+        paleo: {
+          type: Boolean,
+          observer: 'checkUpdated'
+        },
+        glutenFree: {
+          type: Boolean,
+          observer: 'checkUpdated'
+        },
+        kosher: {
+          type: Boolean,
+          observer: 'checkUpdated'
+        },
+        lock: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      dietaryConcernsChanged: function() {
+        // lock
+        this.lock = true;
+        // update checks
+        this.vegan = this.getKthBit(this.dietaryConcerns, 0);
+        this.vegetarian = this.getKthBit(this.dietaryConcerns, 1);
+        this.paleo = this.getKthBit(this.dietaryConcerns, 2);
+        this.glutenFree = this.getKthBit(this.dietaryConcerns, 3);
+        this.kosher = this.getKthBit(this.dietaryConcerns, 4);
+        // unlock
+        this.lock = false;
+      },
+      checkUpdated: function() {
+        if (this.lock) {
+          return;
+        }
+        var newDietaryConcerns = 0;
+        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 0, this.vegan);
+        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 1, this.vegetarian);
+        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 2, this.paleo);
+        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 3, this.glutenFree);
+        newDietaryConcerns = this.setKthBit(newDietaryConcerns, 4, this.kosher);
+        if (this.dietaryConcerns !== newDietaryConcerns) {
+          this.dietaryConcerns = newDietaryConcerns;
+        }
+      },
+      getKthBit: function(x, k) {
+        return (((x >> k) & 1) === 1);
+      },
+      setKthBit: function(x, k, val) {
+        if (val) {
+          // set to true
+          return x | 1 << k;
+        }
+        // set to false
+        return x & ~(1 << k);
+      }
+    });
+
+  </script>
+</dom-module>

@@ -1,7 +1,6 @@
 package sub
 
 import (
-	"regexp"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -39,7 +38,6 @@ type SubscriptionSignUp struct {
 	PaymentMethodToken string        `json:"payment_method_token"`
 	Reference          string        `json:"reference" datastore:",noindex"`
 	PhoneNumber        string        `json:"phone_number"`
-	RawPhoneNumber     string        `json:"raw_phone_number"`
 	DeliveryTips       string        `json:"delivery_tips"`
 	BagReminderSMS     bool          `json:"bag_reminder_sms" datastore:",noindex"`
 	// gift
@@ -68,25 +66,6 @@ func (s *SubscriptionSignUp) GetEmail() string {
 // GetFirstDinnerDate returns the first dinner for the subscriber.
 func (s *SubscriptionSignUp) GetFirstDinnerDate() time.Time {
 	return s.FirstBoxDate
-}
-
-// UpdatePhoneNumber takes a raw number and updates the PhoneNumber.
-// Note: Make sure to log old raw number to subscriber.
-func (s *SubscriptionSignUp) UpdatePhoneNumber(rawNumber string) {
-	s.RawPhoneNumber = rawNumber
-	s.PhoneNumber = GetCleanPhoneNumber(rawNumber)
-}
-
-// GetCleanPhoneNumber takes a raw phone number and formats it to clean phone number.
-func GetCleanPhoneNumber(rawNumber string) string {
-	reg := regexp.MustCompile("[^0-9]+")
-	cleanNumber := reg.ReplaceAllString(rawNumber, "")
-	if len(cleanNumber) < 10 {
-		return cleanNumber
-	}
-	cleanNumber = cleanNumber[len(cleanNumber)-10:]
-	cleanNumber = cleanNumber[:3] + "-" + cleanNumber[3:6] + "-" + cleanNumber[6:]
-	return cleanNumber
 }
 
 // SubscriptionLog is an activity done by a sub.

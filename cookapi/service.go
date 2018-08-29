@@ -18,9 +18,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
-	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -86,9 +86,13 @@ func main() {
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/send-bag-reminder", handleSendBagReminder)
+	http.HandleFunc("/send-preview-culture-email", handleSendPreviewCultureEmail)
+	http.HandleFunc("/send-culture-email", handleSendCultureEmail)
 	http.HandleFunc("/task/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/task/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/task/send-bag-reminder", handleSendBagReminder)
+	http.HandleFunc("/task/send-preview-culture-email", handleSendPreviewCultureEmail)
+	http.HandleFunc("/task/send-culture-email", handleSendCultureEmail)
 	http.HandleFunc("/task/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/webhook/twilio-sms", handleTwilioSMS)
@@ -148,6 +152,7 @@ func main() {
 	// register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Give free meal to a customer for a date. Admin func.")
 	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
 	register("ChangeServingsForDate", "ChangeServingsForDate", "POST", "cookservice/ChangeServingsForDate", "Change number of servings for a week. Admin func.")
+	register("UpdateMailCustomerFields", "UpdateMailCustomerFields", "POST", "cookservice/UpdateMailCustomerFields", "Updates the custom filds in Drip. Admin func.")
 	register("UpdatePaymentMethodToken", "UpdatePaymentMethodToken", "POST", "cookservice/UpdatePaymentMethodToken", "Updates the payment method token. Admin func.")
 	register("ChangeServingsPermanently", "ChangeServingsPermanently", "POST", "cookservice/ChangeServingsPermanently", "Change number of servings permanently. Admin func.")
 	register("GetSubLogs", "getSubLogs", "POST", "cookservice/getSubLogs", "Get all subscription activty. Admin func.")
@@ -338,6 +343,65 @@ func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func handleSendPreviewCultureEmail(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	cultureDate := time.Now().Add(6 * 24 * time.Hour)
+	utils.Infof(ctx, "culture date:%s", cultureDate)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(projectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "befutter@gmail.com")
+		}
+		tag := mail.GetPreviewEmailTag(cultureDate)
+		mailC := mail.New(ctx)
+		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to mail.AddBatchTag: %s", err)
+		}
+	}
+}
+
+func handleSendCultureEmail(w http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
+	cultureDate := time.Now()
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to sub.GetForDate: %s", err)
+		return
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(projectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "befutter@gmail.com")
+		}
+		tag := mail.GetCultureEmailTag(cultureDate)
+		mailC := mail.New(ctx)
+		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			utils.Criticalf(ctx, "failed to handleSendCultureEmail: failed to mail.AddBatchTag: %s", err)
+		}
+	}
+}
+
 func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 	if !common.IsProd(projectID) {
@@ -373,53 +437,70 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	twoVegBags := 0
 	fourBags := 0
 	fourVegBags := 0
+	moreThanFourBags := 0
+	moreThanFourVegBags := 0
 	specialTwoBags := 0
 	specialTwoVegBags := 0
 	specialFourBags := 0
 	specialFourVegBags := 0
+	specialOther := 0
 	var listOfMoreThanFourBags []int8
 	var listOfMoreThanFourVegBags []int8
 	for i, sublog := range nonSkippers {
-		vegRatio := float32(subs[i].VegetarianServings) / float32(subs[i].VegetarianServings+subs[i].Servings)
-		vegServings := int8(float32(sublog.Servings) * vegRatio)
-		nonVegServings := sublog.Servings - vegServings
-
-		switch vegServings {
-		case 0:
-			// break
-		case 2:
-			if sublog.Free {
-				specialTwoVegBags++
-			} else {
-				twoVegBags++
-			}
-		case 4:
-			if sublog.Free {
-				specialFourVegBags++
-			} else {
-				fourVegBags++
-			}
-		default:
-			listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, vegServings)
+		veg := false
+		if subs[i].VegetarianServings > 0 {
+			veg = true
 		}
-
-		switch nonVegServings {
-		case 0:
-			// break
-		case 2:
-			if sublog.Free {
-				specialTwoBags++
+		if sublog.Servings == 2 {
+			if veg {
+				twoVegBags++
 			} else {
 				twoBags++
 			}
-		case 4:
-			if sublog.Free {
-				specialFourBags++
+		} else if sublog.Servings == 4 {
+			if veg {
+				fourVegBags++
 			} else {
 				fourBags++
 			}
-		default:
-			listOfMoreThanFourBags = append(listOfMoreThanFourBags, nonVegServings)
+		} else {
+			if subs[i].VegetarianServings > 0 && subs[i].Servings > 0 {
+				// veg and non-veg split delivery
+				vegRatio := float32(subs[i].VegetarianServings) / float32(subs[i].VegetarianServings+subs[i].Servings)
+				vegServings := int8(float32(sublog.Servings) * vegRatio)
+				nonVegServings := sublog.Servings - vegServings
+				listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, vegServings)
+				listOfMoreThanFourBags = append(listOfMoreThanFourBags, nonVegServings)
+			} else {
+				if veg {
+					moreThanFourVegBags++
+					listOfMoreThanFourVegBags = append(listOfMoreThanFourVegBags, sublog.Servings)
+				} else {
+					moreThanFourBags++
+					listOfMoreThanFourBags = append(listOfMoreThanFourBags, sublog.Servings)
+				}
+			}
+		}
+		if sublog.Free {
+			if sublog.Servings == 2 {
+				if veg {
+					specialTwoVegBags++
+					twoVegBags--
+				} else {
+					specialTwoBags++
+					twoBags--
+				}
+			} else if sublog.Servings == 4 {
+				if veg {
+					specialFourVegBags++
+					fourVegBags--
+				} else {
+					specialFourBags++
+					fourBags--
+				}
+			} else {
+				specialOther++
+			}
 		}
 	}
 	for _, special := range listOfMoreThanFourBags {
@@ -446,20 +527,26 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	msg := `%s culture execution:
 	2 bags: %d
 	2 special bags: %d
-	4 bags: %d
-	4 special bags: %d
-
 	2 veg bags: %d
 	2 special veg bags: %d
+	4 bags: %d
+	4 special bags: %d
 	4 veg bags: %d
 	4 special veg bags: %d
 
 	Total bags: %d
 
-	Accounted for above:
+	4+ bags: %d
 	4+ bags list: %v
-	4+ veg bags list: %v`
-	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, specialTwoBags, fourBags, specialFourBags, twoVegBags, specialTwoVegBags, fourVegBags, specialFourVegBags, totalStandardBags, listOfMoreThanFourBags, listOfMoreThanFourVegBags)
+	4+ veg bags: %d
+	4+ veg bags list: %v
+
+	First 2 bags: %d
+	First 4 bags: %d
+	First 2 veg bags: %d
+	First 4 veg bags: %d
+	First Other: %d`
+	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, specialTwoBags, twoVegBags, specialTwoVegBags, fourBags, specialFourBags, fourVegBags, specialFourVegBags, totalStandardBags, len(listOfMoreThanFourBags), listOfMoreThanFourBags, len(listOfMoreThanFourVegBags), listOfMoreThanFourVegBags, specialTwoBags, specialFourBags, specialTwoVegBags, specialFourVegBags, specialOther)
 	messageC := message.New(ctx)
 	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
 	for _, number := range numbers {
@@ -547,16 +634,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	logging.Infof(ctx, "Params: %+v", params)
 	subC := sub.New(ctx)
-	log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/cookapi/UpdateDrip")
-	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
-		return
-	}
-	mailC, err := mail.NewClient(ctx, log, serverInfo)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
-		return
-	}
+	mailC := mail.New(ctx)
 	// make subscriber if date is same as give reveal date
 	sub, err := subC.GetSubscriber(params.Email)
 	if err != nil {
@@ -568,19 +646,25 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	if sub.IsSubscribed && !sub.GiftRevealDate.IsZero() && timeTillGiftReveal < time.Hour*12 {
 		mailReq := &mail.UserFields{
 			Email:             sub.Email,
+			Name:              sub.Name,
 			FirstName:         sub.FirstName,
 			LastName:          sub.LastName,
 			FirstDeliveryDate: sub.FirstBoxDate,
 			GifterName:        sub.Reference,
 			GifterEmail:       sub.ReferenceEmail,
-			AddTags:           []mail.Tag{mail.Subscribed, mail.Subscriber, mail.Gifted},
-			VegServings:       sub.VegetarianServings,
-			NonVegServings:    sub.Servings,
+			AddTags:           []mail.Tag{mail.Subscribed, mail.Customer, mail.Gifted},
+		}
+		if sub.VegetarianServings > 0 {
+			mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
+		} else {
+			mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
 		}
 		mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
-		err = mailC.SubActivated(mailReq)
+		err = mailC.UpdateUser(mailReq, projectID)
 		if err != nil {
-			utils.Criticalf(ctx, "Failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
+			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", sub.Email, err)
 		}
 	}
 	// add num meals recieved

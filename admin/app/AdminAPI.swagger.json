@@ -1,12 +1,11 @@
 {
   "swagger": "2.0",
-"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],
   "info": {
     "title": "AdminAPI.proto",
     "version": "version not set"
   },
   "schemes": [
-    
+    "http",
     "https"
   ],
   "consumes": [
@@ -151,7 +150,7 @@
     },
     "/admin/api/v1/GetHasSubscribed": {
       "post": {
-        "summary": "GetHasSubscribed gets all the people who are or have subscribed at one point.",
+        "summary": "Subscribers",
         "operationId": "GetHasSubscribed",
         "responses": {
           "200": {
@@ -178,7 +177,7 @@
     },
     "/admin/api/v1/GetLog": {
       "post": {
-        "summary": "GetLog returns a log.",
+        "summary": "Activities\nrpc GetActivities (GetActivitiesReq) returns (GetActivitiesResp) {\n    option (google.api.http) = {\n        post: \"/admin/api/v1/GetActivities\"\n        body: \"*\"\n    };\n}\nLogs",
         "operationId": "GetLog",
         "responses": {
           "200": {
@@ -205,7 +204,6 @@
     },
     "/admin/api/v1/GetLogs": {
       "post": {
-        "summary": "GetLogs returns a list of logs.",
         "operationId": "GetLogs",
         "responses": {
           "200": {
@@ -232,7 +230,6 @@
     },
     "/admin/api/v1/GetLogsByEmail": {
       "post": {
-        "summary": "GetLogsByEmail returns a list of logs by email.",
         "operationId": "GetLogsByEmail",
         "responses": {
           "200": {
@@ -310,6 +307,33 @@
         ]
       }
     },
+    "/admin/api/v1/Login": {
+      "post": {
+        "summary": "Auth",
+        "operationId": "Login",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPITokenOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPITokenOnlyReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/ProcessSublogs": {
       "post": {
         "operationId": "ProcessSublogs",
@@ -328,6 +352,32 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIProcessSublogsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/Refresh": {
+      "post": {
+        "operationId": "Refresh",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPITokenOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPITokenOnlyReq"
             }
           }
         ],
@@ -1211,6 +1261,26 @@
         }
       },
       "title": "Subscriber"
+    },
+    "AdminAPITokenOnlyReq": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "title": "Auth"
+    },
+    "AdminAPITokenOnlyResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
     },
     "AdminAPIUpdateDeliveriesReq": {
       "type": "object",

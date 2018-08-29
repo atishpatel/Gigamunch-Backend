@@ -13,7 +13,7 @@ import (
 	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
-	"github.com/atishpatel/Gigamunch-Backend/core/mail"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -99,7 +99,6 @@ func handleCheckout(w http.ResponseWriter, req *http.Request, params httprouter.
 	if email == "" {
 		email = params.ByName("email")
 	}
-	email = strings.TrimSpace(strings.ToLower(email))
 	// TODO: add referred email address
 	var err error
 	if email != "" && terp == "" && strings.Contains(email, "@") {
@@ -122,15 +121,8 @@ func handleCheckout(w http.ResponseWriter, req *http.Request, params httprouter.
 					utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
 				}
 			}
-			log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/checkout")
-			if err != nil {
-				utils.Criticalf(ctx, "Error added setupLoggingAndServerInfo for email(%s). Err: %+v", entry.Email, err)
-			}
-			mailC, err := mail.NewClient(ctx, log, serverInfo)
-			if err != nil {
-				utils.Criticalf(ctx, "Error added mail.NewClient for email(%s). Err: %+v", entry.Email, err)
-			}
-			err = mailC.LeftEmail(entry.Email, "", "")
+			mailC := mail.New(ctx)
+			err = mailC.AddTag(entry.Email, mail.LeftWebsiteEmail)
 			if err != nil {
 				utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
 			}

@@ -1,0 +1,30 @@
+service: eaterapi
+runtime: go
+vm: true
+threadsafe: true
+
+health_check:
+    enable_health_check: False
+
+manual_scaling:
+  instances: 2
+
+network:
+  forwarded_ports:
+  - 50051
+  - 80:50051
+  instance_tag: grpcserver
+  name: default
+
+# resources:
+#   cpu: .5
+#   memory_gb: 1.3
+#   disk_size_gb: 10
+
+beta_settings:
+  cloud_sql_instances: PROJECT_ID:us-central1:gigasqldb
+
+env_variables:
+  MYSQL_CONNECTION: server:gigamunch@tcp(SQL_IP:3306)/gigamunch?collation=utf8mb4_general_ci
+  DOMAIN_URL: https://_DOMAIN_.com
+  PROJECTID: PROJECT_ID

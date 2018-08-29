@@ -1,0 +1,221 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+
+<!-- shared styles for all views -->
+<dom-module id="shared-styles">
+  <template>
+    <style>
+      /*@font-face {
+        font-family: 'NexaBold';
+        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
+      }
+      
+      @font-face {
+        font-family: 'FontRegular';
+        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_regular.ttf') format('truetype');
+      }
+      
+      @font-face {
+        font-family: 'FontRegular';
+        font-weight: bold;
+        src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
+      }*/
+
+       :host {
+        font-family: 'FontRegular', 'Roboto';
+        font-smoothing: antialiased;
+        -webkit-font-smoothing: antialiased;
+        letter-spacing: .5px;
+        --primary-color: #FF7043;
+        --light-primary-color: #FF8A65;
+        --dark-primary-color: #FF5722;
+        --gray-line-color: #CFD8DC;
+        --link-color: #899BA3;
+        --accent-color: var(--paper-light-blue-a200);
+        --light-accent-color: var(--paper-light-blue-a100);
+        --dark-accent-color: var(--paper-light-blue-a400);
+        --primary-text-color: #4F4F4F;
+        --secondary-text-color: #727272;
+        --primary-text-opacity: .87;
+        --secondary-text-opacity: .54;
+        --disabled-text-color: #A1A1A1;
+        --max-content-width: 1000px;
+        --font-bold: {
+          font-family: 'FontRegular', 'Roboto';
+          letter-spacing: .5px;
+          font-weight: bold;
+          font-smoothing: antialiased;
+          -webkit-font-smoothing: antialiased;
+        }
+        --font: {
+          font-family: 'FontRegular', 'Roboto';
+          letter-spacing: .5px;
+          font-smoothing: antialiased;
+          -webkit-font-smoothing: antialiased;
+        }
+        /* paper-button */
+        --paper-button: {
+          @apply --font;
+          background: var(--primary-color);
+          color: white;
+          min-width: 5em;
+        }
+        /* paper-input */
+        --paper-input: {
+          @apply --font;
+        }
+        --paper-input-container-label: {
+          @apply --font;
+        }
+        --paper-input-container-input: {
+          @apply --font;
+        }
+        --paper-tab-ink: var(--light-accent-color);
+        /* paper-progress */
+        --paper-progress-active-color: var(--accent-color);
+        /* paper-collapse-item */
+        --paper-collapse-item-header: {
+          @apply --font-bold;
+        }
+        --paper-collapse-item-content: {
+          @apply --font;
+        }
+        /* paper-slider */
+        --paper-slider-active-color: var(--dark-primary-color);
+        --paper-slider-knob-color: var(--dark-primary-color);
+        --paper-slider-pin-color: var(--dark-primary-color);
+      }
+
+      paper-checkbox,
+      paper-input,
+      paper-button {
+        @apply --font;
+      }
+
+      paper-tab {
+        @apply --font-bold;
+      }
+
+      paper-item {
+        @apply --font;
+      }
+
+      paper-menu {
+        min-width: 175px;
+      }
+
+      paper-spinner[active] {
+        display: block;
+      }
+
+      paper-spinner {
+        display: none;
+      }
+
+      .logo {
+        font-family: 'NexaBold';
+      }
+
+      .font-bold {
+        @apply --font-bold;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      a:link,
+      a:visited {
+        color: var(--primary-color);
+      }
+
+      a:hover {
+        color: var(--light-primary-color);
+      }
+
+      h1 {
+        margin: 16px 0;
+        color: #212121;
+        font-size: 22px;
+      }
+
+      paper-icon-button {
+        color: var(--link-color);
+        /* --link-color */
+      }
+
+      .photo-16-9 {
+        display: block;
+        width: 100%;
+        position: relative;
+        height: 0;
+        padding: 56.25% 0 0 0;
+        overflow: hidden;
+        background-color: white;
+      }
+
+      .photo-16-9 img {
+        position: absolute;
+        display: block;
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+      }
+
+      .row>*:not(:first-child) {
+        margin-left: 8px;
+      }
+
+      .flex-1 {
+        flex: 1;
+      }
+
+      .flex-2 {
+        flex: 2;
+      }
+
+      .flex-3 {
+        flex: 3;
+      }
+
+      .half-field {
+        max-width: 49.5%;
+      }
+
+      .secondary-text {
+        color: var(--secondary-text-color);
+      }
+
+      .bold {
+        font-weight: bold;
+      }
+
+      .vertical-align-center {
+        display: flex;
+        align-items: center;
+      }
+
+      .page-desc {
+        color: var(--secondary-text-color);
+        font-size: 14px;
+        line-height: 16px;
+        padding-top: 8px;
+      }
+
+    </style>
+  </template>
+</dom-module>

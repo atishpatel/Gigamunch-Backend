@@ -1,0 +1,204 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+
+<link rel="import"
+      href="../bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import"
+      href="../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import"
+      href="../bower_components/gold-phone-input/gold-phone-input.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="file-input.html">
+<link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
+      href="address-input.html">
+
+<dom-module id="profile-fields">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        .row {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-end;
+        }
+        
+        .row>*:not(:first-child) {
+          margin-left: 8px;
+        }
+        
+        .flex-1 {
+          flex: 1;
+        }
+        
+        .flex-2 {
+          flex: 2;
+        }
+        
+        .flex-3 {
+          flex: 3;
+        }
+        
+        label {
+          line-height: 20px;
+        }
+        
+        .profile-pic {
+          position: relative;
+          height: 150px;
+          width: 150px;
+          border-radius: 50%;
+          margin: auto;
+          cursor: pointer;
+          overflow: hidden;
+          z-index: 3;
+        }
+        
+        placeholder-img {
+          height: 150px;
+          width: 150px;
+          border-radius: 50%;
+          transition: all .3s ease-in-out;
+          z-index: 1;
+        }
+        
+        placeholder-img:hover {
+          transform: scale(1.1);
+        }
+        
+        .change-photo-text {
+          width: 150px;
+          position: absolute;
+          bottom: 0;
+          color: white;
+          text-align: center;
+          pointer-events: none;
+          background-color: rgba(0, 0, 0, 0.5);
+          padding: 8px 0;
+          z-index: 2;
+        }
+        
+        paper-progress {
+          width: 100%;
+          padding-top: 20px;
+        }
+        
+        .file-input-container {
+          display: flex;
+        }
+        
+        file-input {
+          margin: auto;
+        }
+
+      </style>
+    </shared-styles>
+    <div class="file-input-container">
+      <file-input id="fileInput"
+                  photos="{{photos}}"
+                  url-postfix="=s250-c"
+                  on-photoschanged="photosChanged"
+                  on-progressstart="progressStart"
+                  on-progressend="progressEnd"
+                  progress="{{progress}}">
+        <div class="profile-pic">
+          <placeholder-img icon="app:account-circle"
+                           alt="user profile picture"
+                           src="[[photoUrl]]">
+          </placeholder-img>
+          <span class="change-photo-text">Change</span>
+        </div>
+      </file-input>
+    </div>
+    <div id="progressBar"
+         hidden>
+      <paper-progress value="[[progress]]"></paper-progress>
+    </div>
+    <paper-input label="Name*"
+                 value="{{name}}"
+                 required
+                 auto-validate>
+    </paper-input>
+    <div class="row">
+      <gold-email-input class="flex-1"
+                        label="Email*"
+                        value="{{email}}"
+                        required
+                        auto-validate>
+      </gold-email-input>
+      <gold-phone-input class="flex-1"
+                        label="Cell Phone Number*"
+                        value="{{phoneNumber}}"
+                        required
+                        auto-validate>
+      </gold-phone-input>
+    </div>
+    <address-input id="addressInput"
+                   address="{{address}}"
+                   required>
+    </address-input>
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'profile-fields',
+
+      properties: {
+        name: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        email: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        phoneNumber: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        address: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        photos: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        photoUrl: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+      },
+      photosChanged: function(e) {
+        if (this.photos.length > 0) {
+          this.set('photoUrl', this.photos[0]);
+          this.set('photos', []);
+        }
+      },
+      progressStart: function() {
+        this.$.progressBar.hidden = false;
+      },
+      progressEnd: function() {
+        this.$.progressBar.hidden = true;
+      },
+    });
+
+  </script>
+</dom-module>

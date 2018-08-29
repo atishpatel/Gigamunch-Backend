@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -12,18 +13,30 @@ import (
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
+	"github.com/gorilla/schema"
 )
 
 // GetSubscriber gets all info about a subscriber from their email address
-func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetSubscriber(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetSubscriberReq)
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 
 	email := req.Email
@@ -43,15 +56,26 @@ func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 // GetHasSubscribed gets all subscribers.
-func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetHasSubscribed(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetHasSubscribedReq)
 	var err error
 
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 
 	date, err := getTime(req.Date)

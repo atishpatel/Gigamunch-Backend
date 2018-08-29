@@ -1,0 +1,56 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="channel-card.html">
+
+<dom-module id="channel-list">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: column;
+        }
+
+      </style>
+    </shared-styles>
+    <dom-repeart items="[[channels]]"
+                 as="channel"
+                 filter="filterCookConversations">
+      <template>
+        <channel-card channel="[[channel]]"
+                      user="[[user]]"></channel-card>
+      </template>
+    </dom-repeart>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'channel-list',
+      properties: {
+        channels: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        user: {
+          type: Object,
+          notify: true,
+        },
+      },
+      selected: function() {},
+      filterCookConversations: function(channel) {
+        var names = channel.uniqueName.split('<;>');
+        if (names.length >= 2) {
+          return this.user.id === names[0];
+        }
+        return true;
+      },
+    });
+
+  </script>
+</dom-module>

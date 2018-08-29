@@ -108,16 +108,6 @@ export function GetLog(id: number): Promise<any> {
   return callFetch(url, 'GET', req);
 }
 
-export function GetLogsByEmail(start: number, limit: number, email: string): Promise<any> {
-  const url: string = baseURL + 'GetLogsByEmail';
-  const req: GetLogsByEmailReq = {
-    email,
-    start,
-    limit,
-  };
-  return callFetch(url, 'GET', req);
-}
-
 function callFetch(url: string, method: string, body: object): Promise<APIResponse> {
   const config: RequestInit = {
     method,

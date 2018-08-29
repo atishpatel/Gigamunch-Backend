@@ -19,8 +19,3 @@ func IsStage(projID string) bool {
 func IsProd(projID string) bool {
 	return projID == prod
 }
-
-type ServerInfo struct {
-	ProjectID           string
-	IsStandardAppEngine bool
-}

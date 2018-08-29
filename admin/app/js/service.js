@@ -83,15 +83,6 @@ export function GetLog(id) {
     };
     return callFetch(url, 'GET', req);
 }
-export function GetLogsByEmail(start, limit, email) {
-    const url = baseURL + 'GetLogsByEmail';
-    const req = {
-        email,
-        start,
-        limit,
-    };
-    return callFetch(url, 'GET', req);
-}
 function callFetch(url, method, body) {
     const config = {
         method,

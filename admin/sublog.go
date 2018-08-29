@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -10,25 +11,35 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/gorilla/schema"
 )
 
 // ProcessSublog runs sub.Process.
-func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func ProcessSublog(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.ProcessSublogsReq)
 	var err error
-
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-
 	date, err := getTime(req.Date)
 	if err != nil {
 		return errors.Annotate(err, "failed to decode date")
 	}
-	subC := subold.NewWithLogging(ctx, log)
+	subC := subold.New(ctx)
 	err = subC.Process(date, req.Email)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
@@ -38,17 +49,26 @@ func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 // GetUnpaidSublogs gets a list of unpaid sublogs log.
-func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetUnpaidSublogs(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetUnpaidSublogsReq)
 	var err error
-
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-
 	subC := subold.New(ctx)
 	sublogs, err := subC.GetUnpaidSublogs(req.Limit)
 	if err != nil {
@@ -60,15 +80,25 @@ func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r 
 	return resp
 }
 
-func (s *server) GetSubscriberSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetSubscriberSublogs(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetSubscriberSublogsReq)
 	var err error
-
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
 
 	email := req.Email

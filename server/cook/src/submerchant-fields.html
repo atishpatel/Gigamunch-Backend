@@ -1,0 +1,157 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+
+<link rel="import"
+      href="../bower_components/gold-email-input/gold-email-input.html">
+<link rel="import"
+      href="../bower_components/paper-input/paper-input.html">
+<link rel="import"
+      href="../bower_components/paper-input/paper-textarea.html">
+
+<link rel="import"
+      href="address-input.html">
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="submerchant-fields">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        label {
+          line-height: 20px;
+        }
+        
+        .check-image {
+          width: 50%;
+        }
+        
+        @media (max-width: 500px) {
+          .check-image {
+            width: 100%;
+          }
+        }
+
+      </style>
+    </shared-styles>
+
+    <div class="row">
+      <paper-input class="flex-1"
+                   label="Legal First Name"
+                   value="{{firstName}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input class="flex-1"
+                   label="Legal Last Name"
+                   value="{{lastName}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input id="dob"
+                   class="flex-1"
+                   label="Date of Birth*"
+                   type="date"
+                   value="{{_dob}}"
+                   placeholder="mm/dd/yyyy"
+                   min="1900-01-01"
+                   required
+                   auto-validate>
+      </paper-input>
+    </div>
+    <address-input id="addressInput"
+                   address="{{address}}"
+                   required>
+    </address-input>
+    <div class="row">
+      <paper-input class="flex-1"
+                   label="Routing Number*"
+                   value="{{routingNumber}}"
+                   required
+                   auto-validate>
+      </paper-input>
+      <paper-input class="flex-1"
+                   label="Account Number*"
+                   value="{{accountNumber}}"
+                   required
+                   auto-validate>
+      </paper-input>
+    </div>
+    <div>
+      <img class="check-image"
+           alt="A check with routing and account number."
+           src="https://storage.googleapis.com/gigamunch-omninexus-website/cook/routing-number-check.jpg"></img>
+    </div>
+
+  </template>
+  <script>
+    'use strict';
+
+    Polymer({
+      is: 'submerchant-fields',
+
+      properties: {
+        firstName: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        lastName: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        routingNumber: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        accountNumber: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        address: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        dob: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        _dob: {
+          type: String,
+          observer: '_dobUpdated',
+        },
+      },
+      _dobUpdated: function() {
+        if (this._dob && this._dob.length === 10) {
+          var date = new Date(this._dob);
+          if (date && date.getDate()) {
+            this.dob = date.toISOString();
+          }
+        }
+      },
+      ready: function() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth() + 1; //January is 0
+        var yyyy = today.getFullYear();
+        if (dd < 10) {
+          dd = '0' + dd
+        }
+        if (mm < 10) {
+          mm = '0' + mm
+        }
+        today = yyyy + '-' + mm + '-' + dd;
+        this.$.dob.setAttribute("max", today);
+      },
+    });
+
+  </script>
+</dom-module>

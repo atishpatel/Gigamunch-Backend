@@ -1,0 +1,79 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="channel-list.html">
+
+<dom-module id="channels-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        #spinner {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+        }
+
+      </style>
+    </shared-styles>
+    <paper-spinner id="spinner"
+                   hidden="[[hideSpinner]]"
+                   active$="[[!hideSpinner]]">
+    </paper-spinner>
+    <channel-list id="channelList"
+                  channels="[[channels]]"
+                  user="[[user]]">
+    </channel-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'channels-page',
+      properties: {
+        channels: {
+          type: Array,
+          notify: true,
+          value: [],
+        },
+        user: {
+          type: Object,
+          notify: true,
+        },
+        hideSpinner: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      selected: function() {
+        ga('send', 'event', 'page', 'channels');
+        this.getChannels();
+      },
+      ready: function() {
+        window.addEventListener('channelAdded', this.getChannels.bind(this));
+        window.addEventListener('channelUpdated', this.getChannels.bind(this));
+      },
+      getChannels: function() {
+        if (window.messagingClient) {
+          this.hideSpinner = false;
+          window.messagingClient.getChannels().then(function(channels) {
+            this.channels = channels;
+            this.hideSpinner = true;
+          }.bind(this));
+        } else {
+          setTimeout(this.getChannels.bind(this), 100);
+        }
+      },
+    });
+
+  </script>
+</dom-module>

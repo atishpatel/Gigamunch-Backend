@@ -2,27 +2,38 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	shared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/gorilla/schema"
 )
 
 // GetLog gets a log.
-func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetLog(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetLogReq)
 	var err error
-
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-
-	l, err := log.Get(req.Id)
+	l, err := log.GetLog(req.Id)
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
@@ -33,18 +44,27 @@ func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Requ
 }
 
 // GetLogs gets logs.
-func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetLogs(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetLogsReq)
 	var err error
-
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-
-	logs, err := log.GetAll(int(req.Start), int(req.Limit))
+	logs, err := log.GetLogs(int(req.Start), int(req.Limit))
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
@@ -57,18 +77,27 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 }
 
 // GetLogsByEmail gets logs by email.
-func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func GetLogsByEmail(ctx context.Context, r *http.Request, log *logging.Client) Response {
 	req := new(pb.GetLogsByEmailReq)
 	var err error
-
 	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(req, r.URL.Query())
+		if err != nil {
+			return failedToDecode(err)
+		}
+	} else {
+		decoder := json.NewDecoder(r.Body)
+		err = decoder.Decode(&req)
+		if err != nil {
+			return failedToDecode(err)
+		}
+		defer closeRequestBody(r)
 	}
+	logging.Infof(ctx, "Request: %+v", req)
 	// end decode request
-
-	logs, err := log.GetAllByEmail(req.Email, int(req.Start), int(req.Limit))
+	logs, err := log.GetUserLogsByEmail(req.Email, int(req.Start), int(req.Limit))
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetUserLogsByEmail")
 	}

@@ -1,0 +1,80 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="cook-item.html">
+
+<dom-module id="item-list">
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+      
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      
+      .add-card {
+        cursor: pointer;
+      }
+      
+      cook-item {
+        min-width: 270px;
+        width: 100%;
+        flex-basis: 100%;
+        padding: 24px 0 32px 0;
+        border-bottom: 1px solid #e8e8e8;
+        overflow: hidden;
+      }
+      
+      @media (min-width: 640px) {
+        cook-item {
+          margin-right: 24px;
+          flex-basis: 30%;
+          border-bottom: none;
+        }
+      }
+
+    </style>
+
+    <div class="grid">
+      <dom-repeat items="[[items]]">
+        <template>
+          <cook-item item="[[item]]"
+                     menu-color="[[menuColor]]"
+                     allow-activating="[[allowActivating]]"></cook-item>
+        </template>
+      </dom-repeat>
+      <cook-item class="add-card"
+                 on-tap="addItem"
+                 menu-color="[[menuColor]]"></cook-item>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'item-list',
+      properties: {
+        items: {
+          type: Array,
+          notify: true,
+          reflectToAttribute: true,
+          value: [],
+        },
+        menuColor: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        allowActivating: {
+          type: Boolean,
+        },
+      },
+      addItem: function() {
+        this.fire('additem');
+      },
+    });
+
+  </script>
+</dom-module>

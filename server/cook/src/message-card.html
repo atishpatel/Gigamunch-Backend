@@ -1,0 +1,311 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="placeholder-img.html">
+<link rel="import"
+      href="inquiry-card.html">
+
+<dom-module id="message-card">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          padding: 6px 0;
+        }
+        
+        .inquiry-card {
+          max-width: 400px;
+          width: 100%;
+          margin: auto;
+        }
+        
+        @media (max-width: 400px) {
+          .inquiry-card {
+            max-width: 300px;
+          }
+        }
+        
+        .user-pic-container {
+          min-width: 35px;
+        }
+        
+        .user-pic {
+          height: 35px;
+          width: 35px;
+          background-size: 35px;
+          border-radius: 50%;
+        }
+        
+        .eater-chat {
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+        }
+        
+        .eater-chat-bubble {
+          margin: 0 47px 0 12px;
+          border-radius: 12px;
+          background-color: #CFD8DC;
+        }
+        
+        .cook-chat {
+          flex: 1;
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: flex-end;
+        }
+        
+        .cook-chat-bubble {
+          margin: 0 12px 0 47px;
+          border-radius: 12px;
+          background-color: var(--primary-color);
+          color: white;
+        }
+        
+        .body {
+          padding: 6px;
+        }
+        
+        .status-container {
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+        }
+        
+        .status-line {
+          flex: 1;
+          height: 1px;
+          background-color: var(--gray-line-color);
+          margin: auto 0;
+        }
+        
+        .status {
+          flex: 2;
+          display: flex;
+          flex-direction: column;
+          padding: 8px;
+        }
+        
+        .status-title {
+          text-align: center;
+        }
+        
+        .status-body {
+          text-align: center;
+          font-size: 12px;
+          max-width: 300px;
+          margin: auto;
+        }
+        
+        @media (min-width: 700px) {
+          .status {
+            flex: 2;
+          }
+        }
+
+      </style>
+    </shared-styles>
+    <!-- InquiryBot Chat -->
+    <template is="dom-if"
+              if="[[showInquiryCard]]">
+      <inquiry-card class="inquiry-card"
+                    inquiry="[[inquiry]]"
+                    showeater="[[f]]"></inquiry-card>
+    </template>
+
+    <!-- Eater Chat -->
+    <template is="dom-if"
+              if="[[showEaterCard]]">
+      <div class="eater-chat">
+        <div class="user-pic-container">
+          <placeholder-img class="user-pic"
+                           icon="app:account-circle"
+                           alt="user profile picture"
+                           src="[[eaterimage]]"
+                           hidden$="[[message.isPreviousAuthorSame]]"></placeholder-img>
+        </div>
+        <div class="eater-chat-bubble">
+          <div id$="[[message.sid]]eaterBody"
+               class="body">[[body]]</div>
+        </div>
+      </div>
+    </template>
+    <!-- Cook Chat -->
+    <template is="dom-if"
+              if="[[showCookCard]]">
+      <div class="cook-chat">
+        <div class="user-pic-container">
+          <placeholder-img class="user-pic"
+                           icon="app:account-circle"
+                           alt="user profile picture"
+                           src="[[cookimage]]"
+                           hidden$="[[message.isPreviousAuthorSame]]"></placeholder-img>
+        </div>
+
+        <div class="cook-chat-bubble">
+          <div id$="[[message.sid]]cookBody"
+               class="body">[[body]]</div>
+        </div>
+      </div>
+    </template>
+    <!-- GigamunchBot Chat -->
+    <template is="dom-if"
+              if="[[showGigamunchBotChat]]">
+      <div class="eater-chat">
+        <div class="user-pic-container">
+          <placeholder-img class="user-pic"
+                           icon="app:account-circle"
+                           alt="user profile picture"
+                           src="https://storage.googleapis.com/gigamunch-omninexus-website/icons/icon-144.png"></placeholder-img>
+        </div>
+        <div class="eater-chat-bubble">
+          <div id$="[[message.sid]]gigamunchBody"
+               class="body">[[body]]</div>
+        </div>
+      </div>
+    </template>
+    <!-- InquiryStatusBot Chat -->
+    <template is="dom-if"
+              if="[[showInquiryStatus]]">
+      <div class="status-container">
+        <div class="status-line"></div>
+        <div class="status">
+          <div class="status-title bold">[[title]]</div>
+          <div class="status-body secondary-text">[[body]]</div>
+        </div>
+        <div class="status-line"></div>
+      </div>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'message-card',
+      properties: {
+        message: {
+          type: Object,
+          notify: true,
+          reflectToAttribute: true,
+          observer: 'messageUpdated',
+        },
+        eaterid: {
+          type: String,
+        },
+        eaterimage: {
+          type: String
+        },
+        cookid: {
+          type: String,
+        },
+        cookimage: {
+          type: String
+        },
+        showInquiryCard: {
+          type: Boolean,
+          value: false,
+        },
+        showEaterCard: {
+          type: Boolean,
+          value: false,
+        },
+        showGigamunchBotChat: {
+          type: Boolean,
+          value: false,
+        },
+        showInquiryStatus: {
+          type: Boolean,
+          value: false,
+        },
+        title: {
+          type: String,
+        },
+        body: {
+          type: String,
+        },
+        inquiry: {
+          type: Object,
+        },
+        f: {
+          type: Boolean,
+          value: false,
+        }
+      },
+      ready: function() {
+        this.messageUpdated();
+      },
+      messageUpdated: function() {
+        if (this.message) {
+          message = this.message;
+          // is InquiryBot chat
+          if (message.author === 'InquiryBot') {
+            this.fire('getinquiry', {
+              id: message.attributes.inquiry_id,
+              callback: function(inquiry, err) {
+                if (err.code !== 0) {
+                  this.fire('error', err);
+                  return;
+                }
+                this.inquiry = inquiry;
+              }.bind(this)
+            });
+            this.showInquiryCard = true;
+          }
+          // is eater chat
+          if (message.author === this.eaterid) {
+            this.showEaterCard = true;
+            this.body = message.body;
+            if (message.body.includes('\n')) {
+              this.async(this.updateBody.bind(this), 100);
+            }
+          }
+          // is cook chat
+          if (message.author === this.cookid) {
+            this.showCookCard = true;
+            this.body = message.body;
+            if (message.body.includes('\n')) {
+              this.async(this.updateBody.bind(this), 100);
+            }
+          }
+          // is GigamunchBotChat
+          if (message.author === 'GigamunchBot') {
+            this.showGigamunchBotChat = true;
+            this.body = message.body;
+            if (message.body.includes('\n')) {
+              this.async(this.updateBody.bind(this), 100);
+            }
+          }
+          // is InquiryStatusBot
+          if (message.author === 'InquiryStatusBot') {
+            this.title = message.attributes.title;
+            this.body = message.attributes.message;
+            this.showInquiryStatus = true;
+          }
+        }
+      },
+      updateBody: function() {
+        var el;
+        // is eater chat
+        if (message.author === this.eaterid) {
+          el = this.$$('#' + message.sid + 'eaterBody');
+        }
+        // is cook chat
+        if (message.author === this.cookid) {
+          el = this.$$('#' + message.sid + 'cookBody');
+        }
+        // is GigamunchBotChat
+        if (message.author === 'GigamunchBot') {
+          el = this.$$('#' + message.sid + 'gigamunchBody');
+        }
+        if (el === undefined || el === null) {
+          this.async(this.updateBody.bind(this), 100);
+          return;
+        }
+        el.innerHTML = message.body.replace('\n', '<br/>', -1);
+      },
+    });
+
+  </script>
+</dom-module>

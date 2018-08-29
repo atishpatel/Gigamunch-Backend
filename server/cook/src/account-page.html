@@ -1,0 +1,246 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="delivery-fields.html">
+<link rel="import"
+      href="profile-fields.html">
+<link rel="import"
+      href="profile-social-fields.html">
+<link rel="import"
+      href="submerchant-fields.html">
+
+<dom-module id="account-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: block;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+        }
+        
+        #spinner {
+          margin: auto;
+        }
+        
+        .card {
+          border: 1px solid #dce0e0;
+          border-radius: 8px;
+          overflow: hidden;
+          margin-bottom: 24px;
+        }
+        
+        .card-header {
+          background-color: #edefed;
+          font-size: 16px;
+          padding: 12px 24px;
+          border-bottom: 1px solid #dce0e0;
+          font-weight: bold;
+        }
+        
+        .sub-header {
+          font-size: 16px;
+          padding-top: 12px;
+        }
+        
+        .card-body {
+          font-size: 14px;
+          padding: 24px;
+        }
+        
+        .save-button-container {
+          display: flex;
+        }
+        
+        .save-button {
+          text-transform: none;
+          min-width: 200px;
+          margin: 24px 0 0 auto;
+        }
+        
+        @media (max-width: 1000px) {
+          .card {
+            border-radius: 0;
+            border-bottom: none;
+          }
+        }
+        
+        @media (max-width: 700px) {
+          .save-button {
+            width: 100%;
+          }
+        }
+
+      </style>
+    </shared-styles>
+    <div class="card">
+      <div class="card-header">
+        <span class="sub-header-title">Profile</span>
+      </div>
+
+      <div class="card-body">
+        <profile-fields id="profileFields"
+                        photo-url="{{cook.photo_url}}"
+                        name="{{cook.name}}"
+                        email="{{cook.email}}"
+                        phone-number="{{cook.phone_number}}"
+                        address="{{cook.address}}">
+        </profile-fields>
+
+        <div class="bold sub-header">Bio</div>
+        <p>Gigamunch is built on relationships. Help other people get to know you.
+          <br>Tell them about your creations: How did you learn to cook? Why are you sharing your food?
+          <br>Tell them about a cooking memory: How did you get started cooking?
+          <br>Tell them about you.
+        </p>
+
+        <profile-social-fields id="profileSocialFields"
+                               bio="{{cook.bio}}"
+                               instagram-id="{{cook.instagram_id}}"
+                               twitter-id="{{cook.twitter_id}}">
+        </profile-social-fields>
+
+        <div class="bold sub-header">Delivery</div>
+        <p>
+          Set how far you are willing to deliver your food, and how much you will charge for each delivery.
+          <br><span class="secondary-text">Setting range to 0 will disable delivery.</span>
+        </p>
+
+        <delivery-fields id="deliveryFields"
+                         price="{{cook.delivery_price}}"
+                         range="{{cook.delivery_range}}">
+        </delivery-fields>
+
+        <div class="save-button-container">
+          <paper-button class="save-button"
+                        disabled$="[[savingProfile]]"
+                        on-tap="updateCook">
+            <paper-spinner id="spinner"
+                           hidden$="[[!savingProfile]]"
+                           active$="[[savingProfile]]"></paper-spinner>
+            <span hidden$="[[savingProfile]]">Save Profile</span>
+          </paper-button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="sub-header-title">Payout Preferences</span>
+      </div>
+      <div class="card-body">
+        <p>Payouts for completed orders are released to you 48 hours after the order is completed.
+          <br>Note: saved payout information is not displayed below for safety.</p>
+        <submerchant-fields id="submerchantFields"
+                            first-name="{{submerchant.first_name}}"
+                            last-name="{{submerchant.last_name}}"
+                            routing-number="{{submerchant.routing_number}}"
+                            account-number="{{submerchant.account_number}}"
+                            dob="{{submerchant.date_of_birth}}"
+                            address="{{submerchant.address}}">
+        </submerchant-fields>
+        <div class="save-button-container">
+          <paper-button class="save-button"
+                        disabled$="[[savingPayoutPreferences]]"
+                        on-tap="updateSubmerchant">
+            <paper-spinner id="spinner"
+                           hidden$="[[!savingPayoutPreferences]]"
+                           active$="[[savingPayoutPreferences]]"></paper-spinner>
+            <span hidden$="[[savingPayoutPreferences]]">Save Payout Preferences</span>
+          </paper-button>
+        </div>
+      </div>
+
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'account-page',
+      properties: {
+        cook: {
+          type: Object,
+        },
+        submerchant: {
+          type: Object,
+        },
+        service: {
+          type: Object,
+        },
+        user: {
+          type: Object,
+          notify: true,
+        },
+        savingProfile: {
+          type: Boolean,
+          value: false,
+        },
+        savingPayoutPreferences: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      selected: function() {
+        ga('send', 'event', 'page', 'account');
+        this.getCook();
+        this.getSubmerchant();
+      },
+      ready: function() {},
+      getCook: function() {
+        this.service.getCook(function(cook, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('cook', cook);
+        }.bind(this));
+      },
+      getSubmerchant: function() {
+        this.service.getSubMerchant(function(submerchant, err) {
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('submerchant', submerchant);
+        }.bind(this));
+      },
+      updateCook: function() {
+        this.savingProfile = true;
+        this.service.updateCook(this.cook, function(cook, err) {
+          this.savingProfile = false;
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.set('cook', cook);
+          this.fire('toast', {
+            text: 'Profile Updated',
+          });
+        }.bind(this));
+      },
+      updateSubmerchant: function() {
+        this.savingPayoutPreferences = true;
+        this.service.updateSubMerchant(this.submerchant, function(cook, err) {
+          this.savingPayoutPreferences = false;
+          if (err.code !== 0) {
+            this.fire('error', err);
+            return;
+          }
+          this.fire('toast', {
+            text: 'Payout Preferences Saved',
+          });
+        }.bind(this))
+      },
+    });
+
+  </script>
+</dom-module>

@@ -10,14 +10,19 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: logging
+- kind: Inquiry
   properties:
-  - name: UserID
-  - name: Timestamp
+  - name: CookID
+  - name: CreatedDateTime
     direction: desc
 
-- kind: logging
+- kind: Inquiry
   properties:
-  - name: UserEmail
-  - name: Timestamp
+  - name: EaterID
+  - name: CreatedDateTime
     direction: desc
+
+- kind: MenuItem
+  properties:
+  - name: CookID
+  - name: MenuID

@@ -9,8 +9,6 @@
 <link rel="import"
       href="subscriber-detail-sublog-table.html">
 <link rel="import"
-      href="subscriber-timeline.html">
-<link rel="import"
       href="materialize-styles.html">
 
 <dom-module id="subscriber-detail-page">
@@ -239,9 +237,6 @@
                                           sublogs="[[sublogs]]">
           </subscriber-detail-sublog-table>
         </div>
-
-        <subscriber-timeline id="timelinel"
-                             logs="[[logs]]"></subscriber-timeline>
       </div>
 
 
@@ -277,10 +272,6 @@
             type: Array,
             notify: true,
           },
-          logs: {
-            type: Array,
-            notify: true,
-          },
           loading: {
             type: Boolean
           }
@@ -296,7 +287,8 @@
         const subscriberEmail = decodeURIComponent(tmp[1]);
         this.getSubscriber(subscriberEmail);
         this.getSubscriberSublogs(subscriberEmail);
-        this.getLogs(subscriberEmail);
+        var activitiesTable = this.$.activitiesTable;
+        var instance = M.Collapsible.init(activitiesTable, null);
       }
 
       _getAddress(a) {
@@ -334,6 +326,7 @@
         let time = d.toLocaleTimeString(d);
         return `${date}, ${time}`
       }
+
 
       getSubscriber(subscriberEmail) {
         this.service.GetSubscriber(subscriberEmail).then((resp) => {
@@ -393,16 +386,6 @@
           }
           this.sublogs = resp.sublogs
         });
-      }
-
-      getLogs(subscriberEmail) {
-        this.service.GetLogsByEmail(0, 1000, subscriberEmail).then((resp) => {
-          let err = resp.error;
-          if (err && err.code !== 0) {
-            return;
-          }
-          this.logs = resp.logs;
-        })
       }
 
     }

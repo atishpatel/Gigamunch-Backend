@@ -1,0 +1,267 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import"
+      href="../bower_components/iron-validatable-behavior/iron-validatable-behavior.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="paper-select.html">
+<link rel="import"
+      href="select-with-options.html">
+
+<dom-module id="datetime-input">
+  <template>
+    <shared-styles>
+      <!-- TODO get paper-select -->
+      <style include="shared-styles">
+         :host {
+          display: block;
+        }
+        
+        label {
+          font-size: 12px;
+          color: #727272;
+          -webkit-font-smoothing: antialiased;
+        }
+        
+        .input-header {
+          font-size: 14px;
+          padding: 8px 0;
+          opacity: .7;
+        }
+        
+        paper-select {
+          font-family: 'FontRegular', 'Roboto';
+          letter-spacing: .5px;
+          display: inline-block;
+          position: relative;
+          /* create a layer to avoid invalidation from other controls*/
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+          padding-bottom: 6px;
+        }
+        
+        paper-select>label {
+          line-height: 20px;
+        }
+        
+        paper-select>paper-md-decorator {
+          display: block;
+          border-top: 1px solid #727272;
+          height: 1px;
+          speak: none;
+        }
+        
+        paper-select>paper-md-decorator::after {
+          content: '\25BC';
+          display: block;
+          position: absolute;
+          bottom: calc(50% - 0.75em);
+          right: 8px;
+          speak: none;
+          -webkit-transform: scaleY(.6);
+          transform: scaleY(.6);
+          color: var(--secondary-text-color);
+          pointer-events: none;
+        }
+        
+        paper-select>select {
+          font-family: 'FontRegular', 'Roboto';
+          letter-spacing: .5px;
+          width: 100%;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          padding: 8px 24px 8px 0;
+          border: none;
+          background-color: transparent;
+          border-radius: 0;
+          font-size: 16px;
+          color: var(--primary-text-color);
+          overflow: hidden;
+          margin: 0;
+          outline: none;
+        }
+        
+        paper-select>select::-ms-expand {
+          display: none;
+        }
+        
+        paper-select>paper-md-decorator>paper-underline {
+          display: block;
+          background-color: var(--primary-color);
+          height: 2px;
+          position: relative;
+          top: -1px;
+          width: 100%;
+          margin: auto;
+          -webkit-transform: scale3d(0, 1, 1);
+          transform: scale3d(0, 1, 1);
+          transition: -webkit-transform 0.2s ease-in;
+          transition: transform 0.2s ease-in;
+        }
+        
+        paper-select>select:focus+paper-md-decorator>paper-underline {
+          -webkit-transform: scale3d(1, 1, 1);
+          transform: scale3d(1, 1, 1);
+          transition: -webkit-transform 0.2s ease-out;
+          transition: transform 0.2s ease-out;
+        }
+        
+        paper-select>select:focus+paper-md-decorator::before,
+        paper-select>select:focus+paper-md-decorator::after,
+        paper-select>select:focus {
+          color: black;
+        }
+        /* hide the focus ring in firefox */
+        
+        paper-select>select:focus:-moz-focusring {
+          color: transparent;
+          text-shadow: 0 0 0 #000;
+        }
+        
+        paper-select>[prefix] {
+          position: absolute;
+          left: 0px;
+          top: calc(50% - 8px);
+          line-height: 16px;
+          color: var(--primary-text-color);
+          pointer-events: none;
+        }
+        
+        paper-select[invalid]>paper-md-decorator {
+          border-top: 2px solid #dd2c00;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div class="row">
+      <div class="flex-1 column">
+        <label>Date</label>
+        <paper-select invalid$="[[invalidDate]]">
+          <select id="dates"
+                  is="select-with-options"
+                  option-value="value"
+                  value="{{_date::change}}"
+                  required>
+          <!-- dynamically generated-->
+        </select>
+          <paper-md-decorator>
+            <paper-underline></paper-underline>
+          </paper-md-decorator>
+        </paper-select>
+      </div>
+      <div class="flex-1 column">
+        <label>Time</label>
+        <paper-select invalid$="[[invalidTime]]">
+          <select id="time"
+                  is="select-with-options"
+                  option-value="value"
+                  value="{{_time::change}}"
+                  required>
+          <option disabled selected value> -- select a time -- </option>
+          <option value="09:00">09:00 AM</option>
+          <option value="09:30">09:30 AM</option>
+          <option value="10:00">10:00 AM</option>
+          <option value="10:30">10:30 AM</option>
+          <option value="11:00">11:00 AM</option>
+          <option value="11:30">11:30 AM</option>
+          <option value="12:00">12:00 PM (noon)</option>
+          <option value="12:30">12:30 PM</option>
+          <option value="13:00">01:00 PM</option>
+          <option value="13:30">01:30 PM</option>
+          <option value="14:00">02:00 PM</option>
+          <option value="14:30">02:30 PM</option>
+          <option value="15:00">03:00 PM</option>
+          <option value="15:30">03:30 PM</option>
+          <option value="16:00">04:00 PM</option>
+          <option value="16:30">04:30 PM</option>
+          <option value="17:00">05:00 PM</option>
+          <option value="17:30">05:30 PM</option>
+          <option value="18:00">06:00 PM</option>
+          <option value="18:30">06:30 PM</option>
+          <option value="19:00">07:00 PM</option>
+          <option value="19:30">07:30 PM</option>
+          <option value="20:00">08:00 PM</option>
+          <option value="20:30">08:30 PM</option>
+          <option value="21:00">09:00 PM</option>
+        </select>
+          <paper-md-decorator>
+            <paper-underline></paper-underline>
+          </paper-md-decorator>
+        </paper-select>
+      </div>
+    </div>
+
+
+  </template>
+  <script>
+    'use strict';
+    Polymer({
+      is: 'datetime-input',
+
+      properties: {
+        datetime: {
+          type: String,
+          notify: true,
+          reflectToAttribute: true,
+        },
+        _date: {
+          type: String,
+          observer: 'updateDatetime',
+        },
+        _time: {
+          type: String,
+          observer: 'updateDatetime',
+        },
+        invalidDate: {
+          type: Boolean,
+          value: false,
+        },
+        invalidTime: {
+          type: Boolean,
+          value: false,
+        },
+      },
+      behaviors: [
+        Polymer.IronFormElementBehavior,
+        Polymer.IronValidatableBehavior
+      ],
+      ready: function() {
+        // add dynamically generated dates
+        var today = new Date();
+        this._date = today.toDateString();
+        var year = today.getFullYear();
+        var month = today.getMonth();
+        var date = today.getDate();
+        for (var i = 0; i < 14; i++) {
+          var day = new Date(year, month, date + i);
+          var opt = document.createElement("option");
+          opt.innerHTML = day.toLocaleDateString();
+          opt.value = day.toDateString();
+          this.$.dates.appendChild(opt);
+        }
+      },
+      updateDatetime: function() {
+        if (this._date && this._time) {
+          var d = new Date(this._date + ' ' + this._time);
+          this.datetime = d.toISOString();
+        }
+        this._getValidity();
+      },
+      _getValidity: function() {
+        var validDate = this._date && this._date !== '';
+        var validTime = this._time && this._time !== '';
+        var valid = this.datetime && this.datetime !== '';
+        this.invalidDate = !validDate;
+        this.invalidTime = !validTime;
+        return valid;
+      },
+    });
+
+  </script>
+</dom-module>

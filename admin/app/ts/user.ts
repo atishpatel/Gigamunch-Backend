@@ -16,7 +16,6 @@ export let Email = '';
 export let FirstName = '';
 export let LastName = '';
 export let PhotoURL = '';
-export let Token = '';
 
 export function UpdateUser() {
   const tkn = GetToken();
@@ -32,7 +31,6 @@ export function UpdateUser() {
   FirstName = jwt.first_name;
   LastName = jwt.last_name;
   PhotoURL = jwt.photo_url;
-  Token = tkn;
 }
 
 export function IsAdmin(): boolean {

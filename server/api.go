@@ -11,12 +11,11 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
-	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
-	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/mail"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -304,7 +303,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	entry.DeliveryTips = req.DeliveryNotes
 	entry.Servings = servings
 	entry.VegetarianServings = vegetarianServings
-	entry.UpdatePhoneNumber(req.PhoneNumber)
+	entry.PhoneNumber = req.PhoneNumber
 	entry.PaymentMethodToken = paymenttkn
 	entry.Reference = req.Reference
 	entry.ReferenceEmail = req.ReferenceEmail
@@ -378,24 +377,27 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
 	}
 	if !strings.Contains(req.Email, "test.com") {
-		log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
-		if err != nil {
-			return errors.Wrap("failed to setupLoggingAndServerInfo", err)
-		}
-		mailC, err := mail.NewClient(ctx, log, serverInfo)
+		mailC := mail.New(ctx)
 		mailReq := &mail.UserFields{
 			Email:             entry.Email,
+			Name:              entry.Name,
 			FirstName:         entry.FirstName,
 			LastName:          entry.LastName,
 			FirstDeliveryDate: firstBoxDate,
-			VegServings:       entry.VegetarianServings,
-			NonVegServings:    entry.Servings,
+			AddTags:           []mail.Tag{mail.Subscribed, mail.Customer},
+		}
+		if vegetarianServings > 0 {
+			mailReq.AddTags = append(mailReq.AddTags, mail.Vegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.NonVegetarian)
+		} else {
+			mailReq.AddTags = append(mailReq.AddTags, mail.NonVegetarian)
+			mailReq.RemoveTags = append(mailReq.RemoveTags, mail.Vegetarian)
 		}
 		durationTillFirstMeal := time.Until(firstBoxDate.UTC().Truncate(24 * time.Hour))
 		if durationTillFirstMeal > 0 && durationTillFirstMeal < ((6*24)-12)*time.Hour {
 			mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(firstBoxDate))
 		}
-		err = mailC.SubActivated(mailReq)
+		err = mailC.UpdateUser(mailReq, getProjID())
 		if err != nil {
 			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
 		}
@@ -564,7 +566,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	entry.DeliveryTips = req.DeliveryNotes
 	entry.Servings = servings
 	entry.VegetarianServings = vegetarianServings
-	entry.UpdatePhoneNumber(req.PhoneNumber)
+	entry.PhoneNumber = req.PhoneNumber
 	entry.PaymentMethodToken = paymenttkn
 	entry.Reference = req.Reference
 	entry.ReferenceEmail = req.ReferenceEmail
@@ -803,21 +805,4 @@ func failedToDecode(err error) *pb.ErrorOnlyResp {
 	return &pb.ErrorOnlyResp{
 		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
 	}
-}
-
-func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, error) {
-	dbC, err := db.NewClient(ctx, projectID, nil)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get database client: %+v", err)
-	}
-	// Setup logging
-	serverInfo := &common.ServerInfo{
-		ProjectID:           projectID,
-		IsStandardAppEngine: true,
-	}
-	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
-	if err != nil {
-		return nil, nil, err
-	}
-	return log, serverInfo, nil
 }

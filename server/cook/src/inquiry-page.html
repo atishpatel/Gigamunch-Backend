@@ -1,0 +1,531 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="shared-styles.html">
+
+<link rel="import"
+      href="app-icons.html">
+
+<dom-module id="inquiry-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+         :host {
+          display: flex;
+          flex-direction: column;
+          background-color: white;
+          min-height: 85vh;
+          max-width: var(--max-content-width);
+          margin: auto;
+          --left-indent: 33px;
+        }
+        
+        #spinner {
+          margin: auto;
+        }
+        
+        .content-container {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .servings-text {
+          text-align: center;
+          font-size: 18px;
+        }
+        
+        .image-servings-container {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 12px;
+        }
+        
+        .item-image-user-container {
+          padding: 8px 8px 8px 0;
+        }
+        
+        .item-image {
+          border-radius: 3px;
+          overflow: hidden;
+          margin-left: var(--left-indent);
+        }
+        
+        .eater-image {
+          position: absolute;
+          bottom: 25px;
+          left: 8px;
+          width: 50px;
+          height: 50px;
+          background-size: 50px;
+          background-color: white;
+          border-radius: 50%;
+        }
+        
+        .requested-by-text {
+          position: relative;
+          left: 62px;
+          right: 0;
+          display: inline-block;
+        }
+        
+        .earnings-container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-around;
+        }
+        
+        .earnings-text {
+          text-align: center;
+          font-size: 18px;
+          padding-bottom: 12px;
+          margin-top: 24px;
+        }
+        
+        .button-container {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-around;
+          padding-bottom: 35px;
+          margin-top: auto;
+        }
+        
+        .action-button {
+          min-width: 30%
+        }
+        
+        .image-and-earnings-containers {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        @media (min-width: 700px) {
+          .image-and-earnings-containers {
+            flex-direction: row;
+          }
+          .image-and-earnings-containers>* {
+            flex: 1;
+          }
+        }
+        
+        .detail-list {
+          /* --left-indent - 4px */
+          margin-left: var(--left-indent);
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .detail {
+          display: flex;
+          flex-direction: row;
+          padding: 4px 0;
+        }
+        
+        .detail-info {
+          display: flex;
+          flex-direction: column;
+          padding-left: 8px;
+        }
+        
+        .circle-icon-container {
+          margin: 4px;
+        }
+        
+        .circle-icon {
+          background-color: #4F4F4F;
+          border-radius: 50%;
+          width: 16px;
+          height: 16px;
+        }
+        
+        .eater-address {
+          font-size: 12px;
+          line-height: 12px;
+          text-transform: capitalize;
+        }
+        
+        .messages-title-container {
+          padding-top: 12px;
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+        }
+        
+        .messages-title-line {
+          flex: 1;
+          height: 1px;
+          background-color: var(--gray-line-color);
+          margin: auto 0;
+        }
+        
+        .messages-title {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          text-align: center;
+          padding: 8px;
+        }
+        
+        .channel-view {
+          margin: 0;
+          max-height: 70vh;
+        }
+
+      </style>
+    </shared-styles>
+    <paper-spinner id="spinner"
+                   hidden="[[hideSpinner]]"
+                   active$="[[!hideSpinner]]">
+    </paper-spinner>
+    <div class="content-container"
+         hidden$="[[!hideSpinner]]">
+      <div class="servings-text">[[inquiryServingsText]] of [[inquiry.item.name]]</div>
+      <div class="image-and-earnings-containers">
+        <div class="image-servings-container">
+          <div class="item-image-user-container">
+            <div class="item-image">
+              <div class="photo-16-9">
+                <img src="[[itemImage]]"></img>
+              </div>
+            </div>
+            <placeholder-img icon="app:account-circle"
+                             class="eater-image"
+                             src="[[inquiry.eater_photo_url]]">
+            </placeholder-img>
+            <div class="requested-by-text">Requested by <span>[[inquiry.eater_name]]</span></div>
+          </div>
+        </div>
+        <div class="earnings-container">
+          <div class="earnings-text bold">[[eaterMoneyText]]</div>
+          <div class="button-container"
+               hidden="[[hideActionButtons]]">
+            <paper-button class="action-button"
+                          on-tap="acceptInquiry">Accept</paper-button>
+            <paper-button class="action-button"
+                          on-tap="declineInquiry">Decline</paper-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-list">
+
+        <div class="detail">
+          <iron-icon class="detail-icon"
+                     icon="app:label">
+          </iron-icon>
+          <span class="detail-info">[[inquiryID]]</span>
+        </div>
+
+        <div class="detail">
+          <div class="circle-icon-container detail-icon">
+            <div id="stateIcon"
+                 class="circle-icon"></div>
+          </div>
+          <span class="detail-info">[[inquiryState]]</span>
+        </div>
+
+        <div class="detail">
+          <iron-icon class="detail-icon"
+                     icon="app:insert-invitation">
+          </iron-icon>
+          <span class="detail-info">[[exchangeDatetime]]</span>
+        </div>
+
+        <div class="detail">
+          <iron-icon class="detail-icon"
+                     icon="app:dining"></iron-icon>
+          <span class="detail-info detail-info">[[inquiryServingsText]]</span>
+        </div>
+
+        <div class="detail">
+          <iron-icon class="detail-icon"
+                     hidden$="[[deliveryIcon]]"
+                     icon="app:home">
+          </iron-icon>
+          <iron-icon class="detail-icon"
+                     hidden$="[[!deliveryIcon]]"
+                     icon="app:delivery-car">
+          </iron-icon>
+          <div hidden$="[[cookDelivery]]"
+               class="detail-info exchange-text">[[exchangeText]]</div>
+
+          <div class="detail-info"
+               hidden$="[[!cookDelivery]]">
+            <span class="icon-detail-text">[[exchangeText]]</span>
+            <a target="_blank"
+               href$="[[eaterAddressMapsURL]]">
+              <span class="eater-address">[[eaterDeliveryAddress]]</span>
+            </a>
+          </div>
+        </div>
+        <div class="detail">
+          <iron-icon icon="app:money"></iron-icon>
+          <span class="detail-info">[[cookPriceWithDelivery]]</span>
+        </div>
+      </div>
+      <div class="messages-title-container">
+        <div class="messages-title-line"></div>
+        <div class="messages-title bold">
+          Messages
+        </div>
+        <div class="messages-title-line"></div>
+      </div>
+      <channel-page id="channel"
+                    class="channel-view"
+                    channel-id="[[messageID]]">
+      </channel-page>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'inquiry-page',
+      properties: {
+        user: {
+          type: Object,
+          notify: true,
+        },
+        inquiry: {
+          type: Object,
+          value: {},
+        },
+        itemImage: {
+          type: String,
+        },
+        eaterMoneyText: {
+          type: String,
+        },
+        exchangeDatetime: {
+          type: String,
+        },
+        inquiryID: {
+          type: String,
+        },
+        inquiryState: {
+          type: String,
+        },
+        inquiryServingsText: {
+          type: String,
+        },
+        hideSpinner: {
+          type: Boolean,
+          value: false,
+        },
+        hideActionButtons: {
+          type: Boolean,
+          value: true,
+        },
+        deliveryIcon: {
+          type: Boolean,
+          value: false,
+        },
+        cookDelivery: {
+          type: Boolean,
+          value: false,
+        },
+        eaterAddressMapsURL: {
+          type: String,
+          value: '',
+        },
+        eaterDeliveryAddress: {
+          type: String,
+          value: '',
+        },
+        exchangeText: {
+          type: String,
+          value: 'Pickup',
+        },
+        messageURL: {
+          type: String,
+        },
+        cookPriceWithDelivery: {
+          type: Number,
+        },
+        messageID: {
+          type: String,
+          notify: true,
+          value: '',
+        },
+      },
+      selected: function() {
+        ga('send', 'event', 'page', 'inquiry');
+        this.getInquiry();
+        if (window.COOK.isDev) {
+          this.inquiryUpdated();
+        }
+      },
+      ready: function() {},
+      getInquiry: function() {
+        var tmp = window.location.pathname.split('/inquiry/');
+        var id = parseInt(decodeURIComponent(tmp[1]), 36);
+        this.hideSpinner = false;
+        COOK.Service.getInquiry(id, function(inquiry, err) {
+          if (err.code !== 0) {
+            this.fire('error', err)
+            return;
+          }
+          this.inquiry = inquiry;
+          this.inquiryUpdated();
+        }.bind(this));
+      },
+      inquiryUpdated: function() {
+        if (this.inquiry) {
+          inquiry = this.inquiry;
+          // get messages 
+          this.messageID = inquiry.cook_id + '<;>' + inquiry.eater_id;
+
+          var itemImage = "";
+          if (this.inquiry.item.photos.length > 0) {
+            itemImage = this.inquiry.item.photos[0];
+          }
+          this.itemImage = itemImage;
+          this.updateActionButtonStates();
+          // set earning text 
+          var exchangeTime = new Date(inquiry.expected_exchange_datetime);
+          var now = new Date();
+          var amount = inquiry.servings * inquiry.payment_info.cook_price_per_serving;
+          if (inquiry.state === 'Pending' || inquiry.state === 'Accepted' || inquiry.state === 'Fulfilled' || inquiry.state === 'Paid' || inquiry.state === 'RefunedRequested') {
+            if (exchangeTime > now) {
+              this.eaterMoneyText = 'You will earn $' + amount.toString() + '!';
+            } else {
+              this.eaterMoneyText = 'You earned $' + amount.toString() + '!';
+            }
+          }
+
+          // set exchangeDatetime 
+          var today = new Date();
+          var tomorrow = new Date();
+          tomorrow.setDate(today.getDate() + 1);
+          var d = new Date(inquiry.expected_exchange_datetime);
+          if (inquiry.exchange_method !== 1 && inquiry.exchange_method !== 2) {
+            d.setSeconds(d.getSeconds() - inquiry.exchange_plan_info.duration);
+          }
+          var dateStringArray = d.toDateString().split(' ');
+          var dateString = dateStringArray[1] + ' ' + dateStringArray[2];
+          if (dateStringArray[3] !== today.getFullYear().toString()) {
+            dateString += ' ' + dateStringArray[3];
+          }
+          if (dateString === today.toLocaleDateString()) {
+            dateString = 'Today';
+          } else if (dateString === tomorrow.toLocaleDateString()) {
+            dateString = 'Tomorrow';
+          }
+          var timeString = d.toLocaleTimeString().replace(/:[0-9][0-9] /, ' ');
+          this.set('exchangeDatetime', dateString + ' ' + timeString);
+          // set InquiryID 
+          this.set('inquiryID', Number(inquiry.id).toString(36));
+          var cookPriceWithDelivery = inquiry.payment_info.cook_price;
+          // exchange info 
+          if (inquiry.exchange_method === 1) {
+            // pickup
+            this.cookDelivery = false;
+            this.deliveryIcon = false;
+            this.exchangeText = 'Pickup';
+          } else if (inquiry.exchange_method === 2) {
+            // cook delivery
+            this.cookDelivery = true;
+            this.deliveryIcon = true;
+            this.exchangeText = 'Delivery';
+            var ea = inquiry.exchange_plan_info.eater_address;
+            this.eaterDeliveryAddress = ea.street + ', ' + ea.city + ', ' + ea.state.toUpperCase() + ' ' + ea.zip;
+            cookPriceWithDelivery += inquiry.payment_info.exchange_price;
+            this.eaterAddressMapsURL = this.getAddressMapsURL(ea);
+          } else {
+            // 3rd party delivery
+            this.cookDelivery = false;
+            this.deliveryIcon = true;
+            if (inquiry.exchange_method === 4) {
+              this.exchangeText = 'Gigamunch Delivery';
+            } else {
+              this.exchangeText = '3rd Party Delivery';
+            }
+          }
+          this.cookPriceWithDelivery = cookPriceWithDelivery;
+          this.updateActionButtonStates();
+          this.messageURL = encodeURIComponent(inquiry.cook_id + '<;>' + inquiry.eater_id);
+          if (inquiry.servings === 1) {
+            this.inquiryServingsText = inquiry.servings.toString() + ' serving';
+          } else {
+            this.inquiryServingsText = inquiry.servings.toString() + ' servings';
+          }
+          var red = '#FD5C63';
+          var yellow = '#FFEB3B';
+          var green = '#57C45B';
+          var gray = '#78909C';
+          var color = '#78909C';
+          var inquiryStateString = inquiry.state;
+          switch (inquiry.state) {
+            case 'Pending':
+              color = yellow;
+              break;
+            case 'Accepted':
+              color = green;
+              break;
+            case 'Declined':
+              color = red;
+              break;
+            case 'Fulfilled':
+              color = green;
+              break;
+            case 'RefunedRequested':
+              inquiryStateString = 'Refuned Requested';
+              color = yellow;
+              break;
+            case 'Refunded':
+              color = green;
+              break;
+            case 'Canceled':
+              color = gray;
+              break;
+            case 'TimedOut':
+              inquiryStateString = 'Timed out';
+              color = red;
+              break;
+            default:
+              color = gray;
+          }
+          this.inquiryState = inquiryStateString;
+          this.$.stateIcon.style.backgroundColor = color;
+        }
+      },
+      acceptInquiry: function() {
+        this.hideSpinner = false;
+        this.hideActionButtons = true;
+        this.hideDetailsButtons = true;
+        this.fire('acceptinquiry', {
+          id: this.inquiry.id,
+          callback: this.inquiryUpdated.bind(this),
+        });
+      },
+      declineInquiry: function() {
+        this.hideSpinner = false;
+        this.hideActionButtons = true;
+        this.hideDetailsButtons = true;
+        this.fire('declineinquiry', {
+          id: this.inquiry.id,
+          callback: this.inquiryUpdated.bind(this),
+        });
+      },
+      updateActionButtonStates: function() {
+        this.hideSpinner = true;
+        if (this.inquiry && this.inquiry.state === 'Pending') {
+          this.hideActionButtons = false;
+        } else {
+          this.hideActionButtons = true;
+        }
+      },
+      getAddressMapsURL: function(a) {
+        if (a) {
+          return 'https://maps.google.com/?q=' + encodeURIComponent(a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+        }
+        return '';
+      },
+    });
+
+  </script>
+</dom-module>

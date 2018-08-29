@@ -139,49 +139,49 @@ func ParseProcessSubscriptionRequest(req *http.Request) (*ProcessSubscriptionPar
 }
 
 // SendEmailParams are the parms for SendEmail.
-// type SendEmailParams struct {
-// 	Email string
-// 	Type  string
-// }
+type SendEmailParams struct {
+	Email string
+	Type  string
+}
 
-// // AddSendEmail adds a email to send at specified time.
-// func (c *Client) AddSendEmail(at time.Time, req *SendEmailParams) error {
-// 	if req.Email == "" {
-// 		return errInvalidParameter.Wrapf("expected(recieved): email(%s)", req.Email)
-// 	}
-// 	h := make(http.Header)
-// 	h.Set("Content-Type", "application/x-www-form-urlencoded")
-// 	v := url.Values{}
-// 	v.Set("email", req.Email)
-// 	v.Set("type", req.Type)
-// 	task := &taskqueue.Task{
-// 		Path:    SendEmailURL,
-// 		Payload: []byte(v.Encode()),
-// 		Header:  h,
-// 		Method:  "POST",
-// 		ETA:     at,
-// 	}
-// 	_, err := taskqueue.Add(c.ctx, task, SendEmailQueue)
-// 	if err != nil {
-// 		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
-// 	}
-// 	return nil
-// }
+// AddSendEmail adds a email to send at specified time.
+func (c *Client) AddSendEmail(at time.Time, req *SendEmailParams) error {
+	if req.Email == "" {
+		return errInvalidParameter.Wrapf("expected(recieved): email(%s)", req.Email)
+	}
+	h := make(http.Header)
+	h.Set("Content-Type", "application/x-www-form-urlencoded")
+	v := url.Values{}
+	v.Set("email", req.Email)
+	v.Set("type", req.Type)
+	task := &taskqueue.Task{
+		Path:    SendEmailURL,
+		Payload: []byte(v.Encode()),
+		Header:  h,
+		Method:  "POST",
+		ETA:     at,
+	}
+	_, err := taskqueue.Add(c.ctx, task, SendEmailQueue)
+	if err != nil {
+		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
+	}
+	return nil
+}
 
-// // ParseSendEmailRequest parses an SendEmailRequest from a task request.
-// func ParseSendEmailRequest(req *http.Request) (*SendEmailParams, error) {
-// 	err := req.ParseForm()
-// 	if err != nil {
-// 		return nil, errParse.WithError(err).Wrap("failed to parse from from request")
-// 	}
-// 	parms := new(SendEmailParams)
-// 	parms.Email = req.FormValue("email")
-// 	parms.Type = req.FormValue("type")
-// 	if parms.Email == "" {
-// 		return nil, errParse.Wrapf("Invalid request for SendEmail. Email: %s", parms.Email)
-// 	}
-// 	return parms, nil
-// }
+// ParseSendEmailRequest parses an SendEmailRequest from a task request.
+func ParseSendEmailRequest(req *http.Request) (*SendEmailParams, error) {
+	err := req.ParseForm()
+	if err != nil {
+		return nil, errParse.WithError(err).Wrap("failed to parse from from request")
+	}
+	parms := new(SendEmailParams)
+	parms.Email = req.FormValue("email")
+	parms.Type = req.FormValue("type")
+	if parms.Email == "" {
+		return nil, errParse.Wrapf("Invalid request for SendEmail. Email: %s", parms.Email)
+	}
+	return parms, nil
+}
 
 // AddProcessInquiry adds a process inquiry at specified time.
 func (c *Client) AddProcessInquiry(inquiryID int64, at time.Time) error {

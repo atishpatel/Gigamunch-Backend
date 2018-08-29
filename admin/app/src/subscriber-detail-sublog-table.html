@@ -115,7 +115,7 @@
         } else if (sublog.free) {
           return 'Free';
         } else if (sublog.paid) {
-          return 'Paid $' + sublog.amount_paid;
+          return 'Paid $' + sublog.amount;
         }
         const today = new Date();
         const sublogDate = new Date(sublog.date);
@@ -151,7 +151,7 @@
             sublogs[i].addressString = this._getAddress(sublogs[i].address);
             sublogs[i].addressLink = this._getAddressLink(sublogs[i].address);
             sublogs[i].dateString = this._getDateString(sublogs[i].date);
-            sublogs[i].paidDateString = this._getPaidDateString(sublogs[i].paid_datetime);
+            sublogs[i].paidDateString = this._getPaidDateString(sublogs[i].date);
             sublogs[i].discount_string = this._getDiscountString(sublogs[i].discount_amount, sublogs[i].discount_percent);
           }
           this.sublogs = sublogs;
