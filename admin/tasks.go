@@ -31,7 +31,7 @@ func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.R
 		nextCultureDate = nextCultureDate.Add(24 * time.Hour)
 	}
 	nextPreviewDate := nextCultureDate
-	mailC, err := mail.NewClient(ctx, log)
+	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.NewClient")
 	}
@@ -44,6 +44,75 @@ func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.R
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.UpdateUser")
 	}
 	return errors.NoError
+}
+
+// SendPreviewCultureEmail sends the preview email to all subscribers who are not skipped.
+func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	cultureDate := time.Now().Add(6 * 24 * time.Hour)
+	log.Infof(ctx, "culture date:%s", cultureDate)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to sub.GetForDate")
+		return nil
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(s.serverInfo.ProjectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
+		}
+		tag := mail.GetPreviewEmailTag(cultureDate)
+		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+		if err != nil {
+			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
+		}
+		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.AddBatchTag")
+		}
+	}
+	return nil
+}
+
+// SendCultureEmail sends the culture email to all subscribers who are not skipped.
+func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	cultureDate := time.Now()
+	log.Infof(ctx, "culture date:%s", cultureDate)
+	subC := sub.New(ctx)
+	subLogs, err := subC.GetForDate(cultureDate)
+	if err != nil {
+		errors.Annotate(err, "failed to SendCultureEmail: failed to sub.GetForDate")
+		return nil
+	}
+	var nonSkippers []string
+	for i := range subLogs {
+		if !subLogs[i].Skip {
+			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
+		}
+	}
+	if len(nonSkippers) != 0 {
+		if common.IsProd(s.serverInfo.ProjectID) {
+			// hard code emails that should be sent email
+			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
+		}
+		tag := mail.GetCultureEmailTag(cultureDate)
+		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+		if err != nil {
+			errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
+			return nil
+		}
+		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		if err != nil {
+			errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
+		}
+	}
+	return nil
 }
 
 // CheckPowerSensors checks all the PowerSensors.

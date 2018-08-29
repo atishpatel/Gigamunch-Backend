@@ -86,13 +86,9 @@ func main() {
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/send-bag-reminder", handleSendBagReminder)
-	http.HandleFunc("/send-preview-culture-email", handleSendPreviewCultureEmail)
-	http.HandleFunc("/send-culture-email", handleSendCultureEmail)
 	http.HandleFunc("/task/process-subscribers", handelProcessSubscribers)
 	http.HandleFunc("/task/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/task/send-bag-reminder", handleSendBagReminder)
-	http.HandleFunc("/task/send-preview-culture-email", handleSendPreviewCultureEmail)
-	http.HandleFunc("/task/send-culture-email", handleSendCultureEmail)
 	http.HandleFunc("/task/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/webhook/twilio-sms", handleTwilioSMS)
@@ -340,65 +336,6 @@ func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in4days, err)
 		return
-	}
-}
-
-func handleSendPreviewCultureEmail(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	cultureDate := time.Now().Add(6 * 24 * time.Hour)
-	utils.Infof(ctx, "culture date:%s", cultureDate)
-	subC := sub.New(ctx)
-	subLogs, err := subC.GetForDate(cultureDate)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to sub.GetForDate: %s", err)
-		return
-	}
-	var nonSkippers []string
-	for i := range subLogs {
-		if !subLogs[i].Skip {
-			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
-		}
-	}
-	if len(nonSkippers) != 0 {
-		if common.IsProd(projectID) {
-			// hard code emails that should be sent email
-			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
-		}
-		tag := mail.GetPreviewEmailTag(cultureDate)
-		mailC := mail.New(ctx)
-		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
-		if err != nil {
-			utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to mail.AddBatchTag: %s", err)
-		}
-	}
-}
-
-func handleSendCultureEmail(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	cultureDate := time.Now()
-	subC := sub.New(ctx)
-	subLogs, err := subC.GetForDate(cultureDate)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to handleSendPreviewCultureEmail: failed to sub.GetForDate: %s", err)
-		return
-	}
-	var nonSkippers []string
-	for i := range subLogs {
-		if !subLogs[i].Skip {
-			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
-		}
-	}
-	if len(nonSkippers) != 0 {
-		if common.IsProd(projectID) {
-			// hard code emails that should be sent email
-			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
-		}
-		tag := mail.GetCultureEmailTag(cultureDate)
-		mailC := mail.New(ctx)
-		err := mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
-		if err != nil {
-			utils.Criticalf(ctx, "failed to handleSendCultureEmail: failed to mail.AddBatchTag: %s", err)
-		}
 	}
 }
 

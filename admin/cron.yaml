@@ -10,30 +10,32 @@ cron:
   schedule: every day 18:00
   timezone: America/Chicago
   target: cookapi
+- description: "Check power sensors"
+  url: /admin/task/CheckPowerSensors
+  schedule: every 30 mins
+  target: admin
+# Drip tags
 - description: "Setup Preview and Culture Tags"
   url: /admin/task/SetupTags
   schedule: every day 01:00
   timezone: America/Chicago
   target: admin
-- description: "Check power sensors"
-  url: /admin/task/CheckPowerSensors
-  schedule: every 30 mins
+- description: "Send Preview Culture Email"
+  url: /admin/task/SendPreviewCultureEmail
+  schedule: every day 11:00
+  timezone: America/Chicago
+  target: admin
+- description: "Send Culture Email"
+  url: /admin/task/SendCultureEmail
+  schedule: every day 9:30
+  timezone: America/Chicago
   target: admin
 - description: "Send Stats SMS"
   url: /admin/task/SendStatsSMS
   schedule: every tuesday 08:30
   timezone: America/Chicago
   target: admin
-- description: "Send Preview Culture Email"
-  url: /task/send-preview-culture-email
-  schedule: every day 11:00
-  timezone: America/Chicago
-  target: cookapi
-- description: "Send Culture Email"
-  url: /task/send-culture-email
-  schedule: every day 9:30
-  timezone: America/Chicago
-  target: cookapi
+# Quantity sms
 - description: "Send Monday Quantity sms 1"
   url: /task/send-quantity-sms
   schedule: every friday 16:00
@@ -49,6 +51,7 @@ cron:
   schedule: every monday 8:30
   timezone: America/Chicago
   target: cookapi
+# Datastore backup
 - description: "Backup ScheduleSignUp"
   url: /admin/task/BackupDatastore?kinds=ScheduleSignUp
   schedule: every day 02:00
