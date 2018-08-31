@@ -178,6 +178,7 @@
           .nav-tabs-stuff {
             display: none;
           }
+
           .drawer-stuff {
             display: initial;
           }
@@ -383,12 +384,6 @@
                                             service="[[serviceold]]"
                                             user="{{user}}">
           </change-servings-permanently-page>
-
-          <email-list-page name="email-list"
-                           id="emailList"
-                           service="[[serviceold]]"
-                           user="{{user}}">
-          </email-list-page>
           <unpaid-page name="unpaid"
                        id="unpaidPage"
                        service="[[service]]"
@@ -525,12 +520,6 @@
             resolvedPageURL = this.resolveUrl('change-servings-permanently-page.html');
             el = this.$.changeServingsPermanentlyPage;
             title = 'Change Servings Permanently';
-            break;
-          case 'email-list':
-            elementName = 'email-list-page';
-            resolvedPageURL = this.resolveUrl('email-list-page.html');
-            el = this.$.emailList;
-            title = 'Email list';
             break;
           case 'sublogdetail':
             elementName = 'sublog-detail-page';
