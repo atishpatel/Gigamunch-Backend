@@ -64,8 +64,10 @@ func init() {
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
 	// Culture Executions
-	http.HandleFunc("/admin/api/v1/GetAllExecutions", s.handler(s.userAdmin(s.GetAllExecutions)))
+	http.HandleFunc("/admin/api/v1/GetExecutions", s.handler(s.userAdmin(s.GetExecutions)))
+	http.HandleFunc("/admin/api/v1/GetExecution", s.handler(s.userAdmin(s.GetExecution)))
 	http.HandleFunc("/admin/api/v1/UpdateExecution", s.handler(s.userAdmin(s.UpdateExecution)))
+
 	// Tasks
 	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
 	http.HandleFunc("/admin/task/SendPreviewCultureEmail", s.handler(s.SendPreviewCultureEmail))
@@ -223,8 +225,14 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			// loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
+			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
 			w.WriteHeader(int(sharedErr.Code))
+			// Wrap error in ErrorOnlyResp
+			if _, ok := resp.(errors.ErrorWithCode); ok {
+				resp = &pb.ErrorOnlyResp{
+					Error: sharedErr,
+				}
+			}
 		}
 		// encode
 		encoder := json.NewEncoder(w)

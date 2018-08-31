@@ -159,7 +159,7 @@ interface Dish {
     color: string
     name: string
     description: string
-    ingredients: string[]
+    ingredients: string
     is_for_vegetarian: boolean
     is_for_non_vegetarian: boolean
 }
@@ -168,11 +168,11 @@ interface CultureCook {
     last_name: string
     story: string
 }
-interface GetAllExecutionsReq {
+interface GetExecutionsReq {
     start: number
     limit: number
 }
-interface GetAllExecutionsResp {
+interface GetExecutionsResp {
     error: Error
     executions: Execution[]
 }

@@ -43,33 +43,6 @@
         ]
       }
     },
-    "/admin/api/v1/GetAllExecutions": {
-      "post": {
-        "summary": "Executions",
-        "operationId": "GetAllExecutions",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetAllExecutionsResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetAllExecutionsReq"
-            }
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
     "/admin/api/v1/GetDeliveries": {
       "post": {
         "summary": "Deliveries",
@@ -99,6 +72,7 @@
     },
     "/admin/api/v1/GetExecution": {
       "post": {
+        "summary": "GetExecution returns a single culture execution.",
         "operationId": "GetExecution",
         "responses": {
           "200": {
@@ -141,6 +115,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionStatsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetExecutions": {
+      "post": {
+        "summary": "GetExecutions returns a list of culture executions.",
+        "operationId": "GetExecutions",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetExecutionsReq"
             }
           }
         ],
@@ -364,6 +365,7 @@
     },
     "/admin/api/v1/UpdateExecution": {
       "post": {
+        "summary": "UpdateExecution updates or creates an execution.",
         "operationId": "UpdateExecution",
         "responses": {
           "200": {
@@ -585,10 +587,7 @@
           "type": "string"
         },
         "ingredients": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "type": "string"
         },
         "is_for_vegetarian": {
           "type": "boolean",
@@ -761,33 +760,6 @@
         }
       }
     },
-    "AdminAPIGetAllExecutionsReq": {
-      "type": "object",
-      "properties": {
-        "start": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "limit": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "AdminAPIGetAllExecutionsResp": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "$ref": "#/definitions/ErrorError"
-        },
-        "executions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AdminAPIExecution"
-          }
-        }
-      }
-    },
     "AdminAPIGetDeliveriesReq": {
       "type": "object",
       "properties": {
@@ -850,6 +822,33 @@
         },
         "execution_stats": {
           "$ref": "#/definitions/AdminAPIExecutionStats"
+        }
+      }
+    },
+    "AdminAPIGetExecutionsReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIGetExecutionsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        },
+        "executions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIExecution"
+          }
         }
       }
     },
