@@ -31,7 +31,9 @@ import (
 )
 
 var (
-	errBadRequest = errors.BadRequestError
+	errBadRequest       = errors.BadRequestError
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
+	errInternal         = errors.InternalServerError
 )
 
 func addAPIRoutes(r *httprouter.Router) {
@@ -806,13 +808,13 @@ func failedToDecode(err error) *pb.ErrorOnlyResp {
 }
 
 func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, error) {
-	dbC, err := db.NewClient(ctx, projectID, nil)
+	dbC, err := db.NewClient(ctx, projID, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get database client: %+v", err)
 	}
 	// Setup logging
 	serverInfo := &common.ServerInfo{
-		ProjectID:           projectID,
+		ProjectID:           projID,
 		IsStandardAppEngine: true,
 	}
 	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)

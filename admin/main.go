@@ -63,9 +63,9 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
 	// Zone
 	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
-  // Culture Executions
-  http.HandleFunc("/admin/api/v1/GetAllExecutions", handler(userAdmin(GetAllExecutions)))
-	http.HandleFunc("/admin/api/v1/UpdateExecution", handler(userAdmin(UpdateExecution)))
+	// Culture Executions
+	http.HandleFunc("/admin/api/v1/GetAllExecutions", s.handler(s.userAdmin(s.GetAllExecutions)))
+	http.HandleFunc("/admin/api/v1/UpdateExecution", s.handler(s.userAdmin(s.UpdateExecution)))
 	// Tasks
 	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
 	http.HandleFunc("/admin/task/SendPreviewCultureEmail", s.handler(s.SendPreviewCultureEmail))
@@ -82,8 +82,6 @@ func init() {
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("success"))
 	})
-
-	
 
 }
 

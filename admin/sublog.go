@@ -24,10 +24,7 @@ func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *ht
 	}
 	// end decode request
 
-	date, err := getTime(req.Date)
-	if err != nil {
-		return errors.Annotate(err, "failed to decode date")
-	}
+	date := getDatetime(req.Date)
 	subC := subold.NewWithLogging(ctx, log)
 	err = subC.Process(date, req.Email)
 	if err != nil {
