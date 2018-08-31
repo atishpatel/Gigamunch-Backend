@@ -1,0 +1,558 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+
+<dom-module id="execution-page">
+  <template>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 24px;
+        }
+
+        form {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        button {
+            margin: 12px 0;
+        }
+
+        .input-container {
+            display: flex;
+        }
+
+        .input-container>* {
+            margin: 8px 0 12px;
+        }
+
+        .input-container>* {
+            flex: 1;
+        }
+
+        .input-container>*:not(:first-child) {
+            flex: 2;
+            margin-left: 12px;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        input, textarea {
+            padding: 0 12px;
+            border: solid #CFD8DC 1px;
+            border-radius: 3px;
+            font-size: 14px;
+            background-color: #f7f7f7;
+            outline: none;
+            transition: all .3s ease;
+            /* fixes ie bug */
+            height: 43px;
+        }
+
+        textarea {
+            padding: 12px;
+            height: 100px;
+        }
+
+        input:focus, textarea:focus {
+            background-color: white;
+            opacity: 1;
+            border-color: #FF7043;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group .checkbox-label {
+            margin: 0 5px;
+        }
+
+        input[type=checkbox] {
+            visibility: hidden;
+            width: 20px;
+            height: 20px;
+        }
+
+        input[type=checkbox]:checked+label:after {
+            opacity: 1;
+        }
+
+        .checkbox {
+            display: inline-block;
+            display: inline-flex;
+            width: 20px;
+            position: relative;
+            margin: 12px;
+        }
+
+        .checkbox label {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #f7f7f7;
+            border-radius: 4px;
+            border: solid #CFD8DC 1px;
+            transition: all .3s ease;
+        }
+
+        .checkbox label:after {
+            content: '';
+            width: 9px;
+            height: 5px;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            border: 3px solid #FF7043;
+            border-top: none;
+            border-right: none;
+            background: transparent;
+            opacity: 0;
+            transform: rotate(-45deg);
+        }
+
+        .button {
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background: #F06522;
+            background: -moz-linear-gradient(45deg, #FF5722, #FFB300);
+            background: -webkit-linear-gradient(45deg, #FF5722, #FFB300);
+            background: linear-gradient(45deg, #FF5722, #FFB300);
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            margin: 12px 0 6px 0;
+            font-weight: 600;
+            min-width: 275px;
+            padding: 12px 64px;
+        }
+
+        .show-checkbox[type=checkbox] {
+            visibility: visible;
+        }
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Culture Execution</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <div>
+        <h2>General</h2>
+        <hr>
+
+        <div class="input-group">
+          <label for="date">Date</label>
+          <div class="input-container">
+            <input type="date"
+                   id="date" />
+
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <div class="checkbox">
+            <input type="checkbox"
+                   id="publish"
+                   checked="{{execution.publish::input}}" />
+            <label for="publish"></label>
+          </div>
+          <label>Publish</label>
+        </div>
+
+
+        <h2>Culture</h2>
+        <hr>
+
+        <div class="input-group">
+          <label for="flag_emoji">Flag Emoji</label>
+          <div class="input-container">
+            <input type="text"
+                   id="flag_emoji"
+                   value="{{execution.culture.flag_emoji::input}}" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input-group">
+            <label for="city">City</label>
+            <div class="input-container">
+              <input type="text"
+                     id="city"
+                     value="{{execution.culture.city::input}}" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="country">Country</label>
+            <div class="input-container">
+              <input type="text"
+                     id="country"
+                     value="{{execution.culture.country::input}}" />
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="greeting">Greeting</label>
+          <div class="input-container">
+            <input type="text"
+                   id="greeting"
+                   value="{{execution.culture.greeting::input}}" />
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="description">Description</label>
+          <div class="input-container">
+            <textarea id="description"
+                      value="{{execution.culture.description::input}}"></textarea>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="nationality">Nationality</label>
+          <div class="input-container">
+            <input type="text"
+                   id="nationality"
+                   value="{{execution.culture.nationality::input}}" />
+          </div>
+        </div>
+
+        <h2>Culture Cook</h2>
+        <hr>
+
+        <div class="row">
+          <div class="input-group">
+            <label for="first_name">First Name</label>
+            <div class="input-container">
+              <input type="text"
+                     id="first_name"
+                     value="{{execution.culture_cook.first_name::input}}" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="last_name">Last Name</label>
+            <div class="input-container">
+              <input type="text"
+                     id="last_name"
+                     value="{{execution.culture_cook.last_name::input}}" />
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="story">Story</label>
+          <div class="input-container">
+            <textarea id="story"
+                      value="{{execution.culture_cook.story::input}}"></textarea>
+          </div>
+        </div>
+
+        <h2>Content </h2>
+        <hr>
+
+        <div class="row">
+          <div class="input-group">
+            <label for="hero_image_url">Hero Image URL</label>
+            <div class="input-container">
+              <input type="text"
+                     id="hero_image_url"
+                     value="{{execution.content.hero_image_url::input}}" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="dinner_image_url">Dinner Image URL</label>
+            <div class="input-container">
+              <input type="text"
+                     id="dinner_image_url"
+                     value="{{execution.content.dinner_image_url::input}}" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input-group">
+            <label for="cook_image_url">Cook Image URL</label>
+            <div class="input-container">
+              <input type="text"
+                     id="cook_image_url"
+                     value="{{execution.content.cook_image_url::input}}" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="hands_plate_image_url">Hands plate image url</label>
+            <div class="input-container">
+              <input type="text"
+                     id="hands_plate_image_url"
+                     value="{{execution.content.hands_plate_image_url::input}}" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input-group">
+            <label for="spotify_url">Spotify Playlist URL</label>
+            <div class="input-container">
+              <input type="text"
+                     id="spotify_url"
+                     value="{{execution.content.spotify_url::input}}" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="youtube_url">Youtube Playlist URL</label>
+            <div class="input-container">
+              <input type="text"
+                     id="youtube_url"
+                     value="{{execution.content.youtube_url::input}}" />
+            </div>
+          </div>
+        </div>
+
+        <h2>Dishes</h2>
+        <hr>
+        <template is="dom-repeat"
+                  items="{{dishes}}"
+                  as="dish">
+          <div><strong>Dish:</strong> </div>
+          <div class="row">
+            <div class="input-group">
+              <label for="number">Dish Number</label>
+              <div class="input-container">
+                <input type="number"
+                       id="number"
+                       value="{{dish.number::input}}" />
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="color">Dish Color</label>
+              <div class="input-container">
+                <input type="text"
+                       id="color"
+                       value="{{dish.color::input}}" />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="name">Dish Name</label>
+              <div class="input-container">
+                <input type="text"
+                       id="name"
+                       value="{{dish.name::input}}" />
+              </div>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="description">Dish Description</label>
+            <div class="input-container">
+              <textarea id="description"
+                        value="{{dish.description::input}}"></textarea>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="ingredients">Dish Ingredients</label>
+            <div class="input-container">
+              <input type="text"
+                     id="ingredients"
+                     value="{{dish.ingredients::input}}" />
+            </div>
+          </div>
+
+          <input class="show-checkbox"
+                 type="checkbox"
+                 name="is_for_vegetarian"
+                 id="is_for_vegetarian"
+                 checked="{{dish.is_for_vegetarian::input}}">
+          <span>Is for Vegetarian</span>
+          <br>
+          <input class="show-checkbox"
+                 type="checkbox"
+                 name="is_for_non_vegetarian"
+                 id="is_for_non_vegetarian"
+                 checked="{{dish.is_for_non_vegetarian::input}}">
+          <span>Is for Non-Vegatarian</span>
+          <br/>
+          <br/>
+          <br/>
+
+        </template>
+        <br>
+        <button on-click="addDish">Add Dish</button>
+
+        <h2>Diet</h2>
+        <hr>
+        <div class="checkbox-group">
+          <div class="checkbox">
+            <input type="checkbox"
+                   id="has_pork"
+                   checked="{{execution.has_pork::input}}" />
+            <label for="has_pork"></label>
+          </div>
+          <label>Has Pork</label>
+        </div>
+        <div class="checkbox-group">
+          <div class="checkbox">
+            <input type="checkbox"
+                   id="has_beef"
+                   checked="{{execution.has_beef::input}}" />
+            <label for="has_beef"></label>
+          </div>
+          <label>Has Beef</label>
+        </div>
+        <div class="checkbox-group">
+          <div class="checkbox">
+            <input type="checkbox"
+                   id="has_chicken"
+                   checked="{{execution.has_chicken::input}}" />
+            <label for="has_chicken"></label>
+          </div>
+          <label>Has Chicken</label>
+        </div>
+
+        <button disabled="[[loading]]" on-click="updateExecution" class="button">Update</button>
+      </div>
+
+  </template>
+  </dom-repeat>
+  </div>
+  </template>
+
+  <script>
+    class ExecutionPage extends Polymer.Element {
+      static get is() {
+        return 'execution-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          execution: {
+            type: Object,
+            notify: true,
+          },
+          dishes: {
+            type: Array,
+            value: [],
+          },
+          loading: {
+            type: Boolean
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        let id = 0;
+        const tmp = window.location.pathname.split('/execution/');
+        if (tmp.length > 1) {
+          id = Number(tmp[1]);
+        }
+        this.getExecution(id);
+      }
+
+      getExecution(id) {
+        if (!id || id === 0) {
+          this.execution = {
+            culture: {},
+            culture_cook: {},
+            content: {},
+            dishes: [],
+          };
+          return;
+        }
+        this.loading = true;
+        this.service.GetExecution(id).then((resp) => {
+          this.loading = false;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          this.setExecution(resp.execution);
+        });
+      }
+
+      updateExecution() {
+        // set date
+        const dateValue = this.$.date.value;
+        if (!dateValue) {
+          alert("Date is required.");
+          return;
+        }
+        const date = new Date(dateValue);
+        this.execution.date = date.toISOString().substr(0, 10);
+        // set dishes
+        const dishes = this.dishes;
+        this.execution.dishes = [];
+        for (let i = 0; i < dishes.length; i++) {
+          dishes[i].number = Number(dishes[i].number);
+        }
+        this.execution.dishes = dishes;
+        // update
+        this.loading = true;
+        this.service.UpdateExecution(this.execution).then((resp) => {
+          this.loading = false;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          this.setExecution(resp.execution);
+          FireToast(this, {
+            message: 'Updated Culture Execution.'
+          });
+        });
+      }
+
+      setExecution(execution) {
+        if (execution) {
+          this.execution = execution;
+          this.$.date.value = execution.date;
+          this.dishes = execution.dishes;
+        }
+      }
+
+      addDish() {
+        if (!this.dishes) {
+          this.dishes = [];
+        }
+        this.push('dishes', {});
+      }
+
+      removeDish(e, dish) {
+        console.log(e, dish);
+      }
+    }
+    window.customElements.define(ExecutionPage.is, ExecutionPage);
+  </script>
+</dom-module>

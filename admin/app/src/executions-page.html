@@ -22,96 +22,52 @@
           padding: 10px;
         }
 
-        .table {
-          display: table;
-          width: 100%;
-          border: 1px solid #000;
+        .executions-table {
+          padding: 10px;
         }
 
-        .table-header-row {
-          background-color: #ccc;
-          display: table-header-group;
-          font-weight: bold;
-        }
-
-        .table-row {
-          display: table-row;
-          width: auto;
-          clear: both;
-        }
-
-        .table-cell {
-          border: 1px solid #999999;
-          padding: 3px 10px;
-          display: table-cell;
-          flex: 1;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .table-body {
-          display: table-row-group;
+        .btn:link,
+        .btn:visited {
+          color: white;
         }
 
       </style>
     </shared-styles>
 
     <div>
-      <h1 class="page-title">Culture Exections</h1>
+      <h1 class="page-title">Culture Execution</h1>
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
 
-      <ul id="list"
-          class="collapsible">
-        <li>
-          <div class="collapsible-header"><i class="material-icons">filter_drama</i>First</div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-        </li>
-        <li>
-          <div class="collapsible-header"><i class="material-icons">place</i>Second</div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-        </li>
-        <li>
-          <div class="collapsible-header"><i class="material-icons">whatshot</i>Third</div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
-        </li>
-      </ul>
+      <a href="execution"  class="waves-effect btn">Create new</a>
 
-      <dom-repeat items="[[executions]]">
-        <template>
-          <div class="table">
-            <div class="table-row table-header-row">
-              <div class="table-cell">Location</div>
-              <div class="table-cell">Nationality</div>
-              <div class="table-cell">Servings</div>
-              <div class="table-cell">Amount</div>
-              <div class="table-cell">Edit</div>
-              <div class="table-cell">Action</div>
-            </div>
-            <dom-repeat items="[[item.sublogs]]"
-                        as="sublog">
-              <template>
-                <div class="table-row">
-                  <div class="table-cell">[[sublog.name]]</div>
-                  <div class="table-cell">[[sublog.sub_email]]</div>
-                  <div class="table-cell">[[sublog.servings]]</div>
-                  <div class="table-cell">[[sublog.amount]]</div>
-                  <div class="table-cell">[[sublog.status]]</div>
-                  <div class="table-cell">
-                    <paper-button disabled="[[sublog.disableButton]]"
-                                  on-click="tryCharging">
-                      Try Charging
-                      <paper-spinner hidden$="[[!sublog.loading]]"
-                                     active="[[sublog.loading]]">
-                      </paper-spinner>
-                    </paper-button>
-                  </div>
-                </div>
-              </template>
-            </dom-repeat>
-          </div>
-        </template>
+      <table class="striped executions-table">
+        <thead>
+
+          <tr>
+            <th>Published</th>
+            <th>Date</th>
+            <th>City, Country</th>
+            <th>Culture Cook</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template is="dom-repeat"
+                    items="[[executions]]"
+                    as="execution">
+            <tr>
+              <td>
+                <i class="material-icons"
+                   style="font-size: 42px;">[[execution.icon]]</i>
+              </td>
+              <td><a href="execution/[[execution.id]]">[[execution.date]]</a></td>
+              <td>[[execution.culture.flag_emoji]] [[execution.culture.city]], [[execution.culture.country]]</td>
+              <td>[[execution.culture_cook.first_name]] [[execution.culture_cook.last_name]]</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
 
   </template>
   </dom-repeat>
@@ -129,14 +85,7 @@
           service: {
             type: Object,
           },
-          user: {
-            type: Object,
-            notify: true,
-          },
-          event: {
-            type: Object,
-          },
-          sublogsByDates: {
+          executions: {
             type: Array,
             notify: true,
           },
@@ -152,36 +101,24 @@
 
       selected() {
         this.getExecutions();
-        const list = this.$.list;
-        const listInstance = M.Collapsible.init(list, {
-          accordian: true
-        });
       }
 
       getExecutions() {
-        this.service.GetUnpaidSublogs(2000).then((resp) => {
-          let slogs = resp.sublogs;
+        this.service.GetExecutions(0, 1000).then((resp) => {
           let err = resp.error;
           if (err && err.code !== 0) {
             return;
           }
-          let sublogs = [];
-          let sublogDay = {
-            date: slogs[0].date,
-            sublogs: [],
-          };
-          for (let i = 0; i < slogs.length; i++) {
-            if (sublogDay.date !== slogs[i].date) {
-              sublogs.push(sublogDay);
-              sublogDay = {
-                date: slogs[i].date,
-                sublogs: [],
-              };
+          let executions = resp.executions;
+          for (let i = 0; i < executions.length; i++) {
+            if (executions[i].publish) {
+              executions[i].icon = 'public';
+            } else {
+              executions[i].icon = 'short_text';
             }
-            slogs[i].status = this.getStatus(slogs[i]);
-            sublogDay.sublogs.push(slogs[i]);
           }
-          this.sublogsByDates = sublogs;
+
+          this.executions = executions;
         });
       }
     }
