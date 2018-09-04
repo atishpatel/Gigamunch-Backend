@@ -54,10 +54,7 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 	}
 	// end decode request
 
-	date, err := getTime(req.Date)
-	if err != nil {
-		return errors.Annotate(err, "failed to decode date")
-	}
+	date := getDatetime(req.Date)
 
 	subC := subold.New(ctx)
 	subscribers, err := subC.GetHasSubscribed(date)

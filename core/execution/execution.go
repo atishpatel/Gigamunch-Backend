@@ -2,6 +2,7 @@ package execution
 
 import (
 	"context"
+	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -51,7 +52,7 @@ func (c *Client) Get(id int64) (*Execution, error) {
 // GetAll gets all Executions ordered by created datetime.
 func (c *Client) GetAll(start, limit int) ([]*Execution, error) {
 	var exes []*Execution
-	_, err := c.db.QueryOrdered(c.ctx, Kind, start, limit, "-CreatedDatetime", exes)
+	_, err := c.db.QueryOrdered(c.ctx, Kind, start, limit, "-Date", &exes)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to QueryOrdered")
 	}
@@ -60,12 +61,16 @@ func (c *Client) GetAll(start, limit int) ([]*Execution, error) {
 
 // Update updates an Execution.
 func (c *Client) Update(exe *Execution) (*Execution, error) {
+	if exe.CreatedDatetime.IsZero() {
+		exe.CreatedDatetime = time.Now()
+	}
 	key := c.db.IDKey(c.ctx, Kind, exe.ID)
 	key, err := c.db.Put(c.ctx, key, exe)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to put")
 	}
 	if exe.ID == 0 {
+		// handle new entry
 		exe.ID = key.IntID()
 		_, err = c.db.Put(c.ctx, key, exe)
 		if err != nil {

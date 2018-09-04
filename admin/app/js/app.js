@@ -1,31 +1,3 @@
-const UserUpdated = 'UserUpdated';
-function Fire(eventName, detail = {}) {
-    const event = new CustomEvent(eventName, {
-        detail,
-        bubbles: true,
-        composed: true,
-    });
-    window.dispatchEvent(event);
-}
-function FireToast(t, detail) {
-    const event = new CustomEvent('toast', {
-        detail,
-        bubbles: true,
-        composed: true,
-    });
-    t.dispatchEvent(event);
-}
-function FireError() {
-}
-
-
-var EventUtil = Object.freeze({
-	UserUpdated: UserUpdated,
-	Fire: Fire,
-	FireToast: FireToast,
-	FireError: FireError
-});
-
 function GetToken() {
     const name = 'AUTHTKN=';
     const ca = document.cookie.split(';');
@@ -118,31 +90,27 @@ function ProcessSublog(date, email) {
     };
     return callFetch(url, 'POST', req);
 }
-function Login(token) {
-    const url = baseURL + 'Login';
+function GetExecutions(start, limit) {
+    const url = baseURL + 'GetExecutions';
     const req = {
-        token,
+        start,
+        limit,
     };
-    return callFetch(url, 'POST', req).then((resp) => {
-        if (resp && resp.token) {
-            SetToken(resp.token);
-            Fire(UserUpdated);
-        }
-        return resp;
-    });
+    return callFetch(url, 'GET', req);
 }
-function Refresh(token) {
-    const url = baseURL + 'Refresh';
+function GetExecution(id) {
+    const url = baseURL + 'GetExecution';
     const req = {
-        token,
+        id,
     };
-    return callFetch(url, 'POST', req).then((resp) => {
-        if (resp && resp.token) {
-            SetToken(resp.token);
-            Fire(UserUpdated);
-        }
-        return resp;
-    });
+    return callFetch(url, 'GET', req);
+}
+function UpdateExecution(execution) {
+    const url = baseURL + 'UpdateExecution';
+    const req = {
+        execution,
+    };
+    return callFetch(url, 'POST', req);
 }
 function GetActivityForDate() {
 }
@@ -217,12 +185,41 @@ var Service = Object.freeze({
 	GetUnpaidSublogs: GetUnpaidSublogs,
 	GetSubscriberSublogs: GetSubscriberSublogs,
 	ProcessSublog: ProcessSublog,
-	Login: Login,
-	Refresh: Refresh,
+	GetExecutions: GetExecutions,
+	GetExecution: GetExecution,
+	UpdateExecution: UpdateExecution,
 	GetActivityForDate: GetActivityForDate,
 	GetLogs: GetLogs,
 	GetLog: GetLog,
 	GetLogsByEmail: GetLogsByEmail
+});
+
+const UserUpdated = 'UserUpdated';
+function Fire(eventName, detail = {}) {
+    const event = new CustomEvent(eventName, {
+        detail,
+        bubbles: true,
+        composed: true,
+    });
+    window.dispatchEvent(event);
+}
+function FireToast(t, detail) {
+    const event = new CustomEvent('toast', {
+        detail,
+        bubbles: true,
+        composed: true,
+    });
+    t.dispatchEvent(event);
+}
+function FireError() {
+}
+
+
+var EventUtil = Object.freeze({
+	UserUpdated: UserUpdated,
+	Fire: Fire,
+	FireToast: FireToast,
+	FireError: FireError
 });
 
 addEventListener(UserUpdated, UpdateUser);

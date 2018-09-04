@@ -12,9 +12,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// GetAllExecutions gets all executions.
-func (s *server) GetAllExecutions(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetAllExecutionsReq)
+// GetExecutions gets list of executions.
+func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.GetExecutionsReq)
 	var err error
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -23,7 +23,7 @@ func (s *server) GetAllExecutions(ctx context.Context, w http.ResponseWriter, r 
 	}
 	// end decode request
 
-	exeC, err := execution.NewClient(ctx, log)
+	exeC, err := execution.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
@@ -31,9 +31,36 @@ func (s *server) GetAllExecutions(ctx context.Context, w http.ResponseWriter, r 
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get all executions")
 	}
+	log.Infof(ctx, "return %d executions", len(executions))
 
-	resp := &pb.GetAllExecutionsResp{
+	resp := &pb.GetExecutionsResp{
 		Executions: pbExecutions(executions),
+	}
+	return resp
+}
+
+// GetExecution gets an execution.
+func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.GetExecutionReq)
+	var err error
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	exeC, err := execution.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
+	}
+	execution, err := exeC.Get(req.Id)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to get execution")
+	}
+
+	resp := &pb.GetExecutionResp{
+		Execution: pbExecution(execution),
 	}
 	return resp
 }
@@ -49,7 +76,7 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 	}
 	// end decode request
 
-	exeC, err := execution.NewClient(ctx, log)
+	exeC, err := execution.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
@@ -87,9 +114,9 @@ func pbExecution(exe *execution.Execution) *pb.Execution {
 		HasPork:         exe.HasPork,
 		HasBeef:         exe.HasBeef,
 		HasChicken:      exe.HasChicken,
-		HasWeirdMeat:    exe.HasWeirdMeat,
-		HasFish:         exe.HasFish,
-		HasOtherSeafood: exe.HasOtherSeafood,
+		// HasWeirdMeat:    exe.HasWeirdMeat,
+		// HasFish:         exe.HasFish,
+		// HasOtherSeafood: exe.HasOtherSeafood,
 	}
 }
 
@@ -157,9 +184,9 @@ func executionFromPb(exe *pb.Execution) *execution.Execution {
 		HasPork:         exe.HasPork,
 		HasBeef:         exe.HasBeef,
 		HasChicken:      exe.HasChicken,
-		HasWeirdMeat:    exe.HasWeirdMeat,
-		HasFish:         exe.HasFish,
-		HasOtherSeafood: exe.HasOtherSeafood,
+		// HasWeirdMeat:    exe.HasWeirdMeat,
+		// HasFish:         exe.HasFish,
+		// HasOtherSeafood: exe.HasOtherSeafood,
 	}
 }
 

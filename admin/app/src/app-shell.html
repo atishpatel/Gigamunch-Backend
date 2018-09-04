@@ -178,6 +178,7 @@
           .nav-tabs-stuff {
             display: none;
           }
+
           .drawer-stuff {
             display: initial;
           }
@@ -383,12 +384,6 @@
                                             service="[[serviceold]]"
                                             user="{{user}}">
           </change-servings-permanently-page>
-
-          <email-list-page name="email-list"
-                           id="emailList"
-                           service="[[serviceold]]"
-                           user="{{user}}">
-          </email-list-page>
           <unpaid-page name="unpaid"
                        id="unpaidPage"
                        service="[[service]]"
@@ -415,9 +410,12 @@
           </delivery-page>
           <executions-page name="executions"
                            id="executionsPage"
-                           service="[[service]]"
-                           user="{{user}}">
+                           service="[[service]]">
           </executions-page>
+          <execution-page name="execution"
+                          id="executionPage"
+                          service="[[service]]">
+          </execution-page>
           <my-view404 name="view404">
           </my-view404>
         </iron-pages>
@@ -525,12 +523,6 @@
             resolvedPageURL = this.resolveUrl('change-servings-permanently-page.html');
             el = this.$.changeServingsPermanentlyPage;
             title = 'Change Servings Permanently';
-            break;
-          case 'email-list':
-            elementName = 'email-list-page';
-            resolvedPageURL = this.resolveUrl('email-list-page.html');
-            el = this.$.emailList;
-            title = 'Email list';
             break;
           case 'sublogdetail':
             elementName = 'sublog-detail-page';

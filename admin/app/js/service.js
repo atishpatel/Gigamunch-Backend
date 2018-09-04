@@ -1,5 +1,4 @@
-import { Fire, UserUpdated, } from './utils/event';
-import { GetToken, SetToken, } from './utils/token';
+import { GetToken, } from './utils/token';
 let baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
@@ -40,31 +39,27 @@ export function ProcessSublog(date, email) {
     };
     return callFetch(url, 'POST', req);
 }
-export function Login(token) {
-    const url = baseURL + 'Login';
+export function GetExecutions(start, limit) {
+    const url = baseURL + 'GetExecutions';
     const req = {
-        token,
+        start,
+        limit,
     };
-    return callFetch(url, 'POST', req).then((resp) => {
-        if (resp && resp.token) {
-            SetToken(resp.token);
-            Fire(UserUpdated);
-        }
-        return resp;
-    });
+    return callFetch(url, 'GET', req);
 }
-export function Refresh(token) {
-    const url = baseURL + 'Refresh';
+export function GetExecution(id) {
+    const url = baseURL + 'GetExecution';
     const req = {
-        token,
+        id,
     };
-    return callFetch(url, 'POST', req).then((resp) => {
-        if (resp && resp.token) {
-            SetToken(resp.token);
-            Fire(UserUpdated);
-        }
-        return resp;
-    });
+    return callFetch(url, 'GET', req);
+}
+export function UpdateExecution(execution) {
+    const url = baseURL + 'UpdateExecution';
+    const req = {
+        execution,
+    };
+    return callFetch(url, 'POST', req);
 }
 export function GetActivityForDate() {
 }

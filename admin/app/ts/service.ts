@@ -1,10 +1,5 @@
 import {
-  Fire,
-  UserUpdated,
-} from './utils/event';
-import {
   GetToken,
-  SetToken,
 } from './utils/token';
 
 let baseURL = '/admin/api/v1/';
@@ -55,33 +50,30 @@ export function ProcessSublog(date: string, email: string): Promise<any> {
   return callFetch(url, 'POST', req);
 }
 
-// Auth
-export function Login(token: string): Promise<any> {
-  const url: string = baseURL + 'Login';
-  const req: TokenOnlyReq = {
-    token,
+// Execution
+export function GetExecutions(start: number, limit: number): Promise<any> {
+  const url: string = baseURL + 'GetExecutions';
+  const req: GetExecutionsReq = {
+    start,
+    limit,
   };
-  return callFetch(url, 'POST', req).then((resp) => {
-    if (resp && resp.token) {
-      SetToken(resp.token);
-      Fire(UserUpdated);
-    }
-    return resp;
-  });
+  return callFetch(url, 'GET', req);
 }
 
-export function Refresh(token: string): Promise<any> {
-  const url: string = baseURL + 'Refresh';
-  const req: TokenOnlyReq = {
-    token,
+export function GetExecution(id: number): Promise<any> {
+  const url: string = baseURL + 'GetExecution';
+  const req: GetExecutionReq = {
+    id,
   };
-  return callFetch(url, 'POST', req).then((resp) => {
-    if (resp && resp.token) {
-      SetToken(resp.token);
-      Fire(UserUpdated);
-    }
-    return resp;
-  });
+  return callFetch(url, 'GET', req);
+}
+
+export function UpdateExecution(execution: Execution): Promise<any> {
+  const url: string = baseURL + 'UpdateExecution';
+  const req: UpdateExecutionReq = {
+    execution,
+  };
+  return callFetch(url, 'POST', req);
 }
 
 // Activity
