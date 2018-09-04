@@ -96,7 +96,7 @@
             </div>
         </template>
 
-        </div>
+    </div>
   </template>
   </dom-repeat>
   </div>
@@ -160,6 +160,17 @@
             }
             slogs[i].status = this.getStatus(slogs[i]);
             sublogDay.sublogs.push(slogs[i]);
+          }
+          // remove future dates
+          const tomorrow = new Date();
+          for (let i = 0; i < sublogs.length; i++) {
+            const sublogDate = new Date(sublogs[i].date)
+            if (sublogDate < tomorrow) {
+              break;
+            }
+            // remove first
+            sublogs.shift();
+            i--;
           }
           this.sublogsByDates = sublogs;
         });
