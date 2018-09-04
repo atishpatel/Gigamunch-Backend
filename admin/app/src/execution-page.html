@@ -402,8 +402,11 @@
 
         </template>
         <br>
-        <button on-click="addDish">Add Dish</button>
-
+        <button on-tap="addDish">Add Dish</button>
+        <br>
+        <label>Dish Index</label>
+        <input value="{{dishRemoveIndex::input}}">
+        <button on-tap="removeDish">Remove Dish</button>
         <h2>Diet</h2>
         <hr>
         <div class="checkbox-group">
@@ -434,7 +437,7 @@
           <label>Has Chicken</label>
         </div>
 
-        <button disabled="[[loading]]" on-click="updateExecution" class="button">Update</button>
+        <button disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
       </div>
 
   </template>
@@ -463,6 +466,10 @@
           },
           loading: {
             type: Boolean
+          },
+          dishRemoveIndex: {
+            type: Number,
+            value: 1,
           }
         }
       }
@@ -547,12 +554,18 @@
           this.dishes = [];
         }
         this.push('dishes', {});
+        this.dishRemoveIndex = this.dishes.length;
       }
 
-      removeDish(e, dish) {
-        console.log(e, dish);
+      removeDish() {
+        if (this.dishRemoveIndex < 1 || this.dishRemoveIndex > this.dishes.length) {
+          return;
+        }
+        this.splice('dishes', this.dishRemoveIndex - 1, 1);
+        this.dishRemoveIndex = this.dishes.length;
       }
     }
     window.customElements.define(ExecutionPage.is, ExecutionPage);
+
   </script>
 </dom-module>
