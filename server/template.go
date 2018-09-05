@@ -54,6 +54,10 @@ func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/gifted/:email", handleGifted)
 	r.GET("/becomechef", handleBecomecook)
 	r.GET("/becomecook", handleBecomecook)
+
+	r.GET("/campaign", handleCampaignHome)
+	r.GET("/campaign-checkout", handleCampaignCheckout)
+	r.GET("/campaign-thank-you", handleCheckoutThankYou)
 	r.NotFound = new(handler404)
 }
 
@@ -76,24 +80,37 @@ func display(ctx context.Context, w http.ResponseWriter, tmplName string, data i
 
 type checkoutPage struct {
 	Page
-	Email         string
-	FirstName     string
-	LastName      string
-	PhoneNumber   string
-	Address       string
-	APT           string
-	DeliveryNotes string
-	Reference     string
+	Email           string
+	FirstName       string
+	LastName        string
+	PhoneNumber     string
+	Address         string
+	APT             string
+	DeliveryNotes   string
+	Reference       string
+	ThankYouPageURL string
 }
 
 func handleCheckout(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	ctx := appengine.NewContext(req)
+	page := &checkoutPage{}
+	displayCheckout(w, req, params, page)
+}
+
+func handleCampaignCheckout(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	page := &checkoutPage{
-		Page: Page{
-			ID: "checkout",
-		},
+		ThankYouPageURL: "/campaign-thank-you",
 	}
+
+	displayCheckout(w, req, params, page)
+}
+
+func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter.Params, page *checkoutPage) {
+	ctx := appengine.NewContext(req)
 	defer display(ctx, w, "checkout", page)
+	page.ID = "checkout"
+	if page.ThankYouPageURL == "" {
+		page.ThankYouPageURL = "/checkout-thank-you"
+	}
 	email := req.FormValue("email")
 	terp := req.FormValue("terp")
 	if email == "" {
@@ -375,26 +392,42 @@ func getFirstName(name string) string {
 
 type homePage struct {
 	Page
-	ReferrerName string
+	ReferrerName    string
+	CheckoutPageURL string
 }
 
 func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	ctx := appengine.NewContext(req)
+	page := &homePage{}
+	displayHome(w, req, params, page)
+}
+
+func handleCampaignHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	page := &homePage{
 		Page: Page{
-			ID: "home",
+			CampaignName: "CampaignPage",
 		},
+		CheckoutPageURL: "/campaign-checkout",
 	}
-	defer display(ctx, w, "home", page)
+	displayHome(w, req, params, page)
 }
 
 func handlePassport(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-	ctx := appengine.NewContext(req)
 	page := &homePage{
 		Page: Page{
 			ID:           "passport",
 			CampaignName: "Passport",
 		},
+	}
+	displayHome(w, req, params, page)
+}
+
+func displayHome(w http.ResponseWriter, req *http.Request, params httprouter.Params, page *homePage) {
+	ctx := appengine.NewContext(req)
+	if page.ID == "" {
+		page.ID = "home"
+	}
+	if page.CheckoutPageURL == "" {
+		page.CheckoutPageURL = "/checkout"
 	}
 	defer display(ctx, w, "home", page)
 }

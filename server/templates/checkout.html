@@ -687,6 +687,8 @@
                       <img alt="Rachel Woods picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/rachel_woods.jpg">
 
+
+
                     </div>
                   </div>
                   <div class="checkout-trust-review">
@@ -694,6 +696,8 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Paige Orr Clancy picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/paige_orr_clancy.jpg">
+
+
 
                     </div>
                   </div>
@@ -703,6 +707,8 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Barbara Futter picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/barbara_futter.jpg">
+
+
 
                     </div>
                   </div>
@@ -714,6 +720,8 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/certificate-icon.png">
+
+
 
               </div>
               <div class="checkout-trust-security-text">
@@ -743,6 +751,8 @@
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/lock-icon.png">
 
+
+
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -757,7 +767,7 @@
         </div>
         <div class="checkout-form-container">
           <form id="checkout-form"
-                action="/checkout-thank-you"
+                action="[[.ThankYouPageURL]]"
                 method="post"
                 class="checkout-form"
                 enctype="application/x-www-form-urlencoded">
@@ -952,8 +962,8 @@
             <div>
               <label for="card-number"
                      class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i>
-                     <i class="fa fa-cc-mastercard" aria-hidden="true"></i>
-                     <i class="fa fa-cc-discover" aria-hidden="true"></i></label>
+                <i class="fa fa-cc-mastercard" aria-hidden="true"></i>
+                <i class="fa fa-cc-discover" aria-hidden="true"></i></label>
               <div class="hosted-field"
                    id="card-number"></div>
             </div>
@@ -974,6 +984,20 @@
                 <div class="item-image">
                   <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/product_shot_checkout.jpg"
                        alt="A bag with an international meal.">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 </div>
                 <div class="item-detail">
@@ -1019,7 +1043,7 @@
                    type="submit"
                    value="Subscribe"
                    onclick="subscribeClick()"
-                   disabled/>
+                   disabled />
 
           </form>
         </div>
@@ -1263,9 +1287,9 @@
                   return;
                 }
                 if (req.email) {
-                  window.location = '/checkout-thank-you?email=' + encodeURIComponent(req.email);
+                  window.location = '[[.ThankYouPageURL]]?email=' + encodeURIComponent(req.email);
                 } else {
-                  window.location = '/checkout-thank-you';
+                  window.location = '[[.ThankYouPageURL]]';
                 }
               } catch (err) {
                 var fullError = err;
