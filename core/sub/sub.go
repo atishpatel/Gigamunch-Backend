@@ -8,6 +8,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -71,17 +73,34 @@ func (c *Client) GetActive(start, limit int) ([]*Subscriber, error) {
 // func (c *Client) get(id int64, email string) (*Subscriber, error)
 
 // GetByPhoneNumber gets a subscriber by phone number.
+// func (c *Client) GetByPhoneNumber() error {
+// 	// TODO: implement
+// 	return nil
+// }
 
 // GetHasSubscribed returns a list of all subscribers ever.
+// func (c *Client) GetHasSubscribed() error {
+// 	// TODO: implement
+// 	return nil
+// }
 
-// ChangeServingsPermanently
+// ChangeServingsPermanently changes a subscriber's servings permanently.
+func (c *Client) ChangeServingsPermanently(email string, servings int8, vegetarian bool) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.ChangeServingsPermanently(email, servings, vegetarian, c.serverInfo)
+}
 
-// UpdatePaymentToken
+// UpdatePaymentToken updates a user payment method token.
+func (c *Client) UpdatePaymentToken(email, paymentMethodToken string) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.UpdatePaymentToken(email, paymentMethodToken)
+}
 
 // Update updates a subscriber.
 func (c *Client) Update(sub *Subscriber) error {
 	// TODO: log change
-
 	key := c.db.IDKey(c.ctx, kind, sub.ID)
 	_, err := c.db.Put(c.ctx, key, sub)
 	if err != nil {
@@ -90,12 +109,18 @@ func (c *Client) Update(sub *Subscriber) error {
 	return nil
 }
 
-// Activate
+// Activate activates an account.
+// func (c *Client) Activate() error {
+// 	// TODO: implement
+// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
+// 	return nil
+// }
 
 // Deactivate deactivates an account
-func (c *Client) Deactivate() error {
+func (c *Client) Deactivate(email string) error {
 	// TODO: implement
-	return nil
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.Cancel(email, c.log, c.serverInfo)
 }
 
 // Create
@@ -110,17 +135,13 @@ func (c *Client) SetupActivities(date time.Time) error {
 	}
 	// TODO: implement
 	_ = subs
-
-	return nil
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.SetupSubLogs(date)
 }
 
-// func (c *Client) Deactivate(id string) error {
-
-// }
-
-// func (c *Client) UpdatePaymentToken(subEmail string, paymentMethodToken string) error {
-// }
-
-// func (c *Client) ChangeServings(subEmail string, servings int8, vegetarian bool) error {
-// 	// rememver to change tags
+// LeftEmail is when a user just leaves their email.
+// func (c *Client) LeftEmail() error {
+// 	// TODO: implement
+// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
+// 	return nil
 // }
