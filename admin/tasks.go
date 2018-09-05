@@ -13,15 +13,46 @@ import (
 	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"google.golang.org/appengine"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
+
+func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	parms, err := tasks.ParseProcessSubscriptionRequest(r)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
+	}
+
+	activityC, _ := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	err = activityC.Process(parms.Date, parms.SubEmail)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		return errors.GetErrorWithCode(err)
+	}
+	return nil
+}
+
+func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+
+	in2days := time.Now().Add(48 * time.Hour)
+
+	subC, _ := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	err := subC.SetupActivities(in2days)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)
+	}
+	return nil
+}
 
 // SetupTags sets up tags for culture preview email and culture email 2 weeks in advance.
 func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
@@ -50,10 +81,10 @@ func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.R
 func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	cultureDate := time.Now().Add(6 * 24 * time.Hour)
 	log.Infof(ctx, "culture date:%s", cultureDate)
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
-		errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to sub.GetForDate")
+		errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to subold.GetForDate")
 		return nil
 	}
 	var nonSkippers []string
@@ -84,10 +115,10 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	cultureDate := time.Now()
 	log.Infof(ctx, "culture date:%s", cultureDate)
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
-		errors.Annotate(err, "failed to SendCultureEmail: failed to sub.GetForDate")
+		errors.Annotate(err, "failed to SendCultureEmail: failed to subold.GetForDate")
 		return nil
 	}
 	var nonSkippers []string
@@ -131,10 +162,10 @@ func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *htt
 	if !common.IsProd(s.serverInfo.ProjectID) {
 		return nil
 	}
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	subs, err := subC.GetHasSubscribed(time.Now())
 	if err != nil {
-		log.Errorf(ctx, "failed to SendStatsSMS: failed to sub.GetAllSubscribers: %s", err)
+		log.Errorf(ctx, "failed to SendStatsSMS: failed to subold.GetAllSubscribers: %s", err)
 		return nil
 	}
 	date := time.Now()
@@ -157,17 +188,17 @@ func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *htt
 	newSubs30Days := 0
 	cancelsLast30Days := 0
 	totalSubs30DaysAgo := 0
-	for _, sub := range subs {
-		if sub.IsSubscribed {
+	for _, s := range subs {
+		if s.IsSubscribed {
 			totalSubs++
 		}
 		// week
-		if sub.SubscriptionDate.After(dateMinus7Days) && sub.SubscriptionDate.Before(date) {
+		if s.SubscriptionDate.After(dateMinus7Days) && s.SubscriptionDate.Before(date) {
 			newSubsLastWeek++
 		}
-		if sub.UnSubscribedDate.After(dateMinus7Days) && sub.UnSubscribedDate.Before(date) {
+		if s.UnSubscribedDate.After(dateMinus7Days) && s.UnSubscribedDate.Before(date) {
 			cancelsLastWeek++
-			daysWithUs := int(sub.UnSubscribedDate.Sub(sub.SubscriptionDate) / (time.Hour * 24))
+			daysWithUs := int(s.UnSubscribedDate.Sub(s.SubscriptionDate) / (time.Hour * 24))
 			sumDaysWithUs += daysWithUs
 			if daysWithUs > 7*8 {
 				cancelsMoreThan8WeekRetention++
@@ -177,17 +208,17 @@ func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *htt
 				cancels4To8WeekRetention++
 			}
 		}
-		if sub.SubscriptionDate.Before(dateMinus7Days) {
+		if s.SubscriptionDate.Before(dateMinus7Days) {
 			totalSubsLastWeek++
 		}
 		// month
-		if sub.SubscriptionDate.After(dateMinus30Days) && sub.SubscriptionDate.Before(date) {
+		if s.SubscriptionDate.After(dateMinus30Days) && s.SubscriptionDate.Before(date) {
 			newSubs30Days++
 		}
-		if sub.UnSubscribedDate.After(dateMinus30Days) && sub.UnSubscribedDate.Before(date) {
+		if s.UnSubscribedDate.After(dateMinus30Days) && s.UnSubscribedDate.Before(date) {
 			cancelsLast30Days++
 		}
-		if sub.SubscriptionDate.Before(dateMinus30Days) {
+		if s.SubscriptionDate.Before(dateMinus30Days) {
 			totalSubs30DaysAgo++
 		}
 	}

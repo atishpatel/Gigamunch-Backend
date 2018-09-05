@@ -12,8 +12,9 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/activity"
+	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"github.com/julienschmidt/httprouter"
@@ -114,8 +115,9 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request, _ httpr
 		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
 		return
 	}
-	subC := sub.New(ctx)
-	err = subC.Process(parms.Date, parms.SubEmail)
+	log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/process-subscription")
+	activityC, _ := activity.NewClient(ctx, log, nil, nil, serverInfo)
+	err = activityC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
 		// TODO schedule for later?
@@ -126,8 +128,9 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request, _ httpr
 func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 	in2days := time.Now().Add(48 * time.Hour)
-	subC := sub.New(ctx)
-	err := subC.SetupSubLogs(in2days)
+	log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/process-subscribers")
+	subC, _ := subnew.NewClient(ctx, log, nil, nil, serverInfo)
+	err := subC.SetupActivities(in2days)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)
 		return

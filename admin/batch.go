@@ -2,11 +2,9 @@ package admin
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
-	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
 // UpdatePhoneNumbers updates phonenumbers for subscribers.
@@ -40,5 +38,6 @@ func (s *server) UpdatePhoneNumbers(ctx context.Context, w http.ResponseWriter, 
 	// 	}
 	// 	lastIndex = i
 	// }
-	return errors.NoError.WithMessage(fmt.Sprintf("%d subs updated out of %d", len(updatedSubs), len(subs)))
+	// return errors.NoError.WithMessage(fmt.Sprintf("%d subs updated out of %d", len(updatedSubs), len(subs)))
+	return nil
 }

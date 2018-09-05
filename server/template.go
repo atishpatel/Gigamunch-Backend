@@ -1,21 +1,21 @@
 package server
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/db"
+	"github.com/atishpatel/Gigamunch-Backend/core/lead"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+
+	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
@@ -118,53 +118,36 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 	}
 	email = strings.TrimSpace(strings.ToLower(email))
 	// TODO: add referred email address
-	var err error
+
 	if email != "" && terp == "" && strings.Contains(email, "@") {
 		logging.Infof(ctx, "email: %s", email)
+
+		// save lead
+		log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/checkout")
+		db, _ := db.NewClient(ctx, serverInfo.ProjectID)
+		leadC, err := lead.NewClient(ctx, log, db, serverInfo)
+		if err != nil {
+			log.Errorf(ctx, "failed to lead.NewClient: %+v", err)
+		}
+		err = leadC.Create(email)
+		if err != nil {
+			log.Errorf(ctx, "failed to lead.Create: %+v", err)
+		}
 		page.Email = email
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
-		if err == datastore.ErrNoSuchEntity {
-			entry.Date = time.Now()
-			entry.Email = email
-			_, err = datastore.Put(ctx, key, entry)
-			if err != nil {
-				utils.Criticalf(ctx, "Error putting ScheduleSignupEmail in datastore ", err)
+		// load page if tried before
+		subC := subold.New(ctx)
+		s, err := subC.GetSubscriber(email)
+		if err == nil {
+			page.FirstName = s.FirstName
+			page.LastName = s.LastName
+			page.PhoneNumber = s.PhoneNumber
+			if s.Address.GeoPoint.Valid() {
+				page.Address = s.Address.StringNoAPT()
 			}
-			if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
-				messageC := message.New(ctx)
-				err = messageC.SendSMS("6153975516", fmt.Sprintf("New sign up using schedule page. Get on that booty. \nEmail: %s", email))
-				if err != nil {
-					utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
-				}
-			}
-			log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/checkout")
-			if err != nil {
-				utils.Criticalf(ctx, "Error added setupLoggingAndServerInfo for email(%s). Err: %+v", entry.Email, err)
-			}
-			mailC, err := mail.NewClient(ctx, log, serverInfo)
-			if err != nil {
-				utils.Criticalf(ctx, "Error added mail.NewClient for email(%s). Err: %+v", entry.Email, err)
-			}
-			err = mailC.LeftEmail(entry.Email, "", "")
-			if err != nil {
-				utils.Criticalf(ctx, "Error added mail.AddTag for email(%s). Err: %+v", entry.Email, err)
-			}
-		} else if err != nil {
-			utils.Criticalf(ctx, "failed to add email(%s) to ScheduleSignUp: err - %+v", email, err)
-		} else {
-			utils.Infof(ctx, "email already registered ScheduleSignUp: email - %s, err - %#v", email, err)
+			page.APT = s.Address.APT
+			page.DeliveryNotes = s.DeliveryTips
+			page.Reference = s.Reference
 		}
-		page.FirstName = entry.FirstName
-		page.LastName = entry.LastName
-		page.PhoneNumber = entry.PhoneNumber
-		if entry.Address.GeoPoint.Valid() {
-			page.Address = entry.Address.StringNoAPT()
-		}
-		page.APT = entry.Address.APT
-		page.DeliveryNotes = entry.DeliveryTips
-		page.Reference = entry.Reference
 	}
 }
 
@@ -205,12 +188,11 @@ func handleCheckoutThankYou(w http.ResponseWriter, req *http.Request, _ httprout
 	}
 	defer display(ctx, w, "checkout-thank-you", page)
 	email := req.FormValue("email")
-	var err error
+
 	if email != "" {
 		logging.Infof(ctx, "email: %s", email)
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
+		suboldC := subold.New(ctx)
+		entry, err := suboldC.GetSubscriber(email)
 		if err != nil {
 			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
@@ -248,25 +230,29 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 	if email == "" {
 		email = params.ByName("email")
 	}
-	var err error
+
 	if strings.Contains(email, "@") {
 		page.Email = email
 		logging.Infof(ctx, "email: %s", email)
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
+
+		suboldC := subold.New(ctx)
+		s, err := suboldC.GetSubscriber(email)
 		if err != nil {
 			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
-		page.FirstName = entry.FirstName
-		if entry.FirstName == "" {
-			page.FirstName = getFirstName(entry.Name)
+		page.FirstName = s.FirstName
+		if s.FirstName == "" {
+			page.FirstName = getFirstName(s.Name)
 		}
-		entry.ReferralPageOpens++
-		_, err = datastore.Put(ctx, key, entry)
-		if err != nil {
-			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+		// increase page count
+		log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/referral")
+		subnewC, err := subnew.NewClient(ctx, log, nil, nil, serverInfo)
+		if err == nil {
+			err = subnewC.IncrementPageCount(email, 1, 0)
+			if err != nil {
+				logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+			}
 		}
 	}
 }
@@ -284,17 +270,18 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 	if email == "" {
 		email = params.ByName("email")
 	}
-	var err error
+
 	if strings.Contains(email, "@") {
 		logging.Infof(ctx, "email: %s", email)
 		page.ReferrerName = email
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
+
+		suboldC := subold.New(ctx)
+		entry, err := suboldC.GetSubscriber(email)
 		if err != nil {
 			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
+
 		if entry.Name != "" {
 			page.ReferrerName = entry.Name
 		}
@@ -302,10 +289,15 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 			page.ReferrerName = entry.FirstName + " " + entry.LastName
 		}
 		page.ReferenceEmail = entry.Email
-		entry.ReferredPageOpens++
-		_, err = datastore.Put(ctx, key, entry)
-		if err != nil {
-			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+
+		// increase page count
+		log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/referred")
+		subnewC, err := subnew.NewClient(ctx, log, nil, nil, serverInfo)
+		if err == nil {
+			err = subnewC.IncrementPageCount(email, 0, 1)
+			if err != nil {
+				logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
+			}
 		}
 	}
 }
@@ -322,13 +314,13 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 	if email == "" {
 		email = params.ByName("email")
 	}
-	var err error
+
 	if email != "" {
 		logging.Infof(ctx, "email: %s", email)
 		page.Email = email
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
+
+		suboldC := subold.New(ctx)
+		entry, err := suboldC.GetSubscriber(email)
 		if err != nil {
 			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
@@ -337,11 +329,7 @@ func handleGift(w http.ResponseWriter, req *http.Request, params httprouter.Para
 		if entry.FirstName == "" {
 			page.FirstName = getFirstName(entry.Name)
 		}
-		entry.GiftPageOpens++
-		_, err = datastore.Put(ctx, key, entry)
-		if err != nil {
-			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
-		}
+
 	}
 }
 
@@ -358,17 +346,18 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 	if email == "" {
 		email = params.ByName("email")
 	}
-	var err error
+
 	if email != "" {
 		logging.Infof(ctx, "email: %s", email)
 		page.ReferrerName = email
-		key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-		entry := &sub.SubscriptionSignUp{}
-		err = datastore.Get(ctx, key, entry)
+
+		suboldC := subold.New(ctx)
+		entry, err := suboldC.GetSubscriber(email)
 		if err != nil {
 			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			return
 		}
+
 		if entry.Name != "" {
 			page.ReferrerName = entry.Name
 		}
@@ -376,11 +365,7 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 			page.ReferrerName = entry.FirstName + " " + entry.LastName
 		}
 		page.ReferenceEmail = entry.Email
-		entry.GiftedPageOpens++
-		_, err = datastore.Put(ctx, key, entry)
-		if err != nil {
-			logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
-		}
+
 	}
 }
 

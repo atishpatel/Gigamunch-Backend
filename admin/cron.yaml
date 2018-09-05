@@ -1,10 +1,10 @@
 
 cron:
 - description: "Process Subscribers"
-  url: /task/process-subscribers
+  url: /admin/task/SetupActivites
   schedule: every day 20:00
   timezone: America/Chicago
-  target: cookapi
+  target: admin
 - description: "Bag reminder"
   url: /send-bag-reminder
   schedule: every day 18:00
