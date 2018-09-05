@@ -380,7 +380,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
 	}
 	if !strings.Contains(req.Email, "test.com") {
-		log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
+		log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
 		if err != nil {
 			return errors.Wrap("failed to setupLoggingAndServerInfo", err)
 		}
@@ -807,10 +807,10 @@ func failedToDecode(err error) *pb.ErrorOnlyResp {
 	}
 }
 
-func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, error) {
+func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {
 	dbC, err := db.NewClient(ctx, projID, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get database client: %+v", err)
+		return nil, nil, nil, fmt.Errorf("failed to get database client: %+v", err)
 	}
 	// Setup logging
 	serverInfo := &common.ServerInfo{
@@ -819,7 +819,7 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 	}
 	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return log, serverInfo, nil
+	return log, serverInfo, dbC, nil
 }

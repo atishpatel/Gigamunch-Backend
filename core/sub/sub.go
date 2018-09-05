@@ -2,6 +2,7 @@ package sub
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"time"
 
@@ -36,6 +37,9 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	// if sqlC == nil {
 	// 	return nil, errInternal.Annotate("failed to get sql client")
 	// }
+	if dbC == nil {
+		return nil, fmt.Errorf("failed to get db")
+	}
 	if serverInfo == nil {
 		return nil, errInternal.Annotate("failed to get server info")
 	}

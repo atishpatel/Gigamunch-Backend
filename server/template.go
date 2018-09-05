@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/lead"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
@@ -31,10 +30,10 @@ type Page struct {
 }
 
 func addTemplateRoutes(r *httprouter.Router) {
-	r.GET("/", handleHome)
+	r.GET("/", redirictOldHost(handleHome))
 	r.GET("/schedule", handleHome)
 	r.GET("/passport", handlePassport)
-	r.GET("/login", handleLogin)
+	r.GET("/login", redirictOldHost(handleLogin))
 	r.GET("/terms", handleTerms)
 	r.GET("/privacy", handlePrivacy)
 	r.GET("/checkout", handleCheckout)
@@ -59,6 +58,17 @@ func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/campaign-checkout", handleCampaignCheckout)
 	r.GET("/campaign-thank-you", handleCheckoutThankYou)
 	r.NotFound = new(handler404)
+}
+
+func redirictOldHost(f httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		if strings.Contains(req.URL.Hostname(), "gigamunchapp.com") {
+			url := "https://eatgigamunch.com" + req.URL.Path
+			http.Redirect(w, req, url, http.StatusPermanentRedirect)
+			return
+		}
+		f(w, req, params)
+	}
 }
 
 // display the named template
@@ -123,8 +133,7 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 		logging.Infof(ctx, "email: %s", email)
 
 		// save lead
-		log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/checkout")
-		db, _ := db.NewClient(ctx, serverInfo.ProjectID)
+		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/checkout")
 		leadC, err := lead.NewClient(ctx, log, db, serverInfo)
 		if err != nil {
 			log.Errorf(ctx, "failed to lead.NewClient: %+v", err)
@@ -246,8 +255,8 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 			page.FirstName = getFirstName(s.Name)
 		}
 		// increase page count
-		log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/referral")
-		subnewC, err := subnew.NewClient(ctx, log, nil, nil, serverInfo)
+		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/referral")
+		subnewC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
 		if err == nil {
 			err = subnewC.IncrementPageCount(email, 1, 0)
 			if err != nil {
@@ -291,8 +300,8 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		page.ReferenceEmail = entry.Email
 
 		// increase page count
-		log, serverInfo, _ := setupLoggingAndServerInfo(ctx, "/referred")
-		subnewC, err := subnew.NewClient(ctx, log, nil, nil, serverInfo)
+		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/referred")
+		subnewC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
 		if err == nil {
 			err = subnewC.IncrementPageCount(email, 0, 1)
 			if err != nil {

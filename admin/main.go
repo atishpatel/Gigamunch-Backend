@@ -195,6 +195,11 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
+		if strings.Contains(r.URL.Hostname(), "gigamunchapp.com") {
+			url := "https://eatgigamunch.com" + r.URL.Path
+			http.Redirect(w, r, url, http.StatusPermanentRedirect)
+			return
+		}
 		// get context
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))

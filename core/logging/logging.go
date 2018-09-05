@@ -535,7 +535,7 @@ type SkipPayload struct {
 
 // SubSkip logs a skip.
 func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
-	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
+	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
 	e := &Entry{
 		Type:      Subscriber,
 		Action:    Skip,
@@ -551,7 +551,7 @@ func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
 			UserID:          userID,
 			UserEmail:       userEmail,
 			Reason:          reason,
-			ActionUserID:    c.ctx.Value(common.ContextUserID).(int64),
+			ActionUserID:    c.getInt64FromCtx(common.ContextUserID),
 			ActionUserEmail: actionUserEmail,
 		},
 	}
@@ -560,7 +560,7 @@ func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
 
 // SubUnskip logs a unskip.
 func (c *Client) SubUnskip(date string, userID int64, userEmail string) {
-	actionUserEmail := c.ctx.Value(common.ContextUserEmail).(string)
+	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
 	e := &Entry{
 		Type:      Subscriber,
 		Action:    Unskip,
@@ -575,7 +575,7 @@ func (c *Client) SubUnskip(date string, userID int64, userEmail string) {
 			Date:            date,
 			UserID:          userID,
 			UserEmail:       userEmail,
-			ActionUserID:    c.ctx.Value(common.ContextUserID).(int64),
+			ActionUserID:    c.getInt64FromCtx(common.ContextUserID),
 			ActionUserEmail: actionUserEmail,
 		},
 	}
@@ -685,16 +685,10 @@ func (c *Client) Log(e *Entry) {
 		e.Path = c.path
 	}
 	if e.ActionUserID == 0 {
-		tmp := c.ctx.Value(common.ContextUserID)
-		if tmp != nil {
-			e.ActionUserID = tmp.(int64)
-		}
+		e.ActionUserID = c.getInt64FromCtx(common.ContextUserID)
 	}
 	if e.ActionUserEmail == "" {
-		tmp := c.ctx.Value(common.ContextUserEmail)
-		if tmp != nil {
-			e.ActionUserEmail = tmp.(string)
-		}
+		e.ActionUserEmail = c.getStringFromCtx(common.ContextUserEmail)
 	}
 	key := c.db.IncompleteKey(c.ctx, kind)
 	_, err := c.db.Put(c.ctx, key, e)
@@ -714,4 +708,20 @@ func setup(ctx context.Context, httpClient *http.Client, projID string) error {
 		return err
 	}
 	return nil
+}
+
+func (c *Client) getStringFromCtx(key interface{}) string {
+	v := c.ctx.Value(key)
+	if v == nil {
+		return ""
+	}
+	return v.(string)
+}
+
+func (c *Client) getInt64FromCtx(key interface{}) int64 {
+	v := c.ctx.Value(key)
+	if v == nil {
+		return 0
+	}
+	return v.(int64)
 }
