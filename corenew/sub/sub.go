@@ -10,6 +10,7 @@ import (
 	"time"
 
 	// driver for mysql
+	"cloud.google.com/go/datastore"
 	mysql "github.com/go-sql-driver/mysql"
 
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -57,12 +58,13 @@ var (
 	mysqlDB     *sql.DB
 	errSQLDB    = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
 	// errBuffer           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "An unknown error occured."}
-	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
-	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errEntrySkipped     = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
-	errNoSuchEntry      = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
-	errDuplicateEntry   = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
-	projID              string
+	errDatastore         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errDatastoreNotFound = errors.ErrorWithCode{Code: errors.CodeNotFound, Message: "Not found."}
+	errInvalidParameter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errEntrySkipped      = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
+	errNoSuchEntry       = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
+	errDuplicateEntry    = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
+	projID               string
 )
 
 // Client is the client fro this package.
@@ -119,6 +121,9 @@ func (c *Client) GetSubscriber(email string) (*SubscriptionSignUp, error) {
 		return nil, errInvalidParameter.Wrap("emails cannot be empty.")
 	}
 	subs, err := c.GetSubscribers([]string{email})
+	if err == datastore.ErrNoSuchEntity {
+		return nil, errDatastoreNotFound
+	}
 	if err != nil || len(subs) != 1 {
 		return nil, errors.Wrap("failed to c.GetSubscribers", err)
 	}
@@ -145,7 +150,7 @@ func (c *Client) GetSubscribersByPhoneNumber(number string) ([]*SubscriptionSign
 	if number == "" {
 		return nil, errInvalidParameter.Wrap("number cannot be empty.")
 	}
-	cleanNumber := GetCleanPhoneNumber(number)
+	cleanNumber := getCleanPhoneNumber(number)
 	subs, err := getSubscribersByPhoneNumber(c.ctx, cleanNumber)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")

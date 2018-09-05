@@ -2,7 +2,6 @@ package activity
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -35,11 +34,14 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
-	if sqlC == nil {
-		return nil, fmt.Errorf("sqlDB cannot be nil for sub")
-	}
-	if dbC == nil {
-		return nil, fmt.Errorf("db cannot be nil for sub")
+	// if sqlC == nil {
+	// 	return nil, fmt.Errorf("sqlDB cannot be nil for sub")
+	// }
+	// if dbC == nil {
+	// 	return nil, fmt.Errorf("db cannot be nil for sub")
+	// }
+	if serverInfo == nil {
+		return nil, errInternal.Annotate("failed to get server info")
 	}
 	return &Client{
 		ctx:        ctx,

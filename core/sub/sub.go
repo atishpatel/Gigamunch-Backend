@@ -2,6 +2,7 @@ package sub
 
 import (
 	"context"
+	"regexp"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -32,9 +33,9 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
-	if sqlC == nil {
-		return nil, errInternal.Annotate("failed to get sql client")
-	}
+	// if sqlC == nil {
+	// 	return nil, errInternal.Annotate("failed to get sql client")
+	// }
 	if serverInfo == nil {
 		return nil, errInternal.Annotate("failed to get server info")
 	}
@@ -139,9 +140,31 @@ func (c *Client) SetupActivities(date time.Time) error {
 	return suboldC.SetupSubLogs(date)
 }
 
-// LeftEmail is when a user just leaves their email.
-// func (c *Client) LeftEmail() error {
-// 	// TODO: implement
-// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
-// 	return nil
-// }
+// IncrementPageCount is when a user just leaves their email.
+func (c *Client) IncrementPageCount(email string, referralPageOpens int, referredPageOpens int) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	s, err := suboldC.GetSubscriber(email)
+	if err != nil {
+		return err
+	}
+	s.ReferralPageOpens += referralPageOpens
+	s.ReferredPageOpens += referredPageOpens
+	err = subold.Put(c.ctx, email, s)
+	if err != nil {
+		errDatastore.WithError(err).Annotate("failed to subold.put")
+	}
+	return nil
+}
+
+// GetCleanPhoneNumber takes a raw phone number and formats it to clean phone number.
+func GetCleanPhoneNumber(rawNumber string) string {
+	reg := regexp.MustCompile("[^0-9]+")
+	cleanNumber := reg.ReplaceAllString(rawNumber, "")
+	if len(cleanNumber) < 10 {
+		return cleanNumber
+	}
+	cleanNumber = cleanNumber[len(cleanNumber)-10:]
+	cleanNumber = cleanNumber[:3] + "-" + cleanNumber[3:6] + "-" + cleanNumber[6:]
+	return cleanNumber
+}
