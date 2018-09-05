@@ -27,15 +27,14 @@ type Client struct {
 
 // NewClient gives you a new client.
 func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sqlx.DB, serverInfo *common.ServerInfo) (*Client, error) {
-	var err error
-	if serverInfo.IsStandardAppEngine {
-		err = setup(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
+	}
+	if sqlC == nil {
+		return nil, errInternal.Annotate("failed to get sql client")
+	}
+	if serverInfo == nil {
+		return nil, errInternal.Annotate("failed to get server info")
 	}
 	return &Client{
 		ctx:        ctx,
@@ -67,8 +66,22 @@ func (c *Client) GetActive(start, limit int) ([]*Subscriber, error) {
 	return subs, nil
 }
 
+// GetByEmail gets a subscriber by email.
+
+// func (c *Client) get(id int64, email string) (*Subscriber, error)
+
+// GetByPhoneNumber gets a subscriber by phone number.
+
+// GetHasSubscribed returns a list of all subscribers ever.
+
+// ChangeServingsPermanently
+
+// UpdatePaymentToken
+
 // Update updates a subscriber.
 func (c *Client) Update(sub *Subscriber) error {
+	// TODO: log change
+
 	key := c.db.IDKey(c.ctx, kind, sub.ID)
 	_, err := c.db.Put(c.ctx, key, sub)
 	if err != nil {
@@ -77,14 +90,27 @@ func (c *Client) Update(sub *Subscriber) error {
 	return nil
 }
 
-// SetupActivity updates a subscriber.
-func (c *Client) SetupActivity(date time.Time) error {
-	subs, err := c.GetActive(0, 1000)
+// Activate
+
+// Deactivate deactivates an account
+func (c *Client) Deactivate() error {
+	// TODO: implement
+	return nil
+}
+
+// Create
+
+// CreateFromOldSub
+
+// SetupActivities updates a subscriber.
+func (c *Client) SetupActivities(date time.Time) error {
+	subs, err := c.GetActive(0, 10000)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to put")
 	}
 	// TODO: implement
 	_ = subs
+
 	return nil
 }
 
@@ -98,7 +124,3 @@ func (c *Client) SetupActivity(date time.Time) error {
 // func (c *Client) ChangeServings(subEmail string, servings int8, vegetarian bool) error {
 // 	// rememver to change tags
 // }
-
-func setup(ctx context.Context) error {
-	return nil
-}

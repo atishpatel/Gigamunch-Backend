@@ -1,8 +1,9 @@
- [[define "campaign-logger"]]
+[[define "campaign-logger"]]
 <!-- TODO: add logging of url params utm campaigns -->
 <!-- Page campaigns -->
 [[if .CampaignName]]
-<div id="CampaignName">[[.CampaignName]]</div>
+<div id="CampaignName"
+     style="display:none">[[.CampaignName]]</div>
 <script>
   if (window.localStorage) {
     // add campaigns tag
@@ -30,7 +31,8 @@
 [[end]]
 <!-- Referred Email  -->
 [[if .ReferenceEmail]]
-<div id="ReferenceEmail">[[.ReferenceEmail]]</div>
+<div id="ReferenceEmail"
+     style="display:none">[[.ReferenceEmail]]</div>
 <script>
   if (window.localStorage) {
     // add referrer email

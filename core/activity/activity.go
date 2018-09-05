@@ -46,3 +46,21 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 		serverInfo: serverInfo,
 	}, nil
 }
+
+// Create
+
+// Process
+
+// Discount
+
+// RefundAndSkip
+
+// Refund
+
+// Skip
+
+// Unskip
+
+// Paid
+
+// ChangeServings
