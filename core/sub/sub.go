@@ -134,12 +134,11 @@ func (c *Client) Deactivate(email string) error {
 
 // SetupActivities updates a subscriber.
 func (c *Client) SetupActivities(date time.Time) error {
-	subs, err := c.GetActive(0, 10000)
-	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to put")
-	}
+	// subs, err := c.GetActive(0, 10000)
+	// if err != nil {
+	// 	return errDatastore.WithError(err).Annotate("failed to put")
+	// }
 	// TODO: implement
-	_ = subs
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
 	return suboldC.SetupSubLogs(date)
 }

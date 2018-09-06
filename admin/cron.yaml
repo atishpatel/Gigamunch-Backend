@@ -1,6 +1,6 @@
 
 cron:
-- description: "Process Subscribers"
+- description: "Setup Subscriber Activities"
   url: /admin/task/SetupActivites
   schedule: every day 20:00
   timezone: America/Chicago
