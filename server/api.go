@@ -3,13 +3,18 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"strings"
+	"sync"
 	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
-	"github.com/atishpatel/Gigamunch-Backend/auth"
+	authold "github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
@@ -24,6 +29,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
+	"github.com/gorilla/schema"
+	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
@@ -37,7 +44,13 @@ var (
 )
 
 func addAPIRoutes(r *httprouter.Router) {
-	http.HandleFunc("/api/v1/Login", handler(Login))
+	s := new(server)
+	err := s.setup()
+	if err != nil {
+		log.Fatal("failed to setup", err)
+	}
+
+	http.HandleFunc("/api/v1/Login", s.handler(s.Login))
 	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
 	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
 	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
@@ -80,20 +93,31 @@ func validateSubmitGiftCheckoutReq(r *giftCheckout) error {
 }
 
 // Login updates a user's payment.
-func Login(ctx context.Context, r *http.Request) Response {
+func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.TokenOnlyReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.TokenOnlyResp{}
 
-	_, authToken, err := auth.GetSessionWithGToken(ctx, req.Token)
+	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to get auth.NewClient")
+	}
+
+	usr, err := authC.Verify(req.Token)
+	if err != nil {
+		return errors.Annotate(err, "failed to auth.Verify")
+	}
+	// TODO: remove log
+	log.Infof(ctx, "usr: %+v", usr)
+	// TODO: find / create user and update token
+
+	_, authToken, err := authold.GetSessionWithGToken(ctx, req.Token)
 	if err != nil {
 		resp.Error = errors.GetSharedError(err)
 		return resp
@@ -107,12 +131,10 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	req := new(pb.UpdatePaymentReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	email := strings.TrimSpace(strings.ToLower(req.Email))
@@ -185,11 +207,10 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	req := new(pb.SubmitCheckoutReq)
 	var err error
 	// decode request
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
@@ -439,11 +460,10 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	req := new(giftCheckout)
 	var err error
 	// decode request
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
@@ -774,12 +794,10 @@ func DeviceCheckin(ctx context.Context, r *http.Request) Response {
 	req := new(healthcheck.Device)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 
@@ -792,13 +810,129 @@ func DeviceCheckin(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
-// Response is a response to a rpc call. All responses contain an error.
-type Response interface {
-	GetError() *shared.Error
+// server
+type server struct {
+	once       sync.Once
+	serverInfo *common.ServerInfo
+	db         *db.Client
+	sqlDB      *sqlx.DB
+	log        *logging.Client
 }
 
-func closeRequestBody(r *http.Request) {
-	_ = r.Body.Close()
+func (s *server) setup() error {
+	var err error
+	projID := os.Getenv("PROJECT_ID")
+	if projID == "" {
+		log.Fatal(`You need to set the environment variable "PROJECT_ID"`)
+	}
+	// Setup sql db
+	sqlConnectionString := os.Getenv("MYSQL_CONNECTION")
+	if sqlConnectionString == "" {
+		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
+	}
+	if appengine.IsDevAppServer() {
+		sqlConnectionString = "root@/gigamunch"
+	}
+	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString)
+	if err != nil {
+		return fmt.Errorf("failed to get sql database client: %+v", err)
+	}
+	s.serverInfo = &common.ServerInfo{
+		ProjectID:           projID,
+		IsStandardAppEngine: true,
+	}
+	return nil
+}
+
+func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		if strings.Contains(r.URL.Hostname(), "gigamunchapp.com") {
+			url := "https://eatgigamunch.com" + r.URL.Path
+			http.Redirect(w, r, url, http.StatusPermanentRedirect)
+			return
+		}
+		// get context
+		ctx := appengine.NewContext(r)
+		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
+		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			// TODO:
+			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
+			return
+		}
+		// create logging client
+		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
+		if err != nil {
+			errString := fmt.Sprintf("failed to get new logging client: %+v", err)
+			logging.Errorf(ctx, errString)
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(errString))
+		}
+		// call function
+		resp := f(ctx, w, r, log)
+		if resp == nil {
+			return
+		}
+		// Log errors
+		sharedErr := resp.GetError()
+		if sharedErr == nil {
+			sharedErr = &shared.Error{
+				Code: shared.Code_Success,
+			}
+		}
+		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
+			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
+			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
+			w.WriteHeader(int(sharedErr.Code))
+			// Wrap error in ErrorOnlyResp
+			if _, ok := resp.(errors.ErrorWithCode); ok {
+				resp = &pb.ErrorOnlyResp{
+					Error: sharedErr,
+				}
+			}
+		}
+		// encode
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(resp)
+		if err != nil {
+			w.WriteHeader(int(resp.GetError().Code))
+			_, _ = w.Write([]byte(fmt.Sprintf("failed to encode response: %+v", err)))
+			return
+		}
+	}
+}
+
+// Request helpers
+func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
+	if r.Method == "GET" {
+		decoder := schema.NewDecoder()
+		err := decoder.Decode(v, r.URL.Query())
+		logging.Infof(ctx, "Query: %+v", r.URL.Query())
+		if err != nil {
+			return err
+		}
+	} else {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			return err
+		}
+		logging.Infof(ctx, "Body: %s", body)
+		err = json.Unmarshal(body, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func failedToDecode(err error) *pb.ErrorOnlyResp {
@@ -806,6 +940,13 @@ func failedToDecode(err error) *pb.ErrorOnlyResp {
 		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
 	}
 }
+
+// Response is a response to a rpc call. All responses contain an error.
+type Response interface {
+	GetError() *shared.Error
+}
+
+type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {
 	dbC, err := db.NewClient(ctx, projID, nil)
