@@ -138,7 +138,7 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 		if err != nil {
 			log.Errorf(ctx, "failed to lead.NewClient: %+v", err)
 		}
-		err = leadC.Create(email)
+		err = leadC.Create(email, req.URL.Path)
 		if err != nil {
 			log.Errorf(ctx, "failed to lead.Create: %+v", err)
 		}

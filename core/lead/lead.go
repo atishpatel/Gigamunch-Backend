@@ -48,7 +48,7 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, serverIn
 }
 
 // Create creates or updates a business lead.
-func (c *Client) Create(email string) error {
+func (c *Client) Create(email string, signupURL ...string) error {
 	lead := &Lead{
 		Email:           email,
 		CreatedDatetime: time.Now(),
@@ -61,7 +61,7 @@ func (c *Client) Create(email string) error {
 	}
 	if !appengine.IsDevAppServer() && !strings.Contains(email, "@test.com") {
 		messageC := message.New(c.ctx)
-		_ = messageC.SendAdminSMS("6153975516", fmt.Sprintf("New subscriber lead. \nEmail: %s", email))
+		_ = messageC.SendAdminSMS("6153975516", fmt.Sprintf("New subscriber lead. \nEmail: %s\nURL: %s", email, signupURL))
 	}
 
 	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
