@@ -92,11 +92,6 @@ func NewWithLogging(ctx context.Context, log *logging.Client) *Client {
 	}
 }
 
-func getProjID() string {
-	projID = os.Getenv("PROJECTID")
-	return projID
-}
-
 // GetSubEmails gets a list of unique subscriber emails within the date range.
 func (c *Client) GetSubEmails(from, to time.Time) ([]string, error) {
 	rows, err := mysqlDB.Query(selectSubLogEmails, from.Format(dateFormat), to.Format(dateFormat))

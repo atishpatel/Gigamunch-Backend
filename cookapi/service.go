@@ -45,7 +45,7 @@ func handleResp(ctx context.Context, fnName string, resp coder) {
 		return
 	} else if code != 0 {
 		if projectID == "" {
-			projectID = os.Getenv("PROJECTID")
+			projectID = os.Getenv("PROJECT_ID")
 		}
 		utils.Criticalf(ctx, "%s COOKAPI: %s err: %+v", projectID, fnName, resp)
 	}
@@ -73,7 +73,7 @@ type Service struct{}
 
 func main() {
 	if projectID == "" {
-		projectID = os.Getenv("PROJECTID")
+		projectID = os.Getenv("PROJECT_ID")
 	}
 	getDomainString()
 	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)

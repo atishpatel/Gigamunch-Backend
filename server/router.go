@@ -31,7 +31,7 @@ func init() {
 		log.Fatalf("Failed to read cookSignup page %#v", err)
 	}
 
-	projID = os.Getenv("PROJECTID")
+	projID = os.Getenv("PROJECT_ID")
 
 	r := httprouter.New()
 

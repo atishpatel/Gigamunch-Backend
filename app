@@ -68,7 +68,7 @@ if [[ $1 == "deploy" ]]; then
   echo "Deploying the following to $project"
   if [[ $* == *cook* ]]; then
     echo "Deploying cook:"
-    cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
+    cat cookapi/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
     gcloud app deploy cookapi/app.yaml --project=$project --version=1 --quiet
   fi
   if [[ $* == *admin* ]]; then
@@ -78,7 +78,7 @@ if [[ $1 == "deploy" ]]; then
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
-    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
+    cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
     gcloud app deploy server/app.yaml  --project=$project --version=2 --quiet
   fi
   if [[ $* == *queue* ]]; then
