@@ -50,6 +50,9 @@ func init() {
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
+	// Activity
+	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
+	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
@@ -290,6 +293,9 @@ type Response interface {
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
+	if len(s) == 10 {
+		s += "T12:12:12.000Z"
+	}
 	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
 		return time.Time{}

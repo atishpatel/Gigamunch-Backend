@@ -2,7 +2,7 @@
 
 const gulp = require('gulp');
 const through = require('through2')
-const PluginError = require('gulp-util').PluginError;
+const PluginError = require('plugin-error');
 
 const PLUGIN_NAME = 'proto2typescript-interfaces';
 
