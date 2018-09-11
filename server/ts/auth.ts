@@ -79,10 +79,7 @@ firebase.auth().onAuthStateChanged((user: FBUser) => {
     // is signed in
     eventName = EventSignedIn;
     user.getIdToken(false).then((idToken: string) => {
-      console.log('login in');
-      Login(idToken).then((resp) => {
-        console.log('login resp: ', resp);
-      });
+      Login(idToken);
     });
     APP.User = user;
     // fire event
