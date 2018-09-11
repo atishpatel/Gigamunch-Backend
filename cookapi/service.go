@@ -45,7 +45,7 @@ func handleResp(ctx context.Context, fnName string, resp coder) {
 		return
 	} else if code != 0 {
 		if projectID == "" {
-			projectID = os.Getenv("PROJECTID")
+			projectID = os.Getenv("PROJECT_ID")
 		}
 		utils.Criticalf(ctx, "%s COOKAPI: %s err: %+v", projectID, fnName, resp)
 	}
@@ -73,7 +73,7 @@ type Service struct{}
 
 func main() {
 	if projectID == "" {
-		projectID = os.Getenv("PROJECTID")
+		projectID = os.Getenv("PROJECT_ID")
 	}
 	getDomainString()
 	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
@@ -547,7 +547,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	logging.Infof(ctx, "Params: %+v", params)
 	subC := sub.New(ctx)
-	log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/cookapi/UpdateDrip")
+	log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/cookapi/UpdateDrip")
 	if err != nil {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
 		return

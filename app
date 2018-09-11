@@ -66,16 +66,9 @@ if [[ $1 == "deploy" ]]; then
     domain="eatgigamunch"
   fi
   echo "Deploying the following to $project"
-  if [[ $* == *eater* ]]; then
-    echo "Deploying eater:"
-    cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > eaterapi/app.yaml
-    cd eaterapi
-    aedeploy gcloud app deploy --project=$project --version=1
-    cd ..
-  fi
   if [[ $* == *cook* ]]; then
     echo "Deploying cook:"
-    cat cookapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
+    cat cookapi/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > cookapi/app.yaml
     gcloud app deploy cookapi/app.yaml --project=$project --version=1 --quiet
   fi
   if [[ $* == *admin* ]]; then
@@ -85,7 +78,7 @@ if [[ $1 == "deploy" ]]; then
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
-    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
+    cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
     gcloud app deploy server/app.yaml  --project=$project --version=2 --quiet
   fi
   if [[ $* == *queue* ]]; then
@@ -112,14 +105,9 @@ if [[ $1 == "serve" ]]; then
   # start goapp serve
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
-  if [[ $2 == "eater" ]]; then
-    echo "Starting eaterapi and server."
-    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
-    cat eaterapi/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/SQL_IP/$sqlip/g" > eaterapi/app.yaml
-    dev_appserver.py --datastore_path ./.datastore eaterapi/app.yaml server/app.yaml
-  fi
   if [[ $2 == "admin" ]]; then
     echo "Starting admin:"
+    cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     dev_appserver.py --datastore_path ./.datastore admin/app.yaml&
     cd admin/app
     gulp build&
@@ -128,7 +116,7 @@ if [[ $1 == "serve" ]]; then
   fi
   if [[ $2 == "server" ]]; then
     echo "Starting server:"
-    cat server/app.yaml.template | sed "s/PROJECT_ID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g" > server/app.yaml
+    cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
     dev_appserver.py --datastore_path ./.datastore server/app.yaml&
     cd server
     gulp build&
@@ -153,9 +141,9 @@ fi
 if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo "Here are the commands supported by the script:"
   echo -e "\tapp [help|serve|build|deploy]"
-  echo -e "\tapp serve [eater|admin|*]"
+  echo -e "\tapp serve [server|admin]"
   echo -e "\tapp build [server|admin|cook|proto]"
-  echo -e "\tapp deploy [--prod|-p] [admin|cook|eater|server|queue|cron]"
+  echo -e "\tapp deploy [--prod|-p] [admin|cook|server|queue|cron]"
   exit 0
 fi
 

@@ -1,8 +1,8 @@
 export function GetToken() {
-    const name = 'AUTHTKN=';
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
+    var name = 'AUTHTKN=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
         while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
@@ -11,7 +11,7 @@ export function GetToken() {
         }
     }
     if (location.hostname === 'localhost') {
-        const tnk = window.localStorage.getItem('AUTHTKN');
+        var tnk = window.localStorage.getItem('AUTHTKN');
         if (!tnk) {
             return '';
         }
@@ -20,12 +20,12 @@ export function GetToken() {
     return '';
 }
 export function SetToken(cvalue) {
-    const jwt = GetJWT(cvalue);
-    const d = new Date(0);
+    var jwt = GetJWT(cvalue);
+    var d = new Date(0);
     if (jwt) {
         d.setUTCSeconds(jwt.exp);
     }
-    document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
+    document.cookie = "AUTHTKN=" + cvalue + "; expires=" + d.toUTCString() + "; path=/";
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
     }
@@ -34,11 +34,11 @@ export function GetJWT(tkn) {
     if (!tkn) {
         return null;
     }
-    const tknConv = tkn.replace(/[+\/]/g, (m0) => {
+    var tknConv = tkn.replace(/[+\/]/g, function (m0) {
         return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');
-    const userString = tknConv.split('.')[1].replace(/\s/g, '');
-    return JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
+    var userString = tknConv.split('.')[1].replace(/\s/g, '');
+    return JSON.parse(window.atob(userString.replace(/[-_]/g, function (m0) {
         return m0 === '-' ? '+' : '/';
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
 }

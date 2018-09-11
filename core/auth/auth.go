@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	userIDClaim = "userID"
+	userIDClaim = "user_id"
 	delim       = ";%~&~%;"
 )
 
@@ -108,7 +108,11 @@ func (c *Client) Verify(token string) (*common.User, error) {
 	if ok {
 		userID, _ = strconv.ParseInt(userIDTmp.(string), 2, 64)
 	}
-	admin := claims["admin"].(bool)
+	var admin bool
+	adminTmp, ok := claims["admin"]
+	if ok {
+		admin = adminTmp.(bool)
+	}
 	nameSplit := strings.Split(name, delim)
 	var firstName, lastName string
 	if len(nameSplit) >= 1 {
@@ -161,13 +165,13 @@ func (c *Client) UpdateUserName(authID, firstName, lastName string) error {
 }
 
 // AddCustomClaim adds a custom claim to a user token.
-func (c *Client) AddCustomClaim(userIDOrEmail, key string, value interface{}) error {
+func (c *Client) AddCustomClaim(authIDOrEmail, key string, value interface{}) error {
 	var userRecord *fba.UserRecord
 	var err error
-	if strings.Contains(userIDOrEmail, "@") {
-		userRecord, err = fbAuth.GetUserByEmail(c.ctx, userIDOrEmail)
+	if strings.Contains(authIDOrEmail, "@") {
+		userRecord, err = fbAuth.GetUserByEmail(c.ctx, authIDOrEmail)
 	} else {
-		userRecord, err = fbAuth.GetUser(c.ctx, userIDOrEmail)
+		userRecord, err = fbAuth.GetUser(c.ctx, authIDOrEmail)
 	}
 	if err != nil {
 		return errInvalidArgument.WithMessage("Invalid email")

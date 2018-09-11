@@ -1,31 +1,23 @@
-function GetToken() {
-    const name = 'AUTHTKN=';
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    if (location.hostname === 'localhost') {
-        const tnk = window.localStorage.getItem('AUTHTKN');
-        if (!tnk) {
-            return '';
-        }
-        return tnk;
-    }
-    return '';
+function GetURLParmas() {
+    var vars = {};
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+        vars[key] = value;
+        return value;
+    });
+    return vars;
 }
+
+var utils = /*#__PURE__*/Object.freeze({
+    GetURLParmas: GetURLParmas
+});
+
 function SetToken(cvalue) {
-    const jwt = GetJWT(cvalue);
-    const d = new Date(0);
+    var jwt = GetJWT(cvalue);
+    var d = new Date(0);
     if (jwt) {
         d.setUTCSeconds(jwt.exp);
     }
-    document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
+    document.cookie = "AUTHTKN=" + cvalue + "; expires=" + d.toUTCString() + "; path=/";
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
     }
@@ -34,81 +26,21 @@ function GetJWT(tkn) {
     if (!tkn) {
         return null;
     }
-    const tknConv = tkn.replace(/[+\/]/g, (m0) => {
+    var tknConv = tkn.replace(/[+\/]/g, function (m0) {
         return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');
-    const userString = tknConv.split('.')[1].replace(/\s/g, '');
-    return JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
+    var userString = tknConv.split('.')[1].replace(/\s/g, '');
+    return JSON.parse(window.atob(userString.replace(/[-_]/g, function (m0) {
         return m0 === '-' ? '+' : '/';
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
 }
 
-addEventListener('UserUpdated', UpdateUser);
-function IsLoggedIn() {
-    const tkn = GetToken();
-    if (tkn === '') {
-        return false;
-    }
-    return true;
-}
-let ID = '';
-let Email = '';
-let FirstName = '';
-let LastName = '';
-let PhotoURL = '';
-function UpdateUser() {
-    const tkn = GetToken();
-    if (!tkn) {
-        return;
-    }
-    const jwt = GetJWT(tkn);
-    if (!jwt) {
-        return;
-    }
-    ID = jwt.id;
-    Email = jwt.email;
-    FirstName = jwt.first_name;
-    LastName = jwt.last_name;
-    PhotoURL = jwt.photo_url;
-}
-function IsAdmin() {
-    const jwt = GetJWT(GetToken());
-    if (!jwt) {
-        return false;
-    }
-    return getKthBit(jwt.perm, 2);
-}
-function HasCreditCard() {
-    const jwt = GetJWT(GetToken());
-    if (!jwt) {
-        return false;
-    }
-    return getKthBit(jwt.perm, 0);
-}
-function getKthBit(x, k) {
-    return (((x >> k) & 1) === 1);
-}
-UpdateUser();
-
-
-var user = Object.freeze({
-	IsLoggedIn: IsLoggedIn,
-	get ID () { return ID; },
-	get Email () { return Email; },
-	get FirstName () { return FirstName; },
-	get LastName () { return LastName; },
-	get PhotoURL () { return PhotoURL; },
-	UpdateUser: UpdateUser,
-	IsAdmin: IsAdmin,
-	HasCreditCard: HasCreditCard
-});
-
 function Login(token) {
-    const url = '/api/v1/Login';
-    const req = {
-        token,
+    var url = '/api/v1/Login';
+    var req = {
+        token: token,
     };
-    return callFetch(url, 'POST', req).then((resp) => {
+    return callFetch(url, 'POST', req).then(function (resp) {
         if (resp && resp.token) {
             SetToken(resp.token);
         }
@@ -117,24 +49,101 @@ function Login(token) {
 }
 function callFetch(url, method, body) {
     return fetch(url, {
-        method,
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-    }).then((resp) => {
+    }).then(function (resp) {
         return resp.json();
-    }).catch((err) => {
+    }).catch(function (err) {
         console.error('failed to callFetch', err);
-        console.error('details: ', err.code, err.name, err.message, err.detail);
     });
 }
 
-
-var service = Object.freeze({
-	Login: Login
+var service = /*#__PURE__*/Object.freeze({
+    Login: Login
 });
 
+function SignOut() {
+    firebase.auth().signOut();
+}
+function SetupFirebase() {
+    var config;
+    if (APP.IsProd) {
+        config = {
+            apiKey: 'AIzaSyC-1vqT4YIKXVmrGkaoVSj1BJnm48NxlT0',
+            authDomain: 'gigamunch-omninexus.firebaseapp.com',
+            databaseURL: 'https://gigamunch-omninexus.firebaseio.com',
+            projectId: 'gigamunch-omninexus',
+            storageBucket: 'gigamunch-omninexus.appspot.com',
+            messagingSenderId: '837147123677',
+        };
+    }
+    else {
+        config = {
+            apiKey: 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g',
+            authDomain: 'gigamunch-omninexus-dev.firebaseapp.com',
+            databaseURL: 'https://gigamunch-omninexus-dev.firebaseio.com',
+            projectId: 'gigamunch-omninexus-dev',
+            storageBucket: 'gigamunch-omninexus-dev.appspot.com',
+            messagingSenderId: '108585202286',
+        };
+    }
+    firebase.initializeApp(config);
+}
+function SetupFirebaseAuthUI(elementID) {
+    var uiConfig = {
+        tosUrl: '/terms',
+        privacyPolicyUrl: '/privacy',
+        signInSuccessUrl: 'sub',
+        signInOptions: [
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            {
+                provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+                scopes: [
+                    'public_profile',
+                    'email',
+                    'user_likes',
+                    'user_friends',
+                ],
+            },
+            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        ],
+    };
+    var ui = new firebaseui.auth.AuthUI(firebase.auth());
+    ui.start(elementID, uiConfig);
+}
+var EventSignedOut = 'signed-out';
+var EventSignedIn = 'signed-in';
+SetupFirebase();
+firebase.auth().onAuthStateChanged(function (user) {
+    console.log('user', user);
+    var eventName;
+    if (!user) {
+        eventName = EventSignedOut;
+    }
+    else {
+        eventName = EventSignedIn;
+        user.getIdToken(false).then(function (idToken) {
+            Login(idToken);
+        });
+        APP.User = user;
+        var event_1 = document.createEvent('Event');
+        event_1.initEvent(eventName, true, true);
+        window.dispatchEvent(event_1);
+    }
+});
+
+var auth = /*#__PURE__*/Object.freeze({
+    SignOut: SignOut,
+    SetupFirebase: SetupFirebase,
+    SetupFirebaseAuthUI: SetupFirebaseAuthUI,
+    EventSignedOut: EventSignedOut,
+    EventSignedIn: EventSignedIn
+});
+
+APP.Utils = utils;
 APP.Service = service;
-APP.User = user;
+APP.Auth = auth;
 console.log('app.js loaded');

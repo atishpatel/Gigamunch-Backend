@@ -20,7 +20,7 @@ const (
 	ProcessInquiryQueue      = "process-inquiry"
 	ProcessInquiryURL        = "/process-inquiry"
 	ProcessSubscriptionQueue = "process-subscription"
-	ProcessSubscriptionURL   = "/process-subscription"
+	ProcessSubscriptionURL   = "/admin/task/ProcessActivity"
 	SendEmailQueue           = "send-email"
 	SendEmailURL             = "/send-email"
 )

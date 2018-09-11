@@ -1,5 +1,4 @@
 import {
-  GetToken,
   SetToken,
 } from './token';
 
@@ -21,7 +20,7 @@ export function Login(token: string): Promise<any> {
   });
 }
 
-function callFetch(url: string, method: string, body: object): Promise<Response> {
+function callFetch(url: string, method: string, body: object): Promise<APIResponse> {
   return fetch(url, {
     method,
     headers: {
@@ -33,6 +32,12 @@ function callFetch(url: string, method: string, body: object): Promise<Response>
     return resp.json();
   }).catch((err: Error) => {
     console.error('failed to callFetch', err);
-    console.error('details: ', err.code, err.name, err.message, err.detail);
+    // console.error('details: ', err.code, err.name, err.message, err.detail);
   });
 }
+
+interface APIResponse {
+  token: string;
+  json(): APIResponse;
+}
+

@@ -10,12 +10,14 @@ import (
 	"strings"
 	"time"
 
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
@@ -27,7 +29,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 	from = sub.GetCleanPhoneNumber(from)
 	body := r.FormValue("Body")
 	var name, email string
-	subC := sub.NewWithLogging(ctx, log)
+	subC := subold.NewWithLogging(ctx, log)
 
 	messageC := message.New(ctx)
 	if from == "615-545-4989" {
@@ -139,8 +141,8 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
 	ctx = context.WithValue(ctx, common.ContextUserEmail, email)
-	subC := sub.NewWithLogging(ctx, log)
-	subscriber, err := subC.GetSubscriber(email)
+	suboldC := subold.NewWithLogging(ctx, log)
+	subscriber, err := suboldC.GetSubscriber(email)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to find subscriber: %s, they're probably not in our system: %+v", email, err)
 		return nil
@@ -177,7 +179,11 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 		return nil
 	}
 	//if it's Tuesday - Saturday, skip them
-	err = subC.Skip(skipDate, email, reason)
+	activityC, err := activity.NewClient(ctx, s.log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.GetErrorWithCode(err)
+	}
+	err = activityC.Skip(skipDate, email, reason)
 	if err != nil {
 		err = errors.GetErrorWithCode(err).Annotate("failed to sub.Skip")
 		utils.Criticalf(ctx, "Typeform webhook: %+v", err)

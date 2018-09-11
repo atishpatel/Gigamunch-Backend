@@ -2,11 +2,15 @@ package sub
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -30,8 +34,11 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
-	if sqlC == nil {
-		return nil, errInternal.Annotate("failed to get sql client")
+	// if sqlC == nil {
+	// 	return nil, errInternal.Annotate("failed to get sql client")
+	// }
+	if dbC == nil {
+		return nil, fmt.Errorf("failed to get db")
 	}
 	if serverInfo == nil {
 		return nil, errInternal.Annotate("failed to get server info")
@@ -71,17 +78,34 @@ func (c *Client) GetActive(start, limit int) ([]*Subscriber, error) {
 // func (c *Client) get(id int64, email string) (*Subscriber, error)
 
 // GetByPhoneNumber gets a subscriber by phone number.
+// func (c *Client) GetByPhoneNumber() error {
+// 	// TODO: implement
+// 	return nil
+// }
 
 // GetHasSubscribed returns a list of all subscribers ever.
+// func (c *Client) GetHasSubscribed() error {
+// 	// TODO: implement
+// 	return nil
+// }
 
-// ChangeServingsPermanently
+// ChangeServingsPermanently changes a subscriber's servings permanently.
+func (c *Client) ChangeServingsPermanently(email string, servings int8, vegetarian bool) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.ChangeServingsPermanently(email, servings, vegetarian, c.serverInfo)
+}
 
-// UpdatePaymentToken
+// UpdatePaymentToken updates a user payment method token.
+func (c *Client) UpdatePaymentToken(email, paymentMethodToken string) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.UpdatePaymentToken(email, paymentMethodToken)
+}
 
 // Update updates a subscriber.
 func (c *Client) Update(sub *Subscriber) error {
 	// TODO: log change
-
 	key := c.db.IDKey(c.ctx, kind, sub.ID)
 	_, err := c.db.Put(c.ctx, key, sub)
 	if err != nil {
@@ -90,12 +114,18 @@ func (c *Client) Update(sub *Subscriber) error {
 	return nil
 }
 
-// Activate
+// Activate activates an account.
+// func (c *Client) Activate() error {
+// 	// TODO: implement
+// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
+// 	return nil
+// }
 
 // Deactivate deactivates an account
-func (c *Client) Deactivate() error {
+func (c *Client) Deactivate(email string) error {
 	// TODO: implement
-	return nil
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.Cancel(email, c.log, c.serverInfo)
 }
 
 // Create
@@ -104,23 +134,40 @@ func (c *Client) Deactivate() error {
 
 // SetupActivities updates a subscriber.
 func (c *Client) SetupActivities(date time.Time) error {
-	subs, err := c.GetActive(0, 10000)
-	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to put")
-	}
+	// subs, err := c.GetActive(0, 10000)
+	// if err != nil {
+	// 	return errDatastore.WithError(err).Annotate("failed to put")
+	// }
 	// TODO: implement
-	_ = subs
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.SetupSubLogs(date)
+}
 
+// IncrementPageCount is when a user just leaves their email.
+func (c *Client) IncrementPageCount(email string, referralPageOpens int, referredPageOpens int) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	s, err := suboldC.GetSubscriber(email)
+	if err != nil {
+		return err
+	}
+	s.ReferralPageOpens += referralPageOpens
+	s.ReferredPageOpens += referredPageOpens
+	err = subold.Put(c.ctx, email, s)
+	if err != nil {
+		errDatastore.WithError(err).Annotate("failed to subold.put")
+	}
 	return nil
 }
 
-// func (c *Client) Deactivate(id string) error {
-
-// }
-
-// func (c *Client) UpdatePaymentToken(subEmail string, paymentMethodToken string) error {
-// }
-
-// func (c *Client) ChangeServings(subEmail string, servings int8, vegetarian bool) error {
-// 	// rememver to change tags
-// }
+// GetCleanPhoneNumber takes a raw phone number and formats it to clean phone number.
+func GetCleanPhoneNumber(rawNumber string) string {
+	reg := regexp.MustCompile("[^0-9]+")
+	cleanNumber := reg.ReplaceAllString(rawNumber, "")
+	if len(cleanNumber) < 10 {
+		return cleanNumber
+	}
+	cleanNumber = cleanNumber[len(cleanNumber)-10:]
+	cleanNumber = cleanNumber[:3] + "-" + cleanNumber[3:6] + "-" + cleanNumber[6:]
+	return cleanNumber
+}

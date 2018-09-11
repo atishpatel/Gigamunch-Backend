@@ -54,6 +54,10 @@ func put(ctx context.Context, id string, i *SubscriptionSignUp) error {
 	return err
 }
 
+func Put(ctx context.Context, id string, i *SubscriptionSignUp) error {
+	return put(ctx, id, i)
+}
+
 func putMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
 	keys := make([]*datastore.Key, len(subs))
 	for i := range subs {

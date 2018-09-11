@@ -10,6 +10,7 @@ import (
 	"time"
 
 	// driver for mysql
+	"cloud.google.com/go/datastore"
 	mysql "github.com/go-sql-driver/mysql"
 
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -39,6 +40,7 @@ const (
 	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),sub_email,count(sub_email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount) FROM sub WHERE date>'2017-04-08' AND date<? GROUP BY sub_email ORDER BY mn"
 	updatePaidSubLogStatement                = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
 	updateSkipSubLogStatement                = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
+	updateUnskipSubLogStatement              = "UPDATE `sub` SET skip=0 WHERE date='%s' AND sub_email='%s'"
 	updateRefundedAndSkipSubLogStatement     = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
 	updateFreeSubLogStatment                 = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
 	updateDiscountSubLogStatment             = "UPDATE `sub` SET discount_amount=?, discount_percent=? WHERE date=? AND sub_email=?"
@@ -56,12 +58,13 @@ var (
 	mysqlDB     *sql.DB
 	errSQLDB    = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
 	// errBuffer           = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "An unknown error occured."}
-	errDatastore        = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
-	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
-	errEntrySkipped     = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
-	errNoSuchEntry      = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
-	errDuplicateEntry   = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
-	projID              string
+	errDatastore         = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with datastore."}
+	errDatastoreNotFound = errors.ErrorWithCode{Code: errors.CodeNotFound, Message: "Not found."}
+	errInvalidParameter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
+	errEntrySkipped      = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
+	errNoSuchEntry       = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
+	errDuplicateEntry    = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
+	projID               string
 )
 
 // Client is the client fro this package.
@@ -89,11 +92,6 @@ func NewWithLogging(ctx context.Context, log *logging.Client) *Client {
 	}
 }
 
-func getProjID() string {
-	projID = os.Getenv("PROJECTID")
-	return projID
-}
-
 // GetSubEmails gets a list of unique subscriber emails within the date range.
 func (c *Client) GetSubEmails(from, to time.Time) ([]string, error) {
 	rows, err := mysqlDB.Query(selectSubLogEmails, from.Format(dateFormat), to.Format(dateFormat))
@@ -118,6 +116,9 @@ func (c *Client) GetSubscriber(email string) (*SubscriptionSignUp, error) {
 		return nil, errInvalidParameter.Wrap("emails cannot be empty.")
 	}
 	subs, err := c.GetSubscribers([]string{email})
+	if err == datastore.ErrNoSuchEntity {
+		return nil, errDatastoreNotFound
+	}
 	if err != nil || len(subs) != 1 {
 		return nil, errors.Wrap("failed to c.GetSubscribers", err)
 	}
@@ -144,7 +145,7 @@ func (c *Client) GetSubscribersByPhoneNumber(number string) ([]*SubscriptionSign
 	if number == "" {
 		return nil, errInvalidParameter.Wrap("number cannot be empty.")
 	}
-	cleanNumber := GetCleanPhoneNumber(number)
+	cleanNumber := getCleanPhoneNumber(number)
 	subs, err := getSubscribersByPhoneNumber(c.ctx, cleanNumber)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
@@ -540,7 +541,7 @@ func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, 
 }
 
 // ChangeServingsPermanently changes a subscriber's servings permanently for all bags from now onwards.
-func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, vegetarian bool, log *logging.Client, serverInfo *common.ServerInfo) error {
+func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, vegetarian bool, serverInfo *common.ServerInfo) error {
 	// insert or update
 	if subEmail == "" || servings < 1 {
 		return errInvalidParameter.Wrapf("expected(actual): subEmail(%s) servings(%f)", subEmail, servings)
@@ -577,7 +578,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		c.log.SubServingsChangedPermanently(0, subEmail, oldServings, nonvegServings, oldVegServings, vegServings)
 	}
 
-	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
+	mailC, err := mail.NewClient(c.ctx, c.log, serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to mail.NewClient")
 	}
@@ -687,6 +688,44 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 	if c.log != nil {
 		utils.Infof(c.ctx, "log not nil. logging skip")
 		c.log.SubSkip(date.Format(time.RFC3339), 0, subEmail, reason)
+	} else {
+		utils.Infof(c.ctx, "log nil")
+	}
+	return nil
+}
+
+// Unskip Unskips that subscription for that day.
+func (c *Client) Unskip(date time.Time, subEmail string) error {
+	s, err := c.GetSubscriber(subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.GetSubscriber", err)
+	}
+	// insert or update
+	_, err = c.Get(date, subEmail)
+	if err != nil {
+		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
+			return errors.Wrap("failed to sub.Get", err)
+		}
+		// insert
+		// var s *SubscriptionSignUp
+		// s, err = get(c.ctx, subEmail)
+		// if err != nil {
+		// 	return errDatastore.WithError(err).Wrap("failed to get")
+		// }
+		servings := s.Servings + s.VegetarianServings
+		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		if err != nil {
+			return errors.Wrap("failed to sub.Setup", err)
+		}
+	}
+	st := fmt.Sprintf(updateUnskipSubLogStatement, date.Format(dateFormat), subEmail)
+	_, err = mysqlDB.Exec(st)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateUnskipSubLogStatement statement.")
+	}
+	if c.log != nil {
+		utils.Infof(c.ctx, "log not nil. logging skip")
+		c.log.SubUnskip(date.Format(time.RFC3339), 0, subEmail)
 	} else {
 		utils.Infof(c.ctx, "log nil")
 	}

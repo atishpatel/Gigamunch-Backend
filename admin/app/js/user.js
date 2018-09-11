@@ -2,24 +2,24 @@ import { UserUpdated } from './utils/event';
 import { GetJWT, GetToken } from './utils/token';
 addEventListener(UserUpdated, UpdateUser);
 export function IsLoggedIn() {
-    const tkn = GetToken();
+    var tkn = GetToken();
     if (tkn === '') {
         return false;
     }
     return true;
 }
-export let ID = '';
-export let Email = '';
-export let FirstName = '';
-export let LastName = '';
-export let PhotoURL = '';
-export let Token = '';
+export var ID = '';
+export var Email = '';
+export var FirstName = '';
+export var LastName = '';
+export var PhotoURL = '';
+export var Token = '';
 export function UpdateUser() {
-    const tkn = GetToken();
+    var tkn = GetToken();
     if (!tkn) {
         return;
     }
-    const jwt = GetJWT(tkn);
+    var jwt = GetJWT(tkn);
     if (!jwt) {
         return;
     }
@@ -31,14 +31,14 @@ export function UpdateUser() {
     Token = tkn;
 }
 export function IsAdmin() {
-    const jwt = GetJWT(GetToken());
+    var jwt = GetJWT(GetToken());
     if (!jwt) {
         return false;
     }
     return getKthBit(jwt.perm, 2);
 }
 export function HasCreditCard() {
-    const jwt = GetJWT(GetToken());
+    var jwt = GetJWT(GetToken());
     if (!jwt) {
         return false;
     }

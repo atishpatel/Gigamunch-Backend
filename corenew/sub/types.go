@@ -74,11 +74,11 @@ func (s *SubscriptionSignUp) GetFirstDinnerDate() time.Time {
 // Note: Make sure to log old raw number to subscriber.
 func (s *SubscriptionSignUp) UpdatePhoneNumber(rawNumber string) {
 	s.RawPhoneNumber = rawNumber
-	s.PhoneNumber = GetCleanPhoneNumber(rawNumber)
+	s.PhoneNumber = getCleanPhoneNumber(rawNumber)
 }
 
-// GetCleanPhoneNumber takes a raw phone number and formats it to clean phone number.
-func GetCleanPhoneNumber(rawNumber string) string {
+// getCleanPhoneNumber takes a raw phone number and formats it to clean phone number.
+func getCleanPhoneNumber(rawNumber string) string {
 	reg := regexp.MustCompile("[^0-9]+")
 	cleanNumber := reg.ReplaceAllString(rawNumber, "")
 	if len(cleanNumber) < 10 {

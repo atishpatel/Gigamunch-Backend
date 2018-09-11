@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"golang.org/x/net/context"
 )
@@ -31,11 +31,11 @@ type CohortAnalysis struct {
 
 // GetGeneralStatsResp is a response for GetGeneralStats.
 type GetGeneralStatsResp struct {
-	Activities               []*sub.SublogSummary `json:"activities"`
-	WeeklyCohortAnalysis     *CohortAnalysis      `json:"weekly_cohort_analysis"`
-	WeeklyPaidCohortAnalysis *CohortAnalysis      `json:"weekly_paid_cohort_analysis"`
-	MonthlyCohortAnalysis    *CohortAnalysis      `json:"monthly_cohort_analysis"`
-	PercentCohortAnalysis    *CohortAnalysis      `json:"percent_cohort_analysis"`
+	Activities               []*subold.SublogSummary `json:"activities"`
+	WeeklyCohortAnalysis     *CohortAnalysis         `json:"weekly_cohort_analysis"`
+	WeeklyPaidCohortAnalysis *CohortAnalysis         `json:"weekly_paid_cohort_analysis"`
+	MonthlyCohortAnalysis    *CohortAnalysis         `json:"monthly_cohort_analysis"`
+	PercentCohortAnalysis    *CohortAnalysis         `json:"percent_cohort_analysis"`
 	ErrorOnlyResp
 }
 
@@ -53,16 +53,16 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) 
 		return resp, nil
 	}
 
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	// subs, err = subC.GetHasSubscribed(time.Now())
 	// if err != nil {
-	// 	resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetHasSubscribed")
+	// 	resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetHasSubscribed")
 	// 	return resp, nil
 	// }
 
 	activities, err := subC.GetSublogSummaries()
 	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to sub.GetSublogSummaries")
+		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetSublogSummaries")
 		return resp, nil
 	}
 	// resp.Activities = activities
@@ -72,7 +72,7 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) 
 	return resp, nil
 }
 
-func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
+func getWeeklyCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	analysis := &CohortAnalysis{
 		Interval: 7,
 	}
@@ -139,7 +139,7 @@ func getWeeklyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 	return analysis
 }
 
-func getWeeklyPaidCohort(activities []*sub.SublogSummary) *CohortAnalysis {
+func getWeeklyPaidCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	analysis := &CohortAnalysis{
 		Interval: 7,
 	}
@@ -207,7 +207,7 @@ func getWeeklyPaidCohort(activities []*sub.SublogSummary) *CohortAnalysis {
 }
 
 // Assumes the activities are sorted by min date.
-func getMonthlyCohort(activities []*sub.SublogSummary) *CohortAnalysis {
+func getMonthlyCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	analysis := &CohortAnalysis{
 		Interval: 30,
 	}

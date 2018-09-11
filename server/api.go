@@ -9,7 +9,8 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
-	"github.com/atishpatel/Gigamunch-Backend/auth"
+	authold "github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
@@ -24,7 +25,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -35,14 +35,6 @@ var (
 	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
 	errInternal         = errors.InternalServerError
 )
-
-func addAPIRoutes(r *httprouter.Router) {
-	http.HandleFunc("/api/v1/Login", handler(Login))
-	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
-	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
-	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
-	http.HandleFunc("/api/v1/DeviceCheckin", handler(DeviceCheckin))
-}
 
 func validateSubmitCheckoutReq(r *pb.SubmitCheckoutReq) error {
 	if r.Email == "" {
@@ -80,20 +72,31 @@ func validateSubmitGiftCheckoutReq(r *giftCheckout) error {
 }
 
 // Login updates a user's payment.
-func Login(ctx context.Context, r *http.Request) Response {
+func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.TokenOnlyReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.TokenOnlyResp{}
 
-	_, authToken, err := auth.GetSessionWithGToken(ctx, req.Token)
+	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to get auth.NewClient")
+	}
+
+	usr, err := authC.Verify(req.Token)
+	if err != nil {
+		return errors.Annotate(err, "failed to auth.Verify")
+	}
+	// TODO: remove log
+	log.Infof(ctx, "usr: %+v", usr)
+	// TODO: find / create user and update token
+
+	_, authToken, err := authold.GetSessionWithGToken(ctx, req.Token)
 	if err != nil {
 		resp.Error = errors.GetSharedError(err)
 		return resp
@@ -107,12 +110,10 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	req := new(pb.UpdatePaymentReq)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	email := strings.TrimSpace(strings.ToLower(req.Email))
@@ -185,11 +186,10 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	req := new(pb.SubmitCheckoutReq)
 	var err error
 	// decode request
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
@@ -380,7 +380,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
 	}
 	if !strings.Contains(req.Email, "test.com") {
-		log, serverInfo, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
+		log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
 		if err != nil {
 			return errors.Wrap("failed to setupLoggingAndServerInfo", err)
 		}
@@ -439,11 +439,10 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	req := new(giftCheckout)
 	var err error
 	// decode request
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
@@ -774,12 +773,10 @@ func DeviceCheckin(ctx context.Context, r *http.Request) Response {
 	req := new(healthcheck.Device)
 	var err error
 	// decode request
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-	defer closeRequestBody(r)
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 
@@ -792,25 +789,10 @@ func DeviceCheckin(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
-// Response is a response to a rpc call. All responses contain an error.
-type Response interface {
-	GetError() *shared.Error
-}
-
-func closeRequestBody(r *http.Request) {
-	_ = r.Body.Close()
-}
-
-func failedToDecode(err error) *pb.ErrorOnlyResp {
-	return &pb.ErrorOnlyResp{
-		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
-	}
-}
-
-func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, error) {
+func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {
 	dbC, err := db.NewClient(ctx, projID, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get database client: %+v", err)
+		return nil, nil, nil, fmt.Errorf("failed to get database client: %+v", err)
 	}
 	// Setup logging
 	serverInfo := &common.ServerInfo{
@@ -819,7 +801,7 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 	}
 	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	return log, serverInfo, nil
+	return log, serverInfo, dbC, nil
 }

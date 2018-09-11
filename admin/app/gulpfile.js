@@ -3,11 +3,13 @@ const gulp = require('gulp');
 // const gulpif = require('gulp-if');
 // const mergeStream = require('merge-stream');
 // const polymerBuild = require('polymer-build');
-const importsInliner = require('gulp-js-text-imports');
 const ts = require('gulp-typescript');
+const tsProject = ts.createProject('../../tsconfig.json')
 const watch = require('gulp-watch');
 const rollup = require('gulp-better-rollup');
 let rename = require("gulp-rename");
+// For importing html into ts or js.
+// const importsInliner = require('gulp-js-text-imports');
 
 
 
@@ -28,31 +30,25 @@ function buildOldTS() {
       .then(() => {
         console.log(`Compiling old typescript...`);
         let stream = gulp.src('./ts-old/*.ts')
-          .pipe(importsInliner({
-            parserOptions: {
-              allowImportExportEverywhere: true,
-            },
-            handlers: {
-              html: (content, path, callback) => {
-                let result;
-                try {
-                  result = htmlMinifier(content, {
-                    collapseWhitespace: true,
-                  });
-                } catch (err) {
-                  return callback(err, null);
-                }
-                return callback(null, result);
-              },
-            },
-          }))
-          .pipe(ts({
-            noImplicitAny: true,
-            allowJs: true,
-            target: 'ES2015',
-            module: 'es2015',
-            removeComments: true,
-          }))
+          // .pipe(importsInliner({
+          //   parserOptions: {
+          //     allowImportExportEverywhere: true,
+          //   },
+          //   handlers: {
+          //     html: (content, path, callback) => {
+          //       let result;
+          //       try {
+          //         result = htmlMinifier(content, {
+          //           collapseWhitespace: true,
+          //         });
+          //       } catch (err) {
+          //         return callback(err, null);
+          //       }
+          //       return callback(null, result);
+          //     },
+          //   },
+          // }))
+          .pipe(tsProject())
           .pipe(
             gulp.dest(buildOldTSDirectory)
           );
@@ -77,31 +73,25 @@ function buildTS() {
       .then(() => {
         console.log(`Compiling typescript...`);
         let stream = gulp.src('./ts/**/*s')
-          .pipe(importsInliner({
-            parserOptions: {
-              allowImportExportEverywhere: true,
-            },
-            handlers: {
-              html: (content, path, callback) => {
-                let result;
-                try {
-                  result = htmlMinifier(content, {
-                    collapseWhitespace: true,
-                  });
-                } catch (err) {
-                  return callback(err, null);
-                }
-                return callback(null, result);
-              },
-            },
-          }))
-          .pipe(ts({
-            noImplicitAny: true,
-            allowJs: true,
-            target: 'ES2015',
-            module: 'es2015',
-            removeComments: true,
-          }))
+          // .pipe(importsInliner({
+          //   parserOptions: {
+          //     allowImportExportEverywhere: true,
+          //   },
+          //   handlers: {
+          //     html: (content, path, callback) => {
+          //       let result;
+          //       try {
+          //         result = htmlMinifier(content, {
+          //           collapseWhitespace: true,
+          //         });
+          //       } catch (err) {
+          //         return callback(err, null);
+          //       }
+          //       return callback(null, result);
+          //     },
+          //   },
+          // }))
+          .pipe(tsProject())
           .pipe(
             gulp.dest(buildTSDirectory)
           );
@@ -124,23 +114,23 @@ function buildTS() {
           stream.on('error', reject);
         });
       })
-    //   .then(() => {
-    //     console.log(`Minifying...`);
-    //     let stream = gulp.src(`${buildDirectory}/app-shell.js`)
-    //       .pipe(
-    //         uglify()
-    //       )
-    //       .pipe(
-    //         rename("app-shell.min.js")
-    //       )
-    //       .pipe(
-    //         gulp.dest(buildDirectory)
-    //       );
-    //     return new Promise((resolve, reject) => {
-    //       stream.on('end', resolve);
-    //       stream.on('error', reject);
-    //     });
-    //   })
+      //   .then(() => {
+      //     console.log(`Minifying...`);
+      //     let stream = gulp.src(`${buildDirectory}/app-shell.js`)
+      //       .pipe(
+      //         uglify()
+      //       )
+      //       .pipe(
+      //         rename("app-shell.min.js")
+      //       )
+      //       .pipe(
+      //         gulp.dest(buildDirectory)
+      //       );
+      //     return new Promise((resolve, reject) => {
+      //       stream.on('end', resolve);
+      //       stream.on('error', reject);
+      //     });
+      //   })
       // .then(() => {
       //   // Okay, now let's generate the Service Worker
       //   console.log('Generating the Service Worker...');

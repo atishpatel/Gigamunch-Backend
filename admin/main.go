@@ -50,6 +50,9 @@ func init() {
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
+	// Activity
+	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
+	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
 	// Logs
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
@@ -75,6 +78,9 @@ func init() {
 	http.HandleFunc("/admin/task/CheckPowerSensors", s.handler(s.CheckPowerSensors))
 	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
 	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
+
+	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivity))
+	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
 	// Webhooks
 	http.HandleFunc("/admin/webhook/typeform-skip", s.handler(s.TypeformSkip))
 	http.HandleFunc("/admin/webhook/twilio-sms", s.handler(s.TwilioSMS))
@@ -192,6 +198,11 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
+		if strings.Contains(r.URL.Hostname(), "gigamunchapp.com") {
+			url := "https://eatgigamunch.com" + r.URL.Path
+			http.Redirect(w, r, url, http.StatusPermanentRedirect)
+			return
+		}
 		// get context
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
@@ -282,6 +293,9 @@ type Response interface {
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
+	if len(s) == 10 {
+		s += "T12:12:12.000Z"
+	}
 	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
 		return time.Time{}

@@ -1,102 +1,102 @@
 import { GetToken, } from './utils/token';
-let baseURL = '/admin/api/v1/';
+var baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
 export function GetSubscriber(email) {
-    const url = baseURL + 'GetSubscriber';
-    const req = {
-        email,
+    var url = baseURL + 'GetSubscriber';
+    var req = {
+        email: email,
     };
     return callFetch(url, 'GET', req);
 }
 export function GetHasSubscribed(date) {
-    const url = baseURL + 'GetHasSubscribed';
-    const req = {
+    var url = baseURL + 'GetHasSubscribed';
+    var req = {
         date: date.toISOString(),
     };
     return callFetch(url, 'GET', req);
 }
 export function GetUnpaidSublogs(limit) {
-    const url = baseURL + 'GetUnpaidSublogs';
-    const req = {
-        limit,
+    var url = baseURL + 'GetUnpaidSublogs';
+    var req = {
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 export function GetSubscriberSublogs(email) {
-    const url = baseURL + 'GetSubscriberSublogs';
-    const req = {
-        email,
+    var url = baseURL + 'GetSubscriberSublogs';
+    var req = {
+        email: email,
     };
     return callFetch(url, 'GET', req);
 }
 export function ProcessSublog(date, email) {
-    const url = baseURL + 'ProcessSublog';
-    const req = {
-        date,
-        email,
+    var url = baseURL + 'ProcessSublog';
+    var req = {
+        date: date,
+        email: email,
     };
     return callFetch(url, 'POST', req);
 }
 export function GetExecutions(start, limit) {
-    const url = baseURL + 'GetExecutions';
-    const req = {
-        start,
-        limit,
+    var url = baseURL + 'GetExecutions';
+    var req = {
+        start: start,
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 export function GetExecution(id) {
-    const url = baseURL + 'GetExecution';
-    const req = {
-        id,
+    var url = baseURL + 'GetExecution';
+    var req = {
+        id: id,
     };
     return callFetch(url, 'GET', req);
 }
 export function UpdateExecution(execution) {
-    const url = baseURL + 'UpdateExecution';
-    const req = {
-        execution,
+    var url = baseURL + 'UpdateExecution';
+    var req = {
+        execution: execution,
     };
     return callFetch(url, 'POST', req);
 }
 export function GetActivityForDate() {
 }
 export function GetLogs(start, limit) {
-    const url = baseURL + 'GetLogs';
-    const req = {
-        start,
-        limit,
+    var url = baseURL + 'GetLogs';
+    var req = {
+        start: start,
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 export function GetLog(id) {
-    const url = baseURL + 'GetLog';
-    const req = {
-        id,
+    var url = baseURL + 'GetLog';
+    var req = {
+        id: id,
     };
     return callFetch(url, 'GET', req);
 }
 export function GetLogsByEmail(start, limit, email) {
-    const url = baseURL + 'GetLogsByEmail';
-    const req = {
-        email,
-        start,
-        limit,
+    var url = baseURL + 'GetLogsByEmail';
+    var req = {
+        email: email,
+        start: start,
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 function callFetch(url, method, body) {
-    const config = {
-        method,
+    var config = {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
             'auth-token': GetToken(),
             'Access-Control-Allow-Origin': '*',
         },
     };
-    let URL = url;
+    var URL = url;
     if (method === 'GET') {
         URL += '?' + serializeParams(body);
     }
@@ -104,21 +104,21 @@ function callFetch(url, method, body) {
         config.body = JSON.stringify(body);
     }
     return fetch(URL, config)
-        .then((resp) => {
+        .then(function (resp) {
         return resp.json();
     })
-        .catch((err) => {
+        .catch(function (err) {
         console.error('failed to callFetch', err);
     });
 }
 function serializeParams(obj) {
-    const str = [];
-    let p;
+    var str = [];
+    var p;
     p = 0;
     for (p in obj) {
         if (obj.hasOwnProperty(p)) {
-            const k = p;
-            const v = obj[p];
+            var k = p;
+            var v = obj[p];
             str.push((v !== null && typeof v === 'object') ?
                 serializeParams(v) :
                 encodeURIComponent(k) + '=' + encodeURIComponent(v));

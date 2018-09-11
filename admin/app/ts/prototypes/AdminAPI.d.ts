@@ -8,6 +8,20 @@ interface TokenOnlyResp {
     error: Error
     token: string
 }
+interface SkipActivityReq {
+    email: string
+    date: string
+}
+interface SkipActivityResp {
+    error: Error
+}
+interface UnskipActivityReq {
+    email: string
+    date: string
+}
+interface UnskipActivityResp {
+    error: Error
+}
 interface GetLogReq {
     id: number
 }

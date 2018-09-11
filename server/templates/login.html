@@ -4,12 +4,14 @@
 
 <head>
   [[template "head" .]]
-  <script src="https://cdn.firebase.com/libs/firebaseui/2.7.0/firebaseui.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.4.0/firebaseui.js"></script>
   <link type="text/css"
         rel="stylesheet"
-        href="https://cdn.firebase.com/libs/firebaseui/2.7.0/firebaseui.css" />
-  <script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
-  <script src="/js/app.min.js"></script>
+        href="https://cdn.firebase.com/libs/firebaseui/3.4.0/firebaseui.css" />
+  <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-auth.js"></script>
+  <script src="../js/app.min.js"></script>
 </head>
 
 <body>
@@ -22,6 +24,35 @@
     main {
       background-color: white;
       margin: auto;
+      min-height: 55vh;
+    }
+
+    .firebaseui-id-idp-button {
+      border-radius: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    main {
+      display: flex;
+    }
+
+    #loading,
+    #user-sign-in,
+    #user-sign-out {
+      margin: auto;
+    }
+
+    .login-as {
+      padding-bottom: 12px;
+      color: #757575;
+    }
+
+    .login-email {
+      color: #212529;
+      font-weight: 600;
     }
 
   </style>
@@ -29,86 +60,70 @@
     [[ template "nav" .]]
   </header>
   <main>
-    <h1>Login Page</h1>
-    <div id="firebaseui-auth-container"></div>
+    <div id="loading"
+         class="loading">Loading...</div>
+    <div id="user-sign-out"
+         class="hidden">
+      <div class="card">
+        <div id="login-name"></div>
+        <div id="login-email"></div>
+        <a href="/sub"><button>Dashboard</button></a>
+        <button id="login-sign-out">Sign out</button>
+      </div>
+
+    </div>
+    <div id="user-sign-in"
+         class="hidden">
+      <div id="login-as"
+           class="login-as"></div>
+      <div id="firebaseui-auth-container"></div>
+    </div>
   </main>
 
   <script>
-    let config;
-    if (APP.IsProd) {
-      config = {
-        apiKey: 'AIzaSyC-1vqT4YIKXVmrGkaoVSj1BJnm48NxlT0',
-        authDomain: 'gigamunch-omninexus.firebaseapp.com',
-        databaseURL: 'https://gigamunch-omninexus.firebaseio.com',
-        projectId: 'gigamunch-omninexus',
-        storageBucket: 'gigamunch-omninexus.appspot.com',
-        messagingSenderId: '837147123677',
-      };
-    } else {
-      config = {
-        apiKey: 'AIzaSyBHPe4B4k72ljnBXszda6AJGGg21YqEJ4g',
-        authDomain: 'gigamunch-omninexus-dev.firebaseapp.com',
-        databaseURL: 'https://gigamunch-omninexus-dev.firebaseio.com',
-        projectId: 'gigamunch-omninexus-dev',
-        storageBucket: 'gigamunch-omninexus-dev.appspot.com',
-        messagingSenderId: '108585202286',
-      };
-    }
-    firebase.initializeApp(config);
-
-    function setupFBLogin() {
-      // FirebaseUI config.
-      var uiConfig = {
-        callbacks: {
-          signInSuccess: this.signInSuccess,
-        },
-        tosUrl: '/terms',
-        signInSuccessUrl: 'login',
-        signInOptions: [
-          // TODO: setup facebook perms
-          // Leave the lines as is for the providers you want to offer your users.
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-          {
-            provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-            scopes: [
-              'public_profile',
-              'email',
-              'user_likes',
-              'user_friends',
-            ],
-          },
-          firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        ],
-      };
-
-      // Initialize the FirebaseUI Widget using Firebase.
-      const ui = new firebaseui.auth.AuthUI(firebase.auth());
-      // The start method will wait until the DOM is loaded.
-      ui.start('#firebaseui-auth-container', uiConfig);
-    }
-
-    // TODO: change to es5
-    firebase.auth().onAuthStateChanged((user) => {
-      console.log('user', user);
-      if (!user && !IsLoggedIn()) {
-        console.log('setup fb login');
-        this.setupFBLogin();
-      } else {
-        user.getIdToken(false).then((idToken) => {
-          console.log('signing in');
-          Login(idToken).then((resp) => {
-            console.log('login resp: ', resp);
-            firebase.auth().signOut();
-          });
-        });
-      }
+    document.getElementById('login-sign-out').addEventListener('click', function() {
+      APP.Auth.SignOut();
     });
 
-    function signInSuccess(currentUser, credential, redirectUrl) {
-      console.log('currentUser:', currentUser);
-      console.log('credential:', credential);
-      console.log('redirectUrl:', redirectUrl);
-      return true;
+    function display(elementID) {
+      document.getElementById(elementID).classList = '';
+    }
+
+    function hide(elementID) {
+      document.getElementById(elementID).classList = 'hidden';
+    }
+
+    function showSignedOutPage() {
+      console.log('user is signed in');
+      hide('loading');
+      hide('user-sign-in');
+      document.getElementById('login-name').textContent = APP.User.displayName;
+      document.getElementById('login-email').textContent = APP.User.email;
+      display('user-sign-out');
+    }
+
+    function showSignedInPage() {
+      console.log('user is signed out');
+      SetupFirebaseAuthUI('#firebaseui-auth-container');
+      hide('loading');
+      hide('user-sign-out');
+      display('user-sign-in');
+    }
+
+    window.addEventListener(APP.Auth.EventSignedOut, showSignedInPage.bind(this));
+    window.addEventListener(APP.Auth.EventSignedIn, showSignedOutPage.bind(this));
+
+    console.log('App.User', APP.User);
+    if (APP.User) {
+      showSignedOutPage();
+    } else {
+      showSignedInPage();
+    }
+
+    var urlParms = APP.Utils.GetURLParmas();
+    var email = urlParms['email'];
+    if (email) {
+      document.getElementById('login-as').innerHTML = 'Login as <span class="login-email">' + email + '</span> to get access to your account';
     }
 
   </script>

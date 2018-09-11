@@ -1,15 +1,16 @@
-const authTkn = GetToken();
-setTimeout(() => {
+"use strict";
+var authTkn = GetToken();
+setTimeout(function () {
     if (ui) {
         console.log("set auth-token");
         ui.preauthorizeApiKey("auth-token", authTkn);
     }
 }, 3000);
 function GetToken() {
-    const name = 'AUTHTKN=';
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
+    var name = 'AUTHTKN=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
         while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
@@ -18,7 +19,7 @@ function GetToken() {
         }
     }
     if (location.hostname === 'localhost') {
-        const tnk = window.localStorage.getItem('AUTHTKN');
+        var tnk = window.localStorage.getItem('AUTHTKN');
         if (!tnk) {
             return '';
         }

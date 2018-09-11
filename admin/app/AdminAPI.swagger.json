@@ -337,6 +337,60 @@
         ]
       }
     },
+    "/admin/api/v1/SkipActivity": {
+      "post": {
+        "summary": "Activities\nrpc GetActivities (GetActivitiesReq) returns (GetActivitiesResp) {\n    option (google.api.http) = {\n        post: \"/admin/api/v1/GetActivities\"\n        body: \"*\"\n    };\n}\nSkipActivity skips a sub for a date.",
+        "operationId": "SkipActivity",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPISkipActivityResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISkipActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/UnskipActivity": {
+      "post": {
+        "summary": "UnskipActivity unskips a sub for a date.",
+        "operationId": "UnskipActivity",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUnskipActivityResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUnskipActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/UpdateDeliveries": {
       "post": {
         "operationId": "UpdateDeliveries",
@@ -1036,6 +1090,26 @@
         }
       }
     },
+    "AdminAPISkipActivityReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      },
+      "title": "Activity"
+    },
+    "AdminAPISkipActivityResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        }
+      }
+    },
     "AdminAPISublog": {
       "type": "object",
       "properties": {
@@ -1210,6 +1284,25 @@
         }
       },
       "title": "Subscriber"
+    },
+    "AdminAPIUnskipActivityReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIUnskipActivityResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        }
+      }
     },
     "AdminAPIUpdateDeliveriesReq": {
       "type": "object",
