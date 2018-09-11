@@ -1,15 +1,16 @@
-export const UserUpdated = 'UserUpdated';
-export function Fire(eventName, detail = {}) {
-    const event = new CustomEvent(eventName, {
-        detail,
+export var UserUpdated = 'UserUpdated';
+export function Fire(eventName, detail) {
+    if (detail === void 0) { detail = {}; }
+    var event = new CustomEvent(eventName, {
+        detail: detail,
         bubbles: true,
         composed: true,
     });
     window.dispatchEvent(event);
 }
 export function FireToast(t, detail) {
-    const event = new CustomEvent('toast', {
-        detail,
+    var event = new CustomEvent('toast', {
+        detail: detail,
         bubbles: true,
         composed: true,
     });

@@ -1,8 +1,8 @@
 function GetToken() {
-    const name = 'AUTHTKN=';
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
+    var name = 'AUTHTKN=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
         while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
@@ -11,7 +11,7 @@ function GetToken() {
         }
     }
     if (location.hostname === 'localhost') {
-        const tnk = window.localStorage.getItem('AUTHTKN');
+        var tnk = window.localStorage.getItem('AUTHTKN');
         if (!tnk) {
             return '';
         }
@@ -20,12 +20,12 @@ function GetToken() {
     return '';
 }
 function SetToken(cvalue) {
-    const jwt = GetJWT(cvalue);
-    const d = new Date(0);
+    var jwt = GetJWT(cvalue);
+    var d = new Date(0);
     if (jwt) {
         d.setUTCSeconds(jwt.exp);
     }
-    document.cookie = `AUTHTKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
+    document.cookie = "AUTHTKN=" + cvalue + "; expires=" + d.toUTCString() + "; path=/";
     if (location.hostname === 'localhost') {
         window.localStorage.setItem('AUTHTKN', cvalue);
     }
@@ -34,120 +34,119 @@ function GetJWT(tkn) {
     if (!tkn) {
         return null;
     }
-    const tknConv = tkn.replace(/[+\/]/g, (m0) => {
+    var tknConv = tkn.replace(/[+\/]/g, function (m0) {
         return m0 === '+' ? '-' : '_';
     }).replace(/=/g, '');
-    const userString = tknConv.split('.')[1].replace(/\s/g, '');
-    return JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
+    var userString = tknConv.split('.')[1].replace(/\s/g, '');
+    return JSON.parse(window.atob(userString.replace(/[-_]/g, function (m0) {
         return m0 === '-' ? '+' : '/';
     }).replace(/[^A-Za-z0-9\+\/]/g, '')));
 }
 
-
-var TokenUtil = Object.freeze({
-	GetToken: GetToken,
-	SetToken: SetToken,
-	GetJWT: GetJWT
+var TokenUtil = /*#__PURE__*/Object.freeze({
+    GetToken: GetToken,
+    SetToken: SetToken,
+    GetJWT: GetJWT
 });
 
-let baseURL = '/admin/api/v1/';
+var baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
     baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api/v1/';
 }
 function GetSubscriber(email) {
-    const url = baseURL + 'GetSubscriber';
-    const req = {
-        email,
+    var url = baseURL + 'GetSubscriber';
+    var req = {
+        email: email,
     };
     return callFetch(url, 'GET', req);
 }
 function GetHasSubscribed(date) {
-    const url = baseURL + 'GetHasSubscribed';
-    const req = {
+    var url = baseURL + 'GetHasSubscribed';
+    var req = {
         date: date.toISOString(),
     };
     return callFetch(url, 'GET', req);
 }
 function GetUnpaidSublogs(limit) {
-    const url = baseURL + 'GetUnpaidSublogs';
-    const req = {
-        limit,
+    var url = baseURL + 'GetUnpaidSublogs';
+    var req = {
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 function GetSubscriberSublogs(email) {
-    const url = baseURL + 'GetSubscriberSublogs';
-    const req = {
-        email,
+    var url = baseURL + 'GetSubscriberSublogs';
+    var req = {
+        email: email,
     };
     return callFetch(url, 'GET', req);
 }
 function ProcessSublog(date, email) {
-    const url = baseURL + 'ProcessSublog';
-    const req = {
-        date,
-        email,
+    var url = baseURL + 'ProcessSublog';
+    var req = {
+        date: date,
+        email: email,
     };
     return callFetch(url, 'POST', req);
 }
 function GetExecutions(start, limit) {
-    const url = baseURL + 'GetExecutions';
-    const req = {
-        start,
-        limit,
+    var url = baseURL + 'GetExecutions';
+    var req = {
+        start: start,
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 function GetExecution(id) {
-    const url = baseURL + 'GetExecution';
-    const req = {
-        id,
+    var url = baseURL + 'GetExecution';
+    var req = {
+        id: id,
     };
     return callFetch(url, 'GET', req);
 }
 function UpdateExecution(execution) {
-    const url = baseURL + 'UpdateExecution';
-    const req = {
-        execution,
+    var url = baseURL + 'UpdateExecution';
+    var req = {
+        execution: execution,
     };
     return callFetch(url, 'POST', req);
 }
 function GetActivityForDate() {
 }
 function GetLogs(start, limit) {
-    const url = baseURL + 'GetLogs';
-    const req = {
-        start,
-        limit,
+    var url = baseURL + 'GetLogs';
+    var req = {
+        start: start,
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 function GetLog(id) {
-    const url = baseURL + 'GetLog';
-    const req = {
-        id,
+    var url = baseURL + 'GetLog';
+    var req = {
+        id: id,
     };
     return callFetch(url, 'GET', req);
 }
 function GetLogsByEmail(start, limit, email) {
-    const url = baseURL + 'GetLogsByEmail';
-    const req = {
-        email,
-        start,
-        limit,
+    var url = baseURL + 'GetLogsByEmail';
+    var req = {
+        email: email,
+        start: start,
+        limit: limit,
     };
     return callFetch(url, 'GET', req);
 }
 function callFetch(url, method, body) {
-    const config = {
-        method,
+    var config = {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
             'auth-token': GetToken(),
             'Access-Control-Allow-Origin': '*',
         },
     };
-    let URL = url;
+    var URL = url;
     if (method === 'GET') {
         URL += '?' + serializeParams(body);
     }
@@ -155,21 +154,21 @@ function callFetch(url, method, body) {
         config.body = JSON.stringify(body);
     }
     return fetch(URL, config)
-        .then((resp) => {
+        .then(function (resp) {
         return resp.json();
     })
-        .catch((err) => {
+        .catch(function (err) {
         console.error('failed to callFetch', err);
     });
 }
 function serializeParams(obj) {
-    const str = [];
-    let p;
+    var str = [];
+    var p;
     p = 0;
     for (p in obj) {
         if (obj.hasOwnProperty(p)) {
-            const k = p;
-            const v = obj[p];
+            var k = p;
+            var v = obj[p];
             str.push((v !== null && typeof v === 'object') ?
                 serializeParams(v) :
                 encodeURIComponent(k) + '=' + encodeURIComponent(v));
@@ -178,34 +177,34 @@ function serializeParams(obj) {
     return str.join('&');
 }
 
-
-var Service = Object.freeze({
-	GetSubscriber: GetSubscriber,
-	GetHasSubscribed: GetHasSubscribed,
-	GetUnpaidSublogs: GetUnpaidSublogs,
-	GetSubscriberSublogs: GetSubscriberSublogs,
-	ProcessSublog: ProcessSublog,
-	GetExecutions: GetExecutions,
-	GetExecution: GetExecution,
-	UpdateExecution: UpdateExecution,
-	GetActivityForDate: GetActivityForDate,
-	GetLogs: GetLogs,
-	GetLog: GetLog,
-	GetLogsByEmail: GetLogsByEmail
+var Service = /*#__PURE__*/Object.freeze({
+    GetSubscriber: GetSubscriber,
+    GetHasSubscribed: GetHasSubscribed,
+    GetUnpaidSublogs: GetUnpaidSublogs,
+    GetSubscriberSublogs: GetSubscriberSublogs,
+    ProcessSublog: ProcessSublog,
+    GetExecutions: GetExecutions,
+    GetExecution: GetExecution,
+    UpdateExecution: UpdateExecution,
+    GetActivityForDate: GetActivityForDate,
+    GetLogs: GetLogs,
+    GetLog: GetLog,
+    GetLogsByEmail: GetLogsByEmail
 });
 
-const UserUpdated = 'UserUpdated';
-function Fire(eventName, detail = {}) {
-    const event = new CustomEvent(eventName, {
-        detail,
+var UserUpdated = 'UserUpdated';
+function Fire(eventName, detail) {
+    if (detail === void 0) { detail = {}; }
+    var event = new CustomEvent(eventName, {
+        detail: detail,
         bubbles: true,
         composed: true,
     });
     window.dispatchEvent(event);
 }
 function FireToast(t, detail) {
-    const event = new CustomEvent('toast', {
-        detail,
+    var event = new CustomEvent('toast', {
+        detail: detail,
         bubbles: true,
         composed: true,
     });
@@ -214,34 +213,33 @@ function FireToast(t, detail) {
 function FireError() {
 }
 
-
-var EventUtil = Object.freeze({
-	UserUpdated: UserUpdated,
-	Fire: Fire,
-	FireToast: FireToast,
-	FireError: FireError
+var EventUtil = /*#__PURE__*/Object.freeze({
+    UserUpdated: UserUpdated,
+    Fire: Fire,
+    FireToast: FireToast,
+    FireError: FireError
 });
 
 addEventListener(UserUpdated, UpdateUser);
 function IsLoggedIn() {
-    const tkn = GetToken();
+    var tkn = GetToken();
     if (tkn === '') {
         return false;
     }
     return true;
 }
-let ID = '';
-let Email = '';
-let FirstName = '';
-let LastName = '';
-let PhotoURL = '';
-let Token = '';
+var ID = '';
+var Email = '';
+var FirstName = '';
+var LastName = '';
+var PhotoURL = '';
+var Token = '';
 function UpdateUser() {
-    const tkn = GetToken();
+    var tkn = GetToken();
     if (!tkn) {
         return;
     }
-    const jwt = GetJWT(tkn);
+    var jwt = GetJWT(tkn);
     if (!jwt) {
         return;
     }
@@ -253,14 +251,14 @@ function UpdateUser() {
     Token = tkn;
 }
 function IsAdmin() {
-    const jwt = GetJWT(GetToken());
+    var jwt = GetJWT(GetToken());
     if (!jwt) {
         return false;
     }
     return getKthBit(jwt.perm, 2);
 }
 function HasCreditCard() {
-    const jwt = GetJWT(GetToken());
+    var jwt = GetJWT(GetToken());
     if (!jwt) {
         return false;
     }
@@ -271,18 +269,17 @@ function getKthBit(x, k) {
 }
 UpdateUser();
 
-
-var User = Object.freeze({
-	IsLoggedIn: IsLoggedIn,
-	get ID () { return ID; },
-	get Email () { return Email; },
-	get FirstName () { return FirstName; },
-	get LastName () { return LastName; },
-	get PhotoURL () { return PhotoURL; },
-	get Token () { return Token; },
-	UpdateUser: UpdateUser,
-	IsAdmin: IsAdmin,
-	HasCreditCard: HasCreditCard
+var User = /*#__PURE__*/Object.freeze({
+    IsLoggedIn: IsLoggedIn,
+    get ID () { return ID; },
+    get Email () { return Email; },
+    get FirstName () { return FirstName; },
+    get LastName () { return LastName; },
+    get PhotoURL () { return PhotoURL; },
+    get Token () { return Token; },
+    UpdateUser: UpdateUser,
+    IsAdmin: IsAdmin,
+    HasCreditCard: HasCreditCard
 });
 
 APP.Service = Service;

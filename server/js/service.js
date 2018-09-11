@@ -1,11 +1,11 @@
 import { SetToken, } from './token';
-const baseURL = '/api/v1/';
+var baseURL = '/api/v1/';
 export function Login(token) {
-    const url = '/api/v1/Login';
-    const req = {
-        token,
+    var url = '/api/v1/Login';
+    var req = {
+        token: token,
     };
-    return callFetch(url, 'POST', req).then((resp) => {
+    return callFetch(url, 'POST', req).then(function (resp) {
         if (resp && resp.token) {
             SetToken(resp.token);
         }
@@ -14,15 +14,14 @@ export function Login(token) {
 }
 function callFetch(url, method, body) {
     return fetch(url, {
-        method,
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-    }).then((resp) => {
+    }).then(function (resp) {
         return resp.json();
-    }).catch((err) => {
+    }).catch(function (err) {
         console.error('failed to callFetch', err);
-        console.error('details: ', err.code, err.name, err.message, err.detail);
     });
 }

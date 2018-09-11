@@ -108,7 +108,11 @@ func (c *Client) Verify(token string) (*common.User, error) {
 	if ok {
 		userID, _ = strconv.ParseInt(userIDTmp.(string), 2, 64)
 	}
-	admin := claims["admin"].(bool)
+	var admin bool
+	adminTmp, ok := claims["admin"]
+	if ok {
+		admin = adminTmp.(bool)
+	}
 	nameSplit := strings.Split(name, delim)
 	var firstName, lastName string
 	if len(nameSplit) >= 1 {

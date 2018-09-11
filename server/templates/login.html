@@ -82,7 +82,7 @@
 
   <script>
     document.getElementById('login-sign-out').addEventListener('click', function() {
-      SignOut();
+      APP.Auth.SignOut();
     });
 
     function display(elementID) {
@@ -110,8 +110,8 @@
       display('user-sign-in');
     }
 
-    window.addEventListener(EventSignedOut, showSignedInPage.bind(this));
-    window.addEventListener(EventSignedIn, showSignedOutPage.bind(this));
+    window.addEventListener(APP.Auth.EventSignedOut, showSignedInPage.bind(this));
+    window.addEventListener(APP.Auth.EventSignedIn, showSignedOutPage.bind(this));
 
     console.log('App.User', APP.User);
     if (APP.User) {
@@ -120,7 +120,7 @@
       showSignedInPage();
     }
 
-    var urlParms = GetURLParmas();
+    var urlParms = APP.Utils.GetURLParmas();
     var email = urlParms['email'];
     if (email) {
       document.getElementById('login-as').innerHTML = 'Login as <span class="login-email">' + email + '</span> to get access to your account';

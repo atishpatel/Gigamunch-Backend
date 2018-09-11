@@ -35,7 +35,7 @@ export function SetupFirebase() {
 
 export function SetupFirebaseAuthUI(elementID: string) {
   // FirebaseUI config.
-  var uiConfig = {
+  let uiConfig = {
     tosUrl: '/terms',
     privacyPolicyUrl: '/privacy',
     signInSuccessUrl: 'sub',
@@ -68,10 +68,10 @@ export const EventSignedIn = 'signed-in';
 SetupFirebase();
 
 // Called when user signs in or signs out
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged((user: FBUser) => {
   console.log('user', user);
   let eventName: string;
-  
+
   if (!user) {
     // isn't signed in
     eventName = EventSignedOut;
@@ -92,3 +92,6 @@ firebase.auth().onAuthStateChanged((user) => {
   }
 });
 
+interface FBUser {
+  getIdToken(frocerefresh: boolean): Promise<any>
+}

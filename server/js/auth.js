@@ -3,7 +3,7 @@ export function SignOut() {
     firebase.auth().signOut();
 }
 export function SetupFirebase() {
-    let config;
+    var config;
     if (APP.IsProd) {
         config = {
             apiKey: 'AIzaSyC-1vqT4YIKXVmrGkaoVSj1BJnm48NxlT0',
@@ -45,29 +45,29 @@ export function SetupFirebaseAuthUI(elementID) {
             firebase.auth.EmailAuthProvider.PROVIDER_ID,
         ],
     };
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
+    var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);
 }
-export const EventSignedOut = 'signed-out';
-export const EventSignedIn = 'signed-in';
+export var EventSignedOut = 'signed-out';
+export var EventSignedIn = 'signed-in';
 SetupFirebase();
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged(function (user) {
     console.log('user', user);
-    let eventName;
+    var eventName;
     if (!user) {
         eventName = EventSignedOut;
     }
     else {
         eventName = EventSignedIn;
-        user.getIdToken(false).then((idToken) => {
+        user.getIdToken(false).then(function (idToken) {
             console.log('login in');
-            Login(idToken).then((resp) => {
+            Login(idToken).then(function (resp) {
                 console.log('login resp: ', resp);
             });
         });
         APP.User = user;
-        const event = document.createEvent('Event');
-        event.initEvent(eventName, true, true);
-        window.dispatchEvent(event);
+        var event_1 = document.createEvent('Event');
+        event_1.initEvent(eventName, true, true);
+        window.dispatchEvent(event_1);
     }
 });
