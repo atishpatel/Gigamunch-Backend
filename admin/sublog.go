@@ -7,10 +7,31 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
+
+// RefundAndSkipSublog runs subold.RefundAndSkip.
+func (s *server) RefundAndSkipSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.RefundAndSkipSublogReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	err = activityC.RefundAndSkip(getDatetime(req.Date), req.Email)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.RefundAndSkip")
+	}
+	return nil
+}
 
 // ProcessSublog runs sub.Process.
 func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {

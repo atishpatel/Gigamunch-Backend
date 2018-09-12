@@ -43,9 +43,14 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 }
 
 func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-
-	in2days := time.Now().Add(48 * time.Hour)
-
+	req := struct {
+		Hours int `json:"hours"`
+	}{}
+	decodeRequest(ctx, r, &req)
+	if req.Hours == 0 {
+		req.Hours = 48
+	}
+	in2days := time.Now().Add(time.Duration(req.Hours) * time.Hour)
 	subC, _ := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	err := subC.SetupActivities(in2days)
 	if err != nil {

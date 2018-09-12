@@ -633,7 +633,7 @@ func (service *Service) GetSubLogs(ctx context.Context, req *GigatokenReq) (*Get
 		return resp, nil
 	}
 	subC := subold.New(ctx)
-	subLogs, err := subC.GetAll(2000)
+	subLogs, err := subC.GetAll(3000)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetAll")
 		return resp, nil

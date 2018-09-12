@@ -3,16 +3,75 @@ package admin
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	pbshared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
+
+// SendCustomerSMS sends an CustomerSMS from Gigamunch to number.
+func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.SendCustomerSMSReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	dilm := "{{name}}"
+	firstNameDilm := "{{first_name}}"
+	msg := req.Message
+
+	messageC := message.New(ctx)
+	var emails []string
+	for _, email := range req.Emails {
+		if email != "" {
+			emails = append(emails, email)
+		}
+	}
+	subC := subold.New(ctx)
+	subs, err := subC.GetSubscribers(emails)
+	if err != nil {
+		return errors.Annotate(err, "failed to subold.GetSubscribers")
+	}
+	for _, s := range subs {
+		if s.PhoneNumber == "" {
+			continue
+		}
+		name := s.FirstName
+		if name == "" {
+			name = s.Name
+		}
+		name = strings.Title(name)
+		msg = strings.Replace(msg, dilm, name, -1)
+		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
+		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
+		if err != nil {
+			return errors.Annotate(err, "failed ot message.SendSMS")
+		}
+		// log
+		if log != nil {
+			payload := &logging.MessagePayload{
+				Platform: "SMS",
+				Body:     msg,
+				From:     "Gigamunch",
+				To:       s.PhoneNumber,
+			}
+			log.SubMessage(0, s.Email, payload)
+		}
+	}
+	return nil
+}
 
 // GetSubscriber gets all info about a subscriber from their email address
 func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {

@@ -1,22 +1,24 @@
+"use strict";
 COOK = COOK || {};
-class UserOld {
-    constructor() {
+var UserOld = (function () {
+    function UserOld() {
         this.isLoggedIn = false;
-        const token = this.getTokenCookie();
+        var token = this.getTokenCookie();
         this.update(token, 0);
         if (this.token && this.token !== '') {
             this.isLoggedIn = true;
         }
     }
-    update(tkn, setCookie = 1) {
+    UserOld.prototype.update = function (tkn, setCookie) {
+        if (setCookie === void 0) { setCookie = 1; }
         if (tkn === '') {
             return;
         }
-        this.token = tkn.replace(/[+\/]/g, (m0) => {
+        this.token = tkn.replace(/[+\/]/g, function (m0) {
             return m0 === '+' ? '-' : '_';
         }).replace(/=/g, '');
-        const userString = tkn.split('.')[1].replace(/\s/g, '');
-        const jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, (m0) => {
+        var userString = tkn.split('.')[1].replace(/\s/g, '');
+        var jwt = JSON.parse(window.atob(userString.replace(/[-_]/g, function (m0) {
             return m0 === '-' ? '+' : '/';
         }).replace(/[^A-Za-z0-9\+\/]/g, '')));
         this.id = jwt.id;
@@ -36,12 +38,12 @@ class UserOld {
         document.dispatchEvent(new Event('userUpdated', {
             bubbles: true,
         }));
-    }
-    getTokenCookie() {
-        let name = 'GIGATKN=';
-        let ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
+    };
+    UserOld.prototype.getTokenCookie = function () {
+        var name = 'GIGATKN=';
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
             while (c.charAt(0) === ' ') {
                 c = c.substring(1);
             }
@@ -51,8 +53,8 @@ class UserOld {
         }
         name = 'AUTHTKN=';
         ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
             while (c.charAt(0) === ' ') {
                 c = c.substring(1);
             }
@@ -61,22 +63,23 @@ class UserOld {
             }
         }
         return '';
-    }
-    setTokenCookie(cvalue, exptime) {
-        const d = new Date(0);
+    };
+    UserOld.prototype.setTokenCookie = function (cvalue, exptime) {
+        var d = new Date(0);
         d.setUTCSeconds(exptime);
-        document.cookie = `GIGATKN=${cvalue}; expires=${d.toUTCString()}; path=/`;
-    }
-    getKthBit(x, k) {
+        document.cookie = "GIGATKN=" + cvalue + "; expires=" + d.toUTCString() + "; path=/";
+    };
+    UserOld.prototype.getKthBit = function (x, k) {
         return (((x >> k) & 1) === 1);
-    }
-}
+    };
+    return UserOld;
+}());
 COOK.User = new UserOld();
 function getTokenCookie(cookieName) {
-    const name = cookieName + '=';
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
+    var name = cookieName + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
         while (c.charAt(0) === ' ') {
             c = c.substring(1);
         }
@@ -87,11 +90,11 @@ function getTokenCookie(cookieName) {
     return '';
 }
 if (!getTokenCookie('AUTHTKN')) {
-    const tmptkn = getTokenCookie('GIGATKN');
+    var tmptkn = getTokenCookie('GIGATKN');
     if (tmptkn) {
-        const exptime = 1522623345;
-        const d = new Date(0);
+        var exptime = 1522623345;
+        var d = new Date(0);
         d.setUTCSeconds(exptime);
-        document.cookie = `AUTHTKN=${tmptkn}; expires=${d.toUTCString()}; path=/`;
+        document.cookie = "AUTHTKN=" + tmptkn + "; expires=" + d.toUTCString() + "; path=/";
     }
 }

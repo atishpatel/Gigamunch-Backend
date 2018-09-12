@@ -20,7 +20,7 @@ function logError(fnName, err) {
     }
     return false;
 }
-export function getSubLogs(callback) {
+function getSubLogs(callback) {
     var url = baseURLOld + 'getSubLogs';
     var request = {
         gigatoken: getToken(),
@@ -30,7 +30,7 @@ export function getSubLogs(callback) {
         callback(resp.sublogs, resp.err);
     });
 }
-export function getSubLogsForDate(date, callback) {
+function getSubLogsForDate(date, callback) {
     var url = baseURLOld + 'getSubLogsForDate';
     var request = {
         gigatoken: getToken(),
@@ -41,7 +41,7 @@ export function getSubLogsForDate(date, callback) {
         callback(resp.sublogs, resp.err);
     });
 }
-export function getSubEmails(callback) {
+function getSubEmails(callback) {
     var url = baseURLOld + 'getSubEmails';
     var request = {
         gigatoken: getToken(),
@@ -51,7 +51,7 @@ export function getSubEmails(callback) {
         callback(resp.sub_emails, resp.err);
     });
 }
-export function getSubEmailsAndSubs(callback) {
+function getSubEmailsAndSubs(callback) {
     var url = baseURLOld + 'getSubEmailsAndSubs';
     var request = {
         gigatoken: getToken(),
@@ -61,7 +61,7 @@ export function getSubEmailsAndSubs(callback) {
         callback(resp.sub_emails, resp.subscribers, resp.err);
     });
 }
-export function skipSubLog(date, subEmail, callback) {
+function skipSubLog(date, subEmail, callback) {
     var url = baseURLOld + 'skipSubLog';
     var request = {
         gigatoken: getToken(),
@@ -73,7 +73,7 @@ export function skipSubLog(date, subEmail, callback) {
         callback(resp.err);
     });
 }
-export function CancelSub(email, callback) {
+function CancelSub(email, callback) {
     var url = baseURLOld + 'CancelSub';
     var request = {
         gigatoken: getToken(),
@@ -84,7 +84,7 @@ export function CancelSub(email, callback) {
         callback(resp.err);
     });
 }
-export function discountSubLog(date, subEmail, amount, percent, overrideDiscount, callback) {
+function discountSubLog(date, subEmail, amount, percent, overrideDiscount, callback) {
     var url = baseURLOld + 'DiscountSubLog';
     var request = {
         gigatoken: getToken(),
@@ -99,7 +99,7 @@ export function discountSubLog(date, subEmail, amount, percent, overrideDiscount
         callback(resp.err);
     });
 }
-export function ChangeServingsForDate(date, subEmail, servings, callback) {
+function ChangeServingsForDate(date, subEmail, servings, callback) {
     var url = baseURLOld + 'ChangeServingsForDate';
     var request = {
         gigatoken: getToken(),
@@ -112,7 +112,7 @@ export function ChangeServingsForDate(date, subEmail, servings, callback) {
         callback(resp.err);
     });
 }
-export function ChangeServingsPermanently(email, servings, vegetarian, callback) {
+function ChangeServingsPermanently(email, servings, vegetarian, callback) {
     var url = baseURLOld + 'ChangeServingsPermanently';
     var request = {
         gigatoken: getToken(),
@@ -125,7 +125,7 @@ export function ChangeServingsPermanently(email, servings, vegetarian, callback)
         callback(resp.err);
     });
 }
-export function GetGeneralStats(callback) {
+function GetGeneralStats(callback) {
     var url = baseURLOld + 'GetGeneralStats';
     var request = {
         gigatoken: getToken(),
@@ -170,3 +170,18 @@ function serializeParams(obj) {
     }
     return str.join('&');
 }
+
+var Service = /*#__PURE__*/Object.freeze({
+    getSubLogs: getSubLogs,
+    getSubLogsForDate: getSubLogsForDate,
+    getSubEmails: getSubEmails,
+    getSubEmailsAndSubs: getSubEmailsAndSubs,
+    skipSubLog: skipSubLog,
+    CancelSub: CancelSub,
+    discountSubLog: discountSubLog,
+    ChangeServingsForDate: ChangeServingsForDate,
+    ChangeServingsPermanently: ChangeServingsPermanently,
+    GetGeneralStats: GetGeneralStats
+});
+
+COOK.Service = Service;

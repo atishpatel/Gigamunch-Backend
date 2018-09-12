@@ -29,7 +29,7 @@ function buildOldTS() {
     del([buildOldTSDirectory])
       .then(() => {
         console.log(`Compiling old typescript...`);
-        let stream = gulp.src('./ts-old/*.ts')
+        let stream = gulp.src('./ts-old/**/*s')
           // .pipe(importsInliner({
           //   parserOptions: {
           //     allowImportExportEverywhere: true,
@@ -49,6 +49,20 @@ function buildOldTS() {
           //   },
           // }))
           .pipe(tsProject())
+          .pipe(
+            gulp.dest(buildOldTSDirectory)
+          );
+        return new Promise((resolve, reject) => {
+          stream.on('end', resolve);
+          stream.on('error', reject);
+        });
+      })
+      .then(() => {
+        console.log(`Rolling up...`);
+        let stream = gulp.src(`${buildOldTSDirectory}/app.js`)
+          .pipe(
+            rollup('es')
+          )
           .pipe(
             gulp.dest(buildOldTSDirectory)
           );
