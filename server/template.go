@@ -273,6 +273,7 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 			ID:           "referred",
 			CampaignName: "Referred",
 		},
+		CheckoutPageURL: "/checkout",
 	}
 	defer display(ctx, w, "home", page)
 	email := req.FormValue("email")
@@ -349,6 +350,7 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 			ID:           "gifted",
 			CampaignName: "Gifted",
 		},
+		CheckoutPageURL: "/checkout",
 	}
 	defer display(ctx, w, "home", page)
 	email := req.FormValue("email")
