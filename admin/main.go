@@ -200,7 +200,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if strings.Contains(r.URL.Hostname(), "gigamunchapp.com") {
 			url := "https://eatgigamunch.com" + r.URL.Path
-			http.Redirect(w, r, url, http.StatusPermanentRedirect)
+			http.Redirect(w, r, url, http.StatusMovedPermanently)
 			return
 		}
 		// get context
