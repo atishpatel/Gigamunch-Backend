@@ -34,7 +34,6 @@ type server struct {
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
-	log        *logging.Client
 }
 
 var (

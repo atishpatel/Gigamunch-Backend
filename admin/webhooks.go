@@ -179,7 +179,7 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 		return nil
 	}
 	//if it's Tuesday - Saturday, skip them
-	activityC, err := activity.NewClient(ctx, s.log, s.db, s.sqlDB, s.serverInfo)
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err)
 	}
