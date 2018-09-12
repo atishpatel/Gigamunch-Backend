@@ -96,6 +96,7 @@ type SubscriptionLog struct {
 	CreatedDatetime    time.Time `json:"created_datetime"`
 	Skip               bool      `json:"skip"`
 	Servings           int8      `json:"servings"`
+	VegServings        int8      `json:"veg_servings"`
 	Amount             float32   `json:"amount"`
 	AmountPaid         float32   `json:"amount_paid"`
 	Paid               bool      `json:"paid"`

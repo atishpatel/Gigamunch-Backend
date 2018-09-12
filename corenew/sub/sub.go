@@ -28,29 +28,27 @@ import (
 const (
 	datetimeFormat                           = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	dateFormat                               = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement                    = "INSERT INTO `sub` (date,sub_email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
-	selectSubLogEmails                       = "SELECT DISTINCT sub_email from sub where date>? and date<?"
-	selectSubLogStatement                    = "SELECT created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date='%s' AND sub_email='%s'"
-	selectSubscriberSubLogsStatement         = "SELECT date,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent, refunded FROM `sub` WHERE sub_email=? ORDER BY date DESC"
-	selectAllSubLogStatement                 = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` ORDER BY date DESC LIMIT %d"
-	selectUnpaidSubLogStatement              = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE paid=0 AND free=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
-	selectSubscriberUnpaidSubLogStatement    = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE paid=0 AND free=0 AND skip=0 AND refunded=0 AND sub_email=?"
-	selectSubLogFromDateStatement            = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE date=?"
-	selectSubLogFromSubscriberStatement      = "SELECT date,sub_email,created_datetime,skip,servings,amount,amount_paid,paid,paid_datetime,delivery_time,payment_method_token,transaction_id,free,discount_amount,discount_percent,refunded FROM `sub` WHERE sub_email=? ORDER BY date DESC"
-	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),sub_email,count(sub_email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount) FROM sub WHERE date>'2017-04-08' AND date<? GROUP BY sub_email ORDER BY mn"
-	updatePaidSubLogStatement                = "UPDATE `sub` SET amount_paid=%f,paid=1,paid_datetime='%s',transaction_id='%s' WHERE date='%s' AND sub_email='%s'"
-	updateSkipSubLogStatement                = "UPDATE `sub` SET skip=1 WHERE date='%s' AND sub_email='%s'"
-	updateUnskipSubLogStatement              = "UPDATE `sub` SET skip=0 WHERE date='%s' AND sub_email='%s'"
-	updateRefundedAndSkipSubLogStatement     = "UPDATE `sub` SET skip=1,refunded=1 WHERE date=? AND sub_email=?"
-	updateFreeSubLogStatment                 = "UPDATE `sub` SET free=1 WHERE date='%s' AND sub_email='%s'"
-	updateDiscountSubLogStatment             = "UPDATE `sub` SET discount_amount=?, discount_percent=? WHERE date=? AND sub_email=?"
-	updateServingsSubLogStatement            = "UPDATE sub SET servings=?, amount=? WHERE date=? AND sub_email=?"
-	updateServingsPermanentlySubLogStatement = "UPDATE sub SET servings=?, amount=? WHERE date>? AND sub_email=? AND servings=?"
-	deleteSubLogStatment                     = "DELETE from `sub` WHERE date>? AND sub_email=? AND paid=0"
-	updateUnpaidPayment                      = "UPDATE sub SET payment_method_token=? WHERE free=0 AND paid=0 AND skip=0 AND sub_email=?"
-	updateEmailAddress                       = "UPDATE `sub` SET sub_email='%s' WHERE sub_email='%s'"
-	// insertPromoCodeStatement     = "INSERT INTO `promo_code` (code,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses) VALUES ('%s',%t,%d,%f,%f,%t,%t,'%s','%s',%d)"
-	// selectPromoCodesStatement    = "SELECT created_datetime,free_delivery,percent_off,amount_off,discount_cap,free_dish,buy_one_get_one_free,start_datetime,end_datetime,num_uses FROM `promo_code` WHERE code='%s'"
+	insertSubLogStatement                    = "INSERT INTO activity (date,email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
+	selectSubLogEmails                       = "SELECT DISTINCT email from activity where date>? and date<?"
+	selectSubLogStatement                    = "SELECT created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date='%s' AND email='%s'"
+	selectSubscriberSubLogsStatement         = "SELECT date,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent, refunded FROM activity WHERE email=? ORDER BY date DESC"
+	selectAllSubLogStatement                 = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity ORDER BY date DESC LIMIT %d"
+	selectUnpaidSubLogStatement              = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
+	selectSubscriberUnpaidSubLogStatement    = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
+	selectSubLogFromDateStatement            = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date=?"
+	selectSubLogFromSubscriberStatement      = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE email=? ORDER BY date DESC"
+	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount) FROM activity WHERE date>'2017-04-08' AND date<? GROUP BY email ORDER BY mn"
+	updatePaidSubLogStatement                = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
+	updateSkipSubLogStatement                = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
+	updateUnskipSubLogStatement              = "UPDATE activity SET skip=0 WHERE date='%s' AND email='%s'"
+	updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
+	updateFirstSubLogStatment                = "UPDATE activity SET first=1 WHERE date='%s' AND email='%s'"
+	updateDiscountSubLogStatment             = "UPDATE activity SET discount_amount=?, discount_percent=? WHERE date=? AND email=?"
+	updateServingsSubLogStatement            = "UPDATE activity SET servings=?, amount=? WHERE date=? AND email=?"
+	updateServingsPermanentlySubLogStatement = "UPDATE activity SET servings=?, amount=? WHERE date>? AND email=? AND servings=?"
+	deleteSubLogStatment                     = "DELETE from activity WHERE date>? AND email=? AND paid=0"
+	updateUnpaidPayment                      = "UPDATE activity SET payment_method_token=? WHERE first=0 AND paid=0 AND skip=0 AND email=?"
+	updateEmailAddress                       = "UPDATE activity SET email='%s' WHERE email='%s'"
 )
 
 var (
@@ -832,10 +830,10 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
 	}
-	st := fmt.Sprintf(updateFreeSubLogStatment, date.Format(dateFormat), subEmail)
+	st := fmt.Sprintf(updateFirstSubLogStatment, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute updateFreeSubLogStatment statement: ")
+		return errSQLDB.WithError(err).Wrap("failed to execute updateFirstSubLogStatment statement: ")
 	}
 	return nil
 }
