@@ -286,7 +286,6 @@
     },
     "/admin/api/v1/GetUnpaidSublogs": {
       "post": {
-        "summary": "Sublogs",
         "operationId": "GetUnpaidSublogs",
         "responses": {
           "200": {
@@ -337,9 +336,63 @@
         ]
       }
     },
+    "/admin/api/v1/RefundAndSkipSublog": {
+      "post": {
+        "summary": "RefundAndSkipSublog refunds and skips a customer",
+        "operationId": "RefundAndSkipSublog",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIRefundAndSkipSublogReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/SendCustomerSMS": {
+      "post": {
+        "summary": "SendCustomerSMS sends an sms to the customers. Use {{first_name}} for first name and {{name}} for full name.",
+        "operationId": "SendCustomerSMS",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISendCustomerSMSReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/SkipActivity": {
       "post": {
-        "summary": "Activities\nrpc GetActivities (GetActivitiesReq) returns (GetActivitiesResp) {\n    option (google.api.http) = {\n        post: \"/admin/api/v1/GetActivities\"\n        body: \"*\"\n    };\n}\nSkipActivity skips a sub for a date.",
+        "summary": "SkipActivity skips a sub for a date.",
         "operationId": "SkipActivity",
         "responses": {
           "200": {
@@ -653,6 +706,15 @@
         }
       },
       "description": "Dish is a dish in a culture execution."
+    },
+    "AdminAPIErrorOnlyResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/ErrorError"
+        }
+      },
+      "title": "Common"
     },
     "AdminAPIExecution": {
       "type": "object",
@@ -1090,6 +1152,31 @@
         }
       }
     },
+    "AdminAPIRefundAndSkipSublogReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPISendCustomerSMSReq": {
+      "type": "object",
+      "properties": {
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
     "AdminAPISkipActivityReq": {
       "type": "object",
       "properties": {
@@ -1099,8 +1186,7 @@
         "date": {
           "type": "string"
         }
-      },
-      "title": "Activity"
+      }
     },
     "AdminAPISkipActivityResp": {
       "type": "object",
@@ -1127,6 +1213,10 @@
           "format": "boolean"
         },
         "servings": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "veg_servings": {
           "type": "integer",
           "format": "int32"
         },

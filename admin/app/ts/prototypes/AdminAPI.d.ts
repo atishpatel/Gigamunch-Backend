@@ -1,12 +1,52 @@
 interface ErrorOnlyResp {
     error: Error
 }
-interface TokenOnlyReq {
-    token: string
-}
-interface TokenOnlyResp {
-    error: Error
-    token: string
+interface Activity {
+    created_datetime: string
+    date: string
+    user_id: number
+    email: string
+    first_name: string
+    last_name: string
+    location: number
+    // Address
+    address_changed: boolean
+    address_apt: string
+    address_string: string
+    zip: string
+    latitude: number
+    longitude: number
+    // Detail
+    active: boolean
+    skip: boolean
+    // Bag detail
+    servings: number
+    vegetarian_servings: boolean
+    servings_changed: number
+    first: boolean
+    // Payment
+    amount: number
+    amount_paid: number
+    discount_amount: number
+    discount_percent: number
+    paid: boolean
+    paid_datetime: string
+    transaction_id: string
+    payment_method_token: string
+    customer_id: string
+    // Refund
+    refunded: boolean
+    refunded_amount: number
+    refunded_datetime: string
+    refund_transaction_id: string
+    payment_provider: number
+    forgiven: boolean
+    // Gift
+    gift: boolean
+    gift_from_user_id: number
+    // Deviant
+    deviant: boolean
+    deviant_reason: string
 }
 interface SkipActivityReq {
     email: string
@@ -52,6 +92,7 @@ interface Sublog {
     created_datetime: string
     skip: boolean
     servings: number
+    veg_servings: number
     amount: number
     amount_paid: number
     paid: boolean
@@ -111,6 +152,14 @@ interface ProcessSublogsReq {
 }
 interface ProcessSublogsResp {
     error: Error
+}
+interface SendCustomerSMSReq {
+    emails: string[]
+	message: string
+}
+interface RefundAndSkipSublogReq {
+	email: string
+    date: string
 }
 interface GetHasSubscribedReq {
     date: string
