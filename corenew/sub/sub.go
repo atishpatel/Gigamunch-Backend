@@ -28,7 +28,7 @@ import (
 const (
 	datetimeFormat                           = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	dateFormat                               = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement                    = "INSERT INTO activity (date,email,servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
+	insertSubLogStatement                    = "INSERT INTO activity (date,email,servings,veg_servings,amount,delivery_time,payment_method_token,customer_id) VALUES ('%s','%s',%d,%f,%d,'%s','%s')"
 	selectSubLogEmails                       = "SELECT DISTINCT email from activity where date>? and date<?"
 	selectSubLogStatement                    = "SELECT created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date='%s' AND email='%s'"
 	selectSubscriberSubLogsStatement         = "SELECT date,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,delivery_time,payment_method_token,transaction_id,first,discount_amount,discount_percent, refunded FROM activity WHERE email=? ORDER BY date DESC"
@@ -44,8 +44,8 @@ const (
 	updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
 	updateFirstSubLogStatment                = "UPDATE activity SET first=1 WHERE date='%s' AND email='%s'"
 	updateDiscountSubLogStatment             = "UPDATE activity SET discount_amount=?, discount_percent=? WHERE date=? AND email=?"
-	updateServingsSubLogStatement            = "UPDATE activity SET servings=?, amount=? WHERE date=? AND email=?"
-	updateServingsPermanentlySubLogStatement = "UPDATE activity SET servings=?, amount=? WHERE date>? AND email=? AND servings=?"
+	updateServingsSubLogStatement            = "UPDATE activity SET servings=?, veg_servings=?, amount=? WHERE date=? AND email=?"
+	updateServingsPermanentlySubLogStatement = "UPDATE activity SET servings=?, veg_servings=?, amount=? WHERE date>? AND email=?"
 	deleteSubLogStatment                     = "DELETE from activity WHERE date>? AND email=? AND paid=0"
 	updateUnpaidPayment                      = "UPDATE activity SET payment_method_token=? WHERE first=0 AND paid=0 AND skip=0 AND email=?"
 	updateEmailAddress                       = "UPDATE activity SET email='%s' WHERE email='%s'"
@@ -461,11 +461,11 @@ func (c *Client) Update(subs []*SubscriptionSignUp) error {
 }
 
 // Setup sets up a SubLog.
-func (c *Client) Setup(date time.Time, subEmail string, servings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string) error {
+func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string) error {
 	if date.IsZero() || subEmail == "" || servings == 0 || amount == 0 || paymentMethodToken == "" || customerID == "" {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) servings(%d) amount(%f) deliveryTime(%d) paymentMethodToken(%s) customerID(%s)", date, subEmail, servings, amount, deliveryTime, paymentMethodToken, customerID)
 	}
-	st := fmt.Sprintf(insertSubLogStatement, date.Format(dateFormat), subEmail, servings, amount, deliveryTime, paymentMethodToken, customerID)
+	st := fmt.Sprintf(insertSubLogStatement, date.Format(dateFormat), subEmail, servings, vegServings, amount, deliveryTime, paymentMethodToken, customerID)
 	_, err := mysqlDB.Exec(st)
 	if merr, ok := err.(*mysql.MySQLError); ok {
 		if merr.Number == 1062 {
@@ -507,19 +507,19 @@ func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, 
 	if date.IsZero() || subEmail == "" || servings < 1 || amount < 0.1 {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) servings(%f) amount(%s)", date, subEmail, servings, amount)
 	}
+
+	var s *SubscriptionSignUp
+	s, err := get(c.ctx, subEmail)
+	if err != nil {
+		return errDatastore.WithError(err).Wrap("failed to get")
+	}
 	sl, err := c.Get(date, subEmail)
 	if err != nil {
 		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
 			return errors.Wrap("failed to sub.Get", err)
 		}
 		// insert
-		var s *SubscriptionSignUp
-		s, err = get(c.ctx, subEmail)
-		if err != nil {
-			return errDatastore.WithError(err).Wrap("failed to get")
-		}
-		serv := s.Servings + s.VegetarianServings
-		err = c.Setup(date, subEmail, serv, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -531,7 +531,14 @@ func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, 
 			return errEntrySkipped.Wrap("cannot give change servings to a week that is already skipped")
 		}
 	}
-	_, err = mysqlDB.Exec(updateServingsSubLogStatement, servings, amount, date.Format(dateFormat), subEmail)
+	var nonvegServings int8
+	var vegServings int8
+	if s.VegetarianServings > 0 {
+		vegServings = servings
+	} else {
+		nonvegServings = servings
+	}
+	_, err = mysqlDB.Exec(updateServingsSubLogStatement, nonvegServings, vegServings, amount, date.Format(dateFormat), subEmail)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsSubLogStatement statement")
 	}
@@ -568,7 +575,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		return errors.Wrap("failed to put", err)
 	}
 	// TODO don't update if past deadline date for Serving count
-	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, servings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail, oldServings+oldVegServings)
+	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, nonvegServings, vegServings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail, oldServings+oldVegServings)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}
@@ -610,8 +617,7 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		servings := s.Servings + s.VegetarianServings
-		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -645,8 +651,7 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 		// if err != nil {
 		// 	return errDatastore.WithError(err).Wrap("failed to get")
 		// }
-		servings := s.Servings + s.VegetarianServings
-		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -710,8 +715,7 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 		// if err != nil {
 		// 	return errDatastore.WithError(err).Wrap("failed to get")
 		// }
-		servings := s.Servings + s.VegetarianServings
-		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -784,8 +788,7 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		servings := s.Servings + s.VegetarianServings
-		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -824,8 +827,7 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		servings := s.Servings + s.VegetarianServings
-		err = c.Setup(date, subEmail, servings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -982,21 +984,13 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 		if (!v.FirstBoxDate.IsZero() && v.FirstBoxDate.After(dayBeforeBox)) || (!v.SubscriptionDate.IsZero() && v.SubscriptionDate.After(dayBeforeBox)) {
 			continue
 		}
-		// TODO instead of inserting all in this task, split it into many tasks?
+		// TODO: instead of inserting all in this task, split it into many tasks?
 		// insert into subLog
 		amt := v.WeeklyAmount
-		servings := v.Servings + v.VegetarianServings
-		if amt < .01 { // TODO remove and just give error?
-			switch servings {
-			case 1:
-				amt = 17
-			case 2:
-				amt = 15 * 2
-			default:
-				amt = 14 * float32(servings)
-			}
+		if amt < .01 {
+			utils.Errorf(c.ctx, "WeeklyAmount is less than .01 for %s", v.Email)
 		}
-		err = c.Setup(date, v.Email, servings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID)
+		err = c.Setup(date, v.Email, v.Servings, v.VegetarianServings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID)
 		if err != nil {
 			if errors.GetErrorWithCode(err).Code == errDuplicateEntry.Code {
 				continue
