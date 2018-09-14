@@ -197,6 +197,7 @@ ALTER TABLE `sub` ADD COLUMN gift BOOLEAN NOT NULL DEFAULT 0;
 ALTER TABLE `sub` ADD COLUMN gift_from_user_id BIGINT;
 ALTER TABLE `sub` ADD COLUMN deviant BOOLEAN NOT NULL DEFAULT 0;
 ALTER TABLE `sub` ADD COLUMN deviant_reason VARCHAR(225) NOT NULL DEFAULT '';
+ALTER TABLE `sub` DROP COLUMN delivery_time;
 
 RENAME TABLE sub to activity;
 -- TODO: change primary key from date, email to date, user_id

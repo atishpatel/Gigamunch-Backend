@@ -625,7 +625,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 			utils.Criticalf(ctx, "error in gifCheckout: Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", entry.Email, firstBoxDate, err)
 		}
 	} else {
-		err = subC.Setup(firstBoxDate, entry.Email, entry.Servings+entry.VegetarianServings, entry.WeeklyAmount, 6, entry.PaymentMethodToken, entry.CustomerID)
+		err = subC.Setup(firstBoxDate, entry.Email, entry.Servings, entry.VegetarianServings, entry.WeeklyAmount, 6, entry.PaymentMethodToken, entry.CustomerID)
 		if err != nil {
 			utils.Criticalf(ctx, "error in giftCheckout: Failed to setup sub box for new sign up(%s) for date(%v). Err:%v", entry.Email, firstBoxDate, err)
 		}
