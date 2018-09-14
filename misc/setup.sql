@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS activity(
 	gift_from_user_id BIGINT,
 	deviant BOOLEAN NOT NULL DEFAULT 0,
 	deviant_reason VARCHAR(225) NOT NULL DEFAULT '',
-	PRIMARY KEY (date, user_id)
+	PRIMARY KEY (date, user_id, email)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 
 ALTER TABLE `sub` CHANGE COLUMN `sub_email` `email` VARCHAR(175) NOT NULL;
