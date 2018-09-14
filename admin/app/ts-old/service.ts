@@ -62,7 +62,7 @@ export function getSubEmails(callback: (subEmails: String[], err: ErrorWithCode)
 }
 
 export function getSubEmailsAndSubs(callback: (subEmails: String[], subs: Object[], err: ErrorWithCode) => void) {
-  const url: string = baseURLOld + 'getSubEmailsAndSubs';
+  const url: string = baseURLOld + 'getSubEmails';
   const request = {
     gigatoken: getToken(),
   };

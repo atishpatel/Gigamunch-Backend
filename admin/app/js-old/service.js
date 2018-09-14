@@ -52,7 +52,7 @@ export function getSubEmails(callback) {
     });
 }
 export function getSubEmailsAndSubs(callback) {
-    var url = baseURLOld + 'getSubEmailsAndSubs';
+    var url = baseURLOld + 'getSubEmails';
     var request = {
         gigatoken: getToken(),
     };
