@@ -30,7 +30,6 @@ import (
 )
 
 var (
-	domainURL string
 	projectID string
 )
 
@@ -75,7 +74,6 @@ func main() {
 	if projectID == "" {
 		projectID = os.Getenv("PROJECT_ID")
 	}
-	getDomainString()
 	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
 	http.HandleFunc("/sub-merchant-approved", handleSubMerchantApproved)
 	http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
@@ -141,10 +139,10 @@ func main() {
 	register("SetupSubLogs", "SetupSubLogs", "POST", "cookservice/SetupSubLogs", "Setup subscription activty for a date. Admin func. Do this one Chris.")
 	register("ProcessSubLog", "ProcessSubLog", "POST", "cookservice/ProcessSubLog", "Admin func.")
 	register("CancelSub", "CancelSub", "POST", "cookservice/CancelSub", "Admin func.")
-	register("GetSubEmails", "getSubEmails", "GET", "cookservice/getSubEmails", "Admin func.")
+	register("GetSubEmails", "getSubEmails", "POST", "cookservice/getSubEmails", "Admin func.")
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("RefundAndSkipSubLog", "refundAndSkipSubLog", "POST", "cookservice/refundAndSkipSubLog", "Refund and skip a customer for date. Admin func.")
-	register("GetGeneralStats", "GetGeneralStats", "GET", "cookservice/GetGeneralStats", "Returns general stats. Admin func.")
+	register("GetGeneralStats", "GetGeneralStats", "POST", "cookservice/GetGeneralStats", "Returns general stats. Admin func.")
 	// register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Give free meal to a customer for a date. Admin func.")
 	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
 	register("ChangeServingsForDate", "ChangeServingsForDate", "POST", "cookservice/ChangeServingsForDate", "Change number of servings for a week. Admin func.")
@@ -157,12 +155,6 @@ func main() {
 	// register("SendIntroEmail", "SendIntroEmail", "POST", "cookservice/SendIntroEmail", "Admin func. Sends email for people who just left email.")
 	endpoints.HandleHTTP()
 	appengine.Main()
-}
-
-func getDomainString() {
-	if domainURL == "" {
-		domainURL = os.Getenv("DOMAIN_URL")
-	}
 }
 
 func handleProcessInquiry(w http.ResponseWriter, req *http.Request) {

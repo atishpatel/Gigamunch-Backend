@@ -1,31 +1,56 @@
 [[define "campaign-logger"]]
-<!-- TODO: add logging of url params utm campaigns -->
 <!-- Page campaigns -->
 [[if .CampaignName]]
 <div id="CampaignName"
      style="display:none">[[.CampaignName]]</div>
 <script>
-  if (window.localStorage) {
-    // add campaigns tag
-    var campaignName = document.getElementById('CampaignName').innerHTML;
-    if (campaignName) {
-      var campaignsString = window.localStorage.getItem(APP.CampaignsKey);
-      var campaigns;
-      if (!campaignsString) {
-        campaigns = [];
-      } else {
-        campaigns = JSON.parse(campaignsString);
+  function addCampaign(campaignName, source, medium, term, content) {
+    if (window.localStorage) {
+      // add campaigns tag
+      if (campaignName || source) {
+        var campaignsString = window.localStorage.getItem(APP.CampaignsKey);
+        var campaigns;
+        if (!campaignsString) {
+          campaigns = [];
+        } else {
+          campaigns = JSON.parse(campaignsString);
+        }
+        var d = new Date();
+        campaign = {
+          Campaign: campaignName,
+          Timestamp: d.toISOString(),
+          Source: source,
+          Medium: medium,
+          Term: term,
+          Content: content,
+        }
+        campaigns.push(campaign);
+        window.localStorage.setItem(APP.CampaignsKey, JSON.stringify(campaigns));
       }
-      var d = new Date();
-      campaign = {
-        Campaign: campaignName,
-        Timestamp: d.toISOString(),
-      }
-      campaigns.push(campaign);
-      window.localStorage.setItem(APP.CampaignsKey, JSON.stringify(campaigns));
+      // add email
     }
-    // add email
   }
+  var pageCampaignName = document.getElementById('CampaignName').innerHTML;
+  addCampaign(pageCampaignName, '', '', '', '');
+
+  function GetURLParmas() {
+    var vars = {};
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+      vars[key] = value;
+      return value;
+    });
+    return vars;
+  }
+
+  function getValue(obj, value) {
+    var v = obj[value];
+    if (!v) {
+      return '';
+    }
+    return v;
+  }
+  var urlParams = GetURLParmas();
+  addCampaign(getValue(urlParams, 'utm_campaign'), getValue(urlParams, 'utm_source'), getValue(urlParams, 'utm_medium'), getValue(urlParams, 'utm_term'), getValue(urlParams, 'utm_content'));
 
 </script>
 [[end]]

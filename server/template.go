@@ -64,7 +64,7 @@ func redirictOldHost(f httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		if strings.Contains(req.URL.Hostname(), "gigamunchapp.com") {
 			url := "https://eatgigamunch.com" + req.URL.Path
-			http.Redirect(w, req, url, http.StatusPermanentRedirect)
+			http.Redirect(w, req, url, http.StatusMovedPermanently)
 			return
 		}
 		f(w, req, params)
