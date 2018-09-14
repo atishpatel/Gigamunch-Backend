@@ -49,6 +49,8 @@ func init() {
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
+	// Auth
+	http.HandleFunc("/admin/api/v1/MakeAdmin", s.handler(s.userAdmin(s.MakeAdmin)))
 	// Activity
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))

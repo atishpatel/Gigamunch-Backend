@@ -310,6 +310,33 @@
         ]
       }
     },
+    "/admin/api/v1/MakeAdmin": {
+      "post": {
+        "summary": "MakeAdmin makes a use an admin.",
+        "operationId": "MakeAdmin",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIMakeAdminReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/ProcessSublogs": {
       "post": {
         "operationId": "ProcessSublogs",
@@ -1112,6 +1139,15 @@
           }
         }
       }
+    },
+    "AdminAPIMakeAdminReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      },
+      "title": "Auth"
     },
     "AdminAPIPayroll": {
       "type": "object",
