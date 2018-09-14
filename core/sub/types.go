@@ -21,9 +21,8 @@ type Campaign struct {
 // Subscriber is a subscriber.
 type Subscriber struct {
 	CreatedDatetime time.Time       `json:"created_datetime" datastore:",noindex"`
-	SignUpDate      time.Time       `json:"sign_up_date" datastore:",noindex"`
+	SignUpDatetime  time.Time       `json:"sign_up_datetime" datastore:",noindex"`
 	ID              int64           `json:"id" datastore:",noindex"`
-	Email           string          `json:"email"`
 	AuthID          string          `json:"auth_id"`
 	Location        common.Location `json:"location" datastore:",noindex"`
 	FirstName       string          `json:"first_name" datastore:",noindex"`
@@ -33,14 +32,14 @@ type Subscriber struct {
 	EmailPrefs []EmailPref `json:"email_prefs" datastore:",noindex"`
 	PhonePrefs []PhonePref `json:"phone_prefs" datastore:",noindex"`
 	// Account
-	PaymentProvider    common.PaymentProvider `json:"payment_provider" datastore:",noindex"`
-	PaymentCustomerID  string                 `json:"payment_customer_id" datastore:",noindex"`
-	PaymentMethodToken string                 `json:"payment_method_token" datastore:",noindex"`
-	Active             bool                   `json:"active" datastore:",index"`
-	ActivateDate       time.Time              `json:"activate_date" datastore:",noindex"`
-	DeactivatedDate    time.Time              `json:"deactivated_date" datastore:",noindex"`
-	Address            common.Address         `json:"address" datastore:",noindex"`
-	DeliveryNotes      string                 `json:"delivery_notes" datastore:",noindex"`
+	PaymentProvider     common.PaymentProvider `json:"payment_provider" datastore:",noindex"`
+	PaymentCustomerID   string                 `json:"payment_customer_id" datastore:",noindex"`
+	PaymentMethodToken  string                 `json:"payment_method_token" datastore:",noindex"`
+	Active              bool                   `json:"active" datastore:",index"`
+	ActivateDatetime    time.Time              `json:"activate_datetime" datastore:",noindex"`
+	DeactivatedDatetime time.Time              `json:"deactivated_datetime" datastore:",noindex"`
+	Address             common.Address         `json:"address" datastore:",noindex"`
+	DeliveryNotes       string                 `json:"delivery_notes" datastore:",noindex"`
 	// Plan
 	Servings           int8      `json:"servings" datastore:",noindex"`
 	VegetarianServings int8      `json:"vegetarian_servings" datastore:",noindex"`
@@ -49,8 +48,8 @@ type Subscriber struct {
 	Amount             float32   `json:"amount" datastore:",noindex"`
 	FoodPref           FoodPref  `json:"food_pref" datastore:",noindex"`
 	// Gift
-	NumGiftDinners int       `json:"num_gift_dinners" datastore:",noindex"`
-	GiftRevealDate time.Time `json:"gift_reveal_date"`
+	NumGiftDinners     int       `json:"num_gift_dinners" datastore:",noindex"`
+	GiftRevealDatetime time.Time `json:"gift_reveal_datetime"`
 	// Marketing
 	ReferralPageOpens int        `json:"referral_page_opens" datastore:",noindex"`
 	ReferredPageOpens int        `json:"referred_page_opens" datastore:",noindex"`
