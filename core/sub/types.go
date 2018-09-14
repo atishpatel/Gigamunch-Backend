@@ -21,49 +21,48 @@ type Campaign struct {
 // Subscriber is a subscriber.
 type Subscriber struct {
 	CreatedDatetime time.Time       `json:"created_datetime" datastore:",noindex"`
-	SignUpDate      time.Time       `json:"sign_up_date" datastore:",noindex"`
+	SignUpDatetime  time.Time       `json:"sign_up_datetime" datastore:",noindex"`
 	ID              int64           `json:"id" datastore:",noindex"`
-	Email           string          `json:"email"`
 	AuthID          string          `json:"auth_id"`
 	Location        common.Location `json:"location" datastore:",noindex"`
 	FirstName       string          `json:"first_name" datastore:",noindex"`
 	LastName        string          `json:"last_name" datastore:",noindex"`
 	PhotoURL        string          `json:"photo_url" datastore:",noindex"`
 	// Pref
-	EmailPrefs []EmailPref `json:"email_prefs" datastore:",noindex"`
-	PhonePrefs []PhonePref `json:"phone_prefs" datastore:",noindex"`
+	EmailPrefs []EmailPref `json:"email_prefs"`
+	PhonePrefs []PhonePref `json:"phone_prefs"`
 	// Account
-	PaymentProvider    common.PaymentProvider `json:"payment_provider" datastore:",noindex"`
-	PaymentCustomerID  string                 `json:"payment_customer_id" datastore:",noindex"`
-	PaymentMethodToken string                 `json:"payment_method_token" datastore:",noindex"`
-	Active             bool                   `json:"active" datastore:",index"`
-	ActivateDate       time.Time              `json:"activate_date" datastore:",noindex"`
-	DeactivatedDate    time.Time              `json:"deactivated_date" datastore:",noindex"`
-	Address            common.Address         `json:"address" datastore:",noindex"`
-	DeliveryNotes      string                 `json:"delivery_notes" datastore:",noindex"`
+	PaymentProvider     common.PaymentProvider `json:"payment_provider" datastore:",noindex"`
+	PaymentCustomerID   string                 `json:"payment_customer_id"`
+	PaymentMethodToken  string                 `json:"payment_method_token"`
+	Active              bool                   `json:"active"`
+	ActivateDatetime    time.Time              `json:"activate_datetime"`
+	DeactivatedDatetime time.Time              `json:"deactivated_datetime"`
+	Address             common.Address         `json:"address" datastore:",noindex"`
+	DeliveryNotes       string                 `json:"delivery_notes" datastore:",noindex"`
 	// Plan
-	Servings           int8      `json:"servings" datastore:",noindex"`
-	VegetarianServings int8      `json:"vegetarian_servings" datastore:",noindex"`
-	PlanInterval       int8      `json:"plan_interval" datastore:",noindex"`
-	IntervalStartPoint time.Time `json:"interval_start_point" datastore:",noindex"`
-	Amount             float32   `json:"amount" datastore:",noindex"`
-	FoodPref           FoodPref  `json:"food_pref" datastore:",noindex"`
+	ServingsNonVegetarian int8      `json:"servings_non_vegetarian" datastore:",noindex"`
+	ServingsVegetarian    int8      `json:"servings_vegetarian" datastore:",noindex"`
+	PlanInterval          int8      `json:"plan_interval" datastore:",noindex"`
+	IntervalStartPoint    time.Time `json:"interval_start_point" datastore:",noindex"`
+	Amount                float32   `json:"amount" datastore:",noindex"`
+	FoodPref              FoodPref  `json:"food_pref"`
 	// Gift
-	NumGiftDinners int       `json:"num_gift_dinners" datastore:",noindex"`
-	GiftRevealDate time.Time `json:"gift_reveal_date"`
+	NumGiftDinners     int       `json:"num_gift_dinners" datastore:",noindex"`
+	GiftRevealDatetime time.Time `json:"gift_reveal_datetime"`
 	// Marketing
 	ReferralPageOpens int        `json:"referral_page_opens" datastore:",noindex"`
 	ReferredPageOpens int        `json:"referred_page_opens" datastore:",noindex"`
-	ReferrerUserID    int64      `json:"referrer_user_id" datastore:",noindex"`
-	ReferenceEmail    string     `json:"reference_email" datastore:",noindex"`
+	ReferrerUserID    int64      `json:"referrer_user_id"`
+	ReferenceEmail    string     `json:"reference_email"`
 	ReferenceText     string     `json:"reference_text" datastore:",noindex"`
 	Campaigns         []Campaign `json:"campaigns"`
 }
 
 // FoodPref are pref for food.
 type FoodPref struct {
-	NoPork bool `json:"no_pork" datastore:",noindex"`
-	NoBeef bool `json:"no_beef" datastore:",noindex"`
+	NoPork bool `json:"no_pork"`
+	NoBeef bool `json:"no_beef"`
 }
 
 // EmailPref is a pref for an email.
@@ -80,4 +79,5 @@ type PhonePref struct {
 	RawNumber          string `json:"raw_number" datastore:",index"`
 	DisableBagReminder bool   `json:"disable_bag_reminder" datastore:",noindex"`
 	DisableDelivered   bool   `json:"disable_delivered" datastore:",noindex"`
+	DisableReview      bool   `json:"disable_review" datastore:",noindex"`
 }

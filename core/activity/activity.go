@@ -54,10 +54,10 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 }
 
 // Create creates an activity entry.
-func (c *Client) Create(date time.Time, email string, servings int8, amount float32, paymentMethodToken, customerID string) error {
+func (c *Client) Create(date time.Time, email string, servings, vegServings int8, amount float32, paymentMethodToken, customerID string) error {
 	// TODO: Reimplement
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.Setup(date, email, servings, amount, 0, paymentMethodToken, customerID)
+	return suboldC.Setup(date, email, servings, vegServings, amount, 0, paymentMethodToken, customerID)
 }
 
 // Process processes an actvity.

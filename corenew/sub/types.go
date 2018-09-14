@@ -96,11 +96,12 @@ type SubscriptionLog struct {
 	CreatedDatetime    time.Time `json:"created_datetime"`
 	Skip               bool      `json:"skip"`
 	Servings           int8      `json:"servings"`
+	VegServings        int8      `json:"veg_servings"`
 	Amount             float32   `json:"amount"`
 	AmountPaid         float32   `json:"amount_paid"`
 	Paid               bool      `json:"paid"`
 	PaidDatetime       time.Time `json:"paid_datetime"`
-	DeliveryTime       int8      `json:"delivery_time"`
+	DeliveryTime       int8      `json:"delivery_time"` // depecreated
 	PaymentMethodToken string    `json:"payment_method_token"`
 	TransactionID      string    `json:"transaction_id"`
 	Free               bool      `json:"free"`

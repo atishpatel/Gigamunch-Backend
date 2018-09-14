@@ -24,28 +24,30 @@ type Activity struct {
 	Latitude       float64 `json:"latitude,string" db:"lat"`
 	Longitude      float64 `json:"longitude,string" db:"long"`
 	// Detail
-	Active bool `json:"active" db:"active"`
-	Skip   bool `json:"skip" db:"skip"`
+	Active   bool `json:"active" db:"active"`
+	Skip     bool `json:"skip" db:"skip"`
+	Forgiven bool `json:"forgiven" db:"forgiven"`
 	// Bag detail
 	Servings          int8 `json:"servings" db:"servings"`
 	VegetrainServings bool `json:"vegetarian_servings" db:"veg_servings"`
 	ServingsChanged   int8 `json:"servings_changed" db:"servings_changed"`
 	First             bool `json:"first" db:"first"`
 	// Payment
-	Amount         float32        `json:"amount" db:"amount"`
-	AmountPaid     float32        `json:"amount_paid" db:"amount_paid"`
-	DiscountAmount float32        `json:"discount_amount" db:"discount_amount"`
-	Paid           bool           `json:"paid" db:"paid"`
-	PaidDatetime   mysql.NullTime `json:"paid_datetime" db:"paid_dt"`
-	TransactionID  string         `json:"transaction_id" db:"transaction_id"`
+	Amount             float32                `json:"amount" db:"amount"`
+	AmountPaid         float32                `json:"amount_paid" db:"amount_paid"`
+	DiscountAmount     float32                `json:"discount_amount" db:"discount_amount"`
+	DiscountPercent    int8                   `json:"discount_percent" db:"discount_percent"`
+	Paid               bool                   `json:"paid" db:"paid"`
+	PaidDatetime       mysql.NullTime         `json:"paid_datetime" db:"paid_dt"`
+	PaymentProvider    common.PaymentProvider `json:"payment_provider" db:"payment_provider"`
+	TransactionID      string                 `json:"transaction_id" db:"transaction_id"`
+	PaymentMethodToken string                 `json:"payment_method_token" db:"payment_method_token"`
+	CustomerID         string                 `json:"customer_id" db:"customer_id"`
 	// Refund
 	Refunded            bool           `json:"refunded" db:"refunded"`
 	RefundedAmount      float32        `json:"refunded_amount" db:"refunded_amount"`
 	RefundedDatetime    mysql.NullTime `json:"refunded_datetime" db:"refunded_dt"`
 	RefundTransactionID string         `json:"refund_transaction_id" db:"refund_transaction_id"`
-	// CouponID            sql.NullInt64          `json:"coupon_id" db:"coupon_id"`
-	PaymentProvider common.PaymentProvider `json:"payment_provider" db:"payment_provider"`
-	Forgiven        bool                   `json:"forgiven" db:"forgiven"`
 	// Gift
 	Gift           bool          `json:"gift" db:"gift"`
 	GiftFromUserID sql.NullInt64 `json:"gift_from_user_id" db:"gift_from_user_id"`
@@ -53,8 +55,4 @@ type Activity struct {
 	// used for one time parties
 	Deviant       bool   `json:"deviant" db:"deviant"`
 	DeviantReason string `json:"deviant_reason" db:"deviant_reason"`
-	// Driver
-	AssignedDriverID sql.NullInt64  `json:"assigned_driver_id" db:"assigned_driver_id"`
-	Delivered        bool           `json:"delivered" db:"delivered"`
-	DeliveryDatetime mysql.NullTime `json:"delivery_datetime" db:"delivery_dt"`
 }
