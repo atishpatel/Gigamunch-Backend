@@ -28,10 +28,10 @@ type Activity struct {
 	Skip     bool `json:"skip" db:"skip"`
 	Forgiven bool `json:"forgiven" db:"forgiven"`
 	// Bag detail
-	Servings          int8 `json:"servings" db:"servings"`
-	VegetrainServings bool `json:"vegetarian_servings" db:"veg_servings"`
-	ServingsChanged   int8 `json:"servings_changed" db:"servings_changed"`
-	First             bool `json:"first" db:"first"`
+	ServingsNonVegetarian int8 `json:"servings_non_vegetarian" db:"servings"`
+	ServingsVegetarain    bool `json:"servings_vegetarian" db:"veg_servings"`
+	ServingsChanged       int8 `json:"servings_changed" db:"servings_changed"`
+	First                 bool `json:"first" db:"first"`
 	// Payment
 	Amount             float32                `json:"amount" db:"amount"`
 	AmountPaid         float32                `json:"amount_paid" db:"amount_paid"`
