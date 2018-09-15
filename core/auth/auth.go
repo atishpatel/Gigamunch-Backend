@@ -11,6 +11,7 @@ import (
 
 	fb "firebase.google.com/go"
 	fba "firebase.google.com/go/auth"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
@@ -174,7 +175,7 @@ func (c *Client) AddCustomClaim(authIDOrEmail, key string, value interface{}) er
 		userRecord, err = fbAuth.GetUser(c.ctx, authIDOrEmail)
 	}
 	if err != nil {
-		return errInvalidArgument.WithMessage("Invalid email")
+		return errInvalidArgument.WithError(err).Annotate("Invalid parameter.")
 	}
 	claims := userRecord.CustomClaims
 	claims[key] = value
@@ -208,6 +209,17 @@ func setupFBApp(ctx context.Context, httpClient *http.Client, projectID string) 
 	}
 	if appengine.IsDevAppServer() {
 		ops = append(ops, option.WithCredentialsFile("../private/gitkit_cert.json"))
+	} else {
+		creds := &google.Credentials{
+			ProjectID: projectID,
+			TokenSource: google.AppEngineTokenSource(ctx, "https://www.googleapis.com/auth/cloud-platform",
+				"https://www.googleapis.com/auth/datastore",
+				"https://www.googleapis.com/auth/devstorage.full_control",
+				"https://www.googleapis.com/auth/firebase",
+				"https://www.googleapis.com/auth/identitytoolkit",
+				"https://www.googleapis.com/auth/userinfo.email"),
+		}
+		ops = append(ops, option.WithCredentials(creds))
 	}
 	var err error
 	fbApp, err := fb.NewApp(ctx, &fb.Config{ProjectID: projectID}, ops...)
