@@ -462,8 +462,8 @@ func (c *Client) Update(subs []*SubscriptionSignUp) error {
 
 // Setup sets up a SubLog.
 func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string) error {
-	if date.IsZero() || subEmail == "" || servings == 0 || amount == 0 || paymentMethodToken == "" || customerID == "" {
-		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) servings(%d) amount(%f) deliveryTime(%d) paymentMethodToken(%s) customerID(%s)", date, subEmail, servings, amount, deliveryTime, paymentMethodToken, customerID)
+	if date.IsZero() || subEmail == "" || amount == 0 || paymentMethodToken == "" || customerID == "" {
+		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) amount(%f) deliveryTime(%d) paymentMethodToken(%s) customerID(%s)", date, subEmail, amount, deliveryTime, paymentMethodToken, customerID)
 	}
 	_, err := mysqlDB.Exec(insertSubLogStatement, date.Format(dateFormat), subEmail, servings, vegServings, amount, paymentMethodToken, customerID)
 	if merr, ok := err.(*mysql.MySQLError); ok {
