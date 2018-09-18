@@ -770,7 +770,8 @@ func (service *Service) UpdateAddresses(ctx context.Context, req *GigatokenReq) 
 // AddToProcessSubscriptionQueueReq is a request for AddToProcessSubscriptionQueue.
 type AddToProcessSubscriptionQueueReq struct {
 	SubLogReq
-	Hours int `json:"hours"`
+	Emails []string `json:"emails"`
+	Hours  int      `json:"hours"`
 }
 
 // AddToProcessSubscriptionQueue adds a process to the subscription queue.
@@ -793,10 +794,25 @@ func (service *Service) AddToProcessSubscriptionQueue(ctx context.Context, req *
 	}
 	at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
 	tasksC := tasks.New(ctx)
-	err = tasksC.AddProcessSubscription(at, subR)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
-		return resp, nil
+	if req.SubEmail != "" {
+		err = tasksC.AddProcessSubscription(at, subR)
+		if err != nil {
+			resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
+			return resp, nil
+		}
+	}
+
+	for _, email := range req.Emails {
+		subR := &tasks.ProcessSubscriptionParams{
+			SubEmail: email,
+			Date:     req.Date,
+		}
+		at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+		err = tasksC.AddProcessSubscription(at, subR)
+		if err != nil {
+			resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
+			return resp, nil
+		}
 	}
 
 	return resp, nil

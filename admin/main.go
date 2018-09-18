@@ -52,6 +52,7 @@ func init() {
 	// Auth
 	http.HandleFunc("/admin/api/v1/MakeAdmin", s.handler(s.userAdmin(s.MakeAdmin)))
 	// Activity
+	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
 	// Logs
@@ -73,7 +74,6 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetExecutions", s.handler(s.userAdmin(s.GetExecutions)))
 	http.HandleFunc("/admin/api/v1/GetExecution", s.handler(s.userAdmin(s.GetExecution)))
 	http.HandleFunc("/admin/api/v1/UpdateExecution", s.handler(s.userAdmin(s.UpdateExecution)))
-
 	// Tasks
 	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
 	http.HandleFunc("/admin/task/SendPreviewCultureEmail", s.handler(s.SendPreviewCultureEmail))
@@ -83,6 +83,7 @@ func init() {
 	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
 
 	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivity))
+	http.HandleFunc("/process-subscription", s.handler(s.ProcessActivity))
 	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
 	// Webhooks
 	http.HandleFunc("/admin/webhook/typeform-skip", s.handler(s.TypeformSkip))

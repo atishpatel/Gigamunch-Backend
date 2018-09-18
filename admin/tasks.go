@@ -104,6 +104,8 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 			nonSkippers = append(nonSkippers, "atish@gigamunchapp.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
 		}
 		tag := mail.GetPreviewEmailTag(cultureDate)
+		log.Infof(ctx, "culture email tag: %s", tag)
+		log.Infof(ctx, "applying tags to: %+v", nonSkippers)
 		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 		if err != nil {
 			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
@@ -119,7 +121,7 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 // SendCultureEmail sends the culture email to all subscribers who are not skipped.
 func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	cultureDate := time.Now()
-	log.Infof(ctx, "culture date:%s", cultureDate)
+	log.Infof(ctx, "culture date: s", cultureDate)
 	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
@@ -138,6 +140,8 @@ func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r 
 			nonSkippers = append(nonSkippers, "atish@eatgigamunch.com", "chris@eatgigamunch.com", "enis@eatgigamunch.com", "piyush@eatgigamunch.com", "pkailamanda@gmail.com", "emilywalkerjordan@gmail.com", "mike@eatgigamunch.com", "befutter@gmail.com")
 		}
 		tag := mail.GetCultureEmailTag(cultureDate)
+		log.Infof(ctx, "culture email tag: %s", tag)
+		log.Infof(ctx, "applying tags to: %+v", nonSkippers)
 		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 		if err != nil {
 			errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
