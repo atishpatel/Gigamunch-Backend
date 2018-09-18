@@ -30,17 +30,16 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 
 	dilm := "{{name}}"
 	firstNameDilm := "{{first_name}}"
-	msg := req.Message
 
 	messageC := message.New(ctx)
-	var emails []string
-	for _, email := range req.Emails {
-		if email != "" {
-			emails = append(emails, email)
-		}
-	}
+	// var emails []string
+	// for _, email := range req.Emails {
+	// 	if email != "" {
+	// 		emails = append(emails, email)
+	// 	}
+	// }
 	subC := subold.New(ctx)
-	subs, err := subC.GetSubscribers(emails)
+	subs, err := subC.GetSubscribers(req.Emails)
 	if err != nil {
 		return errors.Annotate(err, "failed to subold.GetSubscribers")
 	}
@@ -53,6 +52,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 			name = s.Name
 		}
 		name = strings.Title(name)
+		msg := req.Message
 		msg = strings.Replace(msg, dilm, name, -1)
 		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)

@@ -30,7 +30,7 @@ export function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: 'sub',
+        signInSuccessUrl: 'login',
         signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             {

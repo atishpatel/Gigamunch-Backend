@@ -38,7 +38,7 @@ export function SetupFirebaseAuthUI(elementID: string) {
   let uiConfig = {
     tosUrl: '/terms',
     privacyPolicyUrl: '/privacy',
-    signInSuccessUrl: 'sub',
+    signInSuccessUrl: 'login',
     signInOptions: [
       // TODO: setup facebook perms
       // Leave the lines as is for the providers you want to offer your users.

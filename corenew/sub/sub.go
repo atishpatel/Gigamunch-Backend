@@ -574,7 +574,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		return errors.Wrap("failed to put", err)
 	}
 	// TODO don't update if past deadline date for Serving count
-	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, nonvegServings, vegServings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail, oldServings+oldVegServings)
+	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, nonvegServings, vegServings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}

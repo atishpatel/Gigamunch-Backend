@@ -75,7 +75,7 @@ func main() {
 	fmt.Printf("Doc link:\n%s\n----------\n", docSheet)
 	startAddress := []string{"1001+Thompson+Pl,+Nashville,+TN+37217"}
 	del := "\n"
-	replacer := strings.NewReplacer("\t", "", " ", "+")
+	replacer := strings.NewReplacer("\t", "", ".", "", " ", "+")
 	for _, i := range input {
 		if len(i.Addresses) > 0 {
 			addresses := strings.Split(replacer.Replace(i.Addresses), del)

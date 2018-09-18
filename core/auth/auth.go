@@ -98,10 +98,17 @@ func (c *Client) Verify(token string) (*common.User, error) {
 		return nil, errInvalidFBToken.WithError(err).Annotate("failed to fbauth.VerifyIDToken")
 	}
 	claims := tkn.Claims
-	picture := claims["picture"].(string)
-	name := claims["name"].(string)
-	email, ok := claims["email"].(string)
-	if !ok {
+	getString := func(c map[string]interface{}, key string) string {
+		tmp := c[key]
+		if tmp == nil {
+			return ""
+		}
+		return tmp.(string)
+	}
+	picture := getString(claims, "picture")
+	name := getString(claims, "name")
+	email := getString(claims, "email")
+	if email == "" {
 		return nil, errInvalidFBToken.WithMessage("User must have email.").Annotate("firebase token does not have email")
 	}
 	var userID int64
