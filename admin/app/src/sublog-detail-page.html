@@ -76,6 +76,12 @@
       <sublog-stats sublogs="[[sublogsByDate.sublogs]]"
                     details>
       </sublog-stats>
+      <h2>Delivery Tool</h2>
+      <p>
+        <a href="delivery/[[urlDate]]">
+          Link to new delivery tool
+      </a>
+      </p>
       <sublog-sortable-table id="unskipped"
                              sublogs="[[sublogsByDate.unskippedSublogs]]">
       </sublog-sortable-table>
@@ -85,12 +91,6 @@
       <sublog-sortable-table id="skipped"
                              sublogs="[[sublogsByDate.skippedSublogs]]">
       </sublog-sortable-table>
-      <h2>Delivery Tool</h2>
-      <p>
-        <a href="delivery/[[urlDate]]">
-          Link to new delivery tool
-      </a>
-      </p>
       <div>
 
         <br>
@@ -171,6 +171,12 @@
           d = new Date();
           while (d.getDay() !== 1) {
             d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
+          }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        } else if (dateString === 'previous') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() - 24 * 3600 * 1000); // previous day
           }
           d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else {

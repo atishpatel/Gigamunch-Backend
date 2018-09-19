@@ -212,12 +212,12 @@
               [[subscriber.first_box_date_string]]
             </div>
           </div>
-          <div class="info-row">
+          <!-- <div class="info-row">
             <div class="info-label">First Payment:</div>
             <div class="info-value first-payment">
               [[subscriber.first_payment_date_string]]
             </div>
-          </div>
+          </div> -->
           <div class="info-row">
             <div class="info-label">Subscription Day:</div>
             <div class="info-value subscription-day">
@@ -391,6 +391,14 @@
           if (err && err.code !== 0) {
             return;
           }
+          if(this.subscriber){
+            for (let i = 0; i < sublogs.length; i++) {
+              if(sublogs[i].servings == 0 && sublogs[i].veg_servings == 0){
+                sublogs[i].veg_servings = this.subscriber.vegetarian_servings;
+              }
+            }
+          }
+          
           this.sublogs = resp.sublogs
         });
       }

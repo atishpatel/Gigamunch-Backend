@@ -124,7 +124,7 @@
                     <div class="table-cell">[[delivery.addressStr]]</div>
                     <div class="table-cell">[[delivery.phone_number]]</div>
                     <div class="table-cell">[[delivery.servings]]</div>
-                    <div class="table-cell">[[delivery.vegetarian_servings]]</div>
+                    <div class="table-cell">[[delivery.veg_servings]]</div>
                     <div class="table-cell">[[delivery.status]]</div>
                     <div class="table-cell">[[delivery.sub_email]]</div>
                   </div>
@@ -247,6 +247,12 @@
             d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
           d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        } else if (dateString === 'previous') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() - 24 * 3600 * 1000); // previous day
+          }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else {
           d = new Date(dateString);
         }
@@ -280,6 +286,9 @@
               slogs[i].addressStr = getAddress(slogs[i].address);
               slogs[i].latlng = this._createGoogleLatlng(slogs[i].address.latitude, slogs[i].address.longitude);
               slogs[i].status = this._getStatus(slogs[i]);
+              if (slogs[i].servings == 0 && slogs[i].veg_servings == 0) {
+                slogs[i].veg_servings = slogs[i].vegetarian_servings;
+              }
               unskippedSublogs.push(slogs[i]);
             }
           }
