@@ -1,5 +1,8 @@
 {
   "git.autofetch": true,
-"editor.formatOnSave": false,
+  "editor.formatOnSave": true,
+  "[sql]": {
+    "editor.formatOnSave": false
+  },
   "beautify.ignore": ["**/*.sql"],
 }
