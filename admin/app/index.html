@@ -110,6 +110,18 @@
   <script>
     var app = document.querySelector('#app');
 
+    document.onkeyup = function(e) {
+      var e = e || window.event; // for IE to cover IEs window object
+      if (e.altKey && e.key == 'n') {
+        window.open('sublogdetail/next')
+        return false;
+      }
+      if (e.altKey && e.key == 'p') {
+        window.open('sublogdetail/previous')
+        return false;
+      }
+    }
+
   </script>
   <style>
     /* Fix issue with font not importing */

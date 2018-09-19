@@ -60,9 +60,12 @@
                     as="sublog">
             <tr>
               <td>[[sublog.name]]</td>
-              <td>[[sublog.sub_email]]</td>
+              <td>
+                  <a target="_blank"
+                  href="subscriber/[[sublog.sub_email]]">[[sublog.sub_email]]</a>
+                </td>
               <td hidden="[[detailed]]">[[sublog.servings]]</td>
-              <td hidden="[[detailed]]">[[sublog.vegetarian_servings]]</td>
+              <td hidden="[[detailed]]">[[sublog.veg_servings]]</td>
               <td hidden="[[detailed]]">[[sublog.status]]</td>
               <td hidden="[[detailed]]">
                 <a target="_blank"
@@ -159,6 +162,9 @@
             sublogs[i].addressString = this.getAddress(sublogs[i].address);
             sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
             sublogs[i].paidDateString = this._getDatetimeString(sublogs[i].paid_datetime);
+            if (sublogs[i].servings == 0 && sublogs[i].veg_servings == 0) {
+                sublogs[i].veg_servings = sublogs[i].vegetarian_servings;
+              }
           }
           this.sublogs = sublogs;
         }
