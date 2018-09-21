@@ -1,8 +1,9 @@
 interface ErrorOnlyResp {
     error: Error
 }
-interface MakeAdminReq {
+interface SetAdminReq {
     email: string
+    active: boolean
 }
 interface Activity {
     created_datetime: string

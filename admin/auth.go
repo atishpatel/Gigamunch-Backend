@@ -10,9 +10,9 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// MakeAdmin makes a user an admin.
-func (s *server) MakeAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.MakeAdminReq)
+// SetAdmin makes a user an admin.
+func (s *server) SetAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.SetAdminReq)
 	var err error
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -25,9 +25,9 @@ func (s *server) MakeAdmin(ctx context.Context, w http.ResponseWriter, r *http.R
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get auth.NewClient")
 	}
-	err = authC.MakeAdmin(req.Email)
+	err = authC.SetAdmin(req.Email, req.Active)
 	if err != nil {
-		return errors.GetErrorWithCode(err).Annotate("failed to auth.MakeAdmin")
+		return errors.GetErrorWithCode(err).Annotate("failed to auth.SetAdmin")
 	}
 	return nil
 }

@@ -310,33 +310,6 @@
         ]
       }
     },
-    "/admin/api/v1/MakeAdmin": {
-      "post": {
-        "summary": "MakeAdmin makes a use an admin.",
-        "operationId": "MakeAdmin",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AdminAPIMakeAdminReq"
-            }
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
     "/admin/api/v1/ProcessSublogs": {
       "post": {
         "operationId": "ProcessSublogs",
@@ -409,6 +382,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPISendCustomerSMSReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/SetAdmin": {
+      "post": {
+        "summary": "SetAdmin makes a use an admin.",
+        "operationId": "SetAdmin",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISetAdminReq"
             }
           }
         ],
@@ -1140,15 +1140,6 @@
         }
       }
     },
-    "AdminAPIMakeAdminReq": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        }
-      },
-      "title": "Auth"
-    },
     "AdminAPIPayroll": {
       "type": "object",
       "properties": {
@@ -1212,6 +1203,19 @@
           "type": "string"
         }
       }
+    },
+    "AdminAPISetAdminReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "Auth"
     },
     "AdminAPISkipActivityReq": {
       "type": "object",

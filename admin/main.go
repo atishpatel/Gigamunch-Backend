@@ -50,7 +50,7 @@ func init() {
 		log.Fatal("failed to setup", err)
 	}
 	// Auth
-	http.HandleFunc("/admin/api/v1/MakeAdmin", s.handler(s.userAdmin(s.MakeAdmin)))
+	http.HandleFunc("/admin/api/v1/SetAdmin", s.handler(s.userAdmin(s.SetAdmin)))
 	// Activity
 	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
