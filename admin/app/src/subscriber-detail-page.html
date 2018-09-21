@@ -391,15 +391,16 @@
           if (err && err.code !== 0) {
             return;
           }
-          if(this.subscriber){
+          let sublogs = resp.sublogs;
+          if (this.subscriber) {
             for (let i = 0; i < sublogs.length; i++) {
-              if(sublogs[i].servings == 0 && sublogs[i].veg_servings == 0){
+              if (sublogs[i].servings == 0 && sublogs[i].veg_servings == 0) {
                 sublogs[i].veg_servings = this.subscriber.vegetarian_servings;
               }
             }
           }
-          
-          this.sublogs = resp.sublogs
+
+          this.sublogs = sublogs;
         });
       }
 
