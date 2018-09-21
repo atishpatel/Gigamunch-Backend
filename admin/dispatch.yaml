@@ -1,3 +1,6 @@
 dispatch:
   - url: "*/admin*"
     service: admin
+dispatch:
+  - url: "*/sub*"
+    service: sub

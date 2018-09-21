@@ -4,5 +4,8 @@
   "[sql]": {
     "editor.formatOnSave": false
   },
-  "beautify.ignore": ["**/*.sql"],
+  "beautify.ignore": [
+    "**/*.sql"
+  ],
+  "vetur.format.defaultFormatter.html": "js-beautify-html",
 }

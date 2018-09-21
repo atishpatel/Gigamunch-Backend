@@ -286,9 +286,9 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		return resp
 	}
 	entry.Email = req.Email
-	entry.Name = req.FirstName + " " + req.LastName
-	entry.FirstName = strings.TrimSpace(req.FirstName)
-	entry.LastName = strings.TrimSpace(req.LastName)
+	entry.Name = strings.Title(req.FirstName + " " + req.LastName)
+	entry.FirstName = strings.Title(strings.TrimSpace(req.FirstName))
+	entry.LastName = strings.Title(strings.TrimSpace(req.LastName))
 	entry.Address = *address
 	if entry.Date.IsZero() {
 		entry.Date = time.Now()
@@ -545,9 +545,9 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 		return resp
 	}
 	entry.Email = req.Email
-	entry.Name = req.FirstName + " " + req.LastName
-	entry.FirstName = strings.TrimSpace(req.FirstName)
-	entry.LastName = strings.TrimSpace(req.LastName)
+	entry.Name = strings.Title(req.FirstName + " " + req.LastName)
+	entry.FirstName = strings.Title(strings.TrimSpace(req.FirstName))
+	entry.LastName = strings.Title(strings.TrimSpace(req.LastName))
 	entry.Address = *address
 	if entry.Date.IsZero() {
 		entry.Date = time.Now()
