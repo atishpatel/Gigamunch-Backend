@@ -88,6 +88,7 @@ func init() {
 	// Webhooks
 	http.HandleFunc("/admin/webhook/typeform-skip", s.handler(s.TypeformSkip))
 	http.HandleFunc("/admin/webhook/twilio-sms", s.handler(s.TwilioSMS))
+	http.HandleFunc("/admin/webhook/slack", s.handler(s.Slack))
 	// Batch
 	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
 	//
