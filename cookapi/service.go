@@ -356,11 +356,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	if len(nonSkippersEmails) == 0 {
 		return
 	}
-	subs, err := subC.GetSubscribers(nonSkippersEmails)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to handleSendQuantitySMS: failed to sub.GetSubscribers: %s", err)
-		return
-	}
+
 	twoBags := 0
 	twoVegBags := 0
 	fourBags := 0
@@ -371,10 +367,9 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	specialFourVegBags := 0
 	var listOfMoreThanFourBags []int8
 	var listOfMoreThanFourVegBags []int8
-	for i, sublog := range nonSkippers {
-		vegRatio := float32(subs[i].VegetarianServings) / float32(subs[i].VegetarianServings+subs[i].Servings)
-		vegServings := int8(float32(sublog.Servings) * vegRatio)
-		nonVegServings := sublog.Servings - vegServings
+	for _, sublog := range nonSkippers {
+		vegServings := sublog.VegServings
+		nonVegServings := sublog.Servings
 
 		switch vegServings {
 		case 0:
