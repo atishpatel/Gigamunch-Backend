@@ -1,4 +1,3 @@
-export var UserUpdated = 'UserUpdated';
 export function Fire(eventName, detail) {
     if (detail === void 0) { detail = {}; }
     var event = new CustomEvent(eventName, {
