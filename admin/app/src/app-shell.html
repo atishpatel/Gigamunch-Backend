@@ -438,6 +438,7 @@
           user: {
             type: Object,
             notify: true,
+            observer: 'userUpdated'
           },
         }
       }
@@ -452,19 +453,27 @@
         super();
         this.addEventListener('toast', this.toastEvent.bind(this));
         this.addEventListener('error', this.errorEvent.bind(this));
-        window.addEventListener(APP.Auth.Events.UserUpdated, () => {
-          const user = APP.User;
-          if (!APP.IsDev && user && !user.IsAdmin()) {
-            // window.location = '/login';
-            alert('user is not admin');
-          }
-          this.user = APP.User;
-        });
+
+        // if null instead of undefined
+        if (APP.User === null) {
+          this.userUpdated()
+        }
+
         if (this.service === undefined) {
           this.service = APP.Service ? APP.Service : Service;
         }
         if (this.page === undefined) {
           this.page = 'sublog';
+        }
+      }
+
+      userUpdated() {
+        const user = this.user;
+        if (!user || !user.Admin) {
+          alert('User is not admin. Redirecting to /login in 3 seconds...');
+          setTimeout(() => {
+            window.location = '/login';
+          }, 3000)
         }
       }
 

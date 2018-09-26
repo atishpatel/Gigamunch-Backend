@@ -1,5 +1,6 @@
 
 declare var APP: any;
+declare var app: any;
 declare var firebase: any;
 
 export const Events = {
@@ -10,24 +11,30 @@ export const Events = {
 
 let userLoaded = false;
 
-function setUser(user: FBUser) {
+function setUser(user: FBUser | null) {
   APP.User = user;
-  user.getIdTokenResult(false).then((tokenResult) => {
-    let adminClaim = tokenResult.claims['admin'];
-    if (adminClaim) {
-      user.Admin = true;
-    } else {
-      user.Admin = false;
-    }
-    user.IsAdmin = function () {
-      return user.Admin;
-    }
-    APP.User = user;
-    const event = document.createEvent('Event');
-    event.initEvent(Events.UserUpdated, true, true);
-    window.dispatchEvent(event);
-    userLoaded = true;
-  })
+  if (!user) {
+    app.user = user;
+  } else {
+    user.getIdTokenResult(false).then((tokenResult) => {
+      let adminClaim = tokenResult.claims['admin'];
+      if (adminClaim) {
+        user.Admin = true;
+      } else {
+        user.Admin = false;
+      }
+      user.IsAdmin = function () {
+        return user.Admin;
+      }
+      APP.User = user;
+      app.user = user;
+    })
+  }
+  const event = document.createEvent('Event');
+  event.initEvent(Events.UserUpdated, true, true);
+  window.dispatchEvent(event);
+  console.log('user', user);
+  userLoaded = true;
 }
 
 export function GetUser(): Promise<FBUser> {
@@ -37,7 +44,9 @@ export function GetUser(): Promise<FBUser> {
     }
 
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      setUser(user);
+      if (!APP.User) {
+        setUser(user);
+      }
       resolve(APP.User);
     }, reject);
   });
@@ -45,6 +54,9 @@ export function GetUser(): Promise<FBUser> {
 
 export function GetToken(): Promise<string> {
   return GetUser().then((user) => {
+    if (!user) {
+      return '';
+    }
     return user.getIdToken(false);
   });
 }
@@ -88,14 +100,12 @@ firebase.auth().onAuthStateChanged((user: FBUser) => {
   } else {
     // is signed in
     eventName = Events.SignedIn;
-
     setUser(user);
-    // fire event
-    const event = document.createEvent('Event');
-    event.initEvent(eventName, true, true);
-    window.dispatchEvent(event);
   }
-
+  // fire event
+  const event = document.createEvent('Event');
+  event.initEvent(eventName, true, true);
+  window.dispatchEvent(event);
 });
 
 interface FBUser {

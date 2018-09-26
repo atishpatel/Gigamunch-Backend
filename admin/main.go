@@ -127,7 +127,7 @@ func (s *server) userAdmin(f handle) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
-			return err
+			return errors.GetErrorWithCode(err)
 		}
 		if !user.Admin {
 			return errPermissionDenied
@@ -138,60 +138,19 @@ func (s *server) userAdmin(f handle) handle {
 	}
 }
 
-func (s *server) driverAdmin(f handle) handle {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-		user, err := s.getUserFromRequest(ctx, w, r, log)
-		if err != nil {
-			return err
-		}
-		if !user.Admin {
-			return errPermissionDenied
-		}
-		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
-		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
-		return f(ctx, w, r, log)
-	}
-}
-
-func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, *errors.ErrorWithCode) {
+func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, error) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
-		e := errBadRequest.Annotate("auth-token is empty")
-		return nil, &e
+		return nil, errBadRequest.Annotate("auth-token is empty")
 	}
-	// TODO: use new auth client
 	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
-		e := errors.Annotate(err, "failed to get auth.NewClient")
-		return nil, &e
+		return nil, errors.Annotate(err, "failed to get auth.NewClient")
 	}
 	user, err := authC.Verify(token)
 	if err != nil {
-		e := errors.Annotate(err, "failed to get auth.Verify")
-		return nil, &e
+		return nil, errors.Annotate(err, "failed to get auth.Verify")
 	}
-	// userold, err := authold.GetUserFromToken(ctx, token)
-	// if err != nil {
-	// 	e := errors.Annotate(err, "failed to authold.GetUserFromToken")
-	// 	return nil, &e
-	// }
-	// first := ""
-	// last := ""
-	// name := strings.Title(strings.TrimSpace(userold.Name))
-	// lastSpace := strings.LastIndex(name, " ")
-	// if lastSpace == -1 {
-	// 	first = name
-	// } else {
-	// 	first = name[:lastSpace]
-	// 	last = name[lastSpace:]
-	// }
-	// user := &common.User{
-	// 	FirstName: first,
-	// 	LastName:  last,
-	// 	Email:     userold.Email,
-	// 	PhotoURL:  userold.PhotoURL,
-	// 	Admin:     userold.IsAdmin(),
-	// }
 	return user, nil
 }
 
