@@ -40,7 +40,7 @@ const (
 	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount) FROM activity WHERE date>'2017-04-08' AND date<? GROUP BY email ORDER BY mn"
 	updatePaidSubLogStatement                = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
 	updateSkipSubLogStatement                = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
-	updateUnskipSubLogStatement              = "UPDATE activity SET skip=0 WHERE date='%s' AND email='%s'"
+	deleteSubLogStatement                    = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
 	updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
 	updateFirstSubLogStatment                = "UPDATE activity SET first=1 WHERE date='%s' AND email='%s'"
 	updateDiscountSubLogStatment             = "UPDATE activity SET discount_amount=?, discount_percent=? WHERE date=? AND email=?"
@@ -702,30 +702,19 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 	if err != nil {
 		return errors.Wrap("failed to sub.GetSubscriber", err)
 	}
-	// insert or update
-	_, err = c.Get(date, subEmail)
-	if err != nil {
-		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
-			return errors.Wrap("failed to sub.Get", err)
-		}
-		// insert
-		// var s *SubscriptionSignUp
-		// s, err = get(c.ctx, subEmail)
-		// if err != nil {
-		// 	return errDatastore.WithError(err).Wrap("failed to get")
-		// }
-		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
-		if err != nil {
-			return errors.Wrap("failed to sub.Setup", err)
-		}
-	}
-	st := fmt.Sprintf(updateUnskipSubLogStatement, date.Format(dateFormat), subEmail)
+	st := fmt.Sprintf(deleteSubLogStatement, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute updateUnskipSubLogStatement statement.")
+		return errSQLDB.WithError(err).Wrap("failed to execute deleteSubLogStatement.")
 	}
+	// insert
+	err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+	if err != nil {
+		return errors.Wrap("failed to sub.Setup", err)
+	}
+
 	if c.log != nil {
-		utils.Infof(c.ctx, "log not nil. logging skip")
+		utils.Infof(c.ctx, "log not nil. logging unskip")
 		c.log.SubUnskip(date.Format(time.RFC3339), 0, subEmail)
 	} else {
 		utils.Infof(c.ctx, "log nil")
