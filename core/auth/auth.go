@@ -46,7 +46,6 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	if err != nil {
 		return nil, err
 	}
-
 	if fbAuth == nil {
 		return nil, errInternal.Annotate("setup not called")
 	}
@@ -96,11 +95,11 @@ func (c *Client) Verify(token string) (*common.User, error) {
 	if ok {
 		admin = adminTmp.(bool)
 	}
-	var activeSubscriber bool
-	activeSubscriberTmp, ok := claims["active_subscriber"]
-	if ok {
-		activeSubscriber = activeSubscriberTmp.(bool)
-	}
+	// var activeSubscriber bool
+	// activeSubscriberTmp, ok := claims["active_subscriber"]
+	// if ok {
+	// 	activeSubscriber = activeSubscriberTmp.(bool)
+	// }
 	nameSplit := strings.Split(name, delim)
 	var firstName, lastName string
 	if len(nameSplit) >= 1 {
@@ -110,22 +109,22 @@ func (c *Client) Verify(token string) (*common.User, error) {
 		lastName = nameSplit[1]
 	}
 	user := &common.User{
-		ID:               userID,
-		AuthID:           tkn.UID,
-		FirstName:        firstName,
-		LastName:         lastName,
-		Email:            email,
-		PhotoURL:         picture,
-		Admin:            admin,
-		ActiveSubscriber: activeSubscriber,
+		ID:        userID,
+		AuthID:    tkn.UID,
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+		PhotoURL:  picture,
+		Admin:     admin,
+		// ActiveSubscriber: activeSubscriber,
 	}
 	return user, nil
 }
 
-// SetActiveSubscriber makes a user an admin
-func (c *Client) SetActiveSubscriber(authIDOrEmail string, active bool) error {
-	return c.AddCustomClaim(authIDOrEmail, "active_subscriber", active)
-}
+// // SetActiveSubscriber makes a user an admin
+// func (c *Client) SetActiveSubscriber(authIDOrEmail string, active bool) error {
+// 	return c.AddCustomClaim(authIDOrEmail, "active_subscriber", active)
+// }
 
 // SetAdmin makes a user an admin
 func (c *Client) SetAdmin(authIDOrEmail string, active bool) error {

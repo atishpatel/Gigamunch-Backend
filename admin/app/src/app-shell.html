@@ -337,68 +337,56 @@
                     role="main">
           <dashboard-page name="dashboard"
                           id="dashboardPage"
-                          serviceold="[[serviceold]]"
-                          user="{{user}}">
+                          serviceold="[[serviceold]]">
           </dashboard-page>
           <subscriber-list-page name="subscriber-list"
                                 id="subscriberListPage"
                                 service="[[service]]"
-                                user="{{user}}"
                                 event="[[event]]">
           </subscriber-list-page>
           <subscriber-detail-page name="subscriber"
                                   id="subscriberDetailPage"
                                   service="[[service]]"
-                                  user="{{user}}"
                                   event="[[event]]">
           </subscriber-detail-page>
           <skip-page name="skip"
                      id="skipPage"
-                     service="[[serviceold]]"
-                     user="{{user}}">
+                     service="[[serviceold]]">
           </skip-page>
           <cancel-page name="cancel"
                        id="cancelPage"
-                       service="[[serviceold]]"
-                       user="{{user}}">
+                       service="[[serviceold]]">
           </cancel-page>
           <discount-page name="discount"
                          id="discountPage"
-                         service="[[serviceold]]"
-                         user="{{user}}">
+                         service="[[serviceold]]">
           </discount-page>
           <change-servings-page name="change-servings"
                                 id="changeServingsPage"
-                                service="[[serviceold]]"
-                                user="{{user}}">
+                                service="[[serviceold]]">
           </change-servings-page>
           <change-servings-permanently-page name="change-servings-permanently"
                                             id="changeServingsPermanentlyPage"
-                                            service="[[serviceold]]"
-                                            user="{{user}}">
+                                            service="[[serviceold]]">
           </change-servings-permanently-page>
           <unpaid-page name="unpaid"
                        id="unpaidPage"
                        service="[[service]]"
-                       user="{{user}}"
                        event="[[event]]">
           </unpaid-page>
           <sublog-page name="sublog"
                        id="sublogPage"
-                       service="[[serviceold]]"
-                       user="{{user}}">
+                       service="[[serviceold]]">
           </sublog-page>
           <sublog-detail-page name="sublogdetail"
                               id="sublogdetailPage"
                               service="[[serviceold]]"
-                              user="{{user}}"
                               route="[[subroute]]">
           </sublog-detail-page>
           <delivery-page name="delivery"
                          id="deliveryPage"
                          serviceold="[[serviceold]]"
                          service="[[service]]"
-                         user="{{user}}"
                          route="[[subroute]]">
           </delivery-page>
           <executions-page name="executions"
@@ -450,18 +438,6 @@
           user: {
             type: Object,
             notify: true,
-            value: function() {
-              if (!APP.IsDev && !APP.User.IsAdmin()) {
-                window.location = '/login';
-              }
-              return APP.User;
-            }
-          },
-          cookAPIURL: {
-            type: String,
-            value: function() {
-              return APP.IsProd ? 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/api/explorer' : 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/api/explorer';
-            }
           },
         }
       }
@@ -476,6 +452,14 @@
         super();
         this.addEventListener('toast', this.toastEvent.bind(this));
         this.addEventListener('error', this.errorEvent.bind(this));
+        window.addEventListener(APP.Auth.Events.UserUpdated, () => {
+          const user = APP.User;
+          if (!APP.IsDev && user && !user.IsAdmin()) {
+            // window.location = '/login';
+            alert('user is not admin');
+          }
+          this.user = APP.User;
+        });
         if (this.service === undefined) {
           this.service = APP.Service ? APP.Service : Service;
         }
@@ -610,7 +594,9 @@
       }
 
       copyGigatoken() {
-        this.copyToClipboard(APP.Token.GetToken());
+        App.GetUser().getIdToken(false).then((token) => {
+          this.copyToClipboard(token);
+        })
       }
 
       copyToClipboard(s) {

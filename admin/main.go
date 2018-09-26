@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/schema"
 	"github.com/jmoiron/sqlx"
 
-	authold "github.com/atishpatel/Gigamunch-Backend/auth"
+	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -125,7 +125,7 @@ func (s *server) setup() error {
 
 func (s *server) userAdmin(f handle) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-		user, err := getUserFromRequest(ctx, w, r, log)
+		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
 			return err
 		}
@@ -140,7 +140,7 @@ func (s *server) userAdmin(f handle) handle {
 
 func (s *server) driverAdmin(f handle) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-		user, err := getUserFromRequest(ctx, w, r, log)
+		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
 			return err
 		}
@@ -153,43 +153,45 @@ func (s *server) driverAdmin(f handle) handle {
 	}
 }
 
-func getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, *errors.ErrorWithCode) {
+func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, *errors.ErrorWithCode) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
 		e := errBadRequest.Annotate("auth-token is empty")
 		return nil, &e
 	}
 	// TODO: use new auth client
-	// authC, err := auth.NewClient(ctx, log)
-	// if err != nil {
-	// 	return nil, errors.Annotate(err, "failed to get auth.NewClient")
-	// }
-	// user, err := authC.GetUser(ctx, token)
-	// if err != nil {
-	// 	return nil, errors.Annotate(err, "failed to get auth.GetUser")
-	// }
-	userold, err := authold.GetUserFromToken(ctx, token)
+	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
-		e := errors.Annotate(err, "failed to authold.GetUserFromToken")
+		e := errors.Annotate(err, "failed to get auth.NewClient")
 		return nil, &e
 	}
-	first := ""
-	last := ""
-	name := strings.Title(strings.TrimSpace(userold.Name))
-	lastSpace := strings.LastIndex(name, " ")
-	if lastSpace == -1 {
-		first = name
-	} else {
-		first = name[:lastSpace]
-		last = name[lastSpace:]
+	user, err := authC.Verify(token)
+	if err != nil {
+		e := errors.Annotate(err, "failed to get auth.Verify")
+		return nil, &e
 	}
-	user := &common.User{
-		FirstName: first,
-		LastName:  last,
-		Email:     userold.Email,
-		PhotoURL:  userold.PhotoURL,
-		Admin:     userold.IsAdmin(),
-	}
+	// userold, err := authold.GetUserFromToken(ctx, token)
+	// if err != nil {
+	// 	e := errors.Annotate(err, "failed to authold.GetUserFromToken")
+	// 	return nil, &e
+	// }
+	// first := ""
+	// last := ""
+	// name := strings.Title(strings.TrimSpace(userold.Name))
+	// lastSpace := strings.LastIndex(name, " ")
+	// if lastSpace == -1 {
+	// 	first = name
+	// } else {
+	// 	first = name[:lastSpace]
+	// 	last = name[lastSpace:]
+	// }
+	// user := &common.User{
+	// 	FirstName: first,
+	// 	LastName:  last,
+	// 	Email:     userold.Email,
+	// 	PhotoURL:  userold.PhotoURL,
+	// 	Admin:     userold.IsAdmin(),
+	// }
 	return user, nil
 }
 
