@@ -5,6 +5,12 @@ interface SetAdminReq {
     email: string
     active: boolean
 }
+interface ActivateSubscriberReq {
+    email: string
+}
+interface DeactivateSubscriberReq {
+    email: string
+}
 interface Activity {
     created_datetime: string
     date: string

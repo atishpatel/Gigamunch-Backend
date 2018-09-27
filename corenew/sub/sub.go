@@ -828,6 +828,56 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 	return nil
 }
 
+func (c *Client) Activate(email string, log *logging.Client, serverInfo *common.ServerInfo) error {
+	if email == "" {
+		return errInvalidParameter.Annotate("email cannot be empty")
+	}
+	firstBoxDate := time.Now().Add(48 * time.Hour) // TODO: change to 81
+	for firstBoxDate.Weekday() != time.Monday {
+		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
+	}
+	var tZero time.Time
+
+	// change isSubscribed to true
+	sub, err := get(c.ctx, email)
+	if err != nil {
+		return errors.Wrap("failed to get sub", err)
+	}
+	if sub.IsSubscribed {
+		return errInvalidParameter.Wrapf("%s is already subscribed.", email)
+	}
+	sub.IsSubscribed = true
+	sub.UnSubscribedDate = tZero
+	sub.FirstBoxDate = firstBoxDate
+	err = put(c.ctx, email, sub)
+	if err != nil {
+		return errors.Wrap("failed to put sub", err)
+	}
+	// add sublog
+	err = c.Setup(firstBoxDate, email, sub.Servings, sub.VegetarianServings, sub.WeeklyAmount, 0, sub.PaymentMethodToken, sub.CustomerID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Setup")
+	}
+	// add to mail
+	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
+	mailReq := &mail.UserFields{
+		Email:             email,
+		FirstName:         sub.FirstName,
+		LastName:          sub.LastName,
+		FirstDeliveryDate: sub.FirstBoxDate,
+		VegServings:       sub.VegetarianServings,
+		NonVegServings:    sub.Servings,
+	}
+	err = mailC.SubActivated(mailReq)
+	if err != nil {
+		return errors.Annotate(err, "failed ot mail.SubActivated")
+	}
+	return nil
+}
+
 // Cancel cancels an user's subscription.
 func (c *Client) Cancel(subEmail string, log *logging.Client, serverInfo *common.ServerInfo) error {
 	if subEmail == "" {

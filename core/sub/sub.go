@@ -115,11 +115,11 @@ func (c *Client) Update(sub *Subscriber) error {
 }
 
 // Activate activates an account.
-// func (c *Client) Activate() error {
-// 	// TODO: implement
-// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
-// 	return nil
-// }
+func (c *Client) Activate(email string) error {
+	// TODO: implement
+	suboldC := subold.NewWithLogging(c.ctx, c.log)
+	return suboldC.Activate(email, c.log, c.serverInfo)
+}
 
 // Deactivate deactivates an account
 func (c *Client) Deactivate(email string) error {
