@@ -11,6 +11,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -127,6 +128,53 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 	}
 
 	return resp
+}
+
+// ActivateSubscriber activates a subscriber account.
+func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.ActivateSubscriberReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.Activate(req.Email)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Activate")
+	}
+
+	return nil
+}
+
+// DeactivateSubscriber activates a subscriber account.
+func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.DeactivateSubscriberReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.Deactivate(req.Email)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Deactivate")
+	}
+	return nil
 }
 
 func pbSubscribers(subscribers []subold.SubscriptionSignUp) []*pb.Subscriber {
