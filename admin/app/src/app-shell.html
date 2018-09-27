@@ -437,8 +437,7 @@
           },
           user: {
             type: Object,
-            notify: true,
-            observer: 'userUpdated'
+            notify: true
           },
         }
       }
@@ -454,24 +453,20 @@
         this.addEventListener('toast', this.toastEvent.bind(this));
         this.addEventListener('error', this.errorEvent.bind(this));
 
-        // if null instead of undefined
-        if (APP.User === null) {
-          this.userUpdated()
-        }
+        // set user
+        APP.Auth.GetUser().then((usr) => {
+          this.user = usr;
+        });
+        // check if admin
+        APP.Auth.IsAdmin().then((admin) => {
+          if (!admin) {
+            alert('User is not admin. Redirecting to /login in 3 seconds...');
+            setTimeout(() => {
+              window.location = '/login';
+            }, 3000)
+          }
+        });
 
-        if (this.service === undefined) {
-          this.service = APP.Service ? APP.Service : Service;
-        }
-      }
-
-      userUpdated() {
-        const user = this.user;
-        if (!user || !user.Admin) {
-          alert('User is not admin. Redirecting to /login in 3 seconds...');
-          setTimeout(() => {
-            window.location = '/login';
-          }, 3000)
-        }
       }
 
       _routePageChanged(page) {

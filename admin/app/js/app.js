@@ -4,10 +4,16 @@ var Events = {
     SignedIn: 'signed-in',
 };
 var userLoaded = false;
+function fireUserUpdated() {
+    var event = document.createEvent('Event');
+    event.initEvent(Events.UserUpdated, true, true);
+    window.dispatchEvent(event);
+}
 function setUser(user) {
     APP.User = user;
     if (user) {
-        user.getIdTokenResult(false).then(function (tokenResult) {
+        user.getIdTokenResult(false)
+            .then(function (tokenResult) {
             var adminClaim = tokenResult.claims['admin'];
             if (adminClaim) {
                 user.Admin = true;
@@ -19,13 +25,31 @@ function setUser(user) {
                 return user.Admin;
             };
             APP.User = user;
+        })
+            .then(function () {
+            console.log('user', user);
+            fireUserUpdated();
         });
     }
-    var event = document.createEvent('Event');
-    event.initEvent(Events.UserUpdated, true, true);
-    window.dispatchEvent(event);
-    console.log('user', user);
+    else {
+        console.log('user', user);
+        fireUserUpdated();
+    }
     userLoaded = true;
+}
+function IsAdmin() {
+    return GetUser().then(function (user) {
+        if (!user) {
+            return false;
+        }
+        return user.getIdTokenResult(false).then(function (tokenResult) {
+            var adminClaim = tokenResult.claims['admin'];
+            if (adminClaim) {
+                return true;
+            }
+            return false;
+        });
+    });
 }
 function GetUser() {
     return new Promise(function (resolve, reject) {
@@ -92,6 +116,7 @@ firebase.auth().onAuthStateChanged(function (user) {
 
 var Auth = /*#__PURE__*/Object.freeze({
     Events: Events,
+    IsAdmin: IsAdmin,
     GetUser: GetUser,
     GetToken: GetToken,
     SignOut: SignOut,

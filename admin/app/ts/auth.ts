@@ -11,28 +11,57 @@ export const Events = {
 
 let userLoaded = false;
 
-function setUser(user: FBUser | null) {
-  APP.User = user;
-  if (user) {
-    user.getIdTokenResult(false).then((tokenResult) => {
-      let adminClaim = tokenResult.claims['admin'];
-      if (adminClaim) {
-        user.Admin = true;
-      } else {
-        user.Admin = false;
-      }
-      user.IsAdmin = function () {
-        return user.Admin;
-      }
-      APP.User = user;
-    })
-  }
+function fireUserUpdated() {
   const event = document.createEvent('Event');
   event.initEvent(Events.UserUpdated, true, true);
   window.dispatchEvent(event);
-  console.log('user', user);
+}
+
+function setUser(user: FBUser | null) {
+  APP.User = user;
+  if (user) {
+    user.getIdTokenResult(false)
+      // update user
+      .then((tokenResult) => {
+        let adminClaim = tokenResult.claims['admin'];
+        if (adminClaim) {
+          user.Admin = true;
+        } else {
+          user.Admin = false;
+        }
+        user.IsAdmin = function () {
+          return user.Admin;
+        }
+        APP.User = user;
+      })
+      // fire event
+      .then(() => {
+        console.log('user', user);
+        fireUserUpdated();
+      });
+  } else {
+    // user is not signed in
+    console.log('user', user);
+    fireUserUpdated();
+  }
   userLoaded = true;
 }
+
+export function IsAdmin(): Promise<boolean> {
+  return GetUser().then((user) => {
+    if (!user) {
+      return false;
+    }
+    return user.getIdTokenResult(false).then((tokenResult) => {
+      let adminClaim = tokenResult.claims['admin'];
+      if (adminClaim) {
+        return true;
+      }
+      return false;
+    })
+  });
+}
+
 
 export function GetUser(): Promise<FBUser> {
   return new Promise((resolve, reject) => {
