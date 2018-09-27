@@ -48,17 +48,19 @@ export function SetupFirebaseAuthUI(elementID) {
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);
 }
-export var EventSignedOut = 'signed-out';
-export var EventSignedIn = 'signed-in';
+export var Events = {
+    SignedOut: 'signed-out',
+    SignedIn: 'signed-in',
+};
 SetupFirebase();
 firebase.auth().onAuthStateChanged(function (user) {
     console.log('user', user);
     var eventName;
     if (!user) {
-        eventName = EventSignedOut;
+        eventName = Events.SignedOut;
     }
     else {
-        eventName = EventSignedIn;
+        eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
             Login(idToken);
         });

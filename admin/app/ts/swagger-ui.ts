@@ -1,5 +1,21 @@
 declare let ui: SwaggerUI;
-declare let APP: any;
+
+// Set Environment
+let APP = APP || {};
+APP.IsDev = false;
+APP.IsStage = false;
+APP.IsProd = false;
+switch (location.hostname) {
+    case '127.0.0.1':
+    case 'localhost':
+        APP.IsDev = true;
+        break;
+    case 'gigamunch-omninexus-dev.appspot.com':
+        APP.IsStage = true;
+        break;
+    default:
+        APP.IsProd = true;
+}
 
 setTimeout(() => {
     if (ui) {

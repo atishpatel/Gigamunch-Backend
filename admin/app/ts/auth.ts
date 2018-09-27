@@ -13,9 +13,7 @@ let userLoaded = false;
 
 function setUser(user: FBUser | null) {
   APP.User = user;
-  if (!user) {
-    app.user = user;
-  } else {
+  if (user) {
     user.getIdTokenResult(false).then((tokenResult) => {
       let adminClaim = tokenResult.claims['admin'];
       if (adminClaim) {
@@ -27,7 +25,6 @@ function setUser(user: FBUser | null) {
         return user.Admin;
       }
       APP.User = user;
-      app.user = user;
     })
   }
   const event = document.createEvent('Event');

@@ -6,10 +6,7 @@ export var Events = {
 var userLoaded = false;
 function setUser(user) {
     APP.User = user;
-    if (!user) {
-        app.user = user;
-    }
-    else {
+    if (user) {
         user.getIdTokenResult(false).then(function (tokenResult) {
             var adminClaim = tokenResult.claims['admin'];
             if (adminClaim) {
@@ -22,7 +19,6 @@ function setUser(user) {
                 return user.Admin;
             };
             APP.User = user;
-            app.user = user;
         });
     }
     var event = document.createEvent('Event');

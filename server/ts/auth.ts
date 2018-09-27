@@ -62,8 +62,10 @@ export function SetupFirebaseAuthUI(elementID: string) {
   ui.start(elementID, uiConfig);
 }
 
-export const EventSignedOut = 'signed-out';
-export const EventSignedIn = 'signed-in';
+export const Events = {
+  SignedOut: 'signed-out',
+  SignedIn: 'signed-in',
+}
 
 SetupFirebase();
 
@@ -74,10 +76,10 @@ firebase.auth().onAuthStateChanged((user: FBUser) => {
 
   if (!user) {
     // isn't signed in
-    eventName = EventSignedOut;
+    eventName = Events.SignedOut;
   } else {
     // is signed in
-    eventName = EventSignedIn;
+    eventName = Events.SignedIn;
     user.getIdToken(false).then((idToken: string) => {
       Login(idToken);
     });

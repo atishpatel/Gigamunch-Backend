@@ -4,13 +4,13 @@
 
 <head>
   [[template "head" .]]
-  <script src="https://cdn.firebase.com/libs/firebaseui/3.4.0/firebaseui.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
   <link type="text/css"
         rel="stylesheet"
-        href="https://cdn.firebase.com/libs/firebaseui/3.4.0/firebaseui.css" />
-  <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js"></script>
+        href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css" />
+  <script src="https://www.gstatic.com/firebasejs/5.5.1/firebase-app.js"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.1/firebase-auth.js"></script>
   <script src="../js/app.min.js"></script>
 </head>
 
@@ -67,7 +67,7 @@
       <div class="card">
         <div id="login-name"></div>
         <div id="login-email"></div>
-        <a href="/sub"><button>Dashboard</button></a>
+        <a href="/sub"><button>My dinners</button></a>
         <button id="login-sign-out">Sign out</button>
       </div>
 
@@ -110,8 +110,8 @@
       display('user-sign-in');
     }
 
-    window.addEventListener(APP.Auth.EventSignedOut, showSignedInPage.bind(this));
-    window.addEventListener(APP.Auth.EventSignedIn, showSignedOutPage.bind(this));
+    window.addEventListener(APP.Auth.Events.SignedOut, showSignedInPage.bind(this));
+    window.addEventListener(APP.Auth.Events.SignedIn, showSignedOutPage.bind(this));
 
     console.log('App.User', APP.User);
     if (APP.User) {
