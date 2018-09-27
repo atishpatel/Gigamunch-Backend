@@ -16,6 +16,60 @@
     "application/json"
   ],
   "paths": {
+    "/admin/api/v1/ActivateSubscriber": {
+      "post": {
+        "summary": "ActivateSubscriber activates a subscriber.",
+        "operationId": "ActivateSubscriber",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIActivateSubscriberReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/DeactivateSubscriber": {
+      "post": {
+        "summary": "DeactivateSubscriber deactivates a subscriber.",
+        "operationId": "DeactivateSubscriber",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIDeactivateSubscriberReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetAllExecutionStats": {
       "post": {
         "summary": "ExecutionStats",
@@ -45,7 +99,6 @@
     },
     "/admin/api/v1/GetDeliveries": {
       "post": {
-        "summary": "Deliveries",
         "operationId": "GetDeliveries",
         "responses": {
           "200": {
@@ -587,6 +640,14 @@
       },
       "title": "The error object that gets returned with every"
     },
+    "AdminAPIActivateSubscriberReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
     "AdminAPIContent": {
       "type": "object",
       "properties": {
@@ -650,6 +711,14 @@
       },
       "description": "CultureCook is the culture cook for a culture execution."
     },
+    "AdminAPIDeactivateSubscriberReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
     "AdminAPIDelivery": {
       "type": "object",
       "properties": {
@@ -702,7 +771,7 @@
           "format": "boolean"
         }
       },
-      "title": "Deliveries"
+      "title": "**********************\nDeliveries\n**********************"
     },
     "AdminAPIDish": {
       "type": "object",
@@ -741,7 +810,7 @@
           "$ref": "#/definitions/ErrorError"
         }
       },
-      "title": "Common"
+      "title": "**********************\nCommon\n**********************"
     },
     "AdminAPIExecution": {
       "type": "object",
@@ -806,7 +875,7 @@
           "format": "boolean"
         }
       },
-      "title": "Execution"
+      "title": "**********************\nExecution\n**********************"
     },
     "AdminAPIExecutionStats": {
       "type": "object",
@@ -874,7 +943,7 @@
           "format": "float"
         }
       },
-      "title": "ExecutionStats"
+      "title": "**********************\nExecutionStats\n**********************"
     },
     "AdminAPIGetAllExecutionStatsReq": {
       "type": "object",
@@ -1025,7 +1094,7 @@
           "format": "int64"
         }
       },
-      "title": "Log"
+      "title": "**********************\nLog\n**********************"
     },
     "AdminAPIGetLogResp": {
       "type": "object",
@@ -1215,7 +1284,7 @@
           "format": "boolean"
         }
       },
-      "title": "Auth"
+      "title": "**********************\nAuth\n**********************"
     },
     "AdminAPISkipActivityReq": {
       "type": "object",
@@ -1301,7 +1370,7 @@
           "format": "boolean"
         }
       },
-      "title": "Sublogs"
+      "title": "**********************\nSublogs\n**********************"
     },
     "AdminAPISubscriber": {
       "type": "object",

@@ -462,9 +462,6 @@
         if (this.service === undefined) {
           this.service = APP.Service ? APP.Service : Service;
         }
-        if (this.page === undefined) {
-          this.page = 'sublog';
-        }
       }
 
       userUpdated() {
@@ -481,7 +478,11 @@
         if (page === undefined) {
           return;
         }
-        this.page = page || 'sublog';
+        if (page === '') {
+          this.page = 'sublog';
+          return;
+        }
+        this.page = page;
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
           this.$.drawer.close();
