@@ -7,6 +7,8 @@ interface SetAdminReq {
 }
 interface ActivateSubscriberReq {
     email: string
+    // optional
+    first_bag_date: string
 }
 interface DeactivateSubscriberReq {
     email: string

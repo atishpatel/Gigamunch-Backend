@@ -163,7 +163,7 @@
       _getDateString(dateString) {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
-        const d = new Date(dateString);
+        const d = new Date(dateString.substr(0, 10) + 'T12:12:12');
         let day = d.getDay();
         let month = d.getMonth();
         let date = d.getDate();
@@ -178,7 +178,7 @@
           return ' '
         }
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const d = new Date(dateString);
+        const d = new Date(dateString.substr(0, 10) + 'T12:12:12');
         let day = d.getDay();
         let month = d.getMonth();
         let date = d.getDate();

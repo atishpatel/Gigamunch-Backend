@@ -72,7 +72,6 @@
     },
     "/admin/api/v1/GetAllExecutionStats": {
       "post": {
-        "summary": "ExecutionStats",
         "operationId": "GetAllExecutionStats",
         "responses": {
           "200": {
@@ -645,6 +644,10 @@
       "properties": {
         "email": {
           "type": "string"
+        },
+        "first_bag_date": {
+          "type": "string",
+          "title": "optional"
         }
       }
     },

@@ -828,14 +828,20 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 	return nil
 }
 
-func (c *Client) Activate(email string, log *logging.Client, serverInfo *common.ServerInfo) error {
+func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Client, serverInfo *common.ServerInfo) error {
 	if email == "" {
 		return errInvalidParameter.Annotate("email cannot be empty")
 	}
-	firstBoxDate := time.Now().Add(48 * time.Hour) // TODO: change to 81
-	for firstBoxDate.Weekday() != time.Monday {
-		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
+	if !firstBagDate.IsZero() && firstBagDate.Sub(time.Now()) < 0 {
+		return errInvalidParameter.WithMessage("First bag date must be after now")
 	}
+	if firstBagDate.IsZero() {
+		firstBagDate = time.Now().Add(4 * 24 * time.Hour)
+		for firstBagDate.Weekday() != time.Monday {
+			firstBagDate = firstBagDate.Add(time.Hour * 24)
+		}
+	}
+
 	var tZero time.Time
 
 	// change isSubscribed to true
@@ -848,17 +854,22 @@ func (c *Client) Activate(email string, log *logging.Client, serverInfo *common.
 	}
 	sub.IsSubscribed = true
 	sub.UnSubscribedDate = tZero
-	sub.FirstBoxDate = firstBoxDate
+	sub.FirstBoxDate = firstBagDate
 	err = put(c.ctx, email, sub)
 	if err != nil {
 		return errors.Wrap("failed to put sub", err)
 	}
 	// add sublog
-	err = c.Setup(firstBoxDate, email, sub.Servings, sub.VegetarianServings, sub.WeeklyAmount, 0, sub.PaymentMethodToken, sub.CustomerID)
+	err = c.Setup(firstBagDate, email, sub.Servings, sub.VegetarianServings, sub.WeeklyAmount, 0, sub.PaymentMethodToken, sub.CustomerID)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Setup")
 	}
 	// add to mail
+	var addTags []mail.Tag
+	// Add preview tag if less than 6 days away add preview tag
+	if firstBagDate.Sub(time.Now()) < 6*24*time.Hour {
+		addTags = append(addTags, mail.GetPreviewEmailTag(firstBagDate))
+	}
 	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to mail.NewClient")
@@ -870,6 +881,7 @@ func (c *Client) Activate(email string, log *logging.Client, serverInfo *common.
 		FirstDeliveryDate: sub.FirstBoxDate,
 		VegServings:       sub.VegetarianServings,
 		NonVegServings:    sub.Servings,
+		AddTags:           addTags,
 	}
 	err = mailC.SubActivated(mailReq)
 	if err != nil {
