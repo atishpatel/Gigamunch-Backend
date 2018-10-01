@@ -13,6 +13,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
@@ -176,6 +177,30 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Deactivate")
 	}
+	return nil
+}
+
+// UpdateDrip updates drip.
+func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.UpdateDripReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+	tasksC := tasks.New(ctx)
+	for _, email := range req.Emails {
+		err = tasksC.AddUpdateDrip(at, &tasks.UpdateDripParams{Email: email})
+		if err != nil {
+			return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
+		}
+	}
+
 	return nil
 }
 

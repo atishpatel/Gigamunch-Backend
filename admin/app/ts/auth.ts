@@ -1,6 +1,5 @@
 
 declare var APP: any;
-declare var app: any;
 declare var firebase: any;
 
 export const Events = {
@@ -33,17 +32,18 @@ function setUser(user: FBUser | null) {
           return user.Admin;
         }
         APP.User = user;
-      })
-      // fire event
-      .then(() => {
+        // fire event
         console.log('user', user);
         fireUserUpdated();
+        userLoaded = true;
       });
-  } else {
-    // user is not signed in
-    console.log('user', user);
-    fireUserUpdated();
+    return;
   }
+
+  // user is not signed in
+  APP.User = user;
+  console.log('user', user);
+  fireUserUpdated();
   userLoaded = true;
 }
 
@@ -64,7 +64,7 @@ export function IsAdmin(): Promise<boolean> {
 
 
 export function GetUser(): Promise<FBUser> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve: (FBUser) => void, reject: () => void) => {
     if (userLoaded) {
       resolve(APP.User);
     }
@@ -73,6 +73,7 @@ export function GetUser(): Promise<FBUser> {
       if (!APP.User) {
         setUser(user);
       }
+      unsubscribe();
       resolve(APP.User);
     }, reject);
   });

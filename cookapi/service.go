@@ -533,47 +533,34 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	logging.Infof(ctx, "Params: %+v", params)
+
 	subC := sub.New(ctx)
 	log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/cookapi/UpdateDrip")
 	if err != nil {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
 		return
 	}
-	mailC, err := mail.NewClient(ctx, log, serverInfo)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
-		return
-	}
+
 	// make subscriber if date is same as give reveal date
 	sub, err := subC.GetSubscriber(params.Email)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriber: %s", err)
 		return
 	}
-	timeTillGiftReveal := sub.GiftRevealDate.Sub(time.Now())
-	utils.Infof(ctx, "time till gift reaveal", timeTillGiftReveal)
-	if sub.IsSubscribed && !sub.GiftRevealDate.IsZero() && timeTillGiftReveal < time.Hour*12 {
-		mailReq := &mail.UserFields{
-			Email:             sub.Email,
-			FirstName:         sub.FirstName,
-			LastName:          sub.LastName,
-			FirstDeliveryDate: sub.FirstBoxDate,
-			GifterName:        sub.Reference,
-			GifterEmail:       sub.ReferenceEmail,
-			AddTags:           []mail.Tag{mail.Subscribed, mail.Subscriber, mail.Gifted},
-			VegServings:       sub.VegetarianServings,
-			NonVegServings:    sub.Servings,
-		}
-		mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
-		err = mailC.SubActivated(mailReq)
-		if err != nil {
-			utils.Criticalf(ctx, "Failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
-		}
+	if !sub.IsSubscribed {
+		utils.Infof(ctx, "%s is not a subscriber", params.Email)
+		return
 	}
+	timeTillGiftReveal := sub.GiftRevealDate.Sub(time.Now())
+	if !sub.GiftRevealDate.IsZero() && timeTillGiftReveal > time.Hour*12 {
+		utils.Infof(ctx, "%s is not ready for gift reveal", params.Email)
+		return
+	}
+
 	// add num meals recieved
 	activites, err := subC.GetSubscriberActivities(params.Email)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetForDate: %s", err)
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriberActivities: %s", err)
 		return
 	}
 	var numNonSkips int
@@ -582,19 +569,50 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 			numNonSkips++
 		}
 	}
-	if numNonSkips >= 1 && numNonSkips <= 3 {
-		tag := mail.GetReceivedJourneyTag(numNonSkips)
-		utils.Infof(ctx, "Applying Tag(%s) to Email(%s)", tag, params.Email)
 
-		err = mailC.AddTag(params.Email, tag)
-		if err != nil {
-			logging.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.AddTag: %+v", err)
-			w.WriteHeader(500)
-			return
-		}
+	addTags := []mail.Tag{mail.Subscribed, mail.Subscriber}
+	// add gift tag
+	if !sub.GiftRevealDate.IsZero() {
+		addTags = append(addTags, mail.Gifted)
+	}
+	// add journey tags
+	if numNonSkips >= 1 {
+		addTags = append(addTags, mail.GetReceivedJourneyTag(1))
+	}
+	if numNonSkips >= 2 {
+		addTags = append(addTags, mail.GetReceivedJourneyTag(2))
+	}
+	if numNonSkips >= 3 {
+		addTags = append(addTags, mail.GetReceivedJourneyTag(3))
+	}
+	if numNonSkips >= 5 {
+		addTags = append(addTags, mail.GetReceivedJourneyTag(5))
+	}
+
+	// Update Drip
+	mailReq := &mail.UserFields{
+		Email:             sub.Email,
+		FirstName:         sub.FirstName,
+		LastName:          sub.LastName,
+		FirstDeliveryDate: sub.FirstBoxDate,
+		GifterName:        sub.Reference,
+		GifterEmail:       sub.ReferenceEmail,
+		AddTags:           addTags,
+		VegServings:       sub.VegetarianServings,
+		NonVegServings:    sub.Servings,
+	}
+	mailC, err := mail.NewClient(ctx, log, serverInfo)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
+		return
+	}
+	mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
+	err = mailC.SubActivated(mailReq)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
 	}
 	// send chris a message if user reached their set amout of gift meals
-	if numNonSkips == sub.NumGiftDinners {
+	if !sub.GiftRevealDate.IsZero() && numNonSkips == sub.NumGiftDinners {
 		messageC := message.New(ctx)
 		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Person is done with their gifted meals \nName: %s\nEmail: %s", sub.Name, sub.Email))
 		if err != nil {

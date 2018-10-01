@@ -344,7 +344,7 @@
               if (slogs[i].servings == 0 && slogs[i].veg_servings == 0) {
                 slogs[i].veg_servings = slogs[i].vegetarian_servings;
               }
-              const d = new Date(sublogs[i].date);
+              const d = new Date(slogs[i].date);
               const sept25 = new Date('2018-09-25');
               if (slogs[i].vegetarian_servings > 0 && d < sept25) {
                 slogs[i].veg_servings = slogs[i].servings;

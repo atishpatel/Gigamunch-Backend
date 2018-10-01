@@ -342,3 +342,7 @@ interface UpdateDeliveriesReq {
 interface UpdateDeliveriesResp {
     error: Error
 }
+interface UpdateDripReq {
+    emails: string[]
+    hours: number
+}

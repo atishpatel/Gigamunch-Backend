@@ -549,6 +549,32 @@
         ]
       }
     },
+    "/admin/api/v1/UpdateDrip": {
+      "post": {
+        "operationId": "UpdateDrip",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateDripReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/UpdateExecution": {
       "post": {
         "summary": "UpdateExecution updates or creates an execution.",
@@ -1522,6 +1548,21 @@
       "properties": {
         "error": {
           "$ref": "#/definitions/ErrorError"
+        }
+      }
+    },
+    "AdminAPIUpdateDripReq": {
+      "type": "object",
+      "properties": {
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hours": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

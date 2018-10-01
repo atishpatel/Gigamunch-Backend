@@ -25,16 +25,15 @@ function setUser(user) {
                 return user.Admin;
             };
             APP.User = user;
-        })
-            .then(function () {
             console.log('user', user);
             fireUserUpdated();
+            userLoaded = true;
         });
+        return;
     }
-    else {
-        console.log('user', user);
-        fireUserUpdated();
-    }
+    APP.User = user;
+    console.log('user', user);
+    fireUserUpdated();
     userLoaded = true;
 }
 function IsAdmin() {
@@ -60,6 +59,7 @@ function GetUser() {
             if (!APP.User) {
                 setUser(user);
             }
+            unsubscribe();
             resolve(APP.User);
         }, reject);
     });
