@@ -43,12 +43,12 @@ type GetGeneralStatsResp struct {
 func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) (*GetGeneralStatsResp, error) {
 	resp := new(GetGeneralStatsResp)
 	defer handleResp(ctx, "GetGeneralStats", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -65,7 +65,7 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) 
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetSublogSummaries")
 		return resp, nil
 	}
-	// resp.Activities = activities
+	resp.Activities = activities
 	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
 	resp.WeeklyPaidCohortAnalysis = getWeeklyPaidCohort(activities)
 	resp.MonthlyCohortAnalysis = getMonthlyCohort(activities)

@@ -38,8 +38,8 @@
 
       </style>
     </shared-styles>
-    <paper-checkbox checked={{retention}}
-                    "">Retention Percent View</paper-checkbox>
+    <paper-checkbox checked="{{retention}}">Retention Percent View</paper-checkbox>
+    <paper-checkbox checked="{{showFull}}">Show full</paper-checkbox>
     <table class="striped cohort-table">
       <thead>
         <tr>
@@ -64,8 +64,25 @@
         <template is="dom-repeat"
                   items="[[_cohort.cohort_rows]]"
                   as="rows">
+          <tr hidden$="[[!showFull]]">
+            <td>[[rows.label]]</td>
+            <template is="dom-repeat"
+                      items="[[rows.cohort_cells]]"
+                      as="cell">
 
-          <tr>
+              <td class="cell"
+                  hidden="[[retention]]"
+                  style="background-color: [[cell.backgroundColor]]">[[cell.amount_left]]</td>
+              <td class="cell"
+                  hidden$="[[!retention]]"
+                  style="background-color: [[cell.backgroundColor]]">[[cell.retentionPercent]]</td>
+            </template>
+          </tr>
+        </template>
+        <template is="dom-repeat"
+                  items="[[_cohort.short_cohort_rows]]"
+                  as="rows">
+          <tr hidden$="[[showFull]]">
             <td>[[rows.label]]</td>
             <template is="dom-repeat"
                       items="[[rows.cohort_cells]]"
@@ -103,7 +120,11 @@
           retention: {
             type: Boolean,
             notify: true,
-          }
+          },
+          showfull: {
+            type: Boolean,
+            notify: true,
+          },
         }
       }
       constructor() {
@@ -131,6 +152,7 @@
               backgroundColor: this._getColor(cohort.average_retention[i]),
             });
           }
+          cohort.short_cohort_rows = cohort.cohort_rows.slice(-10, cohort.cohort_rows.length);
           this.cohort = cohort;
           this._cohort = cohort;
         }

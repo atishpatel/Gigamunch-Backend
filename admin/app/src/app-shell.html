@@ -339,7 +339,7 @@
                           id="dashboardPage"
                           serviceold="[[serviceold]]">
           </dashboard-page>
-          <subscriber-list-page name="subscriber-list"
+          <subscriber-list-page name="subscribers"
                                 id="subscriberListPage"
                                 service="[[service]]"
                                 event="[[event]]">
@@ -472,6 +472,9 @@
         if (page === undefined || page === '') {
           this.page = 'sublog';
           return;
+        }
+        if (page === 'subscriber-list') {
+          page = 'subscribers';
         }
         this.page = page;
         // Close a non-persistent drawer when the page & route are changed.

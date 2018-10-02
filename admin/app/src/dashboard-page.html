@@ -27,6 +27,38 @@
           padding: 12px;
         }
 
+        .table {
+          display: table;
+          width: 100%;
+          border: 1px solid #000;
+        }
+
+        .table-header-row {
+          background-color: #ccc;
+          display: table-header-group;
+          font-weight: bold;
+        }
+
+        .table-row {
+          display: table-row;
+          width: auto;
+          clear: both;
+        }
+
+        .table-cell {
+          border: 1px solid #999999;
+          padding: 3px 10px;
+          display: table-cell;
+          flex: 1;
+          /*display: flex;*/
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-body {
+          display: table-row-group;
+        }
+
       </style>
     </shared-styles>
 
@@ -49,6 +81,43 @@
       <div id="weeklyPaidAvgChart"
            class="chart"></div>
       <cohort-table cohort="[[weeklyPaidCohort]]"></cohort-table>
+
+      <h2>Subscriber Summary</h2>
+      <div class="table-container">
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell">Email</div>
+            <div class="table-cell">Subscriber</div>
+            <div class="table-cell">First Date</div>
+            <div class="table-cell">Last Date</div>
+            <div class="table-cell">Num Skips</div>
+            <div class="table-cell">Num Paid</div>
+            <div class="table-cell">Num Total</div>
+            <div class="table-cell">Total Amount Paid</div>
+            <div class="table-cell">Total Amount</div>
+            <div class="table-cell">Skip Percent</div>
+          </div>
+          <dom-repeat items="[[subs]]"
+                      as="sub">
+            <template>
+              <div class="table-row">
+                <div class="table-cell">
+                  <a target="_blank"
+                       href="subscriber/[[sub.email]]">[[sub.email]]</a>
+                </div>
+                <div class="table-cell">[[sub.is_subscriber]]</div>
+                <div class="table-cell">[[sub.min_date_string]]</div>
+                <div class="table-cell">[[sub.max_date_string]]</div>
+                <div class="table-cell">[[sub.num_skip]]</div>
+                <div class="table-cell">[[sub.num_paid]]</div>
+                <div class="table-cell">[[sub.num_total]]</div>
+                <div class="table-cell">[[sub.total_amount_paid_string]]</div>
+                <div class="table-cell">[[sub.total_amount_string]]</div>
+                <div class="table-cell">[[sub.skip_percent]]</div>
+            </template>
+          </dom-repeat>
+        </div>
+      </div>
     </div>
   </template>
 
@@ -63,9 +132,8 @@
           serviceold: {
             type: Object,
           },
-          user: {
+          subs: {
             type: Object,
-            notify: true,
           },
           weeklyCohort: {
             type: Object,
@@ -99,6 +167,32 @@
             return;
           }
 
+          let lastSunday = this._getLastSunday();
+          let subs = resp.activities;
+          subs.sort(function(a, b) {
+            if (a.max_date === b.max_date) {
+              return a.min_date.localeCompare(b.min_date);
+            }
+            return a.max_date.localeCompare(b.max_date);
+          });
+          for (let i = 0; i < subs.length; i++) {
+
+            subs[i].is_subscriber = true;
+            let d = new Date(subs[i].max_date);
+            if (d < lastSunday) {
+              subs[i].is_subscriber = false;
+            }
+            let skipPercent = subs[i].num_skip / subs[i].num_total
+            if (skipPercent) {
+              subs[i].skip_percent = skipPercent.toFixed(2) + '%';
+            }
+            subs[i].min_date_string = this._getDate(subs[i].min_date);
+            subs[i].max_date_string = this._getDate(subs[i].max_date);
+            subs[i].total_amount_paid_string = this._getMoney(subs[i].total_amount_paid);
+            subs[i].total_amount_string = this._getMoney(subs[i].total_amount);
+          }
+          this.subs = subs;
+
           this.weeklyCohort = resp.weekly_cohort_analysis;
           this.weeklyPaidCohort = resp.weekly_paid_cohort_analysis;
           this.monthlyCohort = resp.monthly_cohort_analysis;
@@ -106,6 +200,26 @@
           this._drawCohortChart(this.weeklyCohort, this.$.weeklyAvgChart);
           this._drawCohortChart(this.weeklyPaidCohort, this.$.weeklyPaidAvgChart);
         });
+      }
+
+      _getLastSunday() {
+        let d = new Date();
+        while (d.getDay() !== 0) {
+          d.setTime(d.getTime() - 24 * 3600 * 1000); // last day
+        }
+        d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        return d;
+      }
+
+      _getDate(date) {
+        return date.substr(0, 10)
+      }
+
+      _getMoney(num) {
+        if (!num) {
+          return '-'
+        }
+        return '$' + num.toFixed(2);
       }
 
       _drawCohortChart(cohort, element) {

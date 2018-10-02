@@ -28,7 +28,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type server struct {
+// Server is the Subscriber server service.
+type Server struct {
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
@@ -42,8 +43,8 @@ var (
 )
 
 func init() {
-	s := new(server)
-	err := s.setup()
+	s := new(Server)
+	err := s.Setup()
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
@@ -56,7 +57,7 @@ func init() {
 	})
 }
 
-func (s *server) setup() error {
+func (s *Server) Setup() error {
 	var err error
 	projID := os.Getenv("PROJECT_ID")
 	if projID == "" {
@@ -81,7 +82,7 @@ func (s *server) setup() error {
 	return nil
 }
 
-func (s *server) isSubscriber(f handle) handle {
+func (s *Server) IsSubscriber(f handle) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
@@ -96,7 +97,7 @@ func (s *server) isSubscriber(f handle) handle {
 	}
 }
 
-func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, error) {
+func (s *Server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, error) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
 		return nil, errBadRequest.Annotate("auth-token is empty")
@@ -112,7 +113,7 @@ func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 	return user, nil
 }
 
-func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
+func (s *Server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
