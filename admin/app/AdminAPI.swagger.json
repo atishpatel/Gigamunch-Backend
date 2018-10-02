@@ -16,9 +16,62 @@
     "application/json"
   ],
   "paths": {
+    "/admin/api/v1/ActivateSubscriber": {
+      "post": {
+        "summary": "ActivateSubscriber activates a subscriber.",
+        "operationId": "ActivateSubscriber",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIActivateSubscriberReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/DeactivateSubscriber": {
+      "post": {
+        "summary": "DeactivateSubscriber deactivates a subscriber.",
+        "operationId": "DeactivateSubscriber",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIDeactivateSubscriberReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetAllExecutionStats": {
       "post": {
-        "summary": "ExecutionStats",
         "operationId": "GetAllExecutionStats",
         "responses": {
           "200": {
@@ -45,7 +98,6 @@
     },
     "/admin/api/v1/GetDeliveries": {
       "post": {
-        "summary": "Deliveries",
         "operationId": "GetDeliveries",
         "responses": {
           "200": {
@@ -390,6 +442,33 @@
         ]
       }
     },
+    "/admin/api/v1/SetAdmin": {
+      "post": {
+        "summary": "SetAdmin makes a use an admin.",
+        "operationId": "SetAdmin",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISetAdminReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/SkipActivity": {
       "post": {
         "summary": "SkipActivity skips a sub for a date.",
@@ -462,6 +541,32 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateDeliveriesReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/UpdateDrip": {
+      "post": {
+        "operationId": "UpdateDrip",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateDripReq"
             }
           }
         ],
@@ -560,6 +665,18 @@
       },
       "title": "The error object that gets returned with every"
     },
+    "AdminAPIActivateSubscriberReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "first_bag_date": {
+          "type": "string",
+          "title": "optional"
+        }
+      }
+    },
     "AdminAPIContent": {
       "type": "object",
       "properties": {
@@ -623,6 +740,14 @@
       },
       "description": "CultureCook is the culture cook for a culture execution."
     },
+    "AdminAPIDeactivateSubscriberReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
     "AdminAPIDelivery": {
       "type": "object",
       "properties": {
@@ -675,7 +800,7 @@
           "format": "boolean"
         }
       },
-      "title": "Deliveries"
+      "title": "**********************\nDeliveries\n**********************"
     },
     "AdminAPIDish": {
       "type": "object",
@@ -714,7 +839,7 @@
           "$ref": "#/definitions/ErrorError"
         }
       },
-      "title": "Common"
+      "title": "**********************\nCommon\n**********************"
     },
     "AdminAPIExecution": {
       "type": "object",
@@ -779,7 +904,7 @@
           "format": "boolean"
         }
       },
-      "title": "Execution"
+      "title": "**********************\nExecution\n**********************"
     },
     "AdminAPIExecutionStats": {
       "type": "object",
@@ -847,7 +972,7 @@
           "format": "float"
         }
       },
-      "title": "ExecutionStats"
+      "title": "**********************\nExecutionStats\n**********************"
     },
     "AdminAPIGetAllExecutionStatsReq": {
       "type": "object",
@@ -998,7 +1123,7 @@
           "format": "int64"
         }
       },
-      "title": "Log"
+      "title": "**********************\nLog\n**********************"
     },
     "AdminAPIGetLogResp": {
       "type": "object",
@@ -1177,6 +1302,19 @@
         }
       }
     },
+    "AdminAPISetAdminReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "**********************\nAuth\n**********************"
+    },
     "AdminAPISkipActivityReq": {
       "type": "object",
       "properties": {
@@ -1261,7 +1399,7 @@
           "format": "boolean"
         }
       },
-      "title": "Sublogs"
+      "title": "**********************\nSublogs\n**********************"
     },
     "AdminAPISubscriber": {
       "type": "object",
@@ -1410,6 +1548,21 @@
       "properties": {
         "error": {
           "$ref": "#/definitions/ErrorError"
+        }
+      }
+    },
+    "AdminAPIUpdateDripReq": {
+      "type": "object",
+      "properties": {
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hours": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

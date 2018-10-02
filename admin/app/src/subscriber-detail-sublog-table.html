@@ -37,7 +37,8 @@
         <thead>
           <tr>
             <th>Date</th>
-            <th>Serving Size</th>
+            <th>Servings</th>
+            <th>Veg Servings</th>
             <!-- <th>Address</th> -->
             <th>Transaction ID</th>
             <th>Discount</th>
@@ -52,6 +53,7 @@
             <tr>
               <td>[[sublog.dateString]]</td>
               <td>[[sublog.servings]]</td>
+              <td>[[sublog.veg_servings]]</td>
               <!-- <td>
                 <a target="_blank"
                    href="[[sublog.addressLink]]">[[sublog.addressString]]</a>
@@ -161,7 +163,7 @@
       _getDateString(dateString) {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
-        const d = new Date(dateString);
+        const d = new Date(dateString.substr(0, 10) + 'T12:12:12');
         let day = d.getDay();
         let month = d.getMonth();
         let date = d.getDate();
@@ -176,7 +178,7 @@
           return ' '
         }
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const d = new Date(dateString);
+        const d = new Date(dateString.substr(0, 10) + 'T12:12:12');
         let day = d.getDay();
         let month = d.getMonth();
         let date = d.getDate();

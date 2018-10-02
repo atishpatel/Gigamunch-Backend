@@ -1,6 +1,3 @@
-export const UserUpdated = 'UserUpdated';
-
-
 export function Fire(eventName: string, detail: Object = {}) {
   const event = new CustomEvent(eventName, {
     detail,

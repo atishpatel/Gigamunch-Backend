@@ -10,6 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/appengine/urlfetch"
+
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 
@@ -20,6 +24,54 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
+
+// SlackResp is a response to slack.
+type SlackResp struct {
+	Challenge string `json:"challenge"`
+	Text      string `json:"text"`
+}
+
+// GetError completes Response interface.
+func (s *SlackResp) GetError() *shared.Error {
+	return nil
+}
+
+// Slack is a webhook for slack messages.
+func (s *server) Slack(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := &struct {
+		Challenge string `json:"challenge"`
+		Event     struct {
+			Channel string `json:"channel"`
+			Text    string `json:"text"`
+		} `json:"event"`
+		Type string `json:"type"`
+	}{}
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+
+	// end decode request
+	resp := &SlackResp{
+		Challenge: req.Challenge,
+	}
+	if req.Type == "event_callback" && strings.Contains(req.Event.Text, "@") {
+		// add subscriber page link if there is an email
+		email := req.Event.Text[strings.Index(req.Event.Text, "<mailto:")+8 : strings.Index(req.Event.Text, "|")]
+		txt := fmt.Sprintf("{\"text\":\"https://eatgigamunch.com/admin/subscriber/%s\"}", email)
+		reader := strings.NewReader(txt)
+		client := urlfetch.Client(ctx)
+		rsp, err := client.Post("https://hooks.slack.com/services/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", "application/json", reader)
+		if err != nil {
+			log.Errorf(ctx, "failed to do POST resp: %+v", rsp)
+			log.Errorf(ctx, "failed to do POST err: %+v", err)
+		}
+	}
+
+	return resp
+}
 
 // TwilioSMS is a webhook for twilio messages.
 func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {

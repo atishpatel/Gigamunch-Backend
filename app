@@ -50,6 +50,7 @@ if [[ $1 == "build" ]]; then
     cp Gigamunch-Proto/admin/*.d.ts admin/app/ts/prototypes
     cp Gigamunch-Proto/shared/*.d.ts admin/app/ts/prototypes
   fi
+  timestamp
   exit 0
 fi
 
@@ -89,6 +90,7 @@ if [[ $1 == "deploy" ]]; then
     echo "Deploying cron.yaml:"
     gcloud app deploy admin/cron.yaml  --project=$project
   fi
+  timestamp
   exit 0
 fi
 
@@ -132,6 +134,7 @@ if [[ $1 == "serve" ]]; then
   fi
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
+  timestamp
   exit 0
 fi
 
@@ -144,6 +147,7 @@ if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo -e "\tapp serve [server|admin]"
   echo -e "\tapp build [server|admin|cook|proto]"
   echo -e "\tapp deploy [--prod|-p] [admin|cook|server|queue|cron]"
+  timestamp
   exit 0
 fi
 

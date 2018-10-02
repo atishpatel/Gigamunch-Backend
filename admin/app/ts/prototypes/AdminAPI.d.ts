@@ -1,6 +1,18 @@
 interface ErrorOnlyResp {
     error: Error
 }
+interface SetAdminReq {
+    email: string
+    active: boolean
+}
+interface ActivateSubscriberReq {
+    email: string
+    // optional
+    first_bag_date: string
+}
+interface DeactivateSubscriberReq {
+    email: string
+}
 interface Activity {
     created_datetime: string
     date: string
@@ -329,4 +341,8 @@ interface UpdateDeliveriesReq {
 }
 interface UpdateDeliveriesResp {
     error: Error
+}
+interface UpdateDripReq {
+    emails: string[]
+    hours: number
 }

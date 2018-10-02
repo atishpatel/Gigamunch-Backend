@@ -117,6 +117,7 @@ func pbSublog(sublog *subold.SubscriptionLog) *pb.Sublog {
 		CreatedDatetime:    sublog.CreatedDatetime.Format(time.RFC3339),
 		Skip:               sublog.Skip,
 		Servings:           int32(sublog.Servings),
+		VegServings:        int32(sublog.VegServings),
 		Amount:             sublog.Amount,
 		AmountPaid:         sublog.AmountPaid,
 		Paid:               sublog.Paid,

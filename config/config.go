@@ -273,6 +273,7 @@ func getDatastoreConfig(ctx context.Context) *Config {
 				configTmp.PhoneNumbers = []string{"14243484448"}
 				_, _ = datastore.Put(ctx, key, configTmp)
 			} else {
+				log.Printf("Error getting Config from datastore: %+v", err)
 				log.Fatalf("Error getting Config from datastore: %+v", err)
 			}
 		}

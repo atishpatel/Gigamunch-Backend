@@ -1,11 +1,10 @@
 import * as Service from './service';
-import * as User from './user';
+import * as Auth from './auth';
 import * as EventUtil from './utils/event';
-import * as TokenUtil from './utils/token';
 
 declare const APP: any;
 
+APP.Auth = Auth;
 APP.Service = Service;
-APP.User = User;
 APP.Event = EventUtil;
-APP.Token = TokenUtil;
+console.log('app.js loaded');

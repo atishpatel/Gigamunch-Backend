@@ -30,17 +30,17 @@ const (
 	dateFormat                               = "2006-01-02"          // "Jan 2, 2006"
 	insertSubLogStatement                    = "INSERT INTO activity (date,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?)"
 	selectSubLogEmails                       = "SELECT DISTINCT email from activity where date>? and date<?"
-	selectSubLogStatement                    = "SELECT created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date='%s' AND email='%s'"
-	selectSubscriberSubLogsStatement         = "SELECT date,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent, refunded FROM activity WHERE email=? ORDER BY date DESC"
-	selectAllSubLogStatement                 = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity ORDER BY date DESC LIMIT %d"
-	selectUnpaidSubLogStatement              = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
-	selectSubscriberUnpaidSubLogStatement    = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
-	selectSubLogFromDateStatement            = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date=?"
-	selectSubLogFromSubscriberStatement      = "SELECT date,email,created_dt,skip,servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE email=? ORDER BY date DESC"
+	selectSubLogStatement                    = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date='%s' AND email='%s'"
+	selectSubscriberSubLogsStatement         = "SELECT date,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent, refunded FROM activity WHERE email=? ORDER BY date DESC"
+	selectAllSubLogStatement                 = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity ORDER BY date DESC LIMIT %d"
+	selectUnpaidSubLogStatement              = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
+	selectSubscriberUnpaidSubLogStatement    = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
+	selectSubLogFromDateStatement            = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE date=?"
+	selectSubLogFromSubscriberStatement      = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded FROM activity WHERE email=? ORDER BY date DESC"
 	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount) FROM activity WHERE date>'2017-04-08' AND date<? GROUP BY email ORDER BY mn"
 	updatePaidSubLogStatement                = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
 	updateSkipSubLogStatement                = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
-	updateUnskipSubLogStatement              = "UPDATE activity SET skip=0 WHERE date='%s' AND email='%s'"
+	deleteSubLogStatement                    = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
 	updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
 	updateFirstSubLogStatment                = "UPDATE activity SET first=1 WHERE date='%s' AND email='%s'"
 	updateDiscountSubLogStatment             = "UPDATE activity SET discount_amount=?, discount_percent=? WHERE date=? AND email=?"
@@ -204,7 +204,7 @@ func (c *Client) GetAll(limit int32) ([]*SubscriptionLog, error) {
 		var date mysql.NullTime
 		var createdNulltime mysql.NullTime
 		var paidNulltime mysql.NullTime
-		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}
@@ -239,7 +239,7 @@ func (c *Client) GetUnpaidSublogs(limit int32) ([]*SubscriptionLog, error) {
 		var date mysql.NullTime
 		var createdNulltime mysql.NullTime
 		var paidNulltime mysql.NullTime
-		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}
@@ -270,7 +270,7 @@ func (c *Client) GetSubscriberUnpaidSublogs(email string) ([]*SubscriptionLog, e
 		var date mysql.NullTime
 		var createdNulltime mysql.NullTime
 		var paidNulltime mysql.NullTime
-		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}
@@ -301,7 +301,7 @@ func (c *Client) GetForDate(date time.Time) ([]*SubscriptionLog, error) {
 		var date mysql.NullTime
 		var createdNulltime mysql.NullTime
 		var paidNulltime mysql.NullTime
-		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}
@@ -332,7 +332,7 @@ func (c *Client) GetSubscriberSublogs(email string) ([]*SubscriptionLog, error) 
 		var date mysql.NullTime
 		var createdNulltime mysql.NullTime
 		var paidNulltime mysql.NullTime
-		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		err = rows.Scan(&date, &subLog.SubEmail, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}
@@ -370,7 +370,7 @@ func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) 
 	}
 	var createdNulltime mysql.NullTime
 	var paidNulltime mysql.NullTime
-	err = rows.Scan(&createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+	err = rows.Scan(&createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 	}
@@ -400,7 +400,7 @@ func (c *Client) GetSubscriberActivities(email string) ([]*SubscriptionLog, erro
 		var date mysql.NullTime
 		var createdNulltime mysql.NullTime
 		var paidNulltime mysql.NullTime
-		err = rows.Scan(&date, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
+		err = rows.Scan(&date, &createdNulltime, &subLog.Skip, &subLog.Servings, &subLog.VegServings, &subLog.Amount, &subLog.AmountPaid, &subLog.Paid, &paidNulltime, &subLog.PaymentMethodToken, &subLog.TransactionID, &subLog.Free, &subLog.DiscountAmount, &subLog.DiscountPercent, &subLog.Refunded)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}
@@ -574,7 +574,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		return errors.Wrap("failed to put", err)
 	}
 	// TODO don't update if past deadline date for Serving count
-	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, nonvegServings, vegServings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail, oldServings+oldVegServings)
+	_, err = mysqlDB.Exec(updateServingsPermanentlySubLogStatement, nonvegServings, vegServings, s.WeeklyAmount, time.Now().Format(dateFormat), subEmail)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}
@@ -702,30 +702,19 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 	if err != nil {
 		return errors.Wrap("failed to sub.GetSubscriber", err)
 	}
-	// insert or update
-	_, err = c.Get(date, subEmail)
-	if err != nil {
-		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
-			return errors.Wrap("failed to sub.Get", err)
-		}
-		// insert
-		// var s *SubscriptionSignUp
-		// s, err = get(c.ctx, subEmail)
-		// if err != nil {
-		// 	return errDatastore.WithError(err).Wrap("failed to get")
-		// }
-		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
-		if err != nil {
-			return errors.Wrap("failed to sub.Setup", err)
-		}
-	}
-	st := fmt.Sprintf(updateUnskipSubLogStatement, date.Format(dateFormat), subEmail)
+	st := fmt.Sprintf(deleteSubLogStatement, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute updateUnskipSubLogStatement statement.")
+		return errSQLDB.WithError(err).Wrap("failed to execute deleteSubLogStatement.")
 	}
+	// insert
+	err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+	if err != nil {
+		return errors.Wrap("failed to sub.Setup", err)
+	}
+
 	if c.log != nil {
-		utils.Infof(c.ctx, "log not nil. logging skip")
+		utils.Infof(c.ctx, "log not nil. logging unskip")
 		c.log.SubUnskip(date.Format(time.RFC3339), 0, subEmail)
 	} else {
 		utils.Infof(c.ctx, "log nil")
@@ -835,6 +824,68 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateFirstSubLogStatment statement: ")
+	}
+	return nil
+}
+
+func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Client, serverInfo *common.ServerInfo) error {
+	if email == "" {
+		return errInvalidParameter.Annotate("email cannot be empty")
+	}
+	if !firstBagDate.IsZero() && firstBagDate.Sub(time.Now()) < 0 {
+		return errInvalidParameter.WithMessage("First bag date must be after now")
+	}
+	if firstBagDate.IsZero() {
+		firstBagDate = time.Now().Add(4 * 24 * time.Hour)
+		for firstBagDate.Weekday() != time.Monday {
+			firstBagDate = firstBagDate.Add(time.Hour * 24)
+		}
+	}
+
+	var tZero time.Time
+
+	// change isSubscribed to true
+	sub, err := get(c.ctx, email)
+	if err != nil {
+		return errors.Wrap("failed to get sub", err)
+	}
+	if sub.IsSubscribed {
+		return errInvalidParameter.Wrapf("%s is already subscribed.", email)
+	}
+	sub.IsSubscribed = true
+	sub.UnSubscribedDate = tZero
+	sub.FirstBoxDate = firstBagDate
+	err = put(c.ctx, email, sub)
+	if err != nil {
+		return errors.Wrap("failed to put sub", err)
+	}
+	// add sublog
+	err = c.Setup(firstBagDate, email, sub.Servings, sub.VegetarianServings, sub.WeeklyAmount, 0, sub.PaymentMethodToken, sub.CustomerID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Setup")
+	}
+	// add to mail
+	var addTags []mail.Tag
+	// Add preview tag if less than 6 days away add preview tag
+	if firstBagDate.Sub(time.Now()) < 6*24*time.Hour {
+		addTags = append(addTags, mail.GetPreviewEmailTag(firstBagDate))
+	}
+	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
+	mailReq := &mail.UserFields{
+		Email:             email,
+		FirstName:         sub.FirstName,
+		LastName:          sub.LastName,
+		FirstDeliveryDate: sub.FirstBoxDate,
+		VegServings:       sub.VegetarianServings,
+		NonVegServings:    sub.Servings,
+		AddTags:           addTags,
+	}
+	err = mailC.SubActivated(mailReq)
+	if err != nil {
+		return errors.Annotate(err, "failed ot mail.SubActivated")
 	}
 	return nil
 }

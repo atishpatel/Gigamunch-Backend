@@ -212,12 +212,12 @@
               [[subscriber.first_box_date_string]]
             </div>
           </div>
-          <div class="info-row">
+          <!-- <div class="info-row">
             <div class="info-label">First Payment:</div>
             <div class="info-value first-payment">
               [[subscriber.first_payment_date_string]]
             </div>
-          </div>
+          </div> -->
           <div class="info-row">
             <div class="info-label">Subscription Day:</div>
             <div class="info-value subscription-day">
@@ -321,10 +321,10 @@
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
         const d = new Date(dateString);
-        let day = d.getDay();
-        let month = d.getMonth();
-        let date = d.getDate();
-        let year = d.getFullYear();
+        let day = d.getUTCDay();
+        let month = d.getUTCMonth();
+        let date = d.getUTCDate();
+        let year = d.getUTCFullYear();
         return `${dayNames[day]}, ${monthNames[month]} ${date} ${year}`
       }
 
@@ -391,7 +391,22 @@
           if (err && err.code !== 0) {
             return;
           }
-          this.sublogs = resp.sublogs
+          let sublogs = resp.sublogs;
+          if (this.subscriber) {
+            for (let i = 0; i < sublogs.length; i++) {
+              if (sublogs[i].servings == 0 && sublogs[i].veg_servings == 0) {
+                sublogs[i].veg_servings = this.subscriber.vegetarian_servings;
+              }
+              const d = new Date(sublogs[i].date);
+              const sept25 = new Date('2018-09-25');
+              if (sublogs[i].vegetarian_servings > 0 && d < sept25) {
+                sublogs[i].veg_servings = sublogs[i].servings;
+                sublogs[i].servings = 0;
+              }
+            }
+          }
+
+          this.sublogs = sublogs;
         });
       }
 

@@ -5,8 +5,8 @@ if (APP.IsDev) {
 else if (APP.IsStage) {
     baseURLOld = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/spi/Service.';
 }
-function getToken() {
-    return COOK.User.token;
+function GetToken() {
+    return APP.Auth.GetToken();
 }
 function logError(fnName, err) {
     if (err && (err.code === undefined || err.code !== 0)) {
@@ -22,117 +22,137 @@ function logError(fnName, err) {
 }
 export function getSubLogs(callback) {
     var url = baseURLOld + 'getSubLogs';
-    var request = {
-        gigatoken: getToken(),
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('getSubLogs', resp.err);
-        callback(resp.sublogs, resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('getSubLogs', resp.err);
+            callback(resp.sublogs, resp.err);
+        });
     });
 }
 export function getSubLogsForDate(date, callback) {
     var url = baseURLOld + 'getSubLogsForDate';
-    var request = {
-        gigatoken: getToken(),
-        date: date.toISOString(),
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('getSubLogsForDate', resp.err);
-        callback(resp.sublogs, resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+            date: date.toISOString(),
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('getSubLogsForDate', resp.err);
+            callback(resp.sublogs, resp.err);
+        });
     });
 }
 export function getSubEmails(callback) {
     var url = baseURLOld + 'getSubEmails';
-    var request = {
-        gigatoken: getToken(),
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('getSubEmails', resp.err);
-        callback(resp.sub_emails, resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('getSubEmails', resp.err);
+            callback(resp.sub_emails, resp.err);
+        });
     });
 }
 export function getSubEmailsAndSubs(callback) {
     var url = baseURLOld + 'getSubEmails';
-    var request = {
-        gigatoken: getToken(),
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('getSubEmails', resp.err);
-        callback(resp.sub_emails, resp.subscribers, resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('getSubEmails', resp.err);
+            callback(resp.sub_emails, resp.subscribers, resp.err);
+        });
     });
 }
 export function skipSubLog(date, subEmail, callback) {
     var url = baseURLOld + 'skipSubLog';
-    var request = {
-        gigatoken: getToken(),
-        date: date.toISOString(),
-        sub_email: subEmail,
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('skipSubLog', resp.err);
-        callback(resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+            date: date.toISOString(),
+            sub_email: subEmail,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('skipSubLog', resp.err);
+            callback(resp.err);
+        });
     });
 }
 export function CancelSub(email, callback) {
     var url = baseURLOld + 'CancelSub';
-    var request = {
-        gigatoken: getToken(),
-        email: email,
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('CancelSub', resp.err);
-        callback(resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+            email: email,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('CancelSub', resp.err);
+            callback(resp.err);
+        });
     });
 }
 export function discountSubLog(date, subEmail, amount, percent, overrideDiscount, callback) {
     var url = baseURLOld + 'DiscountSubLog';
-    var request = {
-        gigatoken: getToken(),
-        date: date.toISOString(),
-        sub_email: subEmail,
-        amount: amount,
-        percent: percent,
-        override_discount: overrideDiscount,
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('DiscountSubLog', resp.err);
-        callback(resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+            date: date.toISOString(),
+            sub_email: subEmail,
+            amount: amount,
+            percent: percent,
+            override_discount: overrideDiscount,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('DiscountSubLog', resp.err);
+            callback(resp.err);
+        });
     });
 }
 export function ChangeServingsForDate(date, subEmail, servings, callback) {
     var url = baseURLOld + 'ChangeServingsForDate';
-    var request = {
-        gigatoken: getToken(),
-        date: date.toISOString(),
-        sub_email: subEmail,
-        servings: servings,
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('ChangeServingForDate', resp.err);
-        callback(resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+            date: date.toISOString(),
+            sub_email: subEmail,
+            servings: servings,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('ChangeServingForDate', resp.err);
+            callback(resp.err);
+        });
     });
 }
 export function ChangeServingsPermanently(email, servings, vegetarian, callback) {
     var url = baseURLOld + 'ChangeServingsPermanently';
-    var request = {
-        gigatoken: getToken(),
-        email: email,
-        servings: servings,
-        vegetarian: vegetarian,
-    };
-    callFetch(url, 'POST', request).then(function (resp) {
-        logError('ChangeServingsPermanently', resp.err);
-        callback(resp.err);
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+            email: email,
+            servings: servings,
+            vegetarian: vegetarian,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) {
+            logError('ChangeServingsPermanently', resp.err);
+            callback(resp.err);
+        });
     });
 }
 export function GetGeneralStats(callback) {
     var url = baseURLOld + 'GetGeneralStats';
-    var request = {
-        gigatoken: getToken(),
-    };
-    callFetch(url, 'POST', request).then(function (resp) { callback(resp); });
+    GetToken().then(function (token) {
+        var request = {
+            gigatoken: token,
+        };
+        callOldFetch(url, 'POST', request).then(function (resp) { callback(resp); });
+    });
 }
-function callFetch(url, method, body) {
+function callOldFetch(url, method, body) {
     var config = {
         method: method,
         headers: {
@@ -152,7 +172,7 @@ function callFetch(url, method, body) {
         return resp.json();
     })
         .catch(function (err) {
-        console.error('failed to callFetch', err);
+        console.error('failed to callOldFetch', err);
     });
 }
 function serializeParams(obj) {

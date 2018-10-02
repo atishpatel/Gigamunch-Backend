@@ -1,4 +1,4 @@
-package admin
+package sub
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gorilla/schema"
@@ -30,7 +29,6 @@ import (
 )
 
 type server struct {
-	once       sync.Once
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
@@ -49,77 +47,13 @@ func init() {
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
-	// **********************
-	// Auth
-	// **********************
-	http.HandleFunc("/admin/api/v1/SetAdmin", s.handler(s.userAdmin(s.SetAdmin)))
-	// **********************
-	// Subscriber
-	// **********************
-	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
-	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
-	// **********************
 	// Activity
-	// **********************
-	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
-	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
-	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
-	// **********************
-	// Logs
-	// **********************
-	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
-	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
-	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsByEmail)))
-	// **********************
-	// Sublogs
-	// **********************
-	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
-	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
-	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
-	http.HandleFunc("/admin/api/v1/RefundAndSkipSublog", s.handler(s.userAdmin(s.RefundAndSkipSublog)))
-	// **********************
-	// Subscriber
-	// **********************
-	http.HandleFunc("/admin/api/v1/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribed)))
-	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
-	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
-	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
-	// Zone
-	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
-	// **********************
-	// Culture Executions
-	// **********************
-	http.HandleFunc("/admin/api/v1/GetExecutions", s.handler(s.userAdmin(s.GetExecutions)))
-	http.HandleFunc("/admin/api/v1/GetExecution", s.handler(s.userAdmin(s.GetExecution)))
-	http.HandleFunc("/admin/api/v1/UpdateExecution", s.handler(s.userAdmin(s.UpdateExecution)))
-	// **********************
-	// Tasks
-	// **********************
-	http.HandleFunc("/admin/task/SetupTags", s.handler(s.SetupTags))
-	http.HandleFunc("/admin/task/SendPreviewCultureEmail", s.handler(s.SendPreviewCultureEmail))
-	http.HandleFunc("/admin/task/SendCultureEmail", s.handler(s.SendCultureEmail))
-	http.HandleFunc("/admin/task/CheckPowerSensors", s.handler(s.CheckPowerSensors))
-	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
-	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
-
-	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivity))
-	http.HandleFunc("/process-subscription", s.handler(s.ProcessActivity))
-	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
-	// **********************
-	// Webhooks
-	// **********************
-	http.HandleFunc("/admin/webhook/typeform-skip", s.handler(s.TypeformSkip))
-	http.HandleFunc("/admin/webhook/twilio-sms", s.handler(s.TwilioSMS))
-	http.HandleFunc("/admin/webhook/slack", s.handler(s.Slack))
-	// **********************
-	// Batch
-	// **********************
-	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
-	//
-	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.GetExecutions))
+	http.HandleFunc("/sub/api/v1/GetExecution", s.handler(s.GetExecution))
+	// Test
+	http.HandleFunc("/sub/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("success"))
 	})
-
 }
 
 func (s *server) setup() error {
@@ -147,7 +81,7 @@ func (s *server) setup() error {
 	return nil
 }
 
-func (s *server) userAdmin(f handle) handle {
+func (s *server) isSubscriber(f handle) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {

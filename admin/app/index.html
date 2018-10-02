@@ -99,16 +99,28 @@
 </head>
 
 <body>
-  <script src="js-old/user.js"></script>
-  <script src="js-old/app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.5.1/firebase-auth.js"></script>
   <script src="js/app.js"></script>
-  <script src="https://apis.google.com/js/client.js?onload=initService"></script>
+  <script src="js-old/app.js"></script>
   <app-shell id="app"></app-shell>
   <!-- For copying to clipboard with button. -->
   <span id="copyElement"
         style="font-size:1px"></span>
   <script>
     var app = document.querySelector('#app');
+
+    document.onkeyup = function(e) {
+      var e = e || window.event; // for IE to cover IEs window object
+      if (e.altKey && e.key == 'n') {
+        window.open('sublogdetail/next')
+        return false;
+      }
+      if (e.altKey && e.key == 'p') {
+        window.open('sublogdetail/previous')
+        return false;
+      }
+    }
 
   </script>
   <style>

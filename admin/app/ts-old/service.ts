@@ -1,6 +1,5 @@
-import {
-  GetToken,
-} from './utils/token';
+
+declare var APP: any;
 
 let baseURLOld = 'https://cookapi-dot-gigamunch-omninexus.appspot.com/_ah/spi/Service.';
 if (APP.IsDev) {
@@ -9,8 +8,8 @@ if (APP.IsDev) {
   baseURLOld = 'https://cookapi-dot-gigamunch-omninexus-dev.appspot.com/_ah/spi/Service.';
 }
 
-function getToken() {
-  return COOK.User.token;
+function GetToken(): Promise<string> {
+  return APP.Auth.GetToken();
 }
 
 function logError(fnName: string, err: ErrorWithCode) {
@@ -31,128 +30,150 @@ function logError(fnName: string, err: ErrorWithCode) {
 
 export function getSubLogs(callback: (sublogs: SubLogs[], err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'getSubLogs';
-  const request = {
-    gigatoken: getToken(),
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('getSubLogs', resp.err);
-        callback(resp.sublogs, resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('getSubLogs', resp.err);
+      callback(resp.sublogs, resp.err);
+    })
   })
 }
 
 export function getSubLogsForDate(date: Date, callback: (sublogs: SubLogs, err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'getSubLogsForDate';
-  const request = {
-    gigatoken: getToken(),
-    date: date.toISOString(),
-  };
-  callFetch(url, 'POST', request).then((resp)=>{logError('getSubLogsForDate', resp.err);
-  callback(resp.sublogs, resp.err);})
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+      date: date.toISOString(),
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('getSubLogsForDate', resp.err);
+      callback(resp.sublogs, resp.err);
+    })
+  })
 }
 
 export function getSubEmails(callback: (subEmails: String[], err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'getSubEmails';
-  const request = {
-    gigatoken: getToken(),
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('getSubEmails', resp.err);
-        callback(resp.sub_emails, resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('getSubEmails', resp.err);
+      callback(resp.sub_emails, resp.err);
+    })
   })
 }
 
 export function getSubEmailsAndSubs(callback: (subEmails: String[], subs: Object[], err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'getSubEmails';
-  const request = {
-    gigatoken: getToken(),
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('getSubEmails', resp.err);
-        callback(resp.sub_emails, resp.subscribers, resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('getSubEmails', resp.err);
+      callback(resp.sub_emails, resp.subscribers, resp.err);
+    })
   })
 }
 
 export function skipSubLog(date: Date, subEmail: string, callback: (err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'skipSubLog';
-  const request = {
-    gigatoken: getToken(),
-    date: date.toISOString(),
-    sub_email: subEmail,
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('skipSubLog', resp.err);
-        callback(resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+      date: date.toISOString(),
+      sub_email: subEmail,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('skipSubLog', resp.err);
+      callback(resp.err);
+    })
   })
 }
 
 export function CancelSub(email: string, callback: (err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'CancelSub';
-  const request = {
-    gigatoken: getToken(),
-    email: email,
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('CancelSub', resp.err);
-        callback(resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+      email: email,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('CancelSub', resp.err);
+      callback(resp.err);
+    })
   })
 }
 
 export function discountSubLog(date: Date, subEmail: string, amount: number, percent: number, overrideDiscount: boolean, callback: (err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'DiscountSubLog';
-  const request = {
-    gigatoken: getToken(),
-    date: date.toISOString(),
-    sub_email: subEmail,
-    amount: amount,
-    percent: percent,
-    override_discount: overrideDiscount,
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('DiscountSubLog', resp.err);
-        callback(resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+      date: date.toISOString(),
+      sub_email: subEmail,
+      amount: amount,
+      percent: percent,
+      override_discount: overrideDiscount,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('DiscountSubLog', resp.err);
+      callback(resp.err);
+    })
   })
 }
 
 export function ChangeServingsForDate(date: Date, subEmail: string, servings: number, callback: (err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'ChangeServingsForDate';
-  const request = {
-    gigatoken: getToken(),
-    date: date.toISOString(),
-    sub_email: subEmail,
-    servings: servings,
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('ChangeServingForDate', resp.err);
-    callback(resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+      date: date.toISOString(),
+      sub_email: subEmail,
+      servings: servings,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('ChangeServingForDate', resp.err);
+      callback(resp.err);
+    })
   })
 }
 
 export function ChangeServingsPermanently(email: string, servings: number, vegetarian: boolean, callback: (err: ErrorWithCode) => void) {
   const url: string = baseURLOld + 'ChangeServingsPermanently';
-  const request = {
-    gigatoken: getToken(),
-    email: email,
-    servings: servings,
-    vegetarian: vegetarian,
-  };
-  callFetch(url, 'POST', request).then((resp)=>{
-    logError('ChangeServingsPermanently', resp.err);
-        callback(resp.err);
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+      email: email,
+      servings: servings,
+      vegetarian: vegetarian,
+    };
+    callOldFetch(url, 'POST', request).then((resp) => {
+      logError('ChangeServingsPermanently', resp.err);
+      callback(resp.err);
+    })
   })
 }
 
 export function GetGeneralStats(callback: (resp: Response) => void) {
   const url: string = baseURLOld + 'GetGeneralStats';
-  const request = {
-    gigatoken: getToken(),
-  };
+  GetToken().then((token) => {
+    const request = {
+      gigatoken: token,
+    };
 
-  callFetch(url, 'POST', request).then((resp)=>{callback(resp)})
+    callOldFetch(url, 'POST', request).then((resp) => { callback(resp) })
+  })
 }
 
 
 
-function callFetch(url: string, method: string, body: object): Promise<APIResponse> {
+function callOldFetch(url: string, method: string, body: object): Promise<APIResponse> {
   const config: RequestInit = {
     method,
     headers: {
@@ -172,7 +193,7 @@ function callFetch(url: string, method: string, body: object): Promise<APIRespon
       return resp.json();
     })
     .catch((err: any) => {
-      console.error('failed to callFetch', err);
+      console.error('failed to callOldFetch', err);
     });
 }
 

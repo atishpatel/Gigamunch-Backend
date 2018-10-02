@@ -12,6 +12,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
+	authnew "github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -26,6 +27,23 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
+
+func getUserFromRequest(ctx context.Context, req validatableTokenReq) (*common.User, error) {
+	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi")
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to setupLoggingAndServerInfo")
+	}
+	authC, err := authnew.NewClient(ctx, log, db, nil, serverInfo)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to get auth.NewClient")
+	}
+	user, err := authC.Verify(req.gigatoken())
+	if err != nil {
+
+		return nil, errors.Annotate(err, "failed to get auth.Verify")
+	}
+	return user, err
+}
 
 // CreateFakeGigatokenReq is the request for CreateFakeGigatoken.
 type CreateFakeGigatokenReq struct {
@@ -65,12 +83,12 @@ type AddToProcessInquiryQueueReq struct {
 func (service *Service) AddToProcessInquiryQueue(ctx context.Context, req *AddToProcessInquiryQueueReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "AddToProcessInquiryQueue", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -96,12 +114,12 @@ type CreateFakeSubmerchantReq struct {
 func (service *Service) CreateFakeSubmerchant(ctx context.Context, req *CreateFakeSubmerchantReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "CreateFakeSubmerchant", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -141,12 +159,12 @@ type SendSMSReq struct {
 func (service *Service) SendSMS(ctx context.Context, req *SendSMSReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SendSMS", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -178,12 +196,12 @@ type SendCustomerSMSReq struct {
 func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSMSReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SendCustomerSMS", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -274,12 +292,12 @@ type SubLogReq struct {
 func (service *Service) SetupSubLogs(ctx context.Context, req *DateReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SetupSubLogs", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -307,12 +325,12 @@ func (service *Service) SetupSubLogs(ctx context.Context, req *DateReq) (*ErrorO
 func (service *Service) ProcessSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "ProcessSubLog", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -344,12 +362,12 @@ type GetSubEmailsResp struct {
 func (service *Service) GetSubEmails(ctx context.Context, req *GigatokenReq) (*GetSubEmailsResp, error) {
 	resp := new(GetSubEmailsResp)
 	defer handleResp(ctx, "GetSubEmails", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -374,12 +392,12 @@ func (service *Service) GetSubEmails(ctx context.Context, req *GigatokenReq) (*G
 func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "SkipSubLog", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -405,12 +423,12 @@ func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "RefundAndSkipSubLog", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -442,12 +460,12 @@ type DiscountSubLogReq struct {
 func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "DiscountSubLog", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -480,12 +498,12 @@ type ChangeServingsPermanentlyReq struct {
 func (service *Service) ChangeServingsPermanently(ctx context.Context, req *ChangeServingsPermanentlyReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "ChangeServingsPermanently", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -515,12 +533,12 @@ type UpdatePaymentMethodTokenReq struct {
 func (service *Service) UpdatePaymentMethodToken(ctx context.Context, req *UpdatePaymentMethodTokenReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "UpdatePaymentMethodToken", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -551,12 +569,12 @@ type ChangeServingsForDateReq struct {
 func (service *Service) ChangeServingsForDate(ctx context.Context, req *ChangeServingsForDateReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "ChangeServingsForDateSubLog", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -588,12 +606,12 @@ type SubReq struct {
 func (service *Service) CancelSub(ctx context.Context, req *EmailReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "CancelSub", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -623,12 +641,12 @@ type GetSubLogsResp struct {
 func (service *Service) GetSubLogs(ctx context.Context, req *GigatokenReq) (*GetSubLogsResp, error) {
 	resp := new(GetSubLogsResp)
 	defer handleResp(ctx, "GetSubLogs", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -662,12 +680,12 @@ type GetSubLogsForDateResp struct {
 func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*GetSubLogsForDateResp, error) {
 	resp := new(GetSubLogsForDateResp)
 	defer handleResp(ctx, "GetSubLogsForDate", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -695,20 +713,8 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
 					resp.SubLogs[i].Date = subLogs[i].Date
 					resp.SubLogs[i].CustomerID = subs[j].CustomerID
-					if subs[j].VegetarianServings > 0 && subs[j].Servings > 0 {
-						if subLogs[i].Servings == subs[j].VegetarianServings+subs[j].Servings {
-							resp.SubLogs[i].VegetarianServings = subs[j].VegetarianServings
-							resp.SubLogs[i].Servings = subs[j].Servings
-						} else {
-							resp.SubLogs[i].VegetarianServings = subLogs[i].Servings / 2
-							resp.SubLogs[i].Servings = subLogs[i].Servings / 2
-						}
-					} else if subs[j].VegetarianServings > 0 {
-						resp.SubLogs[i].VegetarianServings = subLogs[i].Servings
-					} else {
-						resp.SubLogs[i].Servings = subLogs[i].Servings
-					}
 					resp.SubLogs[i].DeliveryTime = subLogs[i].DeliveryTime
+					resp.SubLogs[i].Servings = subLogs[i].Servings
 				}
 			}
 		}
@@ -720,12 +726,12 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 func (service *Service) UpdateAddresses(ctx context.Context, req *GigatokenReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "UpdateAddresses", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -770,19 +776,20 @@ func (service *Service) UpdateAddresses(ctx context.Context, req *GigatokenReq) 
 // AddToProcessSubscriptionQueueReq is a request for AddToProcessSubscriptionQueue.
 type AddToProcessSubscriptionQueueReq struct {
 	SubLogReq
-	Hours int `json:"hours"`
+	Emails []string `json:"emails"`
+	Hours  int      `json:"hours"`
 }
 
 // AddToProcessSubscriptionQueue adds a process to the subscription queue.
 func (service *Service) AddToProcessSubscriptionQueue(ctx context.Context, req *AddToProcessSubscriptionQueueReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "AddToProcessSubscriptionQueue", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
@@ -793,10 +800,25 @@ func (service *Service) AddToProcessSubscriptionQueue(ctx context.Context, req *
 	}
 	at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
 	tasksC := tasks.New(ctx)
-	err = tasksC.AddProcessSubscription(at, subR)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
-		return resp, nil
+	if req.SubEmail != "" {
+		err = tasksC.AddProcessSubscription(at, subR)
+		if err != nil {
+			resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
+			return resp, nil
+		}
+	}
+
+	for _, email := range req.Emails {
+		subR := &tasks.ProcessSubscriptionParams{
+			SubEmail: email,
+			Date:     req.Date,
+		}
+		at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+		err = tasksC.AddProcessSubscription(at, subR)
+		if err != nil {
+			resp.Err = errors.GetErrorWithCode(err).Wrap("failed to tasks.AddProcessSubscription")
+			return resp, nil
+		}
 	}
 
 	return resp, nil
@@ -835,12 +857,12 @@ type ReplaceSubEmailReq struct {
 func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmailReq) (*ErrorOnlyResp, error) {
 	resp := new(ErrorOnlyResp)
 	defer handleResp(ctx, "ReplaceSubEmail", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
+	user, err := getUserFromRequest(ctx, req)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	if !user.IsAdmin() {
+	if !user.Admin {
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}

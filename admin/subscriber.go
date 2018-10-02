@@ -11,7 +11,9 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
@@ -30,17 +32,16 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 
 	dilm := "{{name}}"
 	firstNameDilm := "{{first_name}}"
-	msg := req.Message
 
 	messageC := message.New(ctx)
-	var emails []string
-	for _, email := range req.Emails {
-		if email != "" {
-			emails = append(emails, email)
-		}
-	}
+	// var emails []string
+	// for _, email := range req.Emails {
+	// 	if email != "" {
+	// 		emails = append(emails, email)
+	// 	}
+	// }
 	subC := subold.New(ctx)
-	subs, err := subC.GetSubscribers(emails)
+	subs, err := subC.GetSubscribers(req.Emails)
 	if err != nil {
 		return errors.Annotate(err, "failed to subold.GetSubscribers")
 	}
@@ -53,6 +54,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 			name = s.Name
 		}
 		name = strings.Title(name)
+		msg := req.Message
 		msg = strings.Replace(msg, dilm, name, -1)
 		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
@@ -127,6 +129,79 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 	}
 
 	return resp
+}
+
+// ActivateSubscriber activates a subscriber account.
+func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.ActivateSubscriberReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	firstBagDate := getDatetime(req.FirstBagDate)
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.Activate(req.Email, firstBagDate)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Activate")
+	}
+
+	return nil
+}
+
+// DeactivateSubscriber activates a subscriber account.
+func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.DeactivateSubscriberReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.Deactivate(req.Email)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Deactivate")
+	}
+	return nil
+}
+
+// UpdateDrip updates drip.
+func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.UpdateDripReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	at := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+	tasksC := tasks.New(ctx)
+	for _, email := range req.Emails {
+		err = tasksC.AddUpdateDrip(at, &tasks.UpdateDripParams{Email: email})
+		if err != nil {
+			return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
+		}
+	}
+
+	return nil
 }
 
 func pbSubscribers(subscribers []subold.SubscriptionSignUp) []*pb.Subscriber {

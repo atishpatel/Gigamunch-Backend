@@ -28,28 +28,28 @@
       <div>Total Veg conatiners: <strong>[[totalVegContainers]]</strong></div>
       <br>
     </div>
-    <div>Number of Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
-    <div>Number of 🍖 NonVeg Subscribers: <strong>[[numNonvegCustomers]]</strong></div>
-    <div>Number of 🌱 Veg Subscribers: <strong>[[numVegCustomers]]</strong></div>
-    <div>Number of 2 Serving Subscribers: <strong>[[num2Customers]]</strong></div>
-    <div>Number of 4 Serving Subscribers: <strong>[[num4Customers]]</strong></div>
-    <div>Number of 4+ Serving Subscribers: <strong>[[num4PlusCustomers]]</strong></div>
-    <br>
-    <div>Predicted Revenue: <strong>$[[predictedRevenue]]</strong></div>
-    <div>Total Revenue: <strong>$[[totalRevenue]]</strong></div>
-    <div>Total Unpaid Revenue: <strong>$[[totalUnpaidRevenue]]</strong></div>
-    <div>Total Tax: <strong>$[[totalTax]]</strong></div>
-    <div>Total Processing Cost: <strong>$[[totalProcessingCost]]</strong></div>
-    <div>Total Free + Discount Cost: <strong>$[[totalCost]]</strong></div>
-    <br>
-    <div>Percent skip: <strong>[[percentSkipped]] %</strong></div>
-    <div>Percent Paying unskipped: <strong>[[percentPayingUnskipped]] %</strong></div>
-    <br>
-    <div>Num Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
-    <div>Num Paying Subscribers: <strong>[[numPayingCustomers]]</strong></div>
-    <div>Num Free Subscribers: <strong>[[numFreeCustomers]]</strong></div>
-    <div>Num Skipped Subscribers: <strong>[[numSkipCustomers]]</strong></div>
-    <div>Num Subscribers: <strong>[[numCustomers]]</strong></div>
+      <div>Number of Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
+      <div>Number of 🍖 NonVeg Subscribers: <strong>[[numNonvegCustomers]]</strong></div>
+      <div>Number of 🌱 Veg Subscribers: <strong>[[numVegCustomers]]</strong></div>
+      <div>Number of 2 Serving Subscribers: <strong>[[num2Customers]]</strong></div>
+      <div>Number of 4 Serving Subscribers: <strong>[[num4Customers]]</strong></div>
+      <div>Number of 4+ Serving Subscribers: <strong>[[num4PlusCustomers]]</strong></div>
+      <br>
+      <div>Predicted Revenue: <strong>$[[predictedRevenue]]</strong></div>
+      <div>Total Revenue: <strong>$[[totalRevenue]]</strong></div>
+      <div>Total Unpaid Revenue: <strong>$[[totalUnpaidRevenue]]</strong></div>
+      <div>Total Tax: <strong>$[[totalTax]]</strong></div>
+      <div>Total Processing Cost: <strong>$[[totalProcessingCost]]</strong></div>
+      <div>Total Free + Discount Cost: <strong>$[[totalCost]]</strong></div>
+      <br>
+      <div>Percent skip: <strong>[[percentSkipped]] %</strong></div>
+      <div>Percent Paying unskipped: <strong>[[percentPayingUnskipped]] %</strong></div>
+      <br>
+      <div>Num Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
+      <div>Num Paying Subscribers: <strong>[[numPayingCustomers]]</strong></div>
+      <div>Num Free Subscribers: <strong>[[numFreeCustomers]]</strong></div>
+      <div>Num Skipped Subscribers: <strong>[[numSkipCustomers]]</strong></div>
+      <div>Num Subscribers: <strong>[[numCustomers]]</strong></div>
   </template>
 
   <script>
@@ -190,7 +190,7 @@
           let totalProcessingCost = 0.0;
           for (var i = 0; i < unskippedSublogs.length; i++) {
             totalNoVegServings += unskippedSublogs[i].servings;
-            totalVegServings += unskippedSublogs[i].vegetarian_servings;
+            totalVegServings += unskippedSublogs[i].veg_servings;
             unskippedSublogs[i].status = this._getStatus(unskippedSublogs[i]);
             // calculate revenue
             if (unskippedSublogs[i].free) {
@@ -208,14 +208,14 @@
             }
             totalRevenue += unskippedSublogs[i].amount_paid;
             // calculate number Subscribers
-            if (unskippedSublogs[i].servings + unskippedSublogs[i].vegetarian_servings === 2) {
+            if (unskippedSublogs[i].servings + unskippedSublogs[i].veg_servings === 2) {
               num2Customers++;
-            } else if (unskippedSublogs[i].servings + unskippedSublogs[i].vegetarian_servings === 4) {
+            } else if (unskippedSublogs[i].servings + unskippedSublogs[i].veg_servings === 4) {
               num4Customers++;
             } else {
               num4PlusCustomers++;
             }
-            if (unskippedSublogs[i].vegetarian_servings) {
+            if (unskippedSublogs[i].veg_servings) {
               numVegCustomers++;
             } else {
               numNonvegCustomers++;

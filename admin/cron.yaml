@@ -5,8 +5,8 @@ cron:
   schedule: every day 20:00
   timezone: America/Chicago
   target: admin
-- description: "Setup Subscriber Activities in 5 days"
-  url: /admin/task/SetupActivites?hours=120
+- description: "Setup Subscriber Activities in 7 days"
+  url: /admin/task/SetupActivites?hours=168
   schedule: every day 20:00
   timezone: America/Chicago
   target: admin

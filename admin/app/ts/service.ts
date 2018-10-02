@@ -1,6 +1,6 @@
 import {
-  GetToken,
-} from './utils/token';
+  GetToken
+} from './auth';
 
 let baseURL = '/admin/api/v1/';
 if (location.hostname === 'localhost') {
@@ -110,12 +110,13 @@ export function GetLogsByEmail(start: number, limit: number, email: string): Pro
   return callFetch(url, 'GET', req);
 }
 
-function callFetch(url: string, method: string, body: object): Promise<APIResponse> {
+const callFetch = async (url: string, method: string, body: object): Promise<APIResponse> => {
+  const token = await GetToken()
   const config: RequestInit = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'auth-token': GetToken(),
+      'auth-token': token,
       'Access-Control-Allow-Origin': '*',
     },
   };

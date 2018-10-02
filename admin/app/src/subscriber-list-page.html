@@ -85,40 +85,40 @@
                 </div>
             </template>
           </dom-repeat>
-          </div>
         </div>
-
-        <!-- Canceled Subscribers -->
-        <h2> Canceled Subscribers </h2>
-        <div class="table-container">
-          <div class="table">
-            <div class="table-row table-header-row">
-              <div class="table-cell">Email</div>
-              <div class="table-cell">Name</div>
-              <div class="table-cell">Number</div>
-              <div class="table-cell">Address</div>
-            </div>
-            <dom-repeat items="[[canceledSubscribers]]"
-                        as="canceledSubscriber">
-              <template>
-                <div class="table-row">
-                  <div class="table-cell">
-                    <a target="_blank"
-                       href="subscriber/[[canceledSubscriber.email]]">[[canceledSubscriber.email]]</a>
-                  </div>
-                  <div class="table-cell">[[canceledSubscriber.name]]</div>
-                  <div class="table-cell">[[canceledSubscriber.phone_number]]</div>
-                  <div class="table-cell">
-                    <a target="_blank"
-                       href="[[canceledSubscriber.addressLink]]">[[canceledSubscriber.addressString]]</a>
-                  </div>
-                </div>
-              </template>
-            </dom-repeat>
-          </div>
-        </div>
-
       </div>
+
+      <!-- Canceled Subscribers -->
+      <h2> Canceled Subscribers </h2>
+      <div class="table-container">
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell">Email</div>
+            <div class="table-cell">Name</div>
+            <div class="table-cell">Number</div>
+            <div class="table-cell">Address</div>
+          </div>
+          <dom-repeat items="[[canceledSubscribers]]"
+                      as="canceledSubscriber">
+            <template>
+              <div class="table-row">
+                <div class="table-cell">
+                  <a target="_blank"
+                       href="subscriber/[[canceledSubscriber.email]]">[[canceledSubscriber.email]]</a>
+                </div>
+                <div class="table-cell">[[canceledSubscriber.name]]</div>
+                <div class="table-cell">[[canceledSubscriber.phone_number]]</div>
+                <div class="table-cell">
+                  <a target="_blank"
+                       href="[[canceledSubscriber.addressLink]]">[[canceledSubscriber.addressString]]</a>
+                </div>
+              </div>
+            </template>
+          </dom-repeat>
+        </div>
+      </div>
+
+    </div>
   </template>
 
   <script>
@@ -162,7 +162,6 @@
       }
 
       selected() {
-        console.log("in selected");
         this.getHasSubscribed();
       }
 

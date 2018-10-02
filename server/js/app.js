@@ -96,7 +96,7 @@ function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: 'sub',
+        signInSuccessUrl: 'login',
         signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             {
@@ -114,17 +114,19 @@ function SetupFirebaseAuthUI(elementID) {
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);
 }
-var EventSignedOut = 'signed-out';
-var EventSignedIn = 'signed-in';
+var Events = {
+    SignedOut: 'signed-out',
+    SignedIn: 'signed-in',
+};
 SetupFirebase();
 firebase.auth().onAuthStateChanged(function (user) {
     console.log('user', user);
     var eventName;
     if (!user) {
-        eventName = EventSignedOut;
+        eventName = Events.SignedOut;
     }
     else {
-        eventName = EventSignedIn;
+        eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
             Login(idToken);
         });
@@ -139,8 +141,7 @@ var auth = /*#__PURE__*/Object.freeze({
     SignOut: SignOut,
     SetupFirebase: SetupFirebase,
     SetupFirebaseAuthUI: SetupFirebaseAuthUI,
-    EventSignedOut: EventSignedOut,
-    EventSignedIn: EventSignedIn
+    Events: Events
 });
 
 APP.Utils = utils;
