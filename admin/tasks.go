@@ -105,7 +105,6 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 		}
 		tag := mail.GetPreviewEmailTag(cultureDate)
 		log.Infof(ctx, "culture email tag: %s", tag)
-		log.Infof(ctx, "applying tags to: %+v", nonSkippers)
 		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 		if err != nil {
 			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
@@ -114,6 +113,7 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 		if err != nil {
 			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.AddBatchTag")
 		}
+		log.Infof(ctx, "applying tags to: %+v", nonSkippers)
 	}
 	return nil
 }

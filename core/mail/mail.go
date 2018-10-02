@@ -315,7 +315,7 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 
 // AddBatchTags adds tags to emails. This often triggers a workflow.
 func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
-	// TODO:
+	// TODO: batch limit is 1000 emails so update to split those into two request
 	tagsString := make([]string, len(tags))
 	for i, tag := range tags {
 		tagsString[i] = tag.String()
@@ -349,6 +349,7 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 	if len(resp.Errors) > 0 {
 		return errDrip.WithError(resp.Errors[0]).Annotate("failed to drip.UpdateBatchSubscribers")
 	}
+	c.log.Infof(c.ctx, "drip resp: code(%d) errors: %+v", resp.StatusCode, resp.Errors)
 	return nil
 }
 

@@ -466,14 +466,10 @@
             }, 3000)
           }
         });
-
       }
 
       _routePageChanged(page) {
-        if (page === undefined) {
-          return;
-        }
-        if (page === '') {
+        if (page === undefined || page === '') {
           this.page = 'sublog';
           return;
         }
@@ -512,6 +508,7 @@
             el = this.$.sublogdetailPage;
             title = 'Sublog detailed';
             break;
+          case 'subscribers':
           case 'subscriber-list':
             elementName = 'subscriber-list-page';
             resolvedPageURL = this.resolveUrl('subscriber-list-page.html');
