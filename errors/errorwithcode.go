@@ -3,17 +3,17 @@ package errors
 import (
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 )
 
 const (
-	CodeSuccess                    = int32(shared.Code_Success)
+	CodeSuccess                    = int32(pbcommon.Code_Success)
 	CodeBadRequest                 = 400
 	CodeInvalidParameter           = 400
 	CodeInvalidPromoCode           = 402
 	CodeNotFound                   = 404
-	CodePermissionDenied           = int32(shared.Code_PermissionDenied)
-	CodeUnauthenticated            = int32(shared.Code_Unauthenticated)
+	CodePermissionDenied           = int32(pbcommon.Code_PermissionDenied)
+	CodeUnauthenticated            = int32(pbcommon.Code_Unauthenticated)
 	CodeUnauthorizedAccess         = 401
 	CodeSignOut                    = 452
 	CodeForbidden                  = 403
@@ -116,17 +116,17 @@ func (ewc ErrorWithCode) Equal(e error) bool {
 	return true
 }
 
-// SharedError returns ErrorWithCode as a shared.Error.
-func (ewc ErrorWithCode) SharedError() *shared.Error {
-	return &shared.Error{
-		Code:    shared.Code(ewc.Code),
+// SharedError returns ErrorWithCode as a pbcommon.Error.
+func (ewc ErrorWithCode) SharedError() *pbcommon.Error {
+	return &pbcommon.Error{
+		Code:    pbcommon.Code(ewc.Code),
 		Message: ewc.Message,
 		Detail:  ewc.Detail,
 	}
 }
 
-// GetError returns ErrorWithCode as a shared.Error.
-func (ewc ErrorWithCode) GetError() *shared.Error {
+// GetError returns ErrorWithCode as a pbcommon.Error.
+func (ewc ErrorWithCode) GetError() *pbcommon.Error {
 	return ewc.SharedError()
 }
 
@@ -148,14 +148,14 @@ func GetErrorWithCode(ewc interface{}) ErrorWithCode {
 	if errWithCode, ok := ewc.(ErrorWithCode); ok {
 		return errWithCode
 	}
-	if sharedError, ok := ewc.(*shared.Error); ok {
+	if sharedError, ok := ewc.(*pbcommon.Error); ok {
 		return ErrorWithCode{
 			Code:    int32(sharedError.Code),
 			Message: sharedError.Message,
 			Detail:  sharedError.Detail,
 		}
 	}
-	if sharedError, ok := ewc.(shared.Error); ok {
+	if sharedError, ok := ewc.(pbcommon.Error); ok {
 		return ErrorWithCode{
 			Code:    int32(sharedError.Code),
 			Message: sharedError.Message,
@@ -168,8 +168,8 @@ func GetErrorWithCode(ewc interface{}) ErrorWithCode {
 	return UnknownError
 }
 
-// GetSharedError converts ErrorWithCode into a shared.Error.
-func GetSharedError(ewc error) *shared.Error {
+// GetSharedError converts ErrorWithCode into a pbcommon.Error.
+func GetSharedError(ewc error) *pbcommon.Error {
 	if ewc, ok := ewc.(ErrorWithCode); ok {
 		return ewc.SharedError()
 	}

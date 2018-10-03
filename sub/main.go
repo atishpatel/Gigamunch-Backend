@@ -20,8 +20,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/sub"
 	"google.golang.org/appengine"
 
 	// driver for mysql
@@ -49,14 +49,15 @@ func init() {
 		log.Fatal("failed to setup", err)
 	}
 	// Activity
-	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.GetExecutions))
-	http.HandleFunc("/sub/api/v1/GetExecution", s.handler(s.GetExecution))
+	http.HandleFunc("/sub/api/v1/GetExecutions", s.Handler(s.GetExecutions))
+	http.HandleFunc("/sub/api/v1/GetExecution", s.Handler(s.GetExecution))
 	// Test
 	http.HandleFunc("/sub/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("success"))
 	})
 }
 
+// Setup sets up the server.
 func (s *Server) Setup() error {
 	var err error
 	projID := os.Getenv("PROJECT_ID")
@@ -82,7 +83,8 @@ func (s *Server) Setup() error {
 	return nil
 }
 
-func (s *Server) IsSubscriber(f handle) handle {
+// IsSubscriber checks if user is subscriber.
+func (s *Server) IsSubscriber(f Handle) Handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
@@ -113,7 +115,8 @@ func (s *Server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 	return user, nil
 }
 
-func (s *Server) handler(f handle) func(http.ResponseWriter, *http.Request) {
+// Handler encodes response
+func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
@@ -155,17 +158,17 @@ func (s *Server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		// Log errors
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
-			sharedErr = &shared.Error{
-				Code: shared.Code_Success,
+			sharedErr = &pbcommon.Error{
+				Code: pbcommon.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
+		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
 			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {
-				resp = &pb.ErrorOnlyResp{
+				resp = &pbsub.ErrorOnlyResp{
 					Error: sharedErr,
 				}
 			}
@@ -182,7 +185,9 @@ func (s *Server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 }
 
 // Request helpers
-func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
+
+// DecodeRequest decodes a request into a struct.
+func DecodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
 	if r.Method == "GET" {
 		decoder := schema.NewDecoder()
 		err := decoder.Decode(v, r.URL.Query())
@@ -204,18 +209,19 @@ func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
 	return nil
 }
 
-func failedToDecode(err error) *pb.ErrorOnlyResp {
-	return &pb.ErrorOnlyResp{
+func failedToDecode(err error) *pbsub.ErrorOnlyResp {
+	return &pbsub.ErrorOnlyResp{
 		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
 	}
 }
 
 // Response is a response to a rpc call. All responses contain an error.
 type Response interface {
-	GetError() *shared.Error
+	GetError() *pbcommon.Error
 }
 
-type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
+// Handle is the handle for api request.
+type Handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
 	if len(s) == 10 {

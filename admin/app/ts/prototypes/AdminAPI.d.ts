@@ -1,5 +1,5 @@
 interface ErrorOnlyResp {
-    error: Error
+    error: Common.Error
 }
 interface SetAdminReq {
     email: string
@@ -65,29 +65,29 @@ interface SkipActivityReq {
     date: string
 }
 interface SkipActivityResp {
-    error: Error
+    error: Common.Error
 }
 interface UnskipActivityReq {
     email: string
     date: string
 }
 interface UnskipActivityResp {
-    error: Error
+    error: Common.Error
 }
 interface GetLogReq {
     id: number
 }
 interface GetLogResp {
-    error: Error
-    log: Log
+    error: Common.Error
+    log: Common.Log
 }
 interface GetLogsReq {
     start: number
     limit: number
 }
 interface GetLogsResp {
-    error: Error
-    logs: Log[]
+    error: Common.Error
+    logs: Common.Log[]
 }
 interface GetLogsByEmailReq {
     start: number
@@ -95,8 +95,8 @@ interface GetLogsByEmailReq {
     email: string
 }
 interface GetLogsByEmailResp {
-    error: Error
-    logs: Log[]
+    error: Common.Error
+    logs: Common.Log[]
 }
 interface Sublog {
     date: string
@@ -123,7 +123,7 @@ interface Subscriber {
     name: string
     first_name: string
     last_name: string
-    address: Address
+    address: Common.Address
     customer_id: string
     subscription_ids: string[]
     first_payment_date: string
@@ -155,7 +155,7 @@ interface GetUnpaidSublogsReq {
     limit: number
 }
 interface GetUnpaidSublogsResp {
-    error: Error
+    error: Common.Error
     sublogs: Sublog[]
 }
 interface ProcessSublogsReq {
@@ -163,7 +163,7 @@ interface ProcessSublogsReq {
     date: string
 }
 interface ProcessSublogsResp {
-    error: Error
+    error: Common.Error
 }
 interface SendCustomerSMSReq {
     emails: string[]
@@ -180,18 +180,18 @@ interface GetSubscriberSublogsReq {
     email: string
 }
 interface GetSubscriberSublogsResp {
-    error: Error
+    error: Common.Error
     sublogs: Sublog[]
 }
 interface GetHasSubscribedResp {
-    error: Error
+    error: Common.Error
     subscribers: Subscriber[]
 }
 interface GetSubscriberReq {
     email: string
 }
 interface GetSubscriberResp {
-    error: Error
+    error: Common.Error
     subscriber: Subscriber
 }
 interface Execution {
@@ -248,21 +248,21 @@ interface GetExecutionsReq {
     limit: number
 }
 interface GetExecutionsResp {
-    error: Error
+    error: Common.Error
     executions: Execution[]
 }
 interface GetExecutionReq {
    id: number
 }
 interface GetExecutionResp {
-    error: Error
+    error: Common.Error
     execution: Execution
 }
 interface UpdateExecutionReq {
     execution: Execution
 }
 interface UpdateExecutionResp {
-    error: Error
+    error: Common.Error
     execution: Execution
 }
 interface ExecutionStats {
@@ -295,21 +295,21 @@ interface GetAllExecutionStatsReq {
     limit: number
 }
 interface GetAllExecutionStatsResp {
-    error: Error
+    error: Common.Error
     execution_stats: ExecutionStats[]
 }
 interface GetExecutionStatsReq {
     id: number
 }
 interface GetExecutionStatsResp {
-    error: Error
+    error: Common.Error
     execution_stats: ExecutionStats
 }
 interface UpdateExecutionStatsReq {
     execution_stats: Execution
 }
 interface UpdateExecutionStatsResp {
-    error: Error
+    error: Common.Error
     execution_stats: Execution
 }
 interface Delivery {
@@ -322,7 +322,7 @@ interface Delivery {
     fail: boolean
     sub_name: string
     phone_number: string
-    address: Address
+    address: Common.Address
     delivery_notes: string
     servings: number
     vegetarian: boolean
@@ -333,14 +333,14 @@ interface GetDeliveriesReq {
     driver_email: string
 }
 interface GetDeliveriesResp {
-    error: Error
+    error: Common.Error
     deliveries: Delivery[]
 }
 interface UpdateDeliveriesReq {
     deliveries: Delivery[]
 }
 interface UpdateDeliveriesResp {
-    error: Error
+    error: Common.Error
 }
 interface UpdateDripReq {
     emails: string[]

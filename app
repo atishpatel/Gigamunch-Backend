@@ -33,22 +33,26 @@ if [[ $1 == "build" ]]; then
   if [[ $* == *proto* ]]; then
     # build protobuf and grpc
     echo "Building Gigamunch-Proto APIs."
-    # Eater
-    protoc -I Gigamunch-Proto/common/ -I Gigamunch-Proto/eater/ Gigamunch-Proto/common/*.proto Gigamunch-Proto/eater/*.proto --go_out=plugins=grpc:Gigamunch-Proto/eater
-    # Shared
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/shared/ Gigamunch-Proto/shared/*.proto --go_out=plugins=grpc:Gigamunch-Proto/shared
-    mv Gigamunch-Proto/shared/github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared/*.go Gigamunch-Proto/shared/
-    rm -fR Gigamunch-Proto/shared/github.com
+    # Common 
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/common/ Gigamunch-Proto/common/*.proto --go_out=plugins=grpc:Gigamunch-Proto/common
     # Admin
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/common/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
     sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' admin/app/AdminAPI.swagger.json
+    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/admin/AdminAPI.pb.go
+    # Sub
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/sub/ -I Gigamunch-Proto/common/ Gigamunch-Proto/sub/*.proto --go_out=plugins=grpc:Gigamunch-Proto/sub --swagger_out=logtostderr=true:sub/app
+    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' sub/app/SubAPI.swagger.json
+    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/sub/SubAPI.pb.go
     # Server
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/common/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
+    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' server/ServerAPI.swagger.json
+    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/server/ServerAPI.pb.go
+
     # Typescript
     gulp build
     # Copy Typescript definitions to folder
     cp Gigamunch-Proto/admin/*.d.ts admin/app/ts/prototypes
-    cp Gigamunch-Proto/shared/*.d.ts admin/app/ts/prototypes
+    cp Gigamunch-Proto/common/*.d.ts admin/app/ts/prototypes
   fi
   timestamp
   exit 0

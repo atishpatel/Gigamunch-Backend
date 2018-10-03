@@ -22,7 +22,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	"google.golang.org/appengine"
 
 	// driver for mysql
@@ -220,11 +220,11 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		// Log errors
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
-			sharedErr = &shared.Error{
-				Code: shared.Code_Success,
+			sharedErr = &pbcommon.Error{
+				Code: pbcommon.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
+		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
 			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
 			w.WriteHeader(int(sharedErr.Code))
@@ -277,7 +277,7 @@ func failedToDecode(err error) *pb.ErrorOnlyResp {
 
 // Response is a response to a rpc call. All responses contain an error.
 type Response interface {
-	GetError() *shared.Error
+	GetError() *pbcommon.Error
 }
 
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response

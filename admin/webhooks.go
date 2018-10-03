@@ -12,7 +12,7 @@ import (
 
 	"google.golang.org/appengine/urlfetch"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -32,7 +32,7 @@ type SlackResp struct {
 }
 
 // GetError completes Response interface.
-func (s *SlackResp) GetError() *shared.Error {
+func (s *SlackResp) GetError() *pbcommon.Error {
 	return nil
 }
 

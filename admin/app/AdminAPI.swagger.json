@@ -630,41 +630,6 @@
     }
   },
   "definitions": {
-    "AddressAddress": {
-      "type": "object",
-      "properties": {
-        "apt": {
-          "type": "string"
-        },
-        "street": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        },
-        "state": {
-          "type": "string"
-        },
-        "zip": {
-          "type": "string"
-        },
-        "country": {
-          "type": "string"
-        },
-        "latitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "longitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "full_address": {
-          "type": "string"
-        }
-      },
-      "title": "The error object that gets returned with every"
-    },
     "AdminAPIActivateSubscriberReq": {
       "type": "object",
       "properties": {
@@ -782,7 +747,7 @@
           "type": "string"
         },
         "address": {
-          "$ref": "#/definitions/AddressAddress"
+          "$ref": "#/definitions/CommonAddress"
         },
         "delivery_notes": {
           "type": "string"
@@ -836,7 +801,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       },
       "title": "**********************\nCommon\n**********************"
@@ -991,7 +956,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
           "type": "array",
@@ -1016,7 +981,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "deliveries": {
           "type": "array",
@@ -1039,7 +1004,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution": {
           "$ref": "#/definitions/AdminAPIExecution"
@@ -1059,7 +1024,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
           "$ref": "#/definitions/AdminAPIExecutionStats"
@@ -1083,7 +1048,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "executions": {
           "type": "array",
@@ -1105,7 +1070,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "subscribers": {
           "type": "array",
@@ -1129,10 +1094,10 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "log": {
-          "$ref": "#/definitions/LogLog"
+          "$ref": "#/definitions/CommonLog"
         }
       }
     },
@@ -1156,12 +1121,12 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "logs": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/LogLog"
+            "$ref": "#/definitions/CommonLog"
           }
         }
       }
@@ -1183,12 +1148,12 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "logs": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/LogLog"
+            "$ref": "#/definitions/CommonLog"
           }
         }
       }
@@ -1205,7 +1170,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "sublogs": {
           "type": "array",
@@ -1228,7 +1193,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "sublogs": {
           "type": "array",
@@ -1273,7 +1238,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1330,7 +1295,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1420,7 +1385,7 @@
           "type": "string"
         },
         "address": {
-          "$ref": "#/definitions/AddressAddress"
+          "$ref": "#/definitions/CommonAddress"
         },
         "customer_id": {
           "type": "string"
@@ -1528,7 +1493,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1547,7 +1512,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1578,7 +1543,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution": {
           "$ref": "#/definitions/AdminAPIExecution"
@@ -1597,14 +1562,59 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
           "$ref": "#/definitions/AdminAPIExecution"
         }
       }
     },
-    "ErrorCode": {
+    "CommonAddress": {
+      "type": "object",
+      "properties": {
+        "apt": {
+          "type": "string"
+        },
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "full_address": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonBasicPayload": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonCode": {
       "type": "string",
       "enum": [
         "Unknown",
@@ -1619,11 +1629,11 @@
       "default": "Unknown",
       "title": "- Unknown: TODO:  figure out codes"
     },
-    "ErrorError": {
+    "CommonError": {
       "type": "object",
       "properties": {
         "code": {
-          "$ref": "#/definitions/ErrorCode"
+          "$ref": "#/definitions/CommonCode"
         },
         "message": {
           "type": "string"
@@ -1634,18 +1644,7 @@
       },
       "title": "The error object that gets returned with every"
     },
-    "LogBasicPayload": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        }
-      }
-    },
-    "LogLog": {
+    "CommonLog": {
       "type": "object",
       "properties": {
         "id": {
@@ -1686,7 +1685,7 @@
           "type": "string"
         },
         "basic_payload": {
-          "$ref": "#/definitions/LogBasicPayload"
+          "$ref": "#/definitions/CommonBasicPayload"
         }
       }
     }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	pbshared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
@@ -249,8 +249,8 @@ func pbSubscriber(subscriber *subold.SubscriptionSignUp) *pb.Subscriber {
 	}
 }
 
-func pbAddress(address *types.Address) *pbshared.Address {
-	return &pbshared.Address{
+func pbAddress(address *types.Address) *pbcommon.Address {
+	return &pbcommon.Address{
 		Apt:         address.APT,
 		Street:      address.Street,
 		City:        address.City,

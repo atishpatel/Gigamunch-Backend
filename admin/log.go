@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	shared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
@@ -49,7 +49,7 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
 	resp := &pb.GetLogsResp{}
-	resp.Logs = make([]*shared.Log, len(logs))
+	resp.Logs = make([]*pbcommon.Log, len(logs))
 	for i := range logs {
 		resp.Logs[i] = pbLog(logs[i])
 	}
@@ -73,15 +73,15 @@ func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *h
 		return errors.Annotate(err, "failed to log.GetUserLogsByEmail")
 	}
 	resp := &pb.GetLogsByEmailResp{}
-	resp.Logs = make([]*shared.Log, len(logs))
+	resp.Logs = make([]*pbcommon.Log, len(logs))
 	for i := range logs {
 		resp.Logs[i] = pbLog(logs[i])
 	}
 	return resp
 }
 
-func pbLog(l *logging.Entry) *shared.Log {
-	return &shared.Log{
+func pbLog(l *logging.Entry) *pbcommon.Log {
+	return &pbcommon.Log{
 		Id:              l.ID,
 		LogName:         l.LogName,
 		Timestamp:       l.Timestamp.String(),
@@ -93,7 +93,7 @@ func pbLog(l *logging.Entry) *shared.Log {
 		UserEmail:       l.UserEmail,
 		ActionUserId:    l.ActionUserID,
 		ActionUserEmail: l.ActionUserEmail,
-		BasicPayload: &shared.BasicPayload{
+		BasicPayload: &pbcommon.BasicPayload{
 			Title:       l.BasicPayload.Title,
 			Description: l.BasicPayload.Description,
 		},

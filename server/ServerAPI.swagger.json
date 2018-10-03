@@ -1,11 +1,12 @@
 {
   "swagger": "2.0",
+"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],
   "info": {
     "title": "ServerAPI.proto",
     "version": "version not set"
   },
   "schemes": [
-    "http",
+    
     "https"
   ],
   "consumes": [
@@ -96,7 +97,7 @@
     }
   },
   "definitions": {
-    "AddressAddress": {
+    "CommonAddress": {
       "type": "object",
       "properties": {
         "apt": {
@@ -128,10 +129,9 @@
         "full_address": {
           "type": "string"
         }
-      },
-      "title": "The error object that gets returned with every"
+      }
     },
-    "ErrorCode": {
+    "CommonCode": {
       "type": "string",
       "enum": [
         "Unknown",
@@ -146,11 +146,11 @@
       "default": "Unknown",
       "title": "- Unknown: TODO:  figure out codes"
     },
-    "ErrorError": {
+    "CommonError": {
       "type": "object",
       "properties": {
         "code": {
-          "$ref": "#/definitions/ErrorCode"
+          "$ref": "#/definitions/CommonCode"
         },
         "message": {
           "type": "string"
@@ -188,7 +188,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       },
       "title": "Common"
@@ -209,7 +209,7 @@
           "type": "string"
         },
         "address": {
-          "$ref": "#/definitions/AddressAddress"
+          "$ref": "#/definitions/CommonAddress"
         },
         "delivery_notes": {
           "type": "string"
@@ -254,7 +254,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "token": {
           "type": "string"
