@@ -22,12 +22,10 @@ if [[ $1 == "build" ]]; then
     gulp build
     cd ..
   fi
-  if [[ $* == *cook* ]]; then
-    echo "Building server/cook:"
-    cd server/cook
-    polymer build
-    # remove unneccessary files
-    rm -rf build/unbundled
+  if [[ $* == *sub* ]]; then
+    echo "Building server/sub:"
+    cd sub/app
+    yarn run build
     cd ../..
   fi
   if [[ $* == *proto* ]]; then
@@ -81,6 +79,11 @@ if [[ $1 == "deploy" ]]; then
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     gcloud app deploy admin/app.yaml --project=$project --version=1 --quiet
   fi
+  if [[ $* == *sub* ]]; then
+    echo "Deploying sub:"
+    cat sub/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > sub/app.yaml
+    gcloud app deploy sub/app.yaml --project=$project --version=1 --quiet
+  fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
@@ -129,6 +132,14 @@ if [[ $1 == "serve" ]]; then
     gulp watch
     cd ..
   fi
+  if [[ $2 == "sub" ]]; then
+    echo "Starting sub:"
+    cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
+    dev_appserver.py --datastore_path ./.datastore server/app.yaml&
+    cd sub/app 
+    yarn run serve
+    cd ../..
+  fi
   # stop mysql
 
   if [[ $OSTYPE == "linux-gnu" ]]; then
@@ -148,9 +159,9 @@ fi
 if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo "Here are the commands supported by the script:"
   echo -e "\tapp [help|serve|build|deploy]"
-  echo -e "\tapp serve [server|admin]"
-  echo -e "\tapp build [server|admin|cook|proto]"
-  echo -e "\tapp deploy [--prod|-p] [admin|cook|server|queue|cron]"
+  echo -e "\tapp serve [server|admin|sub]"
+  echo -e "\tapp build [server|admin|sub|proto]"
+  echo -e "\tapp deploy [--prod|-p] [admin|cook|sub|server|queue|cron]"
   timestamp
   exit 0
 fi

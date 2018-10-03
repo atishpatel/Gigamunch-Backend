@@ -14,14 +14,14 @@ handlers:
     static_dir: app/node_modules
     secure: always
   
-  - url: /admin/js
+  - url: /sub/js
     static_dir: app/js
     secure: always
 
   # TODO: set meta data on server side
-  - url: /admin.*
-    static_files: app/index.html
-    upload: app/index.html
+  - url: /sub.*
+    static_files: app/dist/index.html
+    upload: app/dist/index.html
     secure: always
 
   - url: /.*

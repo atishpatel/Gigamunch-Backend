@@ -1,7 +1,10 @@
 {
-  "name": "app",
+  "name": "gigamunch-subscriber",
   "version": "0.1.0",
   "private": true,
+  "vue": {
+    "baseUrl": "/sub/"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -9,6 +12,7 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
+    "register-service-worker": "^1.0.0",
     "vue": "^2.5.17",
     "vue-class-component": "^6.0.0",
     "vue-property-decorator": "^7.0.0",
@@ -18,6 +22,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.4",
     "@vue/cli-plugin-e2e-nightwatch": "^3.0.4",
+    "@vue/cli-plugin-pwa": "^3.0.4",
     "@vue/cli-plugin-typescript": "^3.0.4",
     "@vue/cli-service": "^3.0.4",
     "node-sass": "^4.9.0",
@@ -33,6 +38,6 @@
   "browserslist": [
     "> 1%",
     "last 2 versions",
-    "not ie <= 8"
+    "not ie <= 10"
   ]
 }
