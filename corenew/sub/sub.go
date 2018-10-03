@@ -906,7 +906,7 @@ func (c *Client) Cancel(subEmail string, log *logging.Client, serverInfo *common
 		return errors.Wrap("failed to get sub", err)
 	}
 	if !sub.IsSubscribed {
-		return errInvalidParameter.Wrapf("%s is already not subscribed.", subEmail)
+		return errInvalidParameter.WithMessage("User is already unsubscribed.").Wrapf("%s is already not subscribed.", subEmail)
 	}
 	sub.IsSubscribed = false
 	sub.UnSubscribedDate = time.Now()

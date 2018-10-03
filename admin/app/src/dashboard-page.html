@@ -182,7 +182,7 @@
             if (d < lastSunday) {
               subs[i].is_subscriber = false;
             }
-            let skipPercent = subs[i].num_skip / subs[i].num_total
+            let skipPercent = (subs[i].num_skip / subs[i].num_total) * 100;
             if (skipPercent) {
               subs[i].skip_percent = skipPercent.toFixed(2) + '%';
             }
