@@ -134,8 +134,8 @@ if [[ $1 == "serve" ]]; then
   fi
   if [[ $2 == "sub" ]]; then
     echo "Starting sub:"
-    cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore server/app.yaml&
+    cat sub/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > sub/app.yaml
+    dev_appserver.py --datastore_path ./.datastore sub/app.yaml&
     cd sub/app 
     yarn run serve
     cd ../..

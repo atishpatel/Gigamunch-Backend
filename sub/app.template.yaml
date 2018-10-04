@@ -5,17 +5,27 @@ api_version: go1
 handlers:
   - url: /sub/api/.*
     script: _go_app
+    secure: always
 
   - url: /sub/swagger.json
     static_files: app/SubAPI.swagger.json
     upload: app/SubAPI.swagger.json
-  
-  - url: /sub/node_modules
-    static_dir: app/node_modules
     secure: always
   
+  - url: /sub/css
+    static_dir: app/dist/css
+    secure: always
+
   - url: /sub/js
-    static_dir: app/js
+    static_dir: app/dist/js
+    secure: always
+
+  - url: /sub/(.*\.(js|json))$
+    static_files: app/dist/\1
+    upload: app/dist/.*\.(js|json)$
+
+  - url: /sub/manifest.json
+    static_dir: app/dist/manifest.json
     secure: always
 
   # TODO: set meta data on server side
@@ -40,5 +50,4 @@ skip_files:
   - ^(.*/)?.*\.gitignore$
   - ^(.*/)?.*\.lock$
   - ^(.*/)?.*/LICENSE$
-  - ^(app/types/.*)
-  - ^(app/node_modules/@types/.*)
+  - ^(app/node_modules/.*)

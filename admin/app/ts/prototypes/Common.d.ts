@@ -1,3 +1,4 @@
+declare namespace Common {
 interface Error {
     code: number
     message: string
@@ -80,4 +81,5 @@ interface CultureCook {
     first_name: string
     last_name: string
     story: string
+}
 }

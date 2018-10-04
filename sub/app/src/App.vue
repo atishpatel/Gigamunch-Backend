@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" ref="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
@@ -7,6 +7,19 @@
     <router-view />
   </div>
 </template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+// import {GetUser} from './service';
+
+@Component({})
+export default class App extends Vue {
+  public created() {
+    // App ready
+  }
+}
+</script>
+
 
 <style lang="scss">
 #app {
@@ -24,6 +37,6 @@
     &.router-link-exact-active {
       color: #42b983;
     }
-  } 
+  }
 }
 </style>
