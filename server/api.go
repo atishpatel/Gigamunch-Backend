@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	authold "github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -351,7 +351,6 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
-		// TODO: add to some datastore to save address and stuff
 		resp.Error = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!").SharedError()
 		return resp
 	}
@@ -644,7 +643,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 }
 
 // InNashvilleZone checks if an address is in Nashville zone.
-func InNashvilleZone(ctx context.Context, addr *shared.Address) (bool, *types.Address, error) {
+func InNashvilleZone(ctx context.Context, addr *pbcommon.Address) (bool, *types.Address, error) {
 	var err error
 	address := &types.Address{
 		APT: addr.Apt,
@@ -707,12 +706,12 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 		resp := f(ctx, r)
 		// Log errors
 		sharedErr := resp.GetError()
-		if sharedErr == nil || sharedErr.Code == shared.Code(0) {
-			sharedErr = &shared.Error{
-				Code: shared.Code_Success,
+		if sharedErr == nil || sharedErr.Code == pbcommon.Code(0) {
+			sharedErr = &pbcommon.Error{
+				Code: pbcommon.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success {
+		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success {
 			// 	loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
 			logging.Errorf(ctx, "%+v", sharedErr)
 		}
