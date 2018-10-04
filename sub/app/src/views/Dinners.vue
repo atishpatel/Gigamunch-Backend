@@ -18,17 +18,15 @@ import { GetExecutions } from '../ts/service';
     HelloWorld,
   },
 })
-export default class Home extends Vue {
+export default class Dinners extends Vue {
   public created() {
-    // this.getExecutions();
+    this.getExecutions();
   }
 
   public getExecutions() {
-    // console.log(this.$refs.helloWorld.msg);
     GetExecutions(0, 10).then((resp) => {
       console.log('GetExecutions: ', resp);
     });
-    // this.$refs.helloWorld.msg = "test";
   }
 }
 </script>
