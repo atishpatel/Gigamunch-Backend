@@ -143,11 +143,12 @@ function ChangeServingsPermanently(email, servings, vegetarian, callback) {
         });
     });
 }
-function GetGeneralStats(callback) {
+function GetGeneralStats(date, callback) {
     var url = baseURLOld + 'GetGeneralStats';
     GetToken().then(function (token) {
         var request = {
             gigatoken: token,
+            date: date.toISOString(),
         };
         callOldFetch(url, 'POST', request).then(function (resp) { callback(resp); });
     });

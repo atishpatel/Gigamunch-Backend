@@ -67,6 +67,11 @@
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
+      <input id="date"
+             type="date"
+             style="max-width:300px">
+      <br>
+      <paper-button on-tap="getDashboardStats">Get Cohorts After Date</paper-button>
       <h2>Monthly</h2>
       <div id="monthlyAvgChart"
            class="chart"></div>
@@ -93,6 +98,7 @@
             <div class="table-cell">Num Skips</div>
             <div class="table-cell">Num Paid</div>
             <div class="table-cell">Num Total</div>
+            <div class="table-cell">Num Refunded</div>
             <div class="table-cell">Total Amount Paid</div>
             <div class="table-cell">Total Amount</div>
             <div class="table-cell">Skip Percent</div>
@@ -111,6 +117,7 @@
                 <div class="table-cell">[[sub.num_skip]]</div>
                 <div class="table-cell">[[sub.num_paid]]</div>
                 <div class="table-cell">[[sub.num_total]]</div>
+                <div class="table-cell">[[sub.num_refunded]]</div>
                 <div class="table-cell">[[sub.total_amount_paid_string]]</div>
                 <div class="table-cell">[[sub.total_amount_string]]</div>
                 <div class="table-cell">[[sub.skip_percent]]</div>
@@ -160,7 +167,12 @@
 
       getDashboardStats() {
         this.loading = true;
-        this.serviceold.GetGeneralStats((resp) => {
+        const dateValue = this.$.date.value;
+        let date = new Date('0001-01-01');
+        if (dateValue) {
+          date = new Date(dateValue);
+        }
+        this.serviceold.GetGeneralStats(date, (resp) => {
           this.loading = false;
           const err = resp.err;
           if (err && err.code !== 0) {

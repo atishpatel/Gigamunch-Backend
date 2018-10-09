@@ -40,7 +40,7 @@ type GetGeneralStatsResp struct {
 }
 
 // GetGeneralStats returns general stats.
-func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) (*GetGeneralStatsResp, error) {
+func (service *Service) GetGeneralStats(ctx context.Context, req *DateReq) (*GetGeneralStatsResp, error) {
 	resp := new(GetGeneralStatsResp)
 	defer handleResp(ctx, "GetGeneralStats", resp.Err)
 	user, err := getUserFromRequest(ctx, req)
@@ -60,7 +60,7 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GigatokenReq) 
 	// 	return resp, nil
 	// }
 
-	activities, err := subC.GetSublogSummaries()
+	activities, err := subC.GetSublogSummaries(req.Date)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetSublogSummaries")
 		return resp, nil
