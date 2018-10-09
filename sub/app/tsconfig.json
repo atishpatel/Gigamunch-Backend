@@ -9,16 +9,13 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
       "webpack-env"
     ],
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
+    "paths": {},
     "lib": [
       "esnext",
       "dom",

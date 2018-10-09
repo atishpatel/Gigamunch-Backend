@@ -3,7 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "vue": {
-    "baseUrl": "/sub/"
+    "baseUrl": "/sub/",
+    "css": {
+      "loaderOptions": {
+        "sass": {
+          "includePaths": ["node_modules"]
+        }
+      }
+    }
   },
   "scripts": {
     "serve": "vue-cli-service serve",

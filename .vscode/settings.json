@@ -8,4 +8,5 @@
     "**/*.sql"
   ],
   "vetur.format.defaultFormatter.html": "js-beautify-html",
+  "editor.suggest.localityBonus": true,
 }

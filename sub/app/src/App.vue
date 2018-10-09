@@ -1,11 +1,35 @@
 <template>
-  <div id="app" ref="app">
-    <div id="nav">
-      <router-link to="/">My Dinners</router-link> |
-      <router-link to="/account">Account</router-link>
-    </div>
-    <router-view />
-  </div>
+  <mdc-layout-app id="app">
+    <mdc-drawer slot="drawer" temporary toggle-on="toggle-drawer">
+      <!-- Drawer -->
+      <mdc-drawer-list>
+        <mdc-drawer-item to="/" start-icon="inbox">
+          My Dinners
+        </mdc-drawer-item>
+        <mdc-drawer-item to="/history" start-icon="send">
+          Dinner History
+        </mdc-drawer-item>
+        <mdc-drawer-item to="/account" start-icon="drafts">
+          Account
+        </mdc-drawer-item>
+      </mdc-drawer-list>
+    </mdc-drawer>
+
+    <mdc-toolbar slot="toolbar">
+      <!-- Toolbar -->
+      <mdc-toolbar-row>
+        <mdc-toolbar-section align-start>
+          <mdc-toolbar-menu-icon event="toggle-drawer"></mdc-toolbar-menu-icon>
+          <mdc-toolbar-title>Gigamunch</mdc-toolbar-title>
+        </mdc-toolbar-section>
+      </mdc-toolbar-row>
+    </mdc-toolbar>
+
+    <main>
+      <!-- Main Content -->
+      <router-view />
+    </main>
+  </mdc-layout-app>
 </template>
 
 <script lang="ts">
@@ -14,6 +38,8 @@ import { Component, Vue } from 'vue-property-decorator';
 
 @Component({})
 export default class App extends Vue {
+  public drawerOpen = false;
+
   public created() {
     // App ready
   }
@@ -34,9 +60,8 @@ export default class App extends Vue {
   a {
     font-weight: bold;
     color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+
+    color: #42b983;
   }
 }
 </style>

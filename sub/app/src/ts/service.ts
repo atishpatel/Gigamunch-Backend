@@ -6,7 +6,7 @@ if (location.hostname === 'localhost') {
 }
 
 // Execution
-export function GetExecutions(start: number, limit: number): Promise<GetExecutionsResp | Common.Error> {
+export function GetExecutions(start: number, limit: number): Promise<GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutions';
   const req: GetExecutionsReq = {
     start,
@@ -15,7 +15,7 @@ export function GetExecutions(start: number, limit: number): Promise<GetExecutio
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecution(id: number): Promise<GetExecutionResp | Common.Error> {
+export function GetExecution(id: number): Promise<GetExecutionResp> {
   const url: string = baseURL + 'GetExecution';
   const req: GetExecutionReq = {
     id,
