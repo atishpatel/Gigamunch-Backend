@@ -1,7 +1,7 @@
 declare let ui: SwaggerUI;
-
 // Set Environment
-let APP = APP || {};
+
+let APP: any = {};
 APP.IsDev = false;
 APP.IsStage = false;
 APP.IsProd = false;
@@ -17,14 +17,17 @@ switch (location.hostname) {
         APP.IsProd = true;
 }
 
-setTimeout(() => {
+function updateAuthToken() {
     if (ui) {
         console.log("set auth-token");
         APP.Auth.GetToken().then((token: string) => {
             ui.preauthorizeApiKey("auth-token", token)
-        })
+        });
     }
-}, 3000);
+}
+
+setTimeout(updateAuthToken, 3000);
+setInterval(updateAuthToken, 10 * 60 * 1000); // call every 10 mins
 
 interface SwaggerUI {
     preauthorizeApiKey(key: string, value: string | null): void;

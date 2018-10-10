@@ -64,12 +64,12 @@ export function IsAdmin(): Promise<boolean> {
 
 
 export function GetUser(): Promise<FBUser> {
-  return new Promise((resolve: (FBUser) => void, reject: () => void) => {
+  return new Promise((resolve: (FBUser: FBUser) => void, reject: () => void) => {
     if (userLoaded) {
       resolve(APP.User);
     }
 
-    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((user: FBUser) => {
       if (!APP.User) {
         setUser(user);
       }
