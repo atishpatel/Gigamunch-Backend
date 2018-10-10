@@ -906,7 +906,7 @@
                           <label class="num-meals-label"
                                  for="meal-option-2">2 MEAL BAG</label>
                           <label class="price-per-meal-label"
-                                 for="meal-option-2">$16 PER MEAL</label>
+                                 for="meal-option-2">$16.50 PER MEAL</label>
                         </div>
                       </li>
 
@@ -923,7 +923,7 @@
                           <label class="num-meals-label"
                                  for="meal-option-3">4 MEAL BAG</label>
                           <label class="price-per-meal-label"
-                                 for="meal-option-3">$15 PER MEAL</label>
+                                 for="meal-option-3">$15.25 PER MEAL</label>
                         </div>
                       </li>
                     </ul>
@@ -1349,22 +1349,17 @@
             var boxForTitleText;
             var taxTotal;
             switch (val) {
-              case '1':
-                oneBoxPrice = 17;
-                servingsPerBox = 1;
-                boxForTitleText = 'Bag for One';
-                break;
               case '2':
-                oneBoxPrice = 16;
+                oneBoxPrice = 16.50;
                 servingsPerBox = 2;
                 boxForTitleText = 'Bag for Two';
-                taxTotal = 3.12;
+                taxTotal = 3.22;
                 break;
               case '4':
-                oneBoxPrice = 15;
+                oneBoxPrice = 15.25;
                 servingsPerBox = 4;
                 boxForTitleText = 'Bag for Four';
-                taxTotal = 5.85;
+                taxTotal = 5.95;
                 break;
             }
             var boxTotal = oneBoxPrice * servingsPerBox;
