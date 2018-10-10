@@ -136,7 +136,7 @@ func (s *server) setup() error {
 	if appengine.IsDevAppServer() {
 		sqlConnectionString = "root@/gigamunch"
 	}
-	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString)
+	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}

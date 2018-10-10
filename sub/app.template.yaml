@@ -38,7 +38,7 @@ handlers:
     script: _go_app
 
 env_variables:
-  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch?collation=utf8mb4_general_ci
+  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch
   PROJECT_ID: PROJECTID
 
 skip_files:
