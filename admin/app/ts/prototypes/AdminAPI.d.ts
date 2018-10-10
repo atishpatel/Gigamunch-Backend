@@ -13,6 +13,10 @@ interface ActivateSubscriberReq {
 interface DeactivateSubscriberReq {
     email: string
 }
+interface ReplaceSubscriberEmailReq {
+    old_email: string
+    new_email: string
+}
 interface Activity {
     created_datetime: string
     date: string
@@ -74,6 +78,18 @@ interface UnskipActivityReq {
 interface UnskipActivityResp {
     error: Common.Error
 }
+interface RefundActivityReq {
+    email: string
+    date: string
+    amount: number
+    percent: number
+}
+interface RefundAndSkipActivityReq {
+    email: string
+    date: string
+    amount: number
+    percent: number
+}
 interface GetLogReq {
     id: number
 }
@@ -116,6 +132,7 @@ interface Sublog {
     discount_percent: number
     customer_id: string
     refunded: boolean
+    refunded_amount: number
 }
 interface Subscriber {
     email: string
@@ -168,10 +185,6 @@ interface ProcessSublogsResp {
 interface SendCustomerSMSReq {
     emails: string[]
 	message: string
-}
-interface RefundAndSkipSublogReq {
-	email: string
-    date: string
 }
 interface GetHasSubscribedReq {
     date: string

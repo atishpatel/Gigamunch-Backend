@@ -8,6 +8,7 @@ import (
 	mysql "github.com/go-sql-driver/mysql"
 )
 
+// Activity is a subscriber activity.
 type Activity struct {
 	CreatedDatetime time.Time       `json:"created_datetime" db:"created_dt"`
 	Date            string          `json:"date" db:"date"`

@@ -388,10 +388,10 @@
         ]
       }
     },
-    "/admin/api/v1/RefundAndSkipSublog": {
+    "/admin/api/v1/RefundActivity": {
       "post": {
-        "summary": "RefundAndSkipSublog refunds and skips a customer",
-        "operationId": "RefundAndSkipSublog",
+        "summary": "RefundActivity unskips a sub for a date.",
+        "operationId": "RefundActivity",
         "responses": {
           "200": {
             "description": "",
@@ -406,7 +406,61 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/AdminAPIRefundAndSkipSublogReq"
+              "$ref": "#/definitions/AdminAPIRefundActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/RefundAndSkipActivity": {
+      "post": {
+        "summary": "RefundAndSkipActivity unskips a sub for a date.",
+        "operationId": "RefundAndSkipActivity",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIRefundAndSkipActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ReplaceSubscriberEmail": {
+      "post": {
+        "summary": "ReplaceSubscriberEmail replaces a subscriber email with a new email.",
+        "operationId": "ReplaceSubscriberEmail",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIReplaceSubscriberEmailReq"
             }
           }
         ],
@@ -1242,13 +1296,51 @@
         }
       }
     },
-    "AdminAPIRefundAndSkipSublogReq": {
+    "AdminAPIRefundActivityReq": {
       "type": "object",
       "properties": {
         "email": {
           "type": "string"
         },
         "date": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIRefundAndSkipActivityReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIReplaceSubscriberEmailReq": {
+      "type": "object",
+      "properties": {
+        "old_email": {
+          "type": "string"
+        },
+        "new_email": {
           "type": "string"
         }
       }
@@ -1362,6 +1454,10 @@
         "refunded": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "refunded_amount": {
+          "type": "number",
+          "format": "float"
         }
       },
       "title": "**********************\nSublogs\n**********************"

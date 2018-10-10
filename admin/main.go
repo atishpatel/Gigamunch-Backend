@@ -58,12 +58,15 @@ func init() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
 	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
+	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
 	// **********************
 	// Activity
 	// **********************
 	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
+	http.HandleFunc("/admin/api/v1/RefundActivity", s.handler(s.userAdmin(s.RefundActivity)))
+	http.HandleFunc("/admin/api/v1/RefundAndSkipActivity", s.handler(s.userAdmin(s.RefundAndSkipActivity)))
 	// **********************
 	// Logs
 	// **********************
@@ -76,7 +79,6 @@ func init() {
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
 	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
-	http.HandleFunc("/admin/api/v1/RefundAndSkipSublog", s.handler(s.userAdmin(s.RefundAndSkipSublog)))
 	// **********************
 	// Subscriber
 	// **********************

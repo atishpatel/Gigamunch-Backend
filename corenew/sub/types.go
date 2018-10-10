@@ -109,6 +109,7 @@ type SubscriptionLog struct {
 	DiscountPercent    int8      `json:"discount_percent"`
 	CustomerID         string    `json:"customer_id"`
 	Refunded           bool      `json:"refunded"`
+	RefundedAmount     float32   `json:"refunded_amount"`
 }
 
 // SublogSummary is a summary of sublogs for a email;
@@ -123,4 +124,5 @@ type SublogSummary struct {
 	TotalAmount         float32   `json:"total_amount,omitempty"`
 	TotalAmountPaid     float32   `json:"total_amount_paid,omitempty"`
 	TotalDiscountAmount float32   `json:"total_discount_amount,omitempty"`
+	TotalRefundedAmount float32   `json:"total_refunded_amount"`
 }

@@ -419,36 +419,6 @@ func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	return resp, nil
 }
 
-// RefundAndSkipSubLog runs subold.RefundAndSkip.
-func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "RefundAndSkipSubLog", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/refundandskipsublog")
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	activityC, err := activity.NewClient(ctx, log, db, nil, serverInfo)
-	err = activityC.RefundAndSkip(req.Date, req.SubEmail)
-	// subC := subold.New(ctx)
-	// err = subC.RefundAndSkip(req.Date, req.SubEmail)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to activity.RefundAndSkip")
-		return resp, nil
-	}
-	return resp, nil
-}
-
 type DiscountSubLogReq struct {
 	SubLogReq
 	Amount           float32 `json:"amount"`

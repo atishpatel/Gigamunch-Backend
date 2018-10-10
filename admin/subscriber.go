@@ -8,6 +8,7 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
@@ -200,7 +201,48 @@ func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.
 			return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
 		}
 	}
+	return nil
+}
 
+// ReplaceSubscriberEmail replaces a subscriber's old email with a new email.
+func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	req := new(pb.ReplaceSubscriberEmailReq)
+	var err error
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	i := new(subold.SubscriptionSignUp)
+	err = datastore.RunInTransaction(ctx, func(tctx context.Context) error {
+		keyOld := datastore.NewKey(tctx, "ScheduleSignUp", req.OldEmail, 0, nil)
+		err = datastore.Get(tctx, keyOld, i)
+		if err != nil {
+			return errors.ErrorWithCode{Code: 400, Message: "Invalid parameter."}.WithError(err).Annotatef("failed to find email: %s", req.OldEmail)
+		}
+		i.Email = req.NewEmail
+		keyNew := datastore.NewKey(tctx, "ScheduleSignUp", req.NewEmail, 0, nil)
+		_, err = datastore.Put(tctx, keyNew, i)
+		if err != nil {
+			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to put: %s", req.NewEmail)
+		}
+		subC := subold.New(tctx)
+		err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
+		if err != nil {
+			return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
+		}
+		err = datastore.Delete(tctx, keyOld)
+		if err != nil {
+			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to delete: %s", req.OldEmail)
+		}
+		return nil
+	}, &datastore.TransactionOptions{XG: true})
+	if err != nil {
+		return errors.Annotate(err, "failed to run in transaction")
+	}
 	return nil
 }
 
