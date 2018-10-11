@@ -118,6 +118,9 @@ func (c *Client) Refund(date time.Time, email string, amount float32, precent in
 	if err != nil {
 		return errors.Wrap("failed to Get", err)
 	}
+	if act.Refunded {
+		return errBadRequest.WithMessage("Activity is already refunded.")
+	}
 	if precent > 0 {
 		amount = act.Amount * float32(precent) / 100
 	}

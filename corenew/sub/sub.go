@@ -37,7 +37,7 @@ const (
 	selectSubscriberUnpaidSubLogStatement    = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
 	selectSubLogFromDateStatement            = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date=?"
 	selectSubLogFromSubscriberStatement      = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
-	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount) FROM activity WHERE date>? AND date<? GROUP BY email ORDER BY mn"
+	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date),email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount) FROM activity WHERE date<? GROUP BY email HAVING mn>? ORDER BY mn"
 	updatePaidSubLogStatement                = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
 	updateSkipSubLogStatement                = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
 	deleteSubLogStatement                    = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
@@ -165,7 +165,7 @@ func (c *Client) GetSublogSummaries(date time.Time) ([]*SublogSummary, error) {
 	if date.IsZero() {
 		date, _ = time.Parse(dateFormat, "2017-04-08")
 	}
-	rows, err := mysqlDB.Query(selectSublogSummaryStatement, date.Format(dateFormat), time.Now().Format(dateFormat))
+	rows, err := mysqlDB.Query(selectSublogSummaryStatement, time.Now().Format(dateFormat), date.Format(dateFormat))
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSublogSummaryStatement statement:")
 	}

@@ -153,6 +153,21 @@
           monthlyCohort: {
             type: Object,
             notify: true,
+          },
+          weeklyCohortArray: {
+            type: Array,
+            notify: true,
+            value: [],
+          },
+          weeklyPaidCohortArray: {
+            type: Array,
+            notify: true,
+            value: [],
+          },
+          monthlyCohortArray: {
+            type: Array,
+            notify: true,
+            value: [],
           }
         }
       }
@@ -208,9 +223,12 @@
           this.weeklyCohort = resp.weekly_cohort_analysis;
           this.weeklyPaidCohort = resp.weekly_paid_cohort_analysis;
           this.monthlyCohort = resp.monthly_cohort_analysis;
-          this._drawCohortChart(this.monthlyCohort, this.$.monthlyAvgChart);
-          this._drawCohortChart(this.weeklyCohort, this.$.weeklyAvgChart);
-          this._drawCohortChart(this.weeklyPaidCohort, this.$.weeklyPaidAvgChart);
+          this.weeklyCohortArray.push(resp.weekly_cohort_analysis);
+          this.weeklyPaidCohortArray.push(resp.weekly_paid_cohort_analysis);
+          this.monthlyCohortArray.push(resp.monthly_cohort_analysis);
+          this._drawCohortChart(this.monthlyCohortArray, this.$.monthlyAvgChart);
+          this._drawCohortChart(this.weeklyCohortArray, this.$.weeklyAvgChart);
+          this._drawCohortChart(this.weeklyPaidCohortArray, this.$.weeklyPaidAvgChart);
         });
       }
 
@@ -234,23 +252,35 @@
         return '$' + num.toFixed(2);
       }
 
-      _drawCohortChart(cohort, element) {
-        var dataArray = [
-          ['Week', 'Retention']
+      _drawCohortChart(cohortArray, element) {
+        let numCohorts = cohortArray.length;
+
+        let dataArray = [
+          ['Week']
         ];
-        for (let i = 0; i < cohort.average_retention.length; i++) {
-          const point = [i, cohort.average_retention[i]];
-          dataArray.push(point)
+        // add labels
+        for (let i = 0; i < numCohorts; i++) {
+          dataArray[0].push(cohortArray[i].cohort_rows[0].label + '+ - Retention');
+        }
+        // add data points
+        for (let week = 0; week < cohortArray[0].average_retention.length; week++) {
+          const weekPoints = [week];
+          for (let i = 0; i < numCohorts; i++) {
+            weekPoints.push(cohortArray[i].average_retention[week]);
+          }
+          dataArray.push(weekPoints)
         }
         var data = google.visualization.arrayToDataTable(dataArray);
 
         var options = {
           title: 'Average Retention',
+          interpolateNulls: true,
         };
 
-        var chart = new google.visualization.LineChart(element);
-
-        chart.draw(data, options);
+        // var chart = new google.visualization.LineChart(element);
+        // chart.draw(data, options);
+        var chart = new google.charts.Line(element);
+        chart.draw(data, google.charts.Line.convertOptions(options));
       }
 
     }
