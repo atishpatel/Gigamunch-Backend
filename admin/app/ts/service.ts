@@ -58,15 +58,15 @@ export function GetExecutions(start: number, limit: number): Promise<any> {
     return callFetch(url, 'GET', req);
 }
 
-export function GetExecution(id: number): Promise<any> {
+export function GetExecution(idOrDate: string): Promise<any> {
     const url: string = baseURL + 'GetExecution';
     const req: GetExecutionReq = {
-        id,
+        idOrDate,
     };
     return callFetch(url, 'GET', req);
 }
 
-export function UpdateExecution(execution: Execution): Promise<any> {
+export function UpdateExecution(execution: Common.Execution): Promise<any> {
     const url: string = baseURL + 'UpdateExecution';
     const req: UpdateExecutionReq = {
         execution,

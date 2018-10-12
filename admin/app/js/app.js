@@ -171,10 +171,10 @@ function GetExecutions(start, limit) {
     };
     return callFetch(url, 'GET', req);
 }
-function GetExecution(id) {
+function GetExecution(idOrDate) {
     var url = baseURL + 'GetExecution';
     var req = {
-        id: id,
+        idOrDate: idOrDate,
     };
     return callFetch(url, 'GET', req);
 }

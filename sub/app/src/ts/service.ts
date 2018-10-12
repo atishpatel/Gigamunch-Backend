@@ -16,10 +16,10 @@ export function GetExecutions(start: number, limit: number): Promise<GetExecutio
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecution(id: number): Promise<GetExecutionResp> {
+export function GetExecution(idOrDate: string): Promise<GetExecutionResp> {
   const url: string = baseURL + 'GetExecution';
   const req: GetExecutionReq = {
-    id,
+    idOrDate,
   };
   return callFetch(url, 'GET', req);
 }

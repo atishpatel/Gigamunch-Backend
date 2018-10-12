@@ -2,6 +2,8 @@ package execution
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -11,8 +13,9 @@ import (
 )
 
 var (
-	errDatastore = errors.InternalServerError
-	errInternal  = errors.InternalServerError
+	errDatastore  = errors.InternalServerError
+	errInternal   = errors.InternalServerError
+	errBadRequest = errors.BadRequestError
 )
 
 // Client is a client for manipulating subscribers.
@@ -39,12 +42,30 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 }
 
 // Get gets a culture Execution.
-func (c *Client) Get(id int64) (*Execution, error) {
-	key := c.db.IDKey(c.ctx, Kind, id)
+func (c *Client) Get(idOrDate string) (*Execution, error) {
+	var err error
 	exe := new(Execution)
-	err := c.db.Get(c.ctx, key, exe)
-	if err != nil {
-		return nil, errDatastore.WithError(err).Annotate("failed to get")
+	var key common.Key
+	if strings.Contains(idOrDate, "-") {
+		var exes []*Execution
+		_, err = c.db.QueryFilter(c.ctx, Kind, 0, 1, "Date=", idOrDate, &exes)
+		if err != nil {
+			return nil, errDatastore.WithError(err).Annotate("faield to query")
+		}
+		if len(exes) != 1 {
+			return nil, errBadRequest.Annotatef("num exes found: %d", len(exes))
+		}
+		exe = exes[0]
+	} else {
+		id, err := strconv.ParseInt(idOrDate, 10, 64)
+		if err != nil {
+			return nil, errors.Annotate(err, "failed to parse id")
+		}
+		key = c.db.IDKey(c.ctx, Kind, id)
+		err = c.db.Get(c.ctx, key, exe)
+		if err != nil {
+			return nil, errDatastore.WithError(err).Annotate("failed to get")
+		}
 	}
 	return exe, nil
 }

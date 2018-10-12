@@ -495,7 +495,7 @@
         let id = 0;
         const tmp = window.location.pathname.split('/execution/');
         if (tmp.length > 1) {
-          id = Number(tmp[1]);
+          id = tmp[1];
         }
         this.getExecution(id);
       }

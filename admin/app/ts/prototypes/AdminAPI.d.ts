@@ -216,7 +216,7 @@ interface GetExecutionsResp {
     executions: Common.Execution[]
 }
 interface GetExecutionReq {
-   id: number
+   idOrDate: string
 }
 interface GetExecutionResp {
     error: Common.Error

@@ -890,9 +890,8 @@
     "AdminAPIGetExecutionReq": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "idOrDate": {
+          "type": "string"
         }
       }
     },

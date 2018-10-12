@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div>
     <div>
       <ExecutionsList class="list-component" :executions="executions"></ExecutionsList>
     </div>
