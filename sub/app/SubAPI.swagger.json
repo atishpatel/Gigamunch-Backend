@@ -96,7 +96,10 @@
         "cook_image_url": {
           "type": "string"
         },
-        "hands_plate_image_url": {
+        "hands_plate_non_veg_image_url": {
+          "type": "string"
+        },
+        "hands_plate_veg_image_url": {
           "type": "string"
         },
         "dinner_image_url": {

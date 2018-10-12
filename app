@@ -119,7 +119,7 @@ if [[ $1 == "serve" ]]; then
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     dev_appserver.py --datastore_path ./.datastore admin/app.yaml&
     cd admin/app
-    gulp build&
+    # gulp build&
     gulp watch
     cd ../..
   fi
@@ -128,7 +128,7 @@ if [[ $1 == "serve" ]]; then
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
     dev_appserver.py --datastore_path ./.datastore server/app.yaml&
     cd server
-    gulp build&
+    # gulp build&
     gulp watch
     cd ..
   fi

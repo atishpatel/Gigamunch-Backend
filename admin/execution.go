@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
@@ -92,16 +93,16 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 }
 
 // helper functions
-func pbExecutions(exes []*execution.Execution) []*pb.Execution {
-	pbe := make([]*pb.Execution, len(exes))
+func pbExecutions(exes []*execution.Execution) []*pbcommon.Execution {
+	pbe := make([]*pbcommon.Execution, len(exes))
 	for i := range exes {
 		pbe[i] = pbExecution(exes[i])
 	}
 	return pbe
 }
 
-func pbExecution(exe *execution.Execution) *pb.Execution {
-	return &pb.Execution{
+func pbExecution(exe *execution.Execution) *pbcommon.Execution {
+	return &pbcommon.Execution{
 		Id:              exe.ID,
 		Date:            exe.Date,
 		Location:        int32(exe.Location),
@@ -120,8 +121,8 @@ func pbExecution(exe *execution.Execution) *pb.Execution {
 	}
 }
 
-func pbCulture(culture *execution.Culture) *pb.Culture {
-	return &pb.Culture{
+func pbCulture(culture *execution.Culture) *pbcommon.Culture {
+	return &pbcommon.Culture{
 		Country:     culture.Country,
 		City:        culture.City,
 		Description: culture.Description,
@@ -131,35 +132,36 @@ func pbCulture(culture *execution.Culture) *pb.Culture {
 	}
 }
 
-func pbContent(content *execution.Content) *pb.Content {
-	return &pb.Content{
-		HeroImageUrl:       content.HeroImageURL,
-		CookImageUrl:       content.CookImageURL,
-		HandsPlateImageUrl: content.HandsPlateImageURL,
-		DinnerImageUrl:     content.DinnerImageURL,
-		SpotifyUrl:         content.SpotifyURL,
-		YoutubeUrl:         content.YoutubeURL,
+func pbContent(content *execution.Content) *pbcommon.Content {
+	return &pbcommon.Content{
+		HeroImageUrl:             content.HeroImageURL,
+		CookImageUrl:             content.CookImageURL,
+		HandsPlateNonVegImageUrl: content.HandsPlateNonVegImageURL,
+		HandsPlateVegImageUrl:    content.HandsPlateVegImageURL,
+		DinnerImageUrl:           content.DinnerImageURL,
+		SpotifyUrl:               content.SpotifyURL,
+		YoutubeUrl:               content.YoutubeURL,
 	}
 }
 
-func pbCultureCook(cultureCook *execution.CultureCook) *pb.CultureCook {
-	return &pb.CultureCook{
+func pbCultureCook(cultureCook *execution.CultureCook) *pbcommon.CultureCook {
+	return &pbcommon.CultureCook{
 		FirstName: cultureCook.FirstName,
 		LastName:  cultureCook.LastName,
 		Story:     cultureCook.Story,
 	}
 }
 
-func pbDishes(dishes []execution.Dish) []*pb.Dish {
-	pbd := make([]*pb.Dish, len(dishes))
+func pbDishes(dishes []execution.Dish) []*pbcommon.Dish {
+	pbd := make([]*pbcommon.Dish, len(dishes))
 	for i := range dishes {
 		pbd[i] = pbDish(dishes[i])
 	}
 	return pbd
 }
 
-func pbDish(dish execution.Dish) *pb.Dish {
-	return &pb.Dish{
+func pbDish(dish execution.Dish) *pbcommon.Dish {
+	return &pbcommon.Dish{
 		Number:             dish.Number,
 		Color:              dish.Color,
 		Name:               dish.Name,
@@ -170,7 +172,7 @@ func pbDish(dish execution.Dish) *pb.Dish {
 	}
 }
 
-func executionFromPb(exe *pb.Execution) *execution.Execution {
+func executionFromPb(exe *pbcommon.Execution) *execution.Execution {
 	return &execution.Execution{
 		ID:              exe.Id,
 		Date:            exe.Date,
@@ -190,7 +192,7 @@ func executionFromPb(exe *pb.Execution) *execution.Execution {
 	}
 }
 
-func cultureFromPb(culture *pb.Culture) *execution.Culture {
+func cultureFromPb(culture *pbcommon.Culture) *execution.Culture {
 	return &execution.Culture{
 		Country:     culture.Country,
 		City:        culture.City,
@@ -201,18 +203,19 @@ func cultureFromPb(culture *pb.Culture) *execution.Culture {
 	}
 }
 
-func contentFromPb(content *pb.Content) *execution.Content {
+func contentFromPb(content *pbcommon.Content) *execution.Content {
 	return &execution.Content{
-		HeroImageURL:       content.HeroImageUrl,
-		CookImageURL:       content.CookImageUrl,
-		HandsPlateImageURL: content.HandsPlateImageUrl,
-		DinnerImageURL:     content.DinnerImageUrl,
-		SpotifyURL:         content.SpotifyUrl,
-		YoutubeURL:         content.YoutubeUrl,
+		HeroImageURL:             content.HeroImageUrl,
+		CookImageURL:             content.CookImageUrl,
+		HandsPlateNonVegImageURL: content.HandsPlateNonVegImageUrl,
+		HandsPlateVegImageURL:    content.HandsPlateVegImageUrl,
+		DinnerImageURL:           content.DinnerImageUrl,
+		SpotifyURL:               content.SpotifyUrl,
+		YoutubeURL:               content.YoutubeUrl,
 	}
 }
 
-func cultureCookFromPb(cultureCook *pb.CultureCook) *execution.CultureCook {
+func cultureCookFromPb(cultureCook *pbcommon.CultureCook) *execution.CultureCook {
 	return &execution.CultureCook{
 		FirstName: cultureCook.FirstName,
 		LastName:  cultureCook.LastName,
@@ -220,7 +223,7 @@ func cultureCookFromPb(cultureCook *pb.CultureCook) *execution.CultureCook {
 	}
 }
 
-func dishesFromPb(pbd []*pb.Dish) []execution.Dish {
+func dishesFromPb(pbd []*pbcommon.Dish) []execution.Dish {
 	dishes := make([]execution.Dish, len(pbd))
 	for i := range pbd {
 		dishes[i] = *dishFromPb(pbd[i])
@@ -228,7 +231,7 @@ func dishesFromPb(pbd []*pb.Dish) []execution.Dish {
 	return dishes
 }
 
-func dishFromPb(dish *pb.Dish) *execution.Dish {
+func dishFromPb(dish *pbcommon.Dish) *execution.Dish {
 	return &execution.Dish{
 		Number:             dish.Number,
 		Color:              dish.Color,

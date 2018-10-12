@@ -89,9 +89,6 @@ func pbExecution(exe *execution.Execution) *pbcommon.Execution {
 		HasPork:         exe.HasPork,
 		HasBeef:         exe.HasBeef,
 		HasChicken:      exe.HasChicken,
-		// HasWeirdMeat:    exe.HasWeirdMeat,
-		// HasFish:         exe.HasFish,
-		// HasOtherSeafood: exe.HasOtherSeafood,
 	}
 }
 
@@ -108,12 +105,13 @@ func pbCulture(culture *execution.Culture) *pbcommon.Culture {
 
 func pbContent(content *execution.Content) *pbcommon.Content {
 	return &pbcommon.Content{
-		HeroImageUrl:       content.HeroImageURL,
-		CookImageUrl:       content.CookImageURL,
-		HandsPlateImageUrl: content.HandsPlateImageURL,
-		DinnerImageUrl:     content.DinnerImageURL,
-		SpotifyUrl:         content.SpotifyURL,
-		YoutubeUrl:         content.YoutubeURL,
+		HeroImageUrl:             content.HeroImageURL,
+		CookImageUrl:             content.CookImageURL,
+		HandsPlateNonVegImageUrl: content.HandsPlateNonVegImageURL,
+		HandsPlateVegImageUrl:    content.HandsPlateVegImageURL,
+		DinnerImageUrl:           content.DinnerImageURL,
+		SpotifyUrl:               content.SpotifyURL,
+		YoutubeUrl:               content.YoutubeURL,
 	}
 }
 
@@ -178,12 +176,13 @@ func cultureFromPb(culture *pbcommon.Culture) *execution.Culture {
 
 func contentFromPb(content *pbcommon.Content) *execution.Content {
 	return &execution.Content{
-		HeroImageURL:       content.HeroImageUrl,
-		CookImageURL:       content.CookImageUrl,
-		HandsPlateImageURL: content.HandsPlateImageUrl,
-		DinnerImageURL:     content.DinnerImageUrl,
-		SpotifyURL:         content.SpotifyUrl,
-		YoutubeURL:         content.YoutubeUrl,
+		HeroImageURL:             content.HeroImageUrl,
+		CookImageURL:             content.CookImageUrl,
+		HandsPlateNonVegImageURL: content.HandsPlateNonVegImageUrl,
+		HandsPlateVegImageURL:    content.HandsPlateVegImageUrl,
+		DinnerImageURL:           content.DinnerImageUrl,
+		SpotifyURL:               content.SpotifyUrl,
+		YoutubeURL:               content.YoutubeUrl,
 	}
 }
 

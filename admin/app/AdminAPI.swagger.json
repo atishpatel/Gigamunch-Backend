@@ -696,69 +696,6 @@
         }
       }
     },
-    "AdminAPIContent": {
-      "type": "object",
-      "properties": {
-        "hero_image_url": {
-          "type": "string"
-        },
-        "cook_image_url": {
-          "type": "string"
-        },
-        "hands_plate_image_url": {
-          "type": "string"
-        },
-        "dinner_image_url": {
-          "type": "string"
-        },
-        "spotify_url": {
-          "type": "string"
-        },
-        "youtube_url": {
-          "type": "string"
-        }
-      },
-      "description": "Content is a collection of urls pointing to content realted to the execution."
-    },
-    "AdminAPICulture": {
-      "type": "object",
-      "properties": {
-        "country": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "nationality": {
-          "type": "string"
-        },
-        "greeting": {
-          "type": "string"
-        },
-        "flag_emoji": {
-          "type": "string"
-        }
-      },
-      "description": "Culture is the country in a culture execution."
-    },
-    "AdminAPICultureCook": {
-      "type": "object",
-      "properties": {
-        "first_name": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "story": {
-          "type": "string"
-        }
-      },
-      "description": "CultureCook is the culture cook for a culture execution."
-    },
     "AdminAPIDeactivateSubscriberReq": {
       "type": "object",
       "properties": {
@@ -821,36 +758,6 @@
       },
       "title": "**********************\nDeliveries\n**********************"
     },
-    "AdminAPIDish": {
-      "type": "object",
-      "properties": {
-        "number": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "color": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "ingredients": {
-          "type": "string"
-        },
-        "is_for_vegetarian": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "is_for_non_vegetarian": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      },
-      "description": "Dish is a dish in a culture execution."
-    },
     "AdminAPIErrorOnlyResp": {
       "type": "object",
       "properties": {
@@ -859,71 +766,6 @@
         }
       },
       "title": "**********************\nCommon\n**********************"
-    },
-    "AdminAPIExecution": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
-        "date": {
-          "type": "string"
-        },
-        "location": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "publish": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "created_datetime": {
-          "type": "string"
-        },
-        "culture": {
-          "$ref": "#/definitions/AdminAPICulture",
-          "title": "Info"
-        },
-        "content": {
-          "$ref": "#/definitions/AdminAPIContent"
-        },
-        "culture_cook": {
-          "$ref": "#/definitions/AdminAPICultureCook"
-        },
-        "dishes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AdminAPIDish"
-          }
-        },
-        "has_pork": {
-          "type": "boolean",
-          "format": "boolean",
-          "title": "Diet"
-        },
-        "has_beef": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_chicken": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_weird_meat": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_fish": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_other_seafood": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      },
-      "title": "**********************\nExecution\n**********************"
     },
     "AdminAPIExecutionStats": {
       "type": "object",
@@ -1061,7 +903,7 @@
           "$ref": "#/definitions/CommonError"
         },
         "execution": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/CommonExecution"
         }
       }
     },
@@ -1096,7 +938,8 @@
           "type": "integer",
           "format": "int32"
         }
-      }
+      },
+      "title": "**********************\nExecution\n**********************"
     },
     "AdminAPIGetExecutionsResp": {
       "type": "object",
@@ -1107,7 +950,7 @@
         "executions": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/AdminAPIExecution"
+            "$ref": "#/definitions/CommonExecution"
           }
         }
       }
@@ -1631,7 +1474,7 @@
       "type": "object",
       "properties": {
         "execution": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/CommonExecution"
         }
       }
     },
@@ -1642,7 +1485,7 @@
           "$ref": "#/definitions/CommonError"
         },
         "execution": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/CommonExecution"
         }
       }
     },
@@ -1650,7 +1493,7 @@
       "type": "object",
       "properties": {
         "execution_stats": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/AdminAPIExecutionStats"
         }
       }
     },
@@ -1661,7 +1504,7 @@
           "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/AdminAPIExecutionStats"
         }
       }
     },
@@ -1725,6 +1568,102 @@
       "default": "Unknown",
       "title": "- Unknown: TODO:  figure out codes"
     },
+    "CommonContent": {
+      "type": "object",
+      "properties": {
+        "hero_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "hands_plate_non_veg_image_url": {
+          "type": "string"
+        },
+        "hands_plate_veg_image_url": {
+          "type": "string"
+        },
+        "dinner_image_url": {
+          "type": "string"
+        },
+        "spotify_url": {
+          "type": "string"
+        },
+        "youtube_url": {
+          "type": "string"
+        }
+      },
+      "description": "Content is a collection of urls pointing to content realted to the execution."
+    },
+    "CommonCulture": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "greeting": {
+          "type": "string"
+        },
+        "flag_emoji": {
+          "type": "string"
+        }
+      },
+      "description": "Culture is the country in a culture execution."
+    },
+    "CommonCultureCook": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "story": {
+          "type": "string"
+        }
+      },
+      "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "CommonDish": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "is_for_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "Dish is a dish in a culture execution."
+    },
     "CommonError": {
       "type": "object",
       "properties": {
@@ -1739,6 +1678,71 @@
         }
       },
       "title": "The error object that gets returned with every"
+    },
+    "CommonExecution": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "date": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "publish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "culture": {
+          "$ref": "#/definitions/CommonCulture",
+          "title": "Info"
+        },
+        "content": {
+          "$ref": "#/definitions/CommonContent"
+        },
+        "culture_cook": {
+          "$ref": "#/definitions/CommonCultureCook"
+        },
+        "dishes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonDish"
+          }
+        },
+        "has_pork": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "Diet"
+        },
+        "has_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_chicken": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_weird_meat": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_fish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_other_seafood": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "**********************\nExecution\n**********************"
     },
     "CommonLog": {
       "type": "object",

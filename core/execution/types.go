@@ -36,12 +36,13 @@ type Execution struct {
 
 // Content is a collection of urls pointing to content realted to the execution.
 type Content struct {
-	HeroImageURL       string `json:"hero_image_url,omitempty" datastore:",noindex"`
-	CookImageURL       string `json:"cook_image_url,omitempty" datastore:",noindex"`
-	HandsPlateImageURL string `json:"hands_plate_image_url,omitempty" datastore:",noindex"`
-	DinnerImageURL     string `json:"dinner_image_url,omitempty" datastore:",noindex"`
-	SpotifyURL         string `json:"spotify_url,omitempty" datastore:",noindex"`
-	YoutubeURL         string `json:"youtube_url,omitempty" datastore:",noindex"`
+	HeroImageURL             string `json:"hero_image_url,omitempty" datastore:",noindex"`
+	CookImageURL             string `json:"cook_image_url,omitempty" datastore:",noindex"`
+	HandsPlateNonVegImageURL string `json:"hands_plate_non_veg_image_url,omitempty" datastore:",noindex"`
+	HandsPlateVegImageURL    string `json:"hands_plate_veg_image_url,omitempty" datastore:",noindex"`
+	DinnerImageURL           string `json:"dinner_image_url,omitempty" datastore:",noindex"`
+	SpotifyURL               string `json:"spotify_url,omitempty" datastore:",noindex"`
+	YoutubeURL               string `json:"youtube_url,omitempty" datastore:",noindex"`
 }
 
 // Culture is the culture in a culture execution.

@@ -55,7 +55,8 @@ interface Execution {
 interface Content {
     hero_image_url: string
     cook_image_url: string
-    hands_plate_image_url: string
+    hands_plate_non_veg_image_url: string
+    hands_plate_veg_image_url: string
     dinner_image_url: string
     spotify_url: string
     youtube_url: string

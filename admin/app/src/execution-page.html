@@ -15,9 +15,11 @@
         :host {
           display: block;
           padding: 24px;
+          max-width: 1000px;
+
         }
 
-        form {
+        .form {
             max-width: 1000px;
             margin: auto;
         }
@@ -158,7 +160,7 @@
                      active="[[loading]]">
       </paper-spinner>
 
-      <div>
+      <div class="form">
         <h2>General</h2>
         <hr>
 
@@ -302,13 +304,24 @@
                      value="{{execution.content.cook_image_url::input}}" />
             </div>
           </div>
+        </div>
 
+        <div class="row">
           <div class="input-group">
-            <label for="hands_plate_image_url">Hands plate image url</label>
+            <label for="hands_plate_non_veg_image_url">Hands Plate Non-Veg Image URL</label>
             <div class="input-container">
               <input type="text"
-                     id="hands_plate_image_url"
-                     value="{{execution.content.hands_plate_image_url::input}}" />
+                     id="hands_plate_non_veg_image_url"
+                     value="{{execution.content.hands_plate_non_veg_image_url::input}}" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="hands_plate_veg_image_url">Hands Plate Veg Image URL</label>
+            <div class="input-container">
+              <input type="text"
+                     id="hands_plate_veg_image_url"
+                     value="{{execution.content.hands_plate_veg_image_url::input}}" />
             </div>
           </div>
         </div>
@@ -401,43 +414,43 @@
           <br/>
 
         </template>
-        <br>
-        <button on-tap="addDish">Add Dish</button>
-        <br>
-        <label>Dish Index</label>
-        <input value="{{dishRemoveIndex::input}}">
-        <button on-tap="removeDish">Remove Dish</button>
-        <h2>Diet</h2>
-        <hr>
-        <div class="checkbox-group">
-          <div class="checkbox">
-            <input type="checkbox"
-                   id="has_pork"
-                   checked="{{execution.has_pork::input}}" />
-            <label for="has_pork"></label>
+          <br>
+          <button on-tap="addDish">Add Dish</button>
+          <br>
+          <label>Dish Index</label>
+          <input value="{{dishRemoveIndex::input}}">
+          <button on-tap="removeDish">Remove Dish</button>
+          <h2>Diet</h2>
+          <hr>
+          <div class="checkbox-group">
+            <div class="checkbox">
+              <input type="checkbox"
+                     id="has_pork"
+                     checked="{{execution.has_pork::input}}" />
+              <label for="has_pork"></label>
+            </div>
+            <label>Has Pork</label>
           </div>
-          <label>Has Pork</label>
-        </div>
-        <div class="checkbox-group">
-          <div class="checkbox">
-            <input type="checkbox"
-                   id="has_beef"
-                   checked="{{execution.has_beef::input}}" />
-            <label for="has_beef"></label>
+          <div class="checkbox-group">
+            <div class="checkbox">
+              <input type="checkbox"
+                     id="has_beef"
+                     checked="{{execution.has_beef::input}}" />
+              <label for="has_beef"></label>
+            </div>
+            <label>Has Beef</label>
           </div>
-          <label>Has Beef</label>
-        </div>
-        <div class="checkbox-group">
-          <div class="checkbox">
-            <input type="checkbox"
-                   id="has_chicken"
-                   checked="{{execution.has_chicken::input}}" />
-            <label for="has_chicken"></label>
+          <div class="checkbox-group">
+            <div class="checkbox">
+              <input type="checkbox"
+                     id="has_chicken"
+                     checked="{{execution.has_chicken::input}}" />
+              <label for="has_chicken"></label>
+            </div>
+            <label>Has Chicken</label>
           </div>
-          <label>Has Chicken</label>
-        </div>
 
-        <button disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
+          <button disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
       </div>
 
   </template>
