@@ -1,7 +1,8 @@
 import { GetToken } from './auth';
+import { IsDev } from './env';
 
 let baseURL = '/sub/api/v1/';
-if (location.hostname === 'localhost') {
+if (IsDev()) {
   baseURL = 'https://gigamunch-omninexus-dev.appspot.com/sub/api/v1/';
 }
 

@@ -1,10 +1,10 @@
 <template>
-    <div>
-        <h1>Executions</h1>
-        <div v-for="execution in executions" v-bind:key="execution.id">
-            <ExecutionsItem :execution="execution"></ExecutionsItem>
-        </div>
+  <div>
+    <h1 class="title">Upcomming Dinners</h1>
+    <div v-for="execution in executions" v-bind:key="execution.id">
+      <ExecutionsItem :execution="execution"></ExecutionsItem>
     </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -18,12 +18,20 @@ import ExecutionsItem from './ExecutionsItem.vue';
 })
 export default class ExecutionsList extends Vue {
   @Prop()
-  public executions!: Array<Common.Execution>;
-
-  public created() {}
+  public executions!: Common.Execution[];
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+@import '../scss/theme.scss';
+.title {
+  display: inline-block;
+  text-align: start;
+  margin: 0 24px;
+  padding-bottom: 6px;
+  font-size: 1.5em;
+  color: $mdc-theme-secondary;
+  border-bottom: 4px solid $mdc-theme-accent;
+}
 </style>

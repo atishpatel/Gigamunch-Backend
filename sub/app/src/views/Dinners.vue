@@ -1,28 +1,24 @@
 <template>
   <div class="home">
     <div>
-      <HelloWorld ref="helloWorld" msg="Welcome to Your Vue.js + TypeScrit App" />
-      <button @click="getExecutions">test button</button>
-      <ExecutionsList :executions="executions"></ExecutionsList>
+      <ExecutionsList class="list-component" :executions="executions"></ExecutionsList>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from '../components/HelloWorld.vue';
 import ExecutionsList from '../components/ExecutionsList.vue';
 import { GetExecutions } from '../ts/service';
 import { IsError } from '../ts/errors';
 
 @Component({
   components: {
-    HelloWorld,
     ExecutionsList,
   },
 })
 export default class Dinners extends Vue {
-  protected executions: Array<Common.Execution>;
+  protected executions: Common.Execution[];
 
   public constructor() {
     super();
@@ -38,9 +34,12 @@ export default class Dinners extends Vue {
       if (IsError(resp)) {
         return;
       }
-      console.log('GetExecutions: ', resp);
       this.executions = resp.executions;
     });
   }
 }
 </script>
+<style scoped lang="scss">
+.list-component {
+}
+</style>

@@ -1,5 +1,5 @@
 export function IsDev(): boolean {
-    if (location.hostname !== 'localhost') {
+    if (location.port !== '8080' && location.port !== '8081') {
         return false;
     }
     return true;
