@@ -12,63 +12,7 @@ type nameAndAddresses struct {
 
 var (
 	docSheet = ""
-	input    = []nameAndAddresses{
-		// JoyDriv
-		nameAndAddresses{
-			Name:      "Wofford",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Todd",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Tim",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Eric",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "David",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Libby",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Steven",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Jacques",
-			Addresses: ``,
-		},
-		// Other
-		nameAndAddresses{
-			Name:      "Theo",
-			Addresses: ``,
-		},
-		// Founders
-		nameAndAddresses{
-			Name:      "Piyush",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Enis",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Chris",
-			Addresses: ``,
-		},
-		nameAndAddresses{
-			Name:      "Atish",
-			Addresses: ``,
-		},
-	}
+	input    = ``
 )
 
 func main() {
@@ -76,7 +20,8 @@ func main() {
 	startAddress := []string{"1001+Thompson+Pl,+Nashville,+TN+37217"}
 	del := "\n"
 	replacer := strings.NewReplacer("\t", "", ".", "", " ", "+")
-	for _, i := range input {
+	parsedInput := getNameAndAddresses(input)
+	for _, i := range parsedInput {
 		if len(i.Addresses) > 0 {
 			addresses := strings.Split(replacer.Replace(i.Addresses), del)
 			addresses = append(startAddress, addresses...)
@@ -84,6 +29,39 @@ func main() {
 		}
 	}
 
+}
+
+func getNameAndAddresses(s string) []nameAndAddresses {
+	rows := strings.Split(s, "\n")
+	driverIndex := 0
+	addressIndex := -1
+	headers := strings.Split(rows[0], "\t")
+	for i, header := range headers {
+		if strings.ToUpper(header) == "DRIVER" {
+			driverIndex = i
+		}
+		if strings.ToUpper(header) == "ADDRESS" {
+			addressIndex = i
+		}
+	}
+	deliveries := []nameAndAddresses{}
+	delivery := nameAndAddresses{}
+	for i := 1; i < len(rows); i++ {
+		row := strings.Split(rows[i], "\t")
+		if delivery.Name != row[driverIndex] {
+			deliveries = append(deliveries, delivery)
+			delivery = nameAndAddresses{
+				Name: row[driverIndex],
+			}
+		}
+		if delivery.Addresses == "" {
+			delivery.Addresses = row[addressIndex]
+		} else {
+			delivery.Addresses += "\n" + row[addressIndex]
+		}
+	}
+	deliveries = append(deliveries, delivery)
+	return deliveries[1:]
 }
 
 func printMapLinks(driverName string, addresses []string) {
