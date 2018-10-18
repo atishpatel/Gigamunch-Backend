@@ -125,4 +125,6 @@ type SublogSummary struct {
 	TotalAmountPaid     float32   `json:"total_amount_paid,omitempty"`
 	TotalDiscountAmount float32   `json:"total_discount_amount,omitempty"`
 	TotalRefundedAmount float32   `json:"total_refunded_amount"`
+	TotalVegServings    int       `json:"total_veg_servings"`
+	TotalNonVegServings int       `json:"total_non_veg_servings"`
 }

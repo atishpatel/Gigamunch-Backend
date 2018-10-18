@@ -59,6 +59,14 @@
           display: table-row-group;
         }
 
+        .google-visualization-tooltip {
+          background-color: white;
+          padding: 12px;
+          z-index: 1000;
+          position: absolute;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        }
+
       </style>
     </shared-styles>
 
@@ -72,20 +80,21 @@
              style="max-width:300px">
       <br>
       <paper-button on-tap="getDashboardStats">Get Cohorts After Date</paper-button>
-      <h2>Monthly</h2>
-      <div id="monthlyAvgChart"
-           class="chart"></div>
-      <cohort-table cohort="[[monthlyCohort]]"></cohort-table>
+
       <h2>Weekly</h2>
       <p>How long people are with us based on week. This doesn't account for skip at all.</p>
-      <div id="weeklyAvgChart"
+      <div id="weeklyCohortChart"
            class="chart"></div>
       <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
-      <h2>Weekly Paid</h2>
+      <h2>Weekly Grouped by Bag type</h2>
+      <p>How long people are with us based on week. This doesn't account for skip at all.</p>
+      <div id="weeklyCohortByBagTypeChart"
+           class="chart"></div>
+      <!-- <h2>Weekly Paid</h2>
       <p>This is an imprefect cohort that basically says. The person did not skip from the day they started the service for the same number of times they have recieved Gigamunch in total.</p>
       <div id="weeklyPaidAvgChart"
            class="chart"></div>
-      <cohort-table cohort="[[weeklyPaidCohort]]"></cohort-table>
+      <cohort-table cohort="[[weeklyPaidCohort]]"></cohort-table> -->
 
       <h2>Subscriber Summary</h2>
       <div class="table-container">
@@ -150,10 +159,6 @@
             type: Object,
             notify: true,
           },
-          monthlyCohort: {
-            type: Object,
-            notify: true,
-          },
           weeklyCohortArray: {
             type: Array,
             notify: true,
@@ -164,11 +169,6 @@
             notify: true,
             value: [],
           },
-          monthlyCohortArray: {
-            type: Array,
-            notify: true,
-            value: [],
-          }
         }
       }
 
@@ -222,13 +222,25 @@
 
           this.weeklyCohort = resp.weekly_cohort_analysis;
           this.weeklyPaidCohort = resp.weekly_paid_cohort_analysis;
-          this.monthlyCohort = resp.monthly_cohort_analysis;
           this.weeklyCohortArray.push(resp.weekly_cohort_analysis);
           this.weeklyPaidCohortArray.push(resp.weekly_paid_cohort_analysis);
-          this.monthlyCohortArray.push(resp.monthly_cohort_analysis);
-          this._drawCohortChart(this.monthlyCohortArray, this.$.monthlyAvgChart);
-          this._drawCohortChart(this.weeklyCohortArray, this.$.weeklyAvgChart);
-          this._drawCohortChart(this.weeklyPaidCohortArray, this.$.weeklyPaidAvgChart);
+          this._drawCohortChart(this.weeklyCohortArray, this.$.weeklyCohortChart);
+          const weeklyBagTypeArray = [
+            resp.weekly_cohort_analysis_2_non_veg,
+            resp.weekly_cohort_analysis_2_veg,
+            resp.weekly_cohort_analysis_4_non_veg,
+            resp.weekly_cohort_analysis_4_veg,
+          ];
+          for (let i = 0; i < weeklyBagTypeArray.length; i++) {
+            if (!weeklyBagTypeArray[i].summary) {
+              weeklyBagTypeArray[i] = {
+                label: 'null',
+                summary: [],
+              };
+            }
+          }
+          this._drawCohortChart(weeklyBagTypeArray, this.$.weeklyCohortByBagTypeChart)
+          // this._drawCohortChart(this.weeklyPaidCohortArray, this.$.weeklyPaidAvgChart);
         });
       }
 
@@ -254,33 +266,67 @@
 
       _drawCohortChart(cohortArray, element) {
         let numCohorts = cohortArray.length;
-
-        let dataArray = [
-          ['Week']
-        ];
-        // add labels
+        // Setup columns
+        let chartData = new google.visualization.DataTable();
+        chartData.addColumn('number', 'Week');
         for (let i = 0; i < numCohorts; i++) {
-          dataArray[0].push(cohortArray[i].cohort_rows[0].label + '+ - Retention');
+          chartData.addColumn('number', cohortArray[i].label + '+ - Retention');
+          chartData.addColumn({
+            type: 'string',
+            role: 'tooltip',
+            p: {
+              html: true,
+            },
+          });
         }
         // add data points
-        for (let week = 0; week < cohortArray[0].average_retention.length; week++) {
+        let dataArray = [];
+        for (let week = 0; week < cohortArray[0].summary.length; week++) {
           const weekPoints = [week];
           for (let i = 0; i < numCohorts; i++) {
-            weekPoints.push(cohortArray[i].average_retention[week]);
+            if (cohortArray[i].summary.length > week) {
+              weekPoints.push(cohortArray[i].summary[week].average_retention);
+              weekPoints.push(this._getHTMLTooltip(week, cohortArray[i].summary[week]));
+            } else {
+              weekPoints.push(0);
+              weekPoints.push('<span></span>');
+            }
           }
           dataArray.push(weekPoints)
         }
-        var data = google.visualization.arrayToDataTable(dataArray);
+        // var data = google.visualization.arrayToDataTable(dataArray);
+        chartData.addRows(dataArray);
 
         var options = {
           title: 'Average Retention',
           interpolateNulls: true,
+          tooltip: {
+            isHtml: true,
+          },
+          theme: 'material',
         };
 
-        // var chart = new google.visualization.LineChart(element);
-        // chart.draw(data, options);
-        var chart = new google.charts.Line(element);
-        chart.draw(data, google.charts.Line.convertOptions(options));
+        var chart = new google.visualization.LineChart(element);
+        chart.draw(chartData, options);
+        // var chart = new google.charts.Line(element);
+        // chart.draw(chartData, google.charts.Line.convertOptions(options));
+      }
+
+      _getHTMLTooltip(week, summary) {
+        return `<div style="padding: 12px">
+          <strong>Week</strong>: ${week} <br>
+          <strong>Average Retention</strong>: ${(summary.average_retention * 100).toFixed(2)}% <br>
+          <strong>Group Size</strong>: ${summary.group_size} <br>
+          <br>
+          <strong>For This Group:</strong><br><hr>
+          <strong>Average Skip Rate</strong>: ${summary.average_skip_rate_for_group.toFixed(2)}% <br>
+          <strong>Total Revenue</strong>: $${summary.total_revenue_for_group.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
+          <strong>Average Revenue</strong>: $${summary.average_revenue_for_group.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
+          <br>
+          <strong>For All So Far:</strong><br><hr>
+          <strong>Total Revenue</strong>: $${summary.total_revenue_so_far_for_all.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
+          <strong>Average Revenue</strong>: $${summary.average_revenue_so_far_for_all.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
+        </div>`;
       }
 
     }

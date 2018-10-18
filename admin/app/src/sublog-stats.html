@@ -43,7 +43,7 @@
       <div>Total Free + Discount Cost: <strong>$[[totalCost]]</strong></div>
       <br>
       <div>Percent skip: <strong>[[percentSkipped]] %</strong></div>
-      <div>Percent Paying unskipped: <strong>[[percentPayingUnskipped]] %</strong></div>
+      <div>Percent Paying Skipped: <strong>[[percentPayingSkipped]] %</strong></div>
       <br>
       <div>Num Unskipped Subscribers: <strong>[[numUnskipCustomers]]</strong></div>
       <div>Num Paying Subscribers: <strong>[[numPayingCustomers]]</strong></div>
@@ -142,7 +142,7 @@
           percentSkipped: {
             type: String,
           },
-          percentPayingUnskipped: {
+          percentPayingSkipped: {
             type: String,
           },
         }
@@ -249,7 +249,7 @@
           this.totalProcessingCost = totalProcessingCost.toFixed(2);
           const percentUnskipped = (unskippedSublogs.length / sublogs.length) * 100;
           this.percentSkipped = (100 - percentUnskipped).toFixed(2);
-          this.percentPayingUnskipped = ((numPayingCustomers / sublogs.length) * 100).toFixed(2);
+          this.percentPayingSkipped = ((skipSublogs.length / (sublogs.length - numFreeCustomers)) * 100).toFixed(2);
         }
       }
 
