@@ -46,7 +46,7 @@ func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *
 	req := struct {
 		Hours int `json:"hours"`
 	}{}
-	decodeRequest(ctx, r, &req)
+	_ = decodeRequest(ctx, r, &req)
 	if req.Hours == 0 {
 		req.Hours = 48
 	}
@@ -89,8 +89,7 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
-		errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to subold.GetForDate")
-		return nil
+		return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to subold.GetForDate")
 	}
 	var nonSkippers []string
 	for i := range subLogs {
@@ -125,8 +124,7 @@ func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r 
 	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
-		errors.Annotate(err, "failed to SendCultureEmail: failed to subold.GetForDate")
-		return nil
+		return errors.Annotate(err, "failed to SendCultureEmail: failed to subold.GetForDate")
 	}
 	var nonSkippers []string
 	for i := range subLogs {
@@ -144,12 +142,11 @@ func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r 
 		log.Infof(ctx, "applying tags to: %+v", nonSkippers)
 		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 		if err != nil {
-			errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
-			return nil
+			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
 		}
 		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
 		if err != nil {
-			errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
+			return errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
 		}
 	}
 	return nil
@@ -276,7 +273,7 @@ func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *
 		Kinds      string `json:"kinds"`
 		BucketName string `json:"bucketname"`
 	}{}
-	decodeRequest(ctx, r, &req)
+	_ = decodeRequest(ctx, r, &req)
 	log.Infof(ctx, "req: %+v", req)
 
 	projID := s.serverInfo.ProjectID
@@ -308,6 +305,9 @@ func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *
 		EntityFilter:    entityFilter,
 	}
 	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to json.Marshal")
+	}
 	log.Infof(ctx, "backup req: %s", bodyBytes)
 	bodyBuffer := bytes.NewBuffer(bodyBytes)
 	url := fmt.Sprintf("https://datastore.googleapis.com/v1/projects/%s:export", projID)

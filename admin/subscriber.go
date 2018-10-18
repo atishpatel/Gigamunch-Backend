@@ -21,8 +21,8 @@ import (
 
 // SendCustomerSMS sends an CustomerSMS from Gigamunch to number.
 func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.SendCustomerSMSReq)
 	var err error
+	req := new(pb.SendCustomerSMSReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -78,8 +78,8 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 
 // GetSubscriber gets all info about a subscriber from their email address
 func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetSubscriberReq)
 	var err error
+	req := new(pb.GetSubscriberReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -106,8 +106,8 @@ func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *ht
 
 // GetHasSubscribed gets all subscribers.
 func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetHasSubscribedReq)
 	var err error
+	req := new(pb.GetHasSubscribedReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -134,8 +134,8 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 
 // ActivateSubscriber activates a subscriber account.
 func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.ActivateSubscriberReq)
 	var err error
+	req := new(pb.ActivateSubscriberReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -160,8 +160,8 @@ func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, 
 
 // DeactivateSubscriber activates a subscriber account.
 func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.DeactivateSubscriberReq)
 	var err error
+	req := new(pb.DeactivateSubscriberReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -183,8 +183,8 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 
 // UpdateDrip updates drip.
 func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.UpdateDripReq)
 	var err error
+	req := new(pb.UpdateDripReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -206,8 +206,8 @@ func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.
 
 // ReplaceSubscriberEmail replaces a subscriber's old email with a new email.
 func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.ReplaceSubscriberEmailReq)
 	var err error
+	req := new(pb.ReplaceSubscriberEmailReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)

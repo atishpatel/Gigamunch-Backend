@@ -12,8 +12,8 @@ import (
 
 // GetLog gets a log.
 func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetLogReq)
 	var err error
+	req := new(pb.GetLogReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -34,8 +34,8 @@ func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Requ
 
 // GetLogs gets logs.
 func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetLogsReq)
 	var err error
+	req := new(pb.GetLogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -58,8 +58,8 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 
 // GetLogsByEmail gets logs by email.
 func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetLogsByEmailReq)
 	var err error
+	req := new(pb.GetLogsByEmailReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)

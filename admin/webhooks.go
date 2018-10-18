@@ -97,12 +97,14 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 			logging.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
 		}
 		if len(subs) > 0 {
-			name = subs[0].FirstName + " " + subs[0].LastName
 			email = subs[0].Email
 		}
 		err = messageC.SendDeliverySMS(to, body)
 		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to sub. Err: %+v", err)
+			err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("failed to send sms to %s. Err: %+v", email, err))
+			if err != nil {
+				utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+			}
 		}
 		if email != "" {
 			payload := &logging.MessagePayload{
@@ -113,10 +115,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 			}
 			log.SubMessage(0, email, payload)
 		}
-		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Message successfuly send to %s.", splitBody[0]))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
-		}
+
 	} else {
 		// From Customer to Gigamunch
 		subs, err := subC.GetSubscribersByPhoneNumber(from)

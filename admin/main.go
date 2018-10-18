@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gorilla/schema"
@@ -30,7 +29,6 @@ import (
 )
 
 type server struct {
-	once       sync.Once
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
@@ -38,9 +36,9 @@ type server struct {
 
 var (
 	errPermissionDenied = errors.PermissionDeniedError
-	errUnauthenticated  = errors.UnauthenticatedError
-	errBadRequest       = errors.BadRequestError
-	errInternalError    = errors.InternalServerError
+	// errUnauthenticated  = errors.UnauthenticatedError
+	errBadRequest    = errors.BadRequestError
+	errInternalError = errors.InternalServerError
 )
 
 func init() {
@@ -119,7 +117,7 @@ func init() {
 	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("success"))
+		_, _ = w.Write([]byte("success"))
 	})
 
 }
@@ -203,7 +201,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			// TODO:
-			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
+			_, _ = w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
 			return
 		}
 		// create logging client

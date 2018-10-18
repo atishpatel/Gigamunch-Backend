@@ -15,8 +15,8 @@ import (
 
 // GetExecutions gets list of executions.
 func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetExecutionsReq)
 	var err error
+	req := new(pb.GetExecutionsReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -42,8 +42,8 @@ func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 
 // GetExecution gets an execution.
 func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetExecutionReq)
 	var err error
+	req := new(pb.GetExecutionReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -68,8 +68,8 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 
 // UpdateExecution updates or creates an execution.
 func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.UpdateExecutionReq)
 	var err error
+	req := new(pb.UpdateExecutionReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {

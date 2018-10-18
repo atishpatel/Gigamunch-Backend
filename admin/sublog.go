@@ -14,8 +14,8 @@ import (
 
 // ProcessSublog runs sub.Process.
 func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.ProcessSublogsReq)
 	var err error
+	req := new(pb.ProcessSublogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -36,8 +36,8 @@ func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *ht
 
 // GetUnpaidSublogs gets a list of unpaid sublogs log.
 func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetUnpaidSublogsReq)
 	var err error
+	req := new(pb.GetUnpaidSublogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -58,8 +58,8 @@ func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r 
 }
 
 func (s *server) GetSubscriberSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetSubscriberSublogsReq)
 	var err error
+	req := new(pb.GetSubscriberSublogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)

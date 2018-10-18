@@ -12,8 +12,8 @@ import (
 
 // SkipActivity gets a log.
 func (s *server) SkipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.SkipActivityReq)
 	var err error
+	req := new(pb.SkipActivityReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -35,8 +35,8 @@ func (s *server) SkipActivity(ctx context.Context, w http.ResponseWriter, r *htt
 
 // UnskipActivity gets a log.
 func (s *server) UnskipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.UnskipActivityReq)
 	var err error
+	req := new(pb.UnskipActivityReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -58,8 +58,8 @@ func (s *server) UnskipActivity(ctx context.Context, w http.ResponseWriter, r *h
 
 // RefundAndSkipActivity gets a log.
 func (s *server) RefundAndSkipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.RefundAndSkipActivityReq)
 	var err error
+	req := new(pb.RefundAndSkipActivityReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -80,8 +80,8 @@ func (s *server) RefundAndSkipActivity(ctx context.Context, w http.ResponseWrite
 
 // RefundActivity gets a log.
 func (s *server) RefundActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.RefundActivityReq)
 	var err error
+	req := new(pb.RefundActivityReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
