@@ -75,11 +75,14 @@
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
-      <input id="date"
+      <input id="startDateMin"
+             type="date"
+             style="max-width:300px"> <strong>-</strong>
+      <input id="startDateMax"
              type="date"
              style="max-width:300px">
       <br>
-      <paper-button on-tap="getDashboardStats">Get Cohorts After Date</paper-button>
+      <paper-button on-tap="getDashboardStats">Get Stats After Date</paper-button>
 
       <h2>Weekly</h2>
       <p>How long people are with us based on week. This doesn't account for skip at all.</p>
@@ -90,11 +93,6 @@
       <p>How long people are with us based on week. This doesn't account for skip at all.</p>
       <div id="weeklyCohortByBagTypeChart"
            class="chart"></div>
-      <!-- <h2>Weekly Paid</h2>
-      <p>This is an imprefect cohort that basically says. The person did not skip from the day they started the service for the same number of times they have recieved Gigamunch in total.</p>
-      <div id="weeklyPaidAvgChart"
-           class="chart"></div>
-      <cohort-table cohort="[[weeklyPaidCohort]]"></cohort-table> -->
 
       <h2>Subscriber Summary</h2>
       <div class="table-container">
@@ -177,17 +175,30 @@
       }
 
       selected() {
+        // set start max date
+        var d = new Date();
+        d.setUTCMonth(d.getUTCMonth() - 1);
+        this.$.startDateMax.value = d.toISOString().substr(0, 10);
+        // set start min date
+        d.setUTCMonth(d.getUTCMonth() - 17);
+        this.$.startDateMin.value = d.toISOString().substr(0, 10);
+        // get stats
         this.getDashboardStats();
       }
 
       getDashboardStats() {
         this.loading = true;
-        const dateValue = this.$.date.value;
-        let date = new Date('0001-01-01');
-        if (dateValue) {
-          date = new Date(dateValue);
+        const startDateMinValue = this.$.startDateMin.value;
+        let startDateMin = new Date('0001-01-01');
+        if (startDateMinValue) {
+          startDateMin = new Date(startDateMinValue);
         }
-        this.serviceold.GetGeneralStats(date, (resp) => {
+        const startDateMaxValue = this.$.startDateMax.value;
+        let startDateMax = new Date('0001-01-01');
+        if (startDateMaxValue) {
+          startDateMax = new Date(startDateMaxValue);
+        }
+        this.serviceold.GetGeneralStats(startDateMin, startDateMax, (resp) => {
           this.loading = false;
           const err = resp.err;
           if (err && err.code !== 0) {
@@ -313,6 +324,9 @@
       }
 
       _getHTMLTooltip(week, summary) {
+        // <strong>Total Revenue</strong>: $${summary.total_revenue_for_group.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
+        // <strong>Total Revenue</strong>: $${summary.total_revenue_so_far_for_all.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
+
         return `<div style="padding: 12px">
           <strong>Week</strong>: ${week} <br>
           <strong>Average Retention</strong>: ${(summary.average_retention * 100).toFixed(2)}% <br>
@@ -320,11 +334,9 @@
           <br>
           <strong>For This Group:</strong><br><hr>
           <strong>Average Skip Rate</strong>: ${summary.average_skip_rate_for_group.toFixed(2)}% <br>
-          <strong>Total Revenue</strong>: $${summary.total_revenue_for_group.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
           <strong>Average Revenue</strong>: $${summary.average_revenue_for_group.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
           <br>
           <strong>For All So Far:</strong><br><hr>
-          <strong>Total Revenue</strong>: $${summary.total_revenue_so_far_for_all.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
           <strong>Average Revenue</strong>: $${summary.average_revenue_so_far_for_all.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
         </div>`;
       }

@@ -143,12 +143,13 @@ export function ChangeServingsPermanently(email, servings, vegetarian, callback)
         });
     });
 }
-export function GetGeneralStats(date, callback) {
+export function GetGeneralStats(start_date_min, start_date_max, callback) {
     var url = baseURLOld + 'GetGeneralStats';
     GetToken().then(function (token) {
         var request = {
             gigatoken: token,
-            date: date.toISOString(),
+            start_date_min: start_date_min.toISOString(),
+            start_date_max: start_date_max.toISOString(),
         };
         callOldFetch(url, 'POST', request).then(function (resp) { callback(resp); });
     });

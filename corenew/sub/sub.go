@@ -26,22 +26,22 @@ import (
 )
 
 const (
-	datetimeFormat                           = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
-	dateFormat                               = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement                    = "INSERT INTO activity (date,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?)"
-	selectSubLogEmails                       = "SELECT DISTINCT email from activity where date>? and date<?"
-	selectSubLogStatement                    = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND email='%s'"
-	selectSubscriberSubLogsStatement         = "SELECT date,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
-	selectAllSubLogStatement                 = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity ORDER BY date DESC LIMIT %d"
-	selectUnpaidSubLogStatement              = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
-	selectSubscriberUnpaidSubLogStatement    = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
-	selectSubLogFromDateStatement            = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date=?"
-	selectSubLogFromSubscriberStatement      = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
-	selectSublogSummaryStatement             = "SELECT min(date) as mn,max(date) as mx,email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount),sum(servings),sum(veg_servings) FROM activity WHERE date<? GROUP BY email HAVING mn>? ORDER BY mn,mx"
-	updatePaidSubLogStatement                = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
-	updateSkipSubLogStatement                = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
-	deleteSubLogStatement                    = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
-	updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
+	datetimeFormat                        = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
+	dateFormat                            = "2006-01-02"          // "Jan 2, 2006"
+	insertSubLogStatement                 = "INSERT INTO activity (date,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?)"
+	selectSubLogEmails                    = "SELECT DISTINCT email from activity where date>? and date<?"
+	selectSubLogStatement                 = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND email='%s'"
+	selectSubscriberSubLogsStatement      = "SELECT date,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
+	selectAllSubLogStatement              = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity ORDER BY date DESC LIMIT %d"
+	selectUnpaidSubLogStatement           = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
+	selectSubscriberUnpaidSubLogStatement = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
+	selectSubLogFromDateStatement         = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date=?"
+	selectSubLogFromSubscriberStatement   = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
+	selectSublogSummaryStatement          = "SELECT min(date) as mn,max(date) as mx,email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount),sum(servings),sum(veg_servings) FROM activity WHERE date<NOW() GROUP BY email HAVING mn<? && mn>? ORDER BY mn,mx"
+	updatePaidSubLogStatement             = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
+	updateSkipSubLogStatement             = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
+	deleteSubLogStatement                 = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
+	// updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
 	updateFirstSubLogStatment                = "UPDATE activity SET first=1,discount_percent=100 WHERE date='%s' AND email='%s'"
 	updateDiscountSubLogStatment             = "UPDATE activity SET discount_amount=?, discount_percent=? WHERE date=? AND email=?"
 	updateServingsSubLogStatement            = "UPDATE activity SET servings=?, veg_servings=?, amount=? WHERE date=? AND email=?"
@@ -62,7 +62,6 @@ var (
 	errEntrySkipped      = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
 	errNoSuchEntry       = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
 	errDuplicateEntry    = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
-	projID               string
 )
 
 // Client is the client fro this package.
@@ -161,11 +160,14 @@ func (c *Client) GetHasSubscribed(date time.Time) ([]SubscriptionSignUp, error) 
 }
 
 // GetSublogSummaries gets a summary of SubLogs.
-func (c *Client) GetSublogSummaries(date time.Time) ([]*SublogSummary, error) {
-	if date.IsZero() {
-		date, _ = time.Parse(dateFormat, "2017-04-08")
+func (c *Client) GetSublogSummaries(startDateMin time.Time, startDateMax time.Time) ([]*SublogSummary, error) {
+	if startDateMin.IsZero() {
+		startDateMin, _ = time.Parse(dateFormat, "2017-04-08")
 	}
-	rows, err := mysqlDB.Query(selectSublogSummaryStatement, time.Now().Format(dateFormat), date.Format(dateFormat))
+	if startDateMax.IsZero() {
+		startDateMax = time.Now().Add(-1 * 30 * 24 * time.Hour)
+	}
+	rows, err := mysqlDB.Query(selectSublogSummaryStatement, startDateMax.Format(dateFormat), startDateMin.Format(dateFormat))
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSublogSummaryStatement statement:")
 	}
@@ -838,7 +840,7 @@ func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Cli
 	if email == "" {
 		return errInvalidParameter.Annotate("email cannot be empty")
 	}
-	if !firstBagDate.IsZero() && firstBagDate.Sub(time.Now()) < 0 {
+	if !firstBagDate.IsZero() && time.Until(firstBagDate) < 0 {
 		return errInvalidParameter.WithMessage("First bag date must be after now")
 	}
 	if firstBagDate.IsZero() {
@@ -873,7 +875,7 @@ func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Cli
 	// add to mail
 	var addTags []mail.Tag
 	// Add preview tag if less than 6 days away add preview tag
-	if firstBagDate.Sub(time.Now()) < 6*24*time.Hour {
+	if time.Until(firstBagDate) < 6*24*time.Hour {
 		addTags = append(addTags, mail.GetPreviewEmailTag(firstBagDate))
 	}
 	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
