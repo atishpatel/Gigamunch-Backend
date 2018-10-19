@@ -125,9 +125,9 @@ func Errorf(ctx context.Context, format string, args ...interface{}) {
 	aelog.Errorf(ctx, format, args...)
 }
 
-// Debugf logs debug messages. Only logs on development servers.
-func Debugf(ctx context.Context, format string, args ...interface{}) {
-	aelog.Debugf(ctx, format, args...)
+// Warningf logs debug messages. Only logs on development servers.
+func Warningf(ctx context.Context, format string, args ...interface{}) {
+	aelog.Warningf(ctx, format, args...)
 }
 
 // Client is a logging client.
@@ -168,9 +168,9 @@ func (c *Client) Infof(ctx context.Context, format string, args ...interface{}) 
 	Infof(ctx, format, args...)
 }
 
-// Debugf logs debug messages. Only logs on development servers.
-func (c *Client) Debugf(ctx context.Context, format string, args ...interface{}) {
-	Debugf(ctx, format, args...)
+// Warningf logs debug messages. Only logs on development servers.
+func (c *Client) Warningf(ctx context.Context, format string, args ...interface{}) {
+	Warningf(ctx, format, args...)
 }
 
 // Errorf logs error messages.

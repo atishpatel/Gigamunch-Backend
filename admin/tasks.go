@@ -36,7 +36,7 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 	activityC, _ := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	err = activityC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		log.Warningf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
 		return errors.GetErrorWithCode(err)
 	}
 	return nil
@@ -256,7 +256,6 @@ Stats for last 30 days:
 	msg = fmt.Sprintf(msg, date.Add(time.Hour*25).Format("Jan 2"), totalSubs, newSubsLastWeek, cancelsLastWeek, weeklyChurn, cancelsMoreThan8WeekRetention, cancels4To8WeekRetention, cancelsLessThan4WeekRetention, avgWeeksWithUs, newSubs30Days, cancelsLast30Days, monthlyChurn)
 	messageC := message.New(ctx)
 	numbers := []string{"6155454989", "9316445311", "9316446755", "6153975516"}
-	// numbers := []string{"9316445311"}
 	for _, number := range numbers {
 		err = messageC.SendDeliverySMS(number, msg)
 		if err != nil {

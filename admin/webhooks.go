@@ -84,7 +84,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 	subC := subold.NewWithLogging(ctx, log)
 
 	messageC := message.New(ctx)
-	if from == "615-545-4989" {
+	if message.EmployeeNumbers.IsEmployee(from) {
 		// From Gigamunch to Customer
 		splitBody := strings.Split(body, "::")
 		if len(splitBody) < 2 {
@@ -101,7 +101,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		}
 		err = messageC.SendDeliverySMS(to, body)
 		if err != nil {
-			err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("failed to send sms to %s. Err: %+v", email, err))
+			err = messageC.SendDeliverySMS(message.EmployeeNumbers.Chris(), fmt.Sprintf("failed to send sms to %s. Err: %+v", email, err))
 			if err != nil {
 				utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
 			}
@@ -127,9 +127,9 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 			email = subs[0].Email
 		}
 		// notify customer support agent
-		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
+		err = messageC.SendDeliverySMS(message.EmployeeNumbers.CustomerSupport(), fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
 		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+			utils.Criticalf(ctx, "failed to send sms to customer support. Err: %+v", err)
 		}
 		// log
 		if email != "" {
