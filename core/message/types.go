@@ -36,7 +36,7 @@ func (f *employeeNumbers) Piyush() string {
 }
 
 func (f *employeeNumbers) CustomerSupport() string {
-	return f.enis
+	return f.chris
 }
 
 func (f *employeeNumbers) IsEmployee(number string) bool {
