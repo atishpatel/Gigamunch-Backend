@@ -37,7 +37,7 @@ const (
 	selectSubscriberUnpaidSubLogStatement = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND first=0 AND skip=0 AND refunded=0 AND email=?"
 	selectSubLogFromDateStatement         = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date=?"
 	selectSubLogFromSubscriberStatement   = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
-	selectSublogSummaryStatement          = "SELECT min(date) as mn,max(date) as mx,email,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount),sum(servings),sum(veg_servings) FROM activity WHERE date<NOW() GROUP BY email HAVING mn<? && mn>? ORDER BY mn,mx"
+	selectSublogSummaryStatement          = "SELECT email,amount,min(date) as mn,max(date) as mx,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount),sum(servings),sum(veg_servings) FROM activity WHERE date<NOW() GROUP BY email HAVING mn<? && mn>? ORDER BY mn,mx"
 	updatePaidSubLogStatement             = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
 	updateSkipSubLogStatement             = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
 	deleteSubLogStatement                 = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
@@ -177,7 +177,7 @@ func (c *Client) GetSublogSummaries(startDateMin time.Time, startDateMax time.Ti
 		sub := new(SublogSummary)
 		var minDate mysql.NullTime
 		var maxDate mysql.NullTime
-		err = rows.Scan(&minDate, &maxDate, &sub.Email, &sub.NumTotal, &sub.NumSkip, &sub.NumPaid, &sub.NumRefunded, &sub.TotalAmount, &sub.TotalAmountPaid, &sub.TotalDiscountAmount, &sub.TotalRefundedAmount, &sub.TotalNonVegServings, &sub.TotalVegServings)
+		err = rows.Scan(&sub.Email, &sub.Amount, &minDate, &maxDate, &sub.NumTotal, &sub.NumSkip, &sub.NumPaid, &sub.NumRefunded, &sub.TotalAmount, &sub.TotalAmountPaid, &sub.TotalDiscountAmount, &sub.TotalRefundedAmount, &sub.TotalNonVegServings, &sub.TotalVegServings)
 		if err != nil {
 			return nil, errSQLDB.WithError(err).Wrap("failed to rows.Scan")
 		}

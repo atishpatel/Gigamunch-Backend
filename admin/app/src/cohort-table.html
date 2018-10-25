@@ -39,8 +39,9 @@
       </style>
     </shared-styles>
     <paper-checkbox checked="{{retention}}">Retention Percent View</paper-checkbox>
-    <paper-checkbox checked="{{showFull}}">Show full</paper-checkbox>
-    <table class="striped cohort-table">
+    <paper-checkbox checked="{{showFull}}">Show table</paper-checkbox>
+    <table class="striped cohort-table"
+           hidden$="[[!showFull]]">
       <thead>
         <tr>
           <th>Week</th>
@@ -64,7 +65,7 @@
         <template is="dom-repeat"
                   items="[[_cohort.cohort_rows]]"
                   as="rows">
-          <tr hidden$="[[!showFull]]">
+          <tr>
             <td>[[rows.label]]</td>
             <template is="dom-repeat"
                       items="[[rows.cohort_cells]]"
@@ -79,7 +80,7 @@
             </template>
           </tr>
         </template>
-        <template is="dom-repeat"
+        <!-- <template is="dom-repeat"
                   items="[[_cohort.short_cohort_rows]]"
                   as="rows">
           <tr hidden$="[[showFull]]">
@@ -96,7 +97,7 @@
                   style="background-color: [[cell.backgroundColor]]">[[cell.retentionPercent]]</td>
             </template>
           </tr>
-        </template>
+        </template> -->
       </tbody>
     </table>
   </template>

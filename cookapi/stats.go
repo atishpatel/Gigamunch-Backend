@@ -1,7 +1,11 @@
 package main
 
 import (
+	"math"
+	"sort"
 	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -56,20 +60,62 @@ type CohortAnalysisSummary struct {
 	Summary []*CohortSummary `json:"summary"`
 }
 
+type LTVHistogram struct {
+	AverageWeeks            float32   `json:"average_weeks,omitempty"`
+	AveragePaidWeeks        float32   `json:"average_paid_weeks,omitempty"`
+	AveragePaidRevenue      float32   `json:"average_paid_revenue,omitempty"`
+	Percentile50PaidRevenue float32   `json:"percentile_50_paid_revenue,omitempty"`
+	Percentile50PaidWeeks   float32   `json:"percentile_50_paid_weeks,omitempty"`
+	Weeks                   []int     `json:"weeks,omitempty"`
+	PaidWeeks               []int     `json:"paid_weeks,omitempty"`
+	PaidRevenue             []float32 `json:"paid_revenue,omitempty"`
+}
+
+type LifeTimeValueSummary struct {
+	AverageChurn       float32       `json:"average_churn,omitempty"`
+	ProjectedHistogram *LTVHistogram `json:"projected_histogram,omitempty"`
+	ActualHistogram    *LTVHistogram `json:"actual_histogram,omitempty"`
+	CanceledHistogram  *LTVHistogram `json:"canceled_histogram,omitempty"`
+}
+
+type BagTypeBreakDown struct {
+	NonVeg2 int `json:"non_veg_2"`
+	Veg2    int `json:"veg_2"`
+	NonVeg4 int `json:"non_veg_4"`
+	Veg4    int `json:"veg_4"`
+}
+
+type BagPriceBreakDown struct {
+	Price       float32 `json:"price"`
+	Count       int     `json:"count"`
+	ActiveCount int     `json:"active_count"`
+}
+
 // GetGeneralStatsResp is a response for GetGeneralStats.
 type GetGeneralStatsResp struct {
-	Activities                  []*subold.SublogSummary `json:"activities"`
-	WeeklyCohortAnalysis        *CohortAnalysis         `json:"weekly_cohort_analysis"`
-	WeeklyCohortAnalysis2NonVeg *CohortAnalysisSummary  `json:"weekly_cohort_analysis_2_non_veg"`
-	WeeklyCohortAnalysis4NonVeg *CohortAnalysisSummary  `json:"weekly_cohort_analysis_4_non_veg"`
-	WeeklyCohortAnalysis2Veg    *CohortAnalysisSummary  `json:"weekly_cohort_analysis_2_veg"`
-	WeeklyCohortAnalysis4Veg    *CohortAnalysisSummary  `json:"weekly_cohort_analysis_4_veg"`
-	WeeklyPaidCohortAnalysis    *CohortAnalysis         `json:"weekly_paid_cohort_analysis"`
+	Activities []*subold.SublogSummary `json:"activities"`
+	// ProjectedActivities           []*subold.SublogSummary `json:"projected_activities"`
+	WeeklyCohortAnalysis          *CohortAnalysis        `json:"weekly_cohort_analysis"`
+	ProjectedWeeklyCohortAnalysis *CohortAnalysisSummary `json:"projected_weekly_cohort_analysis"`
+	WeeklyCohortAnalysis2NonVeg   *CohortAnalysisSummary `json:"weekly_cohort_analysis_2_non_veg"`
+	WeeklyCohortAnalysis4NonVeg   *CohortAnalysisSummary `json:"weekly_cohort_analysis_4_non_veg"`
+	WeeklyCohortAnalysis2Veg      *CohortAnalysisSummary `json:"weekly_cohort_analysis_2_veg"`
+	WeeklyCohortAnalysis4Veg      *CohortAnalysisSummary `json:"weekly_cohort_analysis_4_veg"`
+	BagTypeBreakDown              *BagTypeBreakDown      `json:"bag_type_break_down"`
+	BagTypeBreakDownActive        *BagTypeBreakDown      `json:"bag_type_break_down_active"`
+	BagPriceBreakDown             []*BagPriceBreakDown   `json:"bag_price_break_down"`
+	LifeTimeValue                 *LifeTimeValueSummary  `json:"life_time_value"`
 	ErrorOnlyResp
 }
 
+type GetGeneralStatsReq struct {
+	GigatokenReq
+	StartDateMin time.Time `json:"start_date_min"`
+	StartDateMax time.Time `json:"start_date_max"`
+}
+
 // GetGeneralStats returns general stats.
-func (service *Service) GetGeneralStats(ctx context.Context, req *DateReq) (*GetGeneralStatsResp, error) {
+func (service *Service) GetGeneralStats(ctx context.Context, req *GetGeneralStatsReq) (*GetGeneralStatsResp, error) {
 	resp := new(GetGeneralStatsResp)
 	defer handleResp(ctx, "GetGeneralStats", resp.Err)
 	user, err := getUserFromRequest(ctx, req)
@@ -84,7 +130,7 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *DateReq) (*Get
 
 	subC := subold.New(ctx)
 
-	activities, err := subC.GetSublogSummaries(req.Date)
+	activities, err := subC.GetSublogSummaries(req.StartDateMin, req.StartDateMax)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetSublogSummaries")
 		return resp, nil
@@ -114,8 +160,8 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *DateReq) (*Get
 			continue
 		}
 	}
-	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
 	var cohort *CohortAnalysis
+	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
 	cohort = getWeeklyCohort(activities2NonVeg)
 	resp.WeeklyCohortAnalysis2NonVeg = &CohortAnalysisSummary{Label: "2 non-veg " + cohort.Label, Summary: cohort.Summary}
 	cohort = getWeeklyCohort(activities2Veg)
@@ -124,7 +170,14 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *DateReq) (*Get
 	resp.WeeklyCohortAnalysis4NonVeg = &CohortAnalysisSummary{Label: "4 non-veg " + cohort.Label, Summary: cohort.Summary}
 	cohort = getWeeklyCohort(activities4Veg)
 	resp.WeeklyCohortAnalysis4Veg = &CohortAnalysisSummary{Label: "4 veg " + cohort.Label, Summary: cohort.Summary}
-	resp.WeeklyPaidCohortAnalysis = getWeeklyPaidCohort(activities)
+	churn := getChurn(resp.WeeklyCohortAnalysis.Summary)
+	projectedActivites := projectActivites(ctx, activities, churn)
+	resp.LifeTimeValue = getLTVSummary(ctx, activities, projectedActivites, churn)
+	// resp.ProjectedActivities = projectedActivites
+	cohort = getWeeklyCohort(projectedActivites)
+	resp.ProjectedWeeklyCohortAnalysis = &CohortAnalysisSummary{Label: "Projected " + cohort.Label, Summary: cohort.Summary}
+	resp.BagTypeBreakDown, resp.BagTypeBreakDownActive = getBagTypeBreakDown(activities)
+	resp.BagPriceBreakDown = getBagPriceBreadDown(activities)
 	return resp, nil
 }
 
@@ -132,7 +185,7 @@ func getWeeklyCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	analysis := &CohortAnalysis{
 		Interval: 7,
 	}
-	if len(activities) < 3 {
+	if len(activities) < 10 {
 		return analysis
 	}
 	const labelFormat = "2006-01-02"
@@ -142,7 +195,7 @@ func getWeeklyCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	row := &CohortRow{
 		Label: lastMinDate.Format(labelFormat),
 	}
-	analysis.Label = lastMinDate.Format(labelFormat)
+	analysis.Label = lastMinDate.Format(labelFormat) + " to " + activities[len(activities)-1].MaxDate.Format(labelFormat)
 	// for every activity
 	for i := 0; i < len(activities); i++ {
 		// next cohort row
@@ -226,70 +279,221 @@ func getWeeklyCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	return analysis
 }
 
-func getWeeklyPaidCohort(activities []*subold.SublogSummary) *CohortAnalysis {
-	analysis := &CohortAnalysis{
-		Interval: 7,
-	}
-	if len(activities) == 0 {
-		return analysis
-	}
-	const labelFormat = "2006-01-02"
-	// setup for first row
-	lastMinDate := activities[0].MinDate
-	row := &CohortRow{
-		Label: lastMinDate.Format(labelFormat),
-	}
-	// for every activity
-	for i := 0; i < len(activities); i++ {
-		// next cohort row
-		diff := activities[i].MinDate.Sub(lastMinDate)
-		if diff < time.Duration(0) {
-			diff *= -1
+func getChurn(summaries []*CohortSummary) float32 {
+	var totalChurn float32
+	var totalCount float32
+	for i := 0; i < len(summaries)-2; i++ {
+		weekChurn := summaries[i].AverageRetention - summaries[i+1].AverageRetention
+		totalChurn += weekChurn
+		totalCount += 1
+		if i >= 10 || weekChurn < .01 {
+			break
 		}
-		if diff > 12*time.Hour {
-			analysis.CohortRows = append(analysis.CohortRows, row)
-			lastMinDate = activities[i].MinDate
-			row = &CohortRow{
-				Label: lastMinDate.Format(labelFormat),
+	}
+	churn := totalChurn / totalCount
+	if churn < .01 {
+		churn = .0375
+	}
+	return churn
+}
+
+func projectActivites(ctx context.Context, activities []*subold.SublogSummary, churn float32) []*subold.SublogSummary {
+	projectedActivites := []*subold.SublogSummary{}
+	stillSubscribedActivites := []*subold.SublogSummary{}
+	for _, activity := range activities {
+		if time.Since(activity.MaxDate) < 7*24*time.Hour {
+			// still subscribed
+			stillSubscribedActivites = append(stillSubscribedActivites, activity)
+		} else {
+			// already canceled
+			projectedActivites = append(projectedActivites, activity)
+		}
+	}
+	utils.Infof(ctx, "churn: %3.3f", churn)
+	utils.Infof(ctx, "still subscribed actvities length: ", len(stillSubscribedActivites))
+	// get remaining subscribers over time
+	subOverTime := []int{len(stillSubscribedActivites)}
+	for subOverTime[len(subOverTime)-1] != 0 {
+		remainingSubs := int(float32(subOverTime[len(subOverTime)-1]) * (1.0 - churn))
+		subOverTime = append(subOverTime, remainingSubs)
+	}
+	utils.Infof(ctx, "subOverTime: %+v", subOverTime)
+	// distribute remaining subscribers over time to
+	stillSubscribedIndex := 0
+	for i := 0; i < len(subOverTime)-1; i++ {
+		lostSubs := subOverTime[i] - subOverTime[i+1]
+		for j := 0; j < lostSubs; j++ {
+			if stillSubscribedIndex >= len(stillSubscribedActivites) {
+				break
 			}
-			since := time.Since(lastMinDate)
-			totalCells := int(since / (time.Duration(analysis.Interval) * time.Hour * 24))
-			for z := 0; z < totalCells; z++ {
-				row.CohortCells = append(row.CohortCells, new(CohortCell))
+			// say they canceled after x weeks
+			actualSub := stillSubscribedActivites[stillSubscribedIndex]
+			projectedSub := *actualSub // make copy
+			// act as if they stayed for this length of time
+			projectedSub.MaxDate = projectedSub.MaxDate.Add(time.Duration(i) * 7 * 24 * time.Hour)
+			skipRate := float32(projectedSub.NumSkip) / float32(projectedSub.NumTotal)
+			costPerPaid := projectedSub.TotalAmountPaid / float32(projectedSub.NumPaid)
+			if projectedSub.NumPaid == 0 || projectedSub.TotalAmountPaid < 0.1 {
+				costPerPaid = projectedSub.TotalAmount / float32(projectedSub.NumTotal)
 			}
-		}
-		for j := 0; j < activities[i].NumPaid; j++ {
-			if len(row.CohortCells)-1 < j {
-				row.CohortCells = append(row.CohortCells, new(CohortCell))
-			}
-			row.CohortCells[j].AmountLeft++
+			projectedSkips := int(skipRate * float32(i))
+			projectedPaid := int((1.0 - skipRate) * float32(i))
+			projectedSub.NumSkip += projectedSkips
+			projectedSub.NumPaid += projectedPaid
+			projectedSub.NumTotal += projectedSkips + projectedPaid
+			projectedSub.TotalAmountPaid += costPerPaid * float32(projectedPaid)
+			projectedSub.TotalAmount += costPerPaid * float32(projectedPaid+projectedSkips)
+			projectedActivites = append(projectedActivites, &projectedSub)
+			stillSubscribedIndex++
 		}
 	}
-	// fill in amount lost and retention percent
-	for _, r := range analysis.CohortRows {
-		startAmount := r.CohortCells[0].AmountLeft
-		for _, c := range r.CohortCells {
-			c.AmountLost = startAmount - c.AmountLeft
-			if startAmount > 0 {
-				c.RetentionPercent = float32(c.AmountLeft) / float32(startAmount)
-			}
+
+	sort.Slice(projectedActivites, func(i, j int) bool {
+		return projectedActivites[i].MinDate.Before(projectedActivites[j].MinDate)
+	})
+
+	return projectedActivites
+}
+
+func getLTVSummary(ctx context.Context, activities, projectedActivites []*subold.SublogSummary, churn float32) *LifeTimeValueSummary {
+	ltvSummary := &LifeTimeValueSummary{}
+	ltvSummary.AverageChurn = churn
+
+	canceledActivities := []*subold.SublogSummary{}
+	for _, activity := range activities {
+		if time.Since(activity.MaxDate) > 7*24*time.Hour {
+			// already canceled
+			canceledActivities = append(canceledActivities, activity)
 		}
 	}
-	// calculate average retention
-	analysis.Summary = make([]*CohortSummary, len(analysis.CohortRows[0].CohortCells))
-	for i := 0; i < len(analysis.Summary); i++ {
-		analysis.Summary[i] = new(CohortSummary)
-		numTotal := 0
-		var sumTotal float32
-		for _, row := range analysis.CohortRows {
-			if i < len(row.CohortCells)-1 {
-				sumTotal += row.CohortCells[i].RetentionPercent
-				numTotal++
+
+	ltvSummary.ActualHistogram = getLTVHistogram(ctx, activities)
+	ltvSummary.ProjectedHistogram = getLTVHistogram(ctx, projectedActivites)
+	ltvSummary.CanceledHistogram = getLTVHistogram(ctx, canceledActivities)
+	return ltvSummary
+}
+
+func getLTVHistogram(ctx context.Context, activities []*subold.SublogSummary) *LTVHistogram {
+	numSubs := len(activities)
+	ltvHistogram := &LTVHistogram{
+		Weeks:       make([]int, numSubs),
+		PaidWeeks:   make([]int, numSubs),
+		PaidRevenue: make([]float32, numSubs),
+	}
+	if numSubs < 2 {
+		return ltvHistogram
+	}
+
+	totalWeeks := 0
+	totalPaidWeeks := 0
+	var totalPaidRevenue float32
+	for i, activity := range activities {
+		ltvHistogram.Weeks[i] = activity.NumTotal
+		ltvHistogram.PaidWeeks[i] = activity.NumPaid
+		ltvHistogram.PaidRevenue[i] = activity.TotalAmountPaid
+		totalWeeks += activity.NumTotal
+		totalPaidWeeks += activity.NumPaid
+		totalPaidRevenue += activity.TotalAmountPaid
+	}
+	ltvHistogram.AverageWeeks = float32(totalWeeks) / float32(numSubs)
+	ltvHistogram.AveragePaidWeeks = float32(totalPaidWeeks) / float32(numSubs)
+	ltvHistogram.AveragePaidRevenue = totalPaidRevenue / float32(numSubs)
+
+	return ltvHistogram
+}
+
+func getBagTypeBreakDown(activities []*subold.SublogSummary) (*BagTypeBreakDown, *BagTypeBreakDown) {
+	bagType := &BagTypeBreakDown{}
+	bagTypeNewOnly := &BagTypeBreakDown{}
+	for _, activity := range activities {
+		vegServings := float64(activity.TotalVegServings) / float64(activity.NumTotal)
+		nonVegServings := float64(activity.TotalNonVegServings) / float64(activity.NumTotal)
+		stillSubed := time.Since(activity.MaxDate) < 7*24*time.Hour
+		if vegServings >= 3 {
+			bagType.Veg4++
+			if stillSubed {
+				bagTypeNewOnly.Veg4++
 			}
+			continue
 		}
-		if numTotal > 0 && sumTotal > 0.01 {
-			analysis.Summary[i].AverageRetention = sumTotal / float32(numTotal)
+		if vegServings > .05 {
+			bagType.Veg2++
+			if stillSubed {
+				bagTypeNewOnly.Veg2++
+			}
+			continue
+		}
+		if nonVegServings >= 3 {
+			bagType.NonVeg4++
+			if stillSubed {
+				bagTypeNewOnly.NonVeg4++
+			}
+			continue
+		}
+		if nonVegServings < 3 {
+			bagType.NonVeg2++
+			if stillSubed {
+				bagTypeNewOnly.NonVeg2++
+			}
+			continue
 		}
 	}
-	return analysis
+
+	return bagType, bagTypeNewOnly
+}
+
+func getBagPriceBreadDown(activities []*subold.SublogSummary) []*BagPriceBreakDown {
+	bd := []*BagPriceBreakDown{
+		&BagPriceBreakDown{
+			Price: 30,
+		},
+		&BagPriceBreakDown{
+			Price: 35.12,
+		},
+		&BagPriceBreakDown{
+			Price: 36.22,
+		},
+		&BagPriceBreakDown{
+			Price: 65.85,
+		},
+		&BagPriceBreakDown{
+			Price: 66.95,
+		},
+	}
+	sort.SliceStable(activities, func(i, j int) bool {
+		price1 := activities[i].TotalAmount / float32(activities[i].NumTotal)
+		price2 := activities[j].TotalAmount / float32(activities[j].NumTotal)
+		return price1 < price2
+	})
+	for _, activity := range activities {
+		price := activity.TotalAmount / float32(activity.NumTotal)
+		stillSubed := time.Since(activity.MaxDate) < 7*24*time.Hour
+		found := false
+		for _, b := range bd {
+			if math.Abs(float64(price-b.Price)) < 1 || b.Price == activity.Amount {
+				// increase count
+				b.Count++
+				if stillSubed {
+					b.ActiveCount++
+				}
+				found = true
+				break
+			}
+		}
+		// if not found, add type to array
+		if !found {
+			b := &BagPriceBreakDown{
+				Price: activity.Amount,
+				Count: 1,
+			}
+			if stillSubed {
+				b.ActiveCount++
+			}
+			bd = append(bd, b)
+		}
+	}
+	sort.SliceStable(bd, func(i, j int) bool {
+		return bd[i].Price < bd[j].Price
+	})
+	return bd
 }

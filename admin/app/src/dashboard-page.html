@@ -19,7 +19,7 @@
       <style include="materialize-styles shared-styles">
         :host {
           display: block;
-          padding: 12px;
+          padding: 24px;
         }
 
         .chart {
@@ -27,9 +27,13 @@
           padding: 12px;
         }
 
+        .table-container-inline {
+          display: inline-block;
+          padding-right: 24px;
+        }
+
         .table {
           display: table;
-          width: 100%;
           border: 1px solid #000;
         }
 
@@ -89,17 +93,159 @@
       <div id="weeklyCohortChart"
            class="chart"></div>
       <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
+      <!-- LTV -->
+      <h2>Actual LTV</h2>
+      <div class="table-container">
+        <div class="table">
+          <div class="table-row">
+            <div class="table-cell table-header-row">Weekly churn:</div>
+            <div class="table-cell"> [[ltvHistogram.average_churn_string]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average LTV:</div>
+            <div class="table-cell"> [[ltvHistogram.actual_histogram.average_paid_revenue_string]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">50 Percentile LTV:</div>
+            <div class="table-cell"> [[ltvHistogram.actual_histogram.average_percentile_paid_revenue_string]]</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average Weeks:</div>
+            <div class="table-cell"> [[ltvHistogram.actual_histogram.average_weeks]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average Paid Weeks:</div>
+            <div class="table-cell"> [[ltvHistogram.actual_histogram.average_paid_weeks]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">50 Percentile Paid Weeks:</div>
+            <div class="table-cell"> [[ltvHistogram.actual_histogram.average_percentile_paid_weeks_string]]</div>
+          </div>
+        </div>
+      </div>
+      <div id="actualLTVChart"
+           class="chart"></div>
+
+      <h2>Projected LTV</h2>
+      <div class="table-container">
+        <div class="table">
+          <div class="table-row">
+            <div class="table-cell table-header-row">Weekly churn:</div>
+            <div class="table-cell"> [[ltvHistogram.average_churn_string]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average LTV:</div>
+            <div class="table-cell"> [[ltvHistogram.projected_histogram.average_paid_revenue_string]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">50 Percentile LTV:</div>
+            <div class="table-cell"> [[ltvHistogram.projected_histogram.average_percentile_paid_revenue_string]]</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average Weeks:</div>
+            <div class="table-cell"> [[ltvHistogram.projected_histogram.average_weeks]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average Paid Weeks:</div>
+            <div class="table-cell"> [[ltvHistogram.projected_histogram.average_paid_weeks]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">50 Percentile Paid Weeks:</div>
+            <div class="table-cell"> [[ltvHistogram.projected_histogram.average_percentile_paid_weeks_string]]</div>
+          </div>
+        </div>
+      </div>
+      <div id="projectedLTVChart"
+           class="chart"></div>
+
+      <h2>Canceled LTV</h2>
+      <div class="table-container">
+        <div class="table">
+          <div class="table-row">
+            <div class="table-cell table-header-row">Weekly churn:</div>
+            <div class="table-cell">[[ltvHistogram.average_churn_string]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average LTV:</div>
+            <div class="table-cell">[[ltvHistogram.canceled_histogram.average_paid_revenue_string]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average Weeks:</div>
+            <div class="table-cell">[[ltvHistogram.canceled_histogram.average_weeks]] </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Average Paid Weeks:</div>
+            <div class="table-cell">[[ltvHistogram.canceled_histogram.average_paid_weeks]] </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="canceledLTVChart"
+           div
+           class="chart"></div>
+
       <h2>Weekly Grouped by Bag type</h2>
       <p>How long people are with us based on week. This doesn't account for skip at all.</p>
       <div id="weeklyCohortByBagTypeChart"
            class="chart"></div>
+      <h2>Bag Breakdown</h2>
+      <div class="table-container-inline">
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell"></div>
+            <div class="table-cell">All</div>
+            <div class="table-cell">Active</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Non-veg 2</div>
+            <div class="table-cell">[[bag_type_break_down.non_veg_2]]</div>
+            <div class="table-cell">[[bag_type_break_down_active.non_veg_2]]</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Non-veg 4</div>
+            <div class="table-cell">[[bag_type_break_down.non_veg_4]]</div>
+            <div class="table-cell">[[bag_type_break_down_active.non_veg_4]]</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Veg 2</div>
+            <div class="table-cell">[[bag_type_break_down.veg_2]]</div>
+            <div class="table-cell">[[bag_type_break_down_active.veg_2]]</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell table-header-row">Veg 4</div>
+            <div class="table-cell">[[bag_type_break_down.veg_4]]</div>
+            <div class="table-cell">[[bag_type_break_down_active.veg_4]]</div>
+          </div>
+        </div>
+      </div>
+      <div class="table-container-inline">
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell">Price</div>
+            <div class="table-cell">All Count</div>
+            <div class="table-cell">Active Count</div>
+          </div>
+          <dom-repeat items="[[bag_price_break_down]]"
+                      as="bd">
+            <template>
+              <div class="table-row">
+                <div class="table-cell table-header-row">[[bd.price_string]]</div>
+                <div class="table-cell">[[bd.count]]</div>
+                <div class="table-cell">[[bd.active_count]]</div>
+              </div>
+            </template>
+          </dom-repeat>
+        </div>
+      </div>
 
       <h2>Subscriber Summary</h2>
+      <paper-button id="showSubsButton"
+                    on-tap="showSubs">Show subs</paper-button>
       <div class="table-container">
         <div class="table">
           <div class="table-row table-header-row">
             <div class="table-cell">Email</div>
-            <div class="table-cell">Subscriber</div>
+            <div class="table-cell">Active</div>
             <div class="table-cell">First Date</div>
             <div class="table-cell">Last Date</div>
             <div class="table-cell">Num Skips</div>
@@ -128,6 +274,7 @@
                 <div class="table-cell">[[sub.total_amount_paid_string]]</div>
                 <div class="table-cell">[[sub.total_amount_string]]</div>
                 <div class="table-cell">[[sub.skip_percent]]</div>
+              </div>
             </template>
           </dom-repeat>
         </div>
@@ -147,13 +294,12 @@
             type: Object,
           },
           subs: {
-            type: Object,
+            type: Array,
+          },
+          _subs: {
+            type: Array,
           },
           weeklyCohort: {
-            type: Object,
-            notify: true,
-          },
-          weeklyPaidCohort: {
             type: Object,
             notify: true,
           },
@@ -162,10 +308,17 @@
             notify: true,
             value: [],
           },
-          weeklyPaidCohortArray: {
+          ltvHistogram: {
+            type: Object,
+          },
+          bag_type_break_down: {
+            type: Number,
+          },
+          bag_type_break_down_active: {
+            type: Number,
+          },
+          bag_price_break_down: {
             type: Array,
-            notify: true,
-            value: [],
           },
         }
       }
@@ -184,6 +337,12 @@
         this.$.startDateMin.value = d.toISOString().substr(0, 10);
         // get stats
         this.getDashboardStats();
+      }
+
+      showSubs() {
+        this.subs = this._subs;
+        this._subs = null;
+        this.$.showSubsButton.disabled = true;
       }
 
       getDashboardStats() {
@@ -229,12 +388,18 @@
             subs[i].total_amount_paid_string = this._getMoney(subs[i].total_amount_paid);
             subs[i].total_amount_string = this._getMoney(subs[i].total_amount);
           }
-          this.subs = subs;
-
+          this._subs = subs;
+          this.bag_type_break_down = resp.bag_type_break_down;
+          this.bag_type_break_down_active = resp.bag_type_break_down_active;
+          for (let i = 0; i < resp.bag_price_break_down.length; i++) {
+            resp.bag_price_break_down[i].price_string = '$' + resp.bag_price_break_down[i].price.toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+          }
+          this.bag_price_break_down = resp.bag_price_break_down;
+          // cohorts
           this.weeklyCohort = resp.weekly_cohort_analysis;
-          this.weeklyPaidCohort = resp.weekly_paid_cohort_analysis;
-          this.weeklyCohortArray.push(resp.weekly_cohort_analysis);
-          this.weeklyPaidCohortArray.push(resp.weekly_paid_cohort_analysis);
+          this.weeklyCohortArray.push(resp.weekly_cohort_analysis, resp.projected_weekly_cohort_analysis);
           this._drawCohortChart(this.weeklyCohortArray, this.$.weeklyCohortChart);
           const weeklyBagTypeArray = [
             resp.weekly_cohort_analysis_2_non_veg,
@@ -250,8 +415,40 @@
               };
             }
           }
-          this._drawCohortChart(weeklyBagTypeArray, this.$.weeklyCohortByBagTypeChart)
-          // this._drawCohortChart(this.weeklyPaidCohortArray, this.$.weeklyPaidAvgChart);
+          this._drawCohortChart(weeklyBagTypeArray, this.$.weeklyCohortByBagTypeChart);
+          // histograms 
+          this._drawHistogramChart(resp.life_time_value.actual_histogram.paid_revenue, this.$.actualLTVChart, 49.0);
+          this._drawHistogramChart(resp.life_time_value.projected_histogram.paid_revenue, this.$.projectedLTVChart, 49.0);
+          this._drawHistogramChart(resp.life_time_value.canceled_histogram.paid_revenue, this.$.canceledLTVChart, 49.0);
+          resp.life_time_value.average_churn_string = (resp.life_time_value.average_churn * 100).toFixed(2) + '%';
+          try {
+            resp.life_time_value.actual_histogram.average_paid_revenue_string = '$' + resp.life_time_value.actual_histogram.average_paid_revenue.toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+            resp.life_time_value.projected_histogram.average_paid_revenue_string = '$' + resp.life_time_value.projected_histogram.average_paid_revenue.toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+            resp.life_time_value.actual_histogram.average_percentile_paid_revenue_string = '$' + this.percentile(resp.life_time_value.actual_histogram.paid_revenue, .5).toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+            resp.life_time_value.projected_histogram.average_percentile_paid_revenue_string = '$' + this.percentile(resp.life_time_value.projected_histogram.paid_revenue, .5).toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+            resp.life_time_value.actual_histogram.average_percentile_paid_weeks_string = this.percentile(resp.life_time_value.actual_histogram.paid_weeks, .5).toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+            resp.life_time_value.projected_histogram.average_percentile_paid_weeks_string = this.percentile(resp.life_time_value.projected_histogram.paid_weeks, .5).toLocaleString(undefined, {
+              maximumFractionDigits: 2
+            });
+            if (resp.life_time_value.canceled_histogram.average_paid_revenue) {
+              resp.life_time_value.canceled_histogram.average_paid_revenue_string = '$' + resp.life_time_value.canceled_histogram.average_paid_revenue.toLocaleString(undefined, {
+                maximumFractionDigits: 2
+              });
+            }
+          } catch (e) {
+            console.error('ltv errors: ', e)
+          }
+          this.ltvHistogram = resp.life_time_value;
         });
       }
 
@@ -305,7 +502,6 @@
           }
           dataArray.push(weekPoints)
         }
-        // var data = google.visualization.arrayToDataTable(dataArray);
         chartData.addRows(dataArray);
 
         var options = {
@@ -339,6 +535,50 @@
           <strong>For All So Far:</strong><br><hr>
           <strong>Average Revenue</strong>: $${summary.average_revenue_so_far_for_all.toLocaleString(undefined, {maximumFractionDigits:2})} <br>
         </div>`;
+      }
+
+      _drawHistogramChart(valueArray, element, bucketSize) {
+        if (!valueArray) {
+          return;
+        }
+        var dataArray = [
+          ['values']
+        ];
+        for (let i = 0; i < valueArray.length; i++) {
+          dataArray.push([valueArray[i]]);
+        }
+        var data = google.visualization.arrayToDataTable(dataArray);
+        var options = {
+          title: 'LTV',
+          theme: 'material',
+          histogram: {
+            hideBucketItems: true,
+          }
+        };
+        if (bucketSize) {
+          options.histogram.bucketSize = bucketSize;
+        }
+
+        var chart = new google.visualization.Histogram(element);
+        chart.draw(data, options);
+      }
+
+      percentile(arr, p) {
+        if (arr.length === 0) return 0;
+        if (typeof p !== 'number') throw new TypeError('p must be a number');
+        if (p <= 0) return arr[0];
+        if (p >= 1) return arr[arr.length - 1];
+
+        arr.sort(function(a, b) {
+          return b - a;
+        });
+        var index = (arr.length - 1) * p
+        var lower = Math.floor(index),
+          upper = lower + 1,
+          weight = index % 1;
+
+        if (upper >= arr.length) return arr[lower];
+        return arr[lower] * (1 - weight) + arr[upper] * weight;
       }
 
     }
