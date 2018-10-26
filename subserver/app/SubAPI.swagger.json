@@ -110,6 +110,9 @@
         },
         "youtube_url": {
           "type": "string"
+        },
+        "font_url": {
+          "type": "string"
         }
       },
       "description": "Content is a collection of urls pointing to content realted to the execution."
@@ -136,7 +139,7 @@
           "type": "string"
         }
       },
-      "description": "Culture is the country in a culture execution."
+      "description": "Culture is the culture in a culture execution."
     },
     "CommonCultureCook": {
       "type": "object",
@@ -149,9 +152,46 @@
         },
         "story": {
           "type": "string"
+        },
+        "story_preview": {
+          "type": "string"
+        },
+        "q_and_a": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonQandA"
+          }
         }
       },
       "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "CommonCultureGuide": {
+      "type": "object",
+      "properties": {
+        "info_boxes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonInfoBox"
+          }
+        },
+        "dinner_instructions": {
+          "type": "string"
+        },
+        "main_color": {
+          "type": "string"
+        },
+        "font_name": {
+          "type": "string"
+        },
+        "font_style": {
+          "type": "string"
+        },
+        "font_caps": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "CultureGuide is content related to the culture guide."
     },
     "CommonDish": {
       "type": "object",
@@ -179,6 +219,12 @@
         "is_for_non_vegetarian": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "stickers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonSticker"
+          }
         }
       },
       "description": "Dish is a dish in a culture execution."
@@ -220,8 +266,7 @@
           "type": "string"
         },
         "culture": {
-          "$ref": "#/definitions/CommonCulture",
-          "title": "Info"
+          "$ref": "#/definitions/CommonCulture"
         },
         "content": {
           "$ref": "#/definitions/CommonContent"
@@ -229,16 +274,21 @@
         "culture_cook": {
           "$ref": "#/definitions/CommonCultureCook"
         },
+        "culture_guide": {
+          "$ref": "#/definitions/CommonCultureGuide"
+        },
         "dishes": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/CommonDish"
           }
         },
+        "notifications": {
+          "$ref": "#/definitions/CommonNotifications"
+        },
         "has_pork": {
           "type": "boolean",
-          "format": "boolean",
-          "title": "Diet"
+          "format": "boolean"
         },
         "has_beef": {
           "type": "boolean",
@@ -247,21 +297,87 @@
         "has_chicken": {
           "type": "boolean",
           "format": "boolean"
-        },
-        "has_weird_meat": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_fish": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_other_seafood": {
-          "type": "boolean",
-          "format": "boolean"
         }
       },
-      "title": "**********************\nExecution\n**********************"
+      "description": "**********************\nExecution\n**********************\nExecution is an execution of a culture."
+    },
+    "CommonInfoBox": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "description": "InfoBox is the infobox in a culture guide."
+    },
+    "CommonNotifications": {
+      "type": "object",
+      "properties": {
+        "delivery_sms": {
+          "type": "string"
+        },
+        "rating_sms": {
+          "type": "string"
+        }
+      },
+      "description": "Notifications are notifications the subscribers gets."
+    },
+    "CommonQandA": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        }
+      },
+      "description": "QandA are questions and answers with the culture cook."
+    },
+    "CommonSticker": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "extra_instructions": {
+          "type": "string"
+        },
+        "reheat_option_1": {
+          "type": "string"
+        },
+        "reheat_option_2": {
+          "type": "string"
+        },
+        "reheat_time_1": {
+          "type": "string"
+        },
+        "reheat_time_2": {
+          "type": "string"
+        },
+        "reheat_instructions_1": {
+          "type": "string"
+        },
+        "reheat_instructions_2": {
+          "type": "string"
+        },
+        "eating_temperature": {
+          "type": "string"
+        }
+      },
+      "description": "Sticker are reheat stickers for dishes."
     },
     "SubAPIGetExecutionReq": {
       "type": "object",
