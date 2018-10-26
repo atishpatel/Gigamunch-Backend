@@ -172,10 +172,11 @@ func pbQandA(qanda *execution.QandA) *pbcommon.QandA {
 
 func pbCultureCook(cultureCook *execution.CultureCook) *pbcommon.CultureCook {
 	return &pbcommon.CultureCook{
-		FirstName: cultureCook.FirstName,
-		LastName:  cultureCook.LastName,
-		Story:     cultureCook.Story,
-		QAndA:     pbQandAs(cultureCook.QandA),
+		FirstName:    cultureCook.FirstName,
+		LastName:     cultureCook.LastName,
+		Story:        cultureCook.Story,
+		StoryPreview: cultureCook.StoryPreview,
+		QAndA:        pbQandAs(cultureCook.QandA),
 	}
 }
 

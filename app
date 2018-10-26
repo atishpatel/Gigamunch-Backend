@@ -24,7 +24,7 @@ if [[ $1 == "build" ]]; then
   fi
   if [[ $* == *sub* ]]; then
     echo "Building server/sub:"
-    cd sub/app
+    cd subserver/app
     yarn run build
     cd ../..
   fi
@@ -38,8 +38,8 @@ if [[ $1 == "build" ]]; then
     sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' admin/app/AdminAPI.swagger.json
     sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/admin/AdminAPI.pb.go
     # Sub
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/sub/ -I Gigamunch-Proto/common/ Gigamunch-Proto/sub/*.proto --go_out=plugins=grpc:Gigamunch-Proto/sub --swagger_out=logtostderr=true:sub/app
-    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' sub/app/SubAPI.swagger.json
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/sub/ -I Gigamunch-Proto/common/ Gigamunch-Proto/sub/*.proto --go_out=plugins=grpc:Gigamunch-Proto/sub --swagger_out=logtostderr=true:subserver/app
+    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' subserver/app/SubAPI.swagger.json
     sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/sub/SubAPI.pb.go
     # Server
     protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/common/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
@@ -81,8 +81,8 @@ if [[ $1 == "deploy" ]]; then
   fi
   if [[ $* == *sub* ]]; then
     echo "Deploying sub:"
-    cat sub/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > sub/app.yaml
-    gcloud app deploy sub/app.yaml --project=$project --version=1 --quiet
+    cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > subserver/app.yaml
+    gcloud app deploy subserver/app.yaml --project=$project --version=1 --quiet
   fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
@@ -134,9 +134,9 @@ if [[ $1 == "serve" ]]; then
   fi
   if [[ $2 == "sub" ]]; then
     echo "Starting sub:"
-    cat sub/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > sub/app.yaml
-    # dev_appserver.py --datastore_path ./.datastore sub/app.yaml&
-    cd sub/app 
+    cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
+    # dev_appserver.py --datastore_path ./.datastore subserver/app.yaml&
+    cd subserver/app 
     yarn run serve
     cd ../..
   fi

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/atishpatel/Gigamunch-Backend/subserver"
+
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
@@ -35,7 +37,7 @@ func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 	log.Infof(ctx, "return %d executions", len(executions))
 
 	resp := &pb.GetExecutionsResp{
-		Executions: pbExecutions(executions),
+		Executions: subserver.PBExecutions(executions),
 	}
 	return resp
 }
@@ -61,7 +63,7 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 
 	resp := &pb.GetExecutionResp{
-		Execution: pbExecution(execution),
+		Execution: subserver.PBExecution(execution),
 	}
 	return resp
 }
@@ -87,90 +89,12 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 	}
 
 	resp := &pb.UpdateExecutionResp{
-		Execution: pbExecution(execution),
+		Execution: subserver.PBExecution(execution),
 	}
 	return resp
 }
 
 // helper functions
-func pbExecutions(exes []*execution.Execution) []*pbcommon.Execution {
-	pbe := make([]*pbcommon.Execution, len(exes))
-	for i := range exes {
-		pbe[i] = pbExecution(exes[i])
-	}
-	return pbe
-}
-
-func pbExecution(exe *execution.Execution) *pbcommon.Execution {
-	return &pbcommon.Execution{
-		Id:              exe.ID,
-		Date:            exe.Date,
-		Location:        int32(exe.Location),
-		Publish:         exe.Publish,
-		CreatedDatetime: exe.CreatedDatetime.String(),
-		Culture:         pbCulture(&exe.Culture),
-		Content:         pbContent(&exe.Content),
-		CultureCook:     pbCultureCook(&exe.CultureCook),
-		Dishes:          pbDishes(exe.Dishes),
-		HasPork:         exe.HasPork,
-		HasBeef:         exe.HasBeef,
-		HasChicken:      exe.HasChicken,
-		// HasWeirdMeat:    exe.HasWeirdMeat,
-		// HasFish:         exe.HasFish,
-		// HasOtherSeafood: exe.HasOtherSeafood,
-	}
-}
-
-func pbCulture(culture *execution.Culture) *pbcommon.Culture {
-	return &pbcommon.Culture{
-		Country:     culture.Country,
-		City:        culture.City,
-		Description: culture.Description,
-		Nationality: culture.Nationality,
-		Greeting:    culture.Greeting,
-		FlagEmoji:   culture.FlagEmoji,
-	}
-}
-
-func pbContent(content *execution.Content) *pbcommon.Content {
-	return &pbcommon.Content{
-		HeroImageUrl:             content.HeroImageURL,
-		CookImageUrl:             content.CookImageURL,
-		HandsPlateNonVegImageUrl: content.HandsPlateNonVegImageURL,
-		HandsPlateVegImageUrl:    content.HandsPlateVegImageURL,
-		DinnerImageUrl:           content.DinnerImageURL,
-		SpotifyUrl:               content.SpotifyURL,
-		YoutubeUrl:               content.YoutubeURL,
-	}
-}
-
-func pbCultureCook(cultureCook *execution.CultureCook) *pbcommon.CultureCook {
-	return &pbcommon.CultureCook{
-		FirstName: cultureCook.FirstName,
-		LastName:  cultureCook.LastName,
-		Story:     cultureCook.Story,
-	}
-}
-
-func pbDishes(dishes []execution.Dish) []*pbcommon.Dish {
-	pbd := make([]*pbcommon.Dish, len(dishes))
-	for i := range dishes {
-		pbd[i] = pbDish(dishes[i])
-	}
-	return pbd
-}
-
-func pbDish(dish execution.Dish) *pbcommon.Dish {
-	return &pbcommon.Dish{
-		Number:             dish.Number,
-		Color:              dish.Color,
-		Name:               dish.Name,
-		Description:        dish.Description,
-		Ingredients:        dish.Ingredients,
-		IsForVegetarian:    dish.IsForVegetarian,
-		IsForNonVegetarian: dish.IsForNonVegetarian,
-	}
-}
 
 func executionFromPb(exe *pbcommon.Execution) *execution.Execution {
 	return &execution.Execution{
@@ -179,16 +103,22 @@ func executionFromPb(exe *pbcommon.Execution) *execution.Execution {
 		Location:        common.Location(exe.Location),
 		Publish:         exe.Publish,
 		CreatedDatetime: getDatetime(exe.CreatedDatetime),
-		Culture:         *cultureFromPb(exe.Culture),
-		Content:         *contentFromPb(exe.Content),
-		CultureCook:     *cultureCookFromPb(exe.CultureCook),
+		Culture:         cultureFromPb(exe.Culture),
+		Content:         contentFromPb(exe.Content),
+		CultureCook:     cultureCookFromPb(exe.CultureCook),
+		CultureGuide:    cultureGuideFromPb(exe.CultureGuide),
 		Dishes:          dishesFromPb(exe.Dishes),
+		Notifications:   notificationsFromPb(exe.Notifications),
 		HasPork:         exe.HasPork,
 		HasBeef:         exe.HasBeef,
 		HasChicken:      exe.HasChicken,
-		// HasWeirdMeat:    exe.HasWeirdMeat,
-		// HasFish:         exe.HasFish,
-		// HasOtherSeafood: exe.HasOtherSeafood,
+	}
+}
+
+func notificationsFromPb(notifications *pbcommon.Notifications) *execution.Notifications {
+	return &execution.Notifications{
+		DeliverySMS: notifications.DeliverySms,
+		RatingSMS:   notifications.RatingSms,
 	}
 }
 
@@ -203,6 +133,34 @@ func cultureFromPb(culture *pbcommon.Culture) *execution.Culture {
 	}
 }
 
+func infoBoxesFromPb(pbd []*pbcommon.InfoBox) []*execution.InfoBox {
+	infoBoxes := make([]*execution.InfoBox, len(pbd))
+	for i := range pbd {
+		infoBoxes[i] = infoBoxFromPb(pbd[i])
+	}
+	return infoBoxes
+}
+
+func infoBoxFromPb(infoBox *pbcommon.InfoBox) *execution.InfoBox {
+	return &execution.InfoBox{
+		Title:   infoBox.Title,
+		Text:    infoBox.Text,
+		Caption: infoBox.Caption,
+		Image:   infoBox.Image,
+	}
+}
+
+func cultureGuideFromPb(cultureGuide *pbcommon.CultureGuide) *execution.CultureGuide {
+	return &execution.CultureGuide{
+		InfoBoxes:          infoBoxesFromPb(cultureGuide.InfoBoxes),
+		DinnerInstructions: cultureGuide.DinnerInstructions,
+		MainColor:          cultureGuide.MainColor,
+		FontName:           cultureGuide.FontName,
+		FontStyle:          cultureGuide.FontStyle,
+		FontCaps:           cultureGuide.FontCaps,
+	}
+}
+
 func contentFromPb(content *pbcommon.Content) *execution.Content {
 	return &execution.Content{
 		HeroImageURL:             content.HeroImageUrl,
@@ -212,21 +170,39 @@ func contentFromPb(content *pbcommon.Content) *execution.Content {
 		DinnerImageURL:           content.DinnerImageUrl,
 		SpotifyURL:               content.SpotifyUrl,
 		YoutubeURL:               content.YoutubeUrl,
+		FontURL:                  content.FontUrl,
+	}
+}
+
+func qandasFromPb(pbd []*pbcommon.QandA) []*execution.QandA {
+	qandas := make([]*execution.QandA, len(pbd))
+	for i := range pbd {
+		qandas[i] = qandaFromPb(pbd[i])
+	}
+	return qandas
+}
+
+func qandaFromPb(qanda *pbcommon.QandA) *execution.QandA {
+	return &execution.QandA{
+		Question: qanda.Question,
+		Answer:   qanda.Answer,
 	}
 }
 
 func cultureCookFromPb(cultureCook *pbcommon.CultureCook) *execution.CultureCook {
 	return &execution.CultureCook{
-		FirstName: cultureCook.FirstName,
-		LastName:  cultureCook.LastName,
-		Story:     cultureCook.Story,
+		FirstName:    cultureCook.FirstName,
+		LastName:     cultureCook.LastName,
+		Story:        cultureCook.Story,
+		StoryPreview: cultureCook.StoryPreview,
+		QandA:        qandasFromPb(cultureCook.QAndA),
 	}
 }
 
-func dishesFromPb(pbd []*pbcommon.Dish) []execution.Dish {
-	dishes := make([]execution.Dish, len(pbd))
+func dishesFromPb(pbd []*pbcommon.Dish) []*execution.Dish {
+	dishes := make([]*execution.Dish, len(pbd))
 	for i := range pbd {
-		dishes[i] = *dishFromPb(pbd[i])
+		dishes[i] = dishFromPb(pbd[i])
 	}
 	return dishes
 }
@@ -240,5 +216,29 @@ func dishFromPb(dish *pbcommon.Dish) *execution.Dish {
 		Ingredients:        dish.Ingredients,
 		IsForVegetarian:    dish.IsForVegetarian,
 		IsForNonVegetarian: dish.IsForNonVegetarian,
+		Stickers:           stickersFromPb(dish.Stickers),
+	}
+}
+
+func stickersFromPb(pbd []*pbcommon.Sticker) []*execution.Sticker {
+	stickers := make([]*execution.Sticker, len(pbd))
+	for i := range pbd {
+		stickers[i] = stickerFromPb(pbd[i])
+	}
+	return stickers
+}
+
+func stickerFromPb(sticker *pbcommon.Sticker) *execution.Sticker {
+	return &execution.Sticker{
+		Name:                sticker.Name,
+		Ingredients:         sticker.Ingredients,
+		ExtraInstructions:   sticker.ExtraInstructions,
+		ReheatOption1:       sticker.ReheatOption_1,
+		ReheatOption2:       sticker.ReheatOption_2,
+		ReheatTime1:         sticker.ReheatTime_1,
+		ReheatTime2:         sticker.ReheatTime_2,
+		ReheatInstructions1: sticker.ReheatInstructions_1,
+		ReheatInstructions2: sticker.ReheatInstructions_2,
+		EatingTemperature:   sticker.EatingTemperature,
 	}
 }
