@@ -101,7 +101,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		}
 		err = messageC.SendDeliverySMS(to, body)
 		if err != nil {
-			err = messageC.SendDeliverySMS(message.EmployeeNumbers.Chris(), fmt.Sprintf("failed to send sms to %s. Err: %+v", email, err))
+			err = messageC.SendDeliverySMS(from, fmt.Sprintf("failed to send sms to %s. Err: %+v", email, err))
 			if err != nil {
 				utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
 			}
