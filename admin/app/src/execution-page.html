@@ -7,6 +7,12 @@
 
 <link rel="import"
       href="shared-styles.html">
+<link rel="import"
+      href="components/app-input.html">
+<link rel="import"
+      href="components/app-textarea.html">
+<link rel="import"
+      href="components/app-checkbox.html">
 
 <dom-module id="execution-page">
   <template>
@@ -16,7 +22,112 @@
           display: block;
           padding: 24px;
           max-width: 1000px;
+          margin: auto;
+        }
 
+        /* The container */
+        .container {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Hide the browser's default radio button */
+        .container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Create a custom radio button */
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: #eee;
+            border-radius: 50%;
+        }
+
+        /* When the radio button is checked, add a blue background */
+        .container input:checked ~ .checkmark {
+            background-color: #2196F3;
+        }
+
+        .container input:checked:disabled ~ .checkmark {
+            background-color: #353535;
+        }
+
+        /* Create the indicator (the dot/circle - hidden when not checked) */
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        /* Show the indicator (dot/circle) when checked */
+        .container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        /* Style the indicator (dot/circle) */
+        .container .checkmark:after {
+          top: 9px;
+          left: 9px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: white;
+        }
+
+        /* Style the buttons that are used to open and close the accordion panel */
+      .accordion {
+          background-color: #eee;
+          color: #444;
+          cursor: pointer;
+          padding: 18px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+        }
+        .accordion:after {
+            content: '\02795'; /* Unicode character for "plus" sign (+) */
+            font-size: 13px;
+            color: #777;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "\2796"; /* Unicode character for "minus" sign (-) */
+        }
+
+        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+        .active, .accordion:hover {
+            background-color: #ccc;
+        }
+
+        /* Style the accordion panel. Note: hidden by default */
+        .panel {
+          padding: 0 18px;
+          background-color: white;
+          max-height: 0;
+          overflow: auto;
+          transition: max-height 0.2s ease-out;
+        }
+
+        .active-panel {
+          max-height: auto;
         }
 
         .form {
@@ -25,7 +136,7 @@
         }
 
         h2 {
-            font-size: 24px;
+            font-size: 16px;
             font-weight: 600;
         }
 
@@ -33,104 +144,6 @@
             margin: 12px 0;
         }
 
-        .input-container {
-            display: flex;
-        }
-
-        .input-container>* {
-            margin: 8px 0 12px;
-        }
-
-        .input-container>* {
-            flex: 1;
-        }
-
-        .input-container>*:not(:first-child) {
-            flex: 2;
-            margin-left: 12px;
-        }
-
-        .input-group {
-            flex: 1;
-        }
-
-        input, textarea {
-            padding: 0 12px;
-            border: solid #CFD8DC 1px;
-            border-radius: 3px;
-            font-size: 14px;
-            background-color: #f7f7f7;
-            outline: none;
-            transition: all .3s ease;
-            /* fixes ie bug */
-            height: 43px;
-        }
-
-        textarea {
-            padding: 12px;
-            height: 100px;
-        }
-
-        input:focus, textarea:focus {
-            background-color: white;
-            opacity: 1;
-            border-color: #FF7043;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-        }
-
-        .checkbox-group .checkbox-label {
-            margin: 0 5px;
-        }
-
-        input[type=checkbox] {
-            visibility: hidden;
-            width: 20px;
-            height: 20px;
-        }
-
-        input[type=checkbox]:checked+label:after {
-            opacity: 1;
-        }
-
-        .checkbox {
-            display: inline-block;
-            display: inline-flex;
-            width: 20px;
-            position: relative;
-            margin: 12px;
-        }
-
-        .checkbox label {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: #f7f7f7;
-            border-radius: 4px;
-            border: solid #CFD8DC 1px;
-            transition: all .3s ease;
-        }
-
-        .checkbox label:after {
-            content: '';
-            width: 9px;
-            height: 5px;
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            border: 3px solid #FF7043;
-            border-top: none;
-            border-right: none;
-            background: transparent;
-            opacity: 0;
-            transform: rotate(-45deg);
-        }
 
         .button {
             color: white;
@@ -151,6 +164,16 @@
         .show-checkbox[type=checkbox] {
             visibility: visible;
         }
+
+        app-input {
+          padding: 8px 0;
+        }
+        .row > app-input {
+          flex:1;
+        }
+        app-checkbox {
+          padding: 12px 0;
+        }
       </style>
     </shared-styles>
 
@@ -159,299 +182,182 @@
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
+      <div>
+        <h2>Edit Mode</h2>
+        <label class="container">Captain (Chris)
+          <input disabled
+                 type="radio"
+                 name="mode"
+                 value="captain">
+          <span class="checkmark"></span>
+        </label>
+        <label class="container">Culture Guide (Chris)
+          <input disabled
+                 type="radio"
+                 name="mode"
+                 value="culture-guide">
+          <span class="checkmark"></span>
+        </label>
+        <label class="container">Photographer (Piyush)
+          <input disabled
+                 type="radio"
+                 name="mode"
+                 value="photographer">
+          <span class="checkmark"></span>
+        </label>
+        <label class="container">Head Chef (Mike)
+          <input disabled
+                 type="radio"
+                 name="mode"
+                 value="head-chef">
+          <span class="checkmark"></span>
+        </label>
+        <label class="container">Content Writer (Emily)
+          <input disabled
+                 type="radio"
+                 name="mode"
+                 value="content-writer">
+          <span class="checkmark"></span>
+        </label>
+      </div>
 
       <div class="form">
-        <h2>General</h2>
-        <hr>
+        <button class="accordion" accordian-active>General</button>
+        <div class="panel">
+          <app-input id="date"
+                     type="date"
+                     label="Date*"></app-input>
 
-        <div class="input-group">
-          <label for="date">Date</label>
-          <div class="input-container">
-            <input type="date"
-                   id="date" />
-
-          </div>
-        </div>
-
-        <div class="checkbox-group">
-          <div class="checkbox">
-            <input type="checkbox"
-                   id="publish"
-                   checked="{{execution.publish::input}}" />
-            <label for="publish"></label>
-          </div>
-          <label>Publish</label>
+          <app-checkbox value="execution.publish">Publish</app-checkbox>
         </div>
 
 
-        <h2>Culture</h2>
-        <hr>
-
-        <div class="input-group">
-          <label for="flag_emoji">Flag Emoji</label>
-          <div class="input-container">
-            <input type="text"
-                   id="flag_emoji"
-                   value="{{execution.culture.flag_emoji::input}}" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-group">
-            <label for="city">City</label>
-            <div class="input-container">
-              <input type="text"
-                     id="city"
-                     value="{{execution.culture.city::input}}" />
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="country">Country</label>
-            <div class="input-container">
-              <input type="text"
-                     id="country"
-                     value="{{execution.culture.country::input}}" />
-            </div>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label for="greeting">Greeting</label>
-          <div class="input-container">
-            <input type="text"
-                   id="greeting"
-                   value="{{execution.culture.greeting::input}}" />
-          </div>
-        </div>
-        <div class="input-group">
-          <label for="description">Description</label>
-          <div class="input-container">
-            <textarea id="description"
-                      value="{{execution.culture.description::input}}"></textarea>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label for="nationality">Nationality</label>
-          <div class="input-container">
-            <input type="text"
-                   id="nationality"
-                   value="{{execution.culture.nationality::input}}" />
-          </div>
-        </div>
-
-        <h2>Culture Cook</h2>
-        <hr>
-
-        <div class="row">
-          <div class="input-group">
-            <label for="first_name">First Name</label>
-            <div class="input-container">
-              <input type="text"
-                     id="first_name"
-                     value="{{execution.culture_cook.first_name::input}}" />
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="last_name">Last Name</label>
-            <div class="input-container">
-              <input type="text"
-                     id="last_name"
-                     value="{{execution.culture_cook.last_name::input}}" />
-            </div>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label for="story">Story</label>
-          <div class="input-container">
-            <textarea id="story"
-                      value="{{execution.culture_cook.story::input}}"></textarea>
-          </div>
-        </div>
-
-        <h2>Content </h2>
-        <hr>
-
-        <div class="row">
-          <div class="input-group">
-            <label for="hero_image_url">Hero Image URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="hero_image_url"
-                     value="{{execution.content.hero_image_url::input}}" />
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="dinner_image_url">Dinner Image URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="dinner_image_url"
-                     value="{{execution.content.dinner_image_url::input}}" />
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-group">
-            <label for="cook_image_url">Cook Image URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="cook_image_url"
-                     value="{{execution.content.cook_image_url::input}}" />
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-group">
-            <label for="hands_plate_non_veg_image_url">Hands Plate Non-Veg Image URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="hands_plate_non_veg_image_url"
-                     value="{{execution.content.hands_plate_non_veg_image_url::input}}" />
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="hands_plate_veg_image_url">Hands Plate Veg Image URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="hands_plate_veg_image_url"
-                     value="{{execution.content.hands_plate_veg_image_url::input}}" />
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-group">
-            <label for="spotify_url">Spotify Playlist URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="spotify_url"
-                     value="{{execution.content.spotify_url::input}}" />
-            </div>
-          </div>
-
-          <div class="input-group">
-            <label for="youtube_url">Youtube Playlist URL</label>
-            <div class="input-container">
-              <input type="text"
-                     id="youtube_url"
-                     value="{{execution.content.youtube_url::input}}" />
-            </div>
-          </div>
-        </div>
-
-        <h2>Dishes</h2>
-        <hr>
-        <template is="dom-repeat"
-                  items="{{dishes}}"
-                  as="dish">
-          <div><strong>Dish:</strong> </div>
+        <button class="accordion">Culture</button>
+        <div class="panel">
           <div class="row">
-            <div class="input-group">
-              <label for="number">Dish Number</label>
-              <div class="input-container">
-                <input type="number"
-                       id="number"
-                       value="{{dish.number::input}}" />
-              </div>
-            </div>
-            <div class="input-group">
-              <label for="color">Dish Color</label>
-              <div class="input-container">
-                <input type="text"
-                       id="color"
-                       value="{{dish.color::input}}" />
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label for="name">Dish Name</label>
-              <div class="input-container">
-                <input type="text"
-                       id="name"
-                       value="{{dish.name::input}}" />
-              </div>
-            </div>
+            <app-input label="City"
+                       value="{{execution.culture.city}}"></app-input>
+            <app-input label="Country"
+                       value="{{execution.culture.country}}"></app-input>
           </div>
-          <div class="input-group">
-            <label for="description">Dish Description</label>
-            <div class="input-container">
-              <textarea id="description"
-                        value="{{dish.description::input}}"></textarea>
-            </div>
+          <div class="row">
+            <app-input label="Flag Emoji"
+                       value="{{execution.culture.flag_emoji}}"></app-input>
+            <app-input label="Greeting"
+                       value="{{execution.culture.greeting}}"></app-input>
           </div>
 
-          <div class="input-group">
-            <label for="ingredients">Dish Ingredients</label>
-            <div class="input-container">
-              <input type="text"
-                     id="ingredients"
-                     value="{{dish.ingredients::input}}" />
-            </div>
+          <app-input label="Nationality"
+                     value="{{execution.culture.nationality}}"></app-input>
+
+          <app-textarea class="textarea"
+                        label="Description (HTML)"
+                        value="{{execution.culture.description}}"></app-textarea>
+
+        </div>
+
+        <button class="accordion">Culture Cook</button>
+        <div class="panel">
+          <div class="row">
+            <app-input label="First Name"
+                       value="{{execution.culture_cook.first_name}}"></app-input>
+
+            <app-input label="Last Name"
+                       value="{{execution.culture_cook.last_name}}"></app-input>
+
+          </div>
+          <app-textarea label="Story Preview (HTML)"
+                        value="{{execution.culture_cook.story_preview}}"></app-textarea>
+
+          <app-textarea label="Story (HTML)"
+                        value="{{execution.culture_cook.story}}"></app-textarea>
+
+        </div>
+
+        <button class="accordion">Content</button>
+        <div class="panel">
+
+          <div class="row">
+            <app-input label="Hero Image URL"
+                       value="{{execution.content.hero_image_url}}"></app-input>
+
+            <app-input label="Dinner Image URL"
+                       value="{{execution.content.dinner_image_url}}"></app-input>
           </div>
 
-          <input class="show-checkbox"
-                 type="checkbox"
-                 name="is_for_vegetarian"
-                 id="is_for_vegetarian"
-                 checked="{{dish.is_for_vegetarian::input}}">
-          <span>Is for Vegetarian</span>
-          <br>
-          <input class="show-checkbox"
-                 type="checkbox"
-                 name="is_for_non_vegetarian"
-                 id="is_for_non_vegetarian"
-                 checked="{{dish.is_for_non_vegetarian::input}}">
-          <span>Is for Non-Vegatarian</span>
-          <br/>
-          <br/>
-          <br/>
+          <div class="row">
+            <app-input label="Cook Image URL"
+                       value="{{execution.content.cook_image_url}}"></app-input>
+          </div>
+
+          <div class="row">
+            <app-input label="Hands Plate Non-Veg Image URL"
+                       value="{{execution.content.hands_plate_non_veg_image_url}}"></app-input>
+            <app-input label-group="Hands Plate Veg Image URL"
+                       value="{{execution.content.hands_plate_veg_image_url}}"></app-input>
+          </div>
+
+          <div class="row">
+            <app-input label="Spotify Playlist URL"
+                       value="{{execution.content.spotify_url}}"></app-input>
+
+            <app-input label="Youtube Playlist URL"
+                       value="{{execution.content.youtube_url}}"></app-input>
+
+          </div>
+        </div>
+
+        <button class="accordion">Dishes</button>
+        <div id="dishPanel"
+             class="panel">
+          <template is="dom-repeat"
+                    items="{{dishes}}"
+                    as="dish">
+            <div><strong>Dish:</strong> </div>
+            <div class="row">
+              <app-input type="number"
+                         label="Dish Number"
+                         value="{{execution.dish.number}}"></app-input>
+
+              <app-input label="Dish Color #(HEX)"
+                         value="{{execution.dish.color}}"
+                         placeholder="#FF5722"></app-input>
+
+              <app-input label="Dish Name (HTML)"
+                         value="{{execution.dish.name}}"></app-input>
+
+            </div>
+            <app-textarea label="Dish Description Preview (HTML)"
+                          value="{{execution.dish.description_preview}}"></app-textarea>
+
+            <app-textarea label="Dish Ingredients (HTML)"
+                          value="{{execution.dish.ingredients}}"></app-textarea>
+
+            <app-checkbox value="{{dish.is_for_vegetarian}}">Is for Vegetarians</app-checkbox>
+            <br>
+            <app-checkbox value="{{dish.is_for_non_vegetarian}}">Is for Non-Vegatarian</app-checkbox>
+            <br/>
+            <br/>
+            <br/>
 
         </template>
-          <br>
-          <button on-tap="addDish">Add Dish</button>
-          <br>
-          <label>Dish Index</label>
-          <input value="{{dishRemoveIndex::input}}">
-          <button on-tap="removeDish">Remove Dish</button>
-          <h2>Diet</h2>
-          <hr>
-          <div class="checkbox-group">
-            <div class="checkbox">
-              <input type="checkbox"
-                     id="has_pork"
-                     checked="{{execution.has_pork::input}}" />
-              <label for="has_pork"></label>
-            </div>
-            <label>Has Pork</label>
-          </div>
-          <div class="checkbox-group">
-            <div class="checkbox">
-              <input type="checkbox"
-                     id="has_beef"
-                     checked="{{execution.has_beef::input}}" />
-              <label for="has_beef"></label>
-            </div>
-            <label>Has Beef</label>
-          </div>
-          <div class="checkbox-group">
-            <div class="checkbox">
-              <input type="checkbox"
-                     id="has_chicken"
-                     checked="{{execution.has_chicken::input}}" />
-              <label for="has_chicken"></label>
-            </div>
-            <label>Has Chicken</label>
-          </div>
+            <br>
+            <button on-tap="addDish">Add Dish</button>
+            <br>
+            <label>Dish Index</label>
+            <input value="{{dishRemoveIndex::input}}">
+            <button on-tap="removeDish">Remove Dish</button>
+        </div>
+
+        <button class="accordion">Diet</button>
+        <div class="panel">
+          <app-checkbox value="{{execution.has_pork}}">Has Pork</app-checkbox><br>
+          <app-checkbox value="{{execution.has_beef}}">Has Beef</app-checkbox><br>
+          <app-checkbox value="{{execution.has_chicken}}">Has Chicken</app-checkbox><br>
+        </div>
 
           <button disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
-      </div>
+        </div>
 
   </template>
   </dom-repeat>
@@ -491,6 +397,31 @@
         return [ /* observer descriptors */ ]
       }
 
+      ready() {
+        super.ready();
+        var d = new Date();
+        d.setUTCMonth(d.getUTCMonth() + 1);
+        this.$.date.value = d.toISOString().substr(0, 10);
+        const acc = this.root.querySelectorAll('.accordion');
+        let i;
+
+        for (i = 0; i < acc.length; i++) {
+          acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            /* Toggle between hiding and showing the active panel */
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+              panel.style.maxHeight = null;
+            } else {
+              panel.style.maxHeight = (panel.scrollHeight + 50) + "px";
+            }
+          });
+          if (acc[i].getAttribute('accordian-active') !== null) {
+            acc[i].click();
+          }
+        }
+      }
+
       selected() {
         let id = 0;
         const tmp = window.location.pathname.split('/execution/');
@@ -498,6 +429,17 @@
           id = tmp[1];
         }
         this.getExecution(id);
+        const params = GetURLParmas();
+        this.setMode(params.mode);
+      }
+
+      setMode(mode) {
+        var elements = this.shadowRoot.querySelectorAll('input[name="mode"]');
+        for (var i = 0, l = elements.length; i < l; i++) {
+          if (elements[i].value === mode) {
+            return elements[i].checked = 'true';
+          }
+        }
       }
 
       getExecution(id) {
@@ -568,6 +510,12 @@
         }
         this.push('dishes', {});
         this.dishRemoveIndex = this.dishes.length;
+        setTimeout(() => {
+          this.$.dishPanel.style.maxHeight = this.$.dishPanel.scrollHeight + "px";
+        }, 500);
+        setTimeout(() => {
+          this.$.dishPanel.style.maxHeight = this.$.dishPanel.scrollHeight + "px";
+        }, 1000);
       }
 
       removeDish() {

@@ -258,14 +258,21 @@
                        attr-for-selected="name"
                        class="drawer-list"
                        role="navigation">
-
           <a name="subscriber-list"
-             href="subscriber-list">
-            <paper-item>Subscriber List</paper-item>
+             href="subscribers">
+            <paper-item>Subscribers</paper-item>
           </a>
           <a name="sublog"
              href="sublog">
             <paper-item>Sublogs</paper-item>
+          </a>
+          <a name="executions"
+             href="executions">
+            <paper-item>Culture Executions</paper-item>
+          </a>
+          <a name="dashboard"
+             href="dashboard">
+            <paper-item>Dashboard</paper-item>
           </a>
           <a name="skip"
              href="skip">
@@ -397,6 +404,10 @@
                           id="executionPage"
                           service="[[service]]">
           </execution-page>
+          <execution-preview-page name="execution-preview"
+                                  id="executionPreviewPage"
+                                  service="[[service]]">
+          </execution-preview-page>
           <my-view404 name="view404">
           </my-view404>
         </iron-pages>
@@ -523,6 +534,12 @@
             resolvedPageURL = this.resolveUrl('subscriber-detail-page.html');
             el = this.$.subscriberDetailPage;
             title = 'Subscriber Detail';
+            break;
+          case 'execution-preview':
+            elementName = 'execution-preview-page';
+            resolvedPageURL = this.resolveUrl('execution-preview-page.html');
+            el = this.$.executionPreviewPage;
+            title = 'Execution Preview';
             break;
         }
         this.set('title', title);
