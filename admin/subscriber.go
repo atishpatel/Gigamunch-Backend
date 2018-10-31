@@ -31,16 +31,11 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	}
 	// end decode request
 
-	dilm := "{{name}}"
+	nameDilm := "{{name}}"
 	firstNameDilm := "{{first_name}}"
+	emailDilm := "{{email}}"
 
 	messageC := message.New(ctx)
-	// var emails []string
-	// for _, email := range req.Emails {
-	// 	if email != "" {
-	// 		emails = append(emails, email)
-	// 	}
-	// }
 	subC := subold.New(ctx)
 	subs, err := subC.GetSubscribers(req.Emails)
 	if err != nil {
@@ -56,8 +51,9 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		}
 		name = strings.Title(name)
 		msg := req.Message
-		msg = strings.Replace(msg, dilm, name, -1)
+		msg = strings.Replace(msg, nameDilm, name, -1)
 		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
+		msg = strings.Replace(msg, emailDilm, s.Email, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
 		if err != nil {
 			return errors.Annotate(err, "failed ot message.SendSMS")
@@ -215,7 +211,7 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 		return failedToDecode(err)
 	}
 	// end decode request
-
+	req.NewEmail = strings.ToLower(req.NewEmail)
 	i := new(subold.SubscriptionSignUp)
 	err = datastore.RunInTransaction(ctx, func(tctx context.Context) error {
 		keyOld := datastore.NewKey(tctx, "ScheduleSignUp", req.OldEmail, 0, nil)
