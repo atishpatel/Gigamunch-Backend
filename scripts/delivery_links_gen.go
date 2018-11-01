@@ -33,20 +33,24 @@ func main() {
 
 func getNameAndAddresses(s string) []nameAndAddresses {
 	rows := strings.Split(s, "\n")
+	i := 0
 	driverIndex := 0
-	addressIndex := -1
-	headers := strings.Split(rows[0], "\t")
-	for i, header := range headers {
-		if strings.ToUpper(header) == "DRIVER" {
-			driverIndex = i
+	addressIndex := 4
+	if strings.Contains(rows[0], "Driver") {
+		headers := strings.Split(rows[0], "\t")
+		for j, header := range headers {
+			if strings.ToUpper(header) == "DRIVER" {
+				driverIndex = j
+			}
+			if strings.ToUpper(header) == "ADDRESS" {
+				addressIndex = j
+			}
 		}
-		if strings.ToUpper(header) == "ADDRESS" {
-			addressIndex = i
-		}
+		i++
 	}
 	deliveries := []nameAndAddresses{}
 	delivery := nameAndAddresses{}
-	for i := 1; i < len(rows); i++ {
+	for ; i < len(rows); i++ {
 		row := strings.Split(rows[i], "\t")
 		if delivery.Name != row[driverIndex] {
 			deliveries = append(deliveries, delivery)

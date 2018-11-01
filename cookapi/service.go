@@ -434,11 +434,13 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	2 special bags: %d
 	4 bags: %d
 	4 special bags: %d
+	+ EXTRA BAGS
 
 	2 veg bags: %d
 	2 special veg bags: %d
 	4 veg bags: %d
 	4 special veg bags: %d
+	+ EXTRA VEG BAGS
 
 	Total bags: %d
 
