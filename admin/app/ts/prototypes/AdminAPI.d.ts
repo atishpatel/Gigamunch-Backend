@@ -214,6 +214,7 @@ interface GetExecutionsReq {
 interface GetExecutionsResp {
     error: Common.Error
     executions: Common.Execution[]
+    progress: Common.ExecutionProgress[]
 }
 interface GetExecutionReq {
    idOrDate: string
@@ -224,6 +225,7 @@ interface GetExecutionResp {
 }
 interface UpdateExecutionReq {
     execution: Common.Execution
+    mode: string
 }
 interface UpdateExecutionResp {
     error: Common.Error

@@ -951,6 +951,12 @@
           "items": {
             "$ref": "#/definitions/CommonExecution"
           }
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonExecutionProgress"
+          }
         }
       }
     },
@@ -1474,6 +1480,9 @@
       "properties": {
         "execution": {
           "$ref": "#/definitions/CommonExecution"
+        },
+        "mode": {
+          "type": "string"
         }
       }
     },
@@ -1570,7 +1579,7 @@
     "CommonContent": {
       "type": "object",
       "properties": {
-        "hero_image_url": {
+        "landscape_image_url": {
           "type": "string"
         },
         "cook_image_url": {
@@ -1582,7 +1591,7 @@
         "hands_plate_veg_image_url": {
           "type": "string"
         },
-        "dinner_image_url": {
+        "dinner_non_veg_image_url": {
           "type": "string"
         },
         "spotify_url": {
@@ -1592,6 +1601,9 @@
           "type": "string"
         },
         "font_url": {
+          "type": "string"
+        },
+        "dinner_veg_image_url": {
           "type": "string"
         }
       },
@@ -1616,6 +1628,9 @@
           "type": "string"
         },
         "flag_emoji": {
+          "type": "string"
+        },
+        "description_preview": {
           "type": "string"
         }
       },
@@ -1669,6 +1684,12 @@
         "font_caps": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "vegetarian_dinner_instructions": {
+          "type": "string"
+        },
+        "font_name_post_script": {
+          "type": "string"
         }
       },
       "description": "CultureGuide is content related to the culture guide."
@@ -1700,14 +1721,36 @@
           "type": "boolean",
           "format": "boolean"
         },
-        "stickers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CommonSticker"
-          }
+        "is_on_main_plate": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "image_url": {
+          "type": "string"
+        },
+        "description_preview": {
+          "type": "string"
         }
       },
       "description": "Dish is a dish in a culture execution."
+    },
+    "CommonEmail": {
+      "type": "object",
+      "properties": {
+        "dinner_non_veg_image_url": {
+          "type": "string"
+        },
+        "dinner_veg_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "landscape_image_url": {
+          "type": "string"
+        }
+      },
+      "description": "Email is the email content a subscriber gets."
     },
     "CommonError": {
       "type": "object",
@@ -1763,6 +1806,12 @@
             "$ref": "#/definitions/CommonDish"
           }
         },
+        "stickers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonSticker"
+          }
+        },
         "notifications": {
           "$ref": "#/definitions/CommonNotifications"
         },
@@ -1777,9 +1826,34 @@
         "has_chicken": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "email": {
+          "$ref": "#/definitions/CommonEmail"
         }
       },
       "description": "**********************\nExecution\n**********************\nExecution is an execution of a culture."
+    },
+    "CommonExecutionProgress": {
+      "type": "object",
+      "properties": {
+        "head_chef": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "photographer": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "content_writer": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "culture_guide": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "description": "ExecutionProgress is the progress on an execution."
     },
     "CommonInfoBox": {
       "type": "object",
@@ -1900,6 +1974,10 @@
         },
         "eating_temperature": {
           "type": "string"
+        },
+        "reheat_option_1_preferred": {
+          "type": "boolean",
+          "format": "boolean"
         }
       },
       "description": "Sticker are reheat stickers for dishes."

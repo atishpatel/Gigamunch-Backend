@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div v-html="execution">
 
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
 import ExecutionsList from '../components/ExecutionsList.vue';
 import { GetExecution } from '../ts/service';
 import { IsError } from '../ts/errors';
@@ -15,11 +15,12 @@ import { IsError } from '../ts/errors';
     ExecutionsList,
   },
 })
-export default class Dinners extends Vue {
+export default class Dinner extends Vue {
   protected execution!: Common.Execution;
 
   public constructor() {
     super();
+    this.execution = {} as Common.Execution;
   }
 
   public created() {

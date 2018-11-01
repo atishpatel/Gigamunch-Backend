@@ -15,23 +15,32 @@ const (
 
 // Execution is an execution of a culture.
 type Execution struct {
-	ID              int64           `json:"id,omitempty" datastore:",noindex"`
+	ID              int64           `json:"id" datastore:",noindex"`
 	Date            string          `json:"date" datastore:",index"`
 	Location        common.Location `json:"location"`
 	Publish         bool            `json:"publish"`
 	CreatedDatetime time.Time       `json:"created_datetime"`
 	// Info
 	Culture       Culture       `json:"culture"`
-	Content       Content       `json:"content"`
+	Content       Content       `json:"content" datastore:",noindex"`
 	CultureCook   CultureCook   `json:"culture_cook"`
 	CultureGuide  CultureGuide  `json:"culture_guide"`
 	Dishes        []Dish        `json:"dishes"`
-	Stickers      []Sticker     `json:"stickers"`
-	Notifications Notifications `json:"notifications"`
+	Stickers      []Sticker     `json:"stickers" datastore:",noindex"`
+	Notifications Notifications `json:"notifications" datastore:",noindex"`
+	Email         Email         `json:"email" datastore:",noindex"`
 	// Diet
 	HasPork    bool `json:"has_pork"`
 	HasBeef    bool `json:"has_beef"`
 	HasChicken bool `json:"has_chicken"`
+}
+
+// Email is the email content a subscriber gets.
+type Email struct {
+	DinnerNonVegImageURL string `json:"dinner_non_veg_image_url" datastore:",noindex"`
+	DinnerVegImageURL    string `json:"dinner_veg_image_url" datastore:",noindex"`
+	CookImageURL         string `json:"cook_image_url" datastore:",noindex"`
+	LandscapeImageURL    string `json:"landscape_image_url" datastore:",noindex"`
 }
 
 // Notifications are notifications the subscribers gets.
@@ -121,9 +130,9 @@ type QandA struct {
 
 // CultureCook is the culture cook for a culture execution.
 type CultureCook struct {
-	FirstName    string  `json:"first_name,omitempty"`
-	LastName     string  `json:"last_name,omitempty"`
-	Story        string  `json:"story,omitempty" datastore:",noindex"`
+	FirstName    string  `json:"first_name"`
+	LastName     string  `json:"last_name"`
+	Story        string  `json:"story" datastore:",noindex"`
 	StoryPreview string  `json:"story_preview" datastore:",noindex"`
 	QandA        []QandA `json:"q_and_a" datastore:",noindex"`
 }

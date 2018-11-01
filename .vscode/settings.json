@@ -11,4 +11,5 @@
   "editor.suggest.localityBonus": true,
   "go.lintTool": "golangci-lint",
   "go.docsTool": "godoc",
+  "gitlens.blame.ignoreWhitespace": true,
 }
