@@ -1,0 +1,116 @@
+<link rel="import"
+      href="../bower_components/polymer/polymer-element.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+<link rel="import"
+      href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import"
+      href="shared-styles.html">
+<link rel="import"
+      href="materialize-styles.html">
+
+<dom-module id="execution-preview-page">
+  <template>
+    <materialize-styles>
+      <style include="materialize-styles"></style>
+    </materialize-styles>
+    <shared-styles>
+      <style include="shared-styles">
+        :host {
+          display: block;
+          padding: 10px;
+          margin: auto;
+          max-width: 1000px;
+        }
+
+        .textarea-json {
+          height: 1000px;
+          width: 700px;
+        }
+
+      </style>
+    </shared-styles>
+
+    <div>
+      <h1 class="page-title">Culture Execution</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <textarea id="executionJSON"
+                disabled
+                class="textarea-json">
+      </textarea>
+
+
+  </template>
+  </dom-repeat>
+  </div>
+  </template>
+
+  <script>
+    class ExecutionPreviewPage extends Polymer.Element {
+      static get is() {
+        return 'execution-preview-page';
+      }
+
+      static get properties() {
+        return {
+          service: {
+            type: Object,
+          },
+          loading: {
+            type: Boolean
+          },
+          execution: {
+            type: Object,
+            notify: true,
+          }
+        }
+      }
+
+      static get observers() {
+        return [ /* observer descriptors */ ]
+      }
+
+      selected() {
+        let id = 0;
+        const tmp = window.location.pathname.split('/execution-preview/');
+        if (tmp.length > 1) {
+          id = tmp[1];
+        }
+        this.getExecution(id);
+      }
+
+      getExecution(id) {
+        if (!id || id === 0) {
+          this.execution = {
+            culture: {},
+            culture_cook: {},
+            content: {},
+            dishes: [],
+          };
+          return;
+        }
+        this.loading = true;
+        this.service.GetExecution(id).then((resp) => {
+          this.loading = false;
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+
+          this.setExecution(resp.execution);
+        });
+      }
+
+      setExecution(exe) {
+        this.execution = exe;
+        this.$.executionJSON.value = JSON.stringify(exe, null, 2);
+      }
+    }
+    window.customElements.define(ExecutionPreviewPage.is, ExecutionPreviewPage);
+
+  </script>
+</dom-module>

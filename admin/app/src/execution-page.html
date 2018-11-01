@@ -1,9 +1,16 @@
 <link rel="import"
       href="../bower_components/polymer/polymer-element.html">
 <link rel="import"
+      href="../bower_components/polymer/lib/elements/dom-repeat.html">
+
+<link rel="import"
       href="../bower_components/paper-button/paper-button.html">
 <link rel="import"
       href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import"
+      href="../bower_components/paper-item/paper-item.html">
 
 <link rel="import"
       href="shared-styles.html">
@@ -13,6 +20,8 @@
       href="components/app-textarea.html">
 <link rel="import"
       href="components/app-checkbox.html">
+<link rel="import"
+      href="components/app-select.html">
 
 <dom-module id="execution-page">
   <template>
@@ -23,6 +32,10 @@
           padding: 24px;
           max-width: 1000px;
           margin: auto;
+        }
+
+        .row > * {
+          flex:1;
         }
 
         /* The container */
@@ -161,6 +174,22 @@
             padding: 12px 64px;
         }
 
+        .button:disabled {
+          background: gray;
+        }
+
+        #updateBtn {
+          margin: 64px 0;
+        }
+
+        .timer {
+          padding: 12px;
+          text-align: center;
+          border: 2px black solid;
+          border-radius: 6px;
+          background-color: #f5d2d2;
+        }
+
         .show-checkbox[type=checkbox] {
             visibility: visible;
         }
@@ -168,11 +197,21 @@
         app-input {
           padding: 8px 0;
         }
-        .row > app-input {
-          flex:1;
-        }
+        
         app-checkbox {
           padding: 12px 0;
+        }
+
+        .content-image-row {
+          background-color: #e6e6e6;
+          margin: 24px 0;
+        }
+        .content-image {
+          padding: 12px;
+        }
+        .content-image img {
+          width: 100%;
+          min-height: 250px;
         }
       </style>
     </shared-styles>
@@ -182,6 +221,9 @@
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
+      <div id="timer"
+           class="timer">
+      </div>
       <div>
         <h2>Edit Mode</h2>
         <label class="container">Captain (Chris)
@@ -195,28 +237,21 @@
           <input disabled
                  type="radio"
                  name="mode"
-                 value="culture-guide">
-          <span class="checkmark"></span>
-        </label>
-        <label class="container">Photographer (Piyush)
-          <input disabled
-                 type="radio"
-                 name="mode"
-                 value="photographer">
+                 value="culture_guide">
           <span class="checkmark"></span>
         </label>
         <label class="container">Head Chef (Mike)
           <input disabled
                  type="radio"
                  name="mode"
-                 value="head-chef">
+                 value="head_chef">
           <span class="checkmark"></span>
         </label>
         <label class="container">Content Writer (Emily)
           <input disabled
                  type="radio"
                  name="mode"
-                 value="content-writer">
+                 value="content_writer">
           <span class="checkmark"></span>
         </label>
       </div>
@@ -228,12 +263,12 @@
                      type="date"
                      label="Date*"></app-input>
 
-          <app-checkbox value="execution.publish">Publish</app-checkbox>
+          <app-checkbox checked="execution.publish">Publish</app-checkbox>
         </div>
 
-
-        <button class="accordion">Culture</button>
-        <div class="panel">
+        <button class="accordion" editor="content_writer">Culture</button>
+        <div class="panel"
+             editor="content_writer">
           <div class="row">
             <app-input label="City"
                        value="{{execution.culture.city}}"></app-input>
@@ -249,15 +284,19 @@
 
           <app-input label="Nationality"
                      value="{{execution.culture.nationality}}"></app-input>
-
+          <app-textarea class="textarea"
+                        label="Description Preview (HTML)"
+                        value="{{execution.culture.description_preview}}"></app-textarea>
           <app-textarea class="textarea"
                         label="Description (HTML)"
                         value="{{execution.culture.description}}"></app-textarea>
 
         </div>
 
-        <button class="accordion">Culture Cook</button>
-        <div class="panel">
+        <button class="accordion" editor="content_writer">Culture Cook</button>
+        <div id="cultureCookPanel"
+             class="panel"
+             editor="content_writer">
           <div class="row">
             <app-input label="First Name"
                        value="{{execution.culture_cook.first_name}}"></app-input>
@@ -272,29 +311,87 @@
           <app-textarea label="Story (HTML)"
                         value="{{execution.culture_cook.story}}"></app-textarea>
 
+          <h2>Qestions & Answers</h2>
+          <template id="infoBoxesRepeat"
+                    is="dom-repeat"
+                    items="{{execution.culture_cook.q_and_a}}"
+                    as="q_and_a">
+            <app-input label="Question"
+                       value="{{q_and_a.question}}"></app-input>
+
+            <app-textarea label="Answer"
+                          value="{{q_and_a.answer}}"></app-textarea>
+            <br>
+            <br>
+          </template>
+          <button on-tap="addQnA">Add Q&A</button>
+          <br>
+          <app-input type="number"
+                     label="Info Box Index"
+                     value="{{QnARemoveIndex}}"></app-input>
+          <button on-tap="removeQnA">Remove Q&A</button>
+
         </div>
 
-        <button class="accordion">Content</button>
-        <div class="panel">
+        <button class="accordion" editor="culture_guide">Content</button>
+        <div class="panel"
+             editor="culture_guide">
 
           <div class="row">
-            <app-input label="Hero Image URL"
-                       value="{{execution.content.hero_image_url}}"></app-input>
-
-            <app-input label="Dinner Image URL"
-                       value="{{execution.content.dinner_image_url}}"></app-input>
-          </div>
-
-          <div class="row">
+            <app-input label="Landscape Image URL"
+                       value="{{execution.content.landscape_image_url}}"></app-input>
             <app-input label="Cook Image URL"
                        value="{{execution.content.cook_image_url}}"></app-input>
           </div>
 
+          <div class="row content-image-row">
+            <div class="content-image">
+              <h2>Landscape Image</h2>
+              <img src="[[execution.content.landscape_image_url]]">
+            </div>
+            <div class="content-image">
+              <h2>Cook Image</h2>
+              <img src="[[execution.content.cook_image_url]]">
+            </div>
+          </div>
+
+          <div class="row">
+            <app-input label="Dinner Non Veg Image URL"
+                       value="{{execution.content.dinner_non_veg_image_url}}"></app-input>
+
+            <app-input label="Dinner Veg Image URL"
+                       value="{{execution.content.dinner_veg_image_url}}"></app-input>
+          </div>
+
+
+          <div class="row content-image-row">
+            <div class="content-image">
+              <h2>Dinner Non Veg Image</h2>
+              <img src="[[execution.content.dinner_non_veg_image_url]]">
+            </div>
+            <div class="content-image">
+              <h2>Dinner Veg Image</h2>
+              <img src="[[execution.content.dinner_veg_image_url]]">
+            </div>
+          </div>
+
+
           <div class="row">
             <app-input label="Hands Plate Non-Veg Image URL"
                        value="{{execution.content.hands_plate_non_veg_image_url}}"></app-input>
-            <app-input label-group="Hands Plate Veg Image URL"
+            <app-input label="Hands Plate Veg Image URL"
                        value="{{execution.content.hands_plate_veg_image_url}}"></app-input>
+          </div>
+
+          <div class="row content-image-row">
+            <div class="content-image">
+              <h2>Non-veg Plate Image</h2>
+              <img src="[[execution.content.hands_plate_non_veg_image_url]]">
+            </div>
+            <div class="content-image">
+              <h2>Veg Plate Image</h2>
+              <img src="[[execution.content.hands_plate_veg_image_url]]">
+            </div>
           </div>
 
           <div class="row">
@@ -307,57 +404,221 @@
           </div>
         </div>
 
-        <button class="accordion">Dishes</button>
+        <button class="accordion" editor="head_chef content_writer culture_guide">Dishes</button>
         <div id="dishPanel"
-             class="panel">
+             class="panel"
+             editor="head_chef content_writer culture_guide">
           <template is="dom-repeat"
-                    items="{{dishes}}"
+                    items="{{execution.dishes}}"
                     as="dish">
             <div><strong>Dish:</strong> </div>
             <div class="row">
-              <app-input type="number"
+              <app-input editor="head_chef"
+                         type="number"
                          label="Dish Number"
-                         value="{{execution.dish.number}}"></app-input>
+                         value="{{dish.number}}"></app-input>
 
-              <app-input label="Dish Color #(HEX)"
-                         value="{{execution.dish.color}}"
-                         placeholder="#FF5722"></app-input>
+              <app-input editor="culture_guide"
+                         label="Dish Color #(HEX)"
+                         value="{{dish.color}}"
+                         placeholder="#FF5722 (placeholder)"></app-input>
 
-              <app-input label="Dish Name (HTML)"
-                         value="{{execution.dish.name}}"></app-input>
+              <app-input editor="head_chef"
+                         label="Dish Name (HTML)"
+                         value="{{dish.name}}"></app-input>
 
             </div>
-            <app-textarea label="Dish Description Preview (HTML)"
-                          value="{{execution.dish.description_preview}}"></app-textarea>
+            <app-textarea editor="content_writer"
+                          label="Dish Description Preview (HTML)"
+                          value="{{dish.description_preview}}"></app-textarea>
+            <app-textarea editor="content_writer"
+                          label="Dish Description (HTML)"
+                          value="{{dish.description}}"></app-textarea>
 
-            <app-textarea label="Dish Ingredients (HTML)"
-                          value="{{execution.dish.ingredients}}"></app-textarea>
+            <app-textarea editor="head_chef"
+                          label="Dish Ingredients (HTML)"
+                          value="{{dish.ingredients}}"></app-textarea>
 
-            <app-checkbox value="{{dish.is_for_vegetarian}}">Is for Vegetarians</app-checkbox>
-            <br>
-            <app-checkbox value="{{dish.is_for_non_vegetarian}}">Is for Non-Vegatarian</app-checkbox>
-            <br/>
-            <br/>
-            <br/>
 
-        </template>
+            <app-checkbox editor="head_chef"
+                          checked="{{dish.is_for_vegetarian}}">Is for Vegetarians</app-checkbox>
             <br>
-            <button on-tap="addDish">Add Dish</button>
+            <app-checkbox editor="head_chef"
+                          checked="{{dish.is_for_non_vegetarian}}">Is for Non-Vegatarian</app-checkbox>
             <br>
-            <label>Dish Index</label>
-            <input value="{{dishRemoveIndex::input}}">
-            <button on-tap="removeDish">Remove Dish</button>
+            <p editor="culture_guide">Dish Name: <span>[[dish.name]]</span></p>
+            <p editor="culture_guide">Dish Ingredients: <span>[[dish.ingredients]]</span></p>
+            <app-checkbox editor="culture_guide"
+                          checked="{{dish.is_on_main_plate}}">Is On Main Plate</app-checkbox>
+            <app-input hidden$="[[!dish.is_on_main_plate]]"
+                       label="Dish Image URL"
+                       value="{{dish.image_url}}"></app-input>
+            <br>
+            <br>
+
+          </template>
+          <button on-tap="addDish">Add Dish</button>
+          <br>
+          <app-input type="number"
+                     label="Dish Index"
+                     value="{{dishRemoveIndex}}"></app-input>
+          <button on-tap="removeDish">Remove Dish</button>
         </div>
 
-        <button class="accordion">Diet</button>
-        <div class="panel">
-          <app-checkbox value="{{execution.has_pork}}">Has Pork</app-checkbox><br>
-          <app-checkbox value="{{execution.has_beef}}">Has Beef</app-checkbox><br>
-          <app-checkbox value="{{execution.has_chicken}}">Has Chicken</app-checkbox><br>
+        <button editor="head_chef" class="accordion">Diet</button>
+        <div editor="head_chef"
+             class="panel">
+          <app-checkbox checked="{{execution.has_pork}}">Has Pork</app-checkbox><br>
+          <app-checkbox checked="{{execution.has_beef}}">Has Beef</app-checkbox><br>
+          <app-checkbox checked="{{execution.has_chicken}}">Has Chicken</app-checkbox><br>
         </div>
 
-          <button disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
+        <button class="accordion" editor="culture_guide">Notifications</button>
+        <div class="panel"
+             editor="culture_guide">
+          <app-textarea class="textarea"
+                        label="Delivery SMS"
+                        value="{{execution.notifications.delivery_sms}}"></app-textarea>
+          <app-textarea class="textarea"
+                        label="Rating SMS"
+                        value="{{execution.notifications.rating_sms}}"></app-textarea>
+
         </div>
+
+        <button class="accordion" editor="culture_guide">Culture Guide</button>
+        <div id="cultureGuidePanel"
+             class="panel"
+             editor="culture_guide">
+          <app-textarea label="Dinner Instructions"
+                        value="{{execution.culture_guide.dinner_instructions}}"></app-textarea>
+          <app-textarea label="Vegetarian Dinner Instructions"
+                        value="{{execution.culture_guide.vegetarian_dinner_instructions}}"></app-textarea>
+          <div class="row">
+            <app-input label="Main Color"
+                       value="{{execution.culture_guide.main_color}}"></app-input>
+            <app-input label="Font Name"
+                       value="{{execution.culture_guide.font_name}}"></app-input>
+          </div>
+          <div class="row">
+            <app-input label="Font Name"
+                       value="{{execution.culture_guide.font_name_post_script}}"></app-input>
+            <app-select label="Font Style"
+                        value="{{execution.culture_guide.font_style}}"
+                        noink>
+              <paper-listbox slot="dropdown-content"
+                             class="dropdown-content"
+                             style="min-width: 200px">
+                <paper-item label="light">light</paper-item>
+                <paper-item label="regular">regular</paper-item>
+                <paper-item label="medium">medium</paper-item>
+                <paper-item label="bold">bold</paper-item>
+              </paper-listbox>
+            </app-select>
+          </div>
+          <div class="row">
+            <app-checkbox checked="{{execution.culture_guide.font_caps}}">Font Caps</app-input>
+          </div>
+          <h2>Info Boxes</h2>
+          <template id="infoBoxesRepeat"
+                    is="dom-repeat"
+                    items="{{execution.culture_guide.info_boxes}}"
+                    as="info_box">
+            <app-input label="Title"
+                       value="{{info_box.title}}"></app-input>
+
+            <div class="row">
+              <app-input label="Image"
+                         value="{{info_box.image}}"></app-input>
+
+              <app-input label="Caption"
+                         value="{{info_box.caption}}"></app-input>
+
+            </div>
+            <app-textarea label="text"
+                          value="{{info_box.text}}"></app-textarea>
+
+            <br>
+            <br>
+          </template>
+          <br>
+          <button on-tap="addInfoBox">Add Info Box</button>
+          <br>
+          <app-input type="number"
+                     label="Info Box Index"
+                     value="{{infoBoxRemoveIndex}}"></app-input>
+          <button on-tap="removeInfoBox">Remove Info Box</button>
+        </div>
+
+        <button class="accordion" editor="culture_guide">Stickers</button>
+        <div id="stickersPanel"
+             class="panel"
+             editor="culture_guide">
+          <template is="dom-repeat"
+                    items="{{execution.stickers}}"
+                    as="sticker">
+
+            <div class="row">
+              <app-input label="Name"
+                         value="{{sticker.name}}">
+              </app-input>
+
+              <app-input label="Ingredients"
+                         value="{{sticker.ingredients}}">
+              </app-input>
+            </div>
+            <div class="row">
+              <app-input label="Extra Instructions"
+                         value="{{sticker.extra_instructions}}">
+              </app-input>
+
+              <app-select label="Font Style"
+                          value="{{sticker.eating_temperature}}"
+                          noink>
+                <paper-listbox slot="dropdown-content"
+                               class="dropdown-content"
+                               style="min-width: 200px">
+                  <paper-item label="hot">hot</paper-item>
+                  <paper-item label="room">room</paper-item>
+                  <paper-item label="cold">cold</paper-item>
+                </paper-listbox>
+              </app-select>
+            </div>
+            <div class="row">
+              <app-input label="Reheat Option 1"
+                         value="{{sticker.reheat_option_1}}">
+              </app-input>
+
+              <app-input label="Reheat Time 1 "
+                         value="{{sticker.reheat_time_1}}">
+              </app-input>
+            </div>
+            <div class="row">
+              <app-checkbox checked="{{execution.reheat_option_1_preferred}}">Reheat Option 1 Preferred</app-checkbox>
+            </div>
+            <div class="row">
+              <app-input label="Reheat Option 2"
+                         value="{{sticker.reheat_option_2}}">
+              </app-input>
+
+              <app-input label="Reheat Time 2"
+                         value="{{sticker.reheat_time_2}}">
+              </app-input>
+            </div>
+            <br>
+            <br>
+          </template>
+          <br>
+          <button on-tap="addSticker">Add Sticker</button>
+          <br>
+          <app-input type="number"
+                     label="Sticker Index"
+                     value="{{stickerRemoveIndex}}"></app-input>
+          <button on-tap="removeSticker">Remove Sticker</button>
+        </div>
+      </div>
+
+      <button id="updateBtn" disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
+    </div>
 
   </template>
   </dom-repeat>
@@ -378,10 +639,6 @@
           execution: {
             type: Object,
             notify: true,
-          },
-          dishes: {
-            type: Array,
-            value: [],
           },
           loading: {
             type: Boolean
@@ -431,25 +688,64 @@
         this.getExecution(id);
         const params = GetURLParmas();
         this.setMode(params.mode);
+
+        this.setTimer(id);
+      }
+
+      setTimer(id) {
+        this.$.updateBtn.disabled = false;
+        if (!id || id === "") {
+          this.$.timer.hidden = true;
+          return;
+        }
+        var count = 61;
+        var counter = setInterval(timer, 60000); // will run it every 1 minute
+        var thisel = this;
+
+        function timer() {
+          count = count - 1;
+          if (count == -1) {
+            clearInterval(counter);
+            thisel.$.updateBtn.disabled = true;
+            alert('Out of time. Please duplicate tab and copy content');
+            return;
+          }
+
+          var minutes = count;
+
+          thisel.$.timer.innerHTML = `${minutes} minutes left to update`;
+        };
+        timer();
       }
 
       setMode(mode) {
-        var elements = this.shadowRoot.querySelectorAll('input[name="mode"]');
-        for (var i = 0, l = elements.length; i < l; i++) {
-          if (elements[i].value === mode) {
-            return elements[i].checked = 'true';
+        let elementsMode = this.shadowRoot.querySelectorAll('input[name="mode"]');
+        for (var i = 0, l = elementsMode.length; i < l; i++) {
+          if (elementsMode[i].value === mode) {
+            elementsMode[i].checked = 'true';
+          }
+        }
+        // only show relavent elements
+        let elements = this.root.querySelectorAll('[editor]');
+        for (let i = 0; i < elements.length; i++) {
+          if (mode == 'captain') {
+            elements[i].hidden = false;
+            continue;
+          }
+          let editor = elements[i].getAttribute('editor');
+          if (editor) {
+            if (editor.includes(mode)) {
+              elements[i].hidden = false;
+            } else {
+              elements[i].hidden = true;
+            }
           }
         }
       }
 
       getExecution(id) {
-        if (!id || id === 0) {
-          this.execution = {
-            culture: {},
-            culture_cook: {},
-            content: {},
-            dishes: [],
-          };
+        if (!id || id === "") {
+          this.setExecution({});
           return;
         }
         this.loading = true;
@@ -474,12 +770,9 @@
         const date = new Date(dateValue);
         this.execution.date = date.toISOString().substr(0, 10);
         // set dishes
-        const dishes = this.dishes;
-        this.execution.dishes = [];
-        for (let i = 0; i < dishes.length; i++) {
-          dishes[i].number = Number(dishes[i].number);
+        for (let i = 0; i < this.execution.dishes.length; i++) {
+          this.execution.dishes[i].number = Number(this.execution.dishes[i].number);
         }
-        this.execution.dishes = dishes;
         // update
         this.loading = true;
         this.service.UpdateExecution(this.execution).then((resp) => {
@@ -498,18 +791,41 @@
 
       setExecution(execution) {
         if (execution) {
+          if (!execution.culture) {
+            execution.culture = {};
+          }
+          if (!execution.culture_cook) {
+            execution.culture_cook = {};
+          }
+          if (!execution.culture_cook.q_and_a) {
+            execution.culture_cook.q_and_a = []
+          }
+          if (!execution.content) {
+            execution.content = {};
+          }
+          if (!execution.culture_guide) {
+            execution.culture_guide = {};
+          }
+          if (!execution.culture_guide.info_boxes) {
+            execution.culture_guide.info_boxes = []
+          }
+          if (!execution.dishes) {
+            execution.dishes = [];
+          }
+          if (!execution.stickers) {
+            execution.stickers = [];
+          }
           this.execution = execution;
           this.$.date.value = execution.date;
-          this.dishes = execution.dishes;
         }
       }
 
       addDish() {
-        if (!this.dishes) {
-          this.dishes = [];
+        if (!this.execution.dishes) {
+          this.execution.dishes = [];
         }
-        this.push('dishes', {});
-        this.dishRemoveIndex = this.dishes.length;
+        this.push('execution.dishes', {});
+        this.dishRemoveIndex = this.execution.dishes.length;
         setTimeout(() => {
           this.$.dishPanel.style.maxHeight = this.$.dishPanel.scrollHeight + "px";
         }, 500);
@@ -519,11 +835,77 @@
       }
 
       removeDish() {
-        if (this.dishRemoveIndex < 1 || this.dishRemoveIndex > this.dishes.length) {
+        if (this.dishRemoveIndex < 1 || this.dishRemoveIndex > this.execution.dishes.length) {
           return;
         }
-        this.splice('dishes', this.dishRemoveIndex - 1, 1);
-        this.dishRemoveIndex = this.dishes.length;
+        this.splice('execution.dishes', this.dishRemoveIndex - 1, 1);
+        this.dishRemoveIndex = this.execution.dishes.length;
+      }
+
+      addInfoBox() {
+        if (!this.execution.culture_guide.info_boxes) {
+          this.execution.culture_guide.info_boxes = [];
+        }
+        this.push('execution.culture_guide.info_boxes', {});
+        this.infoBoxRemoveIndex = this.execution.culture_guide.info_boxes.length;
+        setTimeout(() => {
+          this.$.cultureGuidePanel.style.maxHeight = this.$.cultureGuidePanel.scrollHeight + "px";
+        }, 500);
+        setTimeout(() => {
+          this.$.cultureGuidePanel.style.maxHeight = this.$.cultureGuidePanel.scrollHeight + "px";
+        }, 1000);
+      }
+
+      removeInfoBox() {
+        if (this.infoBoxRemoveIndex < 1 || this.infoBoxRemoveIndex > this.execution.culture_guide.info_boxes.length) {
+          return;
+        }
+        this.splice('execution.culture_guide.info_boxes', this.infoBoxRemoveIndex - 1, 1);
+        this.infoBoxRemoveIndex = this.execution.culture_guide.info_boxes.length;
+      }
+
+      addQnA() {
+        if (!this.execution.culture_cook.q_and_a) {
+          this.execution.culture_cook.q_and_a = [];
+        }
+        this.push('execution.culture_cook.q_and_a', {});
+        this.QnARemoveIndex = this.execution.culture_cook.q_and_a.length;
+        setTimeout(() => {
+          this.$.cultureCookPanel.style.maxHeight = this.$.cultureCookPanel.scrollHeight + "px";
+        }, 500);
+        setTimeout(() => {
+          this.$.cultureCookPanel.style.maxHeight = this.$.cultureCookPanel.scrollHeight + "px";
+        }, 1000);
+      }
+
+      removeQnA() {
+        if (this.QnARemoveIndex < 1 || this.QnARemoveIndex > this.execution.culture_cook.q_and_a.length) {
+          return;
+        }
+        this.splice('execution.culture_cook.q_and_a', this.QnARemoveIndex - 1, 1);
+        this.QnARemoveIndex = this.execution.culture_cook.q_and_a.length;
+      }
+
+      addSticker() {
+        if (!this.execution.stickers) {
+          this.execution.stickers = [];
+        }
+        this.push('execution.stickers', {});
+        this.stickerRemoveIndex = this.execution.stickers.length;
+        setTimeout(() => {
+          this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
+        }, 500);
+        setTimeout(() => {
+          this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
+        }, 1000);
+      }
+
+      removeSticker() {
+        if (this.stickerRemoveIndex < 1 || this.stickerRemoveIndex > this.execution.stickers.length) {
+          return;
+        }
+        this.splice('execution.stickers', this.stickerRemoveIndex - 1, 1);
+        this.stickerRemoveIndex = this.execution.stickers.length;
       }
     }
     window.customElements.define(ExecutionPage.is, ExecutionPage);
