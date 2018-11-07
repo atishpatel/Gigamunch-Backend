@@ -8,30 +8,30 @@ handlers:
     secure: always
 
   - url: /sub/swagger.json
-    static_files: app/SubAPI.swagger.json
-    upload: app/SubAPI.swagger.json
+    static_files: web/SubAPI.swagger.json
+    upload: web/SubAPI.swagger.json
     secure: always
   
   - url: /sub/css
-    static_dir: app/dist/css
+    static_dir: web/dist/css
     secure: always
 
   - url: /sub/js
-    static_dir: app/dist/js
+    static_dir: web/dist/js
     secure: always
 
   - url: /sub/(.*\.(js|json))$
-    static_files: app/dist/\1
-    upload: app/dist/.*\.(js|json)$
+    static_files: web/dist/\1
+    upload: web/dist/.*\.(js|json)$
 
   - url: /sub/manifest.json
-    static_dir: app/dist/manifest.json
+    static_dir: web/dist/manifest.json
     secure: always
 
   # TODO: set meta data on server side
   - url: /sub.*
-    static_files: app/dist/index.html
-    upload: app/dist/index.html
+    static_files: web/dist/index.html
+    upload: web/dist/index.html
     secure: always
 
   - url: /.*
@@ -50,4 +50,4 @@ skip_files:
   - ^(.*/)?.*\.gitignore$
   - ^(.*/)?.*\.lock$
   - ^(.*/)?.*/LICENSE$
-  - ^(app/node_modules/.*)
+  - ^(web/node_modules/.*)
