@@ -19,6 +19,8 @@
 <link rel="import"
       href="components/app-textarea.html">
 <link rel="import"
+      href="components/app-html-editor.html">
+<link rel="import"
       href="components/app-checkbox.html">
 <link rel="import"
       href="components/app-select.html">
@@ -194,7 +196,7 @@
             visibility: visible;
         }
 
-        app-input {
+        app-input, app-html-editor {
           padding: 8px 0;
         }
         
@@ -255,10 +257,10 @@
           <span class="checkmark"></span>
         </label>
       </div>
-
       <div class="form">
-        <button class="accordion" accordian-active>General</button>
-        <div class="panel">
+        <button editor="captain" class="accordion" accordian-active>General</button>
+        <div editor="captain"
+             class="panel">
           <app-input id="date"
                      type="date"
                      label="Date*"></app-input>
@@ -284,12 +286,10 @@
 
           <app-input label="Nationality"
                      value="{{execution.culture.nationality}}"></app-input>
-          <app-textarea class="textarea"
-                        label="Description Preview (HTML)"
-                        value="{{execution.culture.description_preview}}"></app-textarea>
-          <app-textarea class="textarea"
-                        label="Description (HTML)"
-                        value="{{execution.culture.description}}"></app-textarea>
+          <app-html-editor label="Description Preview (HTML)"
+                           value="{{execution.culture.description_preview}}"></app-html-editor>
+          <app-html-editor label="Description (HTML)"
+                           value="{{execution.culture.description}}"></app-html-editor>
 
         </div>
 
@@ -305,11 +305,12 @@
                        value="{{execution.culture_cook.last_name}}"></app-input>
 
           </div>
-          <app-textarea label="Story Preview (HTML)"
-                        value="{{execution.culture_cook.story_preview}}"></app-textarea>
+          <app-html-editor label="Story Preview (HTML)"
+                           value="{{execution.culture_cook.story_preview}}"></app-html-editor>
 
-          <app-textarea label="Story (HTML)"
-                        value="{{execution.culture_cook.story}}"></app-textarea>
+          <app-html-editor id="storyInput"
+                           label="Story (HTML)"
+                           value="{{execution.culture_cook.story}}"></app-html-editor>
 
           <h2>Qestions & Answers</h2>
           <template id="infoBoxesRepeat"
@@ -321,15 +322,20 @@
 
             <app-textarea label="Answer"
                           value="{{q_and_a.answer}}"></app-textarea>
+
             <br>
+            <hr>
             <br>
           </template>
           <button on-tap="addQnA">Add Q&A</button>
           <br>
-          <app-input type="number"
-                     label="Info Box Index"
-                     value="{{QnARemoveIndex}}"></app-input>
-          <button on-tap="removeQnA">Remove Q&A</button>
+          <h2>Remove An Q&A</h2>
+          <div class="row">
+            <app-input type="number"
+                       label="Remove Index"
+                       value="{{QnARemoveIndex}}"></app-input>
+            <button on-tap="removeQnA">Remove Q&A</button>
+          </div>
 
         </div>
 
@@ -412,6 +418,8 @@
                     items="{{execution.dishes}}"
                     as="dish">
             <div><strong>Dish:</strong> </div>
+            <p editor="culture_guide content_writer">Dish Name: <span>[[dish.name]]</span></p>
+            <p editor="culture_guide content_writer">Dish Ingredients: <span>[[dish.ingredients]]</span></p>
             <div class="row">
               <app-input editor="head_chef"
                          type="number"
@@ -424,20 +432,20 @@
                          placeholder="#FF5722 (placeholder)"></app-input>
 
               <app-input editor="head_chef"
-                         label="Dish Name (HTML)"
+                         label="Dish Name"
                          value="{{dish.name}}"></app-input>
 
             </div>
-            <app-textarea editor="content_writer"
-                          label="Dish Description Preview (HTML)"
-                          value="{{dish.description_preview}}"></app-textarea>
-            <app-textarea editor="content_writer"
-                          label="Dish Description (HTML)"
-                          value="{{dish.description}}"></app-textarea>
+            <app-html-editor editor="content_writer"
+                             label="Dish Description Preview (HTML)"
+                             value="{{dish.description_preview}}"></app-html-editor>
+            <app-html-editor editor="content_writer"
+                             label="Dish Description (HTML)"
+                             value="{{dish.description}}"></app-html-editor>
 
-            <app-textarea editor="head_chef"
-                          label="Dish Ingredients (HTML)"
-                          value="{{dish.ingredients}}"></app-textarea>
+            <app-html-editor editor="head_chef"
+                             label="Dish Ingredients (HTML)"
+                             value="{{dish.ingredients}}"></app-html-editor>
 
 
             <app-checkbox editor="head_chef"
@@ -446,14 +454,15 @@
             <app-checkbox editor="head_chef"
                           checked="{{dish.is_for_non_vegetarian}}">Is for Non-Vegatarian</app-checkbox>
             <br>
-            <p editor="culture_guide">Dish Name: <span>[[dish.name]]</span></p>
-            <p editor="culture_guide">Dish Ingredients: <span>[[dish.ingredients]]</span></p>
             <app-checkbox editor="culture_guide"
                           checked="{{dish.is_on_main_plate}}">Is On Main Plate</app-checkbox>
-            <app-input hidden$="[[!dish.is_on_main_plate]]"
+            <app-input editor="culture_guide"
+                       hidden$="[[dish.is_on_main_plate]]"
                        label="Dish Image URL"
                        value="{{dish.image_url}}"></app-input>
+
             <br>
+            <hr>
             <br>
 
           </template>
@@ -476,11 +485,9 @@
         <button class="accordion" editor="culture_guide">Notifications</button>
         <div class="panel"
              editor="culture_guide">
-          <app-textarea class="textarea"
-                        label="Delivery SMS"
+          <app-textarea label="Delivery SMS"
                         value="{{execution.notifications.delivery_sms}}"></app-textarea>
-          <app-textarea class="textarea"
-                        label="Rating SMS"
+          <app-textarea label="Rating SMS"
                         value="{{execution.notifications.rating_sms}}"></app-textarea>
 
         </div>
@@ -537,16 +544,21 @@
             <app-textarea label="text"
                           value="{{info_box.text}}"></app-textarea>
 
+
             <br>
+            <hr>
             <br>
           </template>
           <br>
           <button on-tap="addInfoBox">Add Info Box</button>
           <br>
-          <app-input type="number"
-                     label="Info Box Index"
-                     value="{{infoBoxRemoveIndex}}"></app-input>
-          <button on-tap="removeInfoBox">Remove Info Box</button>
+          <h2>Remove An Info box</h2>
+          <div class="row">
+            <app-input type="number"
+                       label="Remove Index"
+                       value="{{infoBoxRemoveIndex}}"></app-input>
+            <button on-tap="removeInfoBox">Remove Info Box</button>
+          </div>
         </div>
 
         <button class="accordion" editor="culture_guide">Stickers</button>
@@ -604,7 +616,9 @@
                          value="{{sticker.reheat_time_2}}">
               </app-input>
             </div>
+
             <br>
+            <hr>
             <br>
           </template>
           <br>
@@ -646,6 +660,9 @@
           dishRemoveIndex: {
             type: Number,
             value: 1,
+          },
+          mode: {
+            type: String,
           }
         }
       }
@@ -719,6 +736,7 @@
       }
 
       setMode(mode) {
+        this.mode = mode;
         let elementsMode = this.shadowRoot.querySelectorAll('input[name="mode"]');
         for (var i = 0, l = elementsMode.length; i < l; i++) {
           if (elementsMode[i].value === mode) {
@@ -817,6 +835,10 @@
           }
           this.execution = execution;
           this.$.date.value = execution.date;
+          this.setMode(this.mode);
+          setTimeout(() => {
+            this.setMode(this.mode);
+          }, 500);
         }
       }
 
@@ -828,6 +850,7 @@
         this.dishRemoveIndex = this.execution.dishes.length;
         setTimeout(() => {
           this.$.dishPanel.style.maxHeight = this.$.dishPanel.scrollHeight + "px";
+          this.setMode(this.mode);
         }, 500);
         setTimeout(() => {
           this.$.dishPanel.style.maxHeight = this.$.dishPanel.scrollHeight + "px";
@@ -850,6 +873,7 @@
         this.infoBoxRemoveIndex = this.execution.culture_guide.info_boxes.length;
         setTimeout(() => {
           this.$.cultureGuidePanel.style.maxHeight = this.$.cultureGuidePanel.scrollHeight + "px";
+          this.setMode(this.mode);
         }, 500);
         setTimeout(() => {
           this.$.cultureGuidePanel.style.maxHeight = this.$.cultureGuidePanel.scrollHeight + "px";
@@ -872,6 +896,7 @@
         this.QnARemoveIndex = this.execution.culture_cook.q_and_a.length;
         setTimeout(() => {
           this.$.cultureCookPanel.style.maxHeight = this.$.cultureCookPanel.scrollHeight + "px";
+          this.setMode(this.mode);
         }, 500);
         setTimeout(() => {
           this.$.cultureCookPanel.style.maxHeight = this.$.cultureCookPanel.scrollHeight + "px";
@@ -894,6 +919,7 @@
         this.stickerRemoveIndex = this.execution.stickers.length;
         setTimeout(() => {
           this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
+          this.setMode(this.mode);
         }, 500);
         setTimeout(() => {
           this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";

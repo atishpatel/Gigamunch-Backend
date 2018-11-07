@@ -127,15 +127,13 @@ func (c *progressCounter) addCheck(success bool) {
 func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 	exesProgress := make([]*pbcommon.ExecutionProgress, len(exes))
 
-	for _, exe := range exes {
-		headChef := progressCounter{}
+	// for _, exe := range exes {
+	// 	headChef := progressCounter{}
 
-		photographer := progressCounter{}
+	// 	contentWriter := progressCounter{}
 
-		contentWriter := progressCounter{}
-
-		cultureGuide := progressCounter{}
-	}
+	// 	cultureGuide := progressCounter{}
+	// }
 	return exesProgress
 }
 
@@ -145,7 +143,6 @@ func getExecutionByMode(mode string, exeNew *execution.Execution) *execution.Exe
 	case "captain":
 		exe = exeNew
 	case "head_chef":
-	case "photographer":
 	case "content_writer":
 	case "culture_guide":
 	}

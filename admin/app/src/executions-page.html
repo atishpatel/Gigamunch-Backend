@@ -67,7 +67,8 @@
                      active="[[loading]]">
       </paper-spinner>
 
-      <a href="execution?mode=captain"  class="waves-effect btn">Create new</a>
+      <a href="execution?mode=captain"
+         class="waves-effect btn">Create new</a>
 
       <table class="striped executions-table">
         <thead>
@@ -99,15 +100,9 @@
               </td>
               <td>
                 <div class="edit-progress-section">
-                  <a href="execution/[[execution.id]]?mode=head-chef">
+                  <a href="execution/[[execution.id]]?mode=head_chef">
                     <span>Head Chef (Mike)</span>
                     <paper-progress value="[[execution.progress.head_chef]]"></paper-progress>
-                  </a>
-                </div>
-                <div class="edit-progress-section">
-                  <a href="execution/[[execution.id]]?mode=photographer">
-                    <span>Photographer (Piyush)</span>
-                    <paper-progress value="[[execution.progress.photographer]]"></paper-progress>
                   </a>
                 </div>
                 <div class="edit-progress-section">
@@ -124,11 +119,13 @@
                 </div>
               </td>
               <td>
-                <a target="_blank" href="/sub/dinner/[[execution.id]]">
+                <a target="_blank"
+                   href="/sub/dinner/[[execution.id]]">
                   <i class="material-icons"
                   style="font-size: 42px;">remove_red_eye</i>
                 </a>
-                <a target="_blank" href="execution-preview/[[execution.id]]">
+                <a target="_blank"
+                   href="execution-preview/[[execution.id]]">
                   <i class="material-icons"
                   style="font-size: 42px;">code</i>
                 </a>

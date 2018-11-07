@@ -8,10 +8,14 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-behaviors/iron-control-state.html">
-<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../../bower_components/iron-validatable-behavior/iron-validatable-behavior.html">
+<link rel="import"
+      href="../../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../../bower_components/iron-behaviors/iron-control-state.html">
+<link rel="import"
+      href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import"
+      href="../../bower_components/iron-validatable-behavior/iron-validatable-behavior.html">
 
 <!--
 `iron-autogrow-textarea` is an element containing a textarea that grows in height as more
@@ -48,7 +52,7 @@ Custom property | Description | Default
         -webkit-appearance: textarea;
         overflow: hidden;
         margin-top: 8px;
-        min-height: 134px;
+        min-height: 110px;
       }
 
       .mirror-text {
@@ -62,19 +66,8 @@ Custom property | Description | Default
       }
 
       textarea {
-        /* position: relative;
-        outline: none;
-        border: none;
-        resize: none;
-        background: inherit;
-        color: inherit; */
-        /* see comments in template */
         height: 81%;
-        /* font-size: inherit;
-        font-family: inherit;
-        line-height: inherit;
-        text-align: inherit; */
-        min-height: 100px;
+        min-height: 75px;
         width: calc(99% - 24px);
         padding: 12px;
         border: solid #CFD8DC 1px;
