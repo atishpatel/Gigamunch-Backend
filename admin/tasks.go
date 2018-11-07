@@ -36,7 +36,7 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 	activityC, _ := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	err = activityC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
-		log.Warningf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		log.Errorf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
 		return errors.GetErrorWithCode(err)
 	}
 	return nil

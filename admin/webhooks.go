@@ -76,7 +76,7 @@ func (s *server) Slack(ctx context.Context, w http.ResponseWriter, r *http.Reque
 // TwilioSMS is a webhook for twilio messages.
 func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	err := r.ParseForm()
-	logging.Infof(ctx, "req body: %s err: %s", r.Form, err)
+	log.Infof(ctx, "req body: %s err: %s", r.Form, err)
 	from := r.FormValue("From")
 	from = sub.GetCleanPhoneNumber(from)
 	body := r.FormValue("Body")
@@ -94,7 +94,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		body = splitBody[1]
 		subs, err := subC.GetSubscribersByPhoneNumber(to)
 		if err != nil {
-			logging.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
+			log.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
 		}
 		if len(subs) > 0 {
 			email = subs[0].Email
@@ -120,7 +120,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		// From Customer to Gigamunch
 		subs, err := subC.GetSubscribersByPhoneNumber(from)
 		if err != nil {
-			logging.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
+			log.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
 		}
 		if len(subs) > 0 {
 			name = subs[0].FirstName + " " + subs[0].LastName
@@ -191,6 +191,7 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 		utils.Criticalf(ctx, "failed to get subscriber email from typeform: %+v", err)
 		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
+	email = strings.Replace(email, " ", "+", -1) // replaces space with + in emails
 	ctx = context.WithValue(ctx, common.ContextUserEmail, email)
 	suboldC := subold.NewWithLogging(ctx, log)
 	subscriber, err := suboldC.GetSubscriber(email)

@@ -9,6 +9,8 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 
+	sdreporting "cloud.google.com/go/errorreporting"
+
 	sdlogging "cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"google.golang.org/api/option"
@@ -106,10 +108,6 @@ const (
 )
 
 var (
-	sdClient *sdlogging.Client
-)
-
-var (
 	// Errors
 	errDatastore = errors.InternalServerError
 	errInternal  = errors.InternalServerError
@@ -125,15 +123,10 @@ func Errorf(ctx context.Context, format string, args ...interface{}) {
 	aelog.Errorf(ctx, format, args...)
 }
 
-// Warningf logs debug messages. Only logs on development servers.
-func Warningf(ctx context.Context, format string, args ...interface{}) {
-	aelog.Warningf(ctx, format, args...)
-}
-
 // Client is a logging client.
 type Client struct {
 	ctx        context.Context
-	sdLogger   *sdlogging.Logger
+	sdReporter *sdreporting.Client
 	loggerID   string
 	path       string
 	db         common.DB
@@ -145,17 +138,23 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 	if dbC == nil {
 		return nil, errInternal.Annotate("dbC cannot be nil")
 	}
+	var opts option.ClientOption
 	if serverInfo.IsStandardAppEngine {
 		httpClient := urlfetch.Client(ctx)
-		setup(ctx, httpClient, serverInfo.ProjectID)
+		opts = option.WithHTTPClient(httpClient)
 	}
-	var sdLogger *sdlogging.Logger
-	if sdClient != nil {
-		sdLogger = sdClient.Logger(loggerID)
+	sdReporter, err := sdreporting.NewClient(ctx, serverInfo.ProjectID, sdreporting.Config{
+		ServiceName: loggerID,
+		OnError: func(err error) {
+			Errorf(ctx, "failed to log to sdReporter", err)
+		},
+	}, opts)
+	if err != nil {
+		Errorf(ctx, "failed to create sdReporter", err)
 	}
 	return &Client{
 		ctx:        ctx,
-		sdLogger:   sdLogger,
+		sdReporter: sdReporter,
 		loggerID:   loggerID,
 		path:       path,
 		db:         dbC,
@@ -168,13 +167,13 @@ func (c *Client) Infof(ctx context.Context, format string, args ...interface{}) 
 	Infof(ctx, format, args...)
 }
 
-// Warningf logs debug messages. Only logs on development servers.
-func (c *Client) Warningf(ctx context.Context, format string, args ...interface{}) {
-	Warningf(ctx, format, args...)
-}
-
 // Errorf logs error messages.
 func (c *Client) Errorf(ctx context.Context, format string, args ...interface{}) {
+	if c.sdReporter != nil {
+		c.sdReporter.Report(sdreporting.Entry{
+			Error: fmt.Errorf(format, args),
+		})
+	}
 	Errorf(ctx, format, args...)
 }
 
@@ -639,6 +638,13 @@ func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode, userID 
 		},
 	}
 	c.Log(e)
+	if c.sdReporter != nil {
+		c.sdReporter.Report(sdreporting.Entry{
+			Error: fmt.Errorf("request error: %v", ewc),
+			Req:   r,
+			User:  e.UserEmail,
+		})
+	}
 }
 
 // BasicPayload is in every payload.
@@ -695,19 +701,6 @@ func (c *Client) Log(e *Entry) {
 	if err != nil {
 		Errorf(c.ctx, "failed to log entry(%+v) error: %+v", e, err)
 	}
-}
-
-func setup(ctx context.Context, httpClient *http.Client, projID string) error {
-	var ops option.ClientOption
-	if httpClient != nil {
-		ops = option.WithHTTPClient(httpClient)
-	}
-	var err error
-	sdClient, err = sdlogging.NewClient(ctx, projID, ops)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (c *Client) getStringFromCtx(key interface{}) string {

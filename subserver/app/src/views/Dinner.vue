@@ -1,11 +1,13 @@
 <template>
-  <div v-html="execution">
-
+  <div>
+    <div v-html="execution"></div>
+    <div v-html="execution.culture_cook.story"></div>
+    <div v-html="execution.culture_cook.story_preview"></div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import ExecutionsList from '../components/ExecutionsList.vue';
 import { GetExecution } from '../ts/service';
 import { IsError } from '../ts/errors';

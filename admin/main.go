@@ -226,7 +226,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr), 0, "")
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {

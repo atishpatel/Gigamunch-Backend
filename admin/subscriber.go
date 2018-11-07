@@ -274,7 +274,7 @@ func pbSubscriber(subscriber *subold.SubscriptionSignUp) *pb.Subscriber {
 		Reference:          subscriber.Reference,
 		PhoneNumber:        subscriber.PhoneNumber,
 		DeliveryTips:       subscriber.DeliveryTips,
-		BagReminderSms:     subscriber.BagReminderSMS,
+		BagReminderSMS:     subscriber.BagReminderSMS,
 		// gift
 		NumGiftDinners: int32(subscriber.NumGiftDinners),
 		ReferenceEmail: subscriber.ReferenceEmail,
