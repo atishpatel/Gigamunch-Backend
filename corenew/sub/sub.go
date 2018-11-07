@@ -863,6 +863,7 @@ func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Cli
 	sub.IsSubscribed = true
 	sub.UnSubscribedDate = tZero
 	sub.FirstBoxDate = firstBagDate
+	sub.WeeklyAmount = DerivePrice(sub.Servings)
 	err = put(c.ctx, email, sub)
 	if err != nil {
 		return errors.Wrap("failed to put sub", err)
