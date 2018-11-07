@@ -149,11 +149,11 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 		if err == nil {
 			page.FirstName = s.FirstName
 			page.LastName = s.LastName
-			page.PhoneNumber = s.PhoneNumber
-			if s.Address.GeoPoint.Valid() {
-				page.Address = s.Address.StringNoAPT()
-			}
-			page.APT = s.Address.APT
+			// page.PhoneNumber = s.PhoneNumber
+			// if s.Address.GeoPoint.Valid() {
+			// 	page.Address = s.Address.StringNoAPT()
+			// }
+			// page.APT = s.Address.APT
 			page.DeliveryNotes = s.DeliveryTips
 			page.Reference = s.Reference
 		}
