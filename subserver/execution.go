@@ -1,4 +1,4 @@
-package subserver
+package main
 
 import (
 	"context"

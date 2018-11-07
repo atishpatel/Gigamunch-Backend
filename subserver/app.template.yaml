@@ -1,10 +1,11 @@
 service: sub
-runtime: go
-api_version: go1
+runtime: go111
+
+# default_expiration: "1d"
 
 handlers:
   - url: /sub/api/.*
-    script: _go_app
+    script: auto
     secure: always
 
   - url: /sub/swagger.json
@@ -23,6 +24,7 @@ handlers:
   - url: /sub/(.*\.(js|json))$
     static_files: web/dist/\1
     upload: web/dist/.*\.(js|json)$
+    secure: always
 
   - url: /sub/manifest.json
     static_dir: web/dist/manifest.json
@@ -35,19 +37,9 @@ handlers:
     secure: always
 
   - url: /.*
-    script: _go_app
+    script: auto
+    secure: always
 
 env_variables:
-  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch
+  MYSQL_CONNECTION: server:gigamunch@unix(/cloudsql/PROJECTID:us-central1:gigasqldb)/gigamunch
   PROJECT_ID: PROJECTID
-
-skip_files:
-  - ^(.*/)?.*/test/.*$
-  - ^(.*/)?.*/tests/.*$
-  - ^(.*/)?.*\.DS_Store$
-  - ^(.*/)?.*\.md$
-  - ^(.*/)?.*\.yml$
-  - ^(.*/)?.*\.gitignore$
-  - ^(.*/)?.*\.lock$
-  - ^(.*/)?.*/LICENSE$
-  - ^(web/node_modules/.*)

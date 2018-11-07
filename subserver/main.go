@@ -1,4 +1,4 @@
-package subserver
+package main
 
 import (
 	"context"
@@ -42,7 +42,7 @@ var (
 	errInternalError    = errors.InternalServerError
 )
 
-func init() {
+func main() {
 	s := new(Server)
 	err := s.Setup()
 	if err != nil {
@@ -53,8 +53,9 @@ func init() {
 	http.HandleFunc("/sub/api/v1/GetExecution", s.Handler(s.GetExecution))
 	// Test
 	http.HandleFunc("/sub/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("success"))
+		_, _ = w.Write([]byte("success"))
 	})
+	appengine.Main()
 }
 
 // Setup sets up the server.
@@ -132,14 +133,14 @@ func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 		// get context
-		ctx := appengine.NewContext(r)
+		ctx := r.Context()
 		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			// TODO:
-			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
+			_, _ = w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
 			return
 		}
 		// create logging client
@@ -164,7 +165,7 @@ func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr), 0, "")
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {
