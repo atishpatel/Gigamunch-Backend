@@ -22,7 +22,7 @@ func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	// end decode request
 
-	l, err := log.Get(req.Id)
+	l, err := log.Get(req.ID)
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
@@ -82,16 +82,16 @@ func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *h
 
 func pbLog(l *logging.Entry) *pbcommon.Log {
 	return &pbcommon.Log{
-		Id:              l.ID,
+		ID:              l.ID,
 		LogName:         l.LogName,
 		Timestamp:       l.Timestamp.String(),
 		Type:            string(l.Type),
 		Action:          string(l.Action),
 		Path:            l.Path,
 		Severity:        int32(l.Severity),
-		UserId:          l.UserID,
+		UserID:          l.UserID,
 		UserEmail:       l.UserEmail,
-		ActionUserId:    l.ActionUserID,
+		ActionUserID:    l.ActionUserID,
 		ActionUserEmail: l.ActionUserEmail,
 		BasicPayload: &pbcommon.BasicPayload{
 			Title:       l.BasicPayload.Title,

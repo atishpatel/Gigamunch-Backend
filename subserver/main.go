@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+
 	"github.com/gorilla/schema"
 	"github.com/jmoiron/sqlx"
 
@@ -211,9 +213,7 @@ func DecodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
 }
 
 func failedToDecode(err error) *pbsub.ErrorOnlyResp {
-	return &pbsub.ErrorOnlyResp{
-		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
-	}
+	return serverhelper.FailedToDecode(err)
 }
 
 // Response is a response to a rpc call. All responses contain an error.
@@ -225,12 +225,5 @@ type Response interface {
 type Handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
-	if len(s) == 10 {
-		s += "T12:12:12.000Z"
-	}
-	t, err := time.Parse(time.RFC3339, s)
-	if err != nil {
-		return time.Time{}
-	}
-	return t
+	return serverhelper.GetDatetime(s)
 }

@@ -66,9 +66,10 @@ export function GetExecution(idOrDate: string): Promise<any> {
     return callFetch(url, 'GET', req);
 }
 
-export function UpdateExecution(execution: Common.Execution): Promise<any> {
+export function UpdateExecution(mode: string, execution: Common.Execution): Promise<any> {
     const url: string = baseURL + 'UpdateExecution';
     const req: UpdateExecutionReq = {
+        mode,
         execution,
     };
     return callFetch(url, 'POST', req);

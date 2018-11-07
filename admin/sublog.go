@@ -102,11 +102,11 @@ func pbSublog(sublog *subold.SubscriptionLog) *pb.Sublog {
 		Paid:               sublog.Paid,
 		PaidDatetime:       sublog.PaidDatetime.Format(time.RFC3339),
 		PaymentMethodToken: sublog.PaymentMethodToken,
-		TransactionId:      sublog.TransactionID,
+		TransactionID:      sublog.TransactionID,
 		Free:               sublog.Free,
 		DiscountAmount:     sublog.DiscountAmount,
 		DiscountPercent:    int32(sublog.DiscountPercent),
-		CustomerId:         sublog.CustomerID,
+		CustomerID:         sublog.CustomerID,
 		Refunded:           sublog.Refunded,
 		RefundedAmount:     sublog.RefundedAmount,
 	}

@@ -51,11 +51,15 @@ interface Execution {
   has_chicken: boolean
   email: Email
 }
+interface ExecutionProgressSummary {
+  message: string
+  is_error: boolean
+}
 interface ExecutionProgress {
   head_chef: number
-  photographer: number
   content_writer: number
   culture_guide: number
+  summary: ExecutionProgressSummary[]
 }
 interface Email {
 	dinner_non_veg_image_url: string
@@ -93,6 +97,8 @@ interface Content {
   youtube_url: string
   font_url: string
   dinner_veg_image_url: string
+  cover_image_url: string
+  map_image_url: string
 }
 interface Culture {
   country: string
@@ -138,5 +144,8 @@ interface CultureCook {
   story: string
   story_preview: string
   q_and_a: QandA[]
+}
+interface ErrorOnlyResp {
+  error: Error
 }
 }

@@ -77,6 +77,8 @@ type Content struct {
 	HandsPlateVegImageURL    string `json:"hands_plate_veg_image_url" datastore:",noindex"`
 	DinnerNonVegImageURL     string `json:"dinner_non_veg_image_url" datastore:",noindex"`
 	DinnerVegImageURL        string `json:"dinner_veg_image_url" datastore:",noindex"`
+	CoverImageURL            string `json:"cover_image_url" datastore:",noindex"`
+	MapImageURL              string `json:"map_image_url" datastore:",noindex"`
 	SpotifyURL               string `json:"spotify_url" datastore:",noindex"`
 	YoutubeURL               string `json:"youtube_url" datastore:",noindex"`
 	FontURL                  string `json:"font_url" datastore:",noindex"`

@@ -54,9 +54,10 @@ export function GetExecution(idOrDate) {
     };
     return callFetch(url, 'GET', req);
 }
-export function UpdateExecution(execution) {
+export function UpdateExecution(mode, execution) {
     var url = baseURL + 'UpdateExecution';
     var req = {
+        mode: mode,
         execution: execution,
     };
     return callFetch(url, 'POST', req);

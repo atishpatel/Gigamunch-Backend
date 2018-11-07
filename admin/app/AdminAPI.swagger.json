@@ -1605,6 +1605,12 @@
         },
         "dinner_veg_image_url": {
           "type": "string"
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "map_image_url": {
+          "type": "string"
         }
       },
       "description": "Content is a collection of urls pointing to content realted to the execution."
@@ -1840,10 +1846,6 @@
           "type": "integer",
           "format": "int32"
         },
-        "photographer": {
-          "type": "integer",
-          "format": "int32"
-        },
         "content_writer": {
           "type": "integer",
           "format": "int32"
@@ -1851,9 +1853,28 @@
         "culture_guide": {
           "type": "integer",
           "format": "int32"
+        },
+        "summary": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonExecutionProgressSummary"
+          }
         }
       },
       "description": "ExecutionProgress is the progress on an execution."
+    },
+    "CommonExecutionProgressSummary": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "is_error": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "ExecutionProgressSummary summarizes execution progress."
     },
     "CommonInfoBox": {
       "type": "object",

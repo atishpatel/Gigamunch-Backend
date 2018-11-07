@@ -116,6 +116,12 @@
         },
         "dinner_veg_image_url": {
           "type": "string"
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "map_image_url": {
+          "type": "string"
         }
       },
       "description": "Content is a collection of urls pointing to content realted to the execution."

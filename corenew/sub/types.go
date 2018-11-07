@@ -33,7 +33,7 @@ type SubscriptionSignUp struct {
 	FirstBoxDate       time.Time     `json:"first_box_date"`
 	Servings           int8          `json:"servings"`
 	VegetarianServings int8          `json:"vegetarian_servings"`
-	DeliveryTime       int8          `json:"delivery_time"`
+	DeliveryTime       int8          `json:"delivery_time"` // depecrated
 	SubscriptionDay    string        `json:"subscription_day"`
 	WeeklyAmount       float32       `json:"weekly_amount"`
 	PaymentMethodToken string        `json:"payment_method_token"`

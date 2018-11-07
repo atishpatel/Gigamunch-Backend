@@ -193,19 +193,10 @@
               }
               summaryErrors += `<span style="${style}">${message}</span><br>`;
             }
-            let dishCountNonVeg = 0;
-            let dishCountVeg = 0;
-            for (let j = 0; j < executions[i].dishes.length; j++) {
-              if (executions[i].dishes[j].is_for_vegetarian) {
-                dishCountVeg++;
-              }
-              if (executions[i].dishes[j].is_for_non_vegetarian) {
-                dishCountNonVeg++;
-              }
-            }
-            addSummaryError(`Non-veg Dishes: ${dishCountNonVeg}`, (dishCountNonVeg < 4));
-            addSummaryError(`Veg Dishes: ${dishCountVeg}`, (dishCountVeg < 4));
 
+            for (let j = 0; j < resp.progress[i].summary.length; j++) {
+              addSummaryError(resp.progress[i].summary[j].message, resp.progress[i].summary[j].is_error);
+            }
 
             executions[i].summary_errors = summaryErrors;
 

@@ -178,9 +178,10 @@ function GetExecution(idOrDate) {
     };
     return callFetch(url, 'GET', req);
 }
-function UpdateExecution(execution) {
+function UpdateExecution(mode, execution) {
     var url = baseURL + 'UpdateExecution';
     var req = {
+        mode: mode,
         execution: execution,
     };
     return callFetch(url, 'POST', req);

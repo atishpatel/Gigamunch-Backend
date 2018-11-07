@@ -2,15 +2,16 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 
-	"github.com/atishpatel/Gigamunch-Backend/subserver"
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -38,7 +39,7 @@ func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 	log.Infof(ctx, "return %d executions", len(executions))
 
 	resp := &pb.GetExecutionsResp{
-		Executions: subserver.PBExecutions(executions),
+		Executions: serverhelper.PBExecutions(executions),
 		Progress:   getProgress(executions),
 	}
 	return resp
@@ -59,13 +60,13 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
-	execution, err := exeC.Get(req.IdOrDate)
+	execution, err := exeC.Get(req.IDOrDate)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution")
 	}
 
 	resp := &pb.GetExecutionResp{
-		Execution: subserver.PBExecution(execution),
+		Execution: serverhelper.PBExecution(execution),
 	}
 	return resp
 }
@@ -88,18 +89,18 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
-	exeNew := executionFromPb(req.Execution)
+	exeNew := serverhelper.ExecutionFromPb(req.Execution)
 	var exe *execution.Execution
 	if exeNew.ID == 0 {
 		// Create
 		exe = exeNew
 	} else {
 		// Update
-		exe, err = exeC.Get(strconv.FormatInt(exeNew.ID, 10))
+		exeOld, err := exeC.Get(strconv.FormatInt(exeNew.ID, 10))
 		if err != nil {
 			return errors.Annotate(err, "failed to exection.Get")
 		}
-		exe = getExecutionByMode(req.Mode, exeNew)
+		exe = getExecutionByMode(req.Mode, exeOld, exeNew)
 	}
 	execution, err := exeC.Update(exe)
 	if err != nil {
@@ -107,7 +108,7 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 	}
 
 	resp := &pb.UpdateExecutionResp{
-		Execution: subserver.PBExecution(execution),
+		Execution: serverhelper.PBExecution(execution),
 	}
 	return resp
 }
@@ -124,214 +125,179 @@ func (c *progressCounter) addCheck(success bool) {
 	c.TotalExepectedCount++
 }
 
-func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
-	exesProgress := make([]*pbcommon.ExecutionProgress, len(exes))
+func (c *progressCounter) checkEmpty(object interface{}) {
+	if object == nil {
+		c.addCheck(false)
+		return
+	} else if object == "" {
+		c.addCheck(false)
+		return
+	}
 
-	// for _, exe := range exes {
-	// 	headChef := progressCounter{}
+	// for arrays
+	v := reflect.ValueOf(object)
+	if v.Kind() == reflect.Slice {
+		for i := 0; i < v.Len(); i++ {
+			c.checkEmpty(v.Index(i).Interface())
+		}
+		return
+	}
 
-	// 	contentWriter := progressCounter{}
-
-	// 	cultureGuide := progressCounter{}
-	// }
-	return exesProgress
+	// for structs
+	if v.Kind() == reflect.Struct {
+		for i := 0; i < v.NumField(); i++ {
+			c.checkEmpty(v.Field(i).Interface())
+		}
+		return
+	}
+	// ignore booleans, ints, floats
+	c.addCheck(true)
 }
 
-func getExecutionByMode(mode string, exeNew *execution.Execution) *execution.Execution {
-	var exe *execution.Execution
+func (c *progressCounter) getPercent() int32 {
+	return int32((float32(c.ValidCount) / float32(c.TotalExepectedCount)) * 100)
+}
+
+func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
+	exeProgresses := make([]*pbcommon.ExecutionProgress, len(exes))
+
+	for i, exe := range exes {
+		exeProgress := &pbcommon.ExecutionProgress{}
+		// Head Chef
+		hc := progressCounter{}
+		if len(exe.Dishes) < 5 {
+			hc.TotalExepectedCount += int8(5-len(exe.Stickers)) * 3
+		}
+
+		hc.checkEmpty(exe.CultureGuide.DinnerInstructions)
+		hc.checkEmpty(exe.CultureGuide.VegetarianDinnerInstructions)
+
+		// Content Writer
+		cw := progressCounter{}
+		cw.checkEmpty(exe.Culture)
+		cw.checkEmpty(exe.CultureCook)
+
+		if len(exe.CultureGuide.InfoBoxes) < 2 {
+			cw.TotalExepectedCount += int8(2 - len(exe.CultureGuide.InfoBoxes))
+		}
+
+		// Culture Guide
+		cg := progressCounter{}
+		cg.checkEmpty(exe.Content)
+		cg.checkEmpty(exe.Email)
+		cg.checkEmpty(exe.Notifications)
+		for _, sticker := range exe.Stickers {
+			if sticker.EatingTemperature == "" || sticker.EatingTemperature == "hot" {
+				cg.checkEmpty(sticker)
+			}
+		}
+		if len(exe.Stickers) < 4 {
+			cg.TotalExepectedCount += int8(4 - len(exe.Stickers))
+		}
+		hc.checkEmpty(exe.CultureGuide.MainColor)
+		hc.checkEmpty(exe.CultureGuide.FontName)
+
+		// Dishes
+		for _, dish := range exe.Dishes {
+			// Head Chef
+			hc.checkEmpty(dish.Name)
+			hc.checkEmpty(dish.Ingredients)
+			hc.addCheck(!dish.IsForNonVegetarian && !dish.IsForVegetarian)
+			// Content Writer
+			cw.checkEmpty(dish.Description)
+			cw.checkEmpty(dish.DescriptionPreview)
+			// Culture Guide
+			cg.checkEmpty(dish.Color)
+			if !dish.IsOnMainPlate {
+				cg.checkEmpty(dish.ImageURL)
+			}
+		}
+
+		// set progress
+		exeProgress.HeadChef = hc.getPercent()
+		exeProgress.ContentWriter = cw.getPercent()
+		exeProgress.CultureGuide = cg.getPercent()
+
+		// add summary
+		dishCountNonVeg := 0
+		dishCountVeg := 0
+		for _, dish := range exe.Dishes {
+			if dish.IsForVegetarian {
+				dishCountVeg++
+			}
+			if dish.IsForNonVegetarian {
+				dishCountNonVeg++
+			}
+		}
+
+		exeProgress.Summary = append(exeProgress.Summary, &pbcommon.ExecutionProgressSummary{
+			Message: fmt.Sprintf("Non-veg Dishes: %d", dishCountNonVeg),
+			IsError: (dishCountNonVeg < 4),
+		})
+		exeProgress.Summary = append(exeProgress.Summary, &pbcommon.ExecutionProgressSummary{
+			Message: fmt.Sprintf("Veg Dishes: %d", dishCountVeg),
+			IsError: (dishCountVeg < 4),
+		})
+		exeProgress.Summary = append(exeProgress.Summary, &pbcommon.ExecutionProgressSummary{
+			Message: fmt.Sprintf("CG Info Boxes: %d", len(exe.CultureGuide.InfoBoxes)),
+			IsError: (len(exe.CultureGuide.InfoBoxes) < 2),
+		})
+
+		// add progress
+		exeProgresses[i] = exeProgress
+	}
+	return exeProgresses
+}
+
+func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execution.Execution {
+	exe := exeOld
 	switch mode {
 	case "captain":
 		exe = exeNew
 	case "head_chef":
+		exe.CultureGuide.DinnerInstructions = exeNew.CultureGuide.DinnerInstructions
+		exe.CultureGuide.VegetarianDinnerInstructions = exeNew.CultureGuide.VegetarianDinnerInstructions
 	case "content_writer":
+		exe.Culture = exeNew.Culture
+		exe.CultureCook = exeNew.CultureCook
+		exe.CultureGuide.InfoBoxes = exeNew.CultureGuide.InfoBoxes
 	case "culture_guide":
+		exe.Content = exeNew.Content
+		exe.Email = exeNew.Email
+		exe.Notifications = exeNew.Notifications
+		exe.Stickers = exeNew.Stickers
+		exe.CultureGuide.DinnerInstructions = exeNew.CultureGuide.DinnerInstructions
+		exe.CultureGuide.VegetarianDinnerInstructions = exeNew.CultureGuide.VegetarianDinnerInstructions
+		exe.CultureGuide.MainColor = exeNew.CultureGuide.MainColor
+		exe.CultureGuide.FontNamePostScript = exeNew.CultureGuide.FontNamePostScript
+		exe.CultureGuide.FontName = exeNew.CultureGuide.FontName
+		exe.CultureGuide.FontStyle = exeNew.CultureGuide.FontStyle
+		exe.CultureGuide.FontCaps = exeNew.CultureGuide.FontCaps
+	}
+
+	if len(exe.Dishes) < len(exeNew.Dishes) {
+		exe.Dishes = exe.Dishes[:len(exeNew.Dishes)-1]
+	} else if len(exe.Dishes) > len(exeNew.Dishes) {
+		d := make([]execution.Dish, len(exe.Dishes)-len(exeNew.Dishes))
+		exe.Dishes = append(exe.Dishes, d...)
+	}
+
+	for i := range exeNew.Dishes {
+		switch mode {
+		case "head_chef":
+			exe.Dishes[i].Number = exeNew.Dishes[i].Number
+			exe.Dishes[i].Name = exeNew.Dishes[i].Name
+			exe.Dishes[i].Ingredients = exeNew.Dishes[i].Ingredients
+			exe.Dishes[i].IsForNonVegetarian = exeNew.Dishes[i].IsForNonVegetarian
+			exe.Dishes[i].IsForVegetarian = exeNew.Dishes[i].IsForVegetarian
+		case "content_writer":
+			exe.Dishes[i].Description = exeNew.Dishes[i].Description
+			exe.Dishes[i].DescriptionPreview = exeNew.Dishes[i].DescriptionPreview
+		case "culture_guide":
+			exe.Dishes[i].Color = exeNew.Dishes[i].Color
+			exe.Dishes[i].IsOnMainPlate = exeNew.Dishes[i].IsOnMainPlate
+			exe.Dishes[i].ImageURL = exeNew.Dishes[i].ImageURL
+		}
 	}
 	return exe
-}
-
-// helper functions
-
-func executionFromPb(exe *pbcommon.Execution) *execution.Execution {
-	if exe.CultureGuide == nil {
-		exe.CultureGuide = &pbcommon.CultureGuide{}
-	}
-	if exe.CultureGuide.InfoBoxes == nil {
-		exe.CultureGuide.InfoBoxes = []*pbcommon.InfoBox{}
-	}
-	if exe.Culture == nil {
-		exe.Culture = &pbcommon.Culture{}
-	}
-	if exe.CultureCook == nil {
-		exe.CultureCook = &pbcommon.CultureCook{}
-	}
-	if exe.Content == nil {
-		exe.Content = &pbcommon.Content{}
-	}
-	if exe.Notifications == nil {
-		exe.Notifications = &pbcommon.Notifications{}
-	}
-	return &execution.Execution{
-		ID:              exe.Id,
-		Date:            exe.Date,
-		Location:        common.Location(exe.Location),
-		Publish:         exe.Publish,
-		CreatedDatetime: getDatetime(exe.CreatedDatetime),
-		Culture:         *cultureFromPb(exe.Culture),
-		Content:         *contentFromPb(exe.Content),
-		CultureCook:     *cultureCookFromPb(exe.CultureCook),
-		CultureGuide:    *cultureGuideFromPb(exe.CultureGuide),
-		Dishes:          dishesFromPb(exe.Dishes),
-		Stickers:        stickersFromPb(exe.Stickers),
-		Notifications:   *notificationsFromPb(exe.Notifications),
-		HasPork:         exe.HasPork,
-		HasBeef:         exe.HasBeef,
-		HasChicken:      exe.HasChicken,
-	}
-}
-
-func notificationsFromPb(notifications *pbcommon.Notifications) *execution.Notifications {
-	return &execution.Notifications{
-		DeliverySMS: notifications.DeliverySMS,
-		RatingSMS:   notifications.RatingSMS,
-	}
-}
-
-func emailFromPb(email *pbcommon.Email) *execution.Email {
-	return &execution.Email{
-		DinnerNonVegImageURL: email.DinnerNonVegImageURL,
-		DinnerVegImageURL:    email.DinnerVegImageURL,
-		CookImageURL:         email.CookImageURL,
-		LandscapeImageURL:    email.LandscapeImageURL,
-	}
-}
-
-func cultureFromPb(culture *pbcommon.Culture) *execution.Culture {
-	return &execution.Culture{
-		Country:            culture.Country,
-		City:               culture.City,
-		Description:        culture.Description,
-		DescriptionPreview: culture.DescriptionPreview,
-		Nationality:        culture.Nationality,
-		Greeting:           culture.Greeting,
-		FlagEmoji:          culture.FlagEmoji,
-	}
-}
-
-func infoBoxesFromPb(pbd []*pbcommon.InfoBox) []execution.InfoBox {
-	infoBoxes := make([]execution.InfoBox, len(pbd))
-	for i := range pbd {
-		infoBoxes[i] = *infoBoxFromPb(pbd[i])
-	}
-	return infoBoxes
-}
-
-func infoBoxFromPb(infoBox *pbcommon.InfoBox) *execution.InfoBox {
-	return &execution.InfoBox{
-		Title:   infoBox.Title,
-		Text:    infoBox.Text,
-		Caption: infoBox.Caption,
-		Image:   infoBox.Image,
-	}
-}
-
-func cultureGuideFromPb(cultureGuide *pbcommon.CultureGuide) *execution.CultureGuide {
-	return &execution.CultureGuide{
-		InfoBoxes:                    infoBoxesFromPb(cultureGuide.InfoBoxes),
-		DinnerInstructions:           cultureGuide.DinnerInstructions,
-		MainColor:                    cultureGuide.MainColor,
-		FontName:                     cultureGuide.FontName,
-		FontStyle:                    cultureGuide.FontStyle,
-		FontCaps:                     cultureGuide.FontCaps,
-		FontNamePostScript:           cultureGuide.FontNamePostScript,
-		VegetarianDinnerInstructions: cultureGuide.VegetarianDinnerInstructions,
-	}
-}
-
-func contentFromPb(content *pbcommon.Content) *execution.Content {
-	return &execution.Content{
-		LandscapeImageURL:        content.LandscapeImageURL,
-		CookImageURL:             content.CookImageURL,
-		HandsPlateNonVegImageURL: content.HandsPlateNonVegImageURL,
-		HandsPlateVegImageURL:    content.HandsPlateVegImageURL,
-		DinnerNonVegImageURL:     content.DinnerNonVegImageURL,
-		DinnerVegImageURL:        content.DinnerVegImageURL,
-		SpotifyURL:               content.SpotifyURL,
-		YoutubeURL:               content.YoutubeURL,
-		FontURL:                  content.FontURL,
-	}
-}
-
-func qandasFromPb(pbd []*pbcommon.QandA) []execution.QandA {
-	qandas := make([]execution.QandA, len(pbd))
-	for i := range pbd {
-		qandas[i] = *qandaFromPb(pbd[i])
-	}
-	return qandas
-}
-
-func qandaFromPb(qanda *pbcommon.QandA) *execution.QandA {
-	return &execution.QandA{
-		Question: qanda.Question,
-		Answer:   qanda.Answer,
-	}
-}
-
-func cultureCookFromPb(cultureCook *pbcommon.CultureCook) *execution.CultureCook {
-	return &execution.CultureCook{
-		FirstName:    cultureCook.FirstName,
-		LastName:     cultureCook.LastName,
-		Story:        cultureCook.Story,
-		StoryPreview: cultureCook.StoryPreview,
-		QandA:        qandasFromPb(cultureCook.QAndA),
-	}
-}
-
-func dishesFromPb(pbd []*pbcommon.Dish) []execution.Dish {
-	dishes := make([]execution.Dish, len(pbd))
-	for i := range pbd {
-		dishes[i] = *dishFromPb(pbd[i])
-	}
-	return dishes
-}
-
-func dishFromPb(dish *pbcommon.Dish) *execution.Dish {
-	return &execution.Dish{
-		Number:             dish.Number,
-		Color:              dish.Color,
-		Name:               dish.Name,
-		Description:        dish.Description,
-		DescriptionPreview: dish.DescriptionPreview,
-		Ingredients:        dish.Ingredients,
-		IsForVegetarian:    dish.IsForVegetarian,
-		IsForNonVegetarian: dish.IsForNonVegetarian,
-		IsOnMainPlate:      dish.IsOnMainPlate,
-		ImageURL:           dish.ImageURL,
-	}
-}
-
-func stickersFromPb(pbd []*pbcommon.Sticker) []execution.Sticker {
-	if pbd == nil {
-		return []execution.Sticker{}
-	}
-	stickers := make([]execution.Sticker, len(pbd))
-	for i := range pbd {
-		stickers[i] = *stickerFromPb(pbd[i])
-	}
-	return stickers
-}
-
-func stickerFromPb(sticker *pbcommon.Sticker) *execution.Sticker {
-	return &execution.Sticker{
-		Name:                   sticker.Name,
-		Ingredients:            sticker.Ingredients,
-		ExtraInstructions:      sticker.ExtraInstructions,
-		ReheatOption1:          sticker.ReheatOption1,
-		ReheatOption2:          sticker.ReheatOption2,
-		ReheatTime1:            sticker.ReheatTime1,
-		ReheatTime2:            sticker.ReheatTime2,
-		ReheatInstructions1:    sticker.ReheatInstructions1,
-		ReheatInstructions2:    sticker.ReheatInstructions2,
-		EatingTemperature:      sticker.EatingTemperature,
-		ReheatOption1Preferred: sticker.ReheatOption1Preferred,
-	}
 }
