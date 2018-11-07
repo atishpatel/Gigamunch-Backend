@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -12,6 +13,7 @@ type nameAndAddresses struct {
 
 var (
 	docSheet = ""
+	date     = ""
 	input    = ``
 )
 
@@ -21,14 +23,18 @@ func main() {
 	del := "\n"
 	replacer := strings.NewReplacer("\t", "", ".", "", " ", "+")
 	parsedInput := getNameAndAddresses(input)
+	driverOutput := []string{}
 	for _, i := range parsedInput {
 		if len(i.Addresses) > 0 {
 			addresses := strings.Split(replacer.Replace(i.Addresses), del)
 			addresses = append(startAddress, addresses...)
-			printMapLinks(i.Name, addresses)
+			output := printMapLinks(i.Name, addresses)
+			driverOutput = append(driverOutput, output)
 		}
 	}
-
+	for _, output := range driverOutput {
+		printMailToLinks(output)
+	}
 }
 
 func getNameAndAddresses(s string) []nameAndAddresses {
@@ -68,7 +74,7 @@ func getNameAndAddresses(s string) []nameAndAddresses {
 	return deliveries[1:]
 }
 
-func printMapLinks(driverName string, addresses []string) {
+func printMapLinks(driverName string, addresses []string) string {
 	var urls []string
 	i := 0
 	for i < len(addresses) {
@@ -86,9 +92,18 @@ func printMapLinks(driverName string, addresses []string) {
 		urls = append(urls, fmt.Sprintf("https://www.google.com/maps/dir%s", addressesString))
 		i = n
 	}
-	fmt.Printf("%s:\n", driverName)
+	output := ""
+	output += fmt.Sprintf("%s:\n", driverName)
 	for _, u := range urls {
-		fmt.Printf("%s\n\n", u)
+		output += fmt.Sprintf("%s\n\n", u)
 	}
-	fmt.Print("\n----------\n")
+	output += "\n----------\n"
+	fmt.Print(output)
+	return output
+}
+
+func printMailToLinks(driverOutput string) {
+	docLink := fmt.Sprintf("Doc link:\n%s\n----------\n", docSheet)
+	split := strings.Split(driverOutput, ":")
+	fmt.Printf("<a href=\"mailto:john@joydriv.com?subject=%s&body=%s\">mail to: %s</a><br>\n", url.QueryEscape(date+" - Gigamunch Deliveries"), url.QueryEscape(docLink+driverOutput), split[0])
 }
