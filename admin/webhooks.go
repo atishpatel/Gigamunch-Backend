@@ -57,7 +57,7 @@ func (s *server) Slack(ctx context.Context, w http.ResponseWriter, r *http.Reque
 	resp := &SlackResp{
 		Challenge: req.Challenge,
 	}
-	if req.Type == "event_callback" && strings.Contains(req.Event.Text, "@") {
+	if req.Type == "event_callback" && strings.Contains(req.Event.Text, "@") && strings.Contains(req.Event.Text, "<mailto:") {
 		// add subscriber page link if there is an email
 		email := req.Event.Text[strings.Index(req.Event.Text, "<mailto:")+8 : strings.Index(req.Event.Text, "|")]
 		txt := fmt.Sprintf("{\"text\":\"https://eatgigamunch.com/admin/subscriber/%s\"}", email)
