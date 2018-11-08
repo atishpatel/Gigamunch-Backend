@@ -47,7 +47,7 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
 	// if sqlC == nil {
-	// 	return nil, fmt.Errorf("sqlDB cannot be nil for sub")
+	// 	return nil, fmt.Errorf("sqlDB cannot be nil")
 	// }
 	if dbC == nil {
 		return nil, fmt.Errorf("failed to get db")

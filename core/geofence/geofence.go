@@ -8,12 +8,11 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/jmoiron/sqlx"
 )
 
 var (
-	standAppEngine bool
-	db             common.DB
-	kind           = "Geofence"
+	kind = "Geofence"
 )
 
 var (
@@ -24,8 +23,11 @@ var (
 
 // Client is a client for manipulating subscribers.
 type Client struct {
-	ctx context.Context
-	log *logging.Client
+	ctx        context.Context
+	log        *logging.Client
+	sqlDB      *sqlx.DB
+	db         common.DB
+	serverInfo *common.ServerInfo
 }
 
 type Type string
@@ -53,20 +55,25 @@ type Geofence struct {
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
-	var err error
-	if standAppEngine {
-		err = setup(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
+func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sqlx.DB, serverInfo *common.ServerInfo) (*Client, error) {
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
+	if sqlC == nil {
+		return nil, fmt.Errorf("sqlDB cannot be nil")
+	}
+	if dbC == nil {
+		return nil, fmt.Errorf("failed to get db")
+	}
+	if serverInfo == nil {
+		return nil, errInternal.Annotate("failed to get server info")
+	}
 	return &Client{
-		ctx: ctx,
-		log: log,
+		ctx:        ctx,
+		log:        log,
+		db:         dbC,
+		sqlDB:      sqlC,
+		serverInfo: serverInfo,
 	}, nil
 }
 
@@ -81,11 +88,11 @@ func (c *Client) AddGeofence(ctx context.Context, fence *Geofence) error {
 	}
 	var key common.Key
 	if fence.ID == "" {
-		key = db.NameKey(ctx, kind, fence.ID)
+		key = c.db.NameKey(ctx, kind, fence.ID)
 	} else {
-		key = db.IDKey(ctx, kind, fence.DriverID)
+		key = c.db.IDKey(ctx, kind, fence.DriverID)
 	}
-	_, err := db.Put(ctx, key, fence)
+	_, err := c.db.Put(ctx, key, fence)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to db.Put")
 	}
@@ -98,7 +105,7 @@ func (c *Client) GetDriverZone(ctx context.Context, driverID int64) error {
 		return errBadRequest.Annotate("invalid driverID")
 	}
 	fence := new(Geofence)
-	_, err := db.QueryFilter(ctx, kind, 0, 1, "DriverID=", driverID, fence)
+	_, err := c.db.QueryFilter(ctx, kind, 0, 1, "DriverID=", driverID, fence)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to db.QueryFilter")
 	}
@@ -116,33 +123,12 @@ func (c *Client) InNashvilleZone(ctx context.Context, addr *common.Address) (boo
 		}
 	}
 	fence := new(Geofence)
-	key := db.NameKey(ctx, kind, common.Nashville.String())
-	err = db.Get(ctx, key, fence)
+	key := c.db.NameKey(ctx, kind, common.Nashville.String())
+	err = c.db.Get(ctx, key, fence)
 	if err != nil {
 		return false, errDatastore.WithError(err).Annotate("failed to db.Get")
 	}
 	polygon := NewPolygon(fence.Points)
 	contains := polygon.Contains(Point{GeoPoint: addr.GeoPoint})
 	return contains, nil
-}
-
-// Setup sets up the logging package.
-func Setup(ctx context.Context, standardAppEngine bool, dbC common.DB) error {
-	var err error
-	standAppEngine = standardAppEngine
-	if !standAppEngine {
-		err = setup(ctx)
-		if err != nil {
-			return err
-		}
-	}
-	if dbC == nil {
-		return fmt.Errorf("db cannot be nil for sub")
-	}
-	db = dbC
-	return nil
-}
-
-func setup(ctx context.Context) error {
-	return nil
 }
