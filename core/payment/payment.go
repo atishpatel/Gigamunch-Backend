@@ -55,7 +55,22 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	}, nil
 }
 
-// RefundSale voids a sale with the SaleID
+// CreateCustomer creates a customer.
+func (c *Client) CreateCustomer(nonce, email, firstName, lastName string) (string, string, error) {
+	customerReq := &braintree.CustomerRequest{
+		Email:              email,
+		FirstName:          firstName,
+		LastName:           lastName,
+		PaymentMethodNonce: nonce,
+	}
+	customer, err := c.bt.Customer().Create(c.ctx, customerReq)
+	if err != nil {
+		return "", "", errBT.WithError(err).Wrap("failed to bt.Customer.Create")
+	}
+	return customer.Id, customer.DefaultPaymentMethod().GetToken(), nil
+}
+
+// RefundSale voids a sale with the SaleID.
 func (c *Client) RefundSale(id string, amount float32) (string, error) {
 	status, err := c.getTransactionStatus(id)
 	if err != nil {
