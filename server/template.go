@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"html/template"
@@ -13,7 +13,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 
-	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
@@ -144,8 +144,8 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 		}
 		page.Email = email
 		// load page if tried before
-		subC := subold.New(ctx)
-		s, err := subC.GetSubscriber(email)
+		suboldC := subold.New(ctx)
+		s, err := suboldC.GetSubscriber(email)
 		if err == nil {
 			page.FirstName = s.FirstName
 			page.LastName = s.LastName
@@ -256,9 +256,9 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 		}
 		// increase page count
 		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/referral")
-		subnewC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
+		subC, err := sub.NewClient(ctx, log, db, nil, serverInfo)
 		if err == nil {
-			err = subnewC.IncrementPageCount(email, 1, 0)
+			err = subC.IncrementPageCount(email, 1, 0)
 			if err != nil {
 				logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			}
@@ -302,9 +302,9 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 
 		// increase page count
 		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/referred")
-		subnewC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
+		subC, err := sub.NewClient(ctx, log, db, nil, serverInfo)
 		if err == nil {
-			err = subnewC.IncrementPageCount(email, 0, 1)
+			err = subC.IncrementPageCount(email, 0, 1)
 			if err != nil {
 				logging.Errorf(ctx, "failed to datastore.Get: %+v", err)
 			}

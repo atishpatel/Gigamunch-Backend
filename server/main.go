@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"encoding/json"
@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
@@ -28,7 +29,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/gorilla/schema"
 	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 )
@@ -37,9 +37,9 @@ var cookSignupPage []byte
 
 var projID string
 
-func init() {
-	// TODO: Remove
+func main() {
 	var err error
+	// TODO: Remove
 	cookSignupPage, err = ioutil.ReadFile("signedUp.html")
 	if err != nil {
 		log.Fatalf("Failed to read cookSignup page %#v", err)
@@ -64,11 +64,14 @@ func init() {
 	// route api
 	http.HandleFunc("/api/v1/Login", s.handler(s.Login))
 	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
+	http.HandleFunc("/api/v2/SubmitCheckout", s.handler(s.SubmitCheckoutv2))
 	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
 	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
 	http.HandleFunc("/api/v1/DeviceCheckin", handler(DeviceCheckin))
 
 	http.Handle("/", r)
+
+	appengine.Main()
 
 }
 
@@ -177,11 +180,9 @@ func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 
 // server
 type server struct {
-	once       sync.Once
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
-	log        *logging.Client
 }
 
 func (s *server) setup() error {
@@ -198,11 +199,9 @@ func (s *server) setup() error {
 	if appengine.IsDevAppServer() {
 		sqlConnectionString = "root@/gigamunch"
 	}
-	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString)
+	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
 	if err != nil {
-		if !appengine.IsDevAppServer() { // TODO: remove
-			return fmt.Errorf("failed to get sql database client: %+v", err)
-		}
+		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}
 	s.serverInfo = &common.ServerInfo{
 		ProjectID:           projID,
@@ -238,7 +237,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 		// create logging client
-		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
+		log, err := logging.NewClient(ctx, "server", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
 			errString := fmt.Sprintf("failed to get new logging client: %+v", err)
 			logging.Errorf(ctx, errString)
@@ -259,7 +258,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr))
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {
@@ -281,31 +280,11 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 
 // Request helpers
 func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(v, r.URL.Query())
-		logging.Infof(ctx, "Query: %+v", r.URL.Query())
-		if err != nil {
-			return err
-		}
-	} else {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return err
-		}
-		logging.Infof(ctx, "Body: %s", body)
-		err = json.Unmarshal(body, v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return serverhelper.DecodeRequest(ctx, r, v)
 }
 
-func failedToDecode(err error) *pb.ErrorOnlyResp {
-	return &pb.ErrorOnlyResp{
-		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
-	}
+func failedToDecode(err error) *pbcommon.ErrorOnlyResp {
+	return serverhelper.FailedToDecode(err)
 }
 
 // Response is a response to a rpc call. All responses contain an error.

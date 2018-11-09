@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"encoding/json"
@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
@@ -20,7 +23,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -118,7 +121,7 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	resp := &pb.ErrorOnlyResp{}
 	email := strings.TrimSpace(strings.ToLower(req.Email))
 	key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
+	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err == datastore.ErrNoSuchEntity {
 		resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", email)).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
@@ -141,15 +144,15 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 
 	paymenttkn, err := paymentC.CreateCustomer(paymentReq)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to update payment: failed to sub.CreateCustomer: email(%s) %+v", email, err)
+		utils.Criticalf(ctx, "failed to update payment: failed to subold.CreateCustomer: email(%s) %+v", email, err)
 		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
 		return resp
 	}
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	err = subC.UpdatePaymentToken(email, paymenttkn)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to update payment: failed to sub.UpdatePaymentToken: email(%s) tkn(%s) %+v", email, paymenttkn, err)
-		resp.Error = errors.Wrap("failed to sub.UpdatePaymentToken", err).SharedError()
+		utils.Criticalf(ctx, "failed to update payment: failed to subold.UpdatePaymentToken: email(%s) tkn(%s) %+v", email, paymenttkn, err)
+		resp.Error = errors.Wrap("failed to subold.UpdatePaymentToken", err).SharedError()
 		return resp
 	}
 	messageC := message.New(ctx)
@@ -202,7 +205,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 
 	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
+	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
@@ -246,7 +249,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	default:
 		vegetarianServings = 4
 	}
-	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
+	weeklyAmount = subold.DerivePrice(vegetarianServings + servings)
 	customerID := payment.GetIDFromEmail(req.Email)
 	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
@@ -373,7 +376,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
 	}
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	err = subC.Free(firstBoxDate, req.Email)
 	if err != nil {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
@@ -414,9 +417,9 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
-func campaingFromPB(c *pb.Campaign) sub.Campaign {
+func campaingFromPB(c *pb.Campaign) common.Campaign {
 	t, _ := time.Parse(time.RFC3339, c.Timestamp)
-	return sub.Campaign{
+	return common.Campaign{
 		Timestamp: t,
 		Source:    c.Source,
 		Campaign:  c.Campaign,
@@ -454,7 +457,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	}
 
 	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
+	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
@@ -498,7 +501,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	default:
 		vegetarianServings = 4
 	}
-	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
+	weeklyAmount = subold.DerivePrice(vegetarianServings + servings)
 	customerID := payment.GetIDFromEmail(req.ReferenceEmail)
 	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
@@ -617,7 +620,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
 	}
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	if entry.NumGiftDinners > 2 {
 		err = subC.Free(firstBoxDate, entry.Email)
 		if err != nil {
@@ -806,7 +809,7 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 }
 
 // SubmitCheckoutv2 submits a checkout.
-func SubmitCheckoutv2(ctx context.Context, r *http.Request) Response {
+func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	req := new(pb.SubmitCheckoutReq)
 	var err error
 	// decode request
@@ -818,31 +821,35 @@ func SubmitCheckoutv2(ctx context.Context, r *http.Request) Response {
 	resp := &pb.ErrorOnlyResp{}
 	logging.Infof(ctx, "Request struct: %+v", req)
 
-	var servings int8
-	var vegetarianServings int8
+	var servingsNonVegetarian int8
+	var servingsVegetarian int8
 	switch req.Servings {
 	case "":
 		fallthrough
 	case "0":
-		servings = 0
+		servingsNonVegetarian = 0
 	case "1":
-		servings = 1
+		servingsNonVegetarian = 1
 	case "2":
-		servings = 2
+		servingsNonVegetarian = 2
+	case "4":
+		servingsNonVegetarian = 4
 	default:
-		servings = 4
+		servingsNonVegetarian = 4
 	}
 	switch req.VegetarianServings {
 	case "":
 		fallthrough
 	case "0":
-		vegetarianServings = 0
+		servingsVegetarian = 0
 	case "1":
-		vegetarianServings = 1
+		servingsVegetarian = 1
 	case "2":
-		vegetarianServings = 2
+		servingsVegetarian = 2
+	case "4":
+		servingsVegetarian = 4
 	default:
-		vegetarianServings = 4
+		servingsVegetarian = 4
 	}
 	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
@@ -862,132 +869,39 @@ func SubmitCheckoutv2(ctx context.Context, r *http.Request) Response {
 			return resp
 		}
 	}
-
-	entry.Email = req.Email
-	entry.Name = strings.Title(req.FirstName + " " + req.LastName)
-	entry.FirstName = strings.Title(strings.TrimSpace(req.FirstName))
-	entry.LastName = strings.Title(strings.TrimSpace(req.LastName))
-	entry.Address = *address
-	if entry.Date.IsZero() {
-		entry.Date = time.Now()
-	}
-	// entry.SubscriptionIDs = append(entry.SubscriptionIDs, subID)
-	if inZone {
-		entry.IsSubscribed = true
-		entry.SubscriptionDate = time.Now()
-		entry.WeeklyAmount = weeklyAmount
-		entry.FirstBoxDate = firstBoxDate
-		// entry.FirstPaymentDate = paymentDate
-		entry.SubscriptionDay = time.Monday.String()
-	}
-	entry.CustomerID = customerID
-	entry.DeliveryTips = req.DeliveryNotes
-	entry.Servings = servings
-	entry.VegetarianServings = vegetarianServings
-	entry.UpdatePhoneNumber(req.PhoneNumber)
-	entry.PaymentMethodToken = paymenttkn
-	entry.Reference = req.Reference
-	entry.ReferenceEmail = req.ReferenceEmail
+	var campaigns []common.Campaign
 	for _, c := range req.Campaigns {
-		found := false
-		var timeStamp time.Time
-		timeStamp, _ = time.Parse(time.RFC3339, c.Timestamp)
-		for _, loggedC := range entry.Campaigns {
-			if loggedC.Campaign != c.Campaign {
-				continue
-			}
-			diff := timeStamp.Sub(loggedC.Timestamp)
-			if diff < 0 {
-				diff *= -1
-			}
-			if diff < time.Hour {
-				found = true
-			}
-		}
-		if !found {
-			entry.Campaigns = append(entry.Campaigns, campaingFromPB(c))
-		}
+		campaigns = append(campaigns, campaingFromPB(c))
 	}
-	_, err = datastore.Put(ctx, key, entry)
+
+	address, err := serverhelper.AddressFromPB(ctx, req.Address)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
-		return resp
+		return errors.Annotate(err, "failed to decode address")
 	}
-	if !inZone {
-		logging.Infof(ctx, "failed address zone zip(%s). Address: %s", address.Zip, address.String())
-		// out of delivery range
-		if address.Street == "" {
-			resp.Error = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!").SharedError()
-			return resp
-		}
-		messageC := message.New(ctx)
-		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
-		}
-		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
-		}
-		resp.Error = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!").SharedError()
-		return resp
-	}
-	if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
-		messageC := message.New(ctx)
-		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
-		}
-		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
-		}
-		err = messageC.SendAdminSMS("9316446755", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Piyush. Err: %+v", err)
-		}
-		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
-		}
-	}
-	subC := sub.New(ctx)
-	err = subC.Free(firstBoxDate, req.Email)
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
-		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
+		return errors.Annotate(err, "failed to sub.NewClient")
 	}
-	if !strings.Contains(req.Email, "test.com") {
-		log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
-		if err != nil {
-			return errors.Wrap("failed to setupLoggingAndServerInfo", err)
-		}
-		mailC, err := mail.NewClient(ctx, log, serverInfo)
-		mailReq := &mail.UserFields{
-			Email:             entry.Email,
-			FirstName:         entry.FirstName,
-			LastName:          entry.LastName,
-			FirstDeliveryDate: firstBoxDate,
-			VegServings:       entry.VegetarianServings,
-			NonVegServings:    entry.Servings,
-		}
-		durationTillFirstMeal := time.Until(firstBoxDate.UTC().Truncate(24 * time.Hour))
-		if durationTillFirstMeal > 0 && durationTillFirstMeal < ((6*24)-12)*time.Hour {
-			mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(firstBoxDate))
-		}
-		err = mailC.SubActivated(mailReq)
-		if err != nil {
-			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
-		}
-		// add to task queue
-		taskC := tasks.New(ctx)
-		r := &tasks.ProcessSubscriptionParams{
-			SubEmail: entry.Email,
-			Date:     firstBoxDate,
-		}
-		err = taskC.AddProcessSubscription(firstBoxDate.Add(-24*time.Hour), r)
-		if err != nil {
-			return errors.Wrap("failed to tasks.AddProcessSubscription", err)
-		}
+	createReq := &sub.CreateReq{
+		Email:                 req.Email,
+		FirstName:             req.FirstName,
+		LastName:              req.LastName,
+		PhoneNumber:           req.PhoneNumber,
+		Address:               *address,
+		DeliveryNotes:         req.DeliveryNotes,
+		Reference:             req.Reference,
+		ReferenceEmail:        req.ReferenceEmail,
+		PaymentMethodNonce:    req.PaymentMethodNonce,
+		ServingsNonVegetarian: servingsNonVegetarian,
+		ServingsVegetarian:    servingsVegetarian,
+		FirstDeliveryDate:     firstBoxDate,
+		Campaigns:             campaigns,
+		DiscountPercent:       100,
+	}
+	_, err = subC.Create(createReq)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Create")
 	}
 	return resp
 }
