@@ -1,12 +1,24 @@
 package sub
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 )
+
+func (c *Client) getByIDOrEmail(idOrEmail string) (*subold.Subscriber, error) {
+	if strings.Contains(idOrEmail, "@") {
+		return c.getByEmail(idOrEmail)
+	}
+	key := c.db.NameKey(c.ctx, kind, idOrEmail)
+	sub := new(subold.Subscriber)
+	err := c.db.Get(c.ctx, key, sub)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to get")
+	}
+	return sub, nil
+}
 
 func (c *Client) getByEmail(email string) (*subold.Subscriber, error) {
 	var results []*subold.Subscriber
@@ -15,7 +27,7 @@ func (c *Client) getByEmail(email string) (*subold.Subscriber, error) {
 		return nil, err
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("failed to find sub by email: length is 0")
+		return nil, c.db.ErrNoSuchEntity()
 	}
 	results[0].ID = keys[0].NameID()
 	return results[0], nil

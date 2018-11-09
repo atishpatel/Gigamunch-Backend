@@ -14,7 +14,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/payment"
 	"github.com/atishpatel/Gigamunch-Backend/core/slack"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/utils"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -71,7 +70,7 @@ func (c *Client) Get(id string) (*subold.Subscriber, error) {
 	return sub, nil
 }
 
-// Get gets a subscriber.
+// GetByEmail gets a subscriber by email.
 func (c *Client) GetByEmail(email string) (*subold.Subscriber, error) {
 	sub, err := c.getByEmail(email)
 	if err != nil {
@@ -266,6 +265,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 			return nil, err
 		}
 		sub.PlanInterval = 7
+		sub.PlanWeekday = req.FirstDeliveryDate.Weekday().String()
 		sub.IntervalStartPoint = req.FirstDeliveryDate
 		sub.ServingsNonVegetarian = req.ServingsNonVegetarian
 		sub.ServingsVegetarian = req.ServingsVegetarian
@@ -291,17 +291,17 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		}
 		err = slackC.SendMissedSubscriber(req.Email, req.FirstName+" "+req.LastName, req.Reference+" - "+req.ReferenceEmail, req.Campaigns, req.Address)
 		if err != nil {
-			utils.Criticalf(c.ctx, "failed to slack.SendMissedSubscriber: %+v", err)
+			c.log.Errorf(c.ctx, "failed to slack.SendMissedSubscriber: %+v", err)
 		}
 		return nil, errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know as soon as we are in your area!")
 	}
 
-	if !strings.Contains(req.Email, "@test.com") {
-		err = slackC.SendNewSignup(req.Email, req.FirstName+" "+req.LastName, req.Reference+" - "+req.ReferenceEmail, req.Campaigns)
-		if err != nil {
-			utils.Criticalf(c.ctx, "failed to slack.SendNewSignup: %+v", err)
-		}
+	// if !strings.Contains(req.Email, "@test.com") {
+	err = slackC.SendNewSignup(req.Email, req.FirstName+" "+req.LastName, req.Reference+" - "+req.ReferenceEmail, req.Campaigns)
+	if err != nil {
+		c.log.Errorf(c.ctx, "failed to slack.SendNewSignup: %+v", err)
 	}
+	// }
 
 	// setup activity
 	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
@@ -335,23 +335,58 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	}
 
 	// Add to mail service
-	if !strings.Contains(req.Email, "@test.com") {
-		taskC := tasks.New(c.ctx)
-		// add to update drip
-		err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{Email: req.Email})
-		if err != nil {
-			c.log.Errorf(c.ctx, "failed to task.AddUpdateDrip: %+v", err)
-		}
-		// add to task queue
-		err = taskC.AddProcessSubscription(sub.IntervalStartPoint.Add(-24*time.Hour), &tasks.ProcessSubscriptionParams{
-			SubEmail: req.Email,
-			Date:     sub.IntervalStartPoint,
-		})
-		if err != nil {
-			c.log.Errorf(c.ctx, "failed to task.AddProcessSubscription: %+v", err)
-		}
+	taskC := tasks.New(c.ctx)
+	// add to update drip
+	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{Email: req.Email})
+	if err != nil {
+		c.log.Errorf(c.ctx, "failed to task.AddUpdateDrip: %+v", err)
+	}
+	// add to task queue
+	err = taskC.AddProcessSubscription(sub.IntervalStartPoint.Add(-24*time.Hour), &tasks.ProcessSubscriptionParams{
+		SubEmail: req.Email,
+		Date:     sub.IntervalStartPoint,
+	})
+	if err != nil {
+		c.log.Errorf(c.ctx, "failed to task.AddProcessSubscription: %+v", err)
 	}
 	return sub, nil
+}
+
+func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool, discountAmount float32, discountPrecent int8) error {
+	sub, err := c.getByIDOrEmail(userIDOrEmail)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.GetByIDOrEmail")
+	}
+	// setup activity
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+
+	createReq := &activity.CreateReq{
+		Date:      date.Format(activity.DateFormat),
+		UserID:    sub.ID,
+		Email:     sub.Email(),
+		FirstName: sub.FirstName(),
+		LastName:  sub.LastName(),
+		Location:  sub.Location,
+		Active:    active,
+		Skip:      false,
+		ServingsNonVegetarian: sub.ServingsNonVegetarian,
+		ServingsVegetarain:    sub.ServingsVegetarian,
+		Amount:                sub.Amount,
+		DiscountAmount:        discountAmount,
+		DiscountPercent:       discountPrecent,
+		PaymentProvider:       sub.PaymentProvider,
+		PaymentMethodToken:    sub.PaymentMethodToken,
+		CustomerID:            sub.PaymentCustomerID,
+	}
+	createReq.SetAddress(&sub.Address)
+	err = activityC.Create(createReq)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.Create")
+	}
+	return nil
 }
 
 // SetupActivities updates a subscriber.

@@ -18,11 +18,12 @@ import (
 )
 
 const (
+	// DateFormat is the expected format of date in activity.
 	DateFormat                 = "2006-01-02" // "Jan 2, 2006"
 	selectActivityStatement    = "SELECT * FROM activity WHERE date=? AND email=?"
 	selectAllActivityStatement = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
 	updateRefundedStatement    = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
-	insertStatement            = "INSERT INTO actvity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,long,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
+	insertStatement            = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 )
 
 // Errors
@@ -88,6 +89,7 @@ func (c *Client) GetAll(limit int) ([]*Activity, error) {
 	return acts, nil
 }
 
+// CreateReq is the request for Create.
 type CreateReq struct {
 	Date      string          `json:"date" db:"date"`
 	UserID    string          `json:"user_id" db:"user_id"`
@@ -117,6 +119,7 @@ type CreateReq struct {
 	CustomerID         string                 `json:"customer_id" db:"customer_id"`
 }
 
+// SetAddress is a convenience function for setting address.
 func (req *CreateReq) SetAddress(addr *common.Address) {
 	req.AddressAPT = addr.APT
 	req.AddressString = addr.StringNoAPT()
@@ -177,7 +180,7 @@ func (c *Client) Create(req *CreateReq) error {
 	}
 	_, err = c.sqlDB.NamedExecContext(c.ctx, insertStatement, req)
 	if err != nil {
-		errSQLDB.WithError(err).Annotate("failed to insertStatement")
+		return errSQLDB.WithError(err).Annotate("failed to insertStatement")
 	}
 	return nil
 }
