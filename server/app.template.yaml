@@ -28,6 +28,6 @@ handlers:
   secure: always
 
 env_variables:
-  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch?collation=utf8mb4_general_ci
+  MYSQL_CONNECTION: server:gigamunch@unix(/cloudsql/PROJECTID:us-central1:gigasqldb)/gigamunch
   DOMAIN_URL: https://_DOMAIN_.com
   PROJECT_ID: PROJECTID
