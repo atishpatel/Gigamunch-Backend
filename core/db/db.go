@@ -5,6 +5,10 @@ package db
 import (
 	"context"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+
+	"github.com/segmentio/ksuid"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"google.golang.org/api/option"
 	"google.golang.org/appengine/datastore"
@@ -67,8 +71,24 @@ func (c *Client) NameKey(ctx context.Context, kind, name string) common.Key {
 // IncompleteKey creates a new incomplete key.
 // The supplied kind cannot be empty. The namespace of the new key is empty.
 func (c *Client) IncompleteKey(ctx context.Context, kind string) common.Key {
+	// create string key
+	var id string
+	var key *datastore.Key
+	var v interface{}
+	for {
+		id = ksuid.New().String()
+		key = datastore.NewKey(ctx, kind, id, 0, nil)
+		err := datastore.Get(ctx, key, &v)
+		if err == datastore.ErrNoSuchEntity {
+			break
+		}
+		if err != nil {
+			logging.Errorf(ctx, "failed to create incomplete key: %+v", err)
+			break
+		}
+	}
 	return &Key{
-		key: datastore.NewIncompleteKey(ctx, kind, nil),
+		key: key,
 	}
 }
 
