@@ -33,6 +33,7 @@ func FailedToDecode(err error) *pbcommon.ErrorOnlyResp {
 	}
 }
 
+// DecodeRequest decodes and prints GET and BODY (POST) requests.
 func DecodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
 	if r.Method == "GET" {
 		decoder := schema.NewDecoder()

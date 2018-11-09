@@ -9,6 +9,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 )
 
+// AddressFromPB Address From PB.
 func AddressFromPB(ctx context.Context, in *pbcommon.Address) (*common.Address, error) {
 	geopoint := common.GeoPoint{Latitude: in.Latitude, Longitude: in.Longitude}
 	if geopoint.Valid() && geopoint.Latitude != 0 && geopoint.Longitude != 0 {
