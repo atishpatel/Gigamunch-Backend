@@ -115,6 +115,7 @@ func init() {
 	// Batch
 	// **********************
 	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
+	http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))
@@ -195,7 +196,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		// get context
 		ctx := appengine.NewContext(r)
-		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
 		if err != nil {
@@ -211,6 +212,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 			logging.Errorf(ctx, errString)
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(errString))
+			return
 		}
 		// call function
 		resp := f(ctx, w, r, log)
@@ -226,7 +228,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			log.RequestError(r, errors.GetErrorWithCode(sharedErr), 0, "")
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr))
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {

@@ -18,10 +18,11 @@ import (
 )
 
 const (
-	dateFormat                 = "2006-01-02" // "Jan 2, 2006"
+	DateFormat                 = "2006-01-02" // "Jan 2, 2006"
 	selectActivityStatement    = "SELECT * FROM activity WHERE date=? AND email=?"
 	selectAllActivityStatement = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
 	updateRefundedStatement    = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
+	insertStatement            = "INSERT INTO actvity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,long,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 )
 
 // Errors
@@ -67,7 +68,7 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 // Get gets an activity.
 func (c *Client) Get(date time.Time, email string) (*Activity, error) {
 	act := &Activity{}
-	err := c.sqlDB.GetContext(c.ctx, act, selectActivityStatement, date.Format(dateFormat), email)
+	err := c.sqlDB.GetContext(c.ctx, act, selectActivityStatement, date.Format(DateFormat), email)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to selectActivity")
 	}
@@ -87,11 +88,98 @@ func (c *Client) GetAll(limit int) ([]*Activity, error) {
 	return acts, nil
 }
 
+type CreateReq struct {
+	Date      string          `json:"date" db:"date"`
+	UserID    string          `json:"user_id" db:"user_id"`
+	Email     string          `json:"email" db:"email"`
+	FirstName string          `json:"first_name" db:"first_name"`
+	LastName  string          `json:"last_name" db:"last_name"`
+	Location  common.Location `json:"location" db:"location"`
+	// Address
+	AddressAPT    string  `json:"address_apt" db:"addr_apt"`
+	AddressString string  `json:"address_string" db:"addr_string"`
+	Zip           string  `json:"zip" db:"zip"`
+	Latitude      float64 `json:"latitude,string" db:"lat"`
+	Longitude     float64 `json:"longitude,string" db:"long"`
+	// Detail
+	Active bool `json:"active" db:"active"`
+	Skip   bool `json:"skip" db:"skip"`
+	// Bag detail
+	ServingsNonVegetarian int8 `json:"servings_non_vegetarian" db:"servings"`
+	ServingsVegetarain    int8 `json:"servings_vegetarian" db:"veg_servings"`
+	First                 bool `json:"first" db:"first"`
+	// Payment
+	Amount             float32                `json:"amount" db:"amount"`
+	DiscountAmount     float32                `json:"discount_amount" db:"discount_amount"`
+	DiscountPercent    int8                   `json:"discount_percent" db:"discount_percent"`
+	PaymentProvider    common.PaymentProvider `json:"payment_provider" db:"payment_provider"`
+	PaymentMethodToken string                 `json:"payment_method_token" db:"payment_method_token"`
+	CustomerID         string                 `json:"customer_id" db:"customer_id"`
+}
+
+func (req *CreateReq) SetAddress(addr *common.Address) {
+	req.AddressAPT = addr.APT
+	req.AddressString = addr.StringNoAPT()
+	req.Zip = addr.Zip
+	req.Latitude = addr.Latitude
+	req.Longitude = addr.Longitude
+}
+
+func (req *CreateReq) validate() error {
+	if req.Date == "" {
+		return errBadRequest.WithMessage("Date cannot be empty.")
+	}
+	if req.UserID == "" {
+		return errBadRequest.WithMessage("UserID cannot be empty.")
+	}
+	if req.Email == "" {
+		return errBadRequest.WithMessage("Email cannot be empty.")
+	}
+	if req.FirstName == "" {
+		return errBadRequest.WithMessage("FirstName cannot be empty.")
+	}
+	if req.LastName == "" {
+		return errBadRequest.WithMessage("LastName cannot be empty.")
+	}
+	if req.AddressString == "" {
+		return errBadRequest.WithMessage("AddressString cannot be empty.")
+	}
+	if req.Zip == "" {
+		return errBadRequest.WithMessage("Zip cannot be empty.")
+	}
+	if req.PaymentMethodToken == "" {
+		return errBadRequest.WithMessage("PaymentMethodToken cannot be empty.")
+	}
+	if req.CustomerID == "" {
+		return errBadRequest.WithMessage("CustomerID cannot be empty.")
+	}
+	if req.Amount < 0.001 {
+		return errBadRequest.WithMessage("Amount cannot be empty.")
+	}
+	geopoint := common.GeoPoint{
+		Latitude:  req.Latitude,
+		Longitude: req.Longitude,
+	}
+	if !geopoint.Valid() {
+		return errBadRequest.WithMessage("Geopoint is invalid.")
+	}
+	if req.ServingsNonVegetarian == 0 && req.ServingsVegetarain == 0 {
+		return errBadRequest.WithMessage("Servings cannot be empty.")
+	}
+	return nil
+}
+
 // Create creates an activity entry.
-func (c *Client) Create(date time.Time, email string, servings, vegServings int8, amount float32, paymentMethodToken, customerID string) error {
-	// TODO: Reimplement
-	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.Setup(date, email, servings, vegServings, amount, 0, paymentMethodToken, customerID)
+func (c *Client) Create(req *CreateReq) error {
+	err := req.validate()
+	if err != nil {
+		return err
+	}
+	_, err = c.sqlDB.NamedExecContext(c.ctx, insertStatement, req)
+	if err != nil {
+		errSQLDB.WithError(err).Annotate("failed to insertStatement")
+	}
+	return nil
 }
 
 // Process processes an actvity.
@@ -137,7 +225,7 @@ func (c *Client) Refund(date time.Time, email string, amount float32, precent in
 	c.log.Refund(act.UserID, act.Email, act.Date, act.Amount, amount, rID)
 	c.log.Infof(c.ctx, "Refunding Customer(%s) on transaction(%s): refundID(%s)", act.CustomerID, act.TransactionID, rID)
 	// Update actvity
-	_, err = c.sqlDB.ExecContext(c.ctx, updateRefundedStatement, rID, amount, date.Format(dateFormat), email)
+	_, err = c.sqlDB.ExecContext(c.ctx, updateRefundedStatement, rID, amount, date.Format(DateFormat), email)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateRefundedAndSkipSubLogStatement")
 	}

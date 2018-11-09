@@ -107,3 +107,17 @@ func getHasSubscribed(ctx context.Context, date time.Time) ([]SubscriptionSignUp
 	}
 	return results, nil
 }
+
+// getHasSubscribed returns the list of all Subscribers
+func getHasSubscribedPointer(ctx context.Context, date time.Time) ([]*SubscriptionSignUp, error) {
+	query := datastore.NewQuery(kindSubscriptionSignUp).
+		Filter("SubscriptionDate>", 0).
+		Filter("SubscriptionDate<", date).
+		Limit(1000)
+	var results []*SubscriptionSignUp
+	_, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}

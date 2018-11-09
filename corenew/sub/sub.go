@@ -459,7 +459,7 @@ func (c *Client) Update(subs []*SubscriptionSignUp) error {
 				OldDeliveryNotes:  oldSubs[i].DeliveryTips,
 				DeliveryNotes:     subs[i].DeliveryTips,
 			}
-			c.log.SubUpdated(0, subs[i].Email, payload)
+			c.log.SubUpdated(subs[i].ID, subs[i].Email, payload)
 		}
 	}
 	return nil
@@ -500,7 +500,7 @@ func (c *Client) UpdatePaymentToken(subEmail string, paymentMethodToken string) 
 		return errSQLDB.WithError(err).Wrap("failed to execute updateUnpaidPayment statement")
 	}
 	if c.log != nil {
-		c.log.SubCardUpdated(0, subEmail, oldPMT, paymentMethodToken)
+		c.log.SubCardUpdated(s.ID, subEmail, oldPMT, paymentMethodToken)
 	}
 	return nil
 }
@@ -587,7 +587,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}
 	if c.log != nil {
-		c.log.SubServingsChangedPermanently(0, subEmail, oldServings, nonvegServings, oldVegServings, vegServings)
+		c.log.SubServingsChangedPermanently(s.ID, subEmail, oldServings, nonvegServings, oldVegServings, vegServings)
 	}
 
 	mailC, err := mail.NewClient(c.ctx, c.log, serverInfo)
@@ -635,7 +635,7 @@ func (c *Client) Paid(date time.Time, subEmail string, amountPaid float32, trans
 		return errSQLDB.WithError(err).Wrap("failed to execute updatePaidSubLogStatement statement.")
 	}
 	if c.log != nil {
-		c.log.Paid(0, subEmail, date.Format(time.RFC3339), oldEntry.Amount, amountPaid, transactionID)
+		c.log.Paid("", subEmail, date.Format(time.RFC3339), oldEntry.Amount, amountPaid, transactionID)
 	}
 	return nil
 }
@@ -697,7 +697,7 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 	}
 	if c.log != nil {
 		utils.Infof(c.ctx, "log not nil. logging skip")
-		c.log.SubSkip(date.Format(time.RFC3339), 0, subEmail, reason)
+		c.log.SubSkip(date.Format(time.RFC3339), s.ID, subEmail, reason)
 	} else {
 		utils.Infof(c.ctx, "log nil")
 	}
@@ -723,7 +723,7 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 
 	if c.log != nil {
 		utils.Infof(c.ctx, "log not nil. logging unskip")
-		c.log.SubUnskip(date.Format(time.RFC3339), 0, subEmail)
+		c.log.SubUnskip(date.Format(time.RFC3339), s.ID, subEmail)
 	} else {
 		utils.Infof(c.ctx, "log nil")
 	}

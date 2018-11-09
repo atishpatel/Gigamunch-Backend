@@ -2,42 +2,51 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
 // UpdatePhoneNumbers updates phonenumbers for subscribers.
 func (s *server) UpdatePhoneNumbers(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	// subC := sub.NewWithLogging(ctx, s.log)
-	// subs, err := subC.GetHasSubscribed(time.Now())
-	// if err != nil {
-	// 	return errors.Annotate(err, "failed to sub.GetHasSubscribed")
-	// }
-	// var updatedSubs []*sub.SubscriptionSignUp
-	// for i := range subs {
-	// 	oldNumber := subs[i].PhoneNumber
-	// 	oldRawNumber := subs[i].RawPhoneNumber
-	// 	subs[i].UpdatePhoneNumber(subs[i].PhoneNumber)
-	// 	if oldNumber != subs[i].PhoneNumber || (oldNumber != "" && oldRawNumber == "") {
-	// 		logging.Infof(ctx, "updating: %s", subs[i].Email)
-	// 		updatedSubs = append(updatedSubs, &subs[i])
-	// 	}
-	// }
-	// lastIndex := 0
-	// for i := 0; i < len(updatedSubs); i += 100 {
-	// 	if i == 0 {
-	// 		i += 100
-	// 	}
-	// 	if i > len(updatedSubs) {
-	// 		i = len(updatedSubs)
-	// 	}
-	// 	err = subC.Update(updatedSubs[lastIndex:i])
-	// 	if err != nil {
-	// 		return errors.Annotate(err, "failed to sub.Update")
-	// 	}
-	// 	lastIndex = i
-	// }
-	// return errors.NoError.WithMessage(fmt.Sprintf("%d subs updated out of %d", len(updatedSubs), len(subs)))
+
 	return nil
+}
+
+// MigrateToNewSubscribersStruct migrates subscribers to new struct.
+func (s *server) MigrateToNewSubscribersStruct(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var start, limit int64
+	startStr := r.URL.Query().Get("start")
+	if startStr != "" {
+		start, _ = strconv.ParseInt(startStr, 10, 64)
+	}
+	limitStr := r.URL.Query().Get("limit")
+	if limitStr != "" {
+		limit, _ = strconv.ParseInt(limitStr, 10, 64)
+	}
+	log.Infof(ctx, "start: %d limit: %d", start, limit)
+	suboldC := subold.NewWithLogging(ctx, log)
+	err := suboldC.BatchSubscriptionSignUpToSubscriber(start, limit)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.BatchSubscriptionSignUpToSubscriber")
+	}
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subs, err := subC.GetActive(0, 1000)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.GetActive")
+	}
+	_, err = subold.Subscriberget(ctx, "atish@gigamunchapp.com")
+	if err != nil {
+		log.Errorf(ctx, "failed to sub.Subscriberget atish@gigamunchapp.com: %+v", err)
+	}
+	key := s.db.IncompleteKey(ctx, "Subscriber")
+	return errors.NoError.WithMessage(fmt.Sprintf("%d active Subscribers struct; key: %s", len(subs), key.NameID()))
 }

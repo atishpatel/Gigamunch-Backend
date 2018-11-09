@@ -2,6 +2,7 @@ package execution
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -31,6 +32,15 @@ type Client struct {
 func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sqlx.DB, serverInfo *common.ServerInfo) (*Client, error) {
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
+	}
+	if sqlC == nil {
+		return nil, fmt.Errorf("sqlDB cannot be nil")
+	}
+	if dbC == nil {
+		return nil, fmt.Errorf("failed to get db")
+	}
+	if serverInfo == nil {
+		return nil, errInternal.Annotate("failed to get server info")
 	}
 	return &Client{
 		ctx:        ctx,

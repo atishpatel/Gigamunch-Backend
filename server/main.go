@@ -228,7 +228,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		// get context
 		ctx := appengine.NewContext(r)
-		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
 		if err != nil {
