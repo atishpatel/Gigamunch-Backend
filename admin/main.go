@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/gorilla/schema"
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+
 	"github.com/jmoiron/sqlx"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
@@ -141,6 +141,10 @@ func (s *server) setup() error {
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}
+	s.db, err = db.NewClient(context.Background(), projID, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get database client: %+v", err)
+	}
 	s.serverInfo = &common.ServerInfo{
 		ProjectID:           projID,
 		IsStandardAppEngine: true,
@@ -198,13 +202,6 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
-		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			// TODO:
-			_, _ = w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
-			return
-		}
 		// create logging client
 		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
@@ -250,31 +247,11 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 
 // Request helpers
 func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(v, r.URL.Query())
-		logging.Infof(ctx, "Query: %+v", r.URL.Query())
-		if err != nil {
-			return err
-		}
-	} else {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return err
-		}
-		logging.Infof(ctx, "Body: %s", body)
-		err = json.Unmarshal(body, v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return serverhelper.DecodeRequest(ctx, r, v)
 }
 
-func failedToDecode(err error) *pb.ErrorOnlyResp {
-	return &pb.ErrorOnlyResp{
-		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
-	}
+func failedToDecode(err error) *pbcommon.ErrorOnlyResp {
+	return serverhelper.FailedToDecode(err)
 }
 
 // Response is a response to a rpc call. All responses contain an error.
@@ -285,12 +262,5 @@ type Response interface {
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
-	if len(s) == 10 {
-		s += "T12:12:12.000Z"
-	}
-	t, err := time.Parse(time.RFC3339, s)
-	if err != nil {
-		return time.Time{}
-	}
-	return t
+	return serverhelper.GetDatetime(s)
 }

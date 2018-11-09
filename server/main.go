@@ -203,6 +203,10 @@ func (s *server) setup() error {
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}
+	s.db, err = db.NewClient(context.Background(), projID, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get database client: %+v", err)
+	}
 	s.serverInfo = &common.ServerInfo{
 		ProjectID:           projID,
 		IsStandardAppEngine: true,
@@ -229,13 +233,6 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
-		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			// TODO:
-			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
-			return
-		}
 		// create logging client
 		log, err := logging.NewClient(ctx, "server", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
