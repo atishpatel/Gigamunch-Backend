@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
-	"github.com/gorilla/schema"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
@@ -29,8 +27,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Server is the Subscriber server service.
-type Server struct {
+// server is the Subscriber server service.
+type server struct {
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
@@ -44,14 +42,14 @@ var (
 )
 
 func main() {
-	s := new(Server)
-	err := s.Setup()
+	s := new(server)
+	err := s.setup()
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
 	// Activity
-	http.HandleFunc("/sub/api/v1/GetExecutions", s.Handler(s.GetExecutions))
-	http.HandleFunc("/sub/api/v1/GetExecution", s.Handler(s.GetExecution))
+	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.GetExecutions))
+	http.HandleFunc("/sub/api/v1/GetExecution", s.handler(s.GetExecution))
 	// Test
 	http.HandleFunc("/sub/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))
@@ -60,7 +58,7 @@ func main() {
 }
 
 // Setup sets up the server.
-func (s *Server) Setup() error {
+func (s *server) setup() error {
 	var err error
 	projID := os.Getenv("PROJECT_ID")
 	if projID == "" {
@@ -78,6 +76,10 @@ func (s *Server) Setup() error {
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}
+	s.db, err = db.NewClient(context.Background(), projID, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get database client: %+v", err)
+	}
 	s.serverInfo = &common.ServerInfo{
 		ProjectID:           projID,
 		IsStandardAppEngine: true,
@@ -85,8 +87,8 @@ func (s *Server) Setup() error {
 	return nil
 }
 
-// IsSubscriber checks if user is subscriber.
-func (s *Server) IsSubscriber(f Handle) Handle {
+// isSubscriber checks if user is subscriber.
+func (s *server) isSubscriber(f handle) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
@@ -101,7 +103,7 @@ func (s *Server) IsSubscriber(f Handle) Handle {
 	}
 }
 
-func (s *Server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, error) {
+func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) (*common.User, error) {
 	token := r.Header.Get("auth-token")
 	if token == "" {
 		return nil, errBadRequest.Annotate("auth-token is empty")
@@ -117,8 +119,8 @@ func (s *Server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 	return user, nil
 }
 
-// Handler encodes response
-func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
+// handler encodes response
+func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
@@ -137,13 +139,6 @@ func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
-		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			// TODO:
-			_, _ = w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
-			return
-		}
 		// create logging client
 		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
@@ -188,27 +183,9 @@ func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 
 // Request helpers
 
-// DecodeRequest decodes a request into a struct.
-func DecodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(v, r.URL.Query())
-		logging.Infof(ctx, "Query: %+v", r.URL.Query())
-		if err != nil {
-			return err
-		}
-	} else {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return err
-		}
-		logging.Infof(ctx, "Body: %s", body)
-		err = json.Unmarshal(body, v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+// decodeRequest decodes a request into a struct.
+func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
+	return serverhelper.DecodeRequest(ctx, r, v)
 }
 
 func failedToDecode(err error) *pbcommon.ErrorOnlyResp {
@@ -220,8 +197,8 @@ type Response interface {
 	GetError() *pbcommon.Error
 }
 
-// Handle is the handle for api request.
-type Handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
+// handle is the handle for api request.
+type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
 	return serverhelper.GetDatetime(s)

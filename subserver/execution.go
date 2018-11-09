@@ -13,11 +13,11 @@ import (
 )
 
 // GetExecutions gets list of executions.
-func (s *Server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pbsub.GetExecutionsReq)
 	// decode request
-	err = DecodeRequest(ctx, r, req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
@@ -40,11 +40,11 @@ func (s *Server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 // GetExecution gets an execution.
-func (s *Server) GetExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pbsub.GetExecutionReq)
 	// decode request
-	err = DecodeRequest(ctx, r, req)
+	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
