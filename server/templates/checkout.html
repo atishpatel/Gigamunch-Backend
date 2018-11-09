@@ -686,33 +686,24 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Rachel Woods picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/rachel_woods.jpg">
-
-
-
                     </div>
-                    </div>
-                    <div class="checkout-trust-review">
-                      <p>"We loved exploring food from various parts of the world."</p>
-                      <div class="checkout-trust-review-image">
-                        <img alt="Paige Orr Clancy picture"
+                  </div>
+                  <div class="checkout-trust-review">
+                    <p>"We loved exploring food from various parts of the world."</p>
+                    <div class="checkout-trust-review-image">
+                      <img alt="Paige Orr Clancy picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/paige_orr_clancy.jpg">
-
-
-
                     </div>
-                      </div>
+                  </div>
 
-                      <div class="checkout-trust-review">
-                        <p>"Bravo! I love these meals, culture guides, and songs. They are delicious, convenient, educational, and fun."</p>
-                        <div class="checkout-trust-review-image">
-                          <img alt="Barbara Futter picture"
+                  <div class="checkout-trust-review">
+                    <p>"Bravo! I love these meals, culture guides, and songs. They are delicious, convenient, educational, and fun."</p>
+                    <div class="checkout-trust-review-image">
+                      <img alt="Barbara Futter picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/barbara_futter.jpg">
-
-
-
                     </div>
-                        </div>
-                      </div>
+                  </div>
+                </div>
               </li>
             </ul>
           </div>
@@ -720,727 +711,706 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/certificate-icon.png">
-
-
+              </div>
+              <div class="checkout-trust-security-text">
+                <div class="checkout-trust-security-title">
+                  SKIP OR CANCEL ANYTIME
+                </div>
+                <p class="checkout-trust-security-desc">
+                  If you are out of town or don't want to explore the world with us any longer, skip or cancel anytime.
+                </p>
+              </div>
+            </div>
+            <div class="checkout-trust-security-item">
+              <div class="checkout-trust-security-image">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/shield-icon.png">
 
               </div>
-                <div class="checkout-trust-security-text">
-                  <div class="checkout-trust-security-title">
-                    SKIP OR CANCEL ANYTIME
-                  </div>
-                  <p class="checkout-trust-security-desc">
-                    If you are out of town or don't want to explore the world with us any longer, skip or cancel anytime.
-                  </p>
+              <div class="checkout-trust-security-text">
+                <div class="checkout-trust-security-title">
+                  YOUR INFORMATION IS SAFE
+                </div>
+                <p class="checkout-trust-security-desc">
+                  We will not sell or rent your personal contact information for any marketing purposes.
+                </p>
+              </div>
+            </div>
+            <div class="checkout-trust-security-item">
+              <div class="checkout-trust-security-image">
+                <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/lock-icon.png">
+              </div>
+              <div class="checkout-trust-security-text">
+                <div class="checkout-trust-security-title">
+                  SECURE CHECKOUT
+                </div>
+                <p class="checkout-trust-security-desc">
+                  All information is encrypted and transmitted without risk using a Secure Sockets Layer protocol.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="checkout-form-container">
+          <form id="checkout-form"
+                action="[[.ThankYouPageURL]]"
+                method="post"
+                class="checkout-form"
+                enctype="application/x-www-form-urlencoded">
+
+            <div class="checkout-row">
+              <div>
+                <label for="first_name">First Name</label>
+                <div class="input-container">
+                  <input type="text"
+                         name="first_name"
+                         id="first_name"
+                         onfocus="nameInputFocused()"
+                         placeholder="Ms. Excited"
+                         size="1"
+                         value="[[.FirstName]]"
+                         required />
+
                 </div>
               </div>
-              <div class="checkout-trust-security-item">
-                <div class="checkout-trust-security-image">
-                  <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/shield-icon.png">
+              <div>
+                <label for="last_name">Last Name</label>
+                <div class="input-container">
+                  <input type="text"
+                         name="last_name"
+                         id="last_name"
+                         size="1"
+                         onfocus="nameInputFocused()"
+                         value="[[.LastName]]"
+                         required />
 
-              </div>
-                  <div class="checkout-trust-security-text">
-                    <div class="checkout-trust-security-title">
-                      YOUR INFORMATION IS SAFE
-                    </div>
-                    <p class="checkout-trust-security-desc">
-                      We will not sell or rent your personal contact information for any marketing purposes.
-                    </p>
-                  </div>
-                </div>
-                <div class="checkout-trust-security-item">
-                  <div class="checkout-trust-security-image">
-                    <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/lock-icon.png">
-
-
-
-              </div>
-                    <div class="checkout-trust-security-text">
-                      <div class="checkout-trust-security-title">
-                        SECURE CHECKOUT
-                      </div>
-                      <p class="checkout-trust-security-desc">
-                        All information is encrypted and transmitted without risk using a Secure Sockets Layer protocol.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
-              <div class="checkout-form-container">
-                <form id="checkout-form"
-                      action="[[.ThankYouPageURL]]"
-                      method="post"
-                      class="checkout-form"
-                      enctype="application/x-www-form-urlencoded">
+            </div>
+            <div class="checkout-row">
+              <div class="input-label">
+                <label for="name">Email</label>
+                <div class="input-container">
+                  <input type="text"
+                         name="email"
+                         id="email"
+                         class="checkout-email"
+                         placeholder="Email"
+                         size="1"
+                         value="[[.Email]]" />
 
-                  <div class="checkout-row">
-                    <div>
-                      <label for="first_name">First Name</label>
-                      <div class="input-container">
-                        <input type="text"
-                               name="first_name"
-                               id="first_name"
-                               onfocus="nameInputFocused()"
-                               placeholder="Ms. Excited"
-                               size="1"
-                               value="[[.FirstName]]"
-                               required />
+                </div>
+              </div>
+              <div class="input-label">
+                <label for="phone_number">Phone Number (for delivery)</label>
+                <div class="input-container">
+                  <input type="tel"
+                         name="phone_number"
+                         id="phone_number"
+                         size="1"
+                         placeholder="615-123-1234"
+                         value="[[.PhoneNumber]]" />
 
-                      </div>
-                    </div>
-                    <div>
-                      <label for="last_name">Last Name</label>
-                      <div class="input-container">
-                        <input type="text"
-                               name="last_name"
-                               id="last_name"
-                               size="1"
-                               onfocus="nameInputFocused()"
-                               value="[[.LastName]]"
-                               required />
+                </div>
+              </div>
+            </div>
 
-                      </div>
-                    </div>
-                  </div>
-                  <div class="checkout-row">
-                    <div class="input-label">
-                      <label for="name">Email</label>
-                      <div class="input-container">
-                        <input type="text"
-                               name="email"
-                               id="email"
-                               class="checkout-email"
-                               placeholder="Email"
-                               size="1"
-                               value="[[.Email]]" />
-
-                      </div>
-                    </div>
-                    <div class="input-label">
-                      <label for="phone_number">Phone Number (for delivery)</label>
-                      <div class="input-container">
-                        <input type="tel"
-                               name="phone_number"
-                               id="phone_number"
-                               size="1"
-                               placeholder="615-123-1234"
-                               value="[[.PhoneNumber]]" />
-
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label for="address-input">Address</label>
-                    <div class="input-container
+            <div>
+              <label for="address-input">Address</label>
+              <div class="input-container
                        address-input-container">
-                      <input type="text"
-                             name="address-input"
-                             id="address-input"
-                             onfocus="addressInputFocused()"
-                             placeholder="123 Street Name, City"
-                             required
-                             value="[[.Address]]" />
-                      <input type="text"
-                             name="apt"
-                             class="apt"
-                             id="apt"
-                             placeholder="APT/Unit"
-                             value="[[.APT]]" />
+                <input type="text"
+                       name="address-input"
+                       id="address-input"
+                       onfocus="addressInputFocused()"
+                       placeholder="123 Street Name, City"
+                       required
+                       value="[[.Address]]" />
+                <input type="text"
+                       name="apt"
+                       class="apt"
+                       id="apt"
+                       placeholder="APT/Unit"
+                       value="[[.APT]]" />
 
-                    </div>
-                  </div>
-                  <div>
-                    <label for="delivery_note">Delivery Notes (optional)</label>
-                    <div class="input-container">
-                      <input type="text"
-                             name="delivery_notes"
-                             id="delivery_notes"
-                             placeholder="Gate code: # or any other delivery tips"
-                             value="[[.DeliveryNotes]]" />
+              </div>
+            </div>
+            <div>
+              <label for="delivery_note">Delivery Notes (optional)</label>
+              <div class="input-container">
+                <input type="text"
+                       name="delivery_notes"
+                       id="delivery_notes"
+                       placeholder="Gate code: # or any other delivery tips"
+                       value="[[.DeliveryNotes]]" />
 
-                    </div>
-                  </div>
-                  <div>
-                    <label for="reference">How did you hear about us?</label>
-                    <div class="input-container">
-                      <input type="text"
-                             name="reference"
-                             id="reference"
-                             placeholder="My friend Joe Shmoe."
-                             value="[[.Reference]]" />
+              </div>
+            </div>
+            <div>
+              <label for="reference">How did you hear about us?</label>
+              <div class="input-container">
+                <input type="text"
+                       name="reference"
+                       id="reference"
+                       placeholder="My friend Joe Shmoe."
+                       value="[[.Reference]]" />
 
-                    </div>
-                  </div>
-                  <div class="form-section-title">
-                    <h2>Choose your bag</h2>
-                  </div>
+              </div>
+            </div>
+            <div class="form-section-title">
+              <h2>Choose your bag</h2>
+            </div>
 
-                  <div class="form-section-desc">
-                    Every Monday, you will get a bag that will take you on a new journey! How do you want your journey to be?
-                  </div>
-                  <br>
-                  <div class="select-input-group">
-                    <label>First Delivery Day</label>
-                    <select id="delivery-date"
+            <div class="form-section-desc">
+              Every Monday, you will get a bag that will take you on a new journey! How do you want your journey to be?
+            </div>
+            <br>
+            <div class="select-input-group">
+              <label>First Delivery Day</label>
+              <select id="delivery-date"
                       option-value="value"
                       form="checkout-form"
                       onclick="dayInputClick()">
                     <option selected value="Monday">Monday</option>
                   </select>
+            </div>
+            <div class="form-section-note">*Deliveries are only offered on Monday nights for now.</div>
+            <div id="meal-selector"
+                 class="select-package-container">
+              <ul>
+                <li>
+                  <div class="select-package-container-button"
+                       for="meal-option-2">
+                    <input type="radio"
+                           id="meal-option-2"
+                           value="2"
+                           name="servings"
+                           onclick="meal2InputClick()"
+                           checked>
+                    <label class="most-popular-label"
+                           for="meal-option-2">*Most Popular!*</label>
+                    <label class="num-meals-label"
+                           for="meal-option-2">2 MEAL BAG</label>
+                    <label class="price-per-meal-label"
+                           for="meal-option-2">$16.50 PER MEAL</label>
                   </div>
-                  <div class="form-section-note">*Deliveries are only offered on Monday nights for now.</div>
-                  <div id="meal-selector"
-                       class="select-package-container">
-                    <ul>
-                      <li>
-                        <div class="select-package-container-button"
-                             for="meal-option-2">
-                          <input type="radio"
-                                 id="meal-option-2"
-                                 value="2"
-                                 name="servings"
-                                 onclick="meal2InputClick()"
-                                 checked>
-                          <label class="most-popular-label"
-                                 for="meal-option-2">*Most Popular!*</label>
-                          <label class="num-meals-label"
-                                 for="meal-option-2">2 MEAL BAG</label>
-                          <label class="price-per-meal-label"
-                                 for="meal-option-2">$16.50 PER MEAL</label>
-                        </div>
-                      </li>
+                </li>
 
-                      <li>
-                        <div class="select-package-container-button"
-                             for="meal-option-3">
-                          <input type="radio"
-                                 id="meal-option-3"
-                                 value="4"
-                                 onclick="meal4InputClick()"
-                                 name="servings">
-                          <label class="most-popular-label"
-                                 for="meal-option-3"> </label>
-                          <label class="num-meals-label"
-                                 for="meal-option-3">4 MEAL BAG</label>
-                          <label class="price-per-meal-label"
-                                 for="meal-option-3">$15.25 PER MEAL</label>
-                        </div>
-                      </li>
-                    </ul>
+                <li>
+                  <div class="select-package-container-button"
+                       for="meal-option-3">
+                    <input type="radio"
+                           id="meal-option-3"
+                           value="4"
+                           onclick="meal4InputClick()"
+                           name="servings">
+                    <label class="most-popular-label"
+                           for="meal-option-3"> </label>
+                    <label class="num-meals-label"
+                           for="meal-option-3">4 MEAL BAG</label>
+                    <label class="price-per-meal-label"
+                           for="meal-option-3">$15.25 PER MEAL</label>
                   </div>
-                  <div class="vegetarian-section checkbox-group">
-                    <div class="checkbox">
-                      <input type="checkbox"
-                             value="None"
-                             id="vegetarian"
-                             name="vegetarian" />
-                      <label for="vegetarian"></label>
-                    </div>
-                    <label class="vegetarian-label checkbox-label">I'm a vegetarian! 🌱</label>
-                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="vegetarian-section checkbox-group">
+              <div class="checkbox">
+                <input type="checkbox"
+                       value="None"
+                       id="vegetarian"
+                       name="vegetarian" />
+                <label for="vegetarian"></label>
+              </div>
+              <label class="vegetarian-label checkbox-label">I'm a vegetarian! 🌱</label>
+            </div>
 
-                  <div id="why-free"
-                       class="why-free">
-                    <div class="form-section-title">
-                      <h2 class="why-free-title">Why Free Meal?</h2>
-                    </div>
-                    <p class="form-section-desc">We believe in trying before buying. We're so confident you'll love it; we're willing to take the risk.</p>
-                  </div>
+            <div id="why-free"
+                 class="why-free">
+              <div class="form-section-title">
+                <h2 class="why-free-title">Why Free Meal?</h2>
+              </div>
+              <p class="form-section-desc">We believe in trying before buying. We're so confident you'll love it; we're willing to take the risk.</p>
+            </div>
 
-                  <div class="no-commitment">
-                    <div class="no-commitment-checkmark"><i class="fa
+            <div class="no-commitment">
+              <div class="no-commitment-checkmark"><i class="fa
                        fa-check"
                    aria-hidden="true"></i></div>
-                    <div class="no-commitment-text">
-                      <div class="no-commitment-title">No commitment. No, really.</div>
-                      <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 4 days after your first meal to cancel without getting charged a dime.</div>
-                    </div>
-                  </div>
-                  <div class="form-section-title">
-                    <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
-                  </div>
-                  <div>
-                    <label for="card-number"
-                           class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i>
-                      <i class="fa fa-cc-mastercard" aria-hidden="true"></i>
-                      <i class="fa fa-cc-discover" aria-hidden="true"></i></label>
-                    <div class="hosted-field"
-                         id="card-number"></div>
-                  </div>
-                  <div>
-                    <label for="cvv">CVV</label>
-                    <div class="hosted-field"
-                         id="cvv"></div>
+              <div class="no-commitment-text">
+                <div class="no-commitment-title">No commitment. No, really.</div>
+                <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 4 days after your first meal to cancel without getting charged a dime.</div>
+              </div>
+            </div>
+            <div class="form-section-title">
+              <h2>Payment Info <i class="fa fa-lock checkout-payment-lock" aria-hidden="true"></i></h2>
+            </div>
+            <div>
+              <label for="card-number"
+                     class="card-number">Card Number <i class="fa fa-cc-visa" aria-hidden="true"></i>
+                <i class="fa fa-cc-mastercard" aria-hidden="true"></i>
+                <i class="fa fa-cc-discover" aria-hidden="true"></i></label>
+              <div class="hosted-field"
+                   id="card-number"></div>
+            </div>
+            <div>
+              <label for="cvv">CVV</label>
+              <div class="hosted-field"
+                   id="cvv"></div>
 
-                    <label for="expiration-date">Expiration Date</label>
-                    <div class="hosted-field"
-                         id="expiration-date"></div>
-                  </div>
-                  <div class="review-order">
-                    <div class="form-section-title">
-                      <h2>Order Summary</h2>
-                    </div>
-                    <div class="item">
-                      <div class="item-image">
-                        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/product_shot_checkout.jpg"
+              <label for="expiration-date">Expiration Date</label>
+              <div class="hosted-field"
+                   id="expiration-date"></div>
+            </div>
+            <div class="review-order">
+              <div class="form-section-title">
+                <h2>Order Summary</h2>
+              </div>
+              <div class="item">
+                <div class="item-image">
+                  <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/product_shot_checkout.jpg"
                        alt="A bag with an international meal.">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </div>
-                        <div class="item-detail">
-                          <div class="item-text">
-                            <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
-                            <div class="item-desc">
-                              Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime
-                              with
-                              a 4 day notice.
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="order-summary">
-                        <div class="order-summary-section">
-                          <div class="order-summary-section-name">Meals <span id="meal_multiplier"
-                          class="multiplier">x2</span></div>
-                          <div class="order-summary-section-price"><span class="old_price">$<span id="box_total"></span></span> FREE</div>
-                        </div>
-                        <div class="order-summary-section">
-                          <div class="order-summary-section-name">Delivery</div>
-                          <div class="order-summary-section-price">FREE</div>
-                        </div>
-                        <div class="order-summary-section">
-                          <div class="order-summary-section-name">Tax</div>
-                          <div class="order-summary-section-price"><span class="old_price">$<span id="tax_total"></span></span> FREE</div>
-                        </div>
-                        <div class="order-summary-section">
-                          <div class="order-summary-section-name">Total</div>
-                          <div class="order-summary-section-price">$0.00</div>
-                        </div>
-                      </div>
+                <div class="item-detail">
+                  <div class="item-text">
+                    <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
+                    <div class="item-desc">
+                      Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime
+                      with
+                      a 4 day notice.
                     </div>
-                    <input type="hidden"
-                           name="payment_method_nonce">
-                    <div class="terms-and-conditions">By subscribing, I agree to the <a href="/terms"
+                  </div>
+                </div>
+              </div>
+              <div class="order-summary">
+                <div class="order-summary-section">
+                  <div class="order-summary-section-name">Meals <span id="meal_multiplier"
+                          class="multiplier">x2</span></div>
+                  <div class="order-summary-section-price"><span class="old_price">$<span id="box_total"></span></span> FREE</div>
+                </div>
+                <div class="order-summary-section">
+                  <div class="order-summary-section-name">Delivery</div>
+                  <div class="order-summary-section-price">FREE</div>
+                </div>
+                <div class="order-summary-section">
+                  <div class="order-summary-section-name">Tax</div>
+                  <div class="order-summary-section-price"><span class="old_price">$<span id="tax_total"></span></span> FREE</div>
+                </div>
+                <div class="order-summary-section">
+                  <div class="order-summary-section-name">Total</div>
+                  <div class="order-summary-section-price">$0.00</div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden"
+                   name="payment_method_nonce">
+            <div class="terms-and-conditions">By subscribing, I agree to the <a href="/terms"
                  target="_blank"
                  rel="noopener">Terms &amp; Conditions</a> and <a href="/privacy"
                  target="_blank"
                  rel="noopener">Privacy Policy</a>.</div>
-                    <input id="submit-button"
-                           class="checkout-button"
-                           type="submit"
-                           value="Subscribe"
-                           onclick="subscribeClick()"
-                           disabled />
+            <input id="submit-button"
+                   class="checkout-button"
+                   type="submit"
+                   value="Subscribe"
+                   onclick="subscribeClick()"
+                   disabled />
 
-                </form>
-              </div>
-            </div>
-          </div>
+          </form>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <script>
-          function logError(desc) {
-            ga('send', 'event', 'schedule_checkout_error', desc);
-            ga('send', 'exception', {
-              exDescription: desc,
-              exFatal: false,
-            });
+  <script>
+    function logError(desc) {
+      ga('send', 'event', 'schedule_checkout_error', desc);
+      ga('send', 'exception', {
+        exDescription: desc,
+        exFatal: false,
+      });
+    }
+
+    function logRespError(err) {
+      var desc = 'Function: SubmitCheckout | Message: ' + err.message + '| Details: ' + err.detail;
+      logError(desc);
+    }
+
+
+    var autocomplete;
+    var address = {
+      apt: ''
+    };
+    // Google Maps Autocomplete
+    function initMap() {
+      var addressInput = document.getElementById('address-input');
+      autocomplete = new this.google.maps.places.Autocomplete(addressInput, {
+        types: ['address'],
+        bounds: new this.google.maps.LatLngBounds(
+          new this.google.maps.LatLng(35.889615, -87.336957),
+          new this.google.maps.LatLng(36.436964, -86.398256)
+        ),
+      });
+
+      autocomplete.addListener('place_changed', function() {
+        var componentForm = {
+          street_number: 'short_name',
+          route: 'long_name',
+          locality: 'long_name',
+          administrative_area_level_1: 'short_name',
+          country: 'long_name',
+          postal_code: 'short_name'
+        };
+        // Get the place details from the autocomplete object.
+        var place = autocomplete.getPlace();
+
+        for (var component in componentForm) {
+          // document.getElementById(component).value = '';
+        }
+        var addr = {};
+        // Get each component of the address from the place details
+        // and fill the corresponding field on the form.
+        for (var i = 0; i < place.address_components.length; i++) {
+          var addressType = place.address_components[i].types[0];
+          if (componentForm[addressType]) {
+            var val = place.address_components[i][componentForm[addressType]];
+            addr[addressType] = val;
           }
+        }
+        var apt = '';
+        if (address && address.apt) {
+          apt = address.apt.toUpperCase();
+        }
+        var streetNumber = '';
+        if (addr['street_number']) {
+          streetNumber = addr['street_number'];
+        }
+        var street = streetNumber + ' ' + addr['route'];
+        var city = addr['locality'];
+        var state = addr['administrative_area_level_1'];
+        var country = addr['country'];
+        var zip = addr['postal_code'];
+        var latitude = place.geometry.location.lat();
+        var longitude = place.geometry.location.lng();
+        address = {
+          apt: apt,
+          street: street,
+          city: city,
+          state: state,
+          zip: zip,
+          country: country,
+          latitude: latitude,
+          longitude: longitude,
+        };
+        addressInputSelected()
+      });
+    }
 
-          function logRespError(err) {
-            var desc = 'Function: SubmitCheckout | Message: ' + err.message + '| Details: ' + err.detail;
-            logError(desc);
+    // BrainTree
+    var authorization = 'production_fzp6pdxg_wsgmypp8c46cnbpc';
+    if (!APP.IsProd) {
+      authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
+    }
+    var submit = document.querySelector('input[type="submit"]');
+    var form = document.querySelector('#checkout-form');
+    var hostedFieldsInst;
+    var btClientInst;
+    braintree.client.create({
+      authorization: authorization
+    }, function(clientErr, clientInstance) {
+      if (clientErr) {
+        // Handle error in client creation
+        console.error('Error with client creation', clientErr);
+        return;
+      }
+      byClientInst = clientInstance;
+      braintree.hostedFields.create({
+        client: clientInstance,
+        styles: {
+          'input': {
+            'font-size': '14px',
+            'outline': 'none'
+          },
+          '.invalid': {
+            'color': 'red'
+          },
+          '.valid': {
+            'color': 'green'
           }
-
-
-          var autocomplete;
-          var address = {
-            apt: ''
-          };
-          // Google Maps Autocomplete
-          function initMap() {
-            var addressInput = document.getElementById('address-input');
-            autocomplete = new this.google.maps.places.Autocomplete(addressInput, {
-              types: ['address'],
-              bounds: new this.google.maps.LatLngBounds(
-                new this.google.maps.LatLng(35.889615, -87.336957),
-                new this.google.maps.LatLng(36.436964, -86.398256)
-              ),
-            });
-
-            autocomplete.addListener('place_changed', function() {
-              var componentForm = {
-                street_number: 'short_name',
-                route: 'long_name',
-                locality: 'long_name',
-                administrative_area_level_1: 'short_name',
-                country: 'long_name',
-                postal_code: 'short_name'
-              };
-              // Get the place details from the autocomplete object.
-              var place = autocomplete.getPlace();
-
-              for (var component in componentForm) {
-                // document.getElementById(component).value = '';
-              }
-              var addr = {};
-              // Get each component of the address from the place details
-              // and fill the corresponding field on the form.
-              for (var i = 0; i < place.address_components.length; i++) {
-                var addressType = place.address_components[i].types[0];
-                if (componentForm[addressType]) {
-                  var val = place.address_components[i][componentForm[addressType]];
-                  addr[addressType] = val;
-                }
-              }
-              var apt = '';
-              if (address && address.apt) {
-                apt = address.apt.toUpperCase();
-              }
-              var streetNumber = '';
-              if (addr['street_number']) {
-                streetNumber = addr['street_number'];
-              }
-              var street = streetNumber + ' ' + addr['route'];
-              var city = addr['locality'];
-              var state = addr['administrative_area_level_1'];
-              var country = addr['country'];
-              var zip = addr['postal_code'];
-              var latitude = place.geometry.location.lat();
-              var longitude = place.geometry.location.lng();
-              address = {
-                apt: apt,
-                street: street,
-                city: city,
-                state: state,
-                zip: zip,
-                country: country,
-                latitude: latitude,
-                longitude: longitude,
-              };
-              addressInputSelected()
-            });
+        },
+        fields: {
+          number: {
+            selector: '#card-number',
+            placeholder: '4111 1111 1111 1111'
+          },
+          cvv: {
+            selector: '#cvv',
+            placeholder: '123'
+          },
+          expirationDate: {
+            selector: '#expiration-date',
+            placeholder: '10/2021'
           }
-
-          // BrainTree
-          var authorization = 'production_fzp6pdxg_wsgmypp8c46cnbpc';
-          if (!APP.IsProd) {
-            authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
+        }
+      }, function(hostedFieldsErr, hostedFieldsInstance) {
+        if (hostedFieldsErr) {
+          // Handle error in Hosted Fields creation
+          console.error('Error with hosted fields creation', hostedFieldsErr);
+          return;
+        }
+        hostedFieldsInst = hostedFieldsInstance;
+        submit.removeAttribute('disabled');
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+          if (!validateFields()) {
+            return
           }
-          var submit = document.querySelector('input[type="submit"]');
-          var form = document.querySelector('#checkout-form');
-          var hostedFieldsInst;
-          var btClientInst;
-          braintree.client.create({
-            authorization: authorization
-          }, function(clientErr, clientInstance) {
-            if (clientErr) {
-              // Handle error in client creation
-              console.error('Error with client creation', clientErr);
+          submit.setAttribute('disabled', true);
+          hostedFieldsInstance.tokenize({}, function(tokenizeErr, payload) {
+            if (tokenizeErr) {
+              // Handle error in Hosted Fields tokenization
+              console.error('failed to tokenize fields', tokenizeErr)
+              logError(JSON.stringify(tokenizeErr));
+              if (tokenizeErr.type === 'CUSTOMER') {
+                alert('Invalid credit card information.');
+              } else {
+                alert('An unknown error occured while verifying your credit card. Please try a different card or contact enis@gigamunchapp.com.');
+              }
+              submit.removeAttribute('disabled');
               return;
             }
-            byClientInst = clientInstance;
-            braintree.hostedFields.create({
-              client: clientInstance,
-              styles: {
-                'input': {
-                  'font-size': '14px',
-                  'outline': 'none'
-                },
-                '.invalid': {
-                  'color': 'red'
-                },
-                '.valid': {
-                  'color': 'green'
-                }
-              },
-              fields: {
-                number: {
-                  selector: '#card-number',
-                  placeholder: '4111 1111 1111 1111'
-                },
-                cvv: {
-                  selector: '#cvv',
-                  placeholder: '123'
-                },
-                expirationDate: {
-                  selector: '#expiration-date',
-                  placeholder: '10/2021'
-                }
+
+            // Put `payload.nonce` into the `payment_method_nonce` input, and then
+            // submit the form. Alternatively, you could send the nonce to your server
+            // with AJAX.
+            document.querySelector('input[name="payment_method_nonce"]').value = payload.nonce;
+
+            // submit form
+            var firstName = form.elements['first_name'].value;
+            var lastName = form.elements['last_name'].value;
+            var email = form.elements['email'].value;
+            var firstDeliveryDate = document.getElementById('delivery-date').value;
+            var deliveryNotes = form.elements['delivery_notes'].value;
+            var reference = form.elements['reference'].value;
+            var phoneNumber = form.elements['phone_number'].value;
+            var paymentNonce = payload.nonce;
+            var campaigns;
+            var referenceEmail;
+            if (window.localStorage) {
+              var campaignsString = window.localStorage.getItem(APP.CampaignsKey);
+              if (campaignsString) {
+                campaigns = JSON.parse(campaignsString);
               }
-            }, function(hostedFieldsErr, hostedFieldsInstance) {
-              if (hostedFieldsErr) {
-                // Handle error in Hosted Fields creation
-                console.error('Error with hosted fields creation', hostedFieldsErr);
-                return;
+              var referenceEmailString = window.localStorage.getItem(APP.ReferenceEmailKey);
+              if (referenceEmailString) {
+                referenceEmail = referenceEmailString;
               }
-              hostedFieldsInst = hostedFieldsInstance;
-              submit.removeAttribute('disabled');
-              form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                if (!validateFields()) {
-                  return
-                }
-                submit.setAttribute('disabled', true);
-                hostedFieldsInstance.tokenize({}, function(tokenizeErr, payload) {
-                  if (tokenizeErr) {
-                    // Handle error in Hosted Fields tokenization
-                    console.error('failed to tokenize fields', tokenizeErr)
-                    logError(JSON.stringify(tokenizeErr));
-                    if (tokenizeErr.type === 'CUSTOMER') {
-                      alert('Invalid credit card information.');
-                    } else {
-                      alert('An unknown error occured while verifying your credit card. Please try a different card or contact enis@gigamunchapp.com.');
-                    }
-                    submit.removeAttribute('disabled');
-                    return;
-                  }
-
-                  // Put `payload.nonce` into the `payment_method_nonce` input, and then
-                  // submit the form. Alternatively, you could send the nonce to your server
-                  // with AJAX.
-                  document.querySelector('input[name="payment_method_nonce"]').value = payload.nonce;
-
-                  // submit form
-                  var firstName = form.elements['first_name'].value;
-                  var lastName = form.elements['last_name'].value;
-                  var email = form.elements['email'].value;
-                  var firstDeliveryDate = document.getElementById('delivery-date').value;
-                  var deliveryNotes = form.elements['delivery_notes'].value;
-                  var reference = form.elements['reference'].value;
-                  var phoneNumber = form.elements['phone_number'].value;
-                  var paymentNonce = payload.nonce;
-                  var campaigns;
-                  var referenceEmail;
-                  if (window.localStorage) {
-                    var campaignsString = window.localStorage.getItem(APP.CampaignsKey);
-                    if (campaignsString) {
-                      campaigns = JSON.parse(campaignsString);
-                    }
-                    var referenceEmailString = window.localStorage.getItem(APP.ReferenceEmailKey);
-                    if (referenceEmailString) {
-                      referenceEmail = referenceEmailString;
-                    }
-                  }
-                  // get value of checked radio button
-                  var servings;
-                  var radios = form.elements['servings'];
-                  for (var i = 0, len = radios.length; i < len; i++) {
-                    if (radios[i].checked) { // radio checked?
-                      servings = radios[i].value; // if so, hold its value in servings
-                      break;
-                    }
-                  }
-                  // check if servings should be vegetarian
-                  var vegetarian = form.elements['vegetarian'].checked;
-                  if (vegetarian) {
-                    var vegServings = servings;
-                    servings = "0";
-                  }
-                  var aptEl = document.getElementById('apt');
-                  address.apt = aptEl.value;
-                  if (!address.street) {
-                    address.full_address = document.getElementById('address-input').value;
-                  }
-                  var req = {
-                    'email': email,
-                    'address': address,
-                    'first_delivery_date': firstDeliveryDate,
-                    'delivery_notes': deliveryNotes,
-                    'first_name': firstName,
-                    'last_name': lastName,
-                    'payment_method_nonce': paymentNonce,
-                    'servings': servings,
-                    'vegetarian_servings': vegServings,
-                    'reference': reference,
-                    'phone_number': phoneNumber,
-                    'campaigns': campaigns,
-                    'reference_email': referenceEmail,
-                  };
-
-                  var xhr = new XMLHttpRequest();
-                  xhr.open('POST', '/api/v1/SubmitCheckout', true);
-                  xhr.setRequestHeader("Content-type", "application/json");
-                  xhr.onload = function() {
-                    try {
-                      submit.removeAttribute('disabled');
-                      var resp = JSON.parse(this.response);
-                      if (resp.error && resp.error.code === 400) {
-                        alert(resp.error.message);
-                        console.log(resp.error);
-                        logRespError(resp.error);
-                        return;
-                      }
-                      if (resp.error && resp.error.code !== 200) {
-                        alert('Woops something went wrong: ', resp.error.message);
-                        console.error(resp.error);
-                        logRespError(resp.error)
-                        return;
-                      }
-                      if (req.email) {
-                        window.location = '[[.ThankYouPageURL]]?email=' + encodeURIComponent(req.email);
-                      } else {
-                        window.location = '[[.ThankYouPageURL]]';
-                      }
-                    } catch (err) {
-                      var fullError = err;
-                      try {
-                        fullError = 'resp: ' + JSON.stringify(resp) + 'err: ' + err;
-                      } catch (e) {}
-                      console.error(fullError);
-                      logError(fullError);
-                    }
-                  };
-                  xhr.send(JSON.stringify(req));
-                });
-              }, false);
-              // add listeners to log events
-              hostedFieldsInstance.on('focus', function(e) {
-                switch (e.emittedBy) {
-                  case 'number':
-                    numberInputFocused()
-                    break;
-                  case 'cvv':
-                    cvvInputFocused()
-                    break;
-                  case 'expirationDate':
-                    expirationDateInputFocused()
-                    break;
-                }
-              })
-            });
-
-          });
-
-          function validateFields() {
-            return true
-          }
-
-          function updateOrderInfo() {
-            var deliveryDayElement = document.getElementById('delivery-date');
-            var firstChargeDate = new Date(deliveryDayElement.value);
-            firstChargeDate.setDate(firstChargeDate.getDate() + 5);
-            document.getElementById('first_date').innerHTML = firstChargeDate.toLocaleDateString();
-            var oneBoxPrice = 0.0;
-            var servingsPerBox = 0;
-
+            }
             // get value of checked radio button
-            var val;
+            var servings;
             var radios = form.elements['servings'];
             for (var i = 0, len = radios.length; i < len; i++) {
               if (radios[i].checked) { // radio checked?
-                val = radios[i].value; // if so, hold its value in val
-                break; // and break out of for loop
-              }
-            }
-            var boxForTitleText;
-            var taxTotal;
-            switch (val) {
-              case '2':
-                oneBoxPrice = 16.50;
-                servingsPerBox = 2;
-                boxForTitleText = 'Bag for Two';
-                taxTotal = 3.22;
+                servings = radios[i].value; // if so, hold its value in servings
                 break;
-              case '4':
-                oneBoxPrice = 15.25;
-                servingsPerBox = 4;
-                boxForTitleText = 'Bag for Four';
-                taxTotal = 5.95;
-                break;
-            }
-            var boxTotal = oneBoxPrice * servingsPerBox;
-            // var total = boxTotal + deliveryTotal + taxTotal;
-            var total = boxTotal;
-
-            document.getElementById('meal_multiplier').innerHTML = 'x' + servingsPerBox;
-            document.getElementById('boxForTitle').innerHTML = boxForTitleText;
-            document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
-            document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
-            document.getElementById('total').innerHTML = total.toFixed(2);
-          }
-
-          document.getElementById('delivery-date').addEventListener('change', updateOrderInfo);
-          document.getElementById('meal-option-2').addEventListener('change', updateOrderInfo);
-          document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
-
-          function generateDeliveryDays() {
-            var d = new Date();
-            d.setTime(d.getTime() + (24 * 4 + 8) * 3600 * 1000); // Thursday at 4 PM
-            while (d.getDay() !== 1) { // while not Monday
-              d.setDate(d.getDate() + 1);
-            }
-
-            var days = [];
-            for (var i = 0; i < 3; d.setDate(d.getDate() + 7)) {
-              var dayArray = d.toString().split(' ');
-              var display = d.toLocaleDateString();
-              if (dayArray.length > 3) {
-                display = dayArray[1] + ' ' + dayArray[2];
               }
-              // TODO: remove after Dec 25, 2017
-              if (d.getMonth() === 11 && d.getDate() === 25) {
-                continue;
-              }
-              if (d.getMonth() === 0 && d.getDate() === 1) {
-                display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
-              }
-              // end TODO
-              var day = {
-                display: display,
-                value: d.toISOString(),
-              };
-              days.push(day);
-              i++;
             }
-            var deliveryDayElement = document.getElementById('delivery-date');
-            deliveryDayElement.innerHTML = '';
-            for (var i = 0; i < days.length; i++) {
-              var opt = document.createElement("option");
-              opt.value = days[i].value;
-              opt.innerHTML = days[i].display;
-              deliveryDayElement.appendChild(opt);
+            // check if servings should be vegetarian
+            var vegetarian = form.elements['vegetarian'].checked;
+            if (vegetarian) {
+              var vegServings = servings;
+              servings = "0";
             }
+            var aptEl = document.getElementById('apt');
+            address.apt = aptEl.value;
+            if (!address.street) {
+              address.full_address = document.getElementById('address-input').value;
+            }
+            var req = {
+              'email': email,
+              'address': address,
+              'first_delivery_date': firstDeliveryDate,
+              'delivery_notes': deliveryNotes,
+              'first_name': firstName,
+              'last_name': lastName,
+              'payment_method_nonce': paymentNonce,
+              'servings': servings,
+              'vegetarian_servings': vegServings,
+              'reference': reference,
+              'phone_number': phoneNumber,
+              'campaigns': campaigns,
+              'reference_email': referenceEmail,
+            };
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/SubmitCheckout', true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onload = function() {
+              try {
+                submit.removeAttribute('disabled');
+                var resp = JSON.parse(this.response);
+                if (resp.error && resp.error.code === 400) {
+                  alert(resp.error.message);
+                  console.log(resp.error);
+                  logRespError(resp.error);
+                  return;
+                }
+                if (resp.error && resp.error.code !== 200) {
+                  alert('Woops something went wrong: ', resp.error.message);
+                  console.error(resp.error);
+                  logRespError(resp.error)
+                  return;
+                }
+                if (req.email) {
+                  window.location = '[[.ThankYouPageURL]]?email=' + encodeURIComponent(req.email);
+                } else {
+                  window.location = '[[.ThankYouPageURL]]';
+                }
+              } catch (err) {
+                var fullError = err;
+                try {
+                  fullError = 'resp: ' + JSON.stringify(resp) + 'err: ' + err;
+                } catch (e) {}
+                console.error(fullError);
+                logError(fullError);
+              }
+            };
+            xhr.send(JSON.stringify(req));
+          });
+        }, false);
+        // add listeners to log events
+        hostedFieldsInstance.on('focus', function(e) {
+          switch (e.emittedBy) {
+            case 'number':
+              numberInputFocused()
+              break;
+            case 'cvv':
+              cvvInputFocused()
+              break;
+            case 'expirationDate':
+              expirationDateInputFocused()
+              break;
           }
+        })
+      });
 
-          generateDeliveryDays();
-          updateOrderInfo();
+    });
 
-          function getQueryParameter(name, url) {
-            if (!url) url = location.href;
-            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-            var regexS = "[\\?&]" + name + "=([^&#]*)";
-            var regex = new RegExp(regexS);
-            var results = regex.exec(url);
-            return results == null ? null : results[1];
-          }
-          var promo = getQueryParameter('promo', location.href);
-          if (promo && (promo === 'quizfree')) {
-            var submitButton = document.querySelector('#submit-button');
-            submitButton.value = 'GET FREE DINNER';
-            var mealSelector = document.querySelector('#meal-selector');
-            mealSelector.style.display = 'none';
+    function validateFields() {
+      return true
+    }
 
-          }
+    function updateOrderInfo() {
+      var deliveryDayElement = document.getElementById('delivery-date');
+      var firstChargeDate = new Date(deliveryDayElement.value);
+      firstChargeDate.setDate(firstChargeDate.getDate() + 5);
+      document.getElementById('first_date').innerHTML = firstChargeDate.toLocaleDateString();
+      var oneBoxPrice = 0.0;
+      var servingsPerBox = 0;
 
-        </script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y&libraries=places&callback=initMap"
-                async
-                defer></script>
-        [[template "footer" .]]
+      // get value of checked radio button
+      var val;
+      var radios = form.elements['servings'];
+      for (var i = 0, len = radios.length; i < len; i++) {
+        if (radios[i].checked) { // radio checked?
+          val = radios[i].value; // if so, hold its value in val
+          break; // and break out of for loop
+        }
+      }
+      var boxForTitleText;
+      var taxTotal;
+      switch (val) {
+        case '2':
+          oneBoxPrice = 16.50;
+          servingsPerBox = 2;
+          boxForTitleText = 'Bag for Two';
+          taxTotal = 3.22;
+          break;
+        case '4':
+          oneBoxPrice = 15.25;
+          servingsPerBox = 4;
+          boxForTitleText = 'Bag for Four';
+          taxTotal = 5.95;
+          break;
+      }
+      var boxTotal = oneBoxPrice * servingsPerBox;
+      // var total = boxTotal + deliveryTotal + taxTotal;
+      var total = boxTotal;
+
+      document.getElementById('meal_multiplier').innerHTML = 'x' + servingsPerBox;
+      document.getElementById('boxForTitle').innerHTML = boxForTitleText;
+      document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
+      document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
+      document.getElementById('total').innerHTML = total.toFixed(2);
+    }
+
+    document.getElementById('delivery-date').addEventListener('change', updateOrderInfo);
+    document.getElementById('meal-option-2').addEventListener('change', updateOrderInfo);
+    document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
+
+    function generateDeliveryDays() {
+      var d = new Date();
+      d.setTime(d.getTime() + (24 * 4 + 8) * 3600 * 1000); // Thursday at 4 PM
+      while (d.getDay() !== 1) { // while not Monday
+        d.setDate(d.getDate() + 1);
+      }
+
+      var days = [];
+      for (var i = 0; i < 3; d.setDate(d.getDate() + 7)) {
+        var dayArray = d.toString().split(' ');
+        var display = d.toLocaleDateString();
+        if (dayArray.length > 3) {
+          display = dayArray[1] + ' ' + dayArray[2];
+        }
+        // TODO: remove after Dec 25, 2017
+        if (d.getMonth() === 11 && d.getDate() === 25) {
+          continue;
+        }
+        if (d.getMonth() === 0 && d.getDate() === 1) {
+          display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
+        }
+        // end TODO
+        var day = {
+          display: display,
+          value: d.toISOString(),
+        };
+        days.push(day);
+        i++;
+      }
+      var deliveryDayElement = document.getElementById('delivery-date');
+      deliveryDayElement.innerHTML = '';
+      for (var i = 0; i < days.length; i++) {
+        var opt = document.createElement("option");
+        opt.value = days[i].value;
+        opt.innerHTML = days[i].display;
+        deliveryDayElement.appendChild(opt);
+      }
+    }
+
+    generateDeliveryDays();
+    updateOrderInfo();
+
+    function getQueryParameter(name, url) {
+      if (!url) url = location.href;
+      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+      var regexS = "[\\?&]" + name + "=([^&#]*)";
+      var regex = new RegExp(regexS);
+      var results = regex.exec(url);
+      return results == null ? null : results[1];
+    }
+    var promo = getQueryParameter('promo', location.href);
+    if (promo && (promo === 'quizfree')) {
+      var submitButton = document.querySelector('#submit-button');
+      submitButton.value = 'GET FREE DINNER';
+      var mealSelector = document.querySelector('#meal-selector');
+      mealSelector.style.display = 'none';
+
+    }
+
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y&libraries=places&callback=initMap"
+          async
+          defer></script>
+  [[template "footer" .]]
 </body>
 
 </html>
