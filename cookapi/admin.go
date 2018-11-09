@@ -817,57 +817,6 @@ func (e *SendEmailReq) GetFirstDinnerDate() time.Time {
 	return e.FirstDinnerDate
 }
 
-type ReplaceSubEmailReq struct {
-	GigatokenReq
-	OldEmail string `json:"old_email"`
-	NewEmail string `json:"new_email"`
-}
-
-// ReplaceSubEmail clones a sub's info with a new email address.
-func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmailReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "ReplaceSubEmail", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	i := new(subold.SubscriptionSignUp)
-	err = datastore.RunInTransaction(ctx, func(tctx context.Context) error {
-		keyOld := datastore.NewKey(tctx, "ScheduleSignUp", req.OldEmail, 0, nil)
-		err = datastore.Get(tctx, keyOld, i)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 400, Message: "Invalid parameter."}.WithError(err).Annotatef("failed to find email: %s", req.OldEmail)
-		}
-		i.Email = req.NewEmail
-		keyNew := datastore.NewKey(tctx, "ScheduleSignUp", req.NewEmail, 0, nil)
-		_, err = datastore.Put(tctx, keyNew, i)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to put: %s", req.NewEmail)
-		}
-		subC := subold.New(tctx)
-		err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
-		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
-		}
-		// TODO: delete old one instead
-		err = datastore.Delete(tctx, keyOld)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to delete: %s", req.OldEmail)
-		}
-		return nil
-	}, &datastore.TransactionOptions{XG: true})
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to run in transaction")
-		return resp, nil
-	}
-	return resp, nil
-}
-
 func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {
 	dbC, err := db.NewClient(ctx, projectID, nil)
 	if err != nil {

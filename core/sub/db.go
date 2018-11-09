@@ -25,7 +25,7 @@ func (c *Client) getByEmail(email string) (*subold.Subscriber, error) {
 // returns nil, nil if not found
 func (c *Client) getByAddress(address *common.Address) (*subold.Subscriber, error) {
 	var results []*subold.Subscriber
-	keys, err := c.db.QueryFilter(c.ctx, kind, 0, 300, "Address.Zip=", address.Zip, &results)
+	_, err := c.db.QueryFilter(c.ctx, kind, 0, 300, "Address.Zip=", address.Zip, &results)
 	if err != nil {
 		return nil, err
 	}
