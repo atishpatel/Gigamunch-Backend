@@ -1,20 +1,19 @@
 service: admin
-runtime: go
-api_version: go1
+runtime: go111
 
 handlers:
   - url: /admin/api/.*
-    script: _go_app
+    script: auto
 
   - url: /admin/task/.*
-    script: _go_app
+    script: auto
     login: admin
 
   - url: /admin/webhook/.*
-    script: _go_app
+    script: auto
 
   - url: /admin/batch/.*
-    script: _go_app
+    script: auto
 
   - url: /admin/swagger
     static_dir: app/swagger-ui/dist
@@ -51,20 +50,8 @@ handlers:
     secure: always
 
   - url: /.*
-    script: _go_app
+    script: auto
 
 env_variables:
-  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch
+  MYSQL_CONNECTION: server:gigamunch@unix(/cloudsql/PROJECTID:us-central1:gigasqldb)/gigamunch
   PROJECT_ID: PROJECTID
-
-skip_files:
-  - ^(.*/)?.*/test/.*$
-  - ^(.*/)?.*/tests/.*$
-  - ^(.*/)?.*\.DS_Store$
-  - ^(.*/)?.*\.md$
-  - ^(.*/)?.*\.yml$
-  - ^(.*/)?.*\.gitignore$
-  - ^(.*/)?.*\.lock$
-  - ^(.*/)?.*/LICENSE$
-  - ^(app/types/.*)
-  - ^(app/node_modules/@types/.*)

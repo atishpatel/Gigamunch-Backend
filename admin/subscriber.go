@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -66,7 +66,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 				From:     "Gigamunch",
 				To:       s.PhoneNumber,
 			}
-			log.SubMessage(0, s.Email, payload)
+			log.SubMessage(s.ID, s.Email, payload)
 		}
 	}
 	return nil

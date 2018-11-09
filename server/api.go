@@ -729,7 +729,7 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 
 func getNasvilleGeopoint(ctx context.Context) (*geofence.Geofence, error) {
 	fence := new(geofence.Geofence)
-	key := datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
+	key := datastore.NewKey(ctx, "Geofence", common.Nashville.ID(), 0, nil)
 	err := datastore.Get(ctx, key, fence)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		return nil, err
@@ -803,4 +803,191 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 		return nil, nil, nil, err
 	}
 	return log, serverInfo, dbC, nil
+}
+
+// SubmitCheckoutv2 submits a checkout.
+func SubmitCheckoutv2(ctx context.Context, r *http.Request) Response {
+	req := new(pb.SubmitCheckoutReq)
+	var err error
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	resp := &pb.ErrorOnlyResp{}
+	logging.Infof(ctx, "Request struct: %+v", req)
+
+	var servings int8
+	var vegetarianServings int8
+	switch req.Servings {
+	case "":
+		fallthrough
+	case "0":
+		servings = 0
+	case "1":
+		servings = 1
+	case "2":
+		servings = 2
+	default:
+		servings = 4
+	}
+	switch req.VegetarianServings {
+	case "":
+		fallthrough
+	case "0":
+		vegetarianServings = 0
+	case "1":
+		vegetarianServings = 1
+	case "2":
+		vegetarianServings = 2
+	default:
+		vegetarianServings = 4
+	}
+	firstBoxDate := time.Now().Add(81 * time.Hour)
+	for firstBoxDate.Weekday() != time.Monday {
+		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
+	}
+	if req.FirstDeliveryDate != "" {
+		firstBoxDate, err = time.Parse(time.RFC3339, req.FirstDeliveryDate)
+		if err != nil || firstBoxDate.Weekday() == time.Tuesday {
+			firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() == time.Sunday {
+			firstBoxDate = firstBoxDate.Add(12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() != time.Monday {
+			resp.Error = errBadRequest.WithMessage("Invalid first delivery day selected.").SharedError()
+			utils.Criticalf(ctx, "user selected invalid start date: %+v", req.FirstDeliveryDate)
+			return resp
+		}
+	}
+
+	entry.Email = req.Email
+	entry.Name = strings.Title(req.FirstName + " " + req.LastName)
+	entry.FirstName = strings.Title(strings.TrimSpace(req.FirstName))
+	entry.LastName = strings.Title(strings.TrimSpace(req.LastName))
+	entry.Address = *address
+	if entry.Date.IsZero() {
+		entry.Date = time.Now()
+	}
+	// entry.SubscriptionIDs = append(entry.SubscriptionIDs, subID)
+	if inZone {
+		entry.IsSubscribed = true
+		entry.SubscriptionDate = time.Now()
+		entry.WeeklyAmount = weeklyAmount
+		entry.FirstBoxDate = firstBoxDate
+		// entry.FirstPaymentDate = paymentDate
+		entry.SubscriptionDay = time.Monday.String()
+	}
+	entry.CustomerID = customerID
+	entry.DeliveryTips = req.DeliveryNotes
+	entry.Servings = servings
+	entry.VegetarianServings = vegetarianServings
+	entry.UpdatePhoneNumber(req.PhoneNumber)
+	entry.PaymentMethodToken = paymenttkn
+	entry.Reference = req.Reference
+	entry.ReferenceEmail = req.ReferenceEmail
+	for _, c := range req.Campaigns {
+		found := false
+		var timeStamp time.Time
+		timeStamp, _ = time.Parse(time.RFC3339, c.Timestamp)
+		for _, loggedC := range entry.Campaigns {
+			if loggedC.Campaign != c.Campaign {
+				continue
+			}
+			diff := timeStamp.Sub(loggedC.Timestamp)
+			if diff < 0 {
+				diff *= -1
+			}
+			if diff < time.Hour {
+				found = true
+			}
+		}
+		if !found {
+			entry.Campaigns = append(entry.Campaigns, campaingFromPB(c))
+		}
+	}
+	_, err = datastore.Put(ctx, key, entry)
+	if err != nil {
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		return resp
+	}
+	if !inZone {
+		logging.Infof(ctx, "failed address zone zip(%s). Address: %s", address.Zip, address.String())
+		// out of delivery range
+		if address.Street == "" {
+			resp.Error = errInvalidParameter.WithMessage("Please select an address from the list as you type your address!").SharedError()
+			return resp
+		}
+		messageC := message.New(ctx)
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
+		}
+		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("Missed a customer. Out of zone. \nName: %s\nEmail: %s\nAddress: %s", entry.Name, entry.Email, entry.Address.StringNoAPT()))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
+		}
+		resp.Error = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!").SharedError()
+		return resp
+	}
+	if !appengine.IsDevAppServer() && !strings.Contains(entry.Email, "@test.com") {
+		messageC := message.New(ctx)
+		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+		}
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Enis. Err: %+v", err)
+		}
+		err = messageC.SendAdminSMS("9316446755", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Piyush. Err: %+v", err)
+		}
+		_ = messageC.SendAdminSMS("9316445311", fmt.Sprintf("$$$ New subscriber checkout page. \nName: %s\nEmail: %s\nReference: %s\nReference Email: %s", entry.Name, entry.Email, entry.Reference, entry.ReferenceEmail))
+		if err != nil {
+			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
+		}
+	}
+	subC := sub.New(ctx)
+	err = subC.Free(firstBoxDate, req.Email)
+	if err != nil {
+		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
+	}
+	if !strings.Contains(req.Email, "test.com") {
+		log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
+		if err != nil {
+			return errors.Wrap("failed to setupLoggingAndServerInfo", err)
+		}
+		mailC, err := mail.NewClient(ctx, log, serverInfo)
+		mailReq := &mail.UserFields{
+			Email:             entry.Email,
+			FirstName:         entry.FirstName,
+			LastName:          entry.LastName,
+			FirstDeliveryDate: firstBoxDate,
+			VegServings:       entry.VegetarianServings,
+			NonVegServings:    entry.Servings,
+		}
+		durationTillFirstMeal := time.Until(firstBoxDate.UTC().Truncate(24 * time.Hour))
+		if durationTillFirstMeal > 0 && durationTillFirstMeal < ((6*24)-12)*time.Hour {
+			mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(firstBoxDate))
+		}
+		err = mailC.SubActivated(mailReq)
+		if err != nil {
+			utils.Criticalf(ctx, "Failed to mail.UpdateUser email(%s). Err: %+v", entry.Email, err)
+		}
+		// add to task queue
+		taskC := tasks.New(ctx)
+		r := &tasks.ProcessSubscriptionParams{
+			SubEmail: entry.Email,
+			Date:     firstBoxDate,
+		}
+		err = taskC.AddProcessSubscription(firstBoxDate.Add(-24*time.Hour), r)
+		if err != nil {
+			return errors.Wrap("failed to tasks.AddProcessSubscription", err)
+		}
+	}
+	return resp
 }

@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -41,7 +41,7 @@ var (
 	errInternalError = errors.InternalServerError
 )
 
-func init() {
+func main() {
 	s := new(server)
 	err := s.setup()
 	if err != nil {
@@ -85,7 +85,7 @@ func init() {
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
 	// Zone
-	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
+	// http.HandleFunc("/admin/api/v1/UpdateGeofence", handler(s.UpdateGeofence))
 	// **********************
 	// Culture Executions
 	// **********************
@@ -120,7 +120,7 @@ func init() {
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))
 	})
-
+	appengine.Main()
 }
 
 func (s *server) setup() error {

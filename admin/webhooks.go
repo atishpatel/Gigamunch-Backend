@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -80,7 +80,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 	from := r.FormValue("From")
 	from = sub.GetCleanPhoneNumber(from)
 	body := r.FormValue("Body")
-	var name, email string
+	var name, email, id string
 	subC := subold.NewWithLogging(ctx, log)
 
 	messageC := message.New(ctx)
@@ -98,6 +98,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		}
 		if len(subs) > 0 {
 			email = subs[0].Email
+			id = subs[0].ID
 		}
 		err = messageC.SendDeliverySMS(to, body)
 		if err != nil {
@@ -113,7 +114,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 				From:     "Gigamunch",
 				To:       to,
 			}
-			log.SubMessage(0, email, payload)
+			log.SubMessage(id, email, payload)
 		}
 
 	} else {
@@ -125,6 +126,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		if len(subs) > 0 {
 			name = subs[0].FirstName + " " + subs[0].LastName
 			email = subs[0].Email
+			id = subs[0].ID
 		}
 		// notify customer support agent
 		err = messageC.SendDeliverySMS(message.EmployeeNumbers.CustomerSupport(), fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
@@ -139,7 +141,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 				From:     sub.GetCleanPhoneNumber(from),
 				To:       "Gigamunch",
 			}
-			log.SubMessage(0, email, payload)
+			log.SubMessage(id, email, payload)
 		}
 		// check if rating
 		if email != "" && (strings.Contains(body, "-") || strings.Contains(body, "star") || strings.Contains(body, "rate") || strings.Contains(body, "rating") || len(body) < 5) {
@@ -152,7 +154,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 					Rating:   int8(rating),
 					Comments: body,
 				}
-				log.SubRating(0, email, payload)
+				log.SubRating(id, email, payload)
 			}
 		}
 	}

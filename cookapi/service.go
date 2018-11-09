@@ -9,14 +9,12 @@ import (
 	"time"
 
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
-	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
@@ -589,6 +587,11 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	if numNonSkips >= 5 {
 		addTags = append(addTags, mail.GetReceivedJourneyTag(5))
 	}
+	// add preview tag
+	durationTillFirstMeal := time.Until(sub.FirstBoxDate.UTC().Truncate(24 * time.Hour))
+	if durationTillFirstMeal > 0 && durationTillFirstMeal < ((6*24)-12)*time.Hour {
+		addTags = append(addTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
+	}
 
 	// Update Drip
 	mailReq := &mail.UserFields{
@@ -607,7 +610,6 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
 		return
 	}
-	mailReq.AddTags = append(mailReq.AddTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
 	err = mailC.SubActivated(mailReq)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
@@ -623,47 +625,6 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 }
 
 func testbra(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	fence := &geofence.Geofence{
-		ID:   "Nashville",
-		Type: geofence.ServiceZone,
-		Name: "Nashville",
-		Points: []geofence.Point{
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.3195513, Longitude: -86.5475464}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.3347628, Longitude: -86.5248873}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.3521861, Longitude: -86.5420532}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.3438904, Longitude: -86.7253876}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2719574, Longitude: -86.7576599}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2459345, Longitude: -86.8139649}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2304274, Longitude: -86.8805695}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.1971752, Longitude: -86.9011731}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.1417563, Longitude: -86.8956756}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.079072, Longitude: -87.0570373}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.9518857, Longitude: -87.0206452}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.8253964, Longitude: -87.0253076}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.8233808, Longitude: -86.8421173}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.8462043, Longitude: -86.6670227}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 35.9526416, Longitude: -86.6629813}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.0080895, Longitude: -86.6210983}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.0835115, Longitude: -86.5626526}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.1323292, Longitude: -86.5956116}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.1927545, Longitude: -86.5647125}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.2614385, Longitude: -86.5805054}},
-			geofence.Point{GeoPoint: common.GeoPoint{Latitude: 36.3195513, Longitude: -86.5475464}},
-		},
-	}
-	key := datastore.NewKey(ctx, "Geofence", "Nashville", 0, nil)
-	_, err := datastore.Put(ctx, key, fence)
-	if err != nil {
-		w.Write([]byte(fmt.Sprintln("fail: ", err)))
-		return
-	}
-	key = datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
-	_, err = datastore.Put(ctx, key, fence)
-	if err != nil {
-		w.Write([]byte(fmt.Sprintln("fail: ", err)))
-		return
-	}
 	w.Write([]byte("success"))
 	w.Write([]byte(projectID))
 }
