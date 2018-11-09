@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -32,8 +31,6 @@ func New(ctx context.Context) *Client {
 		ctx: ctx,
 	}
 	c.twilioC = twilio.NewClient(twilioConfig.AccountSID, twilioConfig.AuthToken)
-	httpClient := urlfetch.Client(ctx)
-	c.twilioC.HTTPClient = httpClient
 	return c
 }
 

@@ -13,9 +13,7 @@ import (
 
 	sdlogging "cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"google.golang.org/api/option"
 	aelog "google.golang.org/appengine/log"
-	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -138,17 +136,12 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 	if dbC == nil {
 		return nil, errInternal.Annotate("dbC cannot be nil")
 	}
-	var opts option.ClientOption
-	if serverInfo.IsStandardAppEngine {
-		httpClient := urlfetch.Client(ctx)
-		opts = option.WithHTTPClient(httpClient)
-	}
 	sdReporter, err := sdreporting.NewClient(ctx, serverInfo.ProjectID, sdreporting.Config{
 		ServiceName: loggerID,
 		OnError: func(err error) {
 			Errorf(ctx, "failed to log to sdReporter", err)
 		},
-	}, opts)
+	})
 	if err != nil {
 		Errorf(ctx, "failed to create sdReporter", err)
 	}

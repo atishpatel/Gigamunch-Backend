@@ -10,7 +10,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/jmoiron/sqlx"
 	braintree "github.com/lionelbarrow/braintree-go"
-	"google.golang.org/appengine/urlfetch"
 )
 
 // Errors
@@ -114,8 +113,5 @@ func getBTClient(ctx context.Context, IsStandardAppEngine bool) *braintree.Brain
 		btConfig.BTPublicKey,
 		btConfig.BTPrivateKey,
 	)
-	if IsStandardAppEngine {
-		bt.HttpClient = urlfetch.Client(ctx)
-	}
 	return bt
 }

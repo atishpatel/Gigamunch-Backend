@@ -12,8 +12,6 @@ import (
 	"golang.org/x/net/context"
 
 	"strings"
-
-	"google.golang.org/appengine/urlfetch"
 )
 
 var (
@@ -363,7 +361,6 @@ func getBTClient(ctx context.Context) *braintree.Braintree {
 		btConfig.BTPublicKey,
 		btConfig.BTPrivateKey,
 	)
-	bt.HttpClient = urlfetch.Client(ctx)
 	return bt
 }
 

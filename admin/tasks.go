@@ -10,8 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/appengine/urlfetch"
-
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -320,9 +318,9 @@ func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *
 	backupReq.Header.Add("Content-Type", "application/json")
 	backupReq.Header.Add("Authorization", "Bearer "+accessToken)
 	// Results
-	result, err := urlfetch.Client(ctx).Do(backupReq)
+	result, err := http.DefaultClient.Do(backupReq)
 	if err != nil {
-		return errInternalError.WithError(err).Annotate("failed to urlfetch.Client.Do")
+		return errInternalError.WithError(err).Annotate("failed to http.Do")
 	}
 	reply, _ := ioutil.ReadAll(result.Body)
 	log.Infof(ctx, "Reply: %s", reply)

@@ -9,7 +9,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/nlopes/slack"
-	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -40,10 +39,6 @@ func NewClient(ctx context.Context, log *logging.Client, serverInfo *common.Serv
 		return nil, errInternal.Annotate("failed to get server info")
 	}
 	var ops slack.Option
-	if serverInfo.IsStandardAppEngine {
-		httpClient := urlfetch.Client(ctx)
-		ops = slack.OptionHTTPClient(httpClient)
-	}
 	slackClient := slack.New(gigabotToken, ops)
 	return &Client{
 		ctx:         ctx,
@@ -76,10 +71,12 @@ func (c *Client) sendAttachmentsMessage(channel, message string, attachments []s
 	return nil
 }
 
+// SendCustomerSupportMessage sends message to slack #customer-support.
 func (c *Client) SendCustomerSupportMessage(message string) error {
 	return c.sendMessage(customerSupportChannel, message)
 }
 
+// SendMissedSubscriber sends message to slack #subscriber-pulse.
 func (c *Client) SendMissedSubscriber(email, name, reference string, campaigns []common.Campaign, address common.Address) error {
 	message := "Missed out on subscriber. Out of zone."
 	attachment := slack.Attachment{
@@ -107,7 +104,7 @@ func (c *Client) SendMissedSubscriber(email, name, reference string, campaigns [
 				Short: false,
 			},
 		},
-		Color: "warning",
+		Color: "#F57F17",
 	}
 	for _, campaign := range campaigns {
 		attachment.Fields = append(attachment.Fields, slack.AttachmentField{
@@ -122,6 +119,7 @@ func (c *Client) SendMissedSubscriber(email, name, reference string, campaigns [
 	return c.sendAttachmentsMessage(subscriberUpdateChannel, message, attachments)
 }
 
+// SendNewSignup sends message to slack #subscriber-pulse.
 func (c *Client) SendNewSignup(email, name, reference string, campaigns []common.Campaign) error {
 	message := "New Subscriber!!!"
 	attachment := slack.Attachment{
@@ -144,7 +142,7 @@ func (c *Client) SendNewSignup(email, name, reference string, campaigns []common
 				Short: false,
 			},
 		},
-		Color: "green",
+		Color: "#1B5E20",
 	}
 	for _, campaign := range campaigns {
 		attachment.Fields = append(attachment.Fields, slack.AttachmentField{
@@ -159,6 +157,7 @@ func (c *Client) SendNewSignup(email, name, reference string, campaigns []common
 	return c.sendAttachmentsMessage(subscriberUpdateChannel, message, attachments)
 }
 
+// SendDeactivate sends message to slack #subscriber-pulse.
 func (c *Client) SendDeactivate(email, name, reason string, daysActive int) error {
 	message := "Subscriber Deactivated"
 	attachment := slack.Attachment{
@@ -186,7 +185,7 @@ func (c *Client) SendDeactivate(email, name, reason string, daysActive int) erro
 				Short: true,
 			},
 		},
-		Color: "danger",
+		Color: "#B71C1C",
 	}
 	attachments := []slack.Attachment{
 		attachment,
@@ -195,26 +194,36 @@ func (c *Client) SendDeactivate(email, name, reason string, daysActive int) erro
 	return c.sendAttachmentsMessage(subscriberUpdateChannel, message, attachments)
 }
 
+// WebhookEvent is an event in WebhookRequest.
 type WebhookEvent struct {
 	Channel string `json:"channel"`
 	Text    string `json:"text"`
 }
 
+// WebhookRequest is a request body for slack webhook.
 type WebhookRequest struct {
 	Challenge string       `json:"challenge"`
 	Event     WebhookEvent `json:"event"`
 	Type      string       `json:"type"`
 }
 
+// HandleWebhook handles slack webhook.
 func (c *Client) HandleWebhook(req *WebhookRequest) error {
 	var err error
-	if req.Type == "event_callback" && strings.Contains(req.Event.Text, "@") && strings.Contains(req.Event.Text, "<mailto:") {
-		// add subscriber page link if there is an email
-		email := req.Event.Text[strings.Index(req.Event.Text, "<mailto:")+8 : strings.Index(req.Event.Text, "|")]
-		txt := fmt.Sprintf("https://eatgigamunch.com/admin/subscriber/%s", email)
-		err = c.SendCustomerSupportMessage(txt)
-		if err != nil {
-			return errSlack.WithError(err).Annotate("failed to SendCustoemrSupportMessage")
+	channelInfo, err := c.slackClient.GetChannelInfo(req.Event.Channel)
+	if err != nil {
+		return errSlack.WithError(err).Annotate("failed to slack.GetChannelInfo")
+	}
+	c.log.Infof(c.ctx, "channel name: %s", channelInfo.Name)
+	if req.Type == "event_callback" {
+		if ("#"+channelInfo.Name) == customerSupportChannel && strings.Contains(req.Event.Text, "@") && strings.Contains(req.Event.Text, "<mailto:") {
+			// add subscriber link if there is an email
+			email := req.Event.Text[strings.Index(req.Event.Text, "<mailto:")+8 : strings.Index(req.Event.Text, "|")]
+			txt := fmt.Sprintf("https://eatgigamunch.com/admin/subscriber/%s", email)
+			err = c.SendCustomerSupportMessage(txt)
+			if err != nil {
+				return errSlack.WithError(err).Annotate("failed to SendCustoemrSupportMessage")
+			}
 		}
 	}
 	return nil

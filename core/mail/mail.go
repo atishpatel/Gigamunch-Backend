@@ -13,7 +13,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/drip-go"
-	"google.golang.org/appengine/urlfetch"
 )
 
 // TODO: Logging
@@ -123,11 +122,6 @@ func NewClient(ctx context.Context, log *logging.Client, serverInfo *common.Serv
 	dripMarketingClient, err := drip.New(dripMarketingAPIKey, dripMarketingAcctID)
 	if err != nil {
 		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
-	}
-	if serverInfo.IsStandardAppEngine {
-		httpClient := urlfetch.Client(ctx)
-		dripSubClient.HTTPClient = httpClient
-		dripMarketingClient.HTTPClient = httpClient
 	}
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
