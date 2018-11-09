@@ -58,14 +58,14 @@ func Put(ctx context.Context, id string, i *SubscriptionSignUp) error {
 	return put(ctx, id, i)
 }
 
-func putMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
-	keys := make([]*datastore.Key, len(subs))
-	for i := range subs {
-		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
-	}
-	_, err := datastore.PutMulti(ctx, keys, subs)
-	return err
-}
+// func putMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
+// 	keys := make([]*datastore.Key, len(subs))
+// 	for i := range subs {
+// 		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
+// 	}
+// 	_, err := datastore.PutMulti(ctx, keys, subs)
+// 	return err
+// }
 
 // getSubscribersByPhoneNumber returns the subscribers via phone number.
 func getSubscribersByPhoneNumber(ctx context.Context, number string) ([]*SubscriptionSignUp, error) {

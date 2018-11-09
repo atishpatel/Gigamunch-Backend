@@ -38,6 +38,7 @@ type Subscriber struct {
 	ServingsNonVegetarian int8      `json:"servings_non_vegetarian" datastore:",noindex"`
 	ServingsVegetarian    int8      `json:"servings_vegetarian" datastore:",noindex"`
 	PlanInterval          int8      `json:"plan_interval" datastore:",noindex"`
+	PlanWeekday           string    `json:"plan_weekday" datastore:",index"`
 	IntervalStartPoint    time.Time `json:"interval_start_point" datastore:",noindex"`
 	Amount                float32   `json:"amount" datastore:",noindex"`
 	FoodPref              FoodPref  `json:"food_pref"`
@@ -174,7 +175,7 @@ func (e *Subscriber) GetSubscriptionSignUp() *SubscriptionSignUp {
 		FirstBoxDate:       e.IntervalStartPoint,
 		Servings:           e.ServingsNonVegetarian,
 		VegetarianServings: e.ServingsVegetarian,
-		SubscriptionDay:    e.IntervalStartPoint.Weekday().String(),
+		SubscriptionDay:    e.PlanWeekday,
 		WeeklyAmount:       e.Amount,
 		PaymentMethodToken: e.PaymentMethodToken,
 		Reference:          e.ReferenceText,
@@ -228,6 +229,7 @@ func (e *SubscriptionSignUp) GetSubscriber() *Subscriber {
 		ServingsNonVegetarian: e.Servings,
 		ServingsVegetarian:    e.VegetarianServings,
 		PlanInterval:          7,
+		PlanWeekday:           e.SubscriptionDay,
 		Amount:                e.WeeklyAmount,
 		PaymentMethodToken:    e.PaymentMethodToken,
 		ReferenceText:         e.Reference,
@@ -318,6 +320,14 @@ func (c *Client) BatchSubscriptionSignUpToSubscriber(start, limit int64) error {
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers with ID")
 	}
+	putMulti := func(ctx context.Context, subs []*SubscriptionSignUp) error {
+		keys := make([]*datastore.Key, len(subs))
+		for i := range subs {
+			keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
+		}
+		_, err := datastore.PutMulti(ctx, keys, subs)
+		return err
+	}
 	err = putMulti(c.ctx, subsold)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers")
@@ -344,100 +354,90 @@ func Subscriberget(ctx context.Context, id string) (*SubscriptionSignUp, error) 
 	return results[0].GetSubscriptionSignUp(), nil
 }
 
-// TODO: modify stuff below
-
 func SubscribergetMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) {
-	// TODO:
-	if len(ids) == 0 {
-		return nil, fmt.Errorf("ids cannot be 0 for getMulti")
-	}
+	// TODO: get all and filter on server
 	dst := make([]*SubscriptionSignUp, len(ids))
 	var err error
-	keys := make([]*datastore.Key, len(ids))
-	for i := range ids {
-		if ids[i] == "" {
-			return nil, fmt.Errorf("ids cannot contain an empty string")
+	for i, email := range ids {
+		dst[i], err = Subscriberget(ctx, email)
+		if err != nil {
+			return nil, err
 		}
-		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, ids[i], 0, nil)
 	}
-	err = datastore.GetMulti(ctx, keys, dst)
-	if err != nil && err.Error() != "(0 errors)" { // GetMulti always returns appengine.MultiError which is stupid
-		return nil, err
-	}
-	// for i := range dst {
-	// 	dst[i].ID = keys[i].StringID()
-	// }
 	return dst, nil
 }
 
 // getSubscribersByPhoneNumber returns the subscribers via phone number.
 func SubscribergetSubscribersByPhoneNumber(ctx context.Context, number string) ([]*SubscriptionSignUp, error) {
-	// TODO:
-	query := datastore.NewQuery(kindSubscriptionSignUp).
-		Filter("PhoneNumber=", number)
-	var results []*SubscriptionSignUp
+	query := datastore.NewQuery(kindSubscriber).
+		Filter("PhonePrefs.Number=", number)
+
+	var results []*Subscriber
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err
 	}
-
-	return results, nil
+	dst := make([]*SubscriptionSignUp, len(results))
+	for i := range results {
+		dst[i] = results[i].GetSubscriptionSignUp()
+	}
+	return dst, nil
 }
 
 // getSubscribers returns the list of Subscribers for that day.
 func SubscribergetSubscribers(ctx context.Context, subDay string) ([]SubscriptionSignUp, error) {
-	// TODO:
-	query := datastore.NewQuery(kindSubscriptionSignUp).
-		Filter("IsSubscribed=", true).
-		Filter("SubscriptionDay=", subDay).
-		Limit(1000)
-	var results []SubscriptionSignUp
+	query := datastore.NewQuery(kindSubscriber).
+		Filter("Active=", true)
+
+	var results []*Subscriber
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err
 	}
-	return results, nil
+	dst := make([]SubscriptionSignUp, len(results))
+	for i := range results {
+		dst[i] = *results[i].GetSubscriptionSignUp()
+	}
+	return dst, nil
 }
 
 // getHasSubscribed returns the list of all Subscribers
 func SubscribergetHasSubscribed(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
-	// TODO:
-	query := datastore.NewQuery(kindSubscriptionSignUp).
-		Filter("SubscriptionDate>", 0).
-		Filter("SubscriptionDate<", date).
-		Limit(1000)
-	var results []SubscriptionSignUp
+	yearsAgo := time.Now().Add(-1 * 100 * 365 * 24 * time.Hour)
+	query := datastore.NewQuery(kindSubscriber).
+		Filter("SignUpDatetime>", yearsAgo)
+
+	var results []*Subscriber
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err
 	}
-	return results, nil
+	dst := make([]SubscriptionSignUp, len(results))
+	for i := range results {
+		dst[i] = *results[i].GetSubscriptionSignUp()
+	}
+	return dst, nil
 }
 
-func Subscriberput(ctx context.Context, id string, i *SubscriptionSignUp) error {
-	// TODO:
+func Subscriberput(ctx context.Context, email string, i *SubscriptionSignUp) error {
 	var err error
-	// process entity
-	if i.RawPhoneNumber == "" && i.PhoneNumber != "" {
-		i.UpdatePhoneNumber(i.PhoneNumber)
+	sub := i.GetSubscriber()
+	if sub.ID == "" {
+		sub.ID = ksuid.New().String()
 	}
-	// end process
-	key := datastore.NewKey(ctx, kindSubscriptionSignUp, id, 0, nil)
-	_, err = datastore.Put(ctx, key, i)
+	key := datastore.NewKey(ctx, kindSubscriber, i.ID, 0, nil)
+	_, err = datastore.Put(ctx, key, sub)
+	if err != nil {
+		return err
+	}
+	if i.ID != sub.ID {
+		i.ID = sub.ID
+		key = datastore.NewKey(ctx, kindSubscriptionSignUp, i.ID, 0, nil)
+		_, err = datastore.Put(ctx, key, i)
+	}
 	return err
 }
 
-func SubscriberPut(ctx context.Context, id string, i *SubscriptionSignUp) error {
-	// TODO:
-	return put(ctx, id, i)
-}
-
-func SubscriberputMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
-	// TODO:
-	keys := make([]*datastore.Key, len(subs))
-	for i := range subs {
-		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
-	}
-	_, err := datastore.PutMulti(ctx, keys, subs)
-	return err
+func SubscriberPut(ctx context.Context, email string, i *SubscriptionSignUp) error {
+	return Subscriberput(ctx, email, i)
 }

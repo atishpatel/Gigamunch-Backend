@@ -424,46 +424,46 @@ func (c *Client) GetSubscriberActivities(email string) ([]*SubscriptionLog, erro
 }
 
 // Update updates all the subs info.
-func (c *Client) Update(subs []*SubscriptionSignUp) error {
-	if len(subs) == 0 {
-		return nil
-	}
-	emails := make([]string, len(subs))
-	for i, sub := range subs {
-		emails[i] = sub.Email
-	}
-	oldSubs, err := getMulti(c.ctx, emails)
-	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to getMulti")
-	}
-	err = putMulti(c.ctx, subs)
-	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to putMulti")
-	}
-	logging.Infof(c.ctx, "after putMulti(%d) %s", len(subs), err)
-	if c.log != nil {
-		for i := range subs {
-			payload := &logging.SubUpdatedPayload{
-				OldEmail:          oldSubs[i].Email,
-				Email:             subs[i].Email,
-				OldFirstName:      oldSubs[i].FirstName,
-				FirstName:         subs[i].FirstName,
-				OldLastName:       oldSubs[i].LastName,
-				LastName:          subs[i].LastName,
-				OldAddress:        oldSubs[i].Address.String(),
-				Address:           subs[i].Address.String(),
-				OldRawPhoneNumber: oldSubs[i].RawPhoneNumber,
-				RawPhoneNumber:    subs[i].RawPhoneNumber,
-				OldPhoneNumber:    oldSubs[i].PhoneNumber,
-				PhoneNumber:       subs[i].PhoneNumber,
-				OldDeliveryNotes:  oldSubs[i].DeliveryTips,
-				DeliveryNotes:     subs[i].DeliveryTips,
-			}
-			c.log.SubUpdated(subs[i].ID, subs[i].Email, payload)
-		}
-	}
-	return nil
-}
+// func (c *Client) Update(subs []*SubscriptionSignUp) error {
+// 	if len(subs) == 0 {
+// 		return nil
+// 	}
+// 	emails := make([]string, len(subs))
+// 	for i, sub := range subs {
+// 		emails[i] = sub.Email
+// 	}
+// 	oldSubs, err := getMulti(c.ctx, emails)
+// 	if err != nil {
+// 		return errDatastore.WithError(err).Annotate("failed to getMulti")
+// 	}
+// 	err = putMulti(c.ctx, subs)
+// 	if err != nil {
+// 		return errDatastore.WithError(err).Annotate("failed to putMulti")
+// 	}
+// 	logging.Infof(c.ctx, "after putMulti(%d) %s", len(subs), err)
+// 	if c.log != nil {
+// 		for i := range subs {
+// 			payload := &logging.SubUpdatedPayload{
+// 				OldEmail:          oldSubs[i].Email,
+// 				Email:             subs[i].Email,
+// 				OldFirstName:      oldSubs[i].FirstName,
+// 				FirstName:         subs[i].FirstName,
+// 				OldLastName:       oldSubs[i].LastName,
+// 				LastName:          subs[i].LastName,
+// 				OldAddress:        oldSubs[i].Address.String(),
+// 				Address:           subs[i].Address.String(),
+// 				OldRawPhoneNumber: oldSubs[i].RawPhoneNumber,
+// 				RawPhoneNumber:    subs[i].RawPhoneNumber,
+// 				OldPhoneNumber:    oldSubs[i].PhoneNumber,
+// 				PhoneNumber:       subs[i].PhoneNumber,
+// 				OldDeliveryNotes:  oldSubs[i].DeliveryTips,
+// 				DeliveryNotes:     subs[i].DeliveryTips,
+// 			}
+// 			c.log.SubUpdated(subs[i].ID, subs[i].Email, payload)
+// 		}
+// 	}
+// 	return nil
+// }
 
 // Setup sets up a SubLog.
 func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string) error {
