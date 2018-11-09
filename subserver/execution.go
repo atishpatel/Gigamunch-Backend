@@ -54,7 +54,7 @@ func (s *Server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
-	execution, err := exeC.Get(req.IdOrDate)
+	execution, err := exeC.Get(req.IDOrDate)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution")
 	}

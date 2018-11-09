@@ -23,7 +23,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/sub"
 	"google.golang.org/appengine"
 
 	// driver for mysql
@@ -136,7 +135,7 @@ func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 		}
 		// get context
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
 		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
 		if err != nil {
@@ -167,11 +166,11 @@ func (s *Server) Handler(f Handle) func(http.ResponseWriter, *http.Request) {
 		}
 		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			log.RequestError(r, errors.GetErrorWithCode(sharedErr), 0, "")
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr))
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {
-				resp = &pbsub.ErrorOnlyResp{
+				resp = &pbcommon.ErrorOnlyResp{
 					Error: sharedErr,
 				}
 			}
@@ -212,7 +211,7 @@ func DecodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
 	return nil
 }
 
-func failedToDecode(err error) *pbsub.ErrorOnlyResp {
+func failedToDecode(err error) *pbcommon.ErrorOnlyResp {
 	return serverhelper.FailedToDecode(err)
 }
 

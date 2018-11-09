@@ -49,8 +49,8 @@ func (g GeoPoint) GreatCircleDistance(p2 GeoPoint) float32 {
 	lat1 := (g.Latitude) * (math.Pi / 180.0)
 	lat2 := (p2.Latitude) * (math.Pi / 180.0)
 
-	a1 := math.Sin(dLat/2) * math.Sin(dLat/2)
-	a2 := math.Sin(dLon/2) * math.Sin(dLon/2) * math.Cos(lat1) * math.Cos(lat2)
+	a1 := math.Sin(dLat/2.0) * math.Sin(dLat/2.0)
+	a2 := math.Sin(dLon/2.0) * math.Sin(dLon/2.0) * math.Cos(lat1) * math.Cos(lat2)
 
 	a := a1 + a2
 

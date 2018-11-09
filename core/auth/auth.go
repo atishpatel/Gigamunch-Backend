@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"strconv"
 	"strings"
 
 	fb "firebase.google.com/go"
@@ -85,11 +84,7 @@ func (c *Client) Verify(token string) (*common.User, error) {
 	if email == "" {
 		return nil, errInvalidFBToken.WithMessage("User must have email.").Annotate("firebase token does not have email")
 	}
-	var userID int64
-	userIDTmp, ok := claims[userIDClaim]
-	if ok {
-		userID, _ = strconv.ParseInt(userIDTmp.(string), 2, 64)
-	}
+	userID := getString(claims, userIDClaim)
 	var admin bool
 	adminTmp, ok := claims["admin"]
 	if ok {

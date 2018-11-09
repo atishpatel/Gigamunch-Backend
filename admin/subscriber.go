@@ -179,6 +179,7 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 
 // UpdateDrip updates drip.
 func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	// TODO: Rename to AddToUpdateDripQueue
 	var err error
 	req := new(pb.UpdateDripReq)
 
@@ -233,6 +234,25 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 		err = datastore.Delete(tctx, keyOld)
 		if err != nil {
 			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to delete: %s", req.OldEmail)
+		}
+		if i.ID != "" {
+			subnewC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+			if err != nil {
+				return errors.Annotate(err, "failed to sub.NewClient")
+			}
+			snew, err := subnewC.Get(i.ID)
+			if err != nil {
+				return errors.Annotate(err, "failed to sub.Get")
+			}
+			for i := range snew.EmailPrefs {
+				if snew.EmailPrefs[i].Email == req.OldEmail {
+					snew.EmailPrefs[i].Email = req.NewEmail
+				}
+			}
+			err = subnewC.Update(snew)
+			if err != nil {
+				return errors.Annotate(err, "failed to sub.Update")
+			}
 		}
 		return nil
 	}, &datastore.TransactionOptions{XG: true})

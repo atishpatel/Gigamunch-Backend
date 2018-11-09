@@ -191,9 +191,9 @@ func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 }
 
 // GetAllByID gets logs with UserID.
-func (c *Client) GetAllByID(userID int64, start, limit int) ([]*Entry, error) {
+func (c *Client) GetAllByID(userID string, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, &dst)
+	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserIDString=", userID, &dst)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
@@ -240,13 +240,13 @@ type SalePayload struct {
 }
 
 // Paid is when a transaction is paid.
-func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPaid float32, transactionID string) {
+func (c *Client) Paid(userID string, userEmail, date string, amountDue, amountPaid float32, transactionID string) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Paid,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Paid,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Paid for " + date,
 			Description: fmt.Sprintf("%s successfully paid %.2f for %s", userEmail, amountPaid, date),
@@ -262,13 +262,13 @@ func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPai
 }
 
 // Refund is when a transaction is refunded.
-func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountRefunded float32, transactionID string) {
+func (c *Client) Refund(userID string, userEmail, date string, amountDue, amountRefunded float32, transactionID string) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Refund,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Refund,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Refunded for " + date,
 			Description: fmt.Sprintf("%s was refunded %.2f", userEmail, amountRefunded),
@@ -284,13 +284,13 @@ func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountR
 }
 
 // Forgiven is when a transaction is forgiven.
-func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amountForgiven float32) {
+func (c *Client) Forgiven(userID string, userEmail, date string, amountDue, amountForgiven float32) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Forgiven,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Forgiven,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Forgiven for " + date,
 			Description: fmt.Sprintf("%s was forgiven for %.2f", userEmail, amountForgiven),
@@ -305,13 +305,13 @@ func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amoun
 }
 
 // CardDeclined is when a transaction is declined.
-func (c *Client) CardDeclined(userID int64, userEmail, date string, amountDue, amountDeclined float32, transactionID string) {
+func (c *Client) CardDeclined(userID string, userEmail, date string, amountDue, amountDeclined float32, transactionID string) {
 	e := &Entry{
 		Type: Subscriber,
 		// TODO: Action?
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Card declined for " + date,
 			Description: fmt.Sprintf("%s's card was declined for %.2f", userEmail, amountDeclined),
@@ -333,13 +333,13 @@ type CreditCardPayload struct {
 }
 
 // SubCardUpdated is when a credit card is Updated.
-func (c *Client) SubCardUpdated(userID int64, userEmail, oldPaymentMethodToken, newPaymentMethodToken string) {
+func (c *Client) SubCardUpdated(userID string, userEmail, oldPaymentMethodToken, newPaymentMethodToken string) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    CardUpdated,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       CardUpdated,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Changed Credit Card",
 			Description: fmt.Sprintf("Changed card from %s to %s", oldPaymentMethodToken, newPaymentMethodToken),
@@ -371,7 +371,7 @@ type SubUpdatedPayload struct {
 }
 
 // SubUpdated is when a subscriber account is updated.
-func (c *Client) SubUpdated(userID int64, userEmail string, payload *SubUpdatedPayload) {
+func (c *Client) SubUpdated(userID string, userEmail string, payload *SubUpdatedPayload) {
 	desc := "Changed the following: "
 	if payload.OldEmail != payload.Email {
 		desc += "Email(" + payload.OldEmail + " -> " + payload.Email + "); "
@@ -395,11 +395,11 @@ func (c *Client) SubUpdated(userID int64, userEmail string, payload *SubUpdatedP
 		desc += "DeliveryNotes(" + payload.OldDeliveryNotes + " -> " + payload.DeliveryNotes + "); "
 	}
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Update,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Update,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Updated Subscriber Info",
 			Description: desc,
@@ -427,13 +427,13 @@ type MessagePayload struct {
 }
 
 // SubMessage is a message interaction with a sub.
-func (c *Client) SubMessage(userID int64, userEmail string, payload *MessagePayload) {
+func (c *Client) SubMessage(userID string, userEmail string, payload *MessagePayload) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Message,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Message,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Message from(" + payload.From + ") to(" + payload.To + ")",
 			Description: "Body: '" + payload.Body + "'",
@@ -452,13 +452,13 @@ type RatingPayload struct {
 }
 
 // SubRating is a message interaction with a sub.
-func (c *Client) SubRating(userID int64, userEmail string, payload *RatingPayload) {
+func (c *Client) SubRating(userID string, userEmail string, payload *RatingPayload) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Rating,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Rating,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       fmt.Sprintf("Rating %d", payload.Rating),
 			Description: "Comments: '" + payload.Comments + "'",
@@ -478,13 +478,13 @@ type ServingsChangedPayload struct {
 }
 
 // SubServingsChangedPermanently logs a servings change.
-func (c *Client) SubServingsChangedPermanently(userID int64, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    ServingsChangedPermanently,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       ServingsChangedPermanently,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Servings changed permanently",
 			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
@@ -500,13 +500,13 @@ func (c *Client) SubServingsChangedPermanently(userID int64, userEmail string, o
 }
 
 // SubServingsChanged logs a servings change.
-func (c *Client) SubServingsChanged(userID int64, userEmail string, date string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+func (c *Client) SubServingsChanged(userID string, userEmail string, date string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    ServingsChangedPermanently,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       ServingsChangedPermanently,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Servings changed for " + date,
 			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
@@ -524,58 +524,60 @@ func (c *Client) SubServingsChanged(userID int64, userEmail string, date string,
 
 // SkipPayload is a Skip entry.
 type SkipPayload struct {
-	UserID          int64  `json:"user_id,omitempty" datastore:",omitempty,noindex"`
-	UserEmail       string `json:"user_email,omitempty" datastore:",omitempty,noindex"`
-	Reason          string `json:"reason,omitempty" datastore:",omitempty,noindex"`
-	ActionUserID    int64  `json:"action_user_id,omitempty" datastore:",omitempty,noindex"`
-	ActionUserEmail string `json:"action_user_email,omitempty" datastore:",omitempty,noindex"`
-	Date            string `json:"date,omitempty" datastore:",omitempty,noindex"`
+	UserID             int64  `json:"-" datastore:",omitempty,noindex"`
+	UserIDString       string `json:"user_id,omitempty" datastore:",omitempty,noindex"`
+	UserEmail          string `json:"user_email,omitempty" datastore:",omitempty,noindex"`
+	Reason             string `json:"reason,omitempty" datastore:",omitempty,noindex"`
+	ActionUserID       int64  `json:"-" datastore:",omitempty,noindex"`
+	ActionUserIDString string `json:"action_user_id,omitempty" datastore:",omitempty,noindex"`
+	ActionUserEmail    string `json:"action_user_email,omitempty" datastore:",omitempty,noindex"`
+	Date               string `json:"date,omitempty" datastore:",omitempty,noindex"`
 }
 
 // SubSkip logs a skip.
-func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
+func (c *Client) SubSkip(date string, userID string, userEmail, reason string) {
 	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Skip,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Skip,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Skip for " + date,
 			Description: fmt.Sprintf("%s was skipped for %s by %s because '%s'", userEmail, date, actionUserEmail, reason),
 		},
 		SkipPayload: SkipPayload{
-			Date:            date,
-			UserID:          userID,
-			UserEmail:       userEmail,
-			Reason:          reason,
-			ActionUserID:    c.getInt64FromCtx(common.ContextUserID),
-			ActionUserEmail: actionUserEmail,
+			Date:               date,
+			UserIDString:       userID,
+			UserEmail:          userEmail,
+			Reason:             reason,
+			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
+			ActionUserEmail:    actionUserEmail,
 		},
 	}
 	c.Log(e)
 }
 
 // SubUnskip logs a unskip.
-func (c *Client) SubUnskip(date string, userID int64, userEmail string) {
+func (c *Client) SubUnskip(date string, userID string, userEmail string) {
 	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Unskip,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Unskip,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Unskip for " + date,
 			Description: fmt.Sprintf("%s was unskipped for %s by %s", userEmail, date, actionUserEmail),
 		},
 		SkipPayload: SkipPayload{
-			Date:            date,
-			UserID:          userID,
-			UserEmail:       userEmail,
-			ActionUserID:    c.getInt64FromCtx(common.ContextUserID),
-			ActionUserEmail: actionUserEmail,
+			Date:               date,
+			UserIDString:       userID,
+			UserEmail:          userEmail,
+			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
+			ActionUserEmail:    actionUserEmail,
 		},
 	}
 	c.Log(e)
@@ -619,13 +621,13 @@ type ErrorPayload struct {
 
 // RequestError is used to log an error at the end of a request.
 // TODO: log body?
-func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode, userID int64, userEmail string) {
+func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode) {
 	e := &Entry{
-		Type:      Error,
-		Severity:  SeverityError,
-		Path:      r.URL.Path,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:     Error,
+		Severity: SeverityError,
+		Path:     r.URL.Path,
+		// UserIDString:    userID,
+		// UserEmail: userEmail,
 		ErrorPayload: ErrorPayload{
 			Method:        r.Method,
 			URL:           r.URL.String(),
@@ -658,9 +660,11 @@ type Entry struct {
 	ID                     int64                  `json:"id,omitempty" datastore:",noindex"`
 	Type                   Type                   `json:"type,omitempty" datastore:",index"`
 	Action                 Action                 `json:"action,omitempty" datastore:",index"`
-	ActionUserID           int64                  `json:"action_user_id,omitempty" datastore:",index"`
+	ActionUserID           int64                  `json:"-" datastore:",index"`
+	ActionUserIDString     string                 `json:"action_user_id,omitempty" datastore:",index"`
 	ActionUserEmail        string                 `json:"action_user_email,omitempty" datastore:",index"`
-	UserID                 int64                  `json:"user_id,omitempty" datastore:",index"`
+	UserID                 int64                  `json:"-" datastore:",noindex"` // depecreated
+	UserIDString           string                 `json:"user_id,omitempty" datastore:",index"`
 	UserEmail              string                 `json:"user_email,omitempty" datastore:",index"`
 	Severity               sdlogging.Severity     `json:"serverity,omitempty" datastore:",noindex"`
 	Path                   string                 `json:"path,omitempty" datastore:",noindex"`
@@ -690,8 +694,8 @@ func (c *Client) Log(e *Entry) {
 	if e.Path == "" {
 		e.Path = c.path
 	}
-	if e.ActionUserID == 0 {
-		e.ActionUserID = c.getInt64FromCtx(common.ContextUserID)
+	if e.ActionUserIDString == "" {
+		e.ActionUserIDString = c.getStringFromCtx(common.ContextUserID)
 	}
 	if e.ActionUserEmail == "" {
 		e.ActionUserEmail = c.getStringFromCtx(common.ContextUserEmail)
@@ -709,12 +713,4 @@ func (c *Client) getStringFromCtx(key interface{}) string {
 		return ""
 	}
 	return v.(string)
-}
-
-func (c *Client) getInt64FromCtx(key interface{}) int64 {
-	v := c.ctx.Value(key)
-	if v == nil {
-		return 0
-	}
-	return v.(int64)
 }

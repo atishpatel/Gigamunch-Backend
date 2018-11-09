@@ -27,6 +27,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
+// TODO: UpdateDrip
+
 func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	parms, err := tasks.ParseProcessSubscriptionRequest(r)
 	if err != nil {
