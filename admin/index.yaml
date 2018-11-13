@@ -12,7 +12,7 @@ indexes:
 
 - kind: logging
   properties:
-  - name: UserID
+  - name: UserIDString
   - name: Timestamp
     direction: desc
 

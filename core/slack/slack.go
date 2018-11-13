@@ -38,8 +38,7 @@ func NewClient(ctx context.Context, log *logging.Client, serverInfo *common.Serv
 	if serverInfo == nil {
 		return nil, errInternal.Annotate("failed to get server info")
 	}
-	var ops slack.Option
-	slackClient := slack.New(gigabotToken, ops)
+	slackClient := slack.New(gigabotToken)
 	return &Client{
 		ctx:         ctx,
 		log:         log,

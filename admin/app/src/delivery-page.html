@@ -1,6 +1,8 @@
 <link rel="import"
       href="../bower_components/polymer/polymer-element.html">
 <link rel="import"
+      href="../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import"
       href="../bower_components/paper-button/paper-button.html">
 <link rel="import"
       href="../bower_components/paper-progress/paper-progress.html">
@@ -79,7 +81,7 @@
     <h1 class="">[[dateString]]</h1>
     <div>
       <select id="driverSelect"
-              disabled="[[optimizeInProgress]]"
+              disabled="[[routeChangeInProcess]]"
               value="{{driverName::change}}"
               required>
           <option disabled selected value> -- select an driver -- </option>
@@ -89,9 +91,11 @@
             <option value="[[driver.name]]">[[driver.name]]</option>
           </template>
         </select>
-      <paper-button disabled="[[optimizeInProgress]]"
+      <paper-button disabled="[[routeChangeInProcess]]"
                     on-click="optimizeDriverRoute">Optimize driver route</paper-button>
-      <paper-progress hidden$="[[!optimizeInProgress]]"
+      <paper-button disabled="[[routeChangeInProcess]]"
+                    on-click="reverseRoute">Reverse route</paper-button>
+      <paper-progress hidden$="[[!routeChangeInProcess]]"
                       value="[[routeOptimizeProgress]]"></paper-progress>
     </div>
 
@@ -111,7 +115,7 @@
             <div class="table-cell">Status</div>
             <div class="table-cell">Email</div>
           </div>
-          <dom-repeat id="drivers-repeat"
+          <dom-repeat id="driversOptimizedRepeat"
                       items="[[optimizedDrivers]]"
                       as="driver">
             <template>
@@ -130,7 +134,7 @@
                     <div class="table-cell">[[delivery.status]]</div>
                     <div class="table-cell">
                       <a target="_blank"
-                         href="subscriber/[[sublog.sub_email]]">[[delivery.sub_email]]</a>
+                         href="subscriber/[[delivery.sub_email]]">[[delivery.sub_email]]</a>
                     </div>
                   </div>
                 </template>
@@ -154,7 +158,7 @@
             <div class="table-cell">Status</div>
             <div class="table-cell">Email</div>
           </div>
-          <dom-repeat id="drivers-repeat"
+          <dom-repeat id="driversUnoptimizedRepeat"
                       items="[[drivers]]"
                       as="driver">
             <template>
@@ -187,16 +191,26 @@
             <div class="table-row table-header-row">
               <div class="table-cell">Driver</div>
               <div class="table-cell">Deliveries</div>
-              <div class="table-cell">Optimized</div>
+              <div class="table-cell">Roud Trip</div>
+              <div class="table-cell">Optimize</div>
             </div>
-            <dom-repeat id="drivers-repeat"
+            <dom-repeat id="driversSummaryRepeat"
                         items="[[drivers]]"
                         as="driver">
               <template>
                 <div class="table-row">
                   <div class="table-cell">[[driver.name]]</div>
                   <div class="table-cell">[[driver.deliveries.length]]</div>
-                  <div class="table-cell">[[driver.optimized]]</div>
+                  <div class="table-cell">
+                    <paper-checkbox checked="{{driver.round_trip}}"></paper-checkbox>
+                  </div>
+                  <div class="table-cell">
+                    <a target="_blank"
+                       disabled="[[driver.optimized]]"
+                       href="delivery/[[dateValue]]?optimize_driver=[[driver.name]]&round_trip=[[driver.round_trip]]">
+                      <paper-button disabled="[[driver.optimized]]">Optimize</paper-button>
+                    </a>
+                  </div>
                 </div>
               </template>
             </dom-repeat>
@@ -262,13 +276,16 @@
           dateString: {
             type: String,
           },
+          dateValue: {
+            type: String,
+          },
           polys: {
             type: Object,
           },
           map: {
             type: Object,
           },
-          optimizeInProgress: {
+          routeChangeInProcess: {
             type: Boolean,
             value: false,
           },
@@ -311,6 +328,7 @@
         } else {
           d = new Date(dateString);
         }
+        this.dateValue = d.toISOString().substr(0, 10);
         this.getSubLogsForDate(d);
       }
 
@@ -358,6 +376,7 @@
           this.drivers = this.getDrivers(unskippedSublogs);
           this.totalDeliveries = unskippedSublogs.length;
           this.setPolygons();
+          this.optimizeByQueryParam()
         });
       }
 
@@ -366,18 +385,50 @@
          =====================
       */
 
+      optimizeByQueryParam() {
+        const params = GetURLParmas();
+        if (params.optimize_driver) {
+          this.driverName = params.optimize_driver;
+          if (params.round_trip === 'true' || params.round_trip === 'false') {
+            this.drivers.forEach((driver) => {
+              if (driver.name === params.optimize_driver) {
+                driver.round_trip = params.round_trip === 'true' ? true : false;
+              }
+            });
+          }
+          this.optimizeDriverRoute();
+        }
+      }
+
+      reverseRoute() {
+        const name = this.driverName;
+        const optimizedDrivers = this.optimizedDrivers;
+        this.set('optimizedDrivers', []);
+        optimizedDrivers.forEach((driver) => {
+          // find the driver
+          if (driver.name === name) {
+            driver.deliveries = driver.deliveries.reverse();
+          }
+        });
+        setTimeout(() => {
+          this.set('optimizedDrivers', optimizedDrivers);
+        }, 1000)
+      }
+
       // optimizeDriverRoute optimizes the route for a driver.
       optimizeDriverRoute() {
         const name = this.driverName;
+        thisEl = this;
 
         function errorCallback(e, e2) {
           console.error('tsp solver error: ', e, e2);
           alert('tsp solver error: ', e, e2);
+          thisEl.optimizeDriverRoute();
         }
         this.drivers.forEach((driver) => {
           // find the driver
           if (driver.name === name && driver.deliveries.length > 1) {
-            this.optimizeInProgress = true;
+            this.routeChangeInProcess = true;
             // setup tsp
             if (!this.tsp) {
               this.tsp = new BpTspSolver(this.map, null, errorCallback, errorCallback);
@@ -387,7 +438,7 @@
             tsp.setOnProgressCallback(this.onProgressCallback.bind(this));
             tsp.setTravelMode(google.maps.DirectionsTravelMode.DRIVING);
             google.maps.event.addListener(tsp.getGDirectionsService(), "error", function() {
-              this.optimizeInProgress = false;
+              this.routeChangeInProcess = false;
               alert("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
               console.error("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
             });
@@ -435,7 +486,7 @@
 
       // onSuccessCallback updates the table and map based on the optimal route.
       onSuccessCallback(tsp) {
-        this.optimizeInProgress = false;
+        this.routeChangeInProcess = false;
         const drivers = this.drivers.slice();
         let optimizedDrivers = [];
         this.set('drivers', []);

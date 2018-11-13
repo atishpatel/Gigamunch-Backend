@@ -247,7 +247,7 @@ func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSM
 				From:     "Gigamunch",
 				To:       s.PhoneNumber,
 			}
-			log.SubMessage(0, s.Email, payload)
+			log.SubMessage(s.ID, s.Email, payload)
 		}
 	}
 	return resp, nil
