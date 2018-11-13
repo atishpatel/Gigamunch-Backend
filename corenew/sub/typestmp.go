@@ -355,13 +355,22 @@ func Subscriberget(ctx context.Context, id string) (*SubscriptionSignUp, error) 
 }
 
 func SubscribergetMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) {
-	// TODO: get all and filter on server
+	query := datastore.NewQuery(kindSubscriber).
+		Filter("EmailPrefs.Email>", "")
+
+	var results []*Subscriber
+	_, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+
 	dst := make([]*SubscriptionSignUp, len(ids))
-	var err error
 	for i, email := range ids {
-		dst[i], err = Subscriberget(ctx, email)
-		if err != nil {
-			return nil, err
+		for _, sub := range results {
+			if sub.Email() == email {
+				dst[i] = sub.GetSubscriptionSignUp()
+				break
+			}
 		}
 	}
 	return dst, nil
