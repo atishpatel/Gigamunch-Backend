@@ -147,9 +147,9 @@
         <div class="name-container">
           <div class="subscriber-name">[[subscriber.name]]</div>
           <div class="edit-button">
-            <a target="_blank"
+            <!-- <a target="_blank"
                href="[[subscriber.datastore_link]]"> <i class="material-icons" style="font-size: 42px;">edit</i>
-            </a>
+            </a> -->
           </div>
         </div>
         <div class$="subscriber-status [[subscriber.is_subscribed_class]]">
@@ -379,7 +379,7 @@
           }
 
           // edit link
-          subscriber.datastore_link = `https://console.cloud.google.com/datastore/entities/edit?key=0%2F%7C14%2FScheduleSignUp%7C36%2Fname:${subscriber.email}&project=gigamunch-omninexus&ns=&kind=ScheduleSignUp&filter=5%2FEmail%7CSTR%7CEQ%7C31%2F${subscriber.email}`;
+          // subscriber.datastore_link = ``;
 
           this.subscriber = subscriber;
         });

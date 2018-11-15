@@ -57,8 +57,8 @@ cron:
   timezone: America/Chicago
   target: cookapi
 # Datastore backup
-- description: "Backup ScheduleSignUp"
-  url: /admin/task/BackupDatastore?kinds=ScheduleSignUp,Lead
+- description: "Backup Subscriber"
+  url: /admin/task/BackupDatastore?kinds=Subscriber,Lead
   schedule: every day 02:00
   timezone: America/Chicago
   target: admin

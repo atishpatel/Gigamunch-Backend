@@ -22,9 +22,10 @@ import (
 )
 
 var (
-	errDatastore        = errors.InternalServerError
-	errInternal         = errors.InternalServerError
-	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
+	errDatastore             = errors.InternalServerError
+	errNoSuchEntityDatastore = errors.NotFoundError
+	errInternal              = errors.InternalServerError
+	errInvalidParameter      = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
 )
 
 // Client is a client for manipulating subscribers.
@@ -65,6 +66,9 @@ func (c *Client) Get(id string) (*subold.Subscriber, error) {
 	sub := new(subold.Subscriber)
 	err := c.db.Get(c.ctx, key, sub)
 	if err != nil {
+		if err == c.db.ErrNoSuchEntity() {
+			return nil, errNoSuchEntityDatastore.WithError(err).Annotate("failed to get")
+		}
 		return nil, errDatastore.WithError(err).Annotate("failed to get")
 	}
 	return sub, nil
@@ -74,6 +78,9 @@ func (c *Client) Get(id string) (*subold.Subscriber, error) {
 func (c *Client) GetByEmail(email string) (*subold.Subscriber, error) {
 	sub, err := c.getByEmail(email)
 	if err != nil {
+		if err == c.db.ErrNoSuchEntity() {
+			return nil, errNoSuchEntityDatastore.WithError(err).Annotate("failed to getByEmail")
+		}
 		return nil, errDatastore.WithError(err).Annotate("failed to getByEmail")
 	}
 	return sub, nil
@@ -90,8 +97,6 @@ func (c *Client) GetActive(start, limit int) ([]*subold.Subscriber, error) {
 }
 
 // GetByEmail gets a subscriber by email.
-
-// func (c *Client) get(id int64, email string) (*subold.Subscriber, error)
 
 // GetByPhoneNumber gets a subscriber by phone number.
 // func (c *Client) GetByPhoneNumber() error {
@@ -167,6 +172,9 @@ type CreateReq struct {
 func (req *CreateReq) fix() {
 	req.Email = strings.Replace(strings.ToLower(req.Email), " ", "", -1)
 	req.PhoneNumber = strings.Replace(req.PhoneNumber, " ", "", -1)
+	req.Address.Street = strings.Title(req.Address.Street)
+	req.Address.City = strings.Title(req.Address.City)
+	req.Address.Zip = strings.TrimSpace(req.Address.Zip)
 }
 
 func (req *CreateReq) validateBasic() error {
@@ -296,12 +304,12 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		return nil, errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know as soon as we are in your area!")
 	}
 
-	// if !strings.Contains(req.Email, "@test.com") {
-	err = slackC.SendNewSignup(req.Email, req.FirstName+" "+req.LastName, req.Reference+" - "+req.ReferenceEmail, req.Campaigns)
-	if err != nil {
-		c.log.Errorf(c.ctx, "failed to slack.SendNewSignup: %+v", err)
+	if !strings.Contains(req.Email, "@test.com") {
+		err = slackC.SendNewSignup(req.Email, req.FirstName+" "+req.LastName, req.Reference+" - "+req.ReferenceEmail, req.Campaigns)
+		if err != nil {
+			c.log.Errorf(c.ctx, "failed to slack.SendNewSignup: %+v", err)
+		}
 	}
-	// }
 
 	// setup activity
 	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
@@ -352,6 +360,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	return sub, nil
 }
 
+// SetupActivity sets up an activity for a subscriber.
 func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool, discountAmount float32, discountPrecent int8) error {
 	sub, err := c.getByIDOrEmail(userIDOrEmail)
 	if err != nil {
@@ -427,4 +436,26 @@ func GetCleanPhoneNumber(rawNumber string) string {
 	cleanNumber = cleanNumber[len(cleanNumber)-10:]
 	cleanNumber = cleanNumber[:3] + "-" + cleanNumber[3:6] + "-" + cleanNumber[6:]
 	return cleanNumber
+}
+
+func (c *Client) BatchUpdateActivityWithUserID() error {
+	subs, err := c.getAll()
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to getAll")
+	}
+	userIDs := make([]string, len(subs))
+	emails := make([]string, len(subs))
+	for i := range subs {
+		userIDs[i] = subs[i].ID
+		emails[i] = subs[i].Email()
+	}
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	err = activityC.BatchUpdateActivityWithUserID(userIDs, emails)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.BatchUpdateActivityWithUserID")
+	}
+	return nil
 }

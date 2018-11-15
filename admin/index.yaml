@@ -21,3 +21,8 @@ indexes:
   - name: UserEmail
   - name: Timestamp
     direction: desc
+
+- kind: Subscriber
+  properties:
+  - name: Active
+  - name: PlanWeekday

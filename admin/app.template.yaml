@@ -11,9 +11,11 @@ handlers:
 
   - url: /admin/webhook/.*
     script: auto
+    secure: always
 
   - url: /admin/batch/.*
     script: auto
+    secure: always
 
   - url: /admin/swagger
     static_dir: app/swagger-ui/dist

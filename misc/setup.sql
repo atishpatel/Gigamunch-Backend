@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
 CREATE TABLE IF NOT EXISTS activity(
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
 	date DATE NOT NULL,
-	user_id BIGINT NOT NULL DEFAULT 0,
+	user_id VARCHAR(125) NOT NULL DEFAULT '',
 	email VARCHAR(175) NOT NULL,
 	first_name VARCHAR(125) NOT NULL DEFAULT '',
 	last_name VARCHAR(125) NOT NULL DEFAULT '',
@@ -198,6 +198,10 @@ ALTER TABLE `sub` ADD COLUMN gift_from_user_id BIGINT;
 ALTER TABLE `sub` ADD COLUMN deviant BOOLEAN NOT NULL DEFAULT 0;
 ALTER TABLE `sub` ADD COLUMN deviant_reason VARCHAR(225) NOT NULL DEFAULT '';
 ALTER TABLE `sub` DROP COLUMN delivery_time;
+
+ALTER TABLE `activity` DROP COLUMN user_id;
+ALTER TABLE `activity` ADD COLUMN user_id VARCHAR(125) NOT NULL DEFAULT '';
+-- PRIMARY KEY (date, user_id, email)
 
 RENAME TABLE sub to activity;
 -- TODO: change primary key from date, email to date, user_id

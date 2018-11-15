@@ -76,8 +76,8 @@ func validateSubmitGiftCheckoutReq(r *giftCheckout) error {
 
 // Login updates a user's payment.
 func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.TokenOnlyReq)
 	var err error
+	req := new(pb.TokenOnlyReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -110,8 +110,8 @@ func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 // UpdatePayment updates a user's payment.
 func UpdatePayment(ctx context.Context, r *http.Request) Response {
-	req := new(pb.UpdatePaymentReq)
 	var err error
+	req := new(pb.UpdatePaymentReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -120,16 +120,16 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	email := strings.TrimSpace(strings.ToLower(req.Email))
-	key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-	entry := &subold.SubscriptionSignUp{}
-	err = datastore.Get(ctx, key, entry)
-	if err == datastore.ErrNoSuchEntity {
-		resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", email)).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
-		utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
-		return resp
-	}
+	subC := subold.New(ctx)
+	entry, err := subC.GetSubscriber(email)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		ewc := errors.GetErrorWithCode(err)
+		if ewc.Code == errors.CodeNotFound {
+			resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", email)).Wrapf("failed to get email(%s) into datastore", req.Email).SharedError()
+			utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
+			return resp
+		}
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get email(%s) into datastore", req.Email).SharedError()
 		utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
 		return resp
 	}
@@ -148,7 +148,7 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
 		return resp
 	}
-	subC := subold.New(ctx)
+
 	err = subC.UpdatePaymentToken(email, paymenttkn)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to update payment: failed to subold.UpdatePaymentToken: email(%s) tkn(%s) %+v", email, paymenttkn, err)
@@ -208,7 +208,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if entry.IsSubscribed {
@@ -335,7 +335,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if !inZone {
@@ -460,7 +460,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if entry.IsSubscribed {
@@ -578,7 +578,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	entry.NumGiftDinners = req.NumGiftDinners
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if !inZone {
@@ -772,8 +772,8 @@ func getNasvilleGeopoint(ctx context.Context) (*geofence.Geofence, error) {
 
 // DeviceCheckin updates a user's payment.
 func DeviceCheckin(ctx context.Context, r *http.Request) Response {
-	req := new(healthcheck.Device)
 	var err error
+	req := new(healthcheck.Device)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -810,8 +810,8 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 
 // SubmitCheckoutv2 submits a checkout.
 func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.SubmitCheckoutReq)
 	var err error
+	req := new(pb.SubmitCheckoutReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {

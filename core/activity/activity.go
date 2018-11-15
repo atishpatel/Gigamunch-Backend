@@ -6,7 +6,7 @@ import (
 	"time"
 
 	// mysql driver
-	_ "github.com/go-sql-driver/mysql"
+	mysql "github.com/go-sql-driver/mysql"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -19,19 +19,20 @@ import (
 
 const (
 	// DateFormat is the expected format of date in activity.
-	DateFormat                 = "2006-01-02" // "Jan 2, 2006"
-	selectActivityStatement    = "SELECT * FROM activity WHERE date=? AND email=?"
-	selectAllActivityStatement = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
-	updateRefundedStatement    = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
-	insertStatement            = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
+	DateFormat                     = "2006-01-02" // "Jan 2, 2006"
+	selectActivityStatement        = "SELECT * FROM activity WHERE date=? AND email=?"
+	selectAllActivityStatement     = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
+	selectActivityForUserStatement = "SELECT * FROM activity WHERE user_id=? ORDER BY date DESC"
+	updateRefundedStatement        = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
+	insertStatement                = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 )
 
 // Errors
 var (
-	errDatastore  = errors.InternalServerError
-	errInternal   = errors.InternalServerError
-	errBadRequest = errors.BadRequestError
-	errSQLDB      = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
+	errInternal       = errors.InternalServerError
+	errBadRequest     = errors.BadRequestError
+	errSQLDB          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
+	errDuplicateEntry = errors.ErrorWithCode{Code: errors.CodeBadRequest, Message: "Duplicate entry."}
 )
 
 // Client is a client for manipulating activity.
@@ -85,6 +86,16 @@ func (c *Client) GetAll(limit int) ([]*Activity, error) {
 	err := c.sqlDB.SelectContext(c.ctx, &acts, selectAllActivityStatement, limit)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to selectAllActivityStatement")
+	}
+	return acts, nil
+}
+
+// GetAllForUser gets a list of activity for a user.
+func (c *Client) GetAllForUser(userID string) ([]*Activity, error) {
+	acts := []*Activity{}
+	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityForUserStatement, userID)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to selectActivityForUserStatement")
 	}
 	return acts, nil
 }
@@ -180,6 +191,11 @@ func (c *Client) Create(req *CreateReq) error {
 	}
 	_, err = c.sqlDB.NamedExecContext(c.ctx, insertStatement, req)
 	if err != nil {
+		if merr, ok := err.(*mysql.MySQLError); ok {
+			if merr.Number == 1062 {
+				return errDuplicateEntry.WithError(err).Wrap("activity already exists")
+			}
+		}
 		return errSQLDB.WithError(err).Annotate("failed to insertStatement")
 	}
 	return nil
@@ -283,4 +299,19 @@ func (c *Client) Free(date time.Time, email string) error {
 	// TODO: Reimplement
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
 	return suboldC.Free(date, email)
+}
+
+func (c *Client) BatchUpdateActivityWithUserID(userIDs []string, emails []string) error {
+	if len(userIDs) != len(emails) {
+		return errBadRequest.WithMessage("UserIDs and Emails should be same length")
+	}
+	var err error
+	for i := range userIDs {
+		statement := "UPDATE activity set user_id=? where email=?"
+		_, err = c.sqlDB.Exec(statement, userIDs[i], emails[i])
+		if err != nil {
+			return errSQLDB.WithError(err).Annotate("failed to run statment")
+		}
+	}
+	return nil
 }

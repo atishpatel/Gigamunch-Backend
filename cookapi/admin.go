@@ -5,10 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
-
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
@@ -19,7 +16,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -687,57 +683,6 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 					resp.SubLogs[i].Servings = subLogs[i].Servings
 				}
 			}
-		}
-	}
-	return resp, nil
-}
-
-// UpdateAddresses updates addresses.
-func (service *Service) UpdateAddresses(ctx context.Context, req *GigatokenReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "UpdateAddresses", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	subC := subold.New(ctx)
-	subs, err := subC.GetHasSubscribed(time.Now())
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetHasSubscribed")
-		return resp, nil
-	}
-	count := 0
-	// for i := 0; i < len(subs); i++ {
-	for i := len(subs) - 1; i >= 0; i-- {
-		s := subs[i]
-		if s.IsSubscribed == false {
-			continue
-		}
-		oldLat := s.Address.Latitude
-		oldLong := s.Address.Longitude
-		err = maps.GetGeopointFromAddress(ctx, &s.Address)
-		if err != nil {
-			utils.Errorf(ctx, "failed to maps.GetGeopointFromAddress for %s with address %s error: %s", s.Email, s.Address.String(), err)
-			continue
-		}
-		if oldLat != s.Address.Latitude || oldLong != s.Address.Longitude {
-			utils.Infof(ctx, "updating sub %s from %.6f,%.6f to %.6f,%.6f", s.Email, oldLat, oldLong, s.Address.Latitude, s.Address.Longitude)
-			key := datastore.NewKey(ctx, "ScheduleSignUp", s.Email, 0, nil)
-			_, err = datastore.Put(ctx, key, &s)
-			if err != nil {
-				resp.Err = errors.GetErrorWithCode(err).Wrap("failed to datastore.Put")
-				break
-			}
-		}
-		count++
-		if count == 25 {
-			time.Sleep(500 * time.Millisecond)
-			count = 0
 		}
 	}
 	return resp, nil

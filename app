@@ -121,8 +121,9 @@ if [[ $1 == "serve" ]]; then
   if [[ $2 == "admin" ]]; then
     echo "Starting admin:"
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
-    dev_appserver.py --datastore_path ./.datastore admin/app.yaml&
-    cd admin/app
+    cd admin
+    dev_appserver.py --datastore_path ../.datastore ./app.yaml&
+    cd app
     # gulp build&
     gulp watch
     cd ../..

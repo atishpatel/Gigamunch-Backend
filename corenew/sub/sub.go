@@ -28,7 +28,7 @@ import (
 const (
 	datetimeFormat                        = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	dateFormat                            = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement                 = "INSERT INTO activity (date,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?)"
+	insertSubLogStatement                 = "INSERT INTO activity (date,user_id,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?,?)"
 	selectSubLogEmails                    = "SELECT DISTINCT email from activity where date>? and date<?"
 	selectSubLogStatement                 = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND email='%s'"
 	selectSubscriberSubLogsStatement      = "SELECT date,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
@@ -470,7 +470,12 @@ func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings in
 	if date.IsZero() || subEmail == "" || amount == 0 || paymentMethodToken == "" || customerID == "" {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) amount(%f) deliveryTime(%d) paymentMethodToken(%s) customerID(%s)", date, subEmail, amount, deliveryTime, paymentMethodToken, customerID)
 	}
-	_, err := mysqlDB.Exec(insertSubLogStatement, date.Format(dateFormat), subEmail, servings, vegServings, amount, paymentMethodToken, customerID)
+	sub, err := get(c.ctx, subEmail)
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to get sub")
+	}
+
+	_, err = mysqlDB.Exec(insertSubLogStatement, date.Format(dateFormat), sub.ID, subEmail, servings, vegServings, amount, paymentMethodToken, customerID)
 	if merr, ok := err.(*mysql.MySQLError); ok {
 		if merr.Number == 1062 {
 			return errDuplicateEntry.WithError(err).Wrap("failed to execute insertSubLogStatement statement.")
@@ -1033,7 +1038,7 @@ func (c *Client) Process(date time.Time, subEmail string) error {
 func (c *Client) SetupSubLogs(date time.Time) error {
 	// get all SubSignups
 	dayName := date.Weekday().String()
-	subs, err := getSubscribers(c.ctx, dayName)
+	subs, err := getSubscribersForWeekday(c.ctx, dayName)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("failed to getSubscribers")
 	}

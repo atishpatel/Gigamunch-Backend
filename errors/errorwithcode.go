@@ -29,6 +29,7 @@ var (
 	NoError               = ErrorWithCode{Code: CodeSuccess, Message: "Success."}
 	Success               = NoError
 	BadRequestError       = ErrorWithCode{Code: CodeBadRequest, Message: "Bad Request."}
+	NotFoundError         = ErrorWithCode{Code: CodeNotFound, Message: "Not found."}
 	InternalServerError   = ErrorWithCode{Code: CodeInternalServerErr, Message: "Internal server error."}
 	SignOutError          = ErrorWithCode{Code: CodeSignOut, Message: "Bad Request."}
 	PermissionDeniedError = ErrorWithCode{Code: CodePermissionDenied, Message: "Permission Denied."}

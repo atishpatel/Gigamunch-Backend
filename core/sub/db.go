@@ -1,7 +1,9 @@
 package sub
 
 import (
+	"context"
 	"strings"
+	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -58,6 +60,51 @@ func (c *Client) getByAddress(address *common.Address) (*subold.Subscriber, erro
 	}
 	return nil, nil
 }
+
+// getByPhoneNumber returns the Subscribers via phone number.
+func (c *Client) getByPhoneNumber(ctx context.Context, number string) ([]*subold.Subscriber, error) {
+	var results []*subold.Subscriber
+	_, err := c.db.QueryFilter(c.ctx, kind, 0, 10, "PhonePrefs.Number=", number, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// getActive returns the list of active Subscribers.
+func (c *Client) getActive(ctx context.Context) ([]*subold.Subscriber, error) {
+	var results []*subold.Subscriber
+	_, err := c.db.QueryFilter(c.ctx, kind, 0, 10, "Active=", true, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// getAll returns the list of Subscribers who are or were active.
+func (c *Client) getAll() ([]*subold.Subscriber, error) {
+	yearsAgo := time.Now().Add(-1 * 100 * 365 * 24 * time.Hour)
+	var results []*subold.Subscriber
+	_, err := c.db.QueryFilter(c.ctx, kind, 0, 10, "SignUpDatetime>", yearsAgo, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// getActiveForWeekday returns the list of Subscribers for that day.
+// func (c *Client) getActiveForWeekday(weekday string) ([]*Subscriber, error) {
+// 	query := datastore.NewQuery(kind).
+// 		Filter("Active=", true).
+// 		Filter("PlanWeekday=", weekday)
+
+// 	var results []*Subscriber
+// 	_, err := query.GetAll(ctx, &results)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return results, nil
+// }
 
 func (c *Client) put(id string, sub *subold.Subscriber) error {
 	sub.Address.Street = strings.Title(sub.Address.Street)

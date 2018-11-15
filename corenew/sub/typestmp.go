@@ -286,6 +286,18 @@ func (e *SubscriptionSignUp) GetSubscriber() *Subscriber {
 }
 
 func (c *Client) BatchSubscriptionSignUpToSubscriber(start, limit int64) error {
+	getHasSubscribedPointer := func(ctx context.Context, date time.Time) ([]*SubscriptionSignUp, error) {
+		query := datastore.NewQuery(kindSubscriptionSignUp).
+			Filter("SubscriptionDate>", 0).
+			Filter("SubscriptionDate<", date).
+			Limit(1000)
+		var results []*SubscriptionSignUp
+		_, err := query.GetAll(ctx, &results)
+		if err != nil {
+			return nil, err
+		}
+		return results, nil
+	}
 
 	subsold, err := getHasSubscribedPointer(c.ctx, time.Now().Add(100*24*time.Hour))
 	if err != nil {
@@ -339,7 +351,7 @@ func (c *Client) BatchSubscriptionSignUpToSubscriber(start, limit int64) error {
 	return nil
 }
 
-func Subscriberget(ctx context.Context, id string) (*SubscriptionSignUp, error) {
+func get(ctx context.Context, id string) (*SubscriptionSignUp, error) {
 	query := datastore.NewQuery(kindSubscriber).
 		Filter("EmailPrefs.Email=", id)
 
@@ -354,7 +366,7 @@ func Subscriberget(ctx context.Context, id string) (*SubscriptionSignUp, error) 
 	return results[0].GetSubscriptionSignUp(), nil
 }
 
-func SubscribergetMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) {
+func getMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) {
 	query := datastore.NewQuery(kindSubscriber).
 		Filter("EmailPrefs.Email>", "")
 
@@ -377,7 +389,7 @@ func SubscribergetMulti(ctx context.Context, ids []string) ([]*SubscriptionSignU
 }
 
 // getSubscribersByPhoneNumber returns the subscribers via phone number.
-func SubscribergetSubscribersByPhoneNumber(ctx context.Context, number string) ([]*SubscriptionSignUp, error) {
+func getSubscribersByPhoneNumber(ctx context.Context, number string) ([]*SubscriptionSignUp, error) {
 	query := datastore.NewQuery(kindSubscriber).
 		Filter("PhonePrefs.Number=", number)
 
@@ -394,7 +406,7 @@ func SubscribergetSubscribersByPhoneNumber(ctx context.Context, number string) (
 }
 
 // getSubscribers returns the list of Subscribers for that day.
-func SubscribergetSubscribers(ctx context.Context, subDay string) ([]SubscriptionSignUp, error) {
+func getSubscribers(ctx context.Context) ([]SubscriptionSignUp, error) {
 	query := datastore.NewQuery(kindSubscriber).
 		Filter("Active=", true)
 
@@ -410,8 +422,26 @@ func SubscribergetSubscribers(ctx context.Context, subDay string) ([]Subscriptio
 	return dst, nil
 }
 
+// getSubscribersForWeekday returns the list of Subscribers for that day.
+func getSubscribersForWeekday(ctx context.Context, subDay string) ([]SubscriptionSignUp, error) {
+	query := datastore.NewQuery(kindSubscriber).
+		Filter("Active=", true).
+		Filter("PlanWeekday=", subDay)
+
+	var results []*Subscriber
+	_, err := query.GetAll(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+	dst := make([]SubscriptionSignUp, len(results))
+	for i := range results {
+		dst[i] = *results[i].GetSubscriptionSignUp()
+	}
+	return dst, nil
+}
+
 // getHasSubscribed returns the list of all Subscribers
-func SubscribergetHasSubscribed(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
+func getHasSubscribed(ctx context.Context, date time.Time) ([]SubscriptionSignUp, error) {
 	yearsAgo := time.Now().Add(-1 * 100 * 365 * 24 * time.Hour)
 	query := datastore.NewQuery(kindSubscriber).
 		Filter("SignUpDatetime>", yearsAgo)
@@ -428,7 +458,7 @@ func SubscribergetHasSubscribed(ctx context.Context, date time.Time) ([]Subscrip
 	return dst, nil
 }
 
-func Subscriberput(ctx context.Context, email string, i *SubscriptionSignUp) error {
+func put(ctx context.Context, email string, i *SubscriptionSignUp) error {
 	var err error
 	sub := i.GetSubscriber()
 	if sub.ID == "" {
@@ -443,10 +473,13 @@ func Subscriberput(ctx context.Context, email string, i *SubscriptionSignUp) err
 		i.ID = sub.ID
 		key = datastore.NewKey(ctx, kindSubscriptionSignUp, i.ID, 0, nil)
 		_, err = datastore.Put(ctx, key, i)
+		if err != nil {
+			return err
+		}
 	}
-	return err
+	return oldput(ctx, email, i)
 }
 
-func SubscriberPut(ctx context.Context, email string, i *SubscriptionSignUp) error {
-	return Subscriberput(ctx, email, i)
+func Put(ctx context.Context, email string, i *SubscriptionSignUp) error {
+	return put(ctx, email, i)
 }
