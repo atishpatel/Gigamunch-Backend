@@ -57,19 +57,19 @@ USE gigamunch;
 --   INDEX(`created_datetime`)
 -- ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 -- create promo_codes table
-CREATE TABLE IF NOT EXISTS `promo_code` (
-  `code` VARCHAR(45) NOT NULL PRIMARY KEY,
-  `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
-  `free_delivery` BOOLEAN NOT NULL DEFAULT 0,
-  `percent_off` TINYINT NOT NULL DEFAULT 0,
-  `amount_off` FLOAT( 6, 2 ) NOT NULL DEFAULT 0,
-  `discount_cap` FLOAT(6,2) NOT NULL DEFAULT 0,
-  `free_dish` BOOLEAN NOT NULL DEFAULT 0,
-  `buy_one_get_one_free` BOOLEAN NOT NULL DEFAULT 0,
-  `start_datetime` DATETIME NOT NULL DEFAULT NOW(),
-  `end_datetime` DATETIME NOT NULL DEFAULT NOW(),
-  `num_uses` INT NOT NULL DEFAULT 0
-) ENGINE = InnoDB CHARACTER SET utf8mb4;
+-- CREATE TABLE IF NOT EXISTS `promo_code` (
+--   `code` VARCHAR(45) NOT NULL PRIMARY KEY,
+--   `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
+--   `free_delivery` BOOLEAN NOT NULL DEFAULT 0,
+--   `percent_off` TINYINT NOT NULL DEFAULT 0,
+--   `amount_off` FLOAT( 6, 2 ) NOT NULL DEFAULT 0,
+--   `discount_cap` FLOAT(6,2) NOT NULL DEFAULT 0,
+--   `free_dish` BOOLEAN NOT NULL DEFAULT 0,
+--   `buy_one_get_one_free` BOOLEAN NOT NULL DEFAULT 0,
+--   `start_datetime` DATETIME NOT NULL DEFAULT NOW(),
+--   `end_datetime` DATETIME NOT NULL DEFAULT NOW(),
+--   `num_uses` INT NOT NULL DEFAULT 0
+-- ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 -- create used_promo_code table 
 -- CREATE TABLE IF NOT EXISTS `used_promo_code` (
 --   `eater_id` VARCHAR(45) NOT NULL,
@@ -93,36 +93,36 @@ CREATE TABLE IF NOT EXISTS `promo_code` (
 --   INDEX(`cook_id`)
 -- ) ENGINE = InnoDB;
 -- create sub
-CREATE TABLE IF NOT EXISTS `sub`(
-  `date` DATE NOT NULL,
-  `sub_email` VARCHAR(175) NOT NULL,
-  `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
-  `skip` BOOLEAN NOT NULL DEFAULT 0,
-  `servings` TINYINT NOT NULL,
-  `amount` FLOAT(6,2) NOT NULL,
-  `amount_paid` FLOAT(6,2) NOT NULL DEFAULT 0,
-  `paid` BOOLEAN NOT NULL DEFAULT 0,
-  `paid_datetime` DATETIME,
-  `refunded` BOOLEAN NOT NULL DEFAULT 0,
-  `delivery_time` TINYINT NOT NULL,
-  `payment_method_token` VARCHAR(37) NOT NULL DEFAULT '',
-  `transaction_id` VARCHAR(37) NOT NULL DEFAULT '',
-  `free` BOOLEAN NOT NULL DEFAULT 0,
-  `discount_amount` FLOAT(6,2) NOT NULL DEFAULT 0,
-  `discount_percent` TINYINT NOT NULL DEFAULT 0,
-  `customer_id` VARCHAR(37) NOT NULL,
-   PRIMARY KEY (`date`, `sub_email`)
-) ENGINE = InnoDB;
+-- CREATE TABLE IF NOT EXISTS `sub`(
+--   `date` DATE NOT NULL,
+--   `sub_email` VARCHAR(175) NOT NULL,
+--   `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
+--   `skip` BOOLEAN NOT NULL DEFAULT 0,
+--   `servings` TINYINT NOT NULL,
+--   `amount` FLOAT(6,2) NOT NULL,
+--   `amount_paid` FLOAT(6,2) NOT NULL DEFAULT 0,
+--   `paid` BOOLEAN NOT NULL DEFAULT 0,
+--   `paid_datetime` DATETIME,
+--   `refunded` BOOLEAN NOT NULL DEFAULT 0,
+--   `delivery_time` TINYINT NOT NULL,
+--   `payment_method_token` VARCHAR(37) NOT NULL DEFAULT '',
+--   `transaction_id` VARCHAR(37) NOT NULL DEFAULT '',
+--   `free` BOOLEAN NOT NULL DEFAULT 0,
+--   `discount_amount` FLOAT(6,2) NOT NULL DEFAULT 0,
+--   `discount_percent` TINYINT NOT NULL DEFAULT 0,
+--   `customer_id` VARCHAR(37) NOT NULL,
+--    PRIMARY KEY (`date`, `sub_email`)
+-- ) ENGINE = InnoDB;
 -- create coupon
 -- create promo
 -- create driver_assignment
 CREATE TABLE IF NOT EXISTS deliveries (
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
 	date DATE NOT NULL,
-	driver_id BIGINT NOT NULL,
+	driver_id VARCHAR(125) NOT NULL,
 	driver_email VARCHAR(175) NOT NULL,
 	driver_name VARCHAR(125) NOT NULL,
-	sub_id BIGINT NOT NULL,
+	sub_id VARCHAR(125) NOT NULL,
 	sub_email VARCHAR(175) NOT NULL,
 	order INT NOT NULL DEFAULT -1,
 	delivered BOOLEAN DEFAULT 0,
@@ -168,39 +168,39 @@ CREATE TABLE IF NOT EXISTS activity(
 	gift_from_user_id BIGINT,
 	deviant BOOLEAN NOT NULL DEFAULT 0,
 	deviant_reason VARCHAR(225) NOT NULL DEFAULT '',
-	PRIMARY KEY (date, user_id, email)
+	PRIMARY KEY (date, user_id)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 
-ALTER TABLE `sub` CHANGE COLUMN `sub_email` `email` VARCHAR(175) NOT NULL;
-ALTER TABLE `sub` CHANGE `created_datetime` `created_dt` DATETIME NOT NULL DEFAULT NOW();
-ALTER TABLE `sub` CHANGE `paid_datetime` `paid_dt` DATETIME;
-ALTER TABLE `sub` CHANGE `free` `first` BOOLEAN NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN user_id BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN first_name VARCHAR(125) NOT NULL DEFAULT '';
-ALTER TABLE `sub` ADD COLUMN last_name VARCHAR(125) NOT NULL DEFAULT '';
-ALTER TABLE `sub` ADD COLUMN location INT NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN addr_changed BOOLEAN NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN addr_apt VARCHAR(50) NOT NULL DEFAULT '';
-ALTER TABLE `sub` ADD COLUMN addr_string VARCHAR(175) NOT NULL DEFAULT '';
-ALTER TABLE `sub` ADD COLUMN zip VARCHAR(30) NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN lat FLOAT( 10, 6 ) NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN `long` FLOAT( 10, 6 ) NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN active BOOLEAN NOT NULL DEFAULT 1;
-ALTER TABLE `sub` ADD COLUMN veg_servings TINYINT NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN servings_changed BOOLEAN NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN refunded_amount FLOAT(6,2) NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN refunded_dt DATETIME;
-ALTER TABLE `sub` ADD COLUMN refund_transaction_id VARCHAR(37) NOT NULL DEFAULT '';
-ALTER TABLE `sub` ADD COLUMN payment_provider TINYINT NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN forgiven BOOLEAN NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN gift BOOLEAN NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN gift_from_user_id BIGINT;
-ALTER TABLE `sub` ADD COLUMN deviant BOOLEAN NOT NULL DEFAULT 0;
-ALTER TABLE `sub` ADD COLUMN deviant_reason VARCHAR(225) NOT NULL DEFAULT '';
-ALTER TABLE `sub` DROP COLUMN delivery_time;
+-- ALTER TABLE `sub` CHANGE COLUMN `sub_email` `email` VARCHAR(175) NOT NULL;
+-- ALTER TABLE `sub` CHANGE `created_datetime` `created_dt` DATETIME NOT NULL DEFAULT NOW();
+-- ALTER TABLE `sub` CHANGE `paid_datetime` `paid_dt` DATETIME;
+-- ALTER TABLE `sub` CHANGE `free` `first` BOOLEAN NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN user_id BIGINT NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN first_name VARCHAR(125) NOT NULL DEFAULT '';
+-- ALTER TABLE `sub` ADD COLUMN last_name VARCHAR(125) NOT NULL DEFAULT '';
+-- ALTER TABLE `sub` ADD COLUMN location INT NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN addr_changed BOOLEAN NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN addr_apt VARCHAR(50) NOT NULL DEFAULT '';
+-- ALTER TABLE `sub` ADD COLUMN addr_string VARCHAR(175) NOT NULL DEFAULT '';
+-- ALTER TABLE `sub` ADD COLUMN zip VARCHAR(30) NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN lat FLOAT( 10, 6 ) NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN `long` FLOAT( 10, 6 ) NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN active BOOLEAN NOT NULL DEFAULT 1;
+-- ALTER TABLE `sub` ADD COLUMN veg_servings TINYINT NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN servings_changed BOOLEAN NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN refunded_amount FLOAT(6,2) NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN refunded_dt DATETIME;
+-- ALTER TABLE `sub` ADD COLUMN refund_transaction_id VARCHAR(37) NOT NULL DEFAULT '';
+-- ALTER TABLE `sub` ADD COLUMN payment_provider TINYINT NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN forgiven BOOLEAN NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN gift BOOLEAN NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN gift_from_user_id BIGINT;
+-- ALTER TABLE `sub` ADD COLUMN deviant BOOLEAN NOT NULL DEFAULT 0;
+-- ALTER TABLE `sub` ADD COLUMN deviant_reason VARCHAR(225) NOT NULL DEFAULT '';
+-- ALTER TABLE `sub` DROP COLUMN delivery_time;
 
-ALTER TABLE `activity` DROP COLUMN user_id;
-ALTER TABLE `activity` ADD COLUMN user_id VARCHAR(125) NOT NULL DEFAULT '';
+-- ALTER TABLE `activity` DROP COLUMN user_id;
+-- ALTER TABLE `activity` ADD COLUMN user_id VARCHAR(125) NOT NULL DEFAULT '';
 -- PRIMARY KEY (date, user_id, email)
 
 RENAME TABLE sub to activity;

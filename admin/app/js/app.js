@@ -211,6 +211,13 @@ function GetLogsByEmail(start, limit, email) {
     };
     return callFetch(url, 'GET', req);
 }
+function GetLogsByExecution(execution_id) {
+    var url = baseURL + 'GetLogsByExecution';
+    var req = {
+        execution_id: execution_id,
+    };
+    return callFetch(url, 'GET', req);
+}
 function callFetch(url, method, body) {
     return GetToken().then(function (token) {
         var config = {
@@ -230,7 +237,17 @@ function callFetch(url, method, body) {
         }
         return fetch(URL, config)
             .then(function (resp) {
-            return resp.json();
+            try {
+                return resp.json();
+            }
+            catch (err) {
+                return {
+                    error: {
+                        code: resp.status,
+                        message: 'Unknown server error',
+                    }
+                };
+            }
         })
             .catch(function (err) {
             console.error('failed to callFetch', err);
@@ -263,7 +280,8 @@ var Service = /*#__PURE__*/Object.freeze({
     GetActivityForDate: GetActivityForDate,
     GetLogs: GetLogs,
     GetLog: GetLog,
-    GetLogsByEmail: GetLogsByEmail
+    GetLogsByEmail: GetLogsByEmail,
+    GetLogsByExecution: GetLogsByExecution
 });
 
 function Fire(eventName, detail) {

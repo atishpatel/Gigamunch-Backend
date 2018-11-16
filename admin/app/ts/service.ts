@@ -107,6 +107,14 @@ export function GetLogsByEmail(start: number, limit: number, email: string): Pro
     return callFetch(url, 'GET', req);
 }
 
+export function GetLogsByExecution(execution_id: number): Promise<any> {
+    const url: string = baseURL + 'GetLogsByExecution';
+    const req: GetLogsByExecutionReq = {
+        execution_id,
+    };
+    return callFetch(url, 'GET', req);
+}
+
 function callFetch(url: string, method: string, body: object): Promise<APIResponse> {
     return GetToken().then((token) => {
         const config: RequestInit = {
@@ -125,7 +133,19 @@ function callFetch(url: string, method: string, body: object): Promise<APIRespon
         }
         return fetch(URL, config)
             .then((resp: Response) => {
-                return resp.json();
+                // if (resp.status == 500 || resp.status == 404) {
+                try {
+                    return resp.json();
+                } catch (err) {
+                    return {
+                        error: {
+                            code: resp.status,
+                            message: 'Unknown server error',
+                        }
+                    }
+                }
+                // }
+                // return resp.json();
             })
             .catch((err: any) => {
                 console.error('failed to callFetch', err);

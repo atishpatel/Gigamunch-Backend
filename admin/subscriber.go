@@ -213,46 +213,28 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 	}
 	// end decode request
 	req.NewEmail = strings.ToLower(req.NewEmail)
-	i := new(subold.SubscriptionSignUp)
 	err = datastore.RunInTransaction(ctx, func(tctx context.Context) error {
-		keyOld := datastore.NewKey(tctx, "ScheduleSignUp", req.OldEmail, 0, nil)
-		err = datastore.Get(tctx, keyOld, i)
+		subnewC, err := sub.NewClient(tctx, log, s.db, s.sqlDB, s.serverInfo)
 		if err != nil {
-			return errors.ErrorWithCode{Code: 400, Message: "Invalid parameter."}.WithError(err).Annotatef("failed to find email: %s", req.OldEmail)
+			return errors.Annotate(err, "failed to sub.NewClient")
 		}
-		i.Email = req.NewEmail
-		keyNew := datastore.NewKey(tctx, "ScheduleSignUp", req.NewEmail, 0, nil)
-		_, err = datastore.Put(tctx, keyNew, i)
+		snew, err := subnewC.GetByEmail(req.OldEmail)
 		if err != nil {
-			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to put: %s", req.NewEmail)
+			return errors.Annotate(err, "failed to sub.GetByEmail")
+		}
+		for i := range snew.EmailPrefs {
+			if snew.EmailPrefs[i].Email == req.OldEmail {
+				snew.EmailPrefs[i].Email = req.NewEmail
+			}
+		}
+		err = subnewC.Update(snew)
+		if err != nil {
+			return errors.Annotate(err, "failed to sub.Update")
 		}
 		subC := subold.New(tctx)
 		err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
-		}
-		err = datastore.Delete(tctx, keyOld)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to delete: %s", req.OldEmail)
-		}
-		if i.ID != "" {
-			subnewC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-			if err != nil {
-				return errors.Annotate(err, "failed to sub.NewClient")
-			}
-			snew, err := subnewC.Get(i.ID)
-			if err != nil {
-				return errors.Annotate(err, "failed to sub.Get")
-			}
-			for i := range snew.EmailPrefs {
-				if snew.EmailPrefs[i].Email == req.OldEmail {
-					snew.EmailPrefs[i].Email = req.NewEmail
-				}
-			}
-			err = subnewC.Update(snew)
-			if err != nil {
-				return errors.Annotate(err, "failed to sub.Update")
-			}
 		}
 		return nil
 	}, &datastore.TransactionOptions{XG: true})

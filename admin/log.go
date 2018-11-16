@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
@@ -26,8 +26,10 @@ func (s *server) GetLog(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
-	resp := &pb.GetLogResp{
-		Log: pbLog(l),
+	resp := &pb.GetLogResp{}
+	resp.Log, err = serverhelper.PBLog(l)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBLog")
 	}
 	return resp
 }
@@ -49,9 +51,9 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return errors.Annotate(err, "failed to log.GetLogs")
 	}
 	resp := &pb.GetLogsResp{}
-	resp.Logs = make([]*pbcommon.Log, len(logs))
-	for i := range logs {
-		resp.Logs[i] = pbLog(logs[i])
+	resp.Logs, err = serverhelper.PBLogs(logs)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBLogs")
 	}
 	return resp
 }
@@ -73,9 +75,9 @@ func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *h
 		return errors.Annotate(err, "failed to log.GetUserLogsByEmail")
 	}
 	resp := &pb.GetLogsResp{}
-	resp.Logs = make([]*pbcommon.Log, len(logs))
-	for i := range logs {
-		resp.Logs[i] = pbLog(logs[i])
+	resp.Logs, err = serverhelper.PBLogs(logs)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBLogs")
 	}
 	return resp
 }
@@ -97,29 +99,9 @@ func (s *server) GetLogsByExecution(ctx context.Context, w http.ResponseWriter, 
 		return errors.Annotate(err, "failed to log.GetAllByExecution")
 	}
 	resp := &pb.GetLogsResp{}
-	resp.Logs = make([]*pbcommon.Log, len(logs))
-	for i := range logs {
-		resp.Logs[i] = pbLog(logs[i])
+	resp.Logs, err = serverhelper.PBLogs(logs)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBLogs")
 	}
 	return resp
-}
-
-func pbLog(l *logging.Entry) *pbcommon.Log {
-	return &pbcommon.Log{
-		ID:              l.ID,
-		LogName:         l.LogName,
-		Timestamp:       l.Timestamp.String(),
-		Type:            string(l.Type),
-		Action:          string(l.Action),
-		Path:            l.Path,
-		Severity:        int32(l.Severity),
-		UserID:          l.UserID,
-		UserEmail:       l.UserEmail,
-		ActionUserID:    l.ActionUserID,
-		ActionUserEmail: l.ActionUserEmail,
-		BasicPayload: &pbcommon.BasicPayload{
-			Title:       l.BasicPayload.Title,
-			Description: l.BasicPayload.Description,
-		},
-	}
 }
