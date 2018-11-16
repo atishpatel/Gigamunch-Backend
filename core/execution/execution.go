@@ -3,6 +3,7 @@ package execution
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -69,7 +70,7 @@ func (c *Client) Get(idOrDate string) (*Execution, error) {
 	} else {
 		id, err := strconv.ParseInt(idOrDate, 10, 64)
 		if err != nil {
-			return nil, errors.Annotate(err, "failed to parse id")
+			return nil, errBadRequest.WithError(err).Annotate("failed to parse id")
 		}
 		key = c.db.IDKey(c.ctx, Kind, id)
 		err = c.db.Get(c.ctx, key, exe)
@@ -83,20 +84,38 @@ func (c *Client) Get(idOrDate string) (*Execution, error) {
 // GetAll gets all Executions ordered by created datetime.
 func (c *Client) GetAll(start, limit int) ([]*Execution, error) {
 	var exes []*Execution
-	_, err := c.db.QueryOrdered(c.ctx, Kind, start, limit, "-Date", &exes)
+	_, err := c.db.QueryOrdered(c.ctx, Kind, start, limit, "-CreatedDatetime", &exes)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to QueryOrdered")
 	}
+	sort.Slice(exes, func(i, j int) bool {
+		if exes[i].Date == "" {
+			return true
+		}
+		if exes[j].Date == "" {
+			return false
+		}
+		return exes[i].Date > exes[j].Date
+	})
 	return exes, nil
 }
 
 // Update updates an Execution.
 func (c *Client) Update(exe *Execution) (*Execution, error) {
+	var err error
 	if exe.CreatedDatetime.IsZero() {
 		exe.CreatedDatetime = time.Now()
 	}
 	key := c.db.IDKey(c.ctx, Kind, exe.ID)
-	key, err := c.db.Put(c.ctx, key, exe)
+	var exeOld *Execution
+	if exe.ID != 0 {
+		exeOld = &Execution{}
+		err = c.db.Get(c.ctx, key, exeOld)
+		if err != nil {
+			return nil, errDatastore.WithError(err).Annotate("failed to get")
+		}
+	}
+	key, err = c.db.Put(c.ctx, key, exe)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to put")
 	}
@@ -107,6 +126,9 @@ func (c *Client) Update(exe *Execution) (*Execution, error) {
 		if err != nil {
 			return nil, errDatastore.WithError(err).Annotate("failed to put")
 		}
+	}
+	if exeOld != nil {
+		c.log.ExecutionUpdate(exe.ID, exeOld, exe)
 	}
 	return exe, nil
 }

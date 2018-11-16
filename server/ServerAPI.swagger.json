@@ -134,6 +134,7 @@
     "CommonCode": {
       "type": "string",
       "enum": [
+        "NoError",
         "Unknown",
         "Success",
         "InvalidArgument",
@@ -143,8 +144,8 @@
         "SignOut",
         "Internal"
       ],
-      "default": "Unknown",
-      "title": "- Unknown: TODO:  figure out codes"
+      "default": "NoError",
+      "title": "- NoError: TODO:  figure out codes"
     },
     "CommonError": {
       "type": "object",

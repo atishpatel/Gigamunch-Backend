@@ -71,6 +71,7 @@ func main() {
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
 	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsByEmail)))
+	http.HandleFunc("/admin/api/v1/GetLogsByExecution", s.handler(s.userAdmin(s.GetLogsByExecution)))
 	// **********************
 	// Sublogs
 	// **********************
@@ -114,8 +115,8 @@ func main() {
 	// **********************
 	// Batch
 	// **********************
-	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
-	http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
+	// http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
+	// http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))
@@ -135,7 +136,7 @@ func (s *server) setup() error {
 		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
 	}
 	if appengine.IsDevAppServer() {
-		sqlConnectionString = "root@/gigamunch"
+		sqlConnectionString = "server:gigamunch@/gigamunch"
 	}
 	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
 	if err != nil {
@@ -163,6 +164,7 @@ func (s *server) userAdmin(f handle) handle {
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
 		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
+		log.SetContext(ctx)
 		return f(ctx, w, r, log)
 	}
 }

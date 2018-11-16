@@ -75,6 +75,7 @@
     "CommonCode": {
       "type": "string",
       "enum": [
+        "NoError",
         "Unknown",
         "Success",
         "InvalidArgument",
@@ -84,8 +85,8 @@
         "SignOut",
         "Internal"
       ],
-      "default": "Unknown",
-      "title": "- Unknown: TODO:  figure out codes"
+      "default": "NoError",
+      "title": "- NoError: TODO:  figure out codes"
     },
     "CommonContent": {
       "type": "object",
@@ -246,6 +247,9 @@
           "type": "string"
         },
         "description_preview": {
+          "type": "string"
+        },
+        "container_size": {
           "type": "string"
         }
       },
@@ -426,6 +430,21 @@
           "type": "string"
         },
         "reheat_option_1_preferred": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_vegetarian": {
           "type": "boolean",
           "format": "boolean"
         }

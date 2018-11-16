@@ -108,6 +108,10 @@ type Sticker struct {
 	ReheatInstructions1    string `json:"reheat_instructions_1" datastore:",noindex"`
 	ReheatInstructions2    string `json:"reheat_instructions_2" datastore:",noindex"`
 	EatingTemperature      string `json:"eating_temperature" datastore:",noindex"`
+	Number                 int32  `json:"number" datastore:",noindex"`
+	Color                  string `json:"color" datastore:",noindex"`
+	IsForNonVegetarian     bool   `json:"is_for_non_vegetarian" datastore:",noindex"`
+	IsForVegetarian        bool   `json:"is_for_vegetarian" datastore:",noindex"`
 }
 
 // Dish is a dish in a culture execution.
@@ -122,6 +126,7 @@ type Dish struct {
 	IsForNonVegetarian bool   `json:"is_for_non_vegetarian"`
 	IsOnMainPlate      bool   `json:"is_on_main_plate" datastore:",noindex"`
 	ImageURL           string `json:"image_url" datastore:",noindex"`
+	ContainerSize      string `json:"container_size" datastore:",noindex"`
 }
 
 // QandA are questions and answers with the culture cook.

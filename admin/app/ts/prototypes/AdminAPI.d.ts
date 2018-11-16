@@ -110,9 +110,8 @@ interface GetLogsByEmailReq {
     limit: number
     email: string
 }
-interface GetLogsByEmailResp {
-    error: Common.Error
-    logs: Common.Log[]
+interface GetLogsByExecutionReq {
+    execution_id: number
 }
 interface Sublog {
     date: string

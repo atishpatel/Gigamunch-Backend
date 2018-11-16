@@ -197,7 +197,7 @@ func (s *server) setup() error {
 		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
 	}
 	if appengine.IsDevAppServer() {
-		sqlConnectionString = "root@/gigamunch"
+		sqlConnectionString = "server:gigamunch@/gigamunch"
 	}
 	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
 	if err != nil {

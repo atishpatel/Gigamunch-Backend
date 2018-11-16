@@ -42,9 +42,9 @@ var (
 // The message is a human readable message.
 // The details is the error message itself.
 type ErrorWithCode struct {
-	Code    int32  `json:"code"`
-	Message string `json:"message"`
-	Detail  string `json:"detail"`
+	Code    int32  `json:"code" datastore:",omitempty,noindex"`
+	Message string `json:"message" datastore:",omitempty,noindex"`
+	Detail  string `json:"detail" datastore:",omitempty,noindex"`
 }
 
 // IsNil checks if error is code success therefore not an error.

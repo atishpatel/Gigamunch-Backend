@@ -121,6 +121,10 @@ interface Sticker {
   reheat_instructions_2: string
   eating_temperature: string
   reheat_option_1_preferred: boolean
+  number: number
+  color: string
+  is_for_non_vegetarian: boolean
+  is_for_vegetarian: boolean
 }
 interface Dish {
   number: number
@@ -133,6 +137,7 @@ interface Dish {
   is_on_main_plate: boolean
   image_url: string
   description_preview: string
+  container_size: string
 }
 interface QandA {
   question: string

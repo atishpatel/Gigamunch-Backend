@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
+	"sort"
+	"strings"
 	"time"
+
+	"github.com/go-test/deep"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 
@@ -30,6 +33,8 @@ const (
 
 	// Delivered Action.
 	Delivered = Action("delivered")
+	// ExecutionUpdate Action.
+	ExecutionUpdate = Action("execution_update")
 	// ======================
 	// User or Admin Actions
 	// ======================
@@ -86,6 +91,8 @@ const (
 	Unknown = Type("unknown")
 	// Subscriber type.
 	Subscriber = Type("subscriber")
+	// Execution type.
+	Execution = Type("execution")
 	// System type.
 	System = Type("system")
 	// Error type.
@@ -136,7 +143,7 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 	if dbC == nil {
 		return nil, errInternal.Annotate("dbC cannot be nil")
 	}
-	sdReporter, err := sdreporting.NewClient(ctx, serverInfo.ProjectID, sdreporting.Config{
+	sdReporter, err := sdreporting.NewClient(context.Background(), serverInfo.ProjectID, sdreporting.Config{
 		ServiceName: loggerID,
 		OnError: func(err error) {
 			Errorf(ctx, "failed to log to sdReporter", err)
@@ -153,6 +160,11 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 		db:         dbC,
 		serverInfo: serverInfo,
 	}, nil
+}
+
+// SetContext sets the context.
+func (c *Client) SetContext(ctx context.Context) {
+	c.ctx = ctx
 }
 
 // Infof logs info.
@@ -206,6 +218,22 @@ func (c *Client) GetAllByEmail(userEmail string, start, limit int) ([]*Entry, er
 	for i := range dst {
 		dst[i].ID = keys[i].IntID()
 	}
+	return dst, nil
+}
+
+// GetAllByExecution gets logs by ExecutionID.
+func (c *Client) GetAllByExecution(executionID int64) ([]*Entry, error) {
+	var dst []*Entry
+	keys, err := c.db.QueryFilter(c.ctx, kind, 0, 1000, "ExecutionID=", executionID, &dst)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilter")
+	}
+	for i := range dst {
+		dst[i].ID = keys[i].IntID()
+	}
+	sort.Slice(dst, func(i, j int) bool {
+		return dst[j].Timestamp.Before(dst[i].Timestamp)
+	})
 	return dst, nil
 }
 
@@ -600,35 +628,49 @@ func (c *Client) ActivitySetup(date string, numSetup int) {
 	c.Log(e)
 }
 
+// ExecutionUpdate is a log of when an execution is udated.
+func (c *Client) ExecutionUpdate(executionID int64, oldExe interface{}, newExe interface{}) {
+	diffs := deep.Equal(oldExe, newExe)
+	desc := ""
+	replacer := strings.NewReplacer("!=", "->", ".slice", "", " slice", "")
+	for _, diff := range diffs {
+		desc += replacer.Replace(diff) + ";;;\n"
+	}
+	e := &Entry{
+		Type:        Execution,
+		Action:      ExecutionUpdate,
+		Severity:    SeverityInfo,
+		ExecutionID: executionID,
+		BasicPayload: BasicPayload{
+			Title:       "Execution Updated",
+			Description: desc,
+		},
+	}
+	c.Log(e)
+}
+
 // ErrorPayload is an error entry assocted with RequestError.
 type ErrorPayload struct {
 	Method        string               `json:"method,omitempty" datastore:",omitempty,noindex"`
 	URL           string               `json:"url,omitempty" datastore:",omitempty,noindex"`
 	Proto         string               `json:"proto,omitempty" datastore:",omitempty,noindex"`
-	Header        http.Header          `json:"header,omitempty" datastore:",omitempty,noindex"`
 	ContentLength int64                `json:"content_length,omitempty" datastore:",omitempty,noindex"`
 	Host          string               `json:"host,omitempty" datastore:",omitempty,noindex"`
-	Form          url.Values           `json:"form,omitempty" datastore:",omitempty,noindex"`
 	Error         errors.ErrorWithCode `json:"error,omitempty" datastore:",omitempty,noindex"`
 }
 
 // RequestError is used to log an error at the end of a request.
-// TODO: log body?
 func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode) {
 	e := &Entry{
 		Type:     Error,
 		Severity: SeverityError,
 		Path:     r.URL.Path,
-		// UserIDString:    userID,
-		// UserEmail: userEmail,
 		ErrorPayload: ErrorPayload{
 			Method:        r.Method,
 			URL:           r.URL.String(),
-			Header:        r.Header,
 			Proto:         r.Proto,
 			ContentLength: r.ContentLength,
 			Host:          r.Host,
-			Form:          r.Form,
 			Error:         ewc,
 		},
 	}
@@ -652,11 +694,12 @@ type BasicPayload struct {
 type Entry struct {
 	ID                     int64                  `json:"id,omitempty" datastore:",noindex"`
 	Type                   Type                   `json:"type,omitempty" datastore:",index"`
+	ExecutionID            int64                  `json:"execution_id" datastore:",index"`
 	Action                 Action                 `json:"action,omitempty" datastore:",index"`
-	ActionUserID           int64                  `json:"-" datastore:",index"`
+	ActionUserID           int64                  `json:"-" datastore:",omitempty,noindex"` // depecreated
 	ActionUserIDString     string                 `json:"action_user_id,omitempty" datastore:",index"`
 	ActionUserEmail        string                 `json:"action_user_email,omitempty" datastore:",index"`
-	UserID                 int64                  `json:"-" datastore:",noindex"` // depecreated
+	UserID                 int64                  `json:"-" datastore:",omitempty,noindex"` // depecreated
 	UserIDString           string                 `json:"user_id,omitempty" datastore:",index"`
 	UserEmail              string                 `json:"user_email,omitempty" datastore:",index"`
 	Severity               sdlogging.Severity     `json:"serverity,omitempty" datastore:",noindex"`

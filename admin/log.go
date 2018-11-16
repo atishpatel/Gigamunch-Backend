@@ -72,7 +72,31 @@ func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *h
 	if err != nil {
 		return errors.Annotate(err, "failed to log.GetUserLogsByEmail")
 	}
-	resp := &pb.GetLogsByEmailResp{}
+	resp := &pb.GetLogsResp{}
+	resp.Logs = make([]*pbcommon.Log, len(logs))
+	for i := range logs {
+		resp.Logs[i] = pbLog(logs[i])
+	}
+	return resp
+}
+
+// GetLogsByExecution gets logs by email.
+func (s *server) GetLogsByExecution(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.GetLogsByExecutionReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	logs, err := log.GetAllByExecution(req.ExecutionID)
+	if err != nil {
+		return errors.Annotate(err, "failed to log.GetAllByExecution")
+	}
+	resp := &pb.GetLogsResp{}
 	resp.Logs = make([]*pbcommon.Log, len(logs))
 	for i := range logs {
 		resp.Logs[i] = pbLog(logs[i])

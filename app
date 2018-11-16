@@ -48,7 +48,8 @@ if [[ $1 == "build" ]]; then
     
     # modift *.pb.go generated code
     cd Gigamunch-Proto
-    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/,omitempty//g;s/Url/URL/g;s/Id/ID/g;s/Sms/SMS/g;s/Option_1/Option1/g;s/Option_2/Option2/g;s/Instructions_1/Instructions1/g;s/Instructions_2/Instructions2/g;s/Time_1/Time1/g;s/Time_2/Time2/g;' X > X.tmp && mv X{.tmp,}"
+    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/,omitempty//g;s/Url/URL/g;s/Id/ID/g;s/Sms/SMS/g;' X > X.tmp && mv X{.tmp,}"
+    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/Option_1/Option1/g;s/Option_2/Option2/g;s/Instructions_1/Instructions1/g;s/Instructions_2/Instructions2/g;s/Time_1/Time1/g;s/Time_2/Time2/g;' X > X.tmp && mv X{.tmp,}"
     cd ..
     # Typescript
     gulp build
@@ -110,11 +111,11 @@ fi
 ################################################################################
 if [[ $1 == "serve" ]]; then
   # setup mysql
-  if [[ $OSTYPE == "linux-gnu" ]]; then
-    service mysql start&
-  else
-    /usr/local/opt/mysql@5.6/bin/mysql.server start
-  fi
+  # if [[ $OSTYPE == "linux-gnu" ]]; then
+  #   service mysql start&
+  # else
+  #   /usr/local/opt/mysql@5.6/bin/mysql.server start
+  # fi
   # start goapp serve
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
@@ -147,11 +148,11 @@ if [[ $1 == "serve" ]]; then
   fi
   # stop mysql
 
-  if [[ $OSTYPE == "linux-gnu" ]]; then
-    service mysql stop&
-  else
-    /usr/local/opt/mysql@5.6/bin/mysql.server stop
-  fi
+  # if [[ $OSTYPE == "linux-gnu" ]]; then
+  #   service mysql stop&
+  # else
+  #   /usr/local/opt/mysql@5.6/bin/mysql.server stop
+  # fi
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
   timestamp

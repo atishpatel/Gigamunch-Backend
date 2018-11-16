@@ -291,7 +291,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/AdminAPIGetLogsByEmailResp"
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
           }
         },
@@ -302,6 +302,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsByEmailReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetLogsByExecution": {
+      "post": {
+        "summary": "GetLogsByExecution returns a list of logs by ExecutionID.",
+        "operationId": "GetLogsByExecution",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByExecutionReq"
             }
           }
         ],
@@ -1019,17 +1046,12 @@
         }
       }
     },
-    "AdminAPIGetLogsByEmailResp": {
+    "AdminAPIGetLogsByExecutionReq": {
       "type": "object",
       "properties": {
-        "error": {
-          "$ref": "#/definitions/CommonError"
-        },
-        "logs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CommonLog"
-          }
+        "execution_id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -1564,6 +1586,7 @@
     "CommonCode": {
       "type": "string",
       "enum": [
+        "NoError",
         "Unknown",
         "Success",
         "InvalidArgument",
@@ -1573,8 +1596,8 @@
         "SignOut",
         "Internal"
       ],
-      "default": "Unknown",
-      "title": "- Unknown: TODO:  figure out codes"
+      "default": "NoError",
+      "title": "- NoError: TODO:  figure out codes"
     },
     "CommonContent": {
       "type": "object",
@@ -1735,6 +1758,9 @@
           "type": "string"
         },
         "description_preview": {
+          "type": "string"
+        },
+        "container_size": {
           "type": "string"
         }
       },
@@ -1997,6 +2023,21 @@
           "type": "string"
         },
         "reheat_option_1_preferred": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_vegetarian": {
           "type": "boolean",
           "format": "boolean"
         }

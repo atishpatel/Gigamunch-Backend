@@ -40,6 +40,7 @@
           flex:1;
         }
 
+
         /* The container */
         .container {
             display: block;
@@ -259,7 +260,7 @@
       </div>
       <div class="form">
         <div editor="captain">
-          <button class="accordion" accordian-active>General</button>
+          <button class="accordion">General</button>
           <div class="panel">
             <app-input id="date"
                        type="date"
@@ -287,10 +288,10 @@
 
             <app-input label="Nationality"
                        value="{{execution.culture.nationality}}"></app-input>
-            <app-html-editor label="Description Preview (HTML)"
-                             value="{{execution.culture.description_preview}}"></app-html-editor>
             <app-html-editor label="Description (HTML)"
                              value="{{execution.culture.description}}"></app-html-editor>
+            <app-html-editor label="Description Preview (HTML)"
+                             value="{{execution.culture.description_preview}}"></app-html-editor>
 
           </div>
         </div>
@@ -307,12 +308,12 @@
                          value="{{execution.culture_cook.last_name}}"></app-input>
 
             </div>
-            <app-html-editor label="Story Preview (HTML)"
-                             value="{{execution.culture_cook.story_preview}}"></app-html-editor>
 
             <app-html-editor id="storyInput"
                              label="Story (HTML)"
                              value="{{execution.culture_cook.story}}"></app-html-editor>
+            <app-html-editor label="Story Preview (HTML)"
+                             value="{{execution.culture_cook.story_preview}}"></app-html-editor>
 
             <h2>Qestions & Answers</h2>
             <template id="infoBoxesRepeat"
@@ -519,22 +520,21 @@
 
               </div>
               <app-html-editor editor="content_writer"
-                               label="Dish Description Preview (HTML)"
-                               value="{{dish.description_preview}}"></app-html-editor>
-              <app-html-editor editor="content_writer"
                                label="Dish Description (HTML)"
                                value="{{dish.description}}"></app-html-editor>
+              <app-html-editor editor="content_writer"
+                               label="Dish Description Preview (HTML)"
+                               value="{{dish.description_preview}}"></app-html-editor>
 
               <app-html-editor editor="head_chef"
                                label="Dish Ingredients (HTML)"
                                value="{{dish.ingredients}}"></app-html-editor>
 
-
               <app-checkbox editor="head_chef"
-                            checked="{{dish.is_for_vegetarian}}">Is for Vegetarians</app-checkbox>
+                            checked="{{dish.is_for_non_vegetarian}}">Is for 🍖 Meat (Non-Vegatarian) Subscribers</app-checkbox>
               <br>
               <app-checkbox editor="head_chef"
-                            checked="{{dish.is_for_non_vegetarian}}">Is for Non-Vegatarian</app-checkbox>
+                            checked="{{dish.is_for_vegetarian}}">Is for 🌱 Vegetarian Subscribers</app-checkbox>
               <br>
               <app-checkbox editor="culture_guide"
                             checked="{{dish.is_on_main_plate}}">Is On Main Plate</app-checkbox>
@@ -543,6 +543,20 @@
                          label="Dish Image URL"
                          value="{{dish.image_url}}"></app-input>
 
+              <app-select editor="head_chef"
+                          label="Container Size"
+                          value="{{dish.container_size}}"
+                          noink>
+                <paper-listbox slot="dropdown-content"
+                               class="dropdown-content"
+                               style="min-width: 200px">
+                  <paper-item label="8oz">8oz</paper-item>
+                  <paper-item label="16oz">16oz</paper-item>
+                  <paper-item label="32oz">32oz</paper-item>
+                  <paper-item label="foil">foil</paper-item>
+                  <paper-item label="other">other</paper-item>
+                </paper-listbox>
+              </app-select>
               <br>
               <hr>
               <br>
@@ -640,15 +654,20 @@
           </div>
         </div>
 
-        <div editor="culture_guide">
+        <div editor="culture_guide head_chef">
           <button class="accordion">Stickers</button>
           <div id="stickersPanel"
                class="panel">
+            <button on-tap="generateStickers">Generate From Dishes</button>
             <template is="dom-repeat"
                       items="{{execution.stickers}}"
                       as="sticker">
-
-              <div class="row">
+              <div editor="culture_guide">
+                <p>Dish Name: <span>[[sticker.name]]</span></p>
+                <p>Dish Ingredients: <span>[[sticker.ingredients]]</span></p>
+              </div>
+              <div class="row"
+                   editor="head_chef">
                 <app-input label="Name"
                            value="{{sticker.name}}">
                 </app-input>
@@ -657,12 +676,16 @@
                            value="{{sticker.ingredients}}">
                 </app-input>
               </div>
-              <div class="row">
+              <div class="row"
+                   editor="head_chef">
+                <app-input type="number"
+                           label="Number"
+                           value="{{sticker.number}}"></app-input>
                 <app-input label="Extra Instructions"
                            value="{{sticker.extra_instructions}}">
                 </app-input>
 
-                <app-select label="Font Style"
+                <app-select label="Eating Temperature"
                             value="{{sticker.eating_temperature}}"
                             noink>
                   <paper-listbox slot="dropdown-content"
@@ -674,7 +697,21 @@
                   </paper-listbox>
                 </app-select>
               </div>
-              <div class="row">
+              <div class="row"
+                   editor="culture_guide">
+                <app-input label="Color #(HEX)"
+                           value="{{sticker.color}}"
+                           placeholder="#FF5722 (placeholder)"></app-input>
+
+              </div>
+              <div editor="head_chef">
+                <app-checkbox checked="{{sticker.is_for_non_vegetarian}}">Is for 🍖 Meat (Non-Vegatarian) Subscribers</app-checkbox>
+                <br>
+                <app-checkbox checked="{{sticker.is_for_vegetarian}}">Is for 🌱 Vegetarian Subscribers</app-checkbox>
+                <br>
+              </div>
+              <div class="row"
+                   editor="head_chef">
                 <app-input label="Reheat Option 1"
                            value="{{sticker.reheat_option_1}}">
                 </app-input>
@@ -683,10 +720,12 @@
                            value="{{sticker.reheat_time_1}}">
                 </app-input>
               </div>
-              <div class="row">
+              <div class="row"
+                   editor="head_chef">
                 <app-checkbox checked="{{execution.reheat_option_1_preferred}}">Reheat Option 1 Preferred</app-checkbox>
               </div>
-              <div class="row">
+              <div class="row"
+                   editor="head_chef">
                 <app-input label="Reheat Option 2"
                            value="{{sticker.reheat_option_2}}">
                 </app-input>
@@ -712,6 +751,31 @@
       </div>
 
       <button id="updateBtn" disabled="[[loading]]" on-tap="updateExecution" class="button">Update</button>
+      <br>
+      <br>
+      <br>
+      <table class="mdl-data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Update User</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template is="dom-repeat"
+                    items="[[logs]]"
+                    as="log">
+            <tr>
+              <td>[[log.timestampString]]</td>
+              <td>[[log.action_user_email]]</td>
+              <td>
+                <div inner-h-t-m-l="[[log.basic_payload.descriptionHTML]]"></div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
     </div>
 
   </template>
@@ -740,6 +804,9 @@
           },
           mode: {
             type: String,
+          },
+          logs: {
+            type: Array,
           }
         }
       }
@@ -782,8 +849,8 @@
         this.getExecution(id);
         const params = GetURLParmas();
         this.setMode(params.mode);
-
         this.setTimer(id);
+        this.getLogs(id);
       }
 
       setTimer(id) {
@@ -838,6 +905,24 @@
         }
       }
 
+      getLogs(id) {
+        if (!id || id === "") {
+          return;
+        }
+        this.service.GetLogsByExecution(Number(id)).then((resp) => {
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            return;
+          }
+          for (var i = 0; i < resp.logs.length; i++) {
+            resp.logs[i].timestampString = this._getTimestampString(resp.logs[i].timestamp);
+            resp.logs[i].basic_payload.descriptionHTML = resp.logs[i].basic_payload.description.replace(/;;;/g, '<br>');
+          }
+          this.logs = resp.logs;
+        });
+      }
+
+
       getExecution(id) {
         if (!id || id === "") {
           this.setExecution({});
@@ -858,15 +943,17 @@
       updateExecution() {
         // set date
         const dateValue = this.$.date.value;
-        if (!dateValue) {
-          alert("Date is required.");
-          return;
+        if (dateValue) {
+          const date = new Date(dateValue);
+          this.execution.date = date.toISOString().substr(0, 10);
         }
-        const date = new Date(dateValue);
-        this.execution.date = date.toISOString().substr(0, 10);
         // set dishes
         for (let i = 0; i < this.execution.dishes.length; i++) {
           this.execution.dishes[i].number = Number(this.execution.dishes[i].number);
+        }
+        // set stickers
+        for (let i = 0; i < this.execution.stickers.length; i++) {
+          this.execution.stickers[i].number = Number(this.execution.stickers[i].number);
         }
         // update
         this.loading = true;
@@ -874,6 +961,11 @@
           this.loading = false;
           let err = resp.error;
           if (err && err.code !== 0) {
+            console.error('failed to update culture execution: ', err)
+            FireToast(this, {
+              message: 'FAILED to update: ' + err,
+              error: true,
+            });
             return;
           }
 
@@ -901,6 +993,9 @@
           if (!execution.culture_guide) {
             execution.culture_guide = {};
           }
+          if (!execution.email) {
+            execution.email = {};
+          }
           if (!execution.culture_guide.info_boxes) {
             execution.culture_guide.info_boxes = []
           }
@@ -910,6 +1005,7 @@
           if (!execution.stickers) {
             execution.stickers = [];
           }
+          execution.publish = false;
           this.execution = execution;
           this.$.date.value = execution.date;
           this.setMode(this.mode);
@@ -1009,6 +1105,44 @@
         }
         this.splice('execution.stickers', this.stickerRemoveIndex - 1, 1);
         this.stickerRemoveIndex = this.execution.stickers.length;
+      }
+
+      generateStickers() {
+        if (this.execution.stickers.length !== 0) {
+          alert('Cannot generate stickers because stickers already exist');
+          return;
+        }
+        let stickers = [];
+        for (let i = 0; i < this.execution.dishes.length; i++) {
+          const sticker = {
+            number: this.execution.dishes[i].number,
+            name: this.execution.dishes[i].name,
+            color: this.execution.dishes[i].color,
+            ingredients: this.execution.dishes[i].ingredients,
+            is_for_non_vegetarian: this.execution.dishes[i].is_for_non_vegetarian,
+            is_for_vegetarian: this.execution.dishes[i].is_for_vegetarian,
+          }
+          stickers.push(sticker);
+        }
+        this.push('execution.stickers', ...stickers);
+        setTimeout(() => {
+          this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
+          this.setMode(this.mode);
+        }, 500);
+        setTimeout(() => {
+          this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
+        }, 1000);
+      }
+
+      _getTimestampString(dateString) {
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wedensday", "Thursday", "Friday", "Saturday"]
+        const d = new Date(dateString);
+        let day = d.getDay();
+        let month = d.getMonth();
+        let date = d.getDate();
+        let year = d.getFullYear();
+        return `${dayNames[day]}, ${monthNames[month]} ${date}, ${year} @ ${d.toLocaleTimeString()}`;
       }
     }
     window.customElements.define(ExecutionPage.is, ExecutionPage);

@@ -33,7 +33,14 @@ Setting up for web development:
   - `go get ./subserver`
   - `app build proto`
   - add private folder
-  - setup mysql servers by running ./misc/setup.sql
+  - setup mysql servers 
+    - run `sudo mysql_secure_installation`
+    - login to mysql with `sudo mysql -uroot`
+    - run following in mysql
+      - `uninstall plugin validate_password;`
+      - `CREATE USER 'server'@'localhost' IDENTIFIED BY 'gigamunch';`
+      - `GRANT ALL PRIVILEGES ON *.* To 'server'@'localhost';`
+      - copy, paste, and run ./misc/setup.sql
 
 To run local development:
   - `app serve (admin | server | sub)`

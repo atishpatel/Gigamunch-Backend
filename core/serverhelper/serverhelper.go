@@ -37,6 +37,8 @@ func FailedToDecode(err error) *pbcommon.ErrorOnlyResp {
 func DecodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
 	if r.Method == "GET" {
 		decoder := schema.NewDecoder()
+		decoder.IgnoreUnknownKeys(true)
+		decoder.SetAliasTag("json")
 		err := decoder.Decode(v, r.URL.Query())
 		logging.Infof(ctx, "Query: %+v", r.URL.Query())
 		if err != nil {

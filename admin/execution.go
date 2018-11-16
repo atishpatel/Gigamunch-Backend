@@ -37,9 +37,12 @@ func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 		return errors.GetErrorWithCode(err).Annotate("failed to get all executions")
 	}
 	log.Infof(ctx, "return %d executions", len(executions))
-
+	exes, err := serverhelper.PBExecutions(executions)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to PBExecutions")
+	}
 	resp := &pb.GetExecutionsResp{
-		Executions: serverhelper.PBExecutions(executions),
+		Executions: exes,
 		Progress:   getProgress(executions),
 	}
 	return resp
@@ -65,8 +68,12 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution")
 	}
 
+	exe, err := serverhelper.PBExecution(execution)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to PBExecution")
+	}
 	resp := &pb.GetExecutionResp{
-		Execution: serverhelper.PBExecution(execution),
+		Execution: exe,
 	}
 	return resp
 }
@@ -89,7 +96,10 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
-	exeNew := serverhelper.ExecutionFromPb(req.Execution)
+	exeNew, err := serverhelper.ExecutionFromPb(req.Execution)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to ExecutionFromPb")
+	}
 	var exe *execution.Execution
 	if exeNew.ID == 0 {
 		// Create
@@ -100,15 +110,18 @@ func (s *server) UpdateExecution(ctx context.Context, w http.ResponseWriter, r *
 		if err != nil {
 			return errors.Annotate(err, "failed to exection.Get")
 		}
-		exe = getExecutionByMode(req.Mode, exeOld, exeNew)
+		exe = getExecutionByMode(ctx, req.Mode, exeOld, exeNew)
 	}
 	execution, err := exeC.Update(exe)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to update execution")
 	}
-
+	exeResp, err := serverhelper.PBExecution(execution)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to PBExecution")
+	}
 	resp := &pb.UpdateExecutionResp{
-		Execution: serverhelper.PBExecution(execution),
+		Execution: exeResp,
 	}
 	return resp
 }
@@ -171,6 +184,14 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 
 		hc.checkEmpty(exe.CultureGuide.DinnerInstructions)
 		hc.checkEmpty(exe.CultureGuide.VegetarianDinnerInstructions)
+		for _, sticker := range exe.Stickers {
+			if sticker.EatingTemperature == "" || sticker.EatingTemperature == "hot" {
+				hc.checkEmpty(sticker)
+			}
+		}
+		if len(exe.Stickers) < 4 {
+			hc.TotalExepectedCount += int8(4 - len(exe.Stickers))
+		}
 
 		// Content Writer
 		cw := progressCounter{}
@@ -186,14 +207,7 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 		cg.checkEmpty(exe.Content)
 		cg.checkEmpty(exe.Email)
 		cg.checkEmpty(exe.Notifications)
-		for _, sticker := range exe.Stickers {
-			if sticker.EatingTemperature == "" || sticker.EatingTemperature == "hot" {
-				cg.checkEmpty(sticker)
-			}
-		}
-		if len(exe.Stickers) < 4 {
-			cg.TotalExepectedCount += int8(4 - len(exe.Stickers))
-		}
+
 		hc.checkEmpty(exe.CultureGuide.MainColor)
 		hc.checkEmpty(exe.CultureGuide.FontName)
 
@@ -249,7 +263,7 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 	return exeProgresses
 }
 
-func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execution.Execution {
+func getExecutionByMode(ctx context.Context, mode string, exeOld, exeNew *execution.Execution) *execution.Execution {
 	exe := exeOld
 	switch mode {
 	case "captain":
@@ -257,6 +271,7 @@ func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execu
 	case "head_chef":
 		exe.CultureGuide.DinnerInstructions = exeNew.CultureGuide.DinnerInstructions
 		exe.CultureGuide.VegetarianDinnerInstructions = exeNew.CultureGuide.VegetarianDinnerInstructions
+		exe.Stickers = exeNew.Stickers
 	case "content_writer":
 		exe.Culture = exeNew.Culture
 		exe.CultureCook = exeNew.CultureCook
@@ -265,7 +280,6 @@ func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execu
 		exe.Content = exeNew.Content
 		exe.Email = exeNew.Email
 		exe.Notifications = exeNew.Notifications
-		exe.Stickers = exeNew.Stickers
 		exe.CultureGuide.DinnerInstructions = exeNew.CultureGuide.DinnerInstructions
 		exe.CultureGuide.VegetarianDinnerInstructions = exeNew.CultureGuide.VegetarianDinnerInstructions
 		exe.CultureGuide.MainColor = exeNew.CultureGuide.MainColor
@@ -274,14 +288,15 @@ func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execu
 		exe.CultureGuide.FontStyle = exeNew.CultureGuide.FontStyle
 		exe.CultureGuide.FontCaps = exeNew.CultureGuide.FontCaps
 	}
-
-	if len(exe.Dishes) < len(exeNew.Dishes) {
+	// Dishes
+	logging.Infof(ctx, "oldExe dishes len(%d) newExe dishes len(%d", len(exe.Dishes), len(exeNew.Dishes))
+	if len(exe.Dishes) > len(exeNew.Dishes) {
 		exe.Dishes = exe.Dishes[:len(exeNew.Dishes)-1]
-	} else if len(exe.Dishes) > len(exeNew.Dishes) {
-		d := make([]execution.Dish, len(exe.Dishes)-len(exeNew.Dishes))
+	} else if len(exe.Dishes) < len(exeNew.Dishes) {
+		d := make([]execution.Dish, len(exeNew.Dishes)-len(exe.Dishes))
 		exe.Dishes = append(exe.Dishes, d...)
 	}
-
+	logging.Infof(ctx, "oldExe dishes len(%d) newExe dishes len(%d", len(exe.Dishes), len(exeNew.Dishes))
 	for i := range exeNew.Dishes {
 		switch mode {
 		case "head_chef":
@@ -290,6 +305,7 @@ func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execu
 			exe.Dishes[i].Ingredients = exeNew.Dishes[i].Ingredients
 			exe.Dishes[i].IsForNonVegetarian = exeNew.Dishes[i].IsForNonVegetarian
 			exe.Dishes[i].IsForVegetarian = exeNew.Dishes[i].IsForVegetarian
+			exe.Dishes[i].ContainerSize = exeNew.Dishes[i].ContainerSize
 		case "content_writer":
 			exe.Dishes[i].Description = exeNew.Dishes[i].Description
 			exe.Dishes[i].DescriptionPreview = exeNew.Dishes[i].DescriptionPreview
@@ -299,5 +315,34 @@ func getExecutionByMode(mode string, exeOld, exeNew *execution.Execution) *execu
 			exe.Dishes[i].ImageURL = exeNew.Dishes[i].ImageURL
 		}
 	}
+	// Stickers
+	if len(exe.Stickers) > len(exeNew.Stickers) {
+		exe.Stickers = exe.Stickers[:len(exeNew.Stickers)-1]
+	} else if len(exe.Stickers) < len(exeNew.Stickers) {
+		d := make([]execution.Sticker, len(exeNew.Stickers)-len(exe.Stickers))
+		exe.Stickers = append(exe.Stickers, d...)
+	}
+	for i := range exeNew.Stickers {
+		switch mode {
+		case "head_chef":
+			exe.Stickers[i].Name = exeNew.Stickers[i].Name
+			exe.Stickers[i].Ingredients = exeNew.Stickers[i].Ingredients
+			exe.Stickers[i].ExtraInstructions = exeNew.Stickers[i].ExtraInstructions
+			exe.Stickers[i].ReheatOption1 = exeNew.Stickers[i].ReheatOption1
+			exe.Stickers[i].ReheatOption2 = exeNew.Stickers[i].ReheatOption2
+			exe.Stickers[i].ReheatOption1Preferred = exeNew.Stickers[i].ReheatOption1Preferred
+			exe.Stickers[i].ReheatTime1 = exeNew.Stickers[i].ReheatTime1
+			exe.Stickers[i].ReheatTime2 = exeNew.Stickers[i].ReheatTime2
+			exe.Stickers[i].ReheatInstructions1 = exeNew.Stickers[i].ReheatInstructions1
+			exe.Stickers[i].ReheatInstructions2 = exeNew.Stickers[i].ReheatInstructions2
+			exe.Stickers[i].EatingTemperature = exeNew.Stickers[i].EatingTemperature
+			exe.Stickers[i].Number = exeNew.Stickers[i].Number
+			exe.Stickers[i].IsForNonVegetarian = exeNew.Stickers[i].IsForNonVegetarian
+			exe.Stickers[i].IsForVegetarian = exeNew.Stickers[i].IsForVegetarian
+		case "culture_guide":
+			exe.Stickers[i].Color = exeNew.Stickers[i].Color
+		}
+	}
+
 	return exe
 }
