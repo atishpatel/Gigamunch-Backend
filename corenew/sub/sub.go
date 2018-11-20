@@ -112,14 +112,14 @@ func (c *Client) GetSubscriber(email string) (*SubscriptionSignUp, error) {
 	if email == "" {
 		return nil, errInvalidParameter.Wrap("emails cannot be empty.")
 	}
-	subs, err := c.GetSubscribers([]string{email})
+	sub, err := get(c.ctx, email)
 	if err == datastore.ErrNoSuchEntity {
 		return nil, errDatastoreNotFound
 	}
-	if err != nil || len(subs) != 1 {
-		return nil, errors.Wrap("failed to c.GetSubscribers", err)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to get")
 	}
-	return subs[0], nil
+	return sub, nil
 }
 
 // GetSubscribers returns a list of SubscriptionSignUp.

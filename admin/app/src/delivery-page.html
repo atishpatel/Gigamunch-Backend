@@ -418,7 +418,7 @@
       // optimizeDriverRoute optimizes the route for a driver.
       optimizeDriverRoute() {
         const name = this.driverName;
-        thisEl = this;
+        const thisEl = this;
 
         function errorCallback(e, e2) {
           console.error('tsp solver error: ', e, e2);

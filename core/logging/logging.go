@@ -373,48 +373,9 @@ func (c *Client) SubCardUpdated(userID string, userEmail, oldPaymentMethodToken,
 	c.Log(e)
 }
 
-// SubUpdatedPayload is the payload related to SubUpdated.
-type SubUpdatedPayload struct {
-	OldEmail          string `json:"old_email,omitempty" datastore:",omitempty,noindex"`
-	Email             string `json:"email,omitempty" datastore:",omitempty,noindex"`
-	OldFirstName      string `json:"old_first_name,omitempty" datastore:",omitempty,noindex"`
-	FirstName         string `json:"first_name,omitempty" datastore:",omitempty,noindex"`
-	OldLastName       string `json:"old_last_name,omitempty" datastore:",omitempty,noindex"`
-	LastName          string `json:"last_name,omitempty" datastore:",omitempty,noindex"`
-	OldAddress        string `json:"old_address,omitempty" datastore:",omitempty,noindex"`
-	Address           string `json:"address,omitempty" datastore:",omitempty,noindex"`
-	OldRawPhoneNumber string `json:"old_raw_phone_number,omitempty" datastore:",omitempty,noindex"`
-	RawPhoneNumber    string `json:"raw_phone_number,omitempty" datastore:",omitempty,noindex"`
-	OldPhoneNumber    string `json:"old_phone_number,omitempty" datastore:",omitempty,noindex"`
-	PhoneNumber       string `json:"phone_number,omitempty" datastore:",omitempty,noindex"`
-	OldDeliveryNotes  string `json:"old_delivery_tip,omitempty" datastore:",omitempty,noindex"`
-	DeliveryNotes     string `json:"delivery_tip,omitempty" datastore:",omitempty,noindex"`
-}
-
 // SubUpdated is when a subscriber account is updated.
-func (c *Client) SubUpdated(userID string, userEmail string, payload *SubUpdatedPayload) {
-	desc := "Changed the following: "
-	if payload.OldEmail != payload.Email {
-		desc += "Email(" + payload.OldEmail + " -> " + payload.Email + "); "
-	}
-	if payload.OldFirstName != payload.FirstName {
-		desc += "FirstName(" + payload.OldFirstName + " -> " + payload.FirstName + "); "
-	}
-	if payload.OldLastName != payload.LastName {
-		desc += "LastName(" + payload.OldLastName + " -> " + payload.LastName + "); "
-	}
-	if payload.OldAddress != payload.Address {
-		desc += "Address(" + payload.OldAddress + " -> " + payload.Address + "); "
-	}
-	if payload.OldRawPhoneNumber != payload.RawPhoneNumber {
-		desc += "RawPhoneNumber(" + payload.OldRawPhoneNumber + " -> " + payload.RawPhoneNumber + "); "
-	}
-	if payload.OldPhoneNumber != payload.PhoneNumber {
-		desc += "PhoneNumber(" + payload.OldPhoneNumber + " -> " + payload.PhoneNumber + "); "
-	}
-	if payload.OldDeliveryNotes != payload.DeliveryNotes {
-		desc += "DeliveryNotes(" + payload.OldDeliveryNotes + " -> " + payload.DeliveryNotes + "); "
-	}
+func (c *Client) SubUpdated(userID string, userEmail string, oldSub, newSub interface{}) {
+	desc := getDiff(oldSub, newSub)
 	e := &Entry{
 		Type:         Subscriber,
 		Action:       Update,
@@ -425,7 +386,6 @@ func (c *Client) SubUpdated(userID string, userEmail string, payload *SubUpdated
 			Title:       "Updated Subscriber Info",
 			Description: desc,
 		},
-		SubUpdatedPayload: *payload,
 	}
 	c.Log(e)
 }
@@ -604,38 +564,33 @@ func (c *Client) SubUnskip(date string, userID string, userEmail string) {
 	c.Log(e)
 }
 
-// ActivitySetupPayload is a System payload.
-type ActivitySetupPayload struct {
-	BasicPayload `json:"basic_payload,omitempty" datastore:",omitempty,noindex"`
-	Date         string `json:"date,omitempty" datastore:",omitempty,noindex"`
-	NumSetup     int    `json:"num_setup,omitempty" datastore:",omitempty,noindex"`
-}
+// // ActivitySetupPayload is a System payload.
+// type ActivitySetupPayload struct {
+// 	BasicPayload `json:"basic_payload,omitempty" datastore:",omitempty,noindex"`
+// 	Date         string `json:"date,omitempty" datastore:",omitempty,noindex"`
+// 	NumSetup     int    `json:"num_setup,omitempty" datastore:",omitempty,noindex"`
+// }
 
-// ActivitySetup is a log of when the cron job for activity setup runs or admin runs activity setup.
-func (c *Client) ActivitySetup(date string, numSetup int) {
-	e := &Entry{
-		Type:     System,
-		Severity: SeverityInfo,
-		BasicPayload: BasicPayload{
-			Title:       date,
-			Description: fmt.Sprintf("Activity setup for %s", date),
-		},
-		ActivitySetupPayload: ActivitySetupPayload{
-			Date:     date,
-			NumSetup: numSetup,
-		},
-	}
-	c.Log(e)
-}
+// // ActivitySetup is a log of when the cron job for activity setup runs or admin runs activity setup.
+// func (c *Client) ActivitySetup(date string, numSetup int) {
+// 	e := &Entry{
+// 		Type:     System,
+// 		Severity: SeverityInfo,
+// 		BasicPayload: BasicPayload{
+// 			Title:       date,
+// 			Description: fmt.Sprintf("Activity setup for %s", date),
+// 		},
+// 		ActivitySetupPayload: ActivitySetupPayload{
+// 			Date:     date,
+// 			NumSetup: numSetup,
+// 		},
+// 	}
+// 	c.Log(e)
+// }
 
 // ExecutionUpdate is a log of when an execution is udated.
 func (c *Client) ExecutionUpdate(executionID int64, oldExe interface{}, newExe interface{}) {
-	diffs := deep.Equal(oldExe, newExe)
-	desc := ""
-	replacer := strings.NewReplacer("!=", "->", ".slice", "", " slice", "")
-	for _, diff := range diffs {
-		desc += replacer.Replace(diff) + ";;;\n"
-	}
+	desc := getDiff(oldExe, newExe)
 	e := &Entry{
 		Type:        Execution,
 		Action:      ExecutionUpdate,
@@ -692,28 +647,28 @@ type BasicPayload struct {
 
 // Entry is a log entry.
 type Entry struct {
-	ID                     int64                  `json:"id,omitempty" datastore:",noindex"`
-	Type                   Type                   `json:"type,omitempty" datastore:",index"`
-	ExecutionID            int64                  `json:"execution_id" datastore:",index"`
-	Action                 Action                 `json:"action,omitempty" datastore:",index"`
-	ActionUserID           int64                  `json:"-" datastore:",omitempty,noindex"` // depecreated
-	ActionUserIDString     string                 `json:"action_user_id,omitempty" datastore:",index"`
-	ActionUserEmail        string                 `json:"action_user_email,omitempty" datastore:",index"`
-	UserID                 int64                  `json:"-" datastore:",omitempty,noindex"` // depecreated
-	UserIDString           string                 `json:"user_id,omitempty" datastore:",index"`
-	UserEmail              string                 `json:"user_email,omitempty" datastore:",index"`
-	Severity               sdlogging.Severity     `json:"serverity,omitempty" datastore:",noindex"`
-	Path                   string                 `json:"path,omitempty" datastore:",noindex"`
-	LogName                string                 `json:"log_name,omitempty" datastore:",noindex"`
-	Timestamp              time.Time              `json:"timestamp,omitempty" datastore:",index"`
-	BasicPayload           BasicPayload           `json:"basic_payload,omitempty" datastore:",noindex"`
-	ErrorPayload           ErrorPayload           `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
-	ActivitySetupPayload   ActivitySetupPayload   `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
+	ID                 int64              `json:"id,omitempty" datastore:",noindex"`
+	Type               Type               `json:"type,omitempty" datastore:",index"`
+	ExecutionID        int64              `json:"execution_id" datastore:",index"`
+	Action             Action             `json:"action,omitempty" datastore:",index"`
+	ActionUserID       int64              `json:"-" datastore:",omitempty,noindex"` // depecreated
+	ActionUserIDString string             `json:"action_user_id,omitempty" datastore:",index"`
+	ActionUserEmail    string             `json:"action_user_email,omitempty" datastore:",index"`
+	UserID             int64              `json:"-" datastore:",omitempty,noindex"` // depecreated
+	UserIDString       string             `json:"user_id,omitempty" datastore:",index"`
+	UserEmail          string             `json:"user_email,omitempty" datastore:",index"`
+	Severity           sdlogging.Severity `json:"serverity,omitempty" datastore:",noindex"`
+	Path               string             `json:"path,omitempty" datastore:",noindex"`
+	LogName            string             `json:"log_name,omitempty" datastore:",noindex"`
+	Timestamp          time.Time          `json:"timestamp,omitempty" datastore:",index"`
+	BasicPayload       BasicPayload       `json:"basic_payload,omitempty" datastore:",noindex"`
+	ErrorPayload       ErrorPayload       `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
+	// ActivitySetupPayload   ActivitySetupPayload   `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
 	SkipPayload            SkipPayload            `json:"skip_payload,omitempty" datastore:",omitempty,noindex"`
 	CreditCardPayload      CreditCardPayload      `json:"credit_card_payload,omitempty" datastore:",omitempty,noindex"`
 	SalePayload            SalePayload            `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
 	ServingsChangedPayload ServingsChangedPayload `json:"servings_changed_payload,omitempty" datastore:",omitempty,noindex"`
-	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"`
+	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"` // depecreated
 	MessagePayload         MessagePayload         `json:"message_payload,omitempty" datastore:",omitempty,noindex"`
 	RatingPayload          RatingPayload          `json:"rating_payload,omitempty" datastore:",omitempty,noindex"`
 }
@@ -749,4 +704,33 @@ func (c *Client) getStringFromCtx(key interface{}) string {
 		return ""
 	}
 	return v.(string)
+}
+
+func getDiff(od interface{}, nw interface{}) string {
+	diffs := deep.Equal(od, nw)
+	desc := ""
+	replacer := strings.NewReplacer("!=", "->", ".slice", "", " slice", "")
+	for _, diff := range diffs {
+		desc += replacer.Replace(diff) + ";;;\n"
+	}
+	return desc
+}
+
+// SubUpdatedPayload is the payload related to SubUpdated.
+// DEPECRATED
+type SubUpdatedPayload struct {
+	OldEmail          string `json:"old_email,omitempty" datastore:",omitempty,noindex"`
+	Email             string `json:"email,omitempty" datastore:",omitempty,noindex"`
+	OldFirstName      string `json:"old_first_name,omitempty" datastore:",omitempty,noindex"`
+	FirstName         string `json:"first_name,omitempty" datastore:",omitempty,noindex"`
+	OldLastName       string `json:"old_last_name,omitempty" datastore:",omitempty,noindex"`
+	LastName          string `json:"last_name,omitempty" datastore:",omitempty,noindex"`
+	OldAddress        string `json:"old_address,omitempty" datastore:",omitempty,noindex"`
+	Address           string `json:"address,omitempty" datastore:",omitempty,noindex"`
+	OldRawPhoneNumber string `json:"old_raw_phone_number,omitempty" datastore:",omitempty,noindex"`
+	RawPhoneNumber    string `json:"raw_phone_number,omitempty" datastore:",omitempty,noindex"`
+	OldPhoneNumber    string `json:"old_phone_number,omitempty" datastore:",omitempty,noindex"`
+	PhoneNumber       string `json:"phone_number,omitempty" datastore:",omitempty,noindex"`
+	OldDeliveryNotes  string `json:"old_delivery_tip,omitempty" datastore:",omitempty,noindex"`
+	DeliveryNotes     string `json:"delivery_tip,omitempty" datastore:",omitempty,noindex"`
 }

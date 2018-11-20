@@ -1,32 +1,30 @@
 service: cookapi
-runtime: go
-api_version: go1
+runtime: go111
 
 handlers:
   - url: /process-order
-    script: _go_app
+    script: auto
     login: admin
 
   - url: /send-bag-reminder
-    script: _go_app
+    script: auto
     login: admin
   
   - url: /task/*
-    script: _go_app
+    script: auto
     login: admin
 
   - url: /.*
-    script: _go_app
+    script: auto
     secure: always
 
   - url: /_ah/spi/.*
-    script: _go_app
+    script: auto
     secure: always
 
 beta_settings:
     cloud_sql_instances: gigasqldb
 
 env_variables:
-    MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch?collation=utf8mb4_general_ci
-    DOMAIN_URL: https://_DOMAIN_.com
+    MYSQL_CONNECTION: server:gigamunch@unix(/cloudsql/PROJECTID:us-central1:gigasqldb)/gigamunch
     PROJECT_ID: PROJECTID
