@@ -8,9 +8,9 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
-	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -213,33 +213,38 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 	}
 	// end decode request
 	req.NewEmail = strings.ToLower(req.NewEmail)
-	err = datastore.RunInTransaction(ctx, func(tctx context.Context) error {
-		subnewC, err := sub.NewClient(tctx, log, s.db, s.sqlDB, s.serverInfo)
-		if err != nil {
-			return errors.Annotate(err, "failed to sub.NewClient")
-		}
-		snew, err := subnewC.GetByEmail(req.OldEmail)
-		if err != nil {
-			return errors.Annotate(err, "failed to sub.GetByEmail")
-		}
-		for i := range snew.EmailPrefs {
-			if snew.EmailPrefs[i].Email == req.OldEmail {
-				snew.EmailPrefs[i].Email = req.NewEmail
-			}
-		}
-		err = subnewC.Update(snew)
-		if err != nil {
-			return errors.Annotate(err, "failed to sub.Update")
-		}
-		subC := subold.New(tctx)
-		err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
-		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
-		}
-		return nil
-	}, &datastore.TransactionOptions{XG: true})
+	subnewC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
-		return errors.Annotate(err, "failed to run in transaction")
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	snew, err := subnewC.GetByEmail(req.OldEmail)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.GetByEmail")
+	}
+	for i := range snew.EmailPrefs {
+		if snew.EmailPrefs[i].Email == req.OldEmail {
+			snew.EmailPrefs[i].Email = req.NewEmail
+		}
+	}
+	err = subnewC.Update(snew)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Update")
+	}
+	subC := subold.New(ctx)
+	err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
+	}
+	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to mail.NewClient")
+	}
+	err = mailC.UpdateUser(&mail.UserFields{
+		Email:    req.OldEmail,
+		NewEmail: req.NewEmail,
+	})
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to mail.Update")
 	}
 	return nil
 }
