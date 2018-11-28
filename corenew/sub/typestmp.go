@@ -285,7 +285,7 @@ func (e *SubscriptionSignUp) GetSubscriber() *Subscriber {
 	return snew
 }
 
-func (c *Client) BatchSubscriptionSignUpToSubscriber(start, limit int64) error {
+func (c *Client) BatchSubscriptionSignUpToSubscriber(start, limit int32) error {
 	getHasSubscribedPointer := func(ctx context.Context, date time.Time) ([]*SubscriptionSignUp, error) {
 		query := datastore.NewQuery(kindSubscriptionSignUp).
 			Filter("SubscriptionDate>", 0).
@@ -299,51 +299,108 @@ func (c *Client) BatchSubscriptionSignUpToSubscriber(start, limit int64) error {
 		return results, nil
 	}
 
+	getAll := func(ctx context.Context, id string) ([]*Subscriber, error) {
+		query := datastore.NewQuery(kindSubscriber).
+			Filter("EmailPrefs.FirstName=", id)
+
+		var results []*Subscriber
+		_, err := query.GetAll(ctx, &results)
+		if err != nil {
+			return nil, err
+		}
+		return results, nil
+	}
+
+	putMulti := func(ctx context.Context, subs []*Subscriber) error {
+		keys := make([]*datastore.Key, len(subs))
+		for i := range subs {
+			keys[i] = datastore.NewKey(ctx, kindSubscriber, subs[i].ID, 0, nil)
+		}
+		_, err := datastore.PutMulti(ctx, keys, subs)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	subsold, err := getHasSubscribedPointer(c.ctx, time.Now().Add(100*24*time.Hour))
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to getHasSubscribed")
 	}
-	if limit > int64(len(subsold)) {
-		limit = int64(len(subsold))
+
+	subnew, err := getAll(c.ctx, "")
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to getAll")
 	}
-	subsold = subsold[start:limit]
-	subsnew := make([]*Subscriber, len(subsold))
-	keys := make([]*datastore.Key, len(subsold))
-	for i := range subsold {
-		if subsold[i].ID == "" {
-			id := ksuid.New().String()
-			keys[i] = datastore.NewKey(c.ctx, kindSubscriber, id, 0, nil)
-		} else {
-			keys[i] = datastore.NewKey(c.ctx, kindSubscriber, subsold[i].ID, 0, nil)
+	emails := make([]string, len(subnew))
+	for i := range subnew {
+		name := ""
+		email := subnew[i].Email()
+		for _, s := range subsold {
+			if email == s.Email {
+				name = s.Name
+				break
+			}
 		}
-		subsnew[i] = subsold[i].GetSubscriber()
-	}
-	keys, err = datastore.PutMulti(c.ctx, keys, subsnew)
-	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers")
-	}
-	emails := make([]string, len(keys))
-	for i := range keys {
-		subsold[i].ID = keys[i].StringID()
-		subsnew[i].ID = keys[i].StringID()
-		emails[i] = subsold[i].Email
-	}
-	_, err = datastore.PutMulti(c.ctx, keys, subsnew)
-	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers with ID")
-	}
-	putMulti := func(ctx context.Context, subs []*SubscriptionSignUp) error {
-		keys := make([]*datastore.Key, len(subs))
-		for i := range subs {
-			keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
+		if name != "" {
+			nameSplit := strings.Split(name, " ")
+			var firstName, lastName string
+			if len(nameSplit) >= 1 {
+				firstName = nameSplit[0]
+			}
+			if len(nameSplit) >= 2 {
+				lastName = nameSplit[1]
+			}
+			subnew[i].EmailPrefs[0].FirstName = firstName
+			subnew[i].EmailPrefs[0].LastName = lastName
+			emails[i] = subnew[i].Email()
 		}
-		_, err := datastore.PutMulti(ctx, keys, subs)
-		return err
 	}
-	err = putMulti(c.ctx, subsold)
+	err = putMulti(c.ctx, subnew)
 	if err != nil {
-		return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers")
+		return errDatastore.WithError(err).Annotate("failed to putMulti")
 	}
+	// if limit > int64(len(subsold)) {
+	// 	limit = int64(len(subsold))
+	// }
+	// subsold = subsold[start:limit]
+	// subsnew := make([]*Subscriber, len(subsold))
+	// keys := make([]*datastore.Key, len(subsold))
+	// for i := range subsold {
+	// 	if subsold[i].ID == "" {
+	// 		id := ksuid.New().String()
+	// 		keys[i] = datastore.NewKey(c.ctx, kindSubscriber, id, 0, nil)
+	// 	} else {
+	// 		keys[i] = datastore.NewKey(c.ctx, kindSubscriber, subsold[i].ID, 0, nil)
+	// 	}
+	// 	subsnew[i] = subsold[i].GetSubscriber()
+	// }
+	// keys, err = datastore.PutMulti(c.ctx, keys, subsnew)
+	// if err != nil {
+	// 	return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers")
+	// }
+	// emails := make([]string, len(keys))
+	// for i := range keys {
+	// 	subsold[i].ID = keys[i].StringID()
+	// 	subsnew[i].ID = keys[i].StringID()
+	// 	emails[i] = subsold[i].Email
+	// }
+	// _, err = datastore.PutMulti(c.ctx, keys, subsnew)
+	// if err != nil {
+	// 	return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers with ID")
+	// }
+	// putMulti := func(ctx context.Context, subs []*SubscriptionSignUp) error {
+	// 	keys := make([]*datastore.Key, len(subs))
+	// 	for i := range subs {
+	// 		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
+	// 	}
+	// 	_, err := datastore.PutMulti(ctx, keys, subs)
+	// 	return err
+	// }
+	// err = putMulti(c.ctx, subsold)
+	// if err != nil {
+	// 	return errDatastore.WithError(err).Annotate("failed to putMulti Subscribers")
+	// }
 	if c.log != nil {
 		c.log.Infof(c.ctx, "emails: %+v", emails)
 	}
@@ -374,6 +431,9 @@ func getMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) 
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err
+	}
+	if len(results) < 1 {
+		return nil, datastore.ErrNoSuchEntity
 	}
 
 	dst := make([]*SubscriptionSignUp, len(ids))

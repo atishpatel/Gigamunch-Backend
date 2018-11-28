@@ -39,6 +39,10 @@ func (f *employeeNumbers) CustomerSupport() string {
 	return f.chris
 }
 
+func (f *employeeNumbers) OnCallDeveloper() string {
+	return f.atish
+}
+
 func (f *employeeNumbers) IsEmployee(number string) bool {
 	cleanNumber := GetCleanPhoneNumber(number)
 	if cleanNumber == f.chris || cleanNumber == f.atish || cleanNumber == f.enis || cleanNumber == f.piyush {

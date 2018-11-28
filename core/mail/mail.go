@@ -179,6 +179,7 @@ func (c *Client) SubDeactivated(req *UserFields) error {
 // UserFields contain all the possible fields a user can have.
 type UserFields struct {
 	Email             string    `json:"email"`
+	NewEmail          string    `json:"new_email"`
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
@@ -201,6 +202,7 @@ func (c *Client) updateUser(req *UserFields, dripClient *drip.Client) error {
 	}
 	sub := drip.UpdateSubscriber{
 		Email:        req.Email,
+		NewEmail:     req.NewEmail,
 		CustomFields: make(map[string]string),
 	}
 	if req.FirstName != "" {

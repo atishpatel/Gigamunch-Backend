@@ -108,7 +108,8 @@ func (c *Client) SendMissedSubscriber(email, name, reference string, campaigns [
 	for _, campaign := range campaigns {
 		attachment.Fields = append(attachment.Fields, slack.AttachmentField{
 			Title: "Campaign",
-			Value: fmt.Sprintf("Source:%s\nMedium:%s\nCampaign:%s\n", campaign.Source, campaign.Medium, campaign.Campaign),
+			Value: fmt.Sprintf("Source: %s\nMedium: %s\nCampaign: %s\n", campaign.Source, campaign.Medium, campaign.Campaign),
+			Short: true,
 		})
 	}
 	attachments := []slack.Attachment{
