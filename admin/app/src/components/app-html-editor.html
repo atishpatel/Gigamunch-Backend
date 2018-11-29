@@ -67,13 +67,36 @@
     },
 
     updated() {
-      this.value = this.$.editor.innerHTML;
+      let html = this.$.editor.innerHTML;
+      let stripedHTML = this.stripHTML(html);
+      if (stripedHTML != html) {
+        this.$.editor.innerHTML = stripedHTML;
+      }
+      this.value = stripedHTML;
     },
 
     valueUpdated(oldValue, newValue) {
       if (newValue == null) {
         this.$.editor.innerHTML = oldValue;
       }
+    },
+    stripHTML(html) {
+      var keep = {
+        b: true,
+        i: true,
+        u: true,
+        br: true
+      };
+      return html.replace(/<\/?([a-z]+) ?[^>]*>/g, function(wholeMatch, tagName) {
+        if (keep[tagName]) {
+          return wholeMatch;
+        }
+        if (tagName === 'pre') {
+          return '<br>';
+        }
+
+        return '';
+      });
     }
   });
 
