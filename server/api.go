@@ -10,8 +10,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbserver"
 	authold "github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"

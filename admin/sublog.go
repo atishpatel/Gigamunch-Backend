@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"

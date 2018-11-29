@@ -22,8 +22,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"google.golang.org/appengine"
 
 	// driver for mysql

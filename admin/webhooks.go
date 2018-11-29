@@ -12,7 +12,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/slack"
 
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"

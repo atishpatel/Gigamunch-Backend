@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/sub"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbsub"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"

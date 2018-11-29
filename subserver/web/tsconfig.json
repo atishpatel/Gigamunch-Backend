@@ -29,8 +29,8 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "../../Gigamunch-Proto/common/*.d.ts",
-    "../../Gigamunch-Proto/sub/*.d.ts"
+    "../../Gigamunch-Proto/pbcommon/*.d.ts",
+    "../../Gigamunch-Proto/pbsub/*.d.ts"
   ],
   "exclude": [
     "node_modules"

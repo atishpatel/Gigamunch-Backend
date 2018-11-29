@@ -32,30 +32,28 @@ if [[ $1 == "build" ]]; then
     # build protobuf and grpc
     echo "Building Gigamunch-Proto APIs."
     # Common 
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/common/ Gigamunch-Proto/common/*.proto --go_out=plugins=grpc:Gigamunch-Proto/common
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/pbcommon/ Gigamunch-Proto/pbcommon/*.proto --go_out=plugins=grpc:Gigamunch-Proto/pbcommon
     # Admin
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/common/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
-    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' admin/app/AdminAPI.swagger.json
-    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/admin/AdminAPI.pb.go
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/pbadmin/ -I Gigamunch-Proto/pbcommon/ Gigamunch-Proto/pbadmin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/pbadmin --swagger_out=logtostderr=true:admin/app
     # Sub
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/sub/ -I Gigamunch-Proto/common/ Gigamunch-Proto/sub/*.proto --go_out=plugins=grpc:Gigamunch-Proto/sub --swagger_out=logtostderr=true:subserver/web
-    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' subserver/web/SubAPI.swagger.json
-    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/sub/SubAPI.pb.go
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/pbsub/ -I Gigamunch-Proto/pbcommon/ Gigamunch-Proto/pbsub/*.proto --go_out=plugins=grpc:Gigamunch-Proto/pbsub --swagger_out=logtostderr=true:subserver/web
     # Server
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/common/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
-    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' server/ServerAPI.swagger.json
-    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/server/ServerAPI.pb.go
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/pbserver/ -I Gigamunch-Proto/pbcommon/ Gigamunch-Proto/pbserver/*.proto --go_out=plugins=grpc:Gigamunch-Proto/pbserver --swagger_out=logtostderr=true:server
     
-    # modift *.pb.go generated code
+    # Fix swagger json for auth
+    ls */*/*.swagger.json */*.swagger.json | xargs -n1 -IX bash -c "sed -e 's/\"http\",//g;s/\"2.0\",/\"2.0\",\n\"securityDefinitions\": {\"auth-token\": {\"type\": \"apiKey\",\"in\": \"header\",\"name\": \"auth-token\"}},\"security\": [{\"auth-token\": []}],/g' X > X.tmp && mv X{.tmp,}"
+
+    # fix *.pb.go generated code
     cd Gigamunch-Proto
+    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/..\/pbcommon/github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/pbcommon/g;' X > X.tmp && mv X{.tmp,}"
     ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/,omitempty//g;s/Url/URL/g;s/Id/ID/g;s/Sms/SMS/g;' X > X.tmp && mv X{.tmp,}"
     ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/Option_1/Option1/g;s/Option_2/Option2/g;s/Instructions_1/Instructions1/g;s/Instructions_2/Instructions2/g;s/Time_1/Time1/g;s/Time_2/Time2/g;' X > X.tmp && mv X{.tmp,}"
     cd ..
     # Typescript
     gulp build
     # Copy Typescript definitions to folder
-    cp Gigamunch-Proto/admin/*.d.ts admin/app/ts/prototypes
-    cp Gigamunch-Proto/common/*.d.ts admin/app/ts/prototypes
+    cp Gigamunch-Proto/pbadmin/*.d.ts admin/app/ts/prototypes
+    cp Gigamunch-Proto/pbcommon/*.d.ts admin/app/ts/prototypes
   fi
   timestamp
   exit 0

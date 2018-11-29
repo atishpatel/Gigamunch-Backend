@@ -11,7 +11,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/gorilla/schema"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 )
 
 // GetDatetime converts string to datetime

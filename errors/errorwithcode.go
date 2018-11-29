@@ -3,7 +3,7 @@ package errors
 import (
 	"fmt"
 
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 )
 
 const (

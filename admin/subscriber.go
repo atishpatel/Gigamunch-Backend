@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"

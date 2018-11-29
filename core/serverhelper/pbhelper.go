@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"

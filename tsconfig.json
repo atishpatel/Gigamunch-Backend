@@ -48,13 +48,13 @@
     "baseUrl": ".",
     /* Base directory to resolve non-absolute module names. */
     /* "paths": {
-      "@proto/admin": "Gigamunch-Proto/admin/*",
+      "@proto/admin": "Gigamunch-Proto/pbadmin/*",
       "@proto/shared": "Gigamunch-Proto/shared/*",
       "@proto/driver": "Gigamunch-Proto/driver/*",
-      "@proto/sub": "Gigamunch-Proto/sub/*"
+      "@proto/sub": "Gigamunch-Proto/pbsub/*"
     }, /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
-    "typeRoots": ["Gigamunch-Proto/admin", "Gigamunch-Proto/server", "Gigamunch-Proto/common"],
+    "typeRoots": ["Gigamunch-Proto/pbadmin", "Gigamunch-Proto/pbserver", "Gigamunch-Proto/pbcommon"],
     /* List of folders to include type definitions from. */
     // "types": [],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
@@ -72,7 +72,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.vue",
-    // "Gigamunch-Proto/admin/AdminAPI.d.ts"
+    // "Gigamunch-Proto/pbadmin/AdminAPI.d.ts"
   ],
   "exclude": [
     "node_modules",

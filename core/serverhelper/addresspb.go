@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 )

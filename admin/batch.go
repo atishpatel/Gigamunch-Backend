@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 )

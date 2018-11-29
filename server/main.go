@@ -18,8 +18,8 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 
-	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbserver"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"

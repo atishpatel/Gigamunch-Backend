@@ -9,8 +9,8 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
-	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
