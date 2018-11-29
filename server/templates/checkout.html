@@ -1356,17 +1356,17 @@
       }
 
       var days = [];
-      for (var i = 0; i < 3; d.setDate(d.getDate() + 7)) {
+      for (var i = 0; i <= 5; d.setDate(d.getDate() + 7)) {
         var dayArray = d.toString().split(' ');
         var display = d.toLocaleDateString();
         if (dayArray.length > 3) {
           display = dayArray[1] + ' ' + dayArray[2];
         }
-        // TODO: remove after Dec 25, 2017
-        if (d.getMonth() === 11 && d.getDate() === 25) {
+        // TODO: comment out after Dec 25, 2018
+        if (d.getMonth() === 11 && d.getDate() === 24) {
           continue;
         }
-        if (d.getMonth() === 0 && d.getDate() === 1) {
+        if (d.getMonth() === 0 && d.getDate() === 7) {
           display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
         }
         // end TODO

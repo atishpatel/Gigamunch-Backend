@@ -11,8 +11,8 @@
   [[template "theme" .]]
   <style>
     *,
-     ::after,
-     ::before {
+    ::after,
+    ::before {
       box-sizing: border-box;
     }
 
@@ -48,14 +48,27 @@
       flex: 1;
     }
 
-    @media (max-width: 800px) {
-      .header-image {
-        width: 100%;
-        padding-top: 90%; 
-    }
+    .header-image-screenshot {
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/gift/gifted_page.jpg');
+      background-size: cover;
+      flex: 1;
     }
 
-    .header-image img {
+    @media (max-width: 800px) {
+
+      .header-image {
+        width: 100%;
+        padding-top: 90%;
+      }
+
+      .header-image-screenshot {
+        width: 100%;
+        padding-top: 79%;
+      }
+    }
+
+    .header-image img,
+    .header-image-screenshot img {
       width: 100%;
     }
 
@@ -159,17 +172,46 @@
       .company-logo img {
         height: 20px;
       }
+
       .company-logo .edible-nashville {
         height: 52px;
       }
     }
 
+    .header-card-screenshot-title {
+      color: #db0311;
+      font-weight: 500;
+    }
+
+    .header-screenshot-button {
+      margin-top: 12px;
+      text-transform: uppercase;
+      background: #db0311;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      font-weight: 500;
+    }
+
+    .header-gift-link {
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    .header-card-link-url {
+      font-style: italic;
+      color: #a1a1a1;
+      word-wrap: break-word;
+    }
+
   </style>
 
   <header>
-    [[ template "nav" . ]]
+    <!-- [ template "nav" . ] -->
   </header>
   <main>
+    <div class="banner bg-noise"
+         style="background-color: #ce020f">
+      <h1>'Tis the season for giving</h1>
+    </div>
     <div class="header">
       <div class="header-image">
         <!-- <img src="https://storage.googleapis.com/gigamunch-omninexus-website/gift/couple_dining_glasses.jpg"
@@ -179,7 +221,7 @@
         <div>
           <h1 class="header-card-title">Give your foodie friend a gift they'll love...for free</h1>
           <p class="header-card-desc">
-              Gift your friends a fully delivered international dinner from one of Nashville's hottest food startups. And do it without paying a dime.
+            Gift your friends a fully delivered international dinner from one of Nashville's hottest food startups. And do it without paying a dime.
           </p>
           <ul class="header-card-list">
             <li><strong>No cost.</strong> ( But we don't have to tell them that 😉 )</li>
@@ -194,8 +236,32 @@
                 ga-event-action="gift-button">Gift a Gigamunch Dinner</button>
       </div>
     </div>
-    <div class="banner bg-noise">
-      <h1>'Tis the season for giving</h1>
+    <div class="banner bg-noise"
+         style="font-family:sans-serif">
+      <h1>What your friends see</h1>
+    </div>
+    <div class="header">
+      <div class="header-image-screenshot">
+      </div>
+      <div class="header-card">
+        <div>
+          <h1 class="header-card-screenshot-title"></h1>
+          <p class="header-card-desc">
+            By sharing the link below, your friends can experience a journey to a different country through Gigamunch!
+          </p>
+          <p class="header-gift-link">
+            Your personal link: <br>
+            <span class="header-card-link-url">
+            https://eatgigamunch.com/gifted/[[.Email]]
+            <span></span>
+          </p>
+        </div>
+        <button class="orange-button header-screenshot-button"
+                  id="giveButton2"
+                  ga-on="click"
+                  ga-event-category="gift"
+                  ga-event-action="gift-button">Give Free Dinner</button>
+      </div>
     </div>
     <section class="as-seen-on-section bg-noise">
       <h1 class="title as-seen-on-title">As seen on</h1>
@@ -222,6 +288,7 @@
   [[template "gift-dialog" .]]
   <script>
     document.getElementById('giveButton').addEventListener('click', openShareDialog);
+    document.getElementById('giveButton2').addEventListener('click', openShareDialog);
 
   </script>
   [[template "footer" .]]
