@@ -1,8 +1,8 @@
 <template>
   <div>
     <h1 class="title">Upcomming Dinners</h1>
-    <div v-for="execution in executions" v-bind:key="execution.id">
-      <ExecutionsItem :execution="execution"></ExecutionsItem>
+    <div v-for="executionAndActivity in executionAndActivityList" v-bind:key="executionAndActivity.execution.id">
+      <ExecutionsItem :execution="executionAndActivity.execution"></ExecutionsItem>
     </div>
   </div>
 </template>
@@ -18,7 +18,7 @@ import ExecutionsItem from './ExecutionsItem.vue';
 })
 export default class ExecutionsList extends Vue {
   @Prop()
-  public executions!: Common.Execution[];
+  public executionAndActivityList!: Common.Execution[];
 }
 </script>
 

@@ -45,8 +45,8 @@ export default class App extends Vue {
   }
 }
 </script>
-
 <style lang="scss">
+// global
 @import 'scss/theme';
 #app {
   font-family: 'Roboto', 'Avenir', Helvetica, Arial, sans-serif;
@@ -63,4 +63,7 @@ export default class App extends Vue {
 //     color: #42b983;
 //   }
 // }
+
+// global shared styles
+@import 'scss/shared-styles';
 </style>

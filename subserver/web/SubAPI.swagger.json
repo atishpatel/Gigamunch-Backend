@@ -69,9 +69,231 @@
           "Sub"
         ]
       }
+    },
+    "/sub/api/v1/GetExecutionsAfterDate": {
+      "post": {
+        "summary": "GetExecutionsAfterDate returns a list of culture executions after date.",
+        "operationId": "GetExecutionsAfterDate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsDateReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/GetExecutionsBeforeDate": {
+      "post": {
+        "summary": "GetExecutionsBeforeDate returns a list of culture executions before date.",
+        "operationId": "GetExecutionsBeforeDate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsDateReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/GetUserSummary": {
+      "post": {
+        "summary": "GetUserSummary returns a user's summary.",
+        "operationId": "GetUserSummary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetUserSummaryResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetUserSummaryReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
     }
   },
   "definitions": {
+    "CommonActivity": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "address_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "address_apt": {
+          "type": "string"
+        },
+        "address_string": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "skip": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "forgiven": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "amount_paid": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "paid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "paid_datetime": {
+          "type": "string"
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transaction_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "customer_id": {
+          "type": "string"
+        },
+        "refunded": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "refunded_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "refunded_datetime": {
+          "type": "string"
+        },
+        "refund_transaction_id": {
+          "type": "string"
+        },
+        "gift": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "gift_from_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deviant": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "deviant_reason": {
+          "type": "string"
+        }
+      }
+    },
     "CommonCode": {
       "type": "string",
       "enum": [
@@ -352,7 +574,18 @@
           "$ref": "#/definitions/CommonEmail"
         }
       },
-      "description": "**********************\nExecution\n**********************\nExecution is an execution of a culture."
+      "description": "Execution is an execution of a culture."
+    },
+    "CommonExecutionAndActivity": {
+      "type": "object",
+      "properties": {
+        "execution": {
+          "$ref": "#/definitions/CommonExecution"
+        },
+        "activity": {
+          "$ref": "#/definitions/CommonActivity"
+        }
+      }
     },
     "CommonInfoBox": {
       "type": "object",
@@ -465,8 +698,16 @@
         "error": {
           "$ref": "#/definitions/CommonError"
         },
-        "execution": {
-          "$ref": "#/definitions/CommonExecution"
+        "execution_and_activity": {
+          "$ref": "#/definitions/CommonExecutionAndActivity"
+        }
+      }
+    },
+    "SubAPIGetExecutionsDateReq": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
         }
       }
     },
@@ -489,11 +730,31 @@
         "error": {
           "$ref": "#/definitions/CommonError"
         },
-        "executions": {
+        "execution_and_activity": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/CommonExecution"
+            "$ref": "#/definitions/CommonExecutionAndActivity"
           }
+        }
+      }
+    },
+    "SubAPIGetUserSummaryReq": {
+      "type": "object",
+      "title": "**********************\nUser\n**********************"
+    },
+    "SubAPIGetUserSummaryResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "is_active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "on_probation": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
     }

@@ -1863,7 +1863,7 @@
           "$ref": "#/definitions/CommonEmail"
         }
       },
-      "description": "**********************\nExecution\n**********************\nExecution is an execution of a culture."
+      "description": "Execution is an execution of a culture."
     },
     "CommonExecutionProgress": {
       "type": "object",
@@ -1940,15 +1940,13 @@
           "type": "string"
         },
         "action_user_id": {
-          "type": "string",
-          "format": "int64"
+          "type": "string"
         },
         "action_user_email": {
           "type": "string"
         },
         "user_id": {
-          "type": "string",
-          "format": "int64"
+          "type": "string"
         },
         "user_email": {
           "type": "string"

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <ExecutionsList class="list-component" :executions="executions"></ExecutionsList>
+      <ExecutionsList class="list-component" :executionAndActivityList="executionAndActivityList"></ExecutionsList>
     </div>
   </div>
 </template>
@@ -18,11 +18,11 @@ import { IsError } from '../ts/errors';
   },
 })
 export default class Dinners extends Vue {
-  protected executions: Common.Execution[];
+  protected executionAndActivityList: Common.ExecutionAndActivity[];
 
   public constructor() {
     super();
-    this.executions = [];
+    this.executionAndActivityList = [];
   }
 
   public created() {
@@ -34,7 +34,7 @@ export default class Dinners extends Vue {
       if (IsError(resp)) {
         return;
       }
-      this.executions = resp.executions;
+      this.executionAndActivityList = resp.execution_and_activity;
     });
   }
 }

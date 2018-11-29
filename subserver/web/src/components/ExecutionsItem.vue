@@ -3,9 +3,10 @@
     <h2 class="date">{{titleDate}}</h2>
     <div class="cards">
       <!-- Culture Card -->
-      <ExecutionsCard class="card" :title="cultureTitle" :description="cultureDescription" :src="execution.content.hero_image_url"></ExecutionsCard>
+      <ExecutionsCard class="card" :title="cultureTitle" :description="cultureDescription" :src="execution.content.landscape_image_url" :to="{path: 'dinner/'+executionURLID+'#culture'}"></ExecutionsCard>
+
       <!-- Cook Card -->
-      <ExecutionsCard class="card" :title="cookName" :description="cookDescription" :src="execution.content.cook_image_url"></ExecutionsCard>
+      <ExecutionsCard class="card" :title="cookName" :description="cookDescription" :src="execution.content.cook_image_url" :to="{path: 'dinner/'+executionURLID+'#culture-cook'}"></ExecutionsCard>
 
     </div>
   </div>
@@ -53,6 +54,13 @@ export default class ExecutionsItem extends Vue {
     }
     return this.execution.culture_cook.story;
   }
+
+  get executionURLID() {
+    if (this.execution.date) {
+      return this.execution.date;
+    }
+    return this.execution.id;
+  }
 }
 </script>
 
@@ -77,10 +85,11 @@ export default class ExecutionsItem extends Vue {
   @media (min-width: 800px) {
     .card {
       max-width: 500px;
+      width: 500px;
     }
   }
   .card:not(:first-child) {
-    padding-left: 24px;
+    margin-left: 24px;
   }
   &::-webkit-scrollbar {
     display: none;

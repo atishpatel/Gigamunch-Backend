@@ -19,10 +19,12 @@ import { IsError } from '../ts/errors';
 })
 export default class Dinner extends Vue {
   protected execution!: Common.Execution;
+  protected activity!: Common.Activity;
 
   public constructor() {
     super();
     this.execution = {} as Common.Execution;
+    this.activity = {} as Common.Activity;
   }
 
   public created() {
@@ -34,7 +36,8 @@ export default class Dinner extends Vue {
       if (IsError(resp)) {
         return;
       }
-      this.execution = resp.execution;
+      this.execution = resp.execution_and_activity.execution;
+      this.activity = resp.execution_and_activity.activity;
     });
   }
 }

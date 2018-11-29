@@ -7,18 +7,18 @@ if (IsDev()) {
 }
 
 // Execution
-export function GetExecutions(start: number, limit: number): Promise<GetExecutionsResp> {
+export function GetExecutions(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutions';
-  const req: GetExecutionsReq = {
+  const req: SubAPI.GetExecutionsReq = {
     start,
     limit,
   };
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecution(idOrDate: string): Promise<GetExecutionResp> {
+export function GetExecution(idOrDate: string): Promise<SubAPI.GetExecutionResp> {
   const url: string = baseURL + 'GetExecution';
-  const req: GetExecutionReq = {
+  const req: SubAPI.GetExecutionReq = {
     idOrDate,
   };
   return callFetch(url, 'GET', req);

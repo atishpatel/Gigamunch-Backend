@@ -1,11 +1,13 @@
 <template>
+  <div>
+    <router-link :to="to" tag="div" class="image unset-link">
+      <img :src="src" :alt="computedImageAlt">
+    </router-link>
     <div>
-        <div class="image">
-            <img :src="src" :alt="computedImageAlt">
-        </div>
-        <h3 class="title" v-html="title"></h3>
-        <p class="description" v-html="description"></p>
+      <router-link :to="to" tag="h3" class="title unset-link" v-html="title"></router-link>
+      <p class="description" v-html="description"></p>
     </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -19,6 +21,8 @@ export default class ExecutionsItem extends Vue {
   public description!: string;
   @Prop()
   public src!: string;
+  @Prop()
+  public to!: object;
 
   get computedImageAlt(): string {
     return this.title + ' image';

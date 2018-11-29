@@ -21,9 +21,9 @@ interface Log {
   timestamp: string
   type: string
   action: string
-  action_user_id: number
+  action_user_id: string
   action_user_email: string
-  user_id: number
+  user_id: string
   user_email: string
   severity: number
   path: string
@@ -32,6 +32,46 @@ interface Log {
 interface BasicPayload {
   title: string
   description: string
+}
+interface Activity {
+  created_datetime: string
+  date: string
+  user_id: string
+  email: string
+  first_name: string
+  last_name: string
+  location: number
+  address_changed: boolean
+  address_apt: string
+  address_string: string
+  zip: string
+  latitude: number
+  longitude: number
+  active: boolean
+  skip: boolean
+  forgiven: boolean
+  servings_non_vegetarian: number
+  servings_vegetarian: number
+  servings_changed: boolean
+  first: boolean
+  amount: number
+  amount_paid: number
+  discount_amount: number
+  discount_percent: number
+  paid: boolean
+  paid_datetime: string
+  payment_provider: number
+  transaction_id: string
+  payment_method_token: string
+  customer_id: string
+  refunded: boolean
+  refunded_amount: number
+  refunded_datetime: string
+  refund_transaction_id: string
+  gift: boolean
+  gift_from_user_id: number
+  deviant: boolean
+  deviant_reason: string
 }
 interface Execution {
   id: number
@@ -50,6 +90,10 @@ interface Execution {
   has_beef: boolean
   has_chicken: boolean
   email: Email
+}
+interface ExecutionAndActivity {
+  execution: Execution
+  activity: Activity
 }
 interface ExecutionProgressSummary {
   message: string
