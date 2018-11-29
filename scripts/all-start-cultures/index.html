@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible"
+        content="ie=edge">
+  <title>All Start Cultures</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+</head>
+
+<body>
+  <style>
+    .card {
+      min-width: 500px;
+      margin: 12px;
+      float: none;
+    }
+
+    .card-body,
+    .card-img-top {
+      float: none;
+    }
+
+    .card-title {
+      font-size: 24px;
+    }
+
+    .field {
+      display: flex;
+      padding: 2px 0;
+    }
+
+    .field-title {
+      font-weight: 400;
+      min-width: 75px;
+      padding-left: 8px;
+    }
+
+    .field-value {
+      min-width: 125px;
+    }
+
+    .field-container {
+      display: flex;
+      flex-direction: row;
+      float: none;
+    }
+
+    .field-section {
+      flex: 1;
+    }
+
+    img {
+      page-break-inside: avoid;
+    }
+
+    .card {
+      page-break-inside: avoid;
+    }
+
+    .field-container {
+      page-break-inside: avoid;
+    }
+
+    .card-body {
+      page-break-inside: avoid;
+    }
+
+    .card-text {
+      page-break-inside: avoid;
+    }
+
+    /* .card>*,
+    .card,
+    .card-body,
+    .field-container,
+    .field-section,
+    .card-deck .card,
+    .card-text,
+    .card-img-top {
+      display: table;
+      width: 100%;
+      float: none;
+    } */
+
+
+    .text-lgt {
+      color: #6c757d;
+    }
+
+    .page-break {
+      page-break-inside: avoid;
+      /* or 'auto' */
+      page-break-after: always;
+      display: block;
+    }
+
+    #app {
+      padding: 0 12px;
+    }
+
+  </style>
+  <div id="app">
+    <div class="card-deck">
+      <div class="card"
+           v-for="(culture,index) in cultures">
+        <img class="card-img-top"
+             :src="culture.Image">
+        <div class="card-body">
+          <h1 class="card-title">{{culture.Country}} <span class="text-lgt"> - {{culture.Continent}}</span></h1>
+          <div class="card-text">
+            <div class="field-container">
+              <div class="field-section">
+                <div class="field">
+                  <div class="field-title"></div>
+                  <div class="field-value"></div>
+                </div>
+                <div class="field">
+                  <div class="field-title"
+                       :style="ratingColor(culture.Rating)">Rating:</div>
+                  <div class="field-value">{{culture.Rating}}</div>
+                </div>
+                <div class="field">
+                  <div class="field-title"
+                       :style="ingColor(culture.IngPerMeal)">Ing:</div>
+                  <div class="field-value">{{culture.IngPerMeal}}</div>
+                </div>
+                <div class="field">
+                  <div class="field-title"
+                       :style="laborColor(culture.LaborCostPerMeal)">Labor:</div>
+                  <div class="field-value">{{culture.LaborCostPerMeal}}</div>
+                </div>
+              </div>
+              <div class="field-section">
+                <div class="field">
+                  <div class="field-title">Meat:</div>
+                  <div class="field-value"
+                       v-html="ingHTML(culture.Meat)"></div>
+                </div>
+                <div class="field">
+                  <div class="field-title">Veg:</div>
+                  <div class="field-value"
+                       v-html="ingHTML(culture.Vegetable)"></div>
+                </div>
+                <div class="field">
+                  <div class="field-title">Carb:</div>
+                  <div class="field-value"
+                       v-html="ingHTML(culture.Carb)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-lgt">
+          <div>{{agoDate(culture.Date)}}</div>
+        </div>
+        <div v-if="index%4==1">
+          <div class="page-break"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://unpkg.com/vue"></script>
+  <script>
+    const red = '#B71C1C';
+    const purple = '#4A148C';
+    const blue = '#0D47A1';
+    const cyan = '#006064';
+    const teal = '#004D40';
+    const green = '#388E3C';
+    const greenDark = '#1B5E20';
+    const yellow = '#FFD600';
+    const yellowDark = '#F57F17';
+    const orangeDark = '#E65100';
+    const white = '#fff';
+    const brown = '#795548';
+    const blueGray = '#607D8B';
+    const black = '#212529'
+
+    let vue = new Vue({
+      el: '#app',
+      data: {
+        cultures: [],
+      },
+      methods: {
+        ingHTML: function(s) {
+          if (!s) {
+            return '';
+          }
+          var stmp = s.toLowerCase();
+          var color = black;
+          if (stmp.includes('beef')) {
+            color = brown;
+          } else if (stmp.includes('chicken')) {
+            color = orangeDark;
+          } else if (stmp.includes('rice')) {
+            color = yellowDark;
+          } else if (stmp.includes('salad')) {
+            color = greenDark;
+          }
+          return `<snap style="color:${color}">${s}</snap>`;
+        },
+        ratingColor: function(s) {
+          let color;
+          if (s < 8) {
+            color = red;
+          } else if (s < 9) {
+            color = yellow;
+          } else {
+            color = green;
+          }
+          return 'border-left: solid 3px ' + color;
+        },
+        ingColor: function(s) {
+          s = Number(s.replace('$', ''));
+          let color;
+          if (s > 4.5) {
+            color = red;
+          } else if (s > 4.0) {
+            color = yellow;
+          } else {
+            color = white;
+          }
+          return 'border-left: solid 3px ' + color;
+        },
+        laborColor: function(s) {
+          s = Number(s.replace('$', ''));
+          let color;
+          if (s > 3.0) {
+            color = yellow;
+          } else if (s > 2.25) {
+            color = white;
+          } else {
+            color = green;
+          }
+          return 'border-left: solid 3px ' + color;
+        },
+        agoDate: function(date) {
+          if (date === "") {
+            return '';
+          }
+
+          function timeSince(dt) {
+            var seconds = Math.floor((new Date() - dt) / 1000);
+
+            var interval = Math.floor(seconds / (7 * 86400));
+            var months = Math.floor(interval / 4);
+            var weeks = ((interval / 4) * 100 % 100 / 100) * 4;
+            var str = '';
+            if (months > 0) {
+              str += `${months} months`
+              if (weeks >= 0) {
+                str += ' and ';
+              }
+            }
+            if (weeks >= 0) {
+              str += `${weeks} weeks`;
+            }
+            return str + ' ago';
+          }
+          return date + ' - ' + timeSince(new Date(date));
+        },
+      }
+    });
+    if (location.host !== '') {
+      var getJSON = function(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.onload = function() {
+          var status = xhr.status;
+          if (status === 200) {
+            callback(null, xhr.response);
+          } else {
+            callback(status, xhr.response);
+          }
+        };
+        xhr.send();
+      };
+      getJSON('./input.json', (err, data) => {
+        console.log(err, data);
+        vue.cultures = data;
+      })
+    } else {
+      vue.cultures = JSON.parse(`[{
+    "Country": "Sri Lanka",
+    "Date": "Nov 26, 18",
+    "Rating": "",
+    "Image": "",
+    "Meat": "",
+    "Vegetable": "",
+    "Carb": "",
+    "LaborCostPerMeal": "",
+    "IngPerMeal": "",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Sudan",
+    "Date": "Nov 19, 18",
+    "Rating": 9.2,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Sudan2/email-topdown.jpg",
+    "Meat": "Beef and Rice",
+    "Vegetable": "Salad",
+    "Carb": "Beans + Pita",
+    "LaborCostPerMeal": "$3.23",
+    "IngPerMeal": "$4.10",
+    "Continent": "Africa",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Senegal",
+    "Date": "Nov 12, 18",
+    "Rating": 8.5,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Senegal/email-topdown-reg.jpg",
+    "Meat": "Beef and Rice",
+    "Vegetable": "Salad",
+    "Carb": "Black-eyed Pea and Sweet Potatoes",
+    "LaborCostPerMeal": "$2.55",
+    "IngPerMeal": "$3.51",
+    "Continent": "Africa",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Pakistan",
+    "Date": "Nov 5, 18",
+    "Rating": 7.4,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Pakistan2/email-hands-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "",
+    "Carb": "Potatoes + Chickpea",
+    "LaborCostPerMeal": "$1.76",
+    "IngPerMeal": "$3.11",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Haiti",
+    "Date": "Oct 29, 18",
+    "Rating": 9.2,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Haiti/email-dinner-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Beets + Vegetable Soup",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$3.03",
+    "IngPerMeal": "$3.45",
+    "Continent": "North America",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Denmark",
+    "Date": "Oct 22, 18",
+    "Rating": 9.1,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Denmark3/email-dinner-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Broccoli Salad",
+    "Carb": "Potatoes",
+    "LaborCostPerMeal": "$2.61",
+    "IngPerMeal": "$2.27",
+    "Continent": "Europe",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Grenada",
+    "Date": "Oct 15, 18",
+    "Rating": 9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Grenada2/email-dinner-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Coleslaw",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.23",
+    "IngPerMeal": "$3.87",
+    "Continent": "North America",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Syria",
+    "Date": "Oct 8, 18",
+    "Rating": 8.9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Syria2/email-hands-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Tabbouleh",
+    "Carb": "Hummus + Pita",
+    "LaborCostPerMeal": "$2.77",
+    "IngPerMeal": "$4.28",
+    "Continent": "Middle East",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "India",
+    "Date": "Oct 1, 18",
+    "Rating": 7.6,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/India3/email-hands-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Spinach Paneer",
+    "Carb": "Chapathi + Lentils",
+    "LaborCostPerMeal": "$2.14",
+    "IngPerMeal": "$3.70",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Puerto Rico",
+    "Date": "Sep 24, 18",
+    "Rating": 9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Puerto%20Rico3/email-topdown-reg.jpg",
+    "Meat": "Shrimp",
+    "Vegetable": "Avocado",
+    "Carb": "Beans",
+    "LaborCostPerMeal": "$2.44",
+    "IngPerMeal": "$3.81",
+    "Continent": "North America",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "South Korea",
+    "Date": "Sep 17, 18",
+    "Rating": 8.9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/South%20Korea2/email-topdown-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Kimchi",
+    "Carb": "Rice + Potatoes",
+    "LaborCostPerMeal": "$1.41",
+    "IngPerMeal": "$2.93",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Persia",
+    "Date": "Sep 10, 18",
+    "Rating": 8.3,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Persia2/email-hands-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Cucumber Salad",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$1.53",
+    "IngPerMeal": "$3.26",
+    "Continent": "Middle East",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Argentina",
+    "Date": "Sep 3, 18",
+    "Rating": 8.5,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Argentina/email-topdown-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Salad",
+    "Carb": "Potato Egg Pie",
+    "LaborCostPerMeal": "$2.31",
+    "IngPerMeal": "$3.20",
+    "Continent": "South America",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Laos",
+    "Date": "Aug 27, 18",
+    "Rating": 8.8,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Laos/email-topdown-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Egg Roll + Soup",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.37",
+    "IngPerMeal": "$2.24",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Asia",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "South Africa",
+    "Date": "Aug 20, 18",
+    "Rating": 9.52,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/South%20Africa/email-hands-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Mango Salad + Tomato Onion Salad",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.31",
+    "IngPerMeal": "$2.31",
+    "Continent": "Africa",
+    "Cusine": "",
+    "Old Continent": "Africa",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Bangladesh",
+    "Date": "Aug 13, 18",
+    "Rating": 9.13,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Bangladesh%202/email-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Mixed Shaak + Cucumber Salad",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.24",
+    "IngPerMeal": "$3.04",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Asia",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "China",
+    "Date": "Aug 6, 18",
+    "Rating": 6.52,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/China2/email-topdown-reg.jpg",
+    "Meat": "Shrimp",
+    "Vegetable": "Cucumber Mushroom Salad",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.07",
+    "IngPerMeal": "$3.61",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Asia",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Bosnia",
+    "Date": "Jul 30, 18",
+    "Rating": 9.08,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Bosnia2/email-topdown-REG.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Vegetable Soup + Broccoli Salad",
+    "Carb": "",
+    "LaborCostPerMeal": "$3.06",
+    "IngPerMeal": "$3.21",
+    "Continent": "Europe",
+    "Cusine": "",
+    "Old Continent": "Europe",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Ethiopia",
+    "Date": "Jul 23, 18",
+    "Rating": 7,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Ethiopia2/email-topdown-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Salad",
+    "Carb": "Injera + Lentils",
+    "LaborCostPerMeal": "$2.54",
+    "IngPerMeal": "$2.29",
+    "Continent": "Africa",
+    "Cusine": "",
+    "Old Continent": "Africa",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Brazil",
+    "Date": "Jul 16, 18",
+    "Rating": 8.75,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Brazil/email-hands.jpg",
+    "Meat": "Pork",
+    "Vegetable": "Salsa",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.26",
+    "IngPerMeal": "$3.02",
+    "Continent": "South America",
+    "Cusine": "",
+    "Old Continent": "South America",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Peru",
+    "Date": "Jul 9, 18",
+    "Rating": 8.05,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Peru2/email-topdown-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "",
+    "Carb": "Potatoes + Lima Beans",
+    "LaborCostPerMeal": "$2.25",
+    "IngPerMeal": "$2.34",
+    "Continent": "South America",
+    "Cusine": "",
+    "Old Continent": "South America",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Taiwan",
+    "Date": "Jul 2, 18",
+    "Rating": 7.25,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Taiwan/email-hands-reg.jpg",
+    "Meat": "Pork",
+    "Vegetable": "Cucumber Salad",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.55",
+    "IngPerMeal": "$2.63",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Asia",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Iraq",
+    "Date": "Jun 25, 18",
+    "Rating": 9.07,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Iraq2/email-hands.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Tabbouleh",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.85",
+    "IngPerMeal": "$3.08",
+    "Continent": "Middle East",
+    "Cusine": "",
+    "Old Continent": "Middle East",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Dominican Republic",
+    "Date": "Jun 18, 18",
+    "Rating": 8.58,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Dominican%20Republic2/email-topdown-reg%3Aveg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Fruit Salad",
+    "Carb": "Potato Salad",
+    "LaborCostPerMeal": "$2.59",
+    "IngPerMeal": "$3.41",
+    "Continent": "North America",
+    "Cusine": "",
+    "Old Continent": "North America",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Turkey",
+    "Date": "Jun 11, 18",
+    "Rating": 7.56,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Turkey2/email-hands-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Roasted Carrots & Broccoli + Cucumber Salad",
+    "Carb": "",
+    "LaborCostPerMeal": "$2.42",
+    "IngPerMeal": "$3.19",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Mediteranean",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Philippines",
+    "Date": "Jun 4, 18",
+    "Rating": 8.91,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Philippines2/topdown-reg-email.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Chop Suey",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$3.16",
+    "IngPerMeal": "$2.35",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Asia",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Uzbekistan",
+    "Date": "May 28, 18",
+    "Rating": 8.8,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Uzbekistan/email-topdown-reg.jpg",
+    "Meat": "Beef and Rice",
+    "Vegetable": "Vegetable Soup",
+    "Carb": "Cucumber Salad",
+    "LaborCostPerMeal": "$3.56",
+    "IngPerMeal": "$3.06",
+    "Continent": "Asia",
+    "Cusine": "",
+    "Old Continent": "Asia",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Sudan",
+    "Date": "May 21, 18",
+    "Rating": 8.9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Sudan2/email-topdown.jpg",
+    "Meat": "Beef and Rice",
+    "Vegetable": "Salad",
+    "Carb": "Beans + Pita",
+    "LaborCostPerMeal": "$3.13",
+    "IngPerMeal": "$3.24",
+    "Continent": "Middle East",
+    "Cusine": "Africa/Middle East",
+    "Old Continent": "Africa/Middle East",
+    "Dish 1": "Beef Mahshi",
+    "Dish 1 Main Ingredient": "Beef stuffed bell pepper",
+    "Dish 2": "Molah fadolia Bayda",
+    "Dish 2 Main Ingredient": "white beans and onion",
+    "Dish 3": "Pita bread",
+    "Dish 3 Main Ingredient": "pita bread",
+    "Dish 4": "salatat",
+    "Dish 4 Main Ingredient": "lettuce",
+    "Dessert": "Basboosa",
+    "Dessert Main Ingredient": "crumbly bar, rose coconut",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Senegal",
+    "Date": "May 14, 18",
+    "Rating": 8.9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Senegal/email-topdown-reg.jpg",
+    "Meat": "Beef and Rice",
+    "Vegetable": "Salad",
+    "Carb": "Black-eyed Pea and Sweet Potatoes",
+    "LaborCostPerMeal": "$2.36",
+    "IngPerMeal": "$2.82",
+    "Continent": "Africa",
+    "Cusine": "African",
+    "Old Continent": "Africa",
+    "Dish 1": "Beef Ceebu Yapp",
+    "Dish 1 Main Ingredient": "Beef and Rice",
+    "Dish 2": "Black-eyed pea and sweet potatoes ndambe",
+    "Dish 2 Main Ingredient": "black eyed pea and sweet potatoes",
+    "Dish 3": "salade cote cap verte",
+    "Dish 3 Main Ingredient": "lettuce",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Thiakry",
+    "Dessert Main Ingredient": "couscous pudding",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Pakistan",
+    "Date": "May 7, 18",
+    "Rating": 8.9,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Pakistan2/email-hands-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "",
+    "Carb": "Potatoes + Chickpea",
+    "LaborCostPerMeal": "$2.47",
+    "IngPerMeal": "$1.83",
+    "Continent": "Asia",
+    "Cusine": "Pakistani",
+    "Old Continent": "Middle East / India",
+    "Dish 1": "Chicken Tikka",
+    "Dish 1 Main Ingredient": "Chicken Breast",
+    "Dish 2": "Chana Chaat",
+    "Dish 2 Main Ingredient": "chickpeas",
+    "Dish 3": "Chatpate Aloo",
+    "Dish 3 Main Ingredient": "Potatoes",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Mango Semolina Pudding",
+    "Dessert Main Ingredient": "Mango, poundcake, pudding",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Denmark",
+    "Date": "Apr 30, 18",
+    "Rating": 8.7,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Denmark2/email-topdown-reg.jpg",
+    "Meat": "Pork",
+    "Vegetable": "Salad",
+    "Carb": "Parsnips",
+    "LaborCostPerMeal": "$2.87",
+    "IngPerMeal": "$3.55",
+    "Continent": "Europe",
+    "Cusine": "Danish",
+    "Old Continent": "Europe",
+    "Dish 1": "Roast Pork with Apples",
+    "Dish 1 Main Ingredient": "Pork, apples",
+    "Dish 2": "greens salad with beets",
+    "Dish 2 Main Ingredient": "mixed greens",
+    "Dish 3": "Roasted Parsnips with onion",
+    "Dish 3 Main Ingredient": "parsnips, onion",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Vaniljekranse",
+    "Dessert Main Ingredient": "cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Grenada",
+    "Date": "Apr 23, 18",
+    "Rating": 8.7,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Grenada2/email-dinner-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Coleslaw",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.47",
+    "IngPerMeal": "$2.25",
+    "Continent": "North America",
+    "Cusine": "Caribbean",
+    "Old Continent": "Caribbean",
+    "Dish 1": "Jerk Chicken",
+    "Dish 1 Main Ingredient": "chicken",
+    "Dish 2": "Rice and Pigeon Peas",
+    "Dish 2 Main Ingredient": "Rice",
+    "Dish 3": "Coleslaw",
+    "Dish 3 Main Ingredient": "Cabbage",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Coconut Sweet Bread",
+    "Dessert Main Ingredient": "Cake/Cookie",
+    "Vegetarain Dish 1": "Pigeon Pea Stew",
+    "Vegetarain Dish 1 Main Ingredient": "Pigeon Peas"
+  },
+  {
+    "Country": "India",
+    "Date": "Apr 16, 18",
+    "Rating": 7.5,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/India2/email-topdown.jpg",
+    "Meat": "",
+    "Vegetable": "Vegetable Shaak",
+    "Carb": "Rice + Chickpea",
+    "LaborCostPerMeal": "$2.24",
+    "IngPerMeal": "$2.41",
+    "Continent": "Asia",
+    "Cusine": "Indian",
+    "Old Continent": "Asia",
+    "Dish 1": "Vegetable Korma",
+    "Dish 1 Main Ingredient": "mixed veggies",
+    "Dish 2": "Jeera Rice",
+    "Dish 2 Main Ingredient": "Rice",
+    "Dish 3": "Chana Masala",
+    "Dish 3 Main Ingredient": "Chick Peas",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Mango Kheer",
+    "Dessert Main Ingredient": "Milk",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Kurdistan",
+    "Date": "Apr 9, 18",
+    "Rating": 8.7,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Kurdistan/email-hands-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Eggplant",
+    "Carb": "Burghul",
+    "LaborCostPerMeal": "$3.18",
+    "IngPerMeal": "$4.91",
+    "Continent": "Asia",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Kudish Stew",
+    "Dish 1 Main Ingredient": "Beef Stew",
+    "Dish 2": "Burghul",
+    "Dish 2 Main Ingredient": "Burghul",
+    "Dish 3": "Tapsi",
+    "Dish 3 Main Ingredient": "eggplant",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Halawa",
+    "Dessert Main Ingredient": "pistachios",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Puerto Rico",
+    "Date": "Apr 2, 18",
+    "Rating": 8.2,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Puerto%20Rico2/email-hands-reg.jpg",
+    "Meat": "Pork",
+    "Vegetable": "",
+    "Carb": "Rice + Beans",
+    "LaborCostPerMeal": "$2.59",
+    "IngPerMeal": "$1.92",
+    "Continent": "North America",
+    "Cusine": "Caribbean/Latin",
+    "Old Continent": "Caribbean",
+    "Dish 1": "Pernil",
+    "Dish 1 Main Ingredient": "pork",
+    "Dish 2": "Arroz Con Gandules",
+    "Dish 2 Main Ingredient": "Rice",
+    "Dish 3": "Black Beans",
+    "Dish 3 Main Ingredient": "Black Beans",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Tembleque",
+    "Dessert Main Ingredient": "coconut pudding",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Israel",
+    "Date": "Mar 26, 18",
+    "Rating": 8.7,
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Israel/email-topdown-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Roasted Zucchini",
+    "Carb": "Couscous",
+    "LaborCostPerMeal": "$1.88",
+    "IngPerMeal": "$1.39",
+    "Continent": "Asia",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Roast Chicken with Orange",
+    "Dish 1 Main Ingredient": "chicken",
+    "Dish 2": "couscous",
+    "Dish 2 Main Ingredient": "couscous",
+    "Dish 3": "Roasted Veggies with Tahini",
+    "Dish 3 Main Ingredient": "zucchini",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Tahini Cookies",
+    "Dessert Main Ingredient": "cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Sri Lanka",
+    "Date": "Mar 19, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Sri%20Lanka/email-topdown-reg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "",
+    "Carb": "Rice + Lentils",
+    "LaborCostPerMeal": "$2.96",
+    "IngPerMeal": "$2.58",
+    "Continent": "Asia",
+    "Cusine": "Indian-ish",
+    "Old Continent": "Asia",
+    "Dish 1": "Kukul Mas",
+    "Dish 1 Main Ingredient": "chicken",
+    "Dish 2": "Kaha Bath",
+    "Dish 2 Main Ingredient": "Rice",
+    "Dish 3": "Parippu",
+    "Dish 3 Main Ingredient": "lentil",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Kiri Dodol",
+    "Dessert Main Ingredient": "Jelly",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Hungary",
+    "Date": "Mar 12, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Hungary/email-hands-reg.jpg",
+    "Meat": "Pork",
+    "Vegetable": "Green Beans + Creamed Vegetables",
+    "Carb": "Noodles",
+    "LaborCostPerMeal": "$2.66",
+    "IngPerMeal": "$2.68",
+    "Continent": "Europe",
+    "Cusine": "Central European",
+    "Old Continent": "Europe",
+    "Dish 1": "Porkolt",
+    "Dish 1 Main Ingredient": "pork stew",
+    "Dish 2": "Tojasos Nokedli",
+    "Dish 2 Main Ingredient": "egg noodles",
+    "Dish 3": "Tokfozelek",
+    "Dish 3 Main Ingredient": "zucchini cream",
+    "Dish 4": "Zoldbab Fozelek",
+    "Dish 4 Main Ingredient": "grean bean with cream",
+    "Dessert": "Hokifli",
+    "Dessert Main Ingredient": "cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "South Korea",
+    "Date": "Mar 5, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/South%20Korea/email-topdown-REG.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Radish",
+    "Carb": "Rice + Potatoes",
+    "LaborCostPerMeal": "$2.35",
+    "IngPerMeal": "$3.61",
+    "Continent": "Asia",
+    "Cusine": "Korean",
+    "Old Continent": "Asia",
+    "Dish 1": "Bulgogi",
+    "Dish 1 Main Ingredient": "Thin Beef",
+    "Dish 2": "Japgokbap",
+    "Dish 2 Main Ingredient": "rice",
+    "Dish 3": "Gamja Jorim",
+    "Dish 3 Main Ingredient": "potatoes",
+    "Dish 4": "Musaengchae",
+    "Dish 4 Main Ingredient": "radish",
+    "Dessert": "Tteok",
+    "Dessert Main Ingredient": "rice cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Nepal",
+    "Date": "Feb 26, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Nepal/email-hands-REG.jpg",
+    "Meat": "Chicken and Noodles",
+    "Vegetable": "Cucumber Salad",
+    "Carb": "Potatoes",
+    "LaborCostPerMeal": "$1.73",
+    "IngPerMeal": "$1.89",
+    "Continent": "Asia",
+    "Cusine": "Asain/Indian",
+    "Old Continent": "Asia",
+    "Dish 1": "Nepali Chicken Chow Mein",
+    "Dish 1 Main Ingredient": "Chicken and noodles",
+    "Dish 2": "Cauli Aloo",
+    "Dish 2 Main Ingredient": "potatoes and caulifower",
+    "Dish 3": "Kakro ko Achar",
+    "Dish 3 Main Ingredient": "cucumber",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Til ko Laddu",
+    "Dessert Main Ingredient": "coconut, sesame seed",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Mexico",
+    "Date": "Feb 19, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Mexico/email-hands.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Poblano Pepper",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.31",
+    "IngPerMeal": "$2.14",
+    "Continent": "North America",
+    "Cusine": "Latin",
+    "Old Continent": "North America",
+    "Dish 1": "Chili Con Carne",
+    "Dish 1 Main Ingredient": "beef chili",
+    "Dish 2": "Mexican rice",
+    "Dish 2 Main Ingredient": "rice",
+    "Dish 3": "Poblano Peppers with Onion Sauce",
+    "Dish 3 Main Ingredient": "poblano peppers",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Camotes Enmielado",
+    "Dessert Main Ingredient": "sweet potato",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Bosnia",
+    "Date": "Feb 12, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Bosnia2/email-topdown-REG.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Vegetable Soup + Broccoli Salad",
+    "Carb": "",
+    "LaborCostPerMeal": "$1.70",
+    "IngPerMeal": "$2.79",
+    "Continent": "Europe",
+    "Cusine": "Balkin",
+    "Old Continent": "Europe",
+    "Dish 1": "Burak Pita",
+    "Dish 1 Main Ingredient": "beef, filo dough",
+    "Dish 2": "Vegetable Chorba",
+    "Dish 2 Main Ingredient": "mixed vegetable stew",
+    "Dish 3": "Salata od Brokolija",
+    "Dish 3 Main Ingredient": "broccoli salad",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Oblatne",
+    "Dessert Main Ingredient": "Chocolate and wafer",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Bangladesh",
+    "Date": "Feb 5, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Bangladesh/email-full-REG.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Mixed Shaak",
+    "Carb": "Lentils + Rice",
+    "LaborCostPerMeal": "$2.20",
+    "IngPerMeal": "$3.08",
+    "Continent": "Asia",
+    "Cusine": "Asian/Indian",
+    "Old Continent": "Asia",
+    "Dish 1": "Chicken Bhuna",
+    "Dish 1 Main Ingredient": "chicken",
+    "Dish 2": "Khichuri",
+    "Dish 2 Main Ingredient": "Rice-ish",
+    "Dish 3": "Booter Dal",
+    "Dish 3 Main Ingredient": "lentil",
+    "Dish 4": "Pattacopy Bhaji",
+    "Dish 4 Main Ingredient": "cabbage",
+    "Dessert": "Shemai",
+    "Dessert Main Ingredient": "milk and noodles",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Afghanistan",
+    "Date": "Jan 29, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Afghanistan/email-full-REG.jpg",
+    "Meat": "Goat + Rice",
+    "Vegetable": "Broccoli Salad + Mushroom Shaak",
+    "Carb": "",
+    "LaborCostPerMeal": "$2.25",
+    "IngPerMeal": "$4.18",
+    "Continent": "Middle East",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Kabuli Pulao",
+    "Dish 1 Main Ingredient": "goat and rice",
+    "Dish 2": "Afghan Salad",
+    "Dish 2 Main Ingredient": "broccoli",
+    "Dish 3": "Gulpi",
+    "Dish 3 Main Ingredient": "caulifower",
+    "Dish 4": "Afghan Mushrooms",
+    "Dish 4 Main Ingredient": "mushrooms",
+    "Dessert": "Halwa e Zardak",
+    "Dessert Main Ingredient": "carrots",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Peru",
+    "Date": "Jan 22, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Peru/email-full-REG.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "",
+    "Carb": "Lentils + Lima Beans",
+    "LaborCostPerMeal": "$1.78",
+    "IngPerMeal": "$2.83",
+    "Continent": "South America",
+    "Cusine": "Latin",
+    "Old Continent": "South America",
+    "Dish 1": "Pollo Al Horno",
+    "Dish 1 Main Ingredient": "chicken",
+    "Dish 2": "Solterito Arequipeno",
+    "Dish 2 Main Ingredient": "lima bean salad",
+    "Dish 3": "Lentejas Guisadas",
+    "Dish 3 Main Ingredient": "lentils",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Arroz con Leche",
+    "Dessert Main Ingredient": "rice pudding",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Persia",
+    "Date": "Jan 15, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Persia/email-persia-topdown.jpg",
+    "Meat": "Chicken and Barley",
+    "Vegetable": "Zucchini + Cucumber Salad",
+    "Carb": "",
+    "LaborCostPerMeal": "$2.36",
+    "IngPerMeal": "$3.07",
+    "Continent": "Middle East",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Chicken Barley Soup",
+    "Dish 1 Main Ingredient": "Chicken Barley Soup",
+    "Dish 2": "Persian Squash",
+    "Dish 2 Main Ingredient": "zucchini",
+    "Dish 3": "Shirazi Salad",
+    "Dish 3 Main Ingredient": "cucumber, onion",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Saffron Rose Brittle",
+    "Dessert Main Ingredient": "toffee",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Syria",
+    "Date": "Jan 8, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Syria/email-topdown-REG.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Tabbouleh",
+    "Carb": "Hummus",
+    "LaborCostPerMeal": "$2.39",
+    "IngPerMeal": "$2.52",
+    "Continent": "Middle East",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Lahm Bi Snayniyeh",
+    "Dish 1 Main Ingredient": "Beef",
+    "Dish 2": "Tabbouleh",
+    "Dish 2 Main Ingredient": "bulgar and tomato",
+    "Dish 3": "Syrian Hummus with Pita Bread",
+    "Dish 3 Main Ingredient": "Hummus and pita",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Wardat Alburtaqal Baskuit",
+    "Dessert Main Ingredient": "orange cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "China",
+    "Date": "Jan 1, 18",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/China/email-full-dinner.jpg",
+    "Meat": "Pork and Noodles",
+    "Vegetable": "Peanut Salad",
+    "Carb": "Tofu",
+    "LaborCostPerMeal": "$2.90",
+    "IngPerMeal": "$3.34",
+    "Continent": "Asia",
+    "Cusine": "Asian",
+    "Old Continent": "Asia",
+    "Dish 1": "Pork Stew with Napa Cabbage",
+    "Dish 1 Main Ingredient": "Pork, tofu, and noodles",
+    "Dish 2": "Green Onion Tofu",
+    "Dish 2 Main Ingredient": "tofu",
+    "Dish 3": "Chinese Peanut Salad",
+    "Dish 3 Main Ingredient": "Peanut and celery",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Rice Cake",
+    "Dessert Main Ingredient": "rice",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "",
+    "Date": "Dec 25, 17",
+    "Rating": "",
+    "Image": "",
+    "Meat": "",
+    "Vegetable": "",
+    "Carb": "",
+    "LaborCostPerMeal": "",
+    "IngPerMeal": "",
+    "Continent": "",
+    "Cusine": "",
+    "Old Continent": "",
+    "Dish 1": "",
+    "Dish 1 Main Ingredient": "",
+    "Dish 2": "",
+    "Dish 2 Main Ingredient": "",
+    "Dish 3": "",
+    "Dish 3 Main Ingredient": "",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "",
+    "Dessert Main Ingredient": "",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Ethiopia",
+    "Date": "Dec 18, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Ethiopia/ethiopia-full-REG-email.jpg",
+    "Meat": "Chicken and Egg",
+    "Vegetable": "Salad",
+    "Carb": "Lentils + Fava Beans + Couscous",
+    "LaborCostPerMeal": "$2.32",
+    "IngPerMeal": "$4.54",
+    "Continent": "Africa",
+    "Cusine": "Ethiopian",
+    "Old Continent": "Africa",
+    "Dish 1": "Doro Wat (Braised Chicken Leg)",
+    "Dish 1 Main Ingredient": "Chicken Leg",
+    "Dish 2": "Couscous",
+    "Dish 2 Main Ingredient": "couscous",
+    "Dish 3": "Ful",
+    "Dish 3 Main Ingredient": "Fava Beans",
+    "Dish 4": "Mesir Wat",
+    "Dish 4 Main Ingredient": "Lentils",
+    "Dessert": "[Not dessert] Salata",
+    "Dessert Main Ingredient": "Lettuce",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Dominican Republic",
+    "Date": "Dec 11, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Dominican%20Republic/DR-topdown-VEG%3AREG.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Fruit Salad",
+    "Carb": "Potato Salad",
+    "LaborCostPerMeal": "$2.36",
+    "IngPerMeal": "$3.27",
+    "Continent": "North America",
+    "Cusine": "Caribbean",
+    "Old Continent": "Caribbean",
+    "Dish 1": "Beef Pastelón",
+    "Dish 1 Main Ingredient": "Ground beef",
+    "Dish 2": "Ensalada Rusa",
+    "Dish 2 Main Ingredient": "potatoe salad",
+    "Dish 3": "Ensalada Frutas",
+    "Dish 3 Main Ingredient": "fruit salad",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Buñuelo",
+    "Dessert Main Ingredient": "fried yucca ball",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Japan",
+    "Date": "Dec 4, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Japan/japan-topdown-REG.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Cabbage Salad + Soup",
+    "Carb": "Noodles",
+    "LaborCostPerMeal": "$1.73",
+    "IngPerMeal": "$2.49",
+    "Continent": "Asia",
+    "Cusine": "Asian",
+    "Old Continent": "Asia",
+    "Dish 1": "Chicken Teriyaki",
+    "Dish 1 Main Ingredient": "Chicken chunks",
+    "Dish 2": "Udon Noodles",
+    "Dish 2 Main Ingredient": "noodles",
+    "Dish 3": "miso soup",
+    "Dish 3 Main Ingredient": "tofu soup",
+    "Dish 4": "Japanese Cabbage Salad",
+    "Dish 4 Main Ingredient": "Cabbage",
+    "Dessert": "Green Tea Cookies",
+    "Dessert Main Ingredient": "shortbread cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Iraq",
+    "Date": "Nov 27, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Iraq/email-hands-reg.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Tabbouleh",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.12",
+    "IngPerMeal": "$2.54",
+    "Continent": "Middle East",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Kebab",
+    "Dish 1 Main Ingredient": "Ground beef",
+    "Dish 2": "Biryani",
+    "Dish 2 Main Ingredient": "Rice",
+    "Dish 3": "Tabbouleh",
+    "Dish 3 Main Ingredient": "buckwheat groats",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Halawat Sha'riyya",
+    "Dessert Main Ingredient": "vermicelli noodles",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Turkey",
+    "Date": "Nov 20, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Turkey/turkey-fullmeal-topdown-REG.jpg",
+    "Meat": "Beef and Potatoes",
+    "Vegetable": "Cucumber Salad",
+    "Carb": "Mac n Cheese",
+    "LaborCostPerMeal": "$2.23",
+    "IngPerMeal": "$4.22",
+    "Continent": "Middle East",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Tas Kebab",
+    "Dish 1 Main Ingredient": "beef chunks",
+    "Dish 2": "çoban Salatasi",
+    "Dish 2 Main Ingredient": "tomatoes, cucumber, onion",
+    "Dish 3": "Besamel Makarna",
+    "Dish 3 Main Ingredient": "mac n cheese",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Etimek Tatlisi",
+    "Dessert Main Ingredient": "coconut bread pudding cookie thing",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Denmark",
+    "Date": "Nov 13, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Denmark/email-reg-full.jpg",
+    "Meat": "Beef and Pork",
+    "Vegetable": "Cabbage Salad + Soup",
+    "Carb": "Potatoes",
+    "LaborCostPerMeal": "$2.92",
+    "IngPerMeal": "$3.74",
+    "Continent": "Europe",
+    "Cusine": "Danish",
+    "Old Continent": "Europe",
+    "Dish 1": "Mock Hare (Danish Meatloaf)",
+    "Dish 1 Main Ingredient": "pork, beef, bacon",
+    "Dish 2": "Danish Hasselback Potatoes",
+    "Dish 2 Main Ingredient": "potatoes",
+    "Dish 3": "Rød Kål",
+    "Dish 3 Main Ingredient": "red cabbage",
+    "Dish 4": "Wild Mushroom in Cream Sauce",
+    "Dish 4 Main Ingredient": "mushrooms",
+    "Dessert": "Parsonage",
+    "Dessert Main Ingredient": "pastry, whipped cream, blackberry",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Cambodia",
+    "Date": "Nov 6, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Cambodia/full_plate_meat.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Pickled Vegetables",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.37",
+    "IngPerMeal": "$4.45",
+    "Continent": "Asia",
+    "Cusine": "Asian",
+    "Old Continent": "Asian",
+    "Dish 1": "Beef Lemongrass Stir Fry",
+    "Dish 1 Main Ingredient": "beef chunks",
+    "Dish 2": "Steamed Jasmine Rice",
+    "Dish 2 Main Ingredient": "Rice",
+    "Dish 3": "Chrourk (pickled vegetables)",
+    "Dish 3 Main Ingredient": "pickled carrots, daikon radishes",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Chek Ktee",
+    "Dessert Main Ingredient": "tapioca pearls",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Italy",
+    "Date": "Oct 30, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Italy/italy-full-plate-email.jpg",
+    "Meat": "Anchovies",
+    "Vegetable": "Salad + Broccoli",
+    "Carb": "Potatoes + Spaghetti",
+    "LaborCostPerMeal": "$2.53",
+    "IngPerMeal": "$2.37",
+    "Continent": "Europe",
+    "Cusine": "Italian",
+    "Old Continent": "Europe",
+    "Dish 1": "Cacio e Pepe Bucatini",
+    "Dish 1 Main Ingredient": "spaghetti",
+    "Dish 2": "Italian Salad",
+    "Dish 2 Main Ingredient": "Lettuce",
+    "Dish 3": "Roasted Broccoli",
+    "Dish 3 Main Ingredient": "broccoli",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Biscotti",
+    "Dessert Main Ingredient": "chocolate chip bread cookie",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Puerto Rico",
+    "Date": "Oct 23, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Puerto%20Rico/full_plate_hands.jpg",
+    "Meat": "Beef",
+    "Vegetable": "",
+    "Carb": "Rice + Beans",
+    "LaborCostPerMeal": "$2.70",
+    "IngPerMeal": "$1.88",
+    "Continent": "North America",
+    "Cusine": "Caribbean",
+    "Old Continent": "Caribbean",
+    "Dish 1": "Picadillo",
+    "Dish 1 Main Ingredient": "ground beef",
+    "Dish 2": "Puerto Rican Rice",
+    "Dish 2 Main Ingredient": "rice",
+    "Dish 3": "black beans",
+    "Dish 3 Main Ingredient": "black beans",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "bizocho",
+    "Dessert Main Ingredient": "dense cake, cinnamon",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Sudan",
+    "Date": "Oct 16, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Sudan/cook-hands.jpg",
+    "Meat": "Beef",
+    "Vegetable": "Cucumber Apple Salad",
+    "Carb": "Lentils + Pita",
+    "LaborCostPerMeal": "$2.30",
+    "IngPerMeal": "$3.38",
+    "Continent": "Africa",
+    "Cusine": "Africa/Middle East",
+    "Old Continent": "Africa/Middle East",
+    "Dish 1": "Aswad-be-allahma",
+    "Dish 1 Main Ingredient": "eggplant, beef",
+    "Dish 2": "Adis",
+    "Dish 2 Main Ingredient": "lentils",
+    "Dish 3": "Aeesh Baldy",
+    "Dish 3 Main Ingredient": "pita bread",
+    "Dish 4": "Salatat",
+    "Dish 4 Main Ingredient": "apple, cucmber, pepper",
+    "Dessert": "Custar",
+    "Dessert Main Ingredient": "custard, sugar, milk",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Philippines",
+    "Date": "Oct 9, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/Philippines/hands_non-veg.jpg",
+    "Meat": "Chicken",
+    "Vegetable": "Chop Suey",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$2.63",
+    "IngPerMeal": "$4.05",
+    "Continent": "Asia",
+    "Cusine": "Pacific Island",
+    "Old Continent": "Pacific Island",
+    "Dish 1": "Chicken Adobo",
+    "Dish 1 Main Ingredient": "chicken",
+    "Dish 2": "steamed rice",
+    "Dish 2 Main Ingredient": "rice",
+    "Dish 3": "chop suey",
+    "Dish 3 Main Ingredient": "bell pepper, caulifower",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "leche flan",
+    "Dessert Main Ingredient": "condensed milk, brown sugar",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "India",
+    "Date": "Oct 2, 17",
+    "Rating": "",
+    "Image": "https://storage.googleapis.com/gigamunch-omninexus-website/email/indian_cook_hand_email.jpg",
+    "Meat": "",
+    "Vegetable": "Mixed Shaak",
+    "Carb": "Rice + Chapathi + Chickpeas",
+    "LaborCostPerMeal": "$2.82",
+    "IngPerMeal": "$2.70",
+    "Continent": "Asia",
+    "Cusine": "Indian",
+    "Old Continent": "India",
+    "Dish 1": "Vegetable Korma",
+    "Dish 1 Main Ingredient": "potatoes, spices",
+    "Dish 2": "fried rice",
+    "Dish 2 Main Ingredient": "rice",
+    "Dish 3": "chole",
+    "Dish 3 Main Ingredient": "chick peas",
+    "Dish 4": "chapathi",
+    "Dish 4 Main Ingredient": "flatbread",
+    "Dessert": "jeera biscuit and chai",
+    "Dessert Main Ingredient": "biscuit and tea",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Bosnia",
+    "Date": "Sep 25, 17",
+    "Rating": "",
+    "Image": "https://mail.google.com/mail/u/0?ui=2&ik=527bf8a45b&attid=0.3&permmsgid=msg-f:1579523360887920872&th=15eb9820c827d8e8&view=fimg&sz=s0-l75-ft&attbid=ANGjdJ8Isf2mu1Tyd6ItkNcq7sIowEdZ0gZ65h9MRTgMBqb6TAjbLkqvZ_QWpfv4NXu3rD_ZQ2Ed3ydMR-S40K2p7bbbWmNK5XGjnuRxD7jdZkJXeUz5mdSaU7JbGlo&disp=emb&realattid=ii_j80a5kx71_15eb97b8440d752a",
+    "Meat": "Beef",
+    "Vegetable": "Vegetable Soup + Cucumber Salad",
+    "Carb": "",
+    "LaborCostPerMeal": "$2.24",
+    "IngPerMeal": "$2.92",
+    "Continent": "Europe",
+    "Cusine": "bosnian",
+    "Old Continent": "Europe",
+    "Dish 1": "burek pita",
+    "Dish 1 Main Ingredient": "beef, filo dough",
+    "Dish 2": "veggie chorba",
+    "Dish 2 Main Ingredient": "vegetable stew (potatoes)",
+    "Dish 3": "salata od Krastavaca",
+    "Dish 3 Main Ingredient": "cucumber salad",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Oblatne",
+    "Dessert Main Ingredient": "chocolate and wafers",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Hungary",
+    "Date": "Sep 18, 17",
+    "Rating": "",
+    "Image": "https://mail.google.com/mail/u/0?ui=2&ik=527bf8a45b&attid=0.2&permmsgid=msg-f:1578889601138857191&th=15e957ba177094e7&view=fimg&sz=s0-l75-ft&attbid=ANGjdJ-awTCOECSasxODrj0ibc-j6KVO-9i4EHmlGc21Ze8sL357ezjwWt4WsczspL1n31yPgIzNvlMBe9axd1zesCrOw1NdEzkdAcSmbdbvxU9pLHZBxTqGdZbD7tw&disp=emb&realattid=ii_j7qafadq1_15e9577ff3220861",
+    "Meat": "Pork and Dumplings",
+    "Vegetable": "Cucumber Salad + Mushroom + Squash",
+    "Carb": "",
+    "LaborCostPerMeal": "$2.41",
+    "IngPerMeal": "$3.17",
+    "Continent": "Europe",
+    "Cusine": "Hungarian",
+    "Old Continent": "Europe",
+    "Dish 1": "Sertespaprikas",
+    "Dish 1 Main Ingredient": "Pork chunks",
+    "Dish 2": "Galuska dumplings",
+    "Dish 2 Main Ingredient": "dumplings",
+    "Dish 3": "Tokfoszelek",
+    "Dish 3 Main Ingredient": "squash casserole",
+    "Dish 4": "Uborkasalata",
+    "Dish 4 Main Ingredient": "Cucumber Onion salad",
+    "Dessert": "Dios Kifli",
+    "Dessert Main Ingredient": "walnut cookies",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Grenada",
+    "Date": "Sep 11, 17",
+    "Rating": "",
+    "Image": "https://mail.google.com/mail/u/0?ui=2&ik=527bf8a45b&attid=0.1&permmsgid=msg-f:1578254347790858107&th=15e715f7a54a377b&view=fimg&sz=s0-l75-ft&attbid=ANGjdJ99gBoB7v13kFu9RPXCJQy2mXr7xGBUsB-xfw4dpYckG3qgyMOpeT8krKDK1HidlSQGsiGIy5RI8Z9k_NqboVsAsnKKob9bK49pBhPT45ldKml3at6_OTXMmEo&disp=emb&realattid=ii_j7g9ftjo1_15e715445ee4d25b",
+    "Meat": "Chicken",
+    "Vegetable": "Coleslaw + Spinach",
+    "Carb": "Rice",
+    "LaborCostPerMeal": "$1.72",
+    "IngPerMeal": "$3.77",
+    "Continent": "North America",
+    "Cusine": "Caribbean",
+    "Old Continent": "Caribbean",
+    "Dish 1": "Caribbean Jerk Chicken",
+    "Dish 1 Main Ingredient": "chicken thigh and leg",
+    "Dish 2": "Yellow rice and peas",
+    "Dish 2 Main Ingredient": "rice",
+    "Dish 3": "spinach callaloo",
+    "Dish 3 Main Ingredient": "spinach",
+    "Dish 4": "coleslaw",
+    "Dish 4 Main Ingredient": "coleslaw",
+    "Dessert": "coconut sweet bread",
+    "Dessert Main Ingredient": "coconout, raisin, cake",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Kurdistan",
+    "Date": "Sep 4, 17",
+    "Rating": "",
+    "Image": "https://mail.google.com/mail/u/0?ui=2&ik=527bf8a45b&attid=0.1&permmsgid=msg-f:1577176378616267224&th=15e3418f638f41d8&view=fimg&sz=s0-l75-ft&attbid=ANGjdJ_R0HOl9MIDfefqGzv3qa2ks8fFDXrRxYnW3W6UNHAMxr3Uk-0cTUY16ffUgwSyUkVtaabi_y5aPLxNiMYyN_Rh0U-mry_b2CdDPlmUjDfHSIVlMJVm8wcKBIM&disp=emb&realattid=ii_j6z9pydc1_15e3416af69f0e39",
+    "Meat": "Beef",
+    "Vegetable": "Mixed Shaak",
+    "Carb": "Burghul",
+    "LaborCostPerMeal": "",
+    "IngPerMeal": "",
+    "Continent": "Middle East",
+    "Cusine": "Middle East",
+    "Old Continent": "Middle East",
+    "Dish 1": "Shifta",
+    "Dish 1 Main Ingredient": "Beef patties",
+    "Dish 2": "Burghul",
+    "Dish 2 Main Ingredient": "Burghul",
+    "Dish 3": "Tapsi",
+    "Dish 3 Main Ingredient": "meat and veg mix",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Baklava",
+    "Dessert Main Ingredient": "filo dough, honey, pistachios",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  },
+  {
+    "Country": "Nepal",
+    "Date": "Aug 28, 17",
+    "Rating": "",
+    "Image": "https://mail.google.com/mail/u/0?ui=2&ik=527bf8a45b&attid=0.1&permmsgid=msg-f:1576986369917279461&th=15e294bf8a8d5ce5&view=fimg&sz=s0-l75-ft&attbid=ANGjdJ8ClQxTwxx_wGXd29TASHcutGuPsmZEo0r_INAt_FcgXxsJWErsthGKdTF-BG4mQ9H9SJifKvWQBCTC-qyxTETIgDryCAyffM0nzip5o6vvHh3Y6YzOb9gWUWo&disp=emb&realattid=ii_j6w9fxon0_15e293f9f821b5f5",
+    "Meat": "Chicken and Noodles",
+    "Vegetable": "Momo",
+    "Carb": "Potatoes",
+    "LaborCostPerMeal": "",
+    "IngPerMeal": "",
+    "Continent": "Asia",
+    "Cusine": "India/China",
+    "Old Continent": "India/China",
+    "Dish 1": "Nepali chow Mein",
+    "Dish 1 Main Ingredient": "chicken, noodles",
+    "Dish 2": "vegetable momo",
+    "Dish 2 Main Ingredient": "vegetable dumplings",
+    "Dish 3": "aloo ko sabji",
+    "Dish 3 Main Ingredient": "spicy potato salad",
+    "Dish 4": "",
+    "Dish 4 Main Ingredient": "",
+    "Dessert": "Gajar Ka Halwa",
+    "Dessert Main Ingredient": "sweet carrot pudding",
+    "Vegetarain Dish 1": "",
+    "Vegetarain Dish 1 Main Ingredient": ""
+  }
+]`);
+    }
+
+  </script>
+</body>
+
+</html>

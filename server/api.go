@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"encoding/json"
@@ -7,8 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
+
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	authold "github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -20,7 +23,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/types"
@@ -73,8 +76,8 @@ func validateSubmitGiftCheckoutReq(r *giftCheckout) error {
 
 // Login updates a user's payment.
 func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.TokenOnlyReq)
 	var err error
+	req := new(pb.TokenOnlyReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -107,8 +110,8 @@ func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Reque
 
 // UpdatePayment updates a user's payment.
 func UpdatePayment(ctx context.Context, r *http.Request) Response {
-	req := new(pb.UpdatePaymentReq)
 	var err error
+	req := new(pb.UpdatePaymentReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -117,16 +120,16 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	email := strings.TrimSpace(strings.ToLower(req.Email))
-	key := datastore.NewKey(ctx, "ScheduleSignUp", email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
-	err = datastore.Get(ctx, key, entry)
-	if err == datastore.ErrNoSuchEntity {
-		resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", email)).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
-		utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
-		return resp
-	}
+	subC := subold.New(ctx)
+	entry, err := subC.GetSubscriber(email)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		ewc := errors.GetErrorWithCode(err)
+		if ewc.Code == errors.CodeNotFound {
+			resp.Error = errBadRequest.WithMessage(fmt.Sprintf("Cannot find user with email: %s", email)).Wrapf("failed to get email(%s) into datastore", req.Email).SharedError()
+			utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
+			return resp
+		}
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get email(%s) into datastore", req.Email).SharedError()
 		utils.Criticalf(ctx, "failed to update payment because can't find email(%s) tkn(%s): %+v", email, req.PaymentMethodNonce, err)
 		return resp
 	}
@@ -141,15 +144,15 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 
 	paymenttkn, err := paymentC.CreateCustomer(paymentReq)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to update payment: failed to sub.CreateCustomer: email(%s) %+v", email, err)
+		utils.Criticalf(ctx, "failed to update payment: failed to subold.CreateCustomer: email(%s) %+v", email, err)
 		resp.Error = errors.Wrap("failed to payment.CreateCustomer", err).SharedError()
 		return resp
 	}
-	subC := sub.New(ctx)
+
 	err = subC.UpdatePaymentToken(email, paymenttkn)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to update payment: failed to sub.UpdatePaymentToken: email(%s) tkn(%s) %+v", email, paymenttkn, err)
-		resp.Error = errors.Wrap("failed to sub.UpdatePaymentToken", err).SharedError()
+		utils.Criticalf(ctx, "failed to update payment: failed to subold.UpdatePaymentToken: email(%s) tkn(%s) %+v", email, paymenttkn, err)
+		resp.Error = errors.Wrap("failed to subold.UpdatePaymentToken", err).SharedError()
 		return resp
 	}
 	messageC := message.New(ctx)
@@ -202,10 +205,10 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 
 	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
+	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if entry.IsSubscribed {
@@ -246,7 +249,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	default:
 		vegetarianServings = 4
 	}
-	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
+	weeklyAmount = subold.DerivePrice(vegetarianServings + servings)
 	customerID := payment.GetIDFromEmail(req.Email)
 	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
@@ -332,7 +335,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	}
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if !inZone {
@@ -351,7 +354,6 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
-		// TODO: add to some datastore to save address and stuff
 		resp.Error = errInvalidParameter.WithMessage("Sorry, you are outside our delivery range! We'll let you know soon as we are in your area!").SharedError()
 		return resp
 	}
@@ -374,7 +376,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
 	}
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	err = subC.Free(firstBoxDate, req.Email)
 	if err != nil {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
@@ -415,9 +417,9 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
-func campaingFromPB(c *pb.Campaign) sub.Campaign {
+func campaingFromPB(c *pb.Campaign) common.Campaign {
 	t, _ := time.Parse(time.RFC3339, c.Timestamp)
-	return sub.Campaign{
+	return common.Campaign{
 		Timestamp: t,
 		Source:    c.Source,
 		Campaign:  c.Campaign,
@@ -455,10 +457,10 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	}
 
 	key := datastore.NewKey(ctx, "ScheduleSignUp", req.Email, 0, nil)
-	entry := &sub.SubscriptionSignUp{}
+	entry := &subold.SubscriptionSignUp{}
 	err = datastore.Get(ctx, key, entry)
 	if err != nil && err != datastore.ErrNoSuchEntity {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to get subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if entry.IsSubscribed {
@@ -499,7 +501,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	default:
 		vegetarianServings = 4
 	}
-	weeklyAmount = sub.DerivePrice(vegetarianServings + servings)
+	weeklyAmount = subold.DerivePrice(vegetarianServings + servings)
 	customerID := payment.GetIDFromEmail(req.ReferenceEmail)
 	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
@@ -576,7 +578,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 	entry.NumGiftDinners = req.NumGiftDinners
 	_, err = datastore.Put(ctx, key, entry)
 	if err != nil {
-		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put ScheduleSignUp email(%s) into datastore", req.Email).SharedError()
+		resp.Error = errInternal.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Wrapf("failed to put subscriber email(%s) into datastore", req.Email).SharedError()
 		return resp
 	}
 	if !inZone {
@@ -618,7 +620,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 			utils.Criticalf(ctx, "failed to send sms to Atish. Err: %+v", err)
 		}
 	}
-	subC := sub.New(ctx)
+	subC := subold.New(ctx)
 	if entry.NumGiftDinners > 2 {
 		err = subC.Free(firstBoxDate, entry.Email)
 		if err != nil {
@@ -644,7 +646,7 @@ func SubmitGiftCheckout(ctx context.Context, r *http.Request) Response {
 }
 
 // InNashvilleZone checks if an address is in Nashville zone.
-func InNashvilleZone(ctx context.Context, addr *shared.Address) (bool, *types.Address, error) {
+func InNashvilleZone(ctx context.Context, addr *pbcommon.Address) (bool, *types.Address, error) {
 	var err error
 	address := &types.Address{
 		APT: addr.Apt,
@@ -707,12 +709,12 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 		resp := f(ctx, r)
 		// Log errors
 		sharedErr := resp.GetError()
-		if sharedErr == nil || sharedErr.Code == shared.Code(0) {
-			sharedErr = &shared.Error{
-				Code: shared.Code_Success,
+		if sharedErr == nil || sharedErr.Code == pbcommon.Code(0) {
+			sharedErr = &pbcommon.Error{
+				Code: pbcommon.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success {
+		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success {
 			// 	loggingC.LogRequestError(r, errors.GetErrorWithCode(sharedErr))
 			logging.Errorf(ctx, "%+v", sharedErr)
 		}
@@ -730,7 +732,7 @@ func handler(f func(context.Context, *http.Request) Response) func(http.Response
 
 func getNasvilleGeopoint(ctx context.Context) (*geofence.Geofence, error) {
 	fence := new(geofence.Geofence)
-	key := datastore.NewKey(ctx, "Geofence", "", common.Nashville.ID(), nil)
+	key := datastore.NewKey(ctx, "Geofence", common.Nashville.ID(), 0, nil)
 	err := datastore.Get(ctx, key, fence)
 	if err != nil && err != datastore.ErrNoSuchEntity {
 		return nil, err
@@ -770,8 +772,8 @@ func getNasvilleGeopoint(ctx context.Context) (*geofence.Geofence, error) {
 
 // DeviceCheckin updates a user's payment.
 func DeviceCheckin(ctx context.Context, r *http.Request) Response {
-	req := new(healthcheck.Device)
 	var err error
+	req := new(healthcheck.Device)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -804,4 +806,102 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 		return nil, nil, nil, err
 	}
 	return log, serverInfo, dbC, nil
+}
+
+// SubmitCheckoutv2 submits a checkout.
+func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.SubmitCheckoutReq)
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	resp := &pb.ErrorOnlyResp{}
+	logging.Infof(ctx, "Request struct: %+v", req)
+
+	var servingsNonVegetarian int8
+	var servingsVegetarian int8
+	switch req.Servings {
+	case "":
+		fallthrough
+	case "0":
+		servingsNonVegetarian = 0
+	case "1":
+		servingsNonVegetarian = 1
+	case "2":
+		servingsNonVegetarian = 2
+	case "4":
+		servingsNonVegetarian = 4
+	default:
+		servingsNonVegetarian = 4
+	}
+	switch req.VegetarianServings {
+	case "":
+		fallthrough
+	case "0":
+		servingsVegetarian = 0
+	case "1":
+		servingsVegetarian = 1
+	case "2":
+		servingsVegetarian = 2
+	case "4":
+		servingsVegetarian = 4
+	default:
+		servingsVegetarian = 4
+	}
+	firstBoxDate := time.Now().Add(81 * time.Hour)
+	for firstBoxDate.Weekday() != time.Monday {
+		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
+	}
+	if req.FirstDeliveryDate != "" {
+		firstBoxDate, err = time.Parse(time.RFC3339, req.FirstDeliveryDate)
+		if err != nil || firstBoxDate.Weekday() == time.Tuesday {
+			firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() == time.Sunday {
+			firstBoxDate = firstBoxDate.Add(12 * time.Hour)
+		}
+		if err != nil || firstBoxDate.Weekday() != time.Monday {
+			resp.Error = errBadRequest.WithMessage("Invalid first delivery day selected.").SharedError()
+			utils.Criticalf(ctx, "user selected invalid start date: %+v", req.FirstDeliveryDate)
+			return resp
+		}
+	}
+	var campaigns []common.Campaign
+	for _, c := range req.Campaigns {
+		campaigns = append(campaigns, campaingFromPB(c))
+	}
+
+	address, err := serverhelper.AddressFromPB(ctx, req.Address)
+	if err != nil {
+		return errors.Annotate(err, "failed to decode address")
+	}
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	createReq := &sub.CreateReq{
+		Email:                 req.Email,
+		FirstName:             req.FirstName,
+		LastName:              req.LastName,
+		PhoneNumber:           req.PhoneNumber,
+		Address:               *address,
+		DeliveryNotes:         req.DeliveryNotes,
+		Reference:             req.Reference,
+		ReferenceEmail:        req.ReferenceEmail,
+		PaymentMethodNonce:    req.PaymentMethodNonce,
+		ServingsNonVegetarian: servingsNonVegetarian,
+		ServingsVegetarian:    servingsVegetarian,
+		FirstDeliveryDate:     firstBoxDate,
+		Campaigns:             campaigns,
+		DiscountPercent:       100,
+	}
+	_, err = subC.Create(createReq)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Create")
+	}
+	return resp
 }

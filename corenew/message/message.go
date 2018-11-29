@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/config"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -463,10 +462,7 @@ func (c *Client) GetUserInfo(userSID string) (*UserInfo, error) {
 
 func getTwilioClients(ctx context.Context, accountSID, authToken, keySID, apiSecret string) (*twilio.TwilioClient, *twilio.TwilioIPMessagingClient) {
 	client := twilio.NewClient(accountSID, authToken)
-	httpClient := urlfetch.Client(ctx)
-	client.HTTPClient = httpClient
 	ipClient := twilio.NewIPMessagingClient(keySID, apiSecret)
-	ipClient.HTTPClient = httpClient
 	return client, ipClient
 }
 

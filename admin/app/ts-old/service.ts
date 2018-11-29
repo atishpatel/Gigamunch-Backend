@@ -160,11 +160,13 @@ export function ChangeServingsPermanently(email: string, servings: number, veget
   })
 }
 
-export function GetGeneralStats(callback: (resp: Response) => void) {
+export function GetGeneralStats(start_date_min: Date, start_date_max: Date, callback: (resp: Response) => void) {
   const url: string = baseURLOld + 'GetGeneralStats';
   GetToken().then((token) => {
     const request = {
       gigatoken: token,
+      start_date_min: start_date_min.toISOString(),
+      start_date_max: start_date_max.toISOString(),
     };
 
     callOldFetch(url, 'POST', request).then((resp) => { callback(resp) })

@@ -110,8 +110,8 @@
       }
 
       _getStatusString(sublog) {
-        if (sublog.refundeed) {
-          return 'Refunded';
+        if (sublog.refunded) {
+          return 'Refunded $' + sublog.refunded_amount;
         } else if (sublog.skip) {
           return 'Skipped';
         } else if (sublog.free) {

@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"bytes"
@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"google.golang.org/appengine/urlfetch"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -27,6 +25,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
+// TODO: UpdateDrip
+
 func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	parms, err := tasks.ParseProcessSubscriptionRequest(r)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 	activityC, _ := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	err = activityC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		log.Errorf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
 		return errors.GetErrorWithCode(err)
 	}
 	return nil
@@ -46,7 +46,7 @@ func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *
 	req := struct {
 		Hours int `json:"hours"`
 	}{}
-	decodeRequest(ctx, r, &req)
+	_ = decodeRequest(ctx, r, &req)
 	if req.Hours == 0 {
 		req.Hours = 48
 	}
@@ -89,8 +89,7 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
-		errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to subold.GetForDate")
-		return nil
+		return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to subold.GetForDate")
 	}
 	var nonSkippers []string
 	for i := range subLogs {
@@ -125,8 +124,7 @@ func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r 
 	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {
-		errors.Annotate(err, "failed to SendCultureEmail: failed to subold.GetForDate")
-		return nil
+		return errors.Annotate(err, "failed to SendCultureEmail: failed to subold.GetForDate")
 	}
 	var nonSkippers []string
 	for i := range subLogs {
@@ -144,12 +142,11 @@ func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r 
 		log.Infof(ctx, "applying tags to: %+v", nonSkippers)
 		mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 		if err != nil {
-			errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
-			return nil
+			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
 		}
 		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
 		if err != nil {
-			errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
+			return errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
 		}
 	}
 	return nil
@@ -259,7 +256,6 @@ Stats for last 30 days:
 	msg = fmt.Sprintf(msg, date.Add(time.Hour*25).Format("Jan 2"), totalSubs, newSubsLastWeek, cancelsLastWeek, weeklyChurn, cancelsMoreThan8WeekRetention, cancels4To8WeekRetention, cancelsLessThan4WeekRetention, avgWeeksWithUs, newSubs30Days, cancelsLast30Days, monthlyChurn)
 	messageC := message.New(ctx)
 	numbers := []string{"6155454989", "9316445311", "9316446755", "6153975516"}
-	// numbers := []string{"9316445311"}
 	for _, number := range numbers {
 		err = messageC.SendDeliverySMS(number, msg)
 		if err != nil {
@@ -276,7 +272,7 @@ func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *
 		Kinds      string `json:"kinds"`
 		BucketName string `json:"bucketname"`
 	}{}
-	decodeRequest(ctx, r, &req)
+	_ = decodeRequest(ctx, r, &req)
 	log.Infof(ctx, "req: %+v", req)
 
 	projID := s.serverInfo.ProjectID
@@ -308,6 +304,9 @@ func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *
 		EntityFilter:    entityFilter,
 	}
 	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return errInternalError.WithError(err).Annotate("failed to json.Marshal")
+	}
 	log.Infof(ctx, "backup req: %s", bodyBytes)
 	bodyBuffer := bytes.NewBuffer(bodyBytes)
 	url := fmt.Sprintf("https://datastore.googleapis.com/v1/projects/%s:export", projID)
@@ -319,9 +318,9 @@ func (s *server) BackupDatastore(ctx context.Context, w http.ResponseWriter, r *
 	backupReq.Header.Add("Content-Type", "application/json")
 	backupReq.Header.Add("Authorization", "Bearer "+accessToken)
 	// Results
-	result, err := urlfetch.Client(ctx).Do(backupReq)
+	result, err := http.DefaultClient.Do(backupReq)
 	if err != nil {
-		return errInternalError.WithError(err).Annotate("failed to urlfetch.Client.Do")
+		return errInternalError.WithError(err).Annotate("failed to http.Do")
 	}
 	reply, _ := ioutil.ReadAll(result.Body)
 	log.Infof(ctx, "Reply: %s", reply)

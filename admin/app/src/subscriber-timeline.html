@@ -53,7 +53,10 @@
               </td>
               <td>[[log.timestampString]]</td>
               <td>[[log.basic_payload.title]]</td>
-              <td>[[log.basic_payload.description]]</td>
+              <td>
+                <!-- [[log.basic_payload.description]] -->
+                <div inner-h-t-m-l="[[log.basic_payload.descriptionHTML]]"></div>
+              </td>
             </tr>
           </template>
         </tbody>
@@ -95,6 +98,7 @@
           for (var i = 0; i < logs.length; i++) {
             logs[i].icon = this._getIcon(logs[i].type, logs[i].action);
             logs[i].timestampString = this._getTimestampString(logs[i].timestamp)
+            logs[i].basic_payload.descriptionHTML = logs[i].basic_payload.description.replace(/;;;/g, '<br>');
           }
           this.logs = logs;
         }

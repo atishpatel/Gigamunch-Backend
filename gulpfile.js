@@ -40,10 +40,8 @@ function buildProto(file, path, callback) {
         "bool": "boolean",
         "string": "string",
         "bytes": "string",
-        "Error.Error": "Error",
-        "Log.Log": "Log",
-        "Address.Address": "Address",
         "Code": "number",
+        "interface Error {": "",
       };
       if (types[p]) {
         return types[p];
@@ -74,7 +72,14 @@ function buildProto(file, path, callback) {
       return `${indentChar.repeat(indent)}${tokens[1]}: ${protoToTsType(tokens[0])}${ isRepeated ? "[]" : ""}`;
     }
     let parsed = "";
+    if (file.path.indexOf('Common.proto') > 0) {
+      parsed += "declare namespace Common {\n";
+    }
+    if (file.path.indexOf('SubAPI.proto') > 0) {
+      parsed += "declare namespace SubAPI {\n";
+    }
     let pb = file.contents.toString();
+
     let inMessage = false;
     for (const line of pb.split("\n")) {
       if (line.indexOf('message') !== -1) {
@@ -87,6 +92,9 @@ function buildProto(file, path, callback) {
       if (line.indexOf('}') !== -1) {
         inMessage = false;
       }
+    }
+    if (file.path.indexOf('Common.proto') > 0 || file.path.indexOf('SubAPI.proto') > 0) {
+      parsed += "}";
     }
     file.contents = Buffer(parsed)
     file.path = file.path.replace('proto', 'd.ts')

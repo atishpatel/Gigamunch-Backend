@@ -12,7 +12,7 @@ indexes:
 
 - kind: logging
   properties:
-  - name: UserID
+  - name: UserIDString
   - name: Timestamp
     direction: desc
 
@@ -21,3 +21,8 @@ indexes:
   - name: UserEmail
   - name: Timestamp
     direction: desc
+
+- kind: Subscriber
+  properties:
+  - name: Active
+  - name: PlanWeekday

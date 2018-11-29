@@ -9,8 +9,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"golang.org/x/net/context"
 	"googlemaps.github.io/maps"
-
-	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -105,7 +103,7 @@ func GetAddress(ctx context.Context, addressString, apt string) (*common.Address
 	if err != nil {
 		return nil, errMaps.WithError(err).Wrap("cannot get geopoint from address")
 	}
-	if mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated) {
+	if len(mapsGeocodeResults) >= 1 || (mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated)) {
 		return nil, errInvalidParameter.WithMessage("Address is not valid. It must be a house address.")
 	}
 	location := mapsGeocodeResults[0].Geometry.Location
@@ -171,7 +169,7 @@ func getMapsClient(ctx context.Context) (*maps.Client, error) {
 		serverKey = config.GetServerKey(ctx)
 	}
 	var err error
-	mapsClient, err := maps.NewClient(maps.WithAPIKey(serverKey), maps.WithHTTPClient(urlfetch.Client(ctx)))
+	mapsClient, err := maps.NewClient(maps.WithAPIKey(serverKey))
 	if err != nil {
 		return nil, errMapsConnect.WithError(err).Wrap("cannot get new maps client")
 	}

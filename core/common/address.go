@@ -8,10 +8,10 @@ import (
 // Address represents a location with GeoPoints and address
 type Address struct {
 	APT      string `json:"apt" datastore:",noindex"`
-	Street   string `json:"street" datastore:",noindex"`
-	City     string `json:"city" datastore:",noindex"`
-	State    string `json:"state" datastore:",noindex"`
-	Zip      string `json:"zip" datastore:",noindex"`
+	Street   string `json:"street" datastore:",index"`
+	City     string `json:"city" datastore:",index"`
+	State    string `json:"state" datastore:",index"`
+	Zip      string `json:"zip" datastore:",index"`
 	Country  string `json:"country" datastore:",noindex"`
 	GeoPoint        // embedded
 }
@@ -27,8 +27,8 @@ func (a Address) StringNoAPT() string {
 
 // GeoPoint represents a location as latitude/longitude in degrees.
 type GeoPoint struct {
-	Latitude  float64 `json:"latitude,string" datastore:",noindex"`
-	Longitude float64 `json:"longitude,string" datastore:",noindex"`
+	Latitude  float64 `json:"latitude,string" datastore:",index"`
+	Longitude float64 `json:"longitude,string" datastore:",index"`
 }
 
 // String returns Latitude,Longitude
@@ -49,8 +49,8 @@ func (g GeoPoint) GreatCircleDistance(p2 GeoPoint) float32 {
 	lat1 := (g.Latitude) * (math.Pi / 180.0)
 	lat2 := (p2.Latitude) * (math.Pi / 180.0)
 
-	a1 := math.Sin(dLat/2) * math.Sin(dLat/2)
-	a2 := math.Sin(dLon/2) * math.Sin(dLon/2) * math.Cos(lat1) * math.Cos(lat2)
+	a1 := math.Sin(dLat/2.0) * math.Sin(dLat/2.0)
+	a2 := math.Sin(dLon/2.0) * math.Sin(dLon/2.0) * math.Cos(lat1) * math.Cos(lat2)
 
 	a := a1 + a2
 

@@ -39,8 +39,9 @@
       </style>
     </shared-styles>
     <paper-checkbox checked="{{retention}}">Retention Percent View</paper-checkbox>
-    <paper-checkbox checked="{{showFull}}">Show full</paper-checkbox>
-    <table class="striped cohort-table">
+    <paper-checkbox checked="{{showFull}}">Show table</paper-checkbox>
+    <table class="striped cohort-table"
+           hidden$="[[!showFull]]">
       <thead>
         <tr>
           <th>Week</th>
@@ -64,7 +65,7 @@
         <template is="dom-repeat"
                   items="[[_cohort.cohort_rows]]"
                   as="rows">
-          <tr hidden$="[[!showFull]]">
+          <tr>
             <td>[[rows.label]]</td>
             <template is="dom-repeat"
                       items="[[rows.cohort_cells]]"
@@ -79,7 +80,7 @@
             </template>
           </tr>
         </template>
-        <template is="dom-repeat"
+        <!-- <template is="dom-repeat"
                   items="[[_cohort.short_cohort_rows]]"
                   as="rows">
           <tr hidden$="[[showFull]]">
@@ -96,7 +97,7 @@
                   style="background-color: [[cell.backgroundColor]]">[[cell.retentionPercent]]</td>
             </template>
           </tr>
-        </template>
+        </template> -->
       </tbody>
     </table>
   </template>
@@ -145,11 +146,11 @@
             }
           }
           cohort.averageRetention = [];
-          for (let i = 0; i < cohort.average_retention.length; i++) {
+          for (let i = 0; i < cohort.summary.length; i++) {
             cohort.averageRetention.push({
               index: i,
-              value: (cohort.average_retention[i] * 100).toFixed(1) + '%',
-              backgroundColor: this._getColor(cohort.average_retention[i]),
+              value: (cohort.summary[i].average_retention * 100).toFixed(1) + '%',
+              backgroundColor: this._getColor(cohort.summary[i].average_retention),
             });
           }
           cohort.short_cohort_rows = cohort.cohort_rows.slice(-10, cohort.cohort_rows.length);

@@ -4,6 +4,8 @@
       href="../bower_components/paper-button/paper-button.html">
 <link rel="import"
       href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import"
+      href="../bower_components/paper-progress/paper-progress.html">
 
 <link rel="import"
       href="shared-styles.html">
@@ -31,6 +33,31 @@
           color: white;
         }
 
+        .summary-column {
+          color: #CFD8DC;
+        }
+
+        .edit-progress-section {
+          /* display: flex; */
+          padding-bottom: 8px;
+        }
+
+        .edit-progress-section:nth-child(1) paper-progress {
+          --paper-progress-active-color: #db4437;
+        }
+
+        .edit-progress-section:nth-child(2) paper-progress {
+          --paper-progress-active-color: #f4b400;
+        }
+
+        .edit-progress-section:nth-child(3) paper-progress {
+          --paper-progress-active-color: #0f9d58;
+        }
+
+        .edit-progress-section:nth-child(4) paper-progress {
+          --paper-progress-active-color: #4285f4;
+        }
+
       </style>
     </shared-styles>
 
@@ -40,7 +67,8 @@
                      active="[[loading]]">
       </paper-spinner>
 
-      <a href="execution"  class="waves-effect btn">Create new</a>
+      <a href="execution?mode=captain"
+         class="waves-effect btn">Create new</a>
 
       <table class="striped executions-table">
         <thead>
@@ -50,6 +78,9 @@
             <th>Date</th>
             <th>City, Country</th>
             <th>Culture Cook</th>
+            <th>Summary</th>
+            <th>Edit</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -61,9 +92,44 @@
                 <i class="material-icons"
                    style="font-size: 42px;">[[execution.icon]]</i>
               </td>
-              <td><a href="execution/[[execution.id]]">[[execution.date]]</a></td>
+              <td>[[execution.date]]</td>
               <td>[[execution.culture.flag_emoji]] [[execution.culture.city]], [[execution.culture.country]]</td>
               <td>[[execution.culture_cook.first_name]] [[execution.culture_cook.last_name]]</td>
+              <td class="summary-column"
+                  inner-h-t-m-l="[[execution.summary_errors]]">
+              </td>
+              <td>
+                <div class="edit-progress-section">
+                  <a href="execution/[[execution.id]]?mode=head_chef">
+                    <span>Head Chef (Mike)</span>
+                    <paper-progress value="[[execution.progress.head_chef]]"></paper-progress>
+                  </a>
+                </div>
+                <div class="edit-progress-section">
+                  <a href="execution/[[execution.id]]?mode=content_writer">
+                    <span>Content Writer (Emily)</span>
+                    <paper-progress value="[[execution.progress.content_writer]]"></paper-progress>
+                  </a>
+                </div>
+                <div class="edit-progress-section">
+                  <a href="execution/[[execution.id]]?mode=culture_guide">
+                    <span>Culture Guide (Chris)</span>
+                    <paper-progress value="[[execution.progress.culture_guide]]"></paper-progress>
+                  </a>
+                </div>
+              </td>
+              <td>
+                <a target="_blank"
+                   href="/sub/dinner/[[execution.id]]">
+                  <i class="material-icons"
+                  style="font-size: 42px;">remove_red_eye</i>
+                </a>
+                <a target="_blank"
+                   href="execution-preview/[[execution.id]]">
+                  <i class="material-icons"
+                  style="font-size: 42px;">code</i>
+                </a>
+              </td>
             </tr>
           </template>
         </tbody>
@@ -111,11 +177,31 @@
           }
           let executions = resp.executions;
           for (let i = 0; i < executions.length; i++) {
+
             if (executions[i].publish) {
               executions[i].icon = 'public';
             } else {
               executions[i].icon = 'short_text';
             }
+            // Add errors
+            let summaryErrors = '';
+
+            function addSummaryError(message, isError) {
+              let style = '';
+              if (isError) {
+                style = 'color:#db4437'
+              }
+              summaryErrors += `<span style="${style}">${message}</span><br>`;
+            }
+
+            for (let j = 0; j < resp.progress[i].summary.length; j++) {
+              addSummaryError(resp.progress[i].summary[j].message, resp.progress[i].summary[j].is_error);
+            }
+
+            executions[i].summary_errors = summaryErrors;
+
+            // Add progress bards
+            executions[i].progress = resp.progress[i];
           }
 
           this.executions = executions;

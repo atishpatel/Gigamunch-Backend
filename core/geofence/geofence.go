@@ -1,19 +1,34 @@
 package geofence
 
+// ServizeZone geofence should look like:
+// type Geofence struct {
+// 	ID           : common.location.String(),
+// 	Name         : common.location.String(),
+// 	Type         : geofence.ServiceZone,
+// 	Points       : []Point,
+// }
+//
+// Driver geofence should look like:
+// type Geofence struct {
+// 	ID           : common.location.String(),
+// 	Name         : common.location.String(),
+// 	Type         : geofence.ServiceZone,
+// 	Points       : []Point,
+// }
+
 import (
 	"context"
 	"fmt"
 
-	"cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/jmoiron/sqlx"
 )
 
 var (
-	standAppEngine bool
-	db             common.DB
-	kind           = "Geofence"
+	kind = "Geofence"
 )
 
 var (
@@ -24,17 +39,33 @@ var (
 
 // Client is a client for manipulating subscribers.
 type Client struct {
-	ctx context.Context
-	log *logging.Client
+	ctx        context.Context
+	log        *logging.Client
+	sqlDB      *sqlx.DB
+	db         common.DB
+	serverInfo *common.ServerInfo
 }
 
 type Type string
 
 var (
-	JoyDriv       Type = "JoyDriv"
-	FounderDriver Type = "FounderDriver"
-	ServiceZone   Type = "ServiceZone"
+	DeliveryDriverNames deliveryDriverNames = deliveryDriverNames{}
 )
+
+const (
+	DeliveryDriverZone Type = "DeliveryDriver"
+	ServiceZone        Type = "ServiceZone"
+)
+
+type deliveryDriverNames struct{}
+
+func (d deliveryDriverNames) Founder() string {
+	return "Founder"
+}
+
+func (d deliveryDriverNames) JoyDriv() string {
+	return "JoyDriv"
+}
 
 // Point is a point.
 type Point struct {
@@ -46,46 +77,45 @@ type Geofence struct {
 	ID          string  `json:"id" datastore:",noindex"`
 	Name        string  `json:"name" datastore:",index"`
 	Type        Type    `json:"type" datastore:",index"`
-	DriverID    int64   `json:"driver_id" datastore:",index"`
 	DriverEmail string  `json:"driver_email" datastore:",index"`
 	DriverName  string  `json:"driver_name" datastore:",noindex"`
 	Points      []Point `json:"points" datastore:",noindex"`
 }
 
 // NewClient gives you a new client.
-func NewClient(ctx context.Context, log *logging.Client) (*Client, error) {
-	var err error
-	if standAppEngine {
-		err = setup(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
+func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sqlx.DB, serverInfo *common.ServerInfo) (*Client, error) {
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
+	if sqlC == nil {
+		return nil, fmt.Errorf("sqlDB cannot be nil")
+	}
+	if dbC == nil {
+		return nil, fmt.Errorf("failed to get db")
+	}
+	if serverInfo == nil {
+		return nil, errInternal.Annotate("failed to get server info")
+	}
 	return &Client{
-		ctx: ctx,
-		log: log,
+		ctx:        ctx,
+		log:        log,
+		db:         dbC,
+		sqlDB:      sqlC,
+		serverInfo: serverInfo,
 	}, nil
 }
 
-// AddGeofence adds a geofence zone.
-func (c *Client) AddGeofence(ctx context.Context, fence *Geofence) error {
-	if fence.ID == "" && fence.DriverID == 0 {
+// UpdateGeofence creates or updates a geofence zone.
+func (c *Client) UpdateGeofence(ctx context.Context, fence *Geofence) error {
+	if fence.ID == "" {
 		return errBadRequest.Annotate("id is empty")
 	}
 	polygon := NewPolygon(fence.Points)
 	if !polygon.IsClosed() {
 		return errBadRequest.Annotate("polygon is closed")
 	}
-	var key common.Key
-	if fence.ID == "" {
-		key = db.NameKey(ctx, kind, fence.ID)
-	} else {
-		key = db.IDKey(ctx, kind, fence.DriverID)
-	}
-	_, err := db.Put(ctx, key, fence)
+	key := c.db.NameKey(ctx, kind, fence.ID)
+	_, err := c.db.Put(ctx, key, fence)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to db.Put")
 	}
@@ -98,51 +128,33 @@ func (c *Client) GetDriverZone(ctx context.Context, driverID int64) error {
 		return errBadRequest.Annotate("invalid driverID")
 	}
 	fence := new(Geofence)
-	_, err := db.QueryFilter(ctx, kind, 0, 1, "DriverID=", driverID, fence)
+	_, err := c.db.QueryFilter(ctx, kind, 0, 1, "DriverID=", driverID, fence)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to db.QueryFilter")
 	}
 	return nil
 }
 
-// InNashvilleZone checks if an address is in Nashville zone.
-func (c *Client) InNashvilleZone(ctx context.Context, addr *common.Address) (bool, error) {
+// InServizeZone checks if an address is in Service zone.
+func (c *Client) InServiceZone(addr *common.Address) (bool, error) {
 	var err error
 	if !addr.GeoPoint.Valid() {
-		// TODO get geopoint form address
-		err = maps.GetGeopoint(ctx, addr)
+		err = maps.GetGeopoint(c.ctx, addr)
 		if err != nil {
 			return false, errors.Annotate(err, "failed to maps.GetGeopoint")
 		}
 	}
-	fence := new(Geofence)
-	key := db.NameKey(ctx, kind, common.Nashville.String())
-	err = db.Get(ctx, key, fence)
+	var zones []*Geofence
+	_, err = c.db.QueryFilter(c.ctx, kind, 0, 100, "Type=", ServiceZone, &zones)
 	if err != nil {
-		return false, errDatastore.WithError(err).Annotate("failed to db.Get")
+		return false, errDatastore.WithError(err).Annotate("failed to db.QueryFilter")
 	}
-	polygon := NewPolygon(fence.Points)
-	contains := polygon.Contains(Point{GeoPoint: addr.GeoPoint})
-	return contains, nil
-}
-
-// Setup sets up the logging package.
-func Setup(ctx context.Context, standardAppEngine bool, dbC common.DB) error {
-	var err error
-	standAppEngine = standardAppEngine
-	if !standAppEngine {
-		err = setup(ctx)
-		if err != nil {
-			return err
+	for _, zone := range zones {
+		polygon := NewPolygon(zone.Points)
+		contains := polygon.Contains(Point{GeoPoint: addr.GeoPoint})
+		if contains {
+			return true, nil
 		}
 	}
-	if dbC == nil {
-		return fmt.Errorf("db cannot be nil for sub")
-	}
-	db = dbC
-	return nil
-}
-
-func setup(ctx context.Context) error {
-	return nil
+	return false, nil
 }

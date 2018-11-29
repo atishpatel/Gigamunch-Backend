@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 
 // SetAdmin makes a user an admin.
 func (s *server) SetAdmin(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.SetAdminReq)
 	var err error
+	req := new(pb.SetAdminReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {

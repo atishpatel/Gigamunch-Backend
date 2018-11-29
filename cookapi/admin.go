@@ -5,10 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/utils"
-
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
 
 	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
@@ -19,7 +16,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/maps"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -247,7 +243,7 @@ func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSM
 				From:     "Gigamunch",
 				To:       s.PhoneNumber,
 			}
-			log.SubMessage(0, s.Email, payload)
+			log.SubMessage(s.ID, s.Email, payload)
 		}
 	}
 	return resp, nil
@@ -414,36 +410,6 @@ func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 	// err = subC.Skip(req.Date, req.SubEmail, "Admin skip.")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to activity.Skip")
-		return resp, nil
-	}
-	return resp, nil
-}
-
-// RefundAndSkipSubLog runs subold.RefundAndSkip.
-func (service *Service) RefundAndSkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "RefundAndSkipSubLog", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/refundandskipsublog")
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	activityC, err := activity.NewClient(ctx, log, db, nil, serverInfo)
-	err = activityC.RefundAndSkip(req.Date, req.SubEmail)
-	// subC := subold.New(ctx)
-	// err = subC.RefundAndSkip(req.Date, req.SubEmail)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to activity.RefundAndSkip")
 		return resp, nil
 	}
 	return resp, nil
@@ -722,57 +688,6 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 	return resp, nil
 }
 
-// UpdateAddresses updates addresses.
-func (service *Service) UpdateAddresses(ctx context.Context, req *GigatokenReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "UpdateAddresses", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	subC := subold.New(ctx)
-	subs, err := subC.GetHasSubscribed(time.Now())
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subold.GetHasSubscribed")
-		return resp, nil
-	}
-	count := 0
-	// for i := 0; i < len(subs); i++ {
-	for i := len(subs) - 1; i >= 0; i-- {
-		s := subs[i]
-		if s.IsSubscribed == false {
-			continue
-		}
-		oldLat := s.Address.Latitude
-		oldLong := s.Address.Longitude
-		err = maps.GetGeopointFromAddress(ctx, &s.Address)
-		if err != nil {
-			utils.Errorf(ctx, "failed to maps.GetGeopointFromAddress for %s with address %s error: %s", s.Email, s.Address.String(), err)
-			continue
-		}
-		if oldLat != s.Address.Latitude || oldLong != s.Address.Longitude {
-			utils.Infof(ctx, "updating sub %s from %.6f,%.6f to %.6f,%.6f", s.Email, oldLat, oldLong, s.Address.Latitude, s.Address.Longitude)
-			key := datastore.NewKey(ctx, "ScheduleSignUp", s.Email, 0, nil)
-			_, err = datastore.Put(ctx, key, &s)
-			if err != nil {
-				resp.Err = errors.GetErrorWithCode(err).Wrap("failed to datastore.Put")
-				break
-			}
-		}
-		count++
-		if count == 25 {
-			time.Sleep(500 * time.Millisecond)
-			count = 0
-		}
-	}
-	return resp, nil
-}
-
 // AddToProcessSubscriptionQueueReq is a request for AddToProcessSubscriptionQueue.
 type AddToProcessSubscriptionQueueReq struct {
 	SubLogReq
@@ -845,57 +760,6 @@ func (e *SendEmailReq) GetEmail() string {
 // GetFirstDinnerDate returns the first dinner for the subscriber.
 func (e *SendEmailReq) GetFirstDinnerDate() time.Time {
 	return e.FirstDinnerDate
-}
-
-type ReplaceSubEmailReq struct {
-	GigatokenReq
-	OldEmail string `json:"old_email"`
-	NewEmail string `json:"new_email"`
-}
-
-// ReplaceSubEmail clones a sub's info with a new email address.
-func (service *Service) ReplaceSubEmail(ctx context.Context, req *ReplaceSubEmailReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "ReplaceSubEmail", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	i := new(subold.SubscriptionSignUp)
-	err = datastore.RunInTransaction(ctx, func(tctx context.Context) error {
-		keyOld := datastore.NewKey(tctx, "ScheduleSignUp", req.OldEmail, 0, nil)
-		err = datastore.Get(tctx, keyOld, i)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 400, Message: "Invalid parameter."}.WithError(err).Annotatef("failed to find email: %s", req.OldEmail)
-		}
-		i.Email = req.NewEmail
-		keyNew := datastore.NewKey(tctx, "ScheduleSignUp", req.NewEmail, 0, nil)
-		_, err = datastore.Put(tctx, keyNew, i)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to put: %s", req.NewEmail)
-		}
-		subC := subold.New(tctx)
-		err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
-		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
-		}
-		// TODO: delete old one instead
-		err = datastore.Delete(tctx, keyOld)
-		if err != nil {
-			return errors.ErrorWithCode{Code: 500, Message: "Datastore error."}.WithError(err).Annotatef("failed to delete: %s", req.OldEmail)
-		}
-		return nil
-	}, &datastore.TransactionOptions{XG: true})
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to run in transaction")
-		return resp, nil
-	}
-	return resp, nil
 }
 
 func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {

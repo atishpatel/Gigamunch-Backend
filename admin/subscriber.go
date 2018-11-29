@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -7,9 +7,10 @@ import (
 	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	pbshared "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -20,8 +21,8 @@ import (
 
 // SendCustomerSMS sends an CustomerSMS from Gigamunch to number.
 func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.SendCustomerSMSReq)
 	var err error
+	req := new(pb.SendCustomerSMSReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -30,16 +31,11 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	}
 	// end decode request
 
-	dilm := "{{name}}"
+	nameDilm := "{{name}}"
 	firstNameDilm := "{{first_name}}"
+	emailDilm := "{{email}}"
 
 	messageC := message.New(ctx)
-	// var emails []string
-	// for _, email := range req.Emails {
-	// 	if email != "" {
-	// 		emails = append(emails, email)
-	// 	}
-	// }
 	subC := subold.New(ctx)
 	subs, err := subC.GetSubscribers(req.Emails)
 	if err != nil {
@@ -55,8 +51,9 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		}
 		name = strings.Title(name)
 		msg := req.Message
-		msg = strings.Replace(msg, dilm, name, -1)
+		msg = strings.Replace(msg, nameDilm, name, -1)
 		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
+		msg = strings.Replace(msg, emailDilm, s.Email, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
 		if err != nil {
 			return errors.Annotate(err, "failed ot message.SendSMS")
@@ -69,7 +66,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 				From:     "Gigamunch",
 				To:       s.PhoneNumber,
 			}
-			log.SubMessage(0, s.Email, payload)
+			log.SubMessage(s.ID, s.Email, payload)
 		}
 	}
 	return nil
@@ -77,8 +74,8 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 
 // GetSubscriber gets all info about a subscriber from their email address
 func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetSubscriberReq)
 	var err error
+	req := new(pb.GetSubscriberReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -105,8 +102,8 @@ func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *ht
 
 // GetHasSubscribed gets all subscribers.
 func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetHasSubscribedReq)
 	var err error
+	req := new(pb.GetHasSubscribedReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -133,8 +130,8 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 
 // ActivateSubscriber activates a subscriber account.
 func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.ActivateSubscriberReq)
 	var err error
+	req := new(pb.ActivateSubscriberReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -159,8 +156,8 @@ func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, 
 
 // DeactivateSubscriber activates a subscriber account.
 func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.DeactivateSubscriberReq)
 	var err error
+	req := new(pb.DeactivateSubscriberReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -182,8 +179,9 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 
 // UpdateDrip updates drip.
 func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.UpdateDripReq)
+	// TODO: Rename to AddToUpdateDripQueue
 	var err error
+	req := new(pb.UpdateDripReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -200,7 +198,54 @@ func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.
 			return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
 		}
 	}
+	return nil
+}
 
+// ReplaceSubscriberEmail replaces a subscriber's old email with a new email.
+func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ReplaceSubscriberEmailReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	req.NewEmail = strings.ToLower(req.NewEmail)
+	subnewC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	snew, err := subnewC.GetByEmail(req.OldEmail)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.GetByEmail")
+	}
+	for i := range snew.EmailPrefs {
+		if snew.EmailPrefs[i].Email == req.OldEmail {
+			snew.EmailPrefs[i].Email = req.NewEmail
+		}
+	}
+	err = subnewC.Update(snew)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Update")
+	}
+	subC := subold.New(ctx)
+	err = subC.UpdateEmail(req.OldEmail, req.NewEmail)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to subold.UpdateEmail")
+	}
+	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to mail.NewClient")
+	}
+	err = mailC.UpdateUser(&mail.UserFields{
+		Email:    req.OldEmail,
+		NewEmail: req.NewEmail,
+	})
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to mail.Update")
+	}
 	return nil
 }
 
@@ -220,8 +265,8 @@ func pbSubscriber(subscriber *subold.SubscriptionSignUp) *pb.Subscriber {
 		FirstName:          subscriber.FirstName,
 		LastName:           subscriber.LastName,
 		Address:            pbAddress(&subscriber.Address),
-		CustomerId:         subscriber.CustomerID,
-		SubscriptionIds:    subscriber.SubscriptionIDs,
+		CustomerID:         subscriber.CustomerID,
+		SubscriptionIDs:    subscriber.SubscriptionIDs,
 		FirstPaymentDate:   subscriber.FirstPaymentDate.Format(time.RFC3339),
 		IsSubscribed:       subscriber.IsSubscribed,
 		SubscriptionDate:   subscriber.SubscriptionDate.Format(time.RFC3339),
@@ -236,7 +281,7 @@ func pbSubscriber(subscriber *subold.SubscriptionSignUp) *pb.Subscriber {
 		Reference:          subscriber.Reference,
 		PhoneNumber:        subscriber.PhoneNumber,
 		DeliveryTips:       subscriber.DeliveryTips,
-		BagReminderSms:     subscriber.BagReminderSMS,
+		BagReminderSMS:     subscriber.BagReminderSMS,
 		// gift
 		NumGiftDinners: int32(subscriber.NumGiftDinners),
 		ReferenceEmail: subscriber.ReferenceEmail,
@@ -249,8 +294,8 @@ func pbSubscriber(subscriber *subold.SubscriptionSignUp) *pb.Subscriber {
 	}
 }
 
-func pbAddress(address *types.Address) *pbshared.Address {
-	return &pbshared.Address{
+func pbAddress(address *types.Address) *pbcommon.Address {
+	return &pbcommon.Address{
 		Apt:         address.APT,
 		Street:      address.Street,
 		City:        address.City,

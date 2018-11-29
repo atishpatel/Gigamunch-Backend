@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"encoding/json"
@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
@@ -17,8 +18,8 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/server"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
@@ -28,7 +29,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
-	"github.com/gorilla/schema"
 	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 )
@@ -37,9 +37,9 @@ var cookSignupPage []byte
 
 var projID string
 
-func init() {
-	// TODO: Remove
+func main() {
 	var err error
+	// TODO: Remove
 	cookSignupPage, err = ioutil.ReadFile("signedUp.html")
 	if err != nil {
 		log.Fatalf("Failed to read cookSignup page %#v", err)
@@ -64,11 +64,14 @@ func init() {
 	// route api
 	http.HandleFunc("/api/v1/Login", s.handler(s.Login))
 	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
+	http.HandleFunc("/api/v2/SubmitCheckout", s.handler(s.SubmitCheckoutv2))
 	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
 	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
 	http.HandleFunc("/api/v1/DeviceCheckin", handler(DeviceCheckin))
 
 	http.Handle("/", r)
+
+	appengine.Main()
 
 }
 
@@ -177,11 +180,9 @@ func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 
 // server
 type server struct {
-	once       sync.Once
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
-	log        *logging.Client
 }
 
 func (s *server) setup() error {
@@ -196,13 +197,15 @@ func (s *server) setup() error {
 		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
 	}
 	if appengine.IsDevAppServer() {
-		sqlConnectionString = "root@/gigamunch"
+		sqlConnectionString = "server:gigamunch@/gigamunch"
 	}
-	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString)
+	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
 	if err != nil {
-		if !appengine.IsDevAppServer() { // TODO: remove
-			return fmt.Errorf("failed to get sql database client: %+v", err)
-		}
+		return fmt.Errorf("failed to get sql database client: %+v", err)
+	}
+	s.db, err = db.NewClient(context.Background(), projID, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get database client: %+v", err)
 	}
 	s.serverInfo = &common.ServerInfo{
 		ProjectID:           projID,
@@ -228,17 +231,10 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		// get context
 		ctx := appengine.NewContext(r)
-		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
-		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			// TODO:
-			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
-			return
-		}
 		// create logging client
-		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
+		log, err := logging.NewClient(ctx, "server", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
 			errString := fmt.Sprintf("failed to get new logging client: %+v", err)
 			logging.Errorf(ctx, errString)
@@ -253,13 +249,13 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		// Log errors
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
-			sharedErr = &shared.Error{
-				Code: shared.Code_Success,
+			sharedErr = &pbcommon.Error{
+				Code: pbcommon.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
+		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr))
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {
@@ -281,36 +277,16 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 
 // Request helpers
 func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(v, r.URL.Query())
-		logging.Infof(ctx, "Query: %+v", r.URL.Query())
-		if err != nil {
-			return err
-		}
-	} else {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return err
-		}
-		logging.Infof(ctx, "Body: %s", body)
-		err = json.Unmarshal(body, v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return serverhelper.DecodeRequest(ctx, r, v)
 }
 
-func failedToDecode(err error) *pb.ErrorOnlyResp {
-	return &pb.ErrorOnlyResp{
-		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
-	}
+func failedToDecode(err error) *pbcommon.ErrorOnlyResp {
+	return serverhelper.FailedToDecode(err)
 }
 
 // Response is a response to a rpc call. All responses contain an error.
 type Response interface {
-	GetError() *shared.Error
+	GetError() *pbcommon.Error
 }
 
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response

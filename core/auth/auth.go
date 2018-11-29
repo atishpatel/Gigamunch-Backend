@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"strconv"
 	"strings"
 
 	fb "firebase.google.com/go"
@@ -85,11 +84,7 @@ func (c *Client) Verify(token string) (*common.User, error) {
 	if email == "" {
 		return nil, errInvalidFBToken.WithMessage("User must have email.").Annotate("firebase token does not have email")
 	}
-	var userID int64
-	userIDTmp, ok := claims[userIDClaim]
-	if ok {
-		userID, _ = strconv.ParseInt(userIDTmp.(string), 2, 64)
-	}
+	userID := getString(claims, userIDClaim)
 	var admin bool
 	adminTmp, ok := claims["admin"]
 	if ok {
@@ -132,12 +127,12 @@ func (c *Client) SetAdmin(authIDOrEmail string, active bool) error {
 }
 
 // UpdateUserID sets the user id for a token.
-func (c *Client) UpdateUserID(authIDOrEmail string, userID int64) error {
+func (c *Client) UpdateUserID(authIDOrEmail string, userID string) error {
 	return c.AddCustomClaim(authIDOrEmail, userIDClaim, userID)
 }
 
-// UpdateUserName updates the user name in token.
-func (c *Client) UpdateUserName(authID, firstName, lastName string) error {
+// UpdateUser updates the user's ID and name in token.
+func (c *Client) UpdateUser(authID, userID, email, firstName, lastName string) error {
 	var userRecord *fba.UserRecord
 	var err error
 	if strings.Contains(authID, "@") {
@@ -149,7 +144,20 @@ func (c *Client) UpdateUserName(authID, firstName, lastName string) error {
 		return errInvalidArgument.WithMessage("Invalid email")
 	}
 	userToUpdate := new(fba.UserToUpdate)
-	userToUpdate.DisplayName(firstName + delim + lastName)
+	if firstName != "" {
+		userToUpdate.DisplayName(firstName + delim + lastName)
+	}
+	if email != "" {
+		userToUpdate.Email(email)
+	}
+	if userID != "" {
+		claims := userRecord.CustomClaims
+		if claims == nil {
+			claims = make(map[string]interface{})
+		}
+		claims[userIDClaim] = userID
+		userToUpdate.CustomClaims(claims)
+	}
 	_, err = c.fbAuth.UpdateUser(c.ctx, userRecord.UID, userToUpdate)
 	if err != nil {
 		return errInternal.WithError(err).Annotate("failed to fbAuth.UpdateUser")

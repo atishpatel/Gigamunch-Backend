@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/appengine/urlfetch"
+	"github.com/atishpatel/Gigamunch-Backend/core/slack"
 
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -28,63 +28,49 @@ import (
 // SlackResp is a response to slack.
 type SlackResp struct {
 	Challenge string `json:"challenge"`
-	Text      string `json:"text"`
 }
 
 // GetError completes Response interface.
-func (s *SlackResp) GetError() *shared.Error {
+func (s *SlackResp) GetError() *pbcommon.Error {
 	return nil
 }
 
 // Slack is a webhook for slack messages.
 func (s *server) Slack(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
-	req := &struct {
-		Challenge string `json:"challenge"`
-		Event     struct {
-			Channel string `json:"channel"`
-			Text    string `json:"text"`
-		} `json:"event"`
-		Type string `json:"type"`
-	}{}
+	req := &slack.WebhookRequest{}
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
 		return failedToDecode(err)
 	}
-
 	// end decode request
 	resp := &SlackResp{
 		Challenge: req.Challenge,
 	}
-	if req.Type == "event_callback" && strings.Contains(req.Event.Text, "@") {
-		// add subscriber page link if there is an email
-		email := req.Event.Text[strings.Index(req.Event.Text, "<mailto:")+8 : strings.Index(req.Event.Text, "|")]
-		txt := fmt.Sprintf("{\"text\":\"https://eatgigamunch.com/admin/subscriber/%s\"}", email)
-		reader := strings.NewReader(txt)
-		client := urlfetch.Client(ctx)
-		rsp, err := client.Post("https://hooks.slack.com/services/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", "application/json", reader)
-		if err != nil {
-			log.Errorf(ctx, "failed to do POST resp: %+v", rsp)
-			log.Errorf(ctx, "failed to do POST err: %+v", err)
-		}
+	slackC, err := slack.NewClient(ctx, log, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to slack.NewClient")
 	}
-
+	err = slackC.HandleWebhook(req)
+	if err != nil {
+		return errors.Annotate(err, "failed to slack.HandleWebhook")
+	}
 	return resp
 }
 
 // TwilioSMS is a webhook for twilio messages.
 func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	err := r.ParseForm()
-	logging.Infof(ctx, "req body: %s err: %s", r.Form, err)
+	log.Infof(ctx, "req body: %s err: %s", r.Form, err)
 	from := r.FormValue("From")
 	from = sub.GetCleanPhoneNumber(from)
 	body := r.FormValue("Body")
-	var name, email string
+	var name, email, id string
 	subC := subold.NewWithLogging(ctx, log)
 
 	messageC := message.New(ctx)
-	if from == "615-545-4989" {
+	if message.EmployeeNumbers.IsEmployee(from) {
 		// From Gigamunch to Customer
 		splitBody := strings.Split(body, "::")
 		if len(splitBody) < 2 {
@@ -94,15 +80,18 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 		body = splitBody[1]
 		subs, err := subC.GetSubscribersByPhoneNumber(to)
 		if err != nil {
-			logging.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
+			log.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
 		}
 		if len(subs) > 0 {
-			name = subs[0].FirstName + " " + subs[0].LastName
 			email = subs[0].Email
+			id = subs[0].ID
 		}
 		err = messageC.SendDeliverySMS(to, body)
 		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to sub. Err: %+v", err)
+			err = messageC.SendDeliverySMS(from, fmt.Sprintf("failed to send sms to %s. Err: %+v", email, err))
+			if err != nil {
+				utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+			}
 		}
 		if email != "" {
 			payload := &logging.MessagePayload{
@@ -111,26 +100,24 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 				From:     "Gigamunch",
 				To:       to,
 			}
-			log.SubMessage(0, email, payload)
+			log.SubMessage(id, email, payload)
 		}
-		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Message successfuly send to %s.", splitBody[0]))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
-		}
+
 	} else {
 		// From Customer to Gigamunch
 		subs, err := subC.GetSubscribersByPhoneNumber(from)
 		if err != nil {
-			logging.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
+			log.Errorf(ctx, "failed to sub.GetSubscribersByPhoneNumber: %v", err)
 		}
 		if len(subs) > 0 {
 			name = subs[0].FirstName + " " + subs[0].LastName
 			email = subs[0].Email
+			id = subs[0].ID
 		}
 		// notify customer support agent
-		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
+		err = messageC.SendDeliverySMS(message.EmployeeNumbers.CustomerSupport(), fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
 		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+			utils.Criticalf(ctx, "failed to send sms to customer support. Err: %+v", err)
 		}
 		// log
 		if email != "" {
@@ -140,7 +127,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 				From:     sub.GetCleanPhoneNumber(from),
 				To:       "Gigamunch",
 			}
-			log.SubMessage(0, email, payload)
+			log.SubMessage(id, email, payload)
 		}
 		// check if rating
 		if email != "" && (strings.Contains(body, "-") || strings.Contains(body, "star") || strings.Contains(body, "rate") || strings.Contains(body, "rating") || len(body) < 5) {
@@ -153,7 +140,7 @@ func (s *server) TwilioSMS(ctx context.Context, w http.ResponseWriter, r *http.R
 					Rating:   int8(rating),
 					Comments: body,
 				}
-				log.SubRating(0, email, payload)
+				log.SubRating(id, email, payload)
 			}
 		}
 	}
@@ -192,6 +179,7 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 		utils.Criticalf(ctx, "failed to get subscriber email from typeform: %+v", err)
 		return errBadRequest.WithError(err).Annotate("failed to get subscriber email from typeform")
 	}
+	email = strings.Replace(email, " ", "+", -1) // replaces space with + in emails
 	ctx = context.WithValue(ctx, common.ContextUserEmail, email)
 	suboldC := subold.NewWithLogging(ctx, log)
 	subscriber, err := suboldC.GetSubscriber(email)

@@ -291,7 +291,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/AdminAPIGetLogsByEmailResp"
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
           }
         },
@@ -302,6 +302,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsByEmailReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetLogsByExecution": {
+      "post": {
+        "summary": "GetLogsByExecution returns a list of logs by ExecutionID.",
+        "operationId": "GetLogsByExecution",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByExecutionReq"
             }
           }
         ],
@@ -388,10 +415,10 @@
         ]
       }
     },
-    "/admin/api/v1/RefundAndSkipSublog": {
+    "/admin/api/v1/RefundActivity": {
       "post": {
-        "summary": "RefundAndSkipSublog refunds and skips a customer",
-        "operationId": "RefundAndSkipSublog",
+        "summary": "RefundActivity unskips a sub for a date.",
+        "operationId": "RefundActivity",
         "responses": {
           "200": {
             "description": "",
@@ -406,7 +433,61 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/AdminAPIRefundAndSkipSublogReq"
+              "$ref": "#/definitions/AdminAPIRefundActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/RefundAndSkipActivity": {
+      "post": {
+        "summary": "RefundAndSkipActivity unskips a sub for a date.",
+        "operationId": "RefundAndSkipActivity",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIRefundAndSkipActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ReplaceSubscriberEmail": {
+      "post": {
+        "summary": "ReplaceSubscriberEmail replaces a subscriber email with a new email.",
+        "operationId": "ReplaceSubscriberEmail",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIReplaceSubscriberEmailReq"
             }
           }
         ],
@@ -630,41 +711,6 @@
     }
   },
   "definitions": {
-    "AddressAddress": {
-      "type": "object",
-      "properties": {
-        "apt": {
-          "type": "string"
-        },
-        "street": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        },
-        "state": {
-          "type": "string"
-        },
-        "zip": {
-          "type": "string"
-        },
-        "country": {
-          "type": "string"
-        },
-        "latitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "longitude": {
-          "type": "number",
-          "format": "double"
-        },
-        "full_address": {
-          "type": "string"
-        }
-      },
-      "title": "The error object that gets returned with every"
-    },
     "AdminAPIActivateSubscriberReq": {
       "type": "object",
       "properties": {
@@ -676,69 +722,6 @@
           "title": "optional"
         }
       }
-    },
-    "AdminAPIContent": {
-      "type": "object",
-      "properties": {
-        "hero_image_url": {
-          "type": "string"
-        },
-        "cook_image_url": {
-          "type": "string"
-        },
-        "hands_plate_image_url": {
-          "type": "string"
-        },
-        "dinner_image_url": {
-          "type": "string"
-        },
-        "spotify_url": {
-          "type": "string"
-        },
-        "youtube_url": {
-          "type": "string"
-        }
-      },
-      "description": "Content is a collection of urls pointing to content realted to the execution."
-    },
-    "AdminAPICulture": {
-      "type": "object",
-      "properties": {
-        "country": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "nationality": {
-          "type": "string"
-        },
-        "greeting": {
-          "type": "string"
-        },
-        "flag_emoji": {
-          "type": "string"
-        }
-      },
-      "description": "Culture is the country in a culture execution."
-    },
-    "AdminAPICultureCook": {
-      "type": "object",
-      "properties": {
-        "first_name": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "story": {
-          "type": "string"
-        }
-      },
-      "description": "CultureCook is the culture cook for a culture execution."
     },
     "AdminAPIDeactivateSubscriberReq": {
       "type": "object",
@@ -782,7 +765,7 @@
           "type": "string"
         },
         "address": {
-          "$ref": "#/definitions/AddressAddress"
+          "$ref": "#/definitions/CommonAddress"
         },
         "delivery_notes": {
           "type": "string"
@@ -802,109 +785,14 @@
       },
       "title": "**********************\nDeliveries\n**********************"
     },
-    "AdminAPIDish": {
-      "type": "object",
-      "properties": {
-        "number": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "color": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "ingredients": {
-          "type": "string"
-        },
-        "is_for_vegetarian": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "is_for_non_vegetarian": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      },
-      "description": "Dish is a dish in a culture execution."
-    },
     "AdminAPIErrorOnlyResp": {
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       },
       "title": "**********************\nCommon\n**********************"
-    },
-    "AdminAPIExecution": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
-        "date": {
-          "type": "string"
-        },
-        "location": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "publish": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "created_datetime": {
-          "type": "string"
-        },
-        "culture": {
-          "$ref": "#/definitions/AdminAPICulture",
-          "title": "Info"
-        },
-        "content": {
-          "$ref": "#/definitions/AdminAPIContent"
-        },
-        "culture_cook": {
-          "$ref": "#/definitions/AdminAPICultureCook"
-        },
-        "dishes": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AdminAPIDish"
-          }
-        },
-        "has_pork": {
-          "type": "boolean",
-          "format": "boolean",
-          "title": "Diet"
-        },
-        "has_beef": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_chicken": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_weird_meat": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_fish": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "has_other_seafood": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      },
-      "title": "**********************\nExecution\n**********************"
     },
     "AdminAPIExecutionStats": {
       "type": "object",
@@ -991,7 +879,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
           "type": "array",
@@ -1016,7 +904,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "deliveries": {
           "type": "array",
@@ -1029,9 +917,8 @@
     "AdminAPIGetExecutionReq": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
+        "idOrDate": {
+          "type": "string"
         }
       }
     },
@@ -1039,10 +926,10 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/CommonExecution"
         }
       }
     },
@@ -1059,7 +946,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
           "$ref": "#/definitions/AdminAPIExecutionStats"
@@ -1077,18 +964,25 @@
           "type": "integer",
           "format": "int32"
         }
-      }
+      },
+      "title": "**********************\nExecution\n**********************"
     },
     "AdminAPIGetExecutionsResp": {
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "executions": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/AdminAPIExecution"
+            "$ref": "#/definitions/CommonExecution"
+          }
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonExecutionProgress"
           }
         }
       }
@@ -1105,7 +999,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "subscribers": {
           "type": "array",
@@ -1129,10 +1023,10 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "log": {
-          "$ref": "#/definitions/LogLog"
+          "$ref": "#/definitions/CommonLog"
         }
       }
     },
@@ -1152,17 +1046,12 @@
         }
       }
     },
-    "AdminAPIGetLogsByEmailResp": {
+    "AdminAPIGetLogsByExecutionReq": {
       "type": "object",
       "properties": {
-        "error": {
-          "$ref": "#/definitions/ErrorError"
-        },
-        "logs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LogLog"
-          }
+        "execution_id": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -1183,12 +1072,12 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "logs": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/LogLog"
+            "$ref": "#/definitions/CommonLog"
           }
         }
       }
@@ -1205,7 +1094,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "sublogs": {
           "type": "array",
@@ -1228,7 +1117,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "sublogs": {
           "type": "array",
@@ -1273,17 +1162,55 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
-    "AdminAPIRefundAndSkipSublogReq": {
+    "AdminAPIRefundActivityReq": {
       "type": "object",
       "properties": {
         "email": {
           "type": "string"
         },
         "date": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIRefundAndSkipActivityReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIReplaceSubscriberEmailReq": {
+      "type": "object",
+      "properties": {
+        "old_email": {
+          "type": "string"
+        },
+        "new_email": {
           "type": "string"
         }
       }
@@ -1330,7 +1257,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1397,6 +1324,10 @@
         "refunded": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "refunded_amount": {
+          "type": "number",
+          "format": "float"
         }
       },
       "title": "**********************\nSublogs\n**********************"
@@ -1420,7 +1351,7 @@
           "type": "string"
         },
         "address": {
-          "$ref": "#/definitions/AddressAddress"
+          "$ref": "#/definitions/CommonAddress"
         },
         "customer_id": {
           "type": "string"
@@ -1528,7 +1459,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1547,7 +1478,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         }
       }
     },
@@ -1570,7 +1501,10 @@
       "type": "object",
       "properties": {
         "execution": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/CommonExecution"
+        },
+        "mode": {
+          "type": "string"
         }
       }
     },
@@ -1578,10 +1512,10 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/CommonExecution"
         }
       }
     },
@@ -1589,7 +1523,7 @@
       "type": "object",
       "properties": {
         "execution_stats": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/AdminAPIExecutionStats"
         }
       }
     },
@@ -1597,44 +1531,48 @@
       "type": "object",
       "properties": {
         "error": {
-          "$ref": "#/definitions/ErrorError"
+          "$ref": "#/definitions/CommonError"
         },
         "execution_stats": {
-          "$ref": "#/definitions/AdminAPIExecution"
+          "$ref": "#/definitions/AdminAPIExecutionStats"
         }
       }
     },
-    "ErrorCode": {
-      "type": "string",
-      "enum": [
-        "Unknown",
-        "Success",
-        "InvalidArgument",
-        "NotFound",
-        "PermissionDenied",
-        "Unauthenticated",
-        "SignOut",
-        "Internal"
-      ],
-      "default": "Unknown",
-      "title": "- Unknown: TODO:  figure out codes"
-    },
-    "ErrorError": {
+    "CommonAddress": {
       "type": "object",
       "properties": {
-        "code": {
-          "$ref": "#/definitions/ErrorCode"
-        },
-        "message": {
+        "apt": {
           "type": "string"
         },
-        "detail": {
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "full_address": {
           "type": "string"
         }
-      },
-      "title": "The error object that gets returned with every"
+      }
     },
-    "LogBasicPayload": {
+    "CommonBasicPayload": {
       "type": "object",
       "properties": {
         "title": {
@@ -1645,7 +1583,350 @@
         }
       }
     },
-    "LogLog": {
+    "CommonCode": {
+      "type": "string",
+      "enum": [
+        "NoError",
+        "Unknown",
+        "Success",
+        "InvalidArgument",
+        "NotFound",
+        "PermissionDenied",
+        "Unauthenticated",
+        "SignOut",
+        "Internal"
+      ],
+      "default": "NoError",
+      "title": "- NoError: TODO:  figure out codes"
+    },
+    "CommonContent": {
+      "type": "object",
+      "properties": {
+        "landscape_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "hands_plate_non_veg_image_url": {
+          "type": "string"
+        },
+        "hands_plate_veg_image_url": {
+          "type": "string"
+        },
+        "dinner_non_veg_image_url": {
+          "type": "string"
+        },
+        "spotify_url": {
+          "type": "string"
+        },
+        "youtube_url": {
+          "type": "string"
+        },
+        "font_url": {
+          "type": "string"
+        },
+        "dinner_veg_image_url": {
+          "type": "string"
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "map_image_url": {
+          "type": "string"
+        },
+        "cook_face_image_url": {
+          "type": "string"
+        }
+      },
+      "description": "Content is a collection of urls pointing to content realted to the execution."
+    },
+    "CommonCulture": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "greeting": {
+          "type": "string"
+        },
+        "flag_emoji": {
+          "type": "string"
+        },
+        "description_preview": {
+          "type": "string"
+        }
+      },
+      "description": "Culture is the culture in a culture execution."
+    },
+    "CommonCultureCook": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "story": {
+          "type": "string"
+        },
+        "story_preview": {
+          "type": "string"
+        },
+        "q_and_a": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonQandA"
+          }
+        }
+      },
+      "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "CommonCultureGuide": {
+      "type": "object",
+      "properties": {
+        "info_boxes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonInfoBox"
+          }
+        },
+        "dinner_instructions": {
+          "type": "string"
+        },
+        "main_color": {
+          "type": "string"
+        },
+        "font_name": {
+          "type": "string"
+        },
+        "font_style": {
+          "type": "string"
+        },
+        "font_caps": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "vegetarian_dinner_instructions": {
+          "type": "string"
+        },
+        "font_name_post_script": {
+          "type": "string"
+        }
+      },
+      "description": "CultureGuide is content related to the culture guide."
+    },
+    "CommonDish": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "is_for_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_on_main_plate": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "image_url": {
+          "type": "string"
+        },
+        "description_preview": {
+          "type": "string"
+        },
+        "container_size": {
+          "type": "string"
+        }
+      },
+      "description": "Dish is a dish in a culture execution."
+    },
+    "CommonEmail": {
+      "type": "object",
+      "properties": {
+        "dinner_non_veg_image_url": {
+          "type": "string"
+        },
+        "dinner_veg_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "landscape_image_url": {
+          "type": "string"
+        },
+        "cook_face_image_url": {
+          "type": "string"
+        }
+      },
+      "description": "Email is the email content a subscriber gets."
+    },
+    "CommonError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/CommonCode"
+        },
+        "message": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      },
+      "title": "The error object that gets returned with every"
+    },
+    "CommonExecution": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "date": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "publish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "culture": {
+          "$ref": "#/definitions/CommonCulture"
+        },
+        "content": {
+          "$ref": "#/definitions/CommonContent"
+        },
+        "culture_cook": {
+          "$ref": "#/definitions/CommonCultureCook"
+        },
+        "culture_guide": {
+          "$ref": "#/definitions/CommonCultureGuide"
+        },
+        "dishes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonDish"
+          }
+        },
+        "stickers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonSticker"
+          }
+        },
+        "notifications": {
+          "$ref": "#/definitions/CommonNotifications"
+        },
+        "has_pork": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_chicken": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "email": {
+          "$ref": "#/definitions/CommonEmail"
+        }
+      },
+      "description": "Execution is an execution of a culture."
+    },
+    "CommonExecutionProgress": {
+      "type": "object",
+      "properties": {
+        "head_chef": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "content_writer": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "culture_guide": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "summary": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonExecutionProgressSummary"
+          }
+        }
+      },
+      "description": "ExecutionProgress is the progress on an execution."
+    },
+    "CommonExecutionProgressSummary": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "is_error": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "ExecutionProgressSummary summarizes execution progress."
+    },
+    "CommonInfoBox": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "description": "InfoBox is the infobox in a culture guide."
+    },
+    "CommonLog": {
       "type": "object",
       "properties": {
         "id": {
@@ -1665,15 +1946,13 @@
           "type": "string"
         },
         "action_user_id": {
-          "type": "string",
-          "format": "int64"
+          "type": "string"
         },
         "action_user_email": {
           "type": "string"
         },
         "user_id": {
-          "type": "string",
-          "format": "int64"
+          "type": "string"
         },
         "user_email": {
           "type": "string"
@@ -1686,9 +1965,88 @@
           "type": "string"
         },
         "basic_payload": {
-          "$ref": "#/definitions/LogBasicPayload"
+          "$ref": "#/definitions/CommonBasicPayload"
         }
       }
+    },
+    "CommonNotifications": {
+      "type": "object",
+      "properties": {
+        "delivery_sms": {
+          "type": "string"
+        },
+        "rating_sms": {
+          "type": "string"
+        }
+      },
+      "description": "Notifications are notifications the subscribers gets."
+    },
+    "CommonQandA": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        }
+      },
+      "description": "QandA are questions and answers with the culture cook."
+    },
+    "CommonSticker": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "extra_instructions": {
+          "type": "string"
+        },
+        "reheat_option_1": {
+          "type": "string"
+        },
+        "reheat_option_2": {
+          "type": "string"
+        },
+        "reheat_time_1": {
+          "type": "string"
+        },
+        "reheat_time_2": {
+          "type": "string"
+        },
+        "reheat_instructions_1": {
+          "type": "string"
+        },
+        "reheat_instructions_2": {
+          "type": "string"
+        },
+        "eating_temperature": {
+          "type": "string"
+        },
+        "reheat_option_1_preferred": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "Sticker are reheat stickers for dishes."
     }
   }
 }

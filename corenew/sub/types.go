@@ -4,20 +4,12 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
-// Campaign is a campaign a subscriber was a part of.
-type Campaign struct {
-	Source    string    `json:"source"`
-	Medium    string    `json:"medium"`
-	Campaign  string    `json:"campaign"`
-	Term      string    `json:"term" datastore:",noindex"`
-	Content   string    `json:"content" datastore:",noindex"`
-	Timestamp time.Time `json:"timestamp"`
-}
-
 type SubscriptionSignUp struct {
+	ID                 string        `json:"id"`
 	Email              string        `json:"email"`
 	Date               time.Time     `json:"date"` // CreatedDate
 	Name               string        `json:"name"`
@@ -33,7 +25,7 @@ type SubscriptionSignUp struct {
 	FirstBoxDate       time.Time     `json:"first_box_date"`
 	Servings           int8          `json:"servings"`
 	VegetarianServings int8          `json:"vegetarian_servings"`
-	DeliveryTime       int8          `json:"delivery_time"`
+	DeliveryTime       int8          `json:"delivery_time"` // depecrated
 	SubscriptionDay    string        `json:"subscription_day"`
 	WeeklyAmount       float32       `json:"weekly_amount"`
 	PaymentMethodToken string        `json:"payment_method_token"`
@@ -52,7 +44,7 @@ type SubscriptionSignUp struct {
 	GiftPageOpens     int `json:"gift_page_opens" datastore:",noindex"`
 	GiftedPageOpens   int `json:"gifted_page_opens" datastore:",noindex"`
 	// Campaign
-	Campaigns []Campaign `json:"campaigns"`
+	Campaigns []common.Campaign `json:"campaigns"`
 }
 
 // GetName returns the name of subscriber.
@@ -109,6 +101,7 @@ type SubscriptionLog struct {
 	DiscountPercent    int8      `json:"discount_percent"`
 	CustomerID         string    `json:"customer_id"`
 	Refunded           bool      `json:"refunded"`
+	RefundedAmount     float32   `json:"refunded_amount"`
 }
 
 // SublogSummary is a summary of sublogs for a email;
@@ -123,4 +116,8 @@ type SublogSummary struct {
 	TotalAmount         float32   `json:"total_amount,omitempty"`
 	TotalAmountPaid     float32   `json:"total_amount_paid,omitempty"`
 	TotalDiscountAmount float32   `json:"total_discount_amount,omitempty"`
+	TotalRefundedAmount float32   `json:"total_refunded_amount"`
+	TotalVegServings    int       `json:"total_veg_servings"`
+	TotalNonVegServings int       `json:"total_non_veg_servings"`
+	Amount              float32   `json:"amount"`
 }

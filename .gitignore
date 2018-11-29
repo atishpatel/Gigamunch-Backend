@@ -12,6 +12,7 @@ bower_components
 dist
 build
 private
+scripts/playground
 **/app.yaml
 yarn-error.log
 .DS_Store

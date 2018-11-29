@@ -1,5 +1,5 @@
 "use strict";
-var APP = APP || {};
+var APP = {};
 APP.IsDev = false;
 APP.IsStage = false;
 APP.IsProd = false;
@@ -14,11 +14,13 @@ switch (location.hostname) {
     default:
         APP.IsProd = true;
 }
-setTimeout(function () {
+function updateAuthToken() {
     if (ui) {
         console.log("set auth-token");
         APP.Auth.GetToken().then(function (token) {
             ui.preauthorizeApiKey("auth-token", token);
         });
     }
-}, 3000);
+}
+setTimeout(updateAuthToken, 3000);
+setInterval(updateAuthToken, 10 * 60 * 1000);

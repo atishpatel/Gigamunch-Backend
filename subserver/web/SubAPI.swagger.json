@@ -1,0 +1,768 @@
+{
+  "swagger": "2.0",
+"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],
+  "info": {
+    "title": "SubAPI.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/sub/api/v1/GetExecution": {
+      "post": {
+        "summary": "GetExecution returns a single culture execution.",
+        "operationId": "GetExecution",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/GetExecutions": {
+      "post": {
+        "summary": "GetExecutions returns a list of culture executions.",
+        "operationId": "GetExecutions",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/GetExecutionsAfterDate": {
+      "post": {
+        "summary": "GetExecutionsAfterDate returns a list of culture executions after date.",
+        "operationId": "GetExecutionsAfterDate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsDateReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/GetExecutionsBeforeDate": {
+      "post": {
+        "summary": "GetExecutionsBeforeDate returns a list of culture executions before date.",
+        "operationId": "GetExecutionsBeforeDate",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetExecutionsDateReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/GetUserSummary": {
+      "post": {
+        "summary": "GetUserSummary returns a user's summary.",
+        "operationId": "GetUserSummary",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetUserSummaryResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetUserSummaryReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "CommonActivity": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "address_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "address_apt": {
+          "type": "string"
+        },
+        "address_string": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "skip": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "forgiven": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "amount_paid": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "paid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "paid_datetime": {
+          "type": "string"
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transaction_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "customer_id": {
+          "type": "string"
+        },
+        "refunded": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "refunded_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "refunded_datetime": {
+          "type": "string"
+        },
+        "refund_transaction_id": {
+          "type": "string"
+        },
+        "gift": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "gift_from_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deviant": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "deviant_reason": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonCode": {
+      "type": "string",
+      "enum": [
+        "NoError",
+        "Unknown",
+        "Success",
+        "InvalidArgument",
+        "NotFound",
+        "PermissionDenied",
+        "Unauthenticated",
+        "SignOut",
+        "Internal"
+      ],
+      "default": "NoError",
+      "title": "- NoError: TODO:  figure out codes"
+    },
+    "CommonContent": {
+      "type": "object",
+      "properties": {
+        "landscape_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "hands_plate_non_veg_image_url": {
+          "type": "string"
+        },
+        "hands_plate_veg_image_url": {
+          "type": "string"
+        },
+        "dinner_non_veg_image_url": {
+          "type": "string"
+        },
+        "spotify_url": {
+          "type": "string"
+        },
+        "youtube_url": {
+          "type": "string"
+        },
+        "font_url": {
+          "type": "string"
+        },
+        "dinner_veg_image_url": {
+          "type": "string"
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "map_image_url": {
+          "type": "string"
+        },
+        "cook_face_image_url": {
+          "type": "string"
+        }
+      },
+      "description": "Content is a collection of urls pointing to content realted to the execution."
+    },
+    "CommonCulture": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "greeting": {
+          "type": "string"
+        },
+        "flag_emoji": {
+          "type": "string"
+        },
+        "description_preview": {
+          "type": "string"
+        }
+      },
+      "description": "Culture is the culture in a culture execution."
+    },
+    "CommonCultureCook": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "story": {
+          "type": "string"
+        },
+        "story_preview": {
+          "type": "string"
+        },
+        "q_and_a": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonQandA"
+          }
+        }
+      },
+      "description": "CultureCook is the culture cook for a culture execution."
+    },
+    "CommonCultureGuide": {
+      "type": "object",
+      "properties": {
+        "info_boxes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonInfoBox"
+          }
+        },
+        "dinner_instructions": {
+          "type": "string"
+        },
+        "main_color": {
+          "type": "string"
+        },
+        "font_name": {
+          "type": "string"
+        },
+        "font_style": {
+          "type": "string"
+        },
+        "font_caps": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "vegetarian_dinner_instructions": {
+          "type": "string"
+        },
+        "font_name_post_script": {
+          "type": "string"
+        }
+      },
+      "description": "CultureGuide is content related to the culture guide."
+    },
+    "CommonDish": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "is_for_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_on_main_plate": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "image_url": {
+          "type": "string"
+        },
+        "description_preview": {
+          "type": "string"
+        },
+        "container_size": {
+          "type": "string"
+        }
+      },
+      "description": "Dish is a dish in a culture execution."
+    },
+    "CommonEmail": {
+      "type": "object",
+      "properties": {
+        "dinner_non_veg_image_url": {
+          "type": "string"
+        },
+        "dinner_veg_image_url": {
+          "type": "string"
+        },
+        "cook_image_url": {
+          "type": "string"
+        },
+        "landscape_image_url": {
+          "type": "string"
+        },
+        "cook_face_image_url": {
+          "type": "string"
+        }
+      },
+      "description": "Email is the email content a subscriber gets."
+    },
+    "CommonError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/CommonCode"
+        },
+        "message": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      },
+      "title": "The error object that gets returned with every"
+    },
+    "CommonExecution": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "date": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "publish": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "culture": {
+          "$ref": "#/definitions/CommonCulture"
+        },
+        "content": {
+          "$ref": "#/definitions/CommonContent"
+        },
+        "culture_cook": {
+          "$ref": "#/definitions/CommonCultureCook"
+        },
+        "culture_guide": {
+          "$ref": "#/definitions/CommonCultureGuide"
+        },
+        "dishes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonDish"
+          }
+        },
+        "stickers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonSticker"
+          }
+        },
+        "notifications": {
+          "$ref": "#/definitions/CommonNotifications"
+        },
+        "has_pork": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "has_chicken": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "email": {
+          "$ref": "#/definitions/CommonEmail"
+        }
+      },
+      "description": "Execution is an execution of a culture."
+    },
+    "CommonExecutionAndActivity": {
+      "type": "object",
+      "properties": {
+        "execution": {
+          "$ref": "#/definitions/CommonExecution"
+        },
+        "activity": {
+          "$ref": "#/definitions/CommonActivity"
+        }
+      }
+    },
+    "CommonInfoBox": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "description": "InfoBox is the infobox in a culture guide."
+    },
+    "CommonNotifications": {
+      "type": "object",
+      "properties": {
+        "delivery_sms": {
+          "type": "string"
+        },
+        "rating_sms": {
+          "type": "string"
+        }
+      },
+      "description": "Notifications are notifications the subscribers gets."
+    },
+    "CommonQandA": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        }
+      },
+      "description": "QandA are questions and answers with the culture cook."
+    },
+    "CommonSticker": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "ingredients": {
+          "type": "string"
+        },
+        "extra_instructions": {
+          "type": "string"
+        },
+        "reheat_option_1": {
+          "type": "string"
+        },
+        "reheat_option_2": {
+          "type": "string"
+        },
+        "reheat_time_1": {
+          "type": "string"
+        },
+        "reheat_time_2": {
+          "type": "string"
+        },
+        "reheat_instructions_1": {
+          "type": "string"
+        },
+        "reheat_instructions_2": {
+          "type": "string"
+        },
+        "eating_temperature": {
+          "type": "string"
+        },
+        "reheat_option_1_preferred": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "number": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "color": {
+          "type": "string"
+        },
+        "is_for_non_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "is_for_vegetarian": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "Sticker are reheat stickers for dishes."
+    },
+    "SubAPIGetExecutionReq": {
+      "type": "object",
+      "properties": {
+        "idOrDate": {
+          "type": "string"
+        }
+      }
+    },
+    "SubAPIGetExecutionResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "execution_and_activity": {
+          "$ref": "#/definitions/CommonExecutionAndActivity"
+        }
+      }
+    },
+    "SubAPIGetExecutionsDateReq": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "SubAPIGetExecutionsReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "SubAPIGetExecutionsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "execution_and_activity": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonExecutionAndActivity"
+          }
+        }
+      }
+    },
+    "SubAPIGetUserSummaryReq": {
+      "type": "object",
+      "title": "**********************\nUser\n**********************"
+    },
+    "SubAPIGetUserSummaryResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "is_active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "on_probation": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 interface ErrorOnlyResp {
-    error: Error
+    error: Common.Error
 }
 interface SetAdminReq {
     email: string
@@ -12,6 +12,10 @@ interface ActivateSubscriberReq {
 }
 interface DeactivateSubscriberReq {
     email: string
+}
+interface ReplaceSubscriberEmailReq {
+    old_email: string
+    new_email: string
 }
 interface Activity {
     created_datetime: string
@@ -65,38 +69,49 @@ interface SkipActivityReq {
     date: string
 }
 interface SkipActivityResp {
-    error: Error
+    error: Common.Error
 }
 interface UnskipActivityReq {
     email: string
     date: string
 }
 interface UnskipActivityResp {
-    error: Error
+    error: Common.Error
+}
+interface RefundActivityReq {
+    email: string
+    date: string
+    amount: number
+    percent: number
+}
+interface RefundAndSkipActivityReq {
+    email: string
+    date: string
+    amount: number
+    percent: number
 }
 interface GetLogReq {
     id: number
 }
 interface GetLogResp {
-    error: Error
-    log: Log
+    error: Common.Error
+    log: Common.Log
 }
 interface GetLogsReq {
     start: number
     limit: number
 }
 interface GetLogsResp {
-    error: Error
-    logs: Log[]
+    error: Common.Error
+    logs: Common.Log[]
 }
 interface GetLogsByEmailReq {
     start: number
     limit: number
     email: string
 }
-interface GetLogsByEmailResp {
-    error: Error
-    logs: Log[]
+interface GetLogsByExecutionReq {
+    execution_id: number
 }
 interface Sublog {
     date: string
@@ -116,6 +131,7 @@ interface Sublog {
     discount_percent: number
     customer_id: string
     refunded: boolean
+    refunded_amount: number
 }
 interface Subscriber {
     email: string
@@ -123,7 +139,7 @@ interface Subscriber {
     name: string
     first_name: string
     last_name: string
-    address: Address
+    address: Common.Address
     customer_id: string
     subscription_ids: string[]
     first_payment_date: string
@@ -155,7 +171,7 @@ interface GetUnpaidSublogsReq {
     limit: number
 }
 interface GetUnpaidSublogsResp {
-    error: Error
+    error: Common.Error
     sublogs: Sublog[]
 }
 interface ProcessSublogsReq {
@@ -163,15 +179,11 @@ interface ProcessSublogsReq {
     date: string
 }
 interface ProcessSublogsResp {
-    error: Error
+    error: Common.Error
 }
 interface SendCustomerSMSReq {
     emails: string[]
 	message: string
-}
-interface RefundAndSkipSublogReq {
-	email: string
-    date: string
 }
 interface GetHasSubscribedReq {
     date: string
@@ -180,90 +192,43 @@ interface GetSubscriberSublogsReq {
     email: string
 }
 interface GetSubscriberSublogsResp {
-    error: Error
+    error: Common.Error
     sublogs: Sublog[]
 }
 interface GetHasSubscribedResp {
-    error: Error
+    error: Common.Error
     subscribers: Subscriber[]
 }
 interface GetSubscriberReq {
     email: string
 }
 interface GetSubscriberResp {
-    error: Error
+    error: Common.Error
     subscriber: Subscriber
-}
-interface Execution {
-    id: number
-    date: string
-    location: number
-    publish: boolean
-    created_datetime: string
-    // Info
-    culture: Culture
-    content: Content
-    culture_cook: CultureCook
-    dishes: Dish[]
-    // Diet
-    has_pork: boolean
-    has_beef: boolean
-    has_chicken: boolean
-    has_weird_meat: boolean
-    has_fish: boolean
-    has_other_seafood: boolean
-}
-interface Content {
-    hero_image_url: string
-    cook_image_url: string
-    hands_plate_image_url: string
-    dinner_image_url: string
-    spotify_url: string
-    youtube_url: string
-}
-interface Culture {
-    country: string
-    city: string
-    description: string
-    nationality: string
-    greeting: string
-    flag_emoji: string
-}
-interface Dish {
-    number: number
-    color: string
-    name: string
-    description: string
-    ingredients: string
-    is_for_vegetarian: boolean
-    is_for_non_vegetarian: boolean
-}
-interface CultureCook {
-    first_name: string
-    last_name: string
-    story: string
 }
 interface GetExecutionsReq {
     start: number
     limit: number
 }
 interface GetExecutionsResp {
-    error: Error
-    executions: Execution[]
+    error: Common.Error
+    executions: Common.Execution[]
+    progress: Common.ExecutionProgress[]
 }
 interface GetExecutionReq {
-   id: number
+   idOrDate: string
 }
 interface GetExecutionResp {
-    error: Error
-    execution: Execution
+    error: Common.Error
+    execution: Common.Execution
 }
 interface UpdateExecutionReq {
-    execution: Execution
+    execution: Common.Execution
+    mode: string
 }
 interface UpdateExecutionResp {
-    error: Error
-    execution: Execution
+    error: Common.Error
+    execution: Common.Execution
 }
 interface ExecutionStats {
     id: number
@@ -295,22 +260,22 @@ interface GetAllExecutionStatsReq {
     limit: number
 }
 interface GetAllExecutionStatsResp {
-    error: Error
+    error: Common.Error
     execution_stats: ExecutionStats[]
 }
 interface GetExecutionStatsReq {
     id: number
 }
 interface GetExecutionStatsResp {
-    error: Error
+    error: Common.Error
     execution_stats: ExecutionStats
 }
 interface UpdateExecutionStatsReq {
-    execution_stats: Execution
+    execution_stats: ExecutionStats
 }
 interface UpdateExecutionStatsResp {
-    error: Error
-    execution_stats: Execution
+    error: Common.Error
+    execution_stats: ExecutionStats
 }
 interface Delivery {
     date: string
@@ -322,7 +287,7 @@ interface Delivery {
     fail: boolean
     sub_name: string
     phone_number: string
-    address: Address
+    address: Common.Address
     delivery_notes: string
     servings: number
     vegetarian: boolean
@@ -333,14 +298,14 @@ interface GetDeliveriesReq {
     driver_email: string
 }
 interface GetDeliveriesResp {
-    error: Error
+    error: Common.Error
     deliveries: Delivery[]
 }
 interface UpdateDeliveriesReq {
     deliveries: Delivery[]
 }
 interface UpdateDeliveriesResp {
-    error: Error
+    error: Common.Error
 }
 interface UpdateDripReq {
     emails: string[]

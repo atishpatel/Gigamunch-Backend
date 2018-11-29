@@ -104,13 +104,13 @@
               <div class="table-row">
                 <div class="table-cell">
                   <a target="_blank"
-                       href="subscriber/[[canceledSubscriber.email]]">[[canceledSubscriber.email]]</a>
+                     href="subscriber/[[canceledSubscriber.email]]">[[canceledSubscriber.email]]</a>
                 </div>
                 <div class="table-cell">[[canceledSubscriber.name]]</div>
                 <div class="table-cell">[[canceledSubscriber.phone_number]]</div>
                 <div class="table-cell">
                   <a target="_blank"
-                       href="[[canceledSubscriber.addressLink]]">[[canceledSubscriber.addressString]]</a>
+                     href="[[canceledSubscriber.addressLink]]">[[canceledSubscriber.addressString]]</a>
                 </div>
               </div>
             </template>
@@ -197,7 +197,7 @@
           for (let i = 0; i < subscribers.length; i++) {
             subscribers[i].addressString = this.getAddress(subscribers[i].address)
             subscribers[i].addressLink = this.getAddressLink(subscribers[i].address)
-            if (subscribers[i].is_subscribed === undefined) {
+            if (subscribers[i].is_subscribed === undefined || subscribers[i].is_subscribed === false) {
               subscribers[i].is_subscribed = false;
               canceledSubscribers.push(subscribers[i]);
             } else {

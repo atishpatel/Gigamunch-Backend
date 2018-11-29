@@ -13,7 +13,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/drip-go"
-	"google.golang.org/appengine/urlfetch"
 )
 
 // TODO: Logging
@@ -124,11 +123,6 @@ func NewClient(ctx context.Context, log *logging.Client, serverInfo *common.Serv
 	if err != nil {
 		return nil, errInternal.WithError(err).Annotate("failed to get drip client")
 	}
-	if serverInfo.IsStandardAppEngine {
-		httpClient := urlfetch.Client(ctx)
-		dripSubClient.HTTPClient = httpClient
-		dripMarketingClient.HTTPClient = httpClient
-	}
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
@@ -185,6 +179,7 @@ func (c *Client) SubDeactivated(req *UserFields) error {
 // UserFields contain all the possible fields a user can have.
 type UserFields struct {
 	Email             string    `json:"email"`
+	NewEmail          string    `json:"new_email"`
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
@@ -207,6 +202,7 @@ func (c *Client) updateUser(req *UserFields, dripClient *drip.Client) error {
 	}
 	sub := drip.UpdateSubscriber{
 		Email:        req.Email,
+		NewEmail:     req.NewEmail,
 		CustomFields: make(map[string]string),
 	}
 	if req.FirstName != "" {

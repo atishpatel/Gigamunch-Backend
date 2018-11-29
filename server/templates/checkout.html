@@ -686,9 +686,6 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Rachel Woods picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/rachel_woods.jpg">
-
-
-
                     </div>
                   </div>
                   <div class="checkout-trust-review">
@@ -696,9 +693,6 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Paige Orr Clancy picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/paige_orr_clancy.jpg">
-
-
-
                     </div>
                   </div>
 
@@ -707,9 +701,6 @@
                     <div class="checkout-trust-review-image">
                       <img alt="Barbara Futter picture"
                            src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/barbara_futter.jpg">
-
-
-
                     </div>
                   </div>
                 </div>
@@ -720,9 +711,6 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/certificate-icon.png">
-
-
-
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -750,9 +738,6 @@
             <div class="checkout-trust-security-item">
               <div class="checkout-trust-security-image">
                 <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/lock-icon.png">
-
-
-
               </div>
               <div class="checkout-trust-security-text">
                 <div class="checkout-trust-security-title">
@@ -839,7 +824,8 @@
                        onfocus="addressInputFocused()"
                        placeholder="123 Street Name, City"
                        required
-                       value="[[.Address]]" />
+                       value="[[.Address]]"
+                       autocomplete="off" />
                 <input type="text"
                        name="apt"
                        class="apt"
@@ -906,7 +892,7 @@
                     <label class="num-meals-label"
                            for="meal-option-2">2 MEAL BAG</label>
                     <label class="price-per-meal-label"
-                           for="meal-option-2">$16 PER MEAL</label>
+                           for="meal-option-2">$16.50 PER MEAL</label>
                   </div>
                 </li>
 
@@ -923,7 +909,7 @@
                     <label class="num-meals-label"
                            for="meal-option-3">4 MEAL BAG</label>
                     <label class="price-per-meal-label"
-                           for="meal-option-3">$15 PER MEAL</label>
+                           for="meal-option-3">$15.25 PER MEAL</label>
                   </div>
                 </li>
               </ul>
@@ -984,21 +970,6 @@
                 <div class="item-image">
                   <img src="https://storage.googleapis.com/gigamunch-omninexus-website/checkout/product_shot_checkout.jpg"
                        alt="A bag with an international meal.">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </div>
                 <div class="item-detail">
                   <div class="item-text">
@@ -1074,7 +1045,11 @@
     function initMap() {
       var addressInput = document.getElementById('address-input');
       autocomplete = new this.google.maps.places.Autocomplete(addressInput, {
-        types: ['address']
+        types: ['address'],
+        bounds: new this.google.maps.LatLngBounds(
+          new this.google.maps.LatLng(35.889615, -87.336957),
+          new this.google.maps.LatLng(36.436964, -86.398256)
+        ),
       });
 
       autocomplete.addListener('place_changed', function() {
@@ -1268,7 +1243,7 @@
             };
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/v1/SubmitCheckout', true);
+            xhr.open('POST', '/api/v2/SubmitCheckout', true);
             xhr.setRequestHeader("Content-type", "application/json");
             xhr.onload = function() {
               try {
@@ -1345,22 +1320,17 @@
       var boxForTitleText;
       var taxTotal;
       switch (val) {
-        case '1':
-          oneBoxPrice = 17;
-          servingsPerBox = 1;
-          boxForTitleText = 'Bag for One';
-          break;
         case '2':
-          oneBoxPrice = 16;
+          oneBoxPrice = 16.50;
           servingsPerBox = 2;
           boxForTitleText = 'Bag for Two';
-          taxTotal = 3.12;
+          taxTotal = 3.22;
           break;
         case '4':
-          oneBoxPrice = 15;
+          oneBoxPrice = 15.25;
           servingsPerBox = 4;
           boxForTitleText = 'Bag for Four';
-          taxTotal = 5.85;
+          taxTotal = 5.95;
           break;
       }
       var boxTotal = oneBoxPrice * servingsPerBox;
@@ -1386,17 +1356,17 @@
       }
 
       var days = [];
-      for (var i = 0; i < 3; d.setDate(d.getDate() + 7)) {
+      for (var i = 0; i <= 5; d.setDate(d.getDate() + 7)) {
         var dayArray = d.toString().split(' ');
         var display = d.toLocaleDateString();
         if (dayArray.length > 3) {
           display = dayArray[1] + ' ' + dayArray[2];
         }
-        // TODO: remove after Dec 25, 2017
-        if (d.getMonth() === 11 && d.getDate() === 25) {
+        // TODO: comment out after Dec 25, 2018
+        if (d.getMonth() === 11 && d.getDate() === 24) {
           continue;
         }
-        if (d.getMonth() === 0 && d.getDate() === 1) {
+        if (d.getMonth() === 0 && d.getDate() === 7) {
           display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
         }
         // end TODO

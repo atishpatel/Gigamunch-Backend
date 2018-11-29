@@ -1,6 +1,5 @@
 service: MODULE
-runtime: go
-api_version: go1
+runtime: go111
 
 handlers:
 - url: /favicon.ico
@@ -13,7 +12,7 @@ handlers:
 
 # Website app
 - url: /cooksignup
-  script: _go_app
+  script: auto
   secure: always
 
 - url: /js
@@ -25,20 +24,10 @@ handlers:
   secure: always
 
 - url: /.*
-  script: _go_app
+  script: auto
   secure: always
 
 env_variables:
-  MYSQL_CONNECTION: server:gigamunch@cloudsql(PROJECTID:us-central1:gigasqldb)/gigamunch?collation=utf8mb4_general_ci
+  MYSQL_CONNECTION: server:gigamunch@unix(/cloudsql/PROJECTID:us-central1:gigasqldb)/gigamunch
   DOMAIN_URL: https://_DOMAIN_.com
   PROJECT_ID: PROJECTID
-
-skip_files:
-  - ^(.*/node_modules/.*)
-  - ^(.*/)?.*/test/.*$
-  - ^(.*/)?.*/tests/.*$
-  - ^(.*/)?.*\.DS_Store$
-  - ^(.*/)?.*\.md$
-  - ^(.*/)?.*\.yml$
-  - ^(.*/)?.*\.gitignore$
-  - ^(.*/)?.*/LICENSE$

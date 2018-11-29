@@ -8,10 +8,11 @@ import (
 	mysql "github.com/go-sql-driver/mysql"
 )
 
+// Activity is a subscriber activity.
 type Activity struct {
 	CreatedDatetime time.Time       `json:"created_datetime" db:"created_dt"`
 	Date            string          `json:"date" db:"date"`
-	UserID          int64           `json:"user_id" db:"user_id"`
+	UserID          string          `json:"user_id" db:"user_id"`
 	Email           string          `json:"email" db:"email"`
 	FirstName       string          `json:"first_name" db:"first_name"`
 	LastName        string          `json:"last_name" db:"last_name"`
@@ -29,8 +30,8 @@ type Activity struct {
 	Forgiven bool `json:"forgiven" db:"forgiven"`
 	// Bag detail
 	ServingsNonVegetarian int8 `json:"servings_non_vegetarian" db:"servings"`
-	ServingsVegetarain    bool `json:"servings_vegetarian" db:"veg_servings"`
-	ServingsChanged       int8 `json:"servings_changed" db:"servings_changed"`
+	ServingsVegetarain    int8 `json:"servings_vegetarian" db:"veg_servings"`
+	ServingsChanged       bool `json:"servings_changed" db:"servings_changed"`
 	First                 bool `json:"first" db:"first"`
 	// Payment
 	Amount             float32                `json:"amount" db:"amount"`

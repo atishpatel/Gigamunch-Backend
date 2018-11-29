@@ -1,18 +1,19 @@
-package admin
+package main
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/gorilla/schema"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
+
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+
 	"github.com/jmoiron/sqlx"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/auth"
@@ -22,7 +23,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
-	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared"
+	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
 	"google.golang.org/appengine"
 
 	// driver for mysql
@@ -30,7 +31,6 @@ import (
 )
 
 type server struct {
-	once       sync.Once
 	serverInfo *common.ServerInfo
 	db         *db.Client
 	sqlDB      *sqlx.DB
@@ -38,12 +38,12 @@ type server struct {
 
 var (
 	errPermissionDenied = errors.PermissionDeniedError
-	errUnauthenticated  = errors.UnauthenticatedError
-	errBadRequest       = errors.BadRequestError
-	errInternalError    = errors.InternalServerError
+	// errUnauthenticated  = errors.UnauthenticatedError
+	errBadRequest    = errors.BadRequestError
+	errInternalError = errors.InternalServerError
 )
 
-func init() {
+func main() {
 	s := new(server)
 	err := s.setup()
 	if err != nil {
@@ -58,25 +58,28 @@ func init() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
 	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
+	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
 	// **********************
 	// Activity
 	// **********************
 	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
+	http.HandleFunc("/admin/api/v1/RefundActivity", s.handler(s.userAdmin(s.RefundActivity)))
+	http.HandleFunc("/admin/api/v1/RefundAndSkipActivity", s.handler(s.userAdmin(s.RefundAndSkipActivity)))
 	// **********************
 	// Logs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
 	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsByEmail)))
+	http.HandleFunc("/admin/api/v1/GetLogsByExecution", s.handler(s.userAdmin(s.GetLogsByExecution)))
 	// **********************
 	// Sublogs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
 	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
 	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
-	http.HandleFunc("/admin/api/v1/RefundAndSkipSublog", s.handler(s.userAdmin(s.RefundAndSkipSublog)))
 	// **********************
 	// Subscriber
 	// **********************
@@ -85,7 +88,7 @@ func init() {
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
 	// Zone
-	// http.HandleFunc("/admin/api/v1/AddGeofence", handler(driverAdmin(s.AddGeofence)))
+	// http.HandleFunc("/admin/api/v1/UpdateGeofence", handler(s.UpdateGeofence))
 	// **********************
 	// Culture Executions
 	// **********************
@@ -114,12 +117,13 @@ func init() {
 	// **********************
 	// Batch
 	// **********************
-	http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
+	http.HandleFunc("/admin/batch/UpdateSubs", s.handler(s.UpdateSubs))
+	// http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("success"))
+		_, _ = w.Write([]byte("success"))
 	})
-
+	appengine.Main()
 }
 
 func (s *server) setup() error {
@@ -134,11 +138,15 @@ func (s *server) setup() error {
 		log.Fatal(`You need to set the environment variable "MYSQL_CONNECTION"`)
 	}
 	if appengine.IsDevAppServer() {
-		sqlConnectionString = "root@/gigamunch"
+		sqlConnectionString = "server:gigamunch@/gigamunch"
 	}
-	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString)
+	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
 	if err != nil {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
+	}
+	s.db, err = db.NewClient(context.Background(), projID, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get database client: %+v", err)
 	}
 	s.serverInfo = &common.ServerInfo{
 		ProjectID:           projID,
@@ -158,6 +166,7 @@ func (s *server) userAdmin(f handle) handle {
 		}
 		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
 		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
+		log.SetContext(ctx)
 		return f(ctx, w, r, log)
 	}
 }
@@ -195,15 +204,19 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		}
 		// get context
 		ctx := appengine.NewContext(r)
-		ctx = context.WithValue(ctx, common.ContextUserID, int64(0))
+		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
-		s.db, err = db.NewClient(ctx, s.serverInfo.ProjectID, nil)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			// TODO:
-			w.Write([]byte(fmt.Sprintf("failed to get database client: %+v", err)))
-			return
-		}
+		defer func() {
+			// handle panic, recover
+			if r := recover(); r != nil {
+				errString := fmt.Sprintf("PANICKING: %+v", r)
+				logging.Errorf(ctx, errString)
+				messageC := message.New(ctx)
+				_ = messageC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), errString)
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(fmt.Sprintf("{\"code\":500,\"message\":\"Woops! Something went wrong. Please try again later.\"}")))
+			}
+		}()
 		// create logging client
 		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
@@ -211,6 +224,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 			logging.Errorf(ctx, errString)
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(errString))
+			return
 		}
 		// call function
 		resp := f(ctx, w, r, log)
@@ -220,13 +234,13 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		// Log errors
 		sharedErr := resp.GetError()
 		if sharedErr == nil {
-			sharedErr = &shared.Error{
-				Code: shared.Code_Success,
+			sharedErr = &pbcommon.Error{
+				Code: pbcommon.Code_Success,
 			}
 		}
-		if sharedErr != nil && sharedErr.Code != shared.Code_Success && sharedErr.Code != shared.Code(0) {
+		if sharedErr != nil && sharedErr.Code != pbcommon.Code_Success && sharedErr.Code != pbcommon.Code(0) {
 			logging.Errorf(ctx, "request error: %+v", errors.GetErrorWithCode(sharedErr))
-			// log.RequestError((r, errors.GetErrorWithCode(sharedErr), )
+			log.RequestError(r, errors.GetErrorWithCode(sharedErr))
 			w.WriteHeader(int(sharedErr.Code))
 			// Wrap error in ErrorOnlyResp
 			if _, ok := resp.(errors.ErrorWithCode); ok {
@@ -248,47 +262,20 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 
 // Request helpers
 func decodeRequest(ctx context.Context, r *http.Request, v interface{}) error {
-	if r.Method == "GET" {
-		decoder := schema.NewDecoder()
-		err := decoder.Decode(v, r.URL.Query())
-		logging.Infof(ctx, "Query: %+v", r.URL.Query())
-		if err != nil {
-			return err
-		}
-	} else {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return err
-		}
-		logging.Infof(ctx, "Body: %s", body)
-		err = json.Unmarshal(body, v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return serverhelper.DecodeRequest(ctx, r, v)
 }
 
-func failedToDecode(err error) *pb.ErrorOnlyResp {
-	return &pb.ErrorOnlyResp{
-		Error: errBadRequest.WithError(err).Annotate("failed to decode").SharedError(),
-	}
+func failedToDecode(err error) *pbcommon.ErrorOnlyResp {
+	return serverhelper.FailedToDecode(err)
 }
 
 // Response is a response to a rpc call. All responses contain an error.
 type Response interface {
-	GetError() *shared.Error
+	GetError() *pbcommon.Error
 }
 
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
 
 func getDatetime(s string) time.Time {
-	if len(s) == 10 {
-		s += "T12:12:12.000Z"
-	}
-	t, err := time.Parse(time.RFC3339, s)
-	if err != nil {
-		return time.Time{}
-	}
-	return t
+	return serverhelper.GetDatetime(s)
 }

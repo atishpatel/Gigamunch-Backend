@@ -169,8 +169,8 @@
                ga-on="click"
                ga-event-category="gift"
                ga-event-action="gift-tab">
-                   <i class="fa fa-gift" aria-hidden="true"></i>
-                </a>
+              <i class="fa fa-gift" aria-hidden="true"></i>
+            </a>
           </li>
           <li class="nav-item">
             <a class="nav-link"
@@ -183,7 +183,7 @@
                ga-on="click"
                ga-event-category="gift"
                ga-event-action="messenger-tab">
-               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="96 93 322 324"><path d="M257 93c-88.918 0-161 67.157-161 150 0 47.205 23.412 89.311 60 116.807V417l54.819-30.273C225.449 390.801 240.948 393 257 393c88.918 0 161-67.157 161-150S345.918 93 257 93zm16 202l-41-44-80 44 88-94 42 44 79-44-88 94z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="96 93 322 324"><path d="M257 93c-88.918 0-161 67.157-161 150 0 47.205 23.412 89.311 60 116.807V417l54.819-30.273C225.449 390.801 240.948 393 257 393c88.918 0 161-67.157 161-150S345.918 93 257 93zm16 202l-41-44-80 44 88-94 42 44 79-44-88 94z"/></svg>
             </a>
           </li>
           <li class="nav-item">
@@ -197,7 +197,7 @@
                ga-on="click"
                ga-event-category="gift"
                ga-event-action="email-tab">
-               <i class="fa fa-envelope" aria-hidden="true"></i>
+              <i class="fa fa-envelope" aria-hidden="true"></i>
             </a>
           </li>
 
@@ -212,7 +212,7 @@
                ga-on="click"
                ga-event-category="gift"
                ga-event-action="sms-tab">
-               <i class="fa fa-comments" aria-hidden="true"></i>
+              <i class="fa fa-comments" aria-hidden="true"></i>
             </a>
           </li>
         </ul>
@@ -224,7 +224,7 @@
              role="tabpanel"
              aria-labelledby="gift-tab">
           <section class="facebook-section">
-            <p class="facebook-section-text">Use your personal link below <br/>to give your friend their gift:</p>
+            <p class="facebook-section-text">Use your personal link below <br />to give your friend their gift:</p>
             <div class="input-group share-copy-input-group">
               <input type="text"
                      data-id="shareCopyInput"
@@ -250,7 +250,7 @@
              role="tabpanel"
              aria-labelledby="messenger-tab">
           <section class="messenger-section">
-            <p class="messenger-section-text">Give your gift on Facebook Messenger <br/>by clicking the button below:</p>
+            <p class="messenger-section-text">Give your gift on Facebook Messenger <br />by clicking the button below:</p>
             <a target="_blank"
                href="https://www.facebook.com/dialog/send?app_id=522395114612219&display=popup&link=https://eatgigamunch.com/gifted/[[.Email]]&redirect_uri=https://eatgigamunch.com/gift/[[.Email]]"
                class="btn green-button messenger-section-button"
@@ -287,10 +287,9 @@ https://eatgigamunch.com/gifted/[[.Email]]
              role="tabpanel"
              aria-labelledby="sms-tab">
           <section class="sms-section">
-            <p class="sms-section-text">Text your friends <br/>by clicking the button below:</p>
+            <p class="sms-section-text">Text your friends <br />by clicking the button below:</p>
             <a target="_blank"
                href="sms:?body=Hey%2C+I+just+got+you+a+gift+you%27ll+love%21+It%27s+a+dinner+from+another+country.+I+got+it+from+a+service+called+Gigamunch+-+they+deliver+international+meals+form+a+different+country+every+week.+They+make+it+super+easy+and+fun+to+try+foods+from+all+around+the+world.+Here%27s+the+link+so+you+can+get+your+gift.+Enjoy%21%0D%0A%0D%0Ahttps://eatgigamunch.com/gifted/[[.Email]]"
-          
                class="btn green-button sms-section-button"
                ga-on="click"
                ga-event-category="gift"
@@ -367,6 +366,7 @@ https://eatgigamunch.com/gifted/[[.Email]]
     };
     if (window.innerWidth > 700) {
       config.width = 700;
+      config.padding = 0;
     }
     swal(config).catch(dialogClosed);
   }

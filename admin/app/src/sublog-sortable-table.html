@@ -79,7 +79,7 @@
                 <a target="_blank"
                    href="https://www.braintreegateway.com/merchants/wsgmypp8c46cnbpc/customers/[[sublog.customer_id]]">[[sublog.customer_id]]</a>
               </td>
-              <td hidden$="[[!detailed]]">[[sublog.refunded]]</td>
+              <td hidden$="[[!detailed]]">[[sublog.refundedString]]</td>
               <td hidden$="[[!detailed]]">$[[sublog.discount_amount]] | [[sublog.discount_percent]]%</td>
               <td hidden$="[[!detailed]]">[[sublog.amount]]</td>
               <td hidden$="[[!detailed]]">[[sublog.amount_paid]]</td>
@@ -162,6 +162,12 @@
             sublogs[i].addressString = this.getAddress(sublogs[i].address);
             sublogs[i].addressLink = this.getAddressLink(sublogs[i].address);
             sublogs[i].paidDateString = this._getDatetimeString(sublogs[i].paid_datetime);
+
+            if (sublogs[i].refunded) {
+              sublogs[i].refundedString = '$' + sublogs[i].refunded_amount;
+            } else {
+              sublogs[i].refundedString = '-';
+            }
             if (sublogs[i].servings == 0 && sublogs[i].veg_servings == 0) {
               sublogs[i].veg_servings = sublogs[i].vegetarian_servings;
             }

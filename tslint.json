@@ -1,4 +1,5 @@
 {
+  "defaultSeverity": "warning",
   "extends": "tslint-config-airbnb",
   "rules": {
     // Custom rules
@@ -6,9 +7,12 @@
     "max-line-length": [
       false
     ],
+    "quotemark": [true, "single"],
+    "indent": [true, "spaces", 2],
     "align": [true, "statements"],
     "import-name": [false],
     "function-name": false,
+    "no-console": [false],
     "variable-name": [true, "allow-pascal-case"]
   }
 }

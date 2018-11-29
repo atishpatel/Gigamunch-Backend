@@ -1,0 +1,103 @@
+<link rel="import"
+      href="../../bower_components/polymer/polymer.html">
+<link rel="import"
+      href="../../bower_components/iron-input/iron-input.html">
+
+<dom-module id="app-html-editor">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      label {
+        pointer-events: none;
+      }
+
+      #editor {
+        min-height: 75px;
+        width: calc(99% - 24px);
+        padding: 12px;
+        border: solid #CFD8DC 1px;
+        border-radius: 3px;
+        font-size: 14px;
+        background-color: #f7f7f7;
+        outline: none;
+        transition: all .3s ease;
+        margin-top: 8px;
+      }
+
+      #editor:focus {
+        background-color: white;
+        opacity: 1;
+        border-color: #FF7043;
+      }
+
+    </style>
+
+
+    <label hidden$="[[!label]]"
+           slot="label">[[label]]</label>
+    <br>
+    <div id="editor"
+         on-input="updated"
+         contenteditable="true"></div>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'app-html-editor',
+    properties: {
+      label: {
+        type: String
+      },
+      quill: {
+        type: Object,
+      },
+      value: {
+        type: String,
+        notify: true,
+        observer: 'valueUpdated',
+      }
+    },
+
+    updated() {
+      let html = this.$.editor.innerHTML;
+      let stripedHTML = this.stripHTML(html);
+      if (stripedHTML != html) {
+        this.$.editor.innerHTML = stripedHTML;
+      }
+      this.value = stripedHTML;
+    },
+
+    valueUpdated(oldValue, newValue) {
+      if (newValue == null) {
+        this.$.editor.innerHTML = oldValue;
+      }
+    },
+    stripHTML(html) {
+      var keep = {
+        b: true,
+        i: true,
+        u: true,
+        br: true
+      };
+      return html.replace(/<\/?([a-z]+) ?[^>]*>/g, function(wholeMatch, tagName) {
+        if (keep[tagName]) {
+          return wholeMatch;
+        }
+        if (tagName === 'pre') {
+          return '<br>';
+        }
+
+        return '';
+      });
+    }
+  });
+
+</script>

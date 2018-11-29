@@ -3,8 +3,7 @@
 # Setup
 The following programs need to be installed:
   - gcloud
-  - golang 1.8
-  - `brew install mysql@5.6`
+  - golang 1.11
   - protoc 
     - https://github.com/google/protobuf/releases 
     - `go get -u github.com/golang/protobuf/protoc-gen-go`
@@ -12,6 +11,7 @@ The following programs need to be installed:
   - install node LTS: https://nodejs.org/en/
   - `brew install yarn`
   - `yarn global add gulp-cli`
+  - `yarn global add @vue/cli`
 
 Do the following in your .bashprofile or .zshrc file:
   - add GOPATH
@@ -26,15 +26,24 @@ Setting up for web development:
   - run `yarn install`
     - in ./
     - in ./admin/app
-    - in ./driver/app
+    - in ./subserver/web
   - `go get ./cookapi`
   - `go get ./server`
+  - `go get ./admin`
+  - `go get ./subserver`
   - `app build proto`
   - add private folder
-  - setup mysql servers by running ./misc/setup.sql
+  - setup mysql servers 
+    - run `sudo mysql_secure_installation`
+    - login to mysql with `sudo mysql -uroot`
+    - run following in mysql
+      - `uninstall plugin validate_password;`
+      - `CREATE USER 'server'@'localhost' IDENTIFIED BY 'gigamunch';`
+      - `GRANT ALL PRIVILEGES ON *.* To 'server'@'localhost';`
+      - copy, paste, and run ./misc/setup.sql
 
 To run local development:
-  - `app serve (admin | server)`
+  - `app serve (admin | server | sub)`
 
 # App Engine Architecture
 Here are the modules:
@@ -43,7 +52,7 @@ Here are the modules:
     - This module serves landing page.
   - admin:
     - In the 'admin' folder.
-  - driver:
-    - In the 'driver' folder.
-  - subscriber:
-    - In the 'subscriber' folder.
+  - sub:
+    - In the 'subserver' folder.
+  - cookapi:
+    - In the 'cookapi' folder.

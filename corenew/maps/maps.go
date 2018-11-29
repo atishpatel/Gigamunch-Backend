@@ -9,8 +9,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/types"
 	"golang.org/x/net/context"
 	"googlemaps.github.io/maps"
-
-	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -171,7 +169,7 @@ func getMapsClient(ctx context.Context) (*maps.Client, error) {
 		serverKey = config.GetServerKey(ctx)
 	}
 	var err error
-	mapsClient, err := maps.NewClient(maps.WithAPIKey(serverKey), maps.WithHTTPClient(urlfetch.Client(ctx)))
+	mapsClient, err := maps.NewClient(maps.WithAPIKey(serverKey))
 	if err != nil {
 		return nil, errMapsConnect.WithError(err).Wrap("cannot get new maps client")
 	}

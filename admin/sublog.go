@@ -1,4 +1,4 @@
-package admin
+package main
 
 import (
 	"context"
@@ -7,36 +7,15 @@ import (
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// RefundAndSkipSublog runs subold.RefundAndSkip.
-func (s *server) RefundAndSkipSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.RefundAndSkipSublogReq)
-	var err error
-
-	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
-	}
-	// end decode request
-
-	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-	err = activityC.RefundAndSkip(getDatetime(req.Date), req.Email)
-	if err != nil {
-		return errors.Annotate(err, "failed to activity.RefundAndSkip")
-	}
-	return nil
-}
-
 // ProcessSublog runs sub.Process.
 func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.ProcessSublogsReq)
 	var err error
+	req := new(pb.ProcessSublogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -57,8 +36,8 @@ func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *ht
 
 // GetUnpaidSublogs gets a list of unpaid sublogs log.
 func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetUnpaidSublogsReq)
 	var err error
+	req := new(pb.GetUnpaidSublogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -79,8 +58,8 @@ func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r 
 }
 
 func (s *server) GetSubscriberSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := new(pb.GetSubscriberSublogsReq)
 	var err error
+	req := new(pb.GetSubscriberSublogsReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -123,11 +102,12 @@ func pbSublog(sublog *subold.SubscriptionLog) *pb.Sublog {
 		Paid:               sublog.Paid,
 		PaidDatetime:       sublog.PaidDatetime.Format(time.RFC3339),
 		PaymentMethodToken: sublog.PaymentMethodToken,
-		TransactionId:      sublog.TransactionID,
+		TransactionID:      sublog.TransactionID,
 		Free:               sublog.Free,
 		DiscountAmount:     sublog.DiscountAmount,
 		DiscountPercent:    int32(sublog.DiscountPercent),
-		CustomerId:         sublog.CustomerID,
+		CustomerID:         sublog.CustomerID,
 		Refunded:           sublog.Refunded,
+		RefundedAmount:     sublog.RefundedAmount,
 	}
 }

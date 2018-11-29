@@ -22,33 +22,40 @@ if [[ $1 == "build" ]]; then
     gulp build
     cd ..
   fi
-  if [[ $* == *cook* ]]; then
-    echo "Building server/cook:"
-    cd server/cook
-    polymer build
-    # remove unneccessary files
-    rm -rf build/unbundled
+  if [[ $* == *sub* ]]; then
+    echo "Building server/sub:"
+    cd subserver/web
+    yarn run build
     cd ../..
   fi
   if [[ $* == *proto* ]]; then
     # build protobuf and grpc
     echo "Building Gigamunch-Proto APIs."
-    # Eater
-    protoc -I Gigamunch-Proto/common/ -I Gigamunch-Proto/eater/ Gigamunch-Proto/common/*.proto Gigamunch-Proto/eater/*.proto --go_out=plugins=grpc:Gigamunch-Proto/eater
-    # Shared
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/shared/ Gigamunch-Proto/shared/*.proto --go_out=plugins=grpc:Gigamunch-Proto/shared
-    mv Gigamunch-Proto/shared/github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/shared/*.go Gigamunch-Proto/shared/
-    rm -fR Gigamunch-Proto/shared/github.com
+    # Common 
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/common/ Gigamunch-Proto/common/*.proto --go_out=plugins=grpc:Gigamunch-Proto/common
     # Admin
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/admin/ -I Gigamunch-Proto/common/ Gigamunch-Proto/admin/*.proto --go_out=plugins=grpc:Gigamunch-Proto/admin --swagger_out=logtostderr=true:admin/app
     sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' admin/app/AdminAPI.swagger.json
+    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/admin/AdminAPI.pb.go
+    # Sub
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/sub/ -I Gigamunch-Proto/common/ Gigamunch-Proto/sub/*.proto --go_out=plugins=grpc:Gigamunch-Proto/sub --swagger_out=logtostderr=true:subserver/web
+    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' subserver/web/SubAPI.swagger.json
+    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/sub/SubAPI.pb.go
     # Server
-    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/shared/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
+    protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/server/ -I Gigamunch-Proto/common/ Gigamunch-Proto/server/*.proto --go_out=plugins=grpc:Gigamunch-Proto/server --swagger_out=logtostderr=true:server
+    sed -i 's/"http",//g; s/"2.0",/"2.0",\n"securityDefinitions": {"auth-token": {"type": "apiKey","in": "header","name": "auth-token"}},"security": [{"auth-token": []}],/g' server/ServerAPI.swagger.json
+    sed -i 's/import Common "."/import Common "github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/common"/g' Gigamunch-Proto/server/ServerAPI.pb.go
+    
+    # modift *.pb.go generated code
+    cd Gigamunch-Proto
+    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/,omitempty//g;s/Url/URL/g;s/Id/ID/g;s/Sms/SMS/g;' X > X.tmp && mv X{.tmp,}"
+    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/Option_1/Option1/g;s/Option_2/Option2/g;s/Instructions_1/Instructions1/g;s/Instructions_2/Instructions2/g;s/Time_1/Time1/g;s/Time_2/Time2/g;' X > X.tmp && mv X{.tmp,}"
+    cd ..
     # Typescript
     gulp build
     # Copy Typescript definitions to folder
     cp Gigamunch-Proto/admin/*.d.ts admin/app/ts/prototypes
-    cp Gigamunch-Proto/shared/*.d.ts admin/app/ts/prototypes
+    cp Gigamunch-Proto/common/*.d.ts admin/app/ts/prototypes
   fi
   timestamp
   exit 0
@@ -77,6 +84,11 @@ if [[ $1 == "deploy" ]]; then
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     gcloud app deploy admin/app.yaml --project=$project --version=1 --quiet
   fi
+  if [[ $* == *sub* ]]; then
+    echo "Deploying sub:"
+    cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > subserver/app.yaml
+    gcloud app deploy subserver/app.yaml --project=$project --version=1 --quiet
+  fi
   if [[ $* == *server* ]]; then
     echo "Deploying server:"
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_SERVEPATH_/\/build\/default/g; s/MODULE/default/g; s/_DOMAIN_/$domain/g" > server/app.yaml
@@ -99,20 +111,21 @@ fi
 ################################################################################
 if [[ $1 == "serve" ]]; then
   # setup mysql
-  if [[ $OSTYPE == "linux-gnu" ]]; then
-    service mysql start&
-  else
-    /usr/local/opt/mysql@5.6/bin/mysql.server start
-  fi
+  # if [[ $OSTYPE == "linux-gnu" ]]; then
+  #   service mysql start&
+  # else
+  #   /usr/local/opt/mysql@5.6/bin/mysql.server start
+  # fi
   # start goapp serve
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
   if [[ $2 == "admin" ]]; then
     echo "Starting admin:"
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
-    dev_appserver.py --datastore_path ./.datastore admin/app.yaml&
-    cd admin/app
-    gulp build&
+    cd admin
+    dev_appserver.py --datastore_path ../.datastore ./app.yaml&
+    cd app
+    # gulp build&
     gulp watch
     cd ../..
   fi
@@ -121,17 +134,25 @@ if [[ $1 == "serve" ]]; then
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
     dev_appserver.py --datastore_path ./.datastore server/app.yaml&
     cd server
-    gulp build&
+    # gulp build&
     gulp watch
     cd ..
   fi
+  if [[ $2 == "sub" ]]; then
+    echo "Starting sub:"
+    cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
+    # dev_appserver.py --datastore_path ./.datastore subserver/app.yaml&
+    cd subserver/web 
+    yarn run serve
+    cd ../..
+  fi
   # stop mysql
 
-  if [[ $OSTYPE == "linux-gnu" ]]; then
-    service mysql stop&
-  else
-    /usr/local/opt/mysql@5.6/bin/mysql.server stop
-  fi
+  # if [[ $OSTYPE == "linux-gnu" ]]; then
+  #   service mysql stop&
+  # else
+  #   /usr/local/opt/mysql@5.6/bin/mysql.server stop
+  # fi
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
   timestamp
@@ -144,9 +165,9 @@ fi
 if [[ $1 == "help" ]] || [[ $1 == "" ]]; then
   echo "Here are the commands supported by the script:"
   echo -e "\tapp [help|serve|build|deploy]"
-  echo -e "\tapp serve [server|admin]"
-  echo -e "\tapp build [server|admin|cook|proto]"
-  echo -e "\tapp deploy [--prod|-p] [admin|cook|server|queue|cron]"
+  echo -e "\tapp serve [server|admin|sub]"
+  echo -e "\tapp build [server|admin|sub|proto]"
+  echo -e "\tapp deploy [--prod|-p] [admin|cook|sub|server|queue|cron]"
   timestamp
   exit 0
 fi

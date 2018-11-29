@@ -1,43 +1,38 @@
-package admin
+package main
 
 import (
 	"context"
 	"net/http"
 
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/admin"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 )
 
-// UpdatePhoneNumbers updates phonenumbers for subscribers.
-func (s *server) UpdatePhoneNumbers(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	// subC := sub.NewWithLogging(ctx, s.log)
-	// subs, err := subC.GetHasSubscribed(time.Now())
+// UpdateSubs updates Subs for subscribers.
+func (s *server) UpdateSubs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pbadmin.GetExecutionsReq)
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	// subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	// if err != nil {
-	// 	return errors.Annotate(err, "failed to sub.GetHasSubscribed")
+	// 	return errors.Annotate(err, "failed to sub.NewClient")
 	// }
-	// var updatedSubs []*sub.SubscriptionSignUp
-	// for i := range subs {
-	// 	oldNumber := subs[i].PhoneNumber
-	// 	oldRawNumber := subs[i].RawPhoneNumber
-	// 	subs[i].UpdatePhoneNumber(subs[i].PhoneNumber)
-	// 	if oldNumber != subs[i].PhoneNumber || (oldNumber != "" && oldRawNumber == "") {
-	// 		logging.Infof(ctx, "updating: %s", subs[i].Email)
-	// 		updatedSubs = append(updatedSubs, &subs[i])
-	// 	}
+	// err = subC.BatchUpdateActivityWithUserID(req.Start, req.Limit)
+	// if err != nil {
+	// 	return errors.Annotate(err, "failed to sub.BatchUpdateActivityWithUserID")
 	// }
-	// lastIndex := 0
-	// for i := 0; i < len(updatedSubs); i += 100 {
-	// 	if i == 0 {
-	// 		i += 100
-	// 	}
-	// 	if i > len(updatedSubs) {
-	// 		i = len(updatedSubs)
-	// 	}
-	// 	err = subC.Update(updatedSubs[lastIndex:i])
-	// 	if err != nil {
-	// 		return errors.Annotate(err, "failed to sub.Update")
-	// 	}
-	// 	lastIndex = i
-	// }
-	// return errors.NoError.WithMessage(fmt.Sprintf("%d subs updated out of %d", len(updatedSubs), len(subs)))
+	return nil
+}
+
+// MigrateToNewSubscribersStruct migrates subscribers to new struct.
+func (s *server) MigrateToNewSubscribersStruct(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+
 	return nil
 }

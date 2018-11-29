@@ -4,16 +4,19 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
+	"sort"
+	"strings"
 	"time"
+
+	"github.com/go-test/deep"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 
+	sdreporting "cloud.google.com/go/errorreporting"
+
 	sdlogging "cloud.google.com/go/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"google.golang.org/api/option"
 	aelog "google.golang.org/appengine/log"
-	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -30,6 +33,8 @@ const (
 
 	// Delivered Action.
 	Delivered = Action("delivered")
+	// ExecutionUpdate Action.
+	ExecutionUpdate = Action("execution_update")
 	// ======================
 	// User or Admin Actions
 	// ======================
@@ -86,6 +91,8 @@ const (
 	Unknown = Type("unknown")
 	// Subscriber type.
 	Subscriber = Type("subscriber")
+	// Execution type.
+	Execution = Type("execution")
 	// System type.
 	System = Type("system")
 	// Error type.
@@ -106,10 +113,6 @@ const (
 )
 
 var (
-	sdClient *sdlogging.Client
-)
-
-var (
 	// Errors
 	errDatastore = errors.InternalServerError
 	errInternal  = errors.InternalServerError
@@ -125,15 +128,10 @@ func Errorf(ctx context.Context, format string, args ...interface{}) {
 	aelog.Errorf(ctx, format, args...)
 }
 
-// Debugf logs debug messages. Only logs on development servers.
-func Debugf(ctx context.Context, format string, args ...interface{}) {
-	aelog.Debugf(ctx, format, args...)
-}
-
 // Client is a logging client.
 type Client struct {
 	ctx        context.Context
-	sdLogger   *sdlogging.Logger
+	sdReporter *sdreporting.Client
 	loggerID   string
 	path       string
 	db         common.DB
@@ -145,17 +143,18 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 	if dbC == nil {
 		return nil, errInternal.Annotate("dbC cannot be nil")
 	}
-	if serverInfo.IsStandardAppEngine {
-		httpClient := urlfetch.Client(ctx)
-		setup(ctx, httpClient, serverInfo.ProjectID)
-	}
-	var sdLogger *sdlogging.Logger
-	if sdClient != nil {
-		sdLogger = sdClient.Logger(loggerID)
+	sdReporter, err := sdreporting.NewClient(context.Background(), serverInfo.ProjectID, sdreporting.Config{
+		ServiceName: loggerID,
+		OnError: func(err error) {
+			Errorf(ctx, "failed to log to sdReporter", err)
+		},
+	})
+	if err != nil {
+		Errorf(ctx, "failed to create sdReporter", err)
 	}
 	return &Client{
 		ctx:        ctx,
-		sdLogger:   sdLogger,
+		sdReporter: sdReporter,
 		loggerID:   loggerID,
 		path:       path,
 		db:         dbC,
@@ -163,18 +162,23 @@ func NewClient(ctx context.Context, loggerID string, path string, dbC common.DB,
 	}, nil
 }
 
+// SetContext sets the context.
+func (c *Client) SetContext(ctx context.Context) {
+	c.ctx = ctx
+}
+
 // Infof logs info.
 func (c *Client) Infof(ctx context.Context, format string, args ...interface{}) {
 	Infof(ctx, format, args...)
 }
 
-// Debugf logs debug messages. Only logs on development servers.
-func (c *Client) Debugf(ctx context.Context, format string, args ...interface{}) {
-	Debugf(ctx, format, args...)
-}
-
 // Errorf logs error messages.
 func (c *Client) Errorf(ctx context.Context, format string, args ...interface{}) {
+	if c.sdReporter != nil {
+		c.sdReporter.Report(sdreporting.Entry{
+			Error: fmt.Errorf(format, args),
+		})
+	}
 	Errorf(ctx, format, args...)
 }
 
@@ -192,9 +196,9 @@ func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 }
 
 // GetAllByID gets logs with UserID.
-func (c *Client) GetAllByID(userID int64, start, limit int) ([]*Entry, error) {
+func (c *Client) GetAllByID(userID string, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
-	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserID=", userID, &dst)
+	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserIDString=", userID, &dst)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
@@ -214,6 +218,22 @@ func (c *Client) GetAllByEmail(userEmail string, start, limit int) ([]*Entry, er
 	for i := range dst {
 		dst[i].ID = keys[i].IntID()
 	}
+	return dst, nil
+}
+
+// GetAllByExecution gets logs by ExecutionID.
+func (c *Client) GetAllByExecution(executionID int64) ([]*Entry, error) {
+	var dst []*Entry
+	keys, err := c.db.QueryFilter(c.ctx, kind, 0, 1000, "ExecutionID=", executionID, &dst)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilter")
+	}
+	for i := range dst {
+		dst[i].ID = keys[i].IntID()
+	}
+	sort.Slice(dst, func(i, j int) bool {
+		return dst[j].Timestamp.Before(dst[i].Timestamp)
+	})
 	return dst, nil
 }
 
@@ -241,13 +261,13 @@ type SalePayload struct {
 }
 
 // Paid is when a transaction is paid.
-func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPaid float32, transactionID string) {
+func (c *Client) Paid(userID string, userEmail, date string, amountDue, amountPaid float32, transactionID string) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Paid,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Paid,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Paid for " + date,
 			Description: fmt.Sprintf("%s successfully paid %.2f for %s", userEmail, amountPaid, date),
@@ -263,13 +283,13 @@ func (c *Client) Paid(userID int64, userEmail, date string, amountDue, amountPai
 }
 
 // Refund is when a transaction is refunded.
-func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountRefunded float32, transactionID string) {
+func (c *Client) Refund(userID string, userEmail, date string, amountDue, amountRefunded float32, transactionID string) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Refund,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Refund,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Refunded for " + date,
 			Description: fmt.Sprintf("%s was refunded %.2f", userEmail, amountRefunded),
@@ -285,13 +305,13 @@ func (c *Client) Refund(userID int64, userEmail, date string, amountDue, amountR
 }
 
 // Forgiven is when a transaction is forgiven.
-func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amountForgiven float32) {
+func (c *Client) Forgiven(userID string, userEmail, date string, amountDue, amountForgiven float32) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Forgiven,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Forgiven,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Forgiven for " + date,
 			Description: fmt.Sprintf("%s was forgiven for %.2f", userEmail, amountForgiven),
@@ -306,13 +326,13 @@ func (c *Client) Forgiven(userID int64, userEmail, date string, amountDue, amoun
 }
 
 // CardDeclined is when a transaction is declined.
-func (c *Client) CardDeclined(userID int64, userEmail, date string, amountDue, amountDeclined float32, transactionID string) {
+func (c *Client) CardDeclined(userID string, userEmail, date string, amountDue, amountDeclined float32, transactionID string) {
 	e := &Entry{
 		Type: Subscriber,
 		// TODO: Action?
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Card declined for " + date,
 			Description: fmt.Sprintf("%s's card was declined for %.2f", userEmail, amountDeclined),
@@ -334,13 +354,13 @@ type CreditCardPayload struct {
 }
 
 // SubCardUpdated is when a credit card is Updated.
-func (c *Client) SubCardUpdated(userID int64, userEmail, oldPaymentMethodToken, newPaymentMethodToken string) {
+func (c *Client) SubCardUpdated(userID string, userEmail, oldPaymentMethodToken, newPaymentMethodToken string) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    CardUpdated,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       CardUpdated,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Changed Credit Card",
 			Description: fmt.Sprintf("Changed card from %s to %s", oldPaymentMethodToken, newPaymentMethodToken),
@@ -353,59 +373,19 @@ func (c *Client) SubCardUpdated(userID int64, userEmail, oldPaymentMethodToken, 
 	c.Log(e)
 }
 
-// SubUpdatedPayload is the payload related to SubUpdated.
-type SubUpdatedPayload struct {
-	OldEmail          string `json:"old_email,omitempty" datastore:",omitempty,noindex"`
-	Email             string `json:"email,omitempty" datastore:",omitempty,noindex"`
-	OldFirstName      string `json:"old_first_name,omitempty" datastore:",omitempty,noindex"`
-	FirstName         string `json:"first_name,omitempty" datastore:",omitempty,noindex"`
-	OldLastName       string `json:"old_last_name,omitempty" datastore:",omitempty,noindex"`
-	LastName          string `json:"last_name,omitempty" datastore:",omitempty,noindex"`
-	OldAddress        string `json:"old_address,omitempty" datastore:",omitempty,noindex"`
-	Address           string `json:"address,omitempty" datastore:",omitempty,noindex"`
-	OldRawPhoneNumber string `json:"old_raw_phone_number,omitempty" datastore:",omitempty,noindex"`
-	RawPhoneNumber    string `json:"raw_phone_number,omitempty" datastore:",omitempty,noindex"`
-	OldPhoneNumber    string `json:"old_phone_number,omitempty" datastore:",omitempty,noindex"`
-	PhoneNumber       string `json:"phone_number,omitempty" datastore:",omitempty,noindex"`
-	OldDeliveryNotes  string `json:"old_delivery_tip,omitempty" datastore:",omitempty,noindex"`
-	DeliveryNotes     string `json:"delivery_tip,omitempty" datastore:",omitempty,noindex"`
-}
-
 // SubUpdated is when a subscriber account is updated.
-func (c *Client) SubUpdated(userID int64, userEmail string, payload *SubUpdatedPayload) {
-	desc := "Changed the following: "
-	if payload.OldEmail != payload.Email {
-		desc += "Email(" + payload.OldEmail + " -> " + payload.Email + "); "
-	}
-	if payload.OldFirstName != payload.FirstName {
-		desc += "FirstName(" + payload.OldFirstName + " -> " + payload.FirstName + "); "
-	}
-	if payload.OldLastName != payload.LastName {
-		desc += "LastName(" + payload.OldLastName + " -> " + payload.LastName + "); "
-	}
-	if payload.OldAddress != payload.Address {
-		desc += "Address(" + payload.OldAddress + " -> " + payload.Address + "); "
-	}
-	if payload.OldRawPhoneNumber != payload.RawPhoneNumber {
-		desc += "RawPhoneNumber(" + payload.OldRawPhoneNumber + " -> " + payload.RawPhoneNumber + "); "
-	}
-	if payload.OldPhoneNumber != payload.PhoneNumber {
-		desc += "PhoneNumber(" + payload.OldPhoneNumber + " -> " + payload.PhoneNumber + "); "
-	}
-	if payload.OldDeliveryNotes != payload.DeliveryNotes {
-		desc += "DeliveryNotes(" + payload.OldDeliveryNotes + " -> " + payload.DeliveryNotes + "); "
-	}
+func (c *Client) SubUpdated(userID string, userEmail string, oldSub, newSub interface{}) {
+	desc := getDiff(oldSub, newSub)
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Update,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Update,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Updated Subscriber Info",
 			Description: desc,
 		},
-		SubUpdatedPayload: *payload,
 	}
 	c.Log(e)
 }
@@ -428,13 +408,13 @@ type MessagePayload struct {
 }
 
 // SubMessage is a message interaction with a sub.
-func (c *Client) SubMessage(userID int64, userEmail string, payload *MessagePayload) {
+func (c *Client) SubMessage(userID string, userEmail string, payload *MessagePayload) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Message,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Message,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Message from(" + payload.From + ") to(" + payload.To + ")",
 			Description: "Body: '" + payload.Body + "'",
@@ -453,13 +433,13 @@ type RatingPayload struct {
 }
 
 // SubRating is a message interaction with a sub.
-func (c *Client) SubRating(userID int64, userEmail string, payload *RatingPayload) {
+func (c *Client) SubRating(userID string, userEmail string, payload *RatingPayload) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Rating,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Rating,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       fmt.Sprintf("Rating %d", payload.Rating),
 			Description: "Comments: '" + payload.Comments + "'",
@@ -479,13 +459,13 @@ type ServingsChangedPayload struct {
 }
 
 // SubServingsChangedPermanently logs a servings change.
-func (c *Client) SubServingsChangedPermanently(userID int64, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    ServingsChangedPermanently,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       ServingsChangedPermanently,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Servings changed permanently",
 			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
@@ -501,13 +481,13 @@ func (c *Client) SubServingsChangedPermanently(userID int64, userEmail string, o
 }
 
 // SubServingsChanged logs a servings change.
-func (c *Client) SubServingsChanged(userID int64, userEmail string, date string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+func (c *Client) SubServingsChanged(userID string, userEmail string, date string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    ServingsChangedPermanently,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       ServingsChangedPermanently,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Servings changed for " + date,
 			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
@@ -525,82 +505,100 @@ func (c *Client) SubServingsChanged(userID int64, userEmail string, date string,
 
 // SkipPayload is a Skip entry.
 type SkipPayload struct {
-	UserID          int64  `json:"user_id,omitempty" datastore:",omitempty,noindex"`
-	UserEmail       string `json:"user_email,omitempty" datastore:",omitempty,noindex"`
-	Reason          string `json:"reason,omitempty" datastore:",omitempty,noindex"`
-	ActionUserID    int64  `json:"action_user_id,omitempty" datastore:",omitempty,noindex"`
-	ActionUserEmail string `json:"action_user_email,omitempty" datastore:",omitempty,noindex"`
-	Date            string `json:"date,omitempty" datastore:",omitempty,noindex"`
+	UserID             int64  `json:"-" datastore:",omitempty,noindex"`
+	UserIDString       string `json:"user_id,omitempty" datastore:",omitempty,noindex"`
+	UserEmail          string `json:"user_email,omitempty" datastore:",omitempty,noindex"`
+	Reason             string `json:"reason,omitempty" datastore:",omitempty,noindex"`
+	ActionUserID       int64  `json:"-" datastore:",omitempty,noindex"`
+	ActionUserIDString string `json:"action_user_id,omitempty" datastore:",omitempty,noindex"`
+	ActionUserEmail    string `json:"action_user_email,omitempty" datastore:",omitempty,noindex"`
+	Date               string `json:"date,omitempty" datastore:",omitempty,noindex"`
 }
 
 // SubSkip logs a skip.
-func (c *Client) SubSkip(date string, userID int64, userEmail, reason string) {
+func (c *Client) SubSkip(date string, userID string, userEmail, reason string) {
 	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Skip,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Skip,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Skip for " + date,
 			Description: fmt.Sprintf("%s was skipped for %s by %s because '%s'", userEmail, date, actionUserEmail, reason),
 		},
 		SkipPayload: SkipPayload{
-			Date:            date,
-			UserID:          userID,
-			UserEmail:       userEmail,
-			Reason:          reason,
-			ActionUserID:    c.getInt64FromCtx(common.ContextUserID),
-			ActionUserEmail: actionUserEmail,
+			Date:               date,
+			UserIDString:       userID,
+			UserEmail:          userEmail,
+			Reason:             reason,
+			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
+			ActionUserEmail:    actionUserEmail,
 		},
 	}
 	c.Log(e)
 }
 
 // SubUnskip logs a unskip.
-func (c *Client) SubUnskip(date string, userID int64, userEmail string) {
+func (c *Client) SubUnskip(date string, userID string, userEmail string) {
 	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
 	e := &Entry{
-		Type:      Subscriber,
-		Action:    Unskip,
-		Severity:  SeverityInfo,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:         Subscriber,
+		Action:       Unskip,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Unskip for " + date,
 			Description: fmt.Sprintf("%s was unskipped for %s by %s", userEmail, date, actionUserEmail),
 		},
 		SkipPayload: SkipPayload{
-			Date:            date,
-			UserID:          userID,
-			UserEmail:       userEmail,
-			ActionUserID:    c.getInt64FromCtx(common.ContextUserID),
-			ActionUserEmail: actionUserEmail,
+			Date:               date,
+			UserIDString:       userID,
+			UserEmail:          userEmail,
+			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
+			ActionUserEmail:    actionUserEmail,
 		},
 	}
 	c.Log(e)
 }
 
-// ActivitySetupPayload is a System payload.
-type ActivitySetupPayload struct {
-	BasicPayload `json:"basic_payload,omitempty" datastore:",omitempty,noindex"`
-	Date         string `json:"date,omitempty" datastore:",omitempty,noindex"`
-	NumSetup     int    `json:"num_setup,omitempty" datastore:",omitempty,noindex"`
-}
+// // ActivitySetupPayload is a System payload.
+// type ActivitySetupPayload struct {
+// 	BasicPayload `json:"basic_payload,omitempty" datastore:",omitempty,noindex"`
+// 	Date         string `json:"date,omitempty" datastore:",omitempty,noindex"`
+// 	NumSetup     int    `json:"num_setup,omitempty" datastore:",omitempty,noindex"`
+// }
 
-// ActivitySetup is a log of when the cron job for activity setup runs or admin runs activity setup.
-func (c *Client) ActivitySetup(date string, numSetup int) {
+// // ActivitySetup is a log of when the cron job for activity setup runs or admin runs activity setup.
+// func (c *Client) ActivitySetup(date string, numSetup int) {
+// 	e := &Entry{
+// 		Type:     System,
+// 		Severity: SeverityInfo,
+// 		BasicPayload: BasicPayload{
+// 			Title:       date,
+// 			Description: fmt.Sprintf("Activity setup for %s", date),
+// 		},
+// 		ActivitySetupPayload: ActivitySetupPayload{
+// 			Date:     date,
+// 			NumSetup: numSetup,
+// 		},
+// 	}
+// 	c.Log(e)
+// }
+
+// ExecutionUpdate is a log of when an execution is udated.
+func (c *Client) ExecutionUpdate(executionID int64, oldExe interface{}, newExe interface{}) {
+	desc := getDiff(oldExe, newExe)
 	e := &Entry{
-		Type:     System,
-		Severity: SeverityInfo,
+		Type:        Execution,
+		Action:      ExecutionUpdate,
+		Severity:    SeverityInfo,
+		ExecutionID: executionID,
 		BasicPayload: BasicPayload{
-			Title:       date,
-			Description: fmt.Sprintf("Activity setup for %s", date),
-		},
-		ActivitySetupPayload: ActivitySetupPayload{
-			Date:     date,
-			NumSetup: numSetup,
+			Title:       "Execution Updated",
+			Description: desc,
 		},
 	}
 	c.Log(e)
@@ -611,34 +609,34 @@ type ErrorPayload struct {
 	Method        string               `json:"method,omitempty" datastore:",omitempty,noindex"`
 	URL           string               `json:"url,omitempty" datastore:",omitempty,noindex"`
 	Proto         string               `json:"proto,omitempty" datastore:",omitempty,noindex"`
-	Header        http.Header          `json:"header,omitempty" datastore:",omitempty,noindex"`
 	ContentLength int64                `json:"content_length,omitempty" datastore:",omitempty,noindex"`
 	Host          string               `json:"host,omitempty" datastore:",omitempty,noindex"`
-	Form          url.Values           `json:"form,omitempty" datastore:",omitempty,noindex"`
 	Error         errors.ErrorWithCode `json:"error,omitempty" datastore:",omitempty,noindex"`
 }
 
 // RequestError is used to log an error at the end of a request.
-// TODO: log body?
-func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode, userID int64, userEmail string) {
+func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode) {
 	e := &Entry{
-		Type:      Error,
-		Severity:  SeverityError,
-		Path:      r.URL.Path,
-		UserID:    userID,
-		UserEmail: userEmail,
+		Type:     Error,
+		Severity: SeverityError,
+		Path:     r.URL.Path,
 		ErrorPayload: ErrorPayload{
 			Method:        r.Method,
 			URL:           r.URL.String(),
-			Header:        r.Header,
 			Proto:         r.Proto,
 			ContentLength: r.ContentLength,
 			Host:          r.Host,
-			Form:          r.Form,
 			Error:         ewc,
 		},
 	}
 	c.Log(e)
+	if c.sdReporter != nil {
+		c.sdReporter.Report(sdreporting.Entry{
+			Error: fmt.Errorf("request error: %v", ewc),
+			Req:   r,
+			User:  e.UserEmail,
+		})
+	}
 }
 
 // BasicPayload is in every payload.
@@ -649,25 +647,28 @@ type BasicPayload struct {
 
 // Entry is a log entry.
 type Entry struct {
-	ID                     int64                  `json:"id,omitempty" datastore:",noindex"`
-	Type                   Type                   `json:"type,omitempty" datastore:",index"`
-	Action                 Action                 `json:"action,omitempty" datastore:",index"`
-	ActionUserID           int64                  `json:"action_user_id,omitempty" datastore:",index"`
-	ActionUserEmail        string                 `json:"action_user_email,omitempty" datastore:",index"`
-	UserID                 int64                  `json:"user_id,omitempty" datastore:",index"`
-	UserEmail              string                 `json:"user_email,omitempty" datastore:",index"`
-	Severity               sdlogging.Severity     `json:"serverity,omitempty" datastore:",noindex"`
-	Path                   string                 `json:"path,omitempty" datastore:",noindex"`
-	LogName                string                 `json:"log_name,omitempty" datastore:",noindex"`
-	Timestamp              time.Time              `json:"timestamp,omitempty" datastore:",index"`
-	BasicPayload           BasicPayload           `json:"basic_payload,omitempty" datastore:",noindex"`
-	ErrorPayload           ErrorPayload           `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
-	ActivitySetupPayload   ActivitySetupPayload   `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
+	ID                 int64              `json:"id,omitempty" datastore:",noindex"`
+	Type               Type               `json:"type,omitempty" datastore:",index"`
+	ExecutionID        int64              `json:"execution_id" datastore:",index"`
+	Action             Action             `json:"action,omitempty" datastore:",index"`
+	ActionUserID       int64              `json:"-" datastore:",omitempty,noindex"` // depecreated
+	ActionUserIDString string             `json:"action_user_id,omitempty" datastore:",index"`
+	ActionUserEmail    string             `json:"action_user_email,omitempty" datastore:",index"`
+	UserID             int64              `json:"-" datastore:",omitempty,noindex"` // depecreated
+	UserIDString       string             `json:"user_id,omitempty" datastore:",index"`
+	UserEmail          string             `json:"user_email,omitempty" datastore:",index"`
+	Severity           sdlogging.Severity `json:"serverity,omitempty" datastore:",noindex"`
+	Path               string             `json:"path,omitempty" datastore:",noindex"`
+	LogName            string             `json:"log_name,omitempty" datastore:",noindex"`
+	Timestamp          time.Time          `json:"timestamp,omitempty" datastore:",index"`
+	BasicPayload       BasicPayload       `json:"basic_payload,omitempty" datastore:",noindex"`
+	ErrorPayload       ErrorPayload       `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
+	// ActivitySetupPayload   ActivitySetupPayload   `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
 	SkipPayload            SkipPayload            `json:"skip_payload,omitempty" datastore:",omitempty,noindex"`
 	CreditCardPayload      CreditCardPayload      `json:"credit_card_payload,omitempty" datastore:",omitempty,noindex"`
 	SalePayload            SalePayload            `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
 	ServingsChangedPayload ServingsChangedPayload `json:"servings_changed_payload,omitempty" datastore:",omitempty,noindex"`
-	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"`
+	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"` // depecreated
 	MessagePayload         MessagePayload         `json:"message_payload,omitempty" datastore:",omitempty,noindex"`
 	RatingPayload          RatingPayload          `json:"rating_payload,omitempty" datastore:",omitempty,noindex"`
 }
@@ -684,8 +685,8 @@ func (c *Client) Log(e *Entry) {
 	if e.Path == "" {
 		e.Path = c.path
 	}
-	if e.ActionUserID == 0 {
-		e.ActionUserID = c.getInt64FromCtx(common.ContextUserID)
+	if e.ActionUserIDString == "" {
+		e.ActionUserIDString = c.getStringFromCtx(common.ContextUserID)
 	}
 	if e.ActionUserEmail == "" {
 		e.ActionUserEmail = c.getStringFromCtx(common.ContextUserEmail)
@@ -697,19 +698,6 @@ func (c *Client) Log(e *Entry) {
 	}
 }
 
-func setup(ctx context.Context, httpClient *http.Client, projID string) error {
-	var ops option.ClientOption
-	if httpClient != nil {
-		ops = option.WithHTTPClient(httpClient)
-	}
-	var err error
-	sdClient, err = sdlogging.NewClient(ctx, projID, ops)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (c *Client) getStringFromCtx(key interface{}) string {
 	v := c.ctx.Value(key)
 	if v == nil {
@@ -718,10 +706,31 @@ func (c *Client) getStringFromCtx(key interface{}) string {
 	return v.(string)
 }
 
-func (c *Client) getInt64FromCtx(key interface{}) int64 {
-	v := c.ctx.Value(key)
-	if v == nil {
-		return 0
+func getDiff(od interface{}, nw interface{}) string {
+	diffs := deep.Equal(od, nw)
+	desc := ""
+	replacer := strings.NewReplacer("!=", "->", ".slice", "", " slice", "")
+	for _, diff := range diffs {
+		desc += replacer.Replace(diff) + ";;;\n"
 	}
-	return v.(int64)
+	return desc
+}
+
+// SubUpdatedPayload is the payload related to SubUpdated.
+// DEPECRATED
+type SubUpdatedPayload struct {
+	OldEmail          string `json:"old_email,omitempty" datastore:",omitempty,noindex"`
+	Email             string `json:"email,omitempty" datastore:",omitempty,noindex"`
+	OldFirstName      string `json:"old_first_name,omitempty" datastore:",omitempty,noindex"`
+	FirstName         string `json:"first_name,omitempty" datastore:",omitempty,noindex"`
+	OldLastName       string `json:"old_last_name,omitempty" datastore:",omitempty,noindex"`
+	LastName          string `json:"last_name,omitempty" datastore:",omitempty,noindex"`
+	OldAddress        string `json:"old_address,omitempty" datastore:",omitempty,noindex"`
+	Address           string `json:"address,omitempty" datastore:",omitempty,noindex"`
+	OldRawPhoneNumber string `json:"old_raw_phone_number,omitempty" datastore:",omitempty,noindex"`
+	RawPhoneNumber    string `json:"raw_phone_number,omitempty" datastore:",omitempty,noindex"`
+	OldPhoneNumber    string `json:"old_phone_number,omitempty" datastore:",omitempty,noindex"`
+	PhoneNumber       string `json:"phone_number,omitempty" datastore:",omitempty,noindex"`
+	OldDeliveryNotes  string `json:"old_delivery_tip,omitempty" datastore:",omitempty,noindex"`
+	DeliveryNotes     string `json:"delivery_tip,omitempty" datastore:",omitempty,noindex"`
 }
