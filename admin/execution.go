@@ -179,18 +179,18 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 		// Head Chef
 		hc := progressCounter{}
 		if len(exe.Dishes) < 5 {
-			hc.TotalExepectedCount += int8(5-len(exe.Stickers)) * 3
+			hc.TotalExepectedCount += int8(5-len(exe.Dishes)) * 3
 		}
 
-		hc.checkEmpty(exe.CultureGuide.DinnerInstructions)
-		hc.checkEmpty(exe.CultureGuide.VegetarianDinnerInstructions)
+		// hc.checkEmpty(exe.CultureGuide.DinnerInstructions)
+		// hc.checkEmpty(exe.CultureGuide.VegetarianDinnerInstructions)
 		for _, sticker := range exe.Stickers {
 			if sticker.EatingTemperature == "" || sticker.EatingTemperature == "hot" {
 				hc.checkEmpty(sticker)
 			}
 		}
 		if len(exe.Stickers) < 4 {
-			hc.TotalExepectedCount += int8(4 - len(exe.Stickers))
+			hc.TotalExepectedCount += int8(4-len(exe.Stickers)) * 4
 		}
 
 		// Content Writer
@@ -205,6 +205,12 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 		// Culture Guide
 		cg := progressCounter{}
 		cg.checkEmpty(exe.Content)
+		if exe.Content.DinnerNonVegImageURL == "" {
+			cg.TotalExepectedCount--
+		}
+		if exe.Content.DinnerVegImageURL == "" {
+			cg.TotalExepectedCount--
+		}
 		cg.checkEmpty(exe.Email)
 		cg.checkEmpty(exe.Notifications)
 
@@ -219,12 +225,12 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 			hc.addCheck(!dish.IsForNonVegetarian && !dish.IsForVegetarian)
 			// Content Writer
 			cw.checkEmpty(dish.Description)
-			cw.checkEmpty(dish.DescriptionPreview)
+			// cw.checkEmpty(dish.DescriptionPreview)
 			// Culture Guide
 			cg.checkEmpty(dish.Color)
-			if !dish.IsOnMainPlate {
-				cg.checkEmpty(dish.ImageURL)
-			}
+			// if !dish.IsOnMainPlate {
+			// 	cg.checkEmpty(dish.ImageURL)
+			// }
 		}
 
 		// set progress
@@ -271,11 +277,9 @@ func getExecutionByMode(ctx context.Context, mode string, exeOld, exeNew *execut
 	case "head_chef":
 		exe.CultureGuide.DinnerInstructions = exeNew.CultureGuide.DinnerInstructions
 		exe.CultureGuide.VegetarianDinnerInstructions = exeNew.CultureGuide.VegetarianDinnerInstructions
-		exe.Stickers = exeNew.Stickers
 	case "content_writer":
 		exe.Culture = exeNew.Culture
 		exe.CultureCook = exeNew.CultureCook
-		exe.CultureGuide.InfoBoxes = exeNew.CultureGuide.InfoBoxes
 	case "culture_guide":
 		exe.Content = exeNew.Content
 		exe.Email = exeNew.Email
@@ -341,6 +345,25 @@ func getExecutionByMode(ctx context.Context, mode string, exeOld, exeNew *execut
 			exe.Stickers[i].IsForVegetarian = exeNew.Stickers[i].IsForVegetarian
 		case "culture_guide":
 			exe.Stickers[i].Color = exeNew.Stickers[i].Color
+		}
+	}
+
+	// CultureGuide.InfoBoxes
+	if len(exe.CultureGuide.InfoBoxes) > len(exeNew.CultureGuide.InfoBoxes) {
+		exe.CultureGuide.InfoBoxes = exe.CultureGuide.InfoBoxes[:len(exeNew.CultureGuide.InfoBoxes)-1]
+	} else if len(exe.CultureGuide.InfoBoxes) < len(exeNew.CultureGuide.InfoBoxes) {
+		d := make([]execution.InfoBox, len(exeNew.CultureGuide.InfoBoxes)-len(exe.CultureGuide.InfoBoxes))
+		exe.CultureGuide.InfoBoxes = append(exe.CultureGuide.InfoBoxes, d...)
+	}
+	for i := range exeNew.CultureGuide.InfoBoxes {
+		switch mode {
+		case "content_writer":
+			exe.CultureGuide.InfoBoxes[i].Title = exeNew.CultureGuide.InfoBoxes[i].Title
+			exe.CultureGuide.InfoBoxes[i].Text = exeNew.CultureGuide.InfoBoxes[i].Text
+		case "culture_guide":
+			exe.CultureGuide.InfoBoxes[i].Image = exeNew.CultureGuide.InfoBoxes[i].Image
+			exe.CultureGuide.InfoBoxes[i].Caption = exeNew.CultureGuide.InfoBoxes[i].Caption
+
 		}
 	}
 

@@ -3,6 +3,7 @@ package activity
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	// mysql driver
@@ -19,12 +20,15 @@ import (
 
 const (
 	// DateFormat is the expected format of date in activity.
-	DateFormat                     = "2006-01-02" // "Jan 2, 2006"
-	selectActivityStatement        = "SELECT * FROM activity WHERE date=? AND email=?"
-	selectAllActivityStatement     = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
-	selectActivityForUserStatement = "SELECT * FROM activity WHERE user_id=? ORDER BY date DESC"
-	updateRefundedStatement        = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
-	insertStatement                = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
+	DateFormat                               = "2006-01-02" // "Jan 2, 2006"
+	selectActivityByEmailStatement           = "SELECT * FROM activity WHERE date=? AND email=?"
+	selectActivityByUserIDStatement          = "SELECT * FROM activity WHERE date=? AND user_id=?"
+	selectAllActivityStatement               = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
+	selectActivityForUserStatement           = "SELECT * FROM activity WHERE user_id=? ORDER BY date DESC"
+	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
+	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
+	updateRefundedStatement                  = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
+	insertStatement                          = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 )
 
 // Errors
@@ -68,9 +72,14 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 }
 
 // Get gets an activity.
-func (c *Client) Get(date time.Time, email string) (*Activity, error) {
+func (c *Client) Get(date time.Time, idOrEmail string) (*Activity, error) {
+	var err error
 	act := &Activity{}
-	err := c.sqlDB.GetContext(c.ctx, act, selectActivityStatement, date.Format(DateFormat), email)
+	if strings.Contains(idOrEmail, "@") {
+		err = c.sqlDB.GetContext(c.ctx, act, selectActivityByEmailStatement, date.Format(DateFormat), idOrEmail)
+	} else {
+		err = c.sqlDB.GetContext(c.ctx, act, selectActivityByUserIDStatement, date.Format(DateFormat), idOrEmail)
+	}
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to selectActivity")
 	}
@@ -96,6 +105,26 @@ func (c *Client) GetAllForUser(userID string) ([]*Activity, error) {
 	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityForUserStatement, userID)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to selectActivityForUserStatement")
+	}
+	return acts, nil
+}
+
+// GetAfterDateForUser gets a list of activity for a user.
+func (c *Client) GetAfterDateForUser(date time.Time, userID string) ([]*Activity, error) {
+	acts := []*Activity{}
+	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityAfterDateForUserStatement, userID, date.Format(DateFormat))
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to selectActivityAfterDateForUserStatement")
+	}
+	return acts, nil
+}
+
+// GetBeforeDateForUser gets a list of activity for a user.
+func (c *Client) GetBeforeDateForUser(date time.Time, userID string) ([]*Activity, error) {
+	acts := []*Activity{}
+	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityBeforeDateForUserStatement, userID, date.Format(DateFormat))
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to selectActivityBeforerDateForUserStatement")
 	}
 	return acts, nil
 }

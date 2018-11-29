@@ -100,6 +100,26 @@ func (c *Client) GetAll(start, limit int) ([]*Execution, error) {
 	return exes, nil
 }
 
+// GetAfterDate gets all the fulture executions after date.
+func (c *Client) GetAfterDate(t time.Time) ([]*Execution, error) {
+	var exes []*Execution
+	_, err := c.db.QueryFilterOrdered(c.ctx, Kind, 0, 1000, "-Date", "Date>=", t.Format(DateFormat), &exes)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to QueryFilterOrdered")
+	}
+	return exes, nil
+}
+
+// GetBeforeDate gets all the fulture executions eefore date.
+func (c *Client) GetBeforeDate(t time.Time) ([]*Execution, error) {
+	var exes []*Execution
+	_, err := c.db.QueryFilterOrdered(c.ctx, Kind, 0, 1000, "-Date", "Date<=", t.Format(DateFormat), &exes)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to QueryFilterOrdered")
+	}
+	return exes, nil
+}
+
 // Update updates an Execution.
 func (c *Client) Update(exe *Execution) (*Execution, error) {
 	var err error

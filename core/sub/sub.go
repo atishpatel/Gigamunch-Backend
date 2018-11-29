@@ -126,12 +126,19 @@ func (c *Client) UpdatePaymentToken(email, paymentMethodToken string) error {
 
 // Update updates a subscriber.
 func (c *Client) Update(sub *subold.Subscriber) error {
-	// TODO: log change
+	if sub.ID == "" {
+		return errInvalidParameter.WithMessage("sub doesn't have an id")
+	}
+	subold, err := c.Get(sub.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to Get")
+	}
 	key := c.db.NameKey(c.ctx, kind, sub.ID)
-	_, err := c.db.Put(c.ctx, key, sub)
+	_, err = c.db.Put(c.ctx, key, sub)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to put")
 	}
+	c.log.SubUpdated(sub.ID, sub.Email(), subold, sub)
 	return nil
 }
 
@@ -438,11 +445,16 @@ func GetCleanPhoneNumber(rawNumber string) string {
 	return cleanNumber
 }
 
-func (c *Client) BatchUpdateActivityWithUserID() error {
+func (c *Client) BatchUpdateActivityWithUserID(start, limit int32) error {
 	subs, err := c.getAll()
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to getAll")
 	}
+	max := int(start + limit)
+	if len(subs) < max {
+		max = len(subs)
+	}
+	subs = subs[start : max-1]
 	userIDs := make([]string, len(subs))
 	emails := make([]string, len(subs))
 	for i := range subs {

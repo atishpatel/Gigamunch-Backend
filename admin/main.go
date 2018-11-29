@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
 	"github.com/jmoiron/sqlx"
@@ -115,7 +117,7 @@ func main() {
 	// **********************
 	// Batch
 	// **********************
-	// http.HandleFunc("/admin/batch/UpdatePhoneNumbers", s.handler(s.UpdatePhoneNumbers))
+	http.HandleFunc("/admin/batch/UpdateSubs", s.handler(s.UpdateSubs))
 	// http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
@@ -204,6 +206,17 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
+		defer func() {
+			// handle panic, recover
+			if r := recover(); r != nil {
+				errString := fmt.Sprintf("PANICKING: %+v", r)
+				logging.Errorf(ctx, errString)
+				messageC := message.New(ctx)
+				_ = messageC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), errString)
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(fmt.Sprintf("{\"code\":500,\"message\":\"Woops! Something went wrong. Please try again later.\"}")))
+			}
+		}()
 		// create logging client
 		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {

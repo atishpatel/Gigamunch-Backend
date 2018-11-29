@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -47,6 +48,16 @@ func PBLog(in *logging.Entry) (*pbcommon.Log, error) {
 		return out, nil
 	}
 	err := marshalUnmarshal(in, out)
+	return out, err
+}
+
+// PBActivities turns an array of Activities into a protobuff array of Activities.
+func PBActivities(in []*activity.Activity) ([]*pbcommon.Activity, error) {
+	out := make([]*pbcommon.Activity, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
 	return out, err
 }
 

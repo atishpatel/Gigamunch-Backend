@@ -40,6 +40,7 @@ type Email struct {
 	DinnerNonVegImageURL string `json:"dinner_non_veg_image_url" datastore:",noindex"`
 	DinnerVegImageURL    string `json:"dinner_veg_image_url" datastore:",noindex"`
 	CookImageURL         string `json:"cook_image_url" datastore:",noindex"`
+	CookFaceImageURL     string `json:"cook_face_image_url" datastore:",noindex"`
 	LandscapeImageURL    string `json:"landscape_image_url" datastore:",noindex"`
 }
 
@@ -73,6 +74,7 @@ type CultureGuide struct {
 type Content struct {
 	LandscapeImageURL        string `json:"landscape_image_url" datastore:",noindex"`
 	CookImageURL             string `json:"cook_image_url" datastore:",noindex"`
+	CookFaceImageURL         string `json:"cook_face_image_url" datastore:",noindex"`
 	HandsPlateNonVegImageURL string `json:"hands_plate_non_veg_image_url" datastore:",noindex"`
 	HandsPlateVegImageURL    string `json:"hands_plate_veg_image_url" datastore:",noindex"`
 	DinnerNonVegImageURL     string `json:"dinner_non_veg_image_url" datastore:",noindex"`

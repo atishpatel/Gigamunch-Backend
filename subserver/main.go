@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 
 	"github.com/jmoiron/sqlx"
 
@@ -47,9 +48,13 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to setup", err)
 	}
+	// User
+	http.HandleFunc("/sub/api/v1/GetUserSummary", s.handler(s.getUser(true, s.GetUserSummary)))
 	// Activity
-	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.GetExecutions))
-	http.HandleFunc("/sub/api/v1/GetExecution", s.handler(s.GetExecution))
+	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.getUser(false, s.GetExecutions)))
+	http.HandleFunc("/sub/api/v1/GetExecutionsAfterDate", s.handler(s.getUser(false, s.GetExecutionsAfterDate)))
+	http.HandleFunc("/sub/api/v1/GetExecutionsBeforeDate", s.handler(s.getUser(false, s.GetExecutionsBeforeDate)))
+	http.HandleFunc("/sub/api/v1/GetExecution", s.handler(s.getUser(false, s.GetExecution)))
 	// Test
 	http.HandleFunc("/sub/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))
@@ -87,19 +92,27 @@ func (s *server) setup() error {
 	return nil
 }
 
-// isSubscriber checks if user is subscriber.
-func (s *server) isSubscriber(f handle) handle {
+// getUser gets a user.
+func (s *server) getUser(required bool, f handleUser) handle {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+		userID := ""
+		userEmail := ""
 		user, err := s.getUserFromRequest(ctx, w, r, log)
 		if err != nil {
-			return errors.GetErrorWithCode(err)
+			ewc := errors.GetErrorWithCode(err)
+			if ewc.Code != errors.CodeBadRequest {
+				log.Errorf(ctx, "failed to getUserFromRequest: %+v", ewc)
+			}
+			if required {
+				return errors.GetErrorWithCode(err)
+			}
+		} else {
+			userID = user.ID
+			userEmail = user.Email
 		}
-		if !user.Admin {
-			return errPermissionDenied
-		}
-		ctx = context.WithValue(ctx, common.ContextUserID, user.ID)
-		ctx = context.WithValue(ctx, common.ContextUserEmail, user.Email)
-		return f(ctx, w, r, log)
+		ctx = context.WithValue(ctx, common.ContextUserID, userID)
+		ctx = context.WithValue(ctx, common.ContextUserEmail, userEmail)
+		return f(ctx, w, r, log, user)
 	}
 }
 
@@ -115,6 +128,33 @@ func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 	user, err := authC.Verify(token)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to get auth.Verify")
+	}
+	if user.ID == "" {
+		// check if subscriber exists with this email
+		subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+		if err != nil {
+			return nil, errors.Annotate(err, "failed to get sub.NewClient")
+		}
+		subscriber, err := subC.GetByEmail(user.Email)
+		if err != nil {
+			log.Errorf(ctx, "failed to sub.GetByEmail: ", err)
+		} else {
+			// add auth id to subscriber
+			if subscriber.AuthID == "" {
+				subscriber.AuthID = user.AuthID
+				err = subC.Update(subscriber)
+				if err != nil {
+					log.Errorf(ctx, "failed to sub.Update: ", err)
+				}
+			}
+			// update auth user
+			err = authC.UpdateUser(user.AuthID, subscriber.ID, subscriber.Email(), subscriber.FirstName(), subscriber.LastName())
+			if err != nil {
+				log.Errorf(ctx, "failed to auth.UpdateUser: ", err)
+			} else {
+				user.ID = subscriber.ID
+			}
+		}
 	}
 	return user, nil
 }
@@ -199,6 +239,7 @@ type Response interface {
 
 // handle is the handle for api request.
 type handle func(context.Context, http.ResponseWriter, *http.Request, *logging.Client) Response
+type handleUser func(context.Context, http.ResponseWriter, *http.Request, *logging.Client, *common.User) Response
 
 func getDatetime(s string) time.Time {
 	return serverhelper.GetDatetime(s)
