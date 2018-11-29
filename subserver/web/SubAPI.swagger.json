@@ -345,6 +345,9 @@
         },
         "map_image_url": {
           "type": "string"
+        },
+        "cook_face_image_url": {
+          "type": "string"
         }
       },
       "description": "Content is a collection of urls pointing to content realted to the execution."
@@ -490,6 +493,9 @@
           "type": "string"
         },
         "landscape_image_url": {
+          "type": "string"
+        },
+        "cook_face_image_url": {
           "type": "string"
         }
       },

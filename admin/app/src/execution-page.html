@@ -266,7 +266,7 @@
                        type="date"
                        label="Date*"></app-input>
 
-            <app-checkbox checked="execution.publish">Publish</app-checkbox>
+            <app-checkbox checked="{{execution.publish}}">Publish</app-checkbox>
           </div>
         </div>
 
@@ -335,7 +335,7 @@
             <h2>Remove An Q&A</h2>
             <div class="row">
               <app-input type="number"
-                         label="Remove Index"
+                         label="Q&A Index"
                          value="{{QnARemoveIndex}}"></app-input>
               <button on-tap="removeQnA">Remove Q&A</button>
             </div>
@@ -348,7 +348,7 @@
           <div class="panel">
 
             <div>
-              <!-- TODO: add image adding tool -->
+              <button on-tap="generateImageURLs">Generate URLs if Empty</button>
             </div>
 
             <div>
@@ -372,6 +372,19 @@
 
             <div>
               <div class="row">
+                <app-input label="Cook Face"
+                           value="{{execution.content.cook_face_image_url}}"></app-input>
+              </div>
+              <div class="row content-image-row">
+                <div class="content-image">
+                  <h2>Cook Face</h2>
+                  <img src="[[execution.content.cook_face_image_url]]">
+                </div>
+              </div>
+            </div>
+
+            <!-- <div>
+              <div class="row">
                 <app-input label="Dinner Non Veg Image URL"
                            value="{{execution.content.dinner_non_veg_image_url}}"></app-input>
 
@@ -388,7 +401,7 @@
                   <img src="[[execution.content.dinner_veg_image_url]]">
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <div>
               <div class="row">
@@ -476,16 +489,28 @@
               </div>
               <div class="row content-image-row">
                 <div class="content-image">
-                  <h2>Dinner Non Veg Image</h2>
+                  <h2>Hands Dinner Non Veg Image</h2>
                   <img src="[[execution.email.dinner_non_veg_image_url]]">
                 </div>
                 <div class="content-image">
-                  <h2>Dinner Veg Image</h2>
+                  <h2>Hands Dinner Veg Image</h2>
                   <img src="[[execution.email.dinner_veg_image_url]]">
                 </div>
               </div>
             </div>
 
+            <div>
+              <div class="row">
+                <app-input label="Cook Face"
+                           value="{{execution.email.cook_face_image_url}}"></app-input>
+              </div>
+              <div class="row content-image-row">
+                <div class="content-image">
+                  <h2>Cook Face</h2>
+                  <img src="[[execution.email.cook_face_image_url]]">
+                </div>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -500,6 +525,7 @@
                       as="dish">
               <div><strong>Dish:</strong> </div>
               <div editor="culture_guide content_writer">
+                <p>Dish Number: <span>[[dish.number]]</span></p>
                 <p>Dish Name: <span>[[dish.name]]</span></p>
                 <p>Dish Ingredients: <span>[[dish.ingredients]]</span></p>
               </div>
@@ -519,16 +545,16 @@
                            value="{{dish.name}}"></app-input>
 
               </div>
-              <app-html-editor editor="content_writer"
-                               label="Dish Description (HTML)"
-                               value="{{dish.description}}"></app-html-editor>
-              <app-html-editor editor="content_writer"
+              <app-textarea editor="content_writer"
+                            label="Dish Description"
+                            value="{{dish.description}}"></app-textarea>
+              <!-- <app-html-editor editor="content_writer"
                                label="Dish Description Preview (HTML)"
-                               value="{{dish.description_preview}}"></app-html-editor>
+                               value="{{dish.description_preview}}"></app-html-editor> -->
 
-              <app-html-editor editor="head_chef"
-                               label="Dish Ingredients (HTML)"
-                               value="{{dish.ingredients}}"></app-html-editor>
+              <app-textarea editor="head_chef"
+                            label="Dish Ingredients"
+                            value="{{dish.ingredients}}"></app-textarea>
 
               <app-checkbox editor="head_chef"
                             checked="{{dish.is_for_non_vegetarian}}">Is for 🍖 Meat (Non-Vegatarian) Subscribers</app-checkbox>
@@ -538,10 +564,10 @@
               <br>
               <app-checkbox editor="culture_guide"
                             checked="{{dish.is_on_main_plate}}">Is On Main Plate</app-checkbox>
-              <app-input editor="culture_guide"
+              <!-- <app-input editor="culture_guide"
                          hidden$="[[dish.is_on_main_plate]]"
                          label="Dish Image URL"
-                         value="{{dish.image_url}}"></app-input>
+                         value="{{dish.image_url}}"></app-input> -->
 
               <app-select editor="head_chef"
                           label="Container Size"
@@ -593,9 +619,9 @@
           <div id="cultureGuidePanel"
                class="panel">
             <div editor="head_chef culture_guide">
-              <app-textarea label="Dinner Instructions"
+              <app-textarea label="Dinner Instructions (optional)"
                             value="{{execution.culture_guide.dinner_instructions}}"></app-textarea>
-              <app-textarea label="Vegetarian Dinner Instructions"
+              <app-textarea label="Vegetarian Dinner Instructions (optional)"
                             value="{{execution.culture_guide.vegetarian_dinner_instructions}}"></app-textarea>
             </div>
             <div class="row"
@@ -616,16 +642,18 @@
                  editor="culture_guide">
               <app-checkbox checked="{{execution.culture_guide.font_caps}}">Font Caps</app-input>
             </div>
-            <div editor="content_writer">
+            <div editor="content_writer culture_guide">
               <h2>Info Boxes</h2>
               <template id="infoBoxesRepeat"
                         is="dom-repeat"
                         items="{{execution.culture_guide.info_boxes}}"
                         as="info_box">
-                <app-input label="Title"
-                           value="{{info_box.title}}"></app-input>
-
-                <div class="row">
+                <div editor="culture_guide">
+                  <p>InfoBox Title: <span>[[info_box.title]]</span></p>
+                  <p>InfoBox Text: <span>[[info_box.text]]</span></p>
+                </div>
+                <div class="row"
+                     editor="culture_guide">
                   <app-input label="Image"
                              value="{{info_box.image}}"></app-input>
 
@@ -633,8 +661,12 @@
                              value="{{info_box.caption}}"></app-input>
 
                 </div>
-                <app-textarea label="text"
-                              value="{{info_box.text}}"></app-textarea>
+                <app-input editor="content_writer"
+                           label="Title"
+                           value="{{info_box.title}}"></app-input>
+                <app-html-editor editor="content_writer"
+                                 label="text"
+                                 value="{{info_box.text}}"></app-html-editor>
 
                 <br>
                 <hr>
@@ -663,6 +695,7 @@
                       items="{{execution.stickers}}"
                       as="sticker">
               <div editor="culture_guide">
+                <p>Dish Number: <span>[[sticker.number]]</span></p>
                 <p>Dish Name: <span>[[sticker.name]]</span></p>
                 <p>Dish Ingredients: <span>[[sticker.ingredients]]</span></p>
               </div>
@@ -710,14 +743,38 @@
                 <app-checkbox checked="{{sticker.is_for_vegetarian}}">Is for 🌱 Vegetarian Subscribers</app-checkbox>
                 <br>
               </div>
+              <div editor="head_chef">
+                <p><strong>Suggested "Reheat Instructions" format</strong></p>
+                <p>
+                  <strong>Microwave: </strong>slightly open lid<br>
+                  <strong>Stove: </strong>350° F<br>
+                  <strong>Oven: </strong>high, medium, low
+                </p>
+              </div>
               <div class="row"
                    editor="head_chef">
-                <app-input label="Reheat Option 1"
-                           value="{{sticker.reheat_option_1}}">
-                </app-input>
+                <app-select label="Reheat Option 1"
+                            value="{{sticker.reheat_option_1}}"
+                            noink>
+                  <paper-listbox slot="dropdown-content"
+                                 class="dropdown-content"
+                                 style="min-width: 200px">
+                    <paper-item label="Microwave">Microwave</paper-item>
+                    <paper-item label="Stove">Stove</paper-item>
+                    <paper-item label="Oven">Oven</paper-item>
+                  </paper-listbox>
+                </app-select>
 
-                <app-input label="Reheat Time 1 "
-                           value="{{sticker.reheat_time_1}}">
+                <app-input label="Reheat Instructions 1"
+                           value="{{sticker.reheat_instructions_1}}">
+                </app-input>
+              </div>
+              <div class="row"
+                   editor="head_chef">
+                <app-input label="Reheat Time 1"
+                           value="{{sticker.reheat_time_1}}"
+                           placeholder="0:00"
+                           style="max-width:200px">
                 </app-input>
               </div>
               <div class="row"
@@ -726,12 +783,28 @@
               </div>
               <div class="row"
                    editor="head_chef">
-                <app-input label="Reheat Option 2"
-                           value="{{sticker.reheat_option_2}}">
-                </app-input>
+                <app-select label="Reheat Option 2"
+                            value="{{sticker.reheat_option_2}}"
+                            noink>
+                  <paper-listbox slot="dropdown-content"
+                                 class="dropdown-content"
+                                 style="min-width: 200px">
+                    <paper-item label="Microwave">Microwave</paper-item>
+                    <paper-item label="Stove">Stove</paper-item>
+                    <paper-item label="Oven">Oven</paper-item>
+                  </paper-listbox>
+                </app-select>
 
+                <app-input label="Reheat Instructions 2"
+                           value="{{sticker.reheat_instructions_2}}">
+                </app-input>
+              </div>
+              <div class="row"
+                   editor="head_chef">
                 <app-input label="Reheat Time 2"
-                           value="{{sticker.reheat_time_2}}">
+                           value="{{sticker.reheat_time_2}}"
+                           placeholder="0:00"
+                           style="max-width:200px">
                 </app-input>
               </div>
 
@@ -1132,6 +1205,41 @@
         setTimeout(() => {
           this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
         }, 1000);
+      }
+
+      generateImageURLs() {
+        const dateValue = this.$.date.value;
+        let dateStr = '';
+        if (dateValue) {
+          const date = new Date(dateValue);
+          dateStr = date.toISOString().substr(0, 10);
+        } else {
+          alert('Date is empty');
+          return
+        }
+        const country = this.execution.culture.country.toLowerCase().replace(' ', '_', -1);;
+        if (!country) {
+          alert('Country name is empty')
+          return
+        }
+        const urlPrefix = `https://storage.googleapis.com/gigamunch-omninexus-website/cultures/${country}-${dateStr}`
+        const urlEmailPrefix = `${urlPrefix}/email-`;
+        const urlWebsitePrefix = `${urlPrefix}/website-`;
+
+        this.set('execution.email.dinner_non_veg_image_url', urlEmailPrefix + 'dinner-hands-reg.jpg');
+        this.set('execution.email.dinner_veg_image_url', urlEmailPrefix + 'dinner-hands-veg.jpg');
+        this.set('execution.email.cook_image_url', urlEmailPrefix + 'cook.jpg');
+        this.set('execution.email.cook_face_image_url', urlEmailPrefix + 'cook-face.jpg');
+        this.set('execution.email.landscape_image_url', urlEmailPrefix + 'landscape.jpg');
+
+        this.set('execution.content.landscape_image_url', urlWebsitePrefix + 'landscape.jpg');
+        this.set('execution.content.cook_image_url', urlWebsitePrefix + 'cook.jpg');
+        this.set('execution.content.cook_face_image_url', urlWebsitePrefix + 'cook-face.jpg');
+        this.set('execution.content.hands_plate_non_veg_image_url', urlWebsitePrefix + 'dinner-hands-reg.jpg');
+        this.set('execution.content.hands_plate_veg_image_url', urlWebsitePrefix + 'dinner-hands-veg.jpg');
+        this.set('execution.content.cover_image_url', urlWebsitePrefix + 'cook.jpg');
+        this.set('execution.content.map_image_url', urlWebsitePrefix + 'map.jpg');
+
       }
 
       _getTimestampString(dateString) {

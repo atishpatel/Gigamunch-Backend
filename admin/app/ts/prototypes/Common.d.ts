@@ -109,7 +109,8 @@ interface Email {
 	dinner_non_veg_image_url: string
 	dinner_veg_image_url: string
 	cook_image_url: string
-	landscape_image_url: string
+  landscape_image_url: string
+  cook_face_image_url: string
 }
 interface Notifications {
   delivery_sms: string
@@ -143,6 +144,7 @@ interface Content {
   dinner_veg_image_url: string
   cover_image_url: string
   map_image_url: string
+  cook_face_image_url: string
 }
 interface Culture {
   country: string
