@@ -587,7 +587,7 @@ func (service *Service) CancelSub(ctx context.Context, req *EmailReq) (*ErrorOnl
 		return resp, nil
 	}
 	subC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
-	err = subC.Deactivate(req.Email)
+	err = subC.Deactivate(req.Email, "")
 	// subC := subold.New(ctx)
 	// err = subC.Cancel(req.Email, log, serverInfo)
 	if err != nil {

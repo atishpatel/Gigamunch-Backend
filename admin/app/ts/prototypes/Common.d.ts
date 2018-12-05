@@ -15,6 +15,14 @@ interface Address {
   longitude: number
   full_address: string
 }
+interface Campaign {
+  Source: string
+  Medium: string
+  Campaign: string
+  Term: string
+  Content: string
+  Timestamp: string
+}
 interface Log {
   id: number
   log_name: string
@@ -106,9 +114,9 @@ interface ExecutionProgress {
   summary: ExecutionProgressSummary[]
 }
 interface Email {
-	dinner_non_veg_image_url: string
-	dinner_veg_image_url: string
-	cook_image_url: string
+  dinner_non_veg_image_url: string
+  dinner_veg_image_url: string
+  cook_image_url: string
   landscape_image_url: string
   cook_face_image_url: string
 }
@@ -195,6 +203,61 @@ interface CultureCook {
   story: string
   story_preview: string
   q_and_a: QandA[]
+}
+interface Subscriber {
+  created_datetime: string
+  sign_up_datetime: string
+  id: string
+  auth_id: string
+  location: number
+  photo_url: string
+  // Pref
+  email_prefs: EmailPref[]
+  phone_prefs: PhonePref[]
+  // Account
+  payment_provider: number
+  payment_customer_id: string
+  payment_method_token: string
+  active: boolean
+  activate_datetime: string
+  deactivated_datetime: string
+  address: Address
+  delivery_notes: string
+  // Plan
+  servings_non_vegetarian: number
+  servings_vegetarian: number
+  plan_interval: number
+  plan_weekday: string
+  interval_start_point: string
+  amount: number
+  food_pref: FoodPref
+  // Gift
+  num_gift_dinners: number
+  gift_reveal_datetime: string
+  // Marketing
+  referral_page_opens: number
+  referred_page_opens: number
+  referrer_user_id: number
+  reference_email: string
+  reference_text: string
+  campaigns: Campaign[]
+}
+interface FoodPref {
+  no_pork: boolean
+  no_beef: boolean
+}
+interface EmailPref {
+  default: boolean
+  first_name: string
+  last_name: string
+  email: string
+}
+interface PhonePref {
+  number: string
+  raw_number: string
+  disable_bag_reminder: boolean
+  disable_delivered: boolean
+  disable_review: boolean
 }
 interface ErrorOnlyResp {
   error: Error

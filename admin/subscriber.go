@@ -170,7 +170,7 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.NewClient")
 	}
-	err = subC.Deactivate(req.Email)
+	err = subC.Deactivate(req.ID, req.Reason)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Deactivate")
 	}

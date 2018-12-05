@@ -110,6 +110,17 @@ func (sub *Subscriber) LastName() string {
 	return v
 }
 
+func (sub *Subscriber) FullName() string {
+	var v string
+	for _, emailPref := range sub.EmailPrefs {
+		v = emailPref.FirstName + " " + emailPref.LastName
+		if emailPref.Default {
+			break
+		}
+	}
+	return v
+}
+
 func (sub *Subscriber) AddEmail(email, firstName, lastName string, defaultEmail bool) {
 	for i := range sub.EmailPrefs {
 		if sub.EmailPrefs[i].Email == email {

@@ -11,7 +11,8 @@ interface ActivateSubscriberReq {
     first_bag_date: string
 }
 interface DeactivateSubscriberReq {
-    email: string
+    id: string
+    reason: string
 }
 interface ReplaceSubscriberEmailReq {
     old_email: string

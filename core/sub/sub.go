@@ -11,6 +11,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/payment"
 	"github.com/atishpatel/Gigamunch-Backend/core/slack"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -151,10 +152,66 @@ func (c *Client) Activate(email string, firstBagDate time.Time) error {
 }
 
 // Deactivate deactivates an account
-func (c *Client) Deactivate(email string) error {
-	// TODO: implement
-	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.Cancel(email, c.log, c.serverInfo)
+func (c *Client) Deactivate(idOrEmail, reason string) error {
+
+	if idOrEmail == "" {
+		return errInvalidParameter.Annotate("id or email is empty")
+	}
+	// remove any Activity that are greater than now
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	// TODO: should time be now or now + couple of days?
+	err = activityC.DeleteFuture(time.Now(), idOrEmail)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.DeleteFuture")
+	}
+	// change isSubscribed to false
+	sub, err := c.getByIDOrEmail(idOrEmail)
+	if err != nil {
+		return errDatastore.WithError(err).Annotate("failed to getByIDOrEmail")
+	}
+	if !sub.Active {
+		return errInvalidParameter.WithMessage("User is already deactivated.").Annotate("not active")
+	}
+	sub.Active = false
+	sub.DeactivatedDatetime = time.Now()
+	err = c.Update(sub)
+	if err != nil {
+		return errors.Annotate(err, "failed to Update")
+	}
+	// update mail client
+	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
+	for _, emailPref := range sub.EmailPrefs {
+		mailReq := &mail.UserFields{
+			Email:     emailPref.Email,
+			FirstName: emailPref.FirstName,
+			LastName:  emailPref.LastName,
+		}
+		err = mailC.SubDeactivated(mailReq)
+		if err != nil {
+			return errors.Annotate(err, "failed to mail.SubDeactivated")
+		}
+	}
+	daysActive := int(sub.DeactivatedDatetime.Sub(sub.ActivateDatetime) / (time.Hour * 24))
+	// logging
+	c.log.SubDeactivated(sub.ID, sub.Email(), reason, daysActive)
+	// send to slack
+	slackC, err := slack.NewClient(c.ctx, c.log, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to slack.NewClient")
+	}
+	if !strings.Contains(sub.Email(), "@test.com") {
+		err = slackC.SendDeactivate(sub.Email(), sub.FullName(), reason, daysActive)
+		if err != nil {
+			c.log.Errorf(c.ctx, "failed to slack.SendDeactivate: %+v", err)
+		}
+	}
+	return nil
 }
 
 // CreateReq is the request for Create.

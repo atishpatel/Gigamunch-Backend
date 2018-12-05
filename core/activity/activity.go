@@ -29,6 +29,9 @@ const (
 	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
 	updateRefundedStatement                  = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
 	insertStatement                          = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
+	deleteFutureStatment                     = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
+	// TODO: switch to user id
+	deleteFutureEmailStatment = "DELETE from activity WHERE date>? AND email=? AND paid=0"
 )
 
 // Errors
@@ -226,6 +229,24 @@ func (c *Client) Create(req *CreateReq) error {
 			}
 		}
 		return errSQLDB.WithError(err).Annotate("failed to insertStatement")
+	}
+	return nil
+}
+
+// DeleteFuture deletes activities for future subscriber that are unpaid.
+func (c *Client) DeleteFuture(date time.Time, idOrEmail string) error {
+	if idOrEmail == "" {
+		return errBadRequest.Annotate("invalid user_id or email")
+	}
+	// Update actvity
+	var err error
+	if strings.Contains(idOrEmail, "@") {
+		_, err = c.sqlDB.ExecContext(c.ctx, deleteFutureEmailStatment, date.Format(DateFormat), idOrEmail)
+	} else {
+		_, err = c.sqlDB.ExecContext(c.ctx, deleteFutureStatment, date.Format(DateFormat), idOrEmail)
+	}
+	if err != nil {
+		return errSQLDB.WithError(err).Annotate("failed to execute deleteFutureStatment")
 	}
 	return nil
 }

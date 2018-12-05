@@ -16,6 +16,33 @@
     "application/json"
   ],
   "paths": {
+    "/sub/api/v1/GetAccountInfo": {
+      "post": {
+        "summary": "GetAccountInfo returns a user's account info.",
+        "operationId": "GetAccountInfo",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetAccountInfoResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIGetAccountInfoReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
     "/sub/api/v1/GetExecution": {
       "post": {
         "summary": "GetExecution returns a single culture execution.",
@@ -294,6 +321,40 @@
         }
       }
     },
+    "CommonAddress": {
+      "type": "object",
+      "properties": {
+        "apt": {
+          "type": "string"
+        },
+        "street": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "full_address": {
+          "type": "string"
+        }
+      }
+    },
     "CommonCode": {
       "type": "string",
       "enum": [
@@ -501,6 +562,25 @@
       },
       "description": "Email is the email content a subscriber gets."
     },
+    "CommonEmailPref": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "description": "EmailPref is a pref for an email."
+    },
     "CommonError": {
       "type": "object",
       "properties": {
@@ -623,6 +703,30 @@
       },
       "description": "Notifications are notifications the subscribers gets."
     },
+    "CommonPhonePref": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "raw_number": {
+          "type": "string"
+        },
+        "disable_bag_reminder": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "disable_delivered": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "disable_review": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "PhonePref is a pref for a phone."
+    },
     "CommonQandA": {
       "type": "object",
       "properties": {
@@ -690,6 +794,35 @@
       },
       "description": "Sticker are reheat stickers for dishes."
     },
+    "SubAPIGetAccountInfoReq": {
+      "type": "object"
+    },
+    "SubAPIGetAccountInfoResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "email_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonEmailPref"
+          }
+        },
+        "phone_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonPhonePref"
+          }
+        },
+        "address": {
+          "$ref": "#/definitions/CommonAddress"
+        },
+        "payment_info": {
+          "$ref": "#/definitions/SubAPIPaymentInfo"
+        }
+      }
+    },
     "SubAPIGetExecutionReq": {
       "type": "object",
       "properties": {
@@ -756,11 +889,32 @@
         },
         "is_active": {
           "type": "boolean",
-          "format": "boolean"
+          "format": "boolean",
+          "title": "is an active subscriber"
         },
         "on_probation": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "has_subscribed": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "has finished checkout flow"
+        },
+        "is_logged_in": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "SubAPIPaymentInfo": {
+      "type": "object",
+      "properties": {
+        "card_number_preview": {
+          "type": "string"
+        },
+        "card_type": {
+          "type": "string"
         }
       }
     }

@@ -394,9 +394,30 @@ func (c *Client) SubUpdated(userID string, userEmail string, oldSub, newSub inte
 
 // }
 
-// func (c *Client) SubDeactivate() {
+type SubDeactivatedPayload struct {
+	Rason      string `json:"reason,omitempty" datastore:",omitempty,noindex"`
+	DaysActive int    `json:"days_active,omitempty" datastore:",omitempty,noindex"`
+}
 
-// }
+func (c *Client) SubDeactivated(userID, userEmail, reason string, daysActive int) {
+	desc := fmt.Sprintf("Rason: %s. Deactivated after %d weeks (%d days).", reason, daysActive/7, daysActive)
+	e := &Entry{
+		Type:         Subscriber,
+		Action:       Deactivate,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Deactivated Subscriber",
+			Description: desc,
+		},
+		SubDeactivatedPayload: SubDeactivatedPayload{
+			Rason:      reason,
+			DaysActive: daysActive,
+		},
+	}
+	c.Log(e)
+}
 
 // MessagePayload is realted to a subscriber message interaction.
 type MessagePayload struct {
@@ -671,6 +692,7 @@ type Entry struct {
 	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"` // depecreated
 	MessagePayload         MessagePayload         `json:"message_payload,omitempty" datastore:",omitempty,noindex"`
 	RatingPayload          RatingPayload          `json:"rating_payload,omitempty" datastore:",omitempty,noindex"`
+	SubDeactivatedPayload  SubDeactivatedPayload  `json:"sub_deactivated_payload,omitempty" datastore:",omitempty,noindex"`
 }
 
 // Log logs a random entry.

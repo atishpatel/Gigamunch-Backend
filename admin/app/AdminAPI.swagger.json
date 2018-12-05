@@ -726,7 +726,10 @@
     "AdminAPIDeactivateSubscriberReq": {
       "type": "object",
       "properties": {
-        "email": {
+        "id": {
+          "type": "string"
+        },
+        "reason": {
           "type": "string"
         }
       }
