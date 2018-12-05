@@ -6,8 +6,10 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/execution"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
@@ -29,6 +31,20 @@ func marshalUnmarshal(oldType interface{}, newType interface{}) error {
 		return errMarshalUnmarshal.WithError(err).Annotate("failed to json.Unmarshal")
 	}
 	return nil
+}
+
+// **********************
+// type -> PB
+// **********************
+
+// PBAddress turns an Address into a protobuff Address.
+func PBAddress(in *common.Address) (*pbcommon.Address, error) {
+	out := &pbcommon.Address{}
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(in, out)
+	return out, err
 }
 
 // PBLogs turns an Log into a protobuff Log.
@@ -80,6 +96,30 @@ func PBExecution(in *execution.Execution) (*pbcommon.Execution, error) {
 	err := marshalUnmarshal(in, out)
 	return out, err
 }
+
+// PBEmailPrefs turns an array of EmailPrefs into a protobuff array of EmailPrefs.
+func PBEmailPrefs(in []subold.EmailPref) ([]*pbcommon.EmailPref, error) {
+	out := make([]*pbcommon.EmailPref, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBPhonePrefs turns an array of PhonePrefs into a protobuff array of PhonePrefs.
+func PBPhonePrefs(in []subold.PhonePref) ([]*pbcommon.PhonePref, error) {
+	out := make([]*pbcommon.PhonePref, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// **********************
+// PB -> type
+// **********************
 
 // ExecutionFromPb turns pbcommon.Execution to execution.Execution
 func ExecutionFromPb(in *pbcommon.Execution) (*execution.Execution, error) {
