@@ -6,9 +6,46 @@ if (IsDev()) {
   baseURL = 'https://gigamunch-omninexus-dev.appspot.com/sub/api/v1/';
 }
 
+// GetUserSummary
+export function GetUserSummary(): Promise<SubAPI.GetUserSummaryResp> {
+  const url: string = baseURL + 'GetUserSummary';
+  const req: SubAPI.GetUserSummaryReq = {};
+  return GetToken().then((token) => {
+    if (!token) {
+      return Promise.resolve({ error: {} });
+    }
+    return callFetchWithToken(url, 'GET', req, token);
+  });
+}
+
+// GetAccountInfo
+export function GetAccountInfo(): Promise<SubAPI.GetAccountInfoResp> {
+  const url: string = baseURL + 'GetAccountInfo';
+  const req: SubAPI.GetAccountInfoReq = {};
+  return callFetch(url, 'GET', req);
+}
+
 // Execution
 export function GetExecutions(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutions';
+  const req: SubAPI.GetExecutionsReq = {
+    start,
+    limit,
+  };
+  return callFetch(url, 'GET', req);
+}
+
+export function GetExecutionsAfterDate(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
+  const url: string = baseURL + 'GetExecutionsAfterDate';
+  const req: SubAPI.GetExecutionsReq = {
+    start,
+    limit,
+  };
+  return callFetch(url, 'GET', req);
+}
+
+export function GetExecutionsBeforeDate(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
+  const url: string = baseURL + 'GetExecutionsBeforeDate';
   const req: SubAPI.GetExecutionsReq = {
     start,
     limit,
@@ -26,28 +63,32 @@ export function GetExecution(idOrDate: string): Promise<SubAPI.GetExecutionResp>
 
 function callFetch(url: string, method: string, body: object): Promise<any> {
   return GetToken().then((token) => {
-    const config: RequestInit = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'auth-token': token,
-        'Access-Control-Allow-Origin': '*',
-      },
-    };
-    let URL = url;
-    if (method === 'GET') {
-      URL += '?' + serializeParams(body);
-    } else {
-      config.body = JSON.stringify(body);
-    }
-    return fetch(URL, config)
-      .then((resp: Response) => {
-        return resp.json();
-      })
-      .catch((err: any) => {
-        console.error('failed to callFetch', err);
-      });
+    return callFetchWithToken(url, method, body, token);
   });
+}
+
+function callFetchWithToken(url: string, method: string, body: object, token: string) {
+  const config: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'auth-token': token,
+      'Access-Control-Allow-Origin': '*',
+    },
+  };
+  let URL = url;
+  if (method === 'GET') {
+    URL += '?' + serializeParams(body);
+  } else {
+    config.body = JSON.stringify(body);
+  }
+  return fetch(URL, config)
+    .then((resp: Response) => {
+      return resp.json();
+    })
+    .catch((err: any) => {
+      console.error('failed to callFetch', err);
+    });
 }
 
 function serializeParams(obj: any): string {

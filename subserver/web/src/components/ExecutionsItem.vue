@@ -3,10 +3,22 @@
     <h2 class="date">{{titleDate}}</h2>
     <div class="cards">
       <!-- Culture Card -->
-      <ExecutionsCard class="card" :title="cultureTitle" :description="cultureDescription" :src="execution.content.landscape_image_url" :to="{path: 'dinner/'+executionURLID+'#culture'}"></ExecutionsCard>
+      <ExecutionsCard
+        class="card"
+        :title="cultureTitle"
+        :description="cultureDescription"
+        :src="execution.content.landscape_image_url"
+        :to="{path: 'dinner/'+executionURLID+'#culture'}"
+      ></ExecutionsCard>
 
       <!-- Cook Card -->
-      <ExecutionsCard class="card" :title="cookName" :description="cookDescription" :src="execution.content.cook_image_url" :to="{path: 'dinner/'+executionURLID+'#culture-cook'}"></ExecutionsCard>
+      <ExecutionsCard
+        class="card"
+        :title="cookName"
+        :description="cookDescription"
+        :src="execution.content.cook_image_url"
+        :to="{path: 'dinner/'+executionURLID+'#culture-cook'}"
+      ></ExecutionsCard>
 
     </div>
   </div>
@@ -77,10 +89,11 @@ export default class ExecutionsItem extends Vue {
   overflow-x: auto;
   transition: 0.5s ease 0s;
   padding: 0px 24px 30px;
-  // -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch;
   .card {
     flex: 0 0 auto;
     max-width: 77vw;
+    min-height: 250px;
   }
   @media (min-width: 800px) {
     .card {

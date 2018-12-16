@@ -18,5 +18,10 @@ export default new Router({
       name: 'dinner',
       component: () => import(/* webpackChunkName: "dinner" */ './views/Dinner.vue'),
     },
+    {
+      path: '/account',
+      name: 'account',
+      component: () => import(/* webpackChunkName: "account" */ './views/Account.vue'),
+    },
   ],
 });
