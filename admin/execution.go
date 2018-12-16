@@ -43,7 +43,7 @@ func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 	}
 	resp := &pb.GetExecutionsResp{
 		Executions: exes,
-		Progress:   getProgress(executions),
+		Progress:   getProgress(ctx, executions),
 	}
 	return resp
 }
@@ -171,30 +171,44 @@ func (c *progressCounter) getPercent() int32 {
 	return int32((float32(c.ValidCount) / float32(c.TotalExepectedCount)) * 100)
 }
 
-func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
+func getProgress(ctx context.Context, exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 	exeProgresses := make([]*pbcommon.ExecutionProgress, len(exes))
 
 	for i, exe := range exes {
 		exeProgress := &pbcommon.ExecutionProgress{}
 		// Head Chef
 		hc := progressCounter{}
-		if len(exe.Dishes) < 5 {
+		cw := progressCounter{}
+		cg := progressCounter{}
+		if len(exe.Dishes) <= 3 {
 			hc.TotalExepectedCount += int8(5-len(exe.Dishes)) * 3
 		}
 
-		// hc.checkEmpty(exe.CultureGuide.DinnerInstructions)
-		// hc.checkEmpty(exe.CultureGuide.VegetarianDinnerInstructions)
 		for _, sticker := range exe.Stickers {
-			if sticker.EatingTemperature == "" || sticker.EatingTemperature == "hot" {
+			if sticker.EatingTemperature == "hot" {
 				hc.checkEmpty(sticker)
+				if sticker.ExtraInstructions == "" {
+					hc.TotalExepectedCount--
+				}
+				if sticker.ReheatInstructions2 == "" {
+					hc.TotalExepectedCount--
+				}
+				if sticker.ReheatOption2 == "" {
+					hc.TotalExepectedCount--
+				}
+				if sticker.ReheatTime2 == "" {
+					hc.TotalExepectedCount--
+				}
+				if sticker.Color == "" {
+					hc.TotalExepectedCount--
+				}
 			}
 		}
-		if len(exe.Stickers) < 4 {
+		if len(exe.Stickers) <= 3 {
 			hc.TotalExepectedCount += int8(4-len(exe.Stickers)) * 4
 		}
 
 		// Content Writer
-		cw := progressCounter{}
 		cw.checkEmpty(exe.Culture)
 		cw.checkEmpty(exe.CultureCook)
 
@@ -203,7 +217,6 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 		}
 
 		// Culture Guide
-		cg := progressCounter{}
 		cg.checkEmpty(exe.Content)
 		if exe.Content.DinnerNonVegImageURL == "" {
 			cg.TotalExepectedCount--
@@ -214,15 +227,16 @@ func getProgress(exes []*execution.Execution) []*pbcommon.ExecutionProgress {
 		cg.checkEmpty(exe.Email)
 		cg.checkEmpty(exe.Notifications)
 
-		hc.checkEmpty(exe.CultureGuide.MainColor)
-		hc.checkEmpty(exe.CultureGuide.FontName)
+		cg.checkEmpty(exe.CultureGuide.MainColor)
+		cg.checkEmpty(exe.CultureGuide.FontName)
 
 		// Dishes
 		for _, dish := range exe.Dishes {
 			// Head Chef
 			hc.checkEmpty(dish.Name)
 			hc.checkEmpty(dish.Ingredients)
-			hc.addCheck(!dish.IsForNonVegetarian && !dish.IsForVegetarian)
+			hc.checkEmpty(dish.ContainerSize)
+			hc.addCheck(dish.IsForNonVegetarian || dish.IsForVegetarian)
 			// Content Writer
 			cw.checkEmpty(dish.Description)
 			// cw.checkEmpty(dish.DescriptionPreview)

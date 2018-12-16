@@ -40,9 +40,9 @@ func getExecutionsResp(exes []*execution.Execution, activities []*activity.Activ
 		resp.ExecutionAndActivity[i] = &pbcommon.ExecutionAndActivity{
 			Execution: exespb[i],
 		}
-		if hasActivtites {
+		if hasActivtites && exespb[i] != nil {
 			for j := range activitiespb {
-				if exespb[i].Date == activitiespb[j].Date {
+				if activitiespb[i] != nil && exespb[i].Date == activitiespb[j].Date {
 					resp.ExecutionAndActivity[i].Activity = activitiespb[j]
 					break
 				}

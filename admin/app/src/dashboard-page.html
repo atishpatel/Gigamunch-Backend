@@ -93,8 +93,8 @@
       <div id="weeklyCohortChart"
            class="chart"></div>
       <cohort-table cohort="[[weeklyCohort]]"></cohort-table>
-      <!-- LTV -->
-      <h2>Actual LTV</h2>
+      <!-- LTR -->
+      <h2>Actual LTR</h2>
       <div class="table-container">
         <div class="table">
           <div class="table-row">
@@ -102,11 +102,11 @@
             <div class="table-cell"> [[ltvHistogram.average_churn_string]] </div>
           </div>
           <div class="table-row">
-            <div class="table-cell table-header-row">Average LTV:</div>
+            <div class="table-cell table-header-row">Average LTR:</div>
             <div class="table-cell"> [[ltvHistogram.actual_histogram.average_paid_revenue_string]] </div>
           </div>
           <div class="table-row">
-            <div class="table-cell table-header-row">50 Percentile LTV:</div>
+            <div class="table-cell table-header-row">50 Percentile LTR:</div>
             <div class="table-cell"> [[ltvHistogram.actual_histogram.average_percentile_paid_revenue_string]]</div>
           </div>
           <div class="table-row">
@@ -123,10 +123,10 @@
           </div>
         </div>
       </div>
-      <div id="actualLTVChart"
+      <div id="actualLTRChart"
            class="chart"></div>
 
-      <h2>Projected LTV</h2>
+      <h2>Projected LTR</h2>
       <div class="table-container">
         <div class="table">
           <div class="table-row">
@@ -134,11 +134,11 @@
             <div class="table-cell"> [[ltvHistogram.average_churn_string]] </div>
           </div>
           <div class="table-row">
-            <div class="table-cell table-header-row">Average LTV:</div>
+            <div class="table-cell table-header-row">Average LTR:</div>
             <div class="table-cell"> [[ltvHistogram.projected_histogram.average_paid_revenue_string]] </div>
           </div>
           <div class="table-row">
-            <div class="table-cell table-header-row">50 Percentile LTV:</div>
+            <div class="table-cell table-header-row">50 Percentile LTR:</div>
             <div class="table-cell"> [[ltvHistogram.projected_histogram.average_percentile_paid_revenue_string]]</div>
           </div>
           <div class="table-row">
@@ -155,10 +155,10 @@
           </div>
         </div>
       </div>
-      <div id="projectedLTVChart"
+      <div id="projectedLTRChart"
            class="chart"></div>
 
-      <h2>Canceled LTV</h2>
+      <h2>Canceled LTR</h2>
       <div class="table-container">
         <div class="table">
           <div class="table-row">
@@ -166,7 +166,7 @@
             <div class="table-cell">[[ltvHistogram.average_churn_string]] </div>
           </div>
           <div class="table-row">
-            <div class="table-cell table-header-row">Average LTV:</div>
+            <div class="table-cell table-header-row">Average LTR:</div>
             <div class="table-cell">[[ltvHistogram.canceled_histogram.average_paid_revenue_string]] </div>
           </div>
           <div class="table-row">
@@ -180,7 +180,7 @@
         </div>
       </div>
 
-      <div id="canceledLTVChart"
+      <div id="canceledLTRChart"
            div
            class="chart"></div>
 
@@ -262,7 +262,7 @@
               <div class="table-row">
                 <div class="table-cell">
                   <a target="_blank"
-                       href="subscriber/[[sub.email]]">[[sub.email]]</a>
+                     href="subscriber/[[sub.email]]">[[sub.email]]</a>
                 </div>
                 <div class="table-cell">[[sub.is_subscriber]]</div>
                 <div class="table-cell">[[sub.min_date_string]]</div>
@@ -417,9 +417,9 @@
           }
           this._drawCohortChart(weeklyBagTypeArray, this.$.weeklyCohortByBagTypeChart);
           // histograms 
-          this._drawHistogramChart(resp.life_time_value.actual_histogram.paid_revenue, this.$.actualLTVChart, 49.0);
-          this._drawHistogramChart(resp.life_time_value.projected_histogram.paid_revenue, this.$.projectedLTVChart, 49.0);
-          this._drawHistogramChart(resp.life_time_value.canceled_histogram.paid_revenue, this.$.canceledLTVChart, 49.0);
+          this._drawHistogramChart(resp.life_time_value.actual_histogram.paid_revenue, this.$.actualLTRChart, 49.0);
+          this._drawHistogramChart(resp.life_time_value.projected_histogram.paid_revenue, this.$.projectedLTRChart, 49.0);
+          this._drawHistogramChart(resp.life_time_value.canceled_histogram.paid_revenue, this.$.canceledLTRChart, 49.0);
           resp.life_time_value.average_churn_string = (resp.life_time_value.average_churn * 100).toFixed(2) + '%';
           try {
             resp.life_time_value.actual_histogram.average_paid_revenue_string = '$' + resp.life_time_value.actual_histogram.average_paid_revenue.toLocaleString(undefined, {
@@ -549,7 +549,7 @@
         }
         var data = google.visualization.arrayToDataTable(dataArray);
         var options = {
-          title: 'LTV',
+          title: 'LTR',
           theme: 'material',
           histogram: {
             hideBucketItems: true,

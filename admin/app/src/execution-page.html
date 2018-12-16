@@ -211,6 +211,7 @@
         }
         .content-image {
           padding: 12px;
+          max-width: 450px;
         }
         .content-image img {
           width: 100%;
@@ -315,7 +316,7 @@
             <app-html-editor label="Story Preview (HTML)"
                              value="{{execution.culture_cook.story_preview}}"></app-html-editor>
 
-            <h2>Qestions & Answers</h2>
+            <h2>Questions & Answers</h2>
             <template id="infoBoxesRepeat"
                       is="dom-repeat"
                       items="{{execution.culture_cook.q_and_a}}"
@@ -327,19 +328,13 @@
                             value="{{q_and_a.answer}}"></app-textarea>
 
               <br>
+              <button on-tap="removeQnA">Remove Question</button>
+
               <hr>
               <br>
             </template>
             <button on-tap="addQnA">Add Q&A</button>
             <br>
-            <h2>Remove An Q&A</h2>
-            <div class="row">
-              <app-input type="number"
-                         label="Q&A Index"
-                         value="{{QnARemoveIndex}}"></app-input>
-              <button on-tap="removeQnA">Remove Q&A</button>
-            </div>
-
           </div>
         </div>
 
@@ -523,12 +518,13 @@
             <template is="dom-repeat"
                       items="{{execution.dishes}}"
                       as="dish">
-              <div><strong>Dish:</strong> </div>
+              <div><strong>Dish</strong>:</div>
               <div editor="culture_guide content_writer">
                 <p>Dish Number: <span>[[dish.number]]</span></p>
                 <p>Dish Name: <span>[[dish.name]]</span></p>
                 <p>Dish Ingredients: <span>[[dish.ingredients]]</span></p>
               </div>
+
               <div class="row">
                 <app-input editor="head_chef"
                            type="number"
@@ -541,7 +537,7 @@
                            placeholder="#FF5722 (placeholder)"></app-input>
 
                 <app-input editor="head_chef"
-                           label="Dish Name"
+                           label="Dish Name [Title Case]"
                            value="{{dish.name}}"></app-input>
 
               </div>
@@ -553,7 +549,7 @@
                                value="{{dish.description_preview}}"></app-html-editor> -->
 
               <app-textarea editor="head_chef"
-                            label="Dish Ingredients"
+                            label="Dish Ingredients [lower case]"
                             value="{{dish.ingredients}}"></app-textarea>
 
               <app-checkbox editor="head_chef"
@@ -584,16 +580,14 @@
                 </paper-listbox>
               </app-select>
               <br>
+              <button on-tap="removeDish">Remove Dish</button>
               <hr>
               <br>
 
             </template>
             <button on-tap="addDish">Add Dish</button>
             <br>
-            <app-input type="number"
-                       label="Dish Index"
-                       value="{{dishRemoveIndex}}"></app-input>
-            <button on-tap="removeDish">Remove Dish</button>
+
             <div editor="head_chef">
               <h2>Diet</h2>
               <app-checkbox checked="{{execution.has_pork}}">Has Pork</app-checkbox><br>
@@ -669,19 +663,13 @@
                                  value="{{info_box.text}}"></app-html-editor>
 
                 <br>
+                <button on-tap="removeInfoBox">Remove Info Box</button>
                 <hr>
                 <br>
               </template>
               <br>
               <button on-tap="addInfoBox">Add Info Box</button>
               <br>
-              <h2>Remove An Info box</h2>
-              <div class="row">
-                <app-input type="number"
-                           label="Remove Index"
-                           value="{{infoBoxRemoveIndex}}"></app-input>
-                <button on-tap="removeInfoBox">Remove Info Box</button>
-              </div>
             </div>
           </div>
         </div>
@@ -705,7 +693,7 @@
                            value="{{sticker.name}}">
                 </app-input>
 
-                <app-input label="Ingredients"
+                <app-input label="Ingredients [lower case]"
                            value="{{sticker.ingredients}}">
                 </app-input>
               </div>
@@ -744,11 +732,11 @@
                 <br>
               </div>
               <div editor="head_chef">
-                <p><strong>Suggested "Reheat Instructions" format</strong></p>
+                <p><strong>Suggested "Reheat Instructions" format. Please keep in order of list.</strong></p>
                 <p>
                   <strong>Microwave: </strong>slightly open lid<br>
-                  <strong>Stove: </strong>350° F<br>
-                  <strong>Oven: </strong>high, medium, low
+                  <strong>Stove: </strong>covered, medium<br>
+                  <strong>Oven: </strong>covered, 350° F
                 </p>
               </div>
               <div class="row"
@@ -779,7 +767,7 @@
               </div>
               <div class="row"
                    editor="head_chef">
-                <app-checkbox checked="{{execution.reheat_option_1_preferred}}">Reheat Option 1 Preferred</app-checkbox>
+                <app-checkbox checked="{{sticker.reheat_option_1_preferred}}">Reheat Option 1 Preferred</app-checkbox>
               </div>
               <div class="row"
                    editor="head_chef">
@@ -809,16 +797,12 @@
               </div>
 
               <br>
+              <button on-tap="removeSticker">Remove Sticker</button>
               <hr>
               <br>
             </template>
             <br>
             <button on-tap="addSticker">Add Sticker</button>
-            <br>
-            <app-input type="number"
-                       label="Sticker Index"
-                       value="{{stickerRemoveIndex}}"></app-input>
-            <button on-tap="removeSticker">Remove Sticker</button>
           </div>
         </div>
       </div>
@@ -843,7 +827,8 @@
               <td>[[log.timestampString]]</td>
               <td>[[log.action_user_email]]</td>
               <td>
-                <div inner-h-t-m-l="[[log.basic_payload.descriptionHTML]]"></div>
+                <div style="text-align:left"
+                     inner-h-t-m-l="[[log.basic_payload.descriptionHTML]]"></div>
               </td>
             </tr>
           </template>
@@ -870,10 +855,6 @@
           },
           loading: {
             type: Boolean
-          },
-          dishRemoveIndex: {
-            type: Number,
-            value: 1,
           },
           mode: {
             type: String,
@@ -982,6 +963,7 @@
         if (!id || id === "") {
           return;
         }
+        this.logs = [];
         this.service.GetLogsByExecution(Number(id)).then((resp) => {
           let err = resp.error;
           if (err && err.code !== 0) {
@@ -1002,6 +984,7 @@
           return;
         }
         this.loading = true;
+        this.setExecution({});
         this.service.GetExecution(id).then((resp) => {
           this.loading = false;
           let err = resp.error;
@@ -1093,7 +1076,6 @@
           this.execution.dishes = [];
         }
         this.push('execution.dishes', {});
-        this.dishRemoveIndex = this.execution.dishes.length;
         setTimeout(() => {
           this.$.dishPanel.style.maxHeight = this.$.dishPanel.scrollHeight + "px";
           this.setMode(this.mode);
@@ -1103,12 +1085,12 @@
         }, 1000);
       }
 
-      removeDish() {
-        if (this.dishRemoveIndex < 1 || this.dishRemoveIndex > this.execution.dishes.length) {
+      removeDish(e) {
+        var index = e.model.index;
+        if (this.index < 0 || this.index > this.execution.dishes.length) {
           return;
         }
-        this.splice('execution.dishes', this.dishRemoveIndex - 1, 1);
-        this.dishRemoveIndex = this.execution.dishes.length;
+        this.splice('execution.dishes', this.index, 1);
       }
 
       addInfoBox() {
@@ -1116,7 +1098,6 @@
           this.execution.culture_guide.info_boxes = [];
         }
         this.push('execution.culture_guide.info_boxes', {});
-        this.infoBoxRemoveIndex = this.execution.culture_guide.info_boxes.length;
         setTimeout(() => {
           this.$.cultureGuidePanel.style.maxHeight = this.$.cultureGuidePanel.scrollHeight + "px";
           this.setMode(this.mode);
@@ -1127,11 +1108,11 @@
       }
 
       removeInfoBox() {
-        if (this.infoBoxRemoveIndex < 1 || this.infoBoxRemoveIndex > this.execution.culture_guide.info_boxes.length) {
+        var index = e.model.index;
+        if (this.index < 0 || this.index > this.execution.culture_guide.info_boxes.length) {
           return;
         }
-        this.splice('execution.culture_guide.info_boxes', this.infoBoxRemoveIndex - 1, 1);
-        this.infoBoxRemoveIndex = this.execution.culture_guide.info_boxes.length;
+        this.splice('execution.culture_guide.info_boxes', this.index, 1);
       }
 
       addQnA() {
@@ -1139,7 +1120,6 @@
           this.execution.culture_cook.q_and_a = [];
         }
         this.push('execution.culture_cook.q_and_a', {});
-        this.QnARemoveIndex = this.execution.culture_cook.q_and_a.length;
         setTimeout(() => {
           this.$.cultureCookPanel.style.maxHeight = this.$.cultureCookPanel.scrollHeight + "px";
           this.setMode(this.mode);
@@ -1149,12 +1129,12 @@
         }, 1000);
       }
 
-      removeQnA() {
-        if (this.QnARemoveIndex < 1 || this.QnARemoveIndex > this.execution.culture_cook.q_and_a.length) {
+      removeQnA(e) {
+        var index = e.model.index;
+        if (this.index < 0 || this.index > this.execution.culture_cook.q_and_a.length) {
           return;
         }
-        this.splice('execution.culture_cook.q_and_a', this.QnARemoveIndex - 1, 1);
-        this.QnARemoveIndex = this.execution.culture_cook.q_and_a.length;
+        this.splice('execution.culture_cook.q_and_a', this.index, 1);
       }
 
       addSticker() {
@@ -1162,7 +1142,6 @@
           this.execution.stickers = [];
         }
         this.push('execution.stickers', {});
-        this.stickerRemoveIndex = this.execution.stickers.length;
         setTimeout(() => {
           this.$.stickersPanel.style.maxHeight = this.$.stickersPanel.scrollHeight + "px";
           this.setMode(this.mode);
@@ -1172,12 +1151,12 @@
         }, 1000);
       }
 
-      removeSticker() {
-        if (this.stickerRemoveIndex < 1 || this.stickerRemoveIndex > this.execution.stickers.length) {
+      removeSticker(e) {
+        var index = e.model.index;
+        if (this.index < 0 || this.index > this.execution.stickers.length) {
           return;
         }
-        this.splice('execution.stickers', this.stickerRemoveIndex - 1, 1);
-        this.stickerRemoveIndex = this.execution.stickers.length;
+        this.splice('execution.stickers', this.index, 1);
       }
 
       generateStickers() {
@@ -1222,7 +1201,7 @@
           alert('Country name is empty')
           return
         }
-        const urlPrefix = `https://storage.googleapis.com/gigamunch-omninexus-website/cultures/${country}-${dateStr}`
+        const urlPrefix = `https://storage.googleapis.com/gigamunch-omninexus-website/cultures/${dateStr}-${country}`
         const urlEmailPrefix = `${urlPrefix}/email-`;
         const urlWebsitePrefix = `${urlPrefix}/website-`;
 
