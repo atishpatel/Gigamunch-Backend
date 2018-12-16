@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 
 	"golang.org/x/net/context"
 
@@ -581,12 +584,12 @@ func (service *Service) CancelSub(ctx context.Context, req *EmailReq) (*ErrorOnl
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "cookapi/CancelSub")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "cookapi/CancelSub")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	subC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
+	subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = subC.Deactivate(req.Email, "")
 	// subC := subold.New(ctx)
 	// err = subC.Cancel(req.Email, log, serverInfo)
@@ -777,4 +780,28 @@ func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Clien
 		return nil, nil, nil, err
 	}
 	return log, serverInfo, dbC, nil
+}
+func setupAll(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, *sqlx.DB, error) {
+	dbC, err := db.NewClient(ctx, projectID, nil)
+	if err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("failed to get database client: %+v", err)
+	}
+	// Setup logging
+	serverInfo := &common.ServerInfo{
+		ProjectID:           projectID,
+		IsStandardAppEngine: true,
+	}
+	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	sqlConnectionString := os.Getenv("MYSQL_CONNECTION")
+	if sqlConnectionString == "" {
+		return nil, nil, nil, nil, fmt.Errorf(`You need to set the environment variable "MYSQL_CONNECTION"`)
+	}
+	sqlDB, err := sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
+	if err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("failed to get sql database client: %+v", err)
+	}
+	return log, serverInfo, dbC, sqlDB, nil
 }
