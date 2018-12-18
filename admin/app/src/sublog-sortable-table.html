@@ -62,7 +62,7 @@
               <td>[[sublog.name]]</td>
               <td>
                 <a target="_blank"
-                  href="subscriber/[[sublog.sub_email]]">[[sublog.sub_email]]</a>
+                   href="subscriber/[[sublog.sub_email]]">[[sublog.sub_email]]</a>
               </td>
               <td hidden="[[detailed]]">[[sublog.servings]]</td>
               <td hidden="[[detailed]]">[[sublog.veg_servings]]</td>
@@ -127,7 +127,7 @@
         if (sublog.refunded) {
           return 'Refunded';
         } else if (sublog.free) {
-          return 'Free';
+          return 'First';
         } else if (sublog.paid) {
           return 'Paid';
         } else if (sublog.skip) {

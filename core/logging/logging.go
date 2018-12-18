@@ -586,11 +586,11 @@ func (c *Client) SubUnskip(date string, userID string, userEmail string) {
 }
 
 // // ActivitySetupPayload is a System payload.
-// type ActivitySetupPayload struct {
-// 	BasicPayload `json:"basic_payload,omitempty" datastore:",omitempty,noindex"`
-// 	Date         string `json:"date,omitempty" datastore:",omitempty,noindex"`
-// 	NumSetup     int    `json:"num_setup,omitempty" datastore:",omitempty,noindex"`
-// }
+type ActivitySetupPayload struct {
+	BasicPayload `json:"basic_payload,omitempty" datastore:",omitempty,noindex"`
+	Date         string `json:"date,omitempty" datastore:",omitempty,noindex"`
+	NumSetup     int    `json:"num_setup,omitempty" datastore:",omitempty,noindex"`
+}
 
 // // ActivitySetup is a log of when the cron job for activity setup runs or admin runs activity setup.
 // func (c *Client) ActivitySetup(date string, numSetup int) {
@@ -662,37 +662,38 @@ func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode) {
 
 // BasicPayload is in every payload.
 type BasicPayload struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Title       string `json:"title" datastore:",omitempty,noindex`
+	Description string `json:"description" datastore:",omitempty,noindex`
 }
 
 // Entry is a log entry.
 type Entry struct {
-	ID                 int64              `json:"id,omitempty" datastore:",noindex"`
-	Type               Type               `json:"type,omitempty" datastore:",index"`
-	ExecutionID        int64              `json:"execution_id" datastore:",index"`
-	Action             Action             `json:"action,omitempty" datastore:",index"`
-	ActionUserID       int64              `json:"-" datastore:",omitempty,noindex"` // depecreated
-	ActionUserIDString string             `json:"action_user_id,omitempty" datastore:",index"`
-	ActionUserEmail    string             `json:"action_user_email,omitempty" datastore:",index"`
-	UserID             int64              `json:"-" datastore:",omitempty,noindex"` // depecreated
-	UserIDString       string             `json:"user_id,omitempty" datastore:",index"`
-	UserEmail          string             `json:"user_email,omitempty" datastore:",index"`
-	Severity           sdlogging.Severity `json:"serverity,omitempty" datastore:",noindex"`
-	Path               string             `json:"path,omitempty" datastore:",noindex"`
-	LogName            string             `json:"log_name,omitempty" datastore:",noindex"`
-	Timestamp          time.Time          `json:"timestamp,omitempty" datastore:",index"`
-	BasicPayload       BasicPayload       `json:"basic_payload,omitempty" datastore:",noindex"`
-	ErrorPayload       ErrorPayload       `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
-	// ActivitySetupPayload   ActivitySetupPayload   `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"`
+	ID                     int64                  `json:"id,omitempty" datastore:",noindex"`
+	Type                   Type                   `json:"type,omitempty" datastore:",index"`
+	ExecutionID            int64                  `json:"execution_id" datastore:",index"`
+	Action                 Action                 `json:"action,omitempty" datastore:",index"`
+	ActionUserIDString     string                 `json:"action_user_id,omitempty" datastore:",index"`
+	ActionUserEmail        string                 `json:"action_user_email,omitempty" datastore:",index"`
+	UserIDString           string                 `json:"user_id,omitempty" datastore:",index"`
+	UserEmail              string                 `json:"user_email,omitempty" datastore:",index"`
+	Severity               sdlogging.Severity     `json:"serverity,omitempty" datastore:",noindex"`
+	Path                   string                 `json:"path,omitempty" datastore:",noindex"`
+	LogName                string                 `json:"log_name,omitempty" datastore:",noindex"`
+	Timestamp              time.Time              `json:"timestamp,omitempty" datastore:",index"`
+	BasicPayload           BasicPayload           `json:"basic_payload,omitempty" datastore:",noindex"`
+	ErrorPayload           ErrorPayload           `json:"error_payload,omitempty" datastore:",omitempty,noindex"`
 	SkipPayload            SkipPayload            `json:"skip_payload,omitempty" datastore:",omitempty,noindex"`
 	CreditCardPayload      CreditCardPayload      `json:"credit_card_payload,omitempty" datastore:",omitempty,noindex"`
 	SalePayload            SalePayload            `json:"sale_payload,omitempty" datastore:",omitempty,noindex"`
 	ServingsChangedPayload ServingsChangedPayload `json:"servings_changed_payload,omitempty" datastore:",omitempty,noindex"`
-	SubUpdatedPayload      SubUpdatedPayload      `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"` // depecreated
 	MessagePayload         MessagePayload         `json:"message_payload,omitempty" datastore:",omitempty,noindex"`
 	RatingPayload          RatingPayload          `json:"rating_payload,omitempty" datastore:",omitempty,noindex"`
 	SubDeactivatedPayload  SubDeactivatedPayload  `json:"sub_deactivated_payload,omitempty" datastore:",omitempty,noindex"`
+	// deprecated
+	UserID               int64                `json:"-" datastore:",omitempty,noindex"`                                // deprecated
+	ActionUserID         int64                `json:"-" datastore:",omitempty,noindex"`                                // deprecated
+	SubUpdatedPayload    SubUpdatedPayload    `json:"sub_updated_payload,omitempty" datastore:",omitempty,noindex"`    // deprecated
+	ActivitySetupPayload ActivitySetupPayload `json:"activity_setup_payload,omitempty" datastore:",omitempty,noindex"` // deprecated
 }
 
 // Log logs a random entry.
