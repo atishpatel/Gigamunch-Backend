@@ -186,8 +186,8 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 
 // SubmitCheckout submits a checkout.
 func SubmitCheckout(ctx context.Context, r *http.Request) Response {
-	req := new(pb.SubmitCheckoutReq)
 	var err error
+	req := new(pb.SubmitCheckoutReq)
 	// decode request
 	err = decodeRequest(ctx, r, req)
 	if err != nil {
@@ -417,7 +417,7 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
-func campaingFromPB(c *pb.Campaign) common.Campaign {
+func campaingFromPB(c *pbcommon.Campaign) common.Campaign {
 	t, _ := time.Parse(time.RFC3339, c.Timestamp)
 	return common.Campaign{
 		Timestamp: t,

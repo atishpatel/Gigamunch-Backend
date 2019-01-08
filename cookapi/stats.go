@@ -136,18 +136,21 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GetGeneralStat
 		return resp, nil
 	}
 	resp.Activities = activities
+	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
+	churn := getChurn(resp.WeeklyCohortAnalysis.Summary)
+	projectedActivites := projectActivites(ctx, activities, churn)
 	var activities2NonVeg []*subold.SublogSummary
 	var activities4NonVeg []*subold.SublogSummary
 	var activities2Veg []*subold.SublogSummary
 	var activities4Veg []*subold.SublogSummary
-	for _, activity := range activities {
+	for _, activity := range projectedActivites {
 		vegServings := float64(activity.TotalVegServings) / float64(activity.NumTotal)
 		nonVegServings := float64(activity.TotalNonVegServings) / float64(activity.NumTotal)
 		if vegServings >= 3 {
 			activities4Veg = append(activities4Veg, activity)
 			continue
 		}
-		if vegServings > .05 {
+		if vegServings > .01 {
 			activities2Veg = append(activities2Veg, activity)
 			continue
 		}
@@ -161,7 +164,6 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GetGeneralStat
 		}
 	}
 	var cohort *CohortAnalysis
-	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
 	cohort = getWeeklyCohort(activities2NonVeg)
 	resp.WeeklyCohortAnalysis2NonVeg = &CohortAnalysisSummary{Label: "2 non-veg " + cohort.Label, Summary: cohort.Summary}
 	cohort = getWeeklyCohort(activities2Veg)
@@ -170,8 +172,6 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GetGeneralStat
 	resp.WeeklyCohortAnalysis4NonVeg = &CohortAnalysisSummary{Label: "4 non-veg " + cohort.Label, Summary: cohort.Summary}
 	cohort = getWeeklyCohort(activities4Veg)
 	resp.WeeklyCohortAnalysis4Veg = &CohortAnalysisSummary{Label: "4 veg " + cohort.Label, Summary: cohort.Summary}
-	churn := getChurn(resp.WeeklyCohortAnalysis.Summary)
-	projectedActivites := projectActivites(ctx, activities, churn)
 	resp.LifeTimeValue = getLTVSummary(ctx, activities, projectedActivites, churn)
 	// resp.ProjectedActivities = projectedActivites
 	cohort = getWeeklyCohort(projectedActivites)
@@ -341,6 +341,11 @@ func projectActivites(ctx context.Context, activities []*subold.SublogSummary, c
 			projectedSub.NumSkip += projectedSkips
 			projectedSub.NumPaid += projectedPaid
 			projectedSub.NumTotal += projectedSkips + projectedPaid
+			if projectedSub.TotalVegServings > 2 {
+				projectedSub.TotalVegServings += projectedSkips + projectedPaid
+			} else {
+				projectedSub.TotalNonVegServings += projectedSkips + projectedPaid
+			}
 			projectedSub.TotalAmountPaid += costPerPaid * float32(projectedPaid)
 			projectedSub.TotalAmount += costPerPaid * float32(projectedPaid+projectedSkips)
 			projectedActivites = append(projectedActivites, &projectedSub)

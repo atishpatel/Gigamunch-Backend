@@ -87,7 +87,7 @@
         u: true,
         br: true
       };
-      return html.replace(/<\/?([a-z]+) ?[^>]*>/g, function(wholeMatch, tagName) {
+      var v = html.replace(/<\/?([a-z]+) ?[^>]*>/g, function(wholeMatch, tagName) {
         if (keep[tagName]) {
           return wholeMatch;
         }
@@ -97,6 +97,9 @@
 
         return '';
       });
+      v = v.replace(/(?=<!--)([\s\S]*?)-->/g, '');
+      v = v.replace('\n', '');
+      return v;
     }
   });
 

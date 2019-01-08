@@ -431,7 +431,14 @@ func get(ctx context.Context, id string) (*SubscriptionSignUp, error) {
 	if len(results) == 0 {
 		return nil, fmt.Errorf("failed to find sub by email: length is 0")
 	}
-	return results[0].GetSubscriptionSignUp(), nil
+	result := results[0]
+	for _, r := range results {
+		if !r.ActivateDatetime.IsZero() {
+			result = r
+			break
+		}
+	}
+	return result.GetSubscriptionSignUp(), nil
 }
 
 func getMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) {

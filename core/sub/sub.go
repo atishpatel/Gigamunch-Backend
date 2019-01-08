@@ -348,7 +348,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		sub.ActivateDatetime = now
 	}
 
-	err = c.put("", sub)
+	err = c.put(sub.ID, sub)
 	if err != nil {
 		return nil, errDatastore.WithMessage("Woops! Something went wrong. Try again in a few minutes.").WithError(err).Annotate("failed to db.Put")
 	}

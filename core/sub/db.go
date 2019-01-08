@@ -31,8 +31,15 @@ func (c *Client) getByEmail(email string) (*subold.Subscriber, error) {
 	if len(results) == 0 {
 		return nil, c.db.ErrNoSuchEntity()
 	}
-	results[0].ID = keys[0].NameID()
-	return results[0], nil
+	result := results[0]
+	for i, r := range results {
+		if !r.ActivateDatetime.IsZero() {
+			result = r
+			result.ID = keys[i].NameID()
+			break
+		}
+	}
+	return result, nil
 }
 
 // returns sub, nil if found

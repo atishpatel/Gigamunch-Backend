@@ -291,6 +291,9 @@ func getExecutionByMode(ctx context.Context, mode string, exeOld, exeNew *execut
 	case "head_chef":
 		exe.CultureGuide.DinnerInstructions = exeNew.CultureGuide.DinnerInstructions
 		exe.CultureGuide.VegetarianDinnerInstructions = exeNew.CultureGuide.VegetarianDinnerInstructions
+		exe.HasChicken = exeNew.HasChicken
+		exe.HasBeef = exeNew.HasBeef
+		exe.HasPork = exeNew.HasPork
 	case "content_writer":
 		exe.Culture = exeNew.Culture
 		exe.CultureCook = exeNew.CultureCook

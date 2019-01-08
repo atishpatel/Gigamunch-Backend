@@ -214,7 +214,7 @@ func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *htt
 				cancels4To8WeekRetention++
 			}
 		}
-		if s.SubscriptionDate.Before(dateMinus7Days) {
+		if s.SubscriptionDate.Before(dateMinus7Days) && s.UnSubscribedDate.IsZero() {
 			totalSubsLastWeek++
 		}
 		// month
@@ -224,12 +224,12 @@ func (s *server) SendStatsSMS(ctx context.Context, w http.ResponseWriter, r *htt
 		if s.UnSubscribedDate.After(dateMinus30Days) && s.UnSubscribedDate.Before(date) {
 			cancelsLast30Days++
 		}
-		if s.SubscriptionDate.Before(dateMinus30Days) {
+		if s.SubscriptionDate.Before(dateMinus30Days) && s.UnSubscribedDate.IsZero() {
 			totalSubs30DaysAgo++
 		}
 	}
-	weeklyChurn := (float32(cancelsLastWeek) / float32(totalSubsLastWeek)) * 100
-	monthlyChurn := (float32(cancelsLast30Days) / float32(totalSubs30DaysAgo)) * 100
+	weeklyChurn := (float32(cancelsLastWeek) / float32(totalSubsLastWeek+cancelsLastWeek)) * 100
+	monthlyChurn := (float32(cancelsLast30Days) / float32(totalSubs30DaysAgo+cancelsLast30Days)) * 100
 	avgWeeksWithUs := (float32(sumDaysWithUs) / float32(cancelsLastWeek)) / 7
 	msg := `📈 %s stats: 
 	Total Subs: %d
