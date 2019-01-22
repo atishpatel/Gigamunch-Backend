@@ -646,12 +646,13 @@
                   <p>InfoBox Title: <span>[[info_box.title]]</span></p>
                   <p>InfoBox Text: <span>[[info_box.text]]</span></p>
                 </div>
-                <div class="row"
-                     editor="culture_guide">
+                <div class="row">
                   <app-input label="Image"
+                             editor="culture_guide"
                              value="{{info_box.image}}"></app-input>
 
                   <app-input label="Caption"
+                             editor="culture_guide content_writer"
                              value="{{info_box.caption}}"></app-input>
 
                 </div>
@@ -1196,7 +1197,7 @@
           alert('Date is empty');
           return
         }
-        const country = this.execution.culture.country.toLowerCase().replace(' ', '_', -1);;
+        const country = this.execution.culture.country.toLowerCase().replace(' ', '-', -1);;
         if (!country) {
           alert('Country name is empty')
           return

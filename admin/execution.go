@@ -377,6 +377,7 @@ func getExecutionByMode(ctx context.Context, mode string, exeOld, exeNew *execut
 		case "content_writer":
 			exe.CultureGuide.InfoBoxes[i].Title = exeNew.CultureGuide.InfoBoxes[i].Title
 			exe.CultureGuide.InfoBoxes[i].Text = exeNew.CultureGuide.InfoBoxes[i].Text
+			exe.CultureGuide.InfoBoxes[i].Caption = exeNew.CultureGuide.InfoBoxes[i].Caption
 		case "culture_guide":
 			exe.CultureGuide.InfoBoxes[i].Image = exeNew.CultureGuide.InfoBoxes[i].Image
 			exe.CultureGuide.InfoBoxes[i].Caption = exeNew.CultureGuide.InfoBoxes[i].Caption

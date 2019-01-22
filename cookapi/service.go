@@ -467,7 +467,7 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 	}
 	var nonSkippers []string
 	for i := range subLogs {
-		if !subLogs[i].Skip {
+		if !subLogs[i].Skip && !subLogs[i].Free {
 			nonSkippers = append(nonSkippers, subLogs[i].SubEmail)
 		}
 	}
@@ -480,12 +480,24 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 		messageC := message.New(ctx)
 		for _, sub := range subs {
 			if sub.PhoneNumber != "" && sub.BagReminderSMS {
-				err := messageC.SendBagSMS(sub.PhoneNumber, fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName()))
+				msg := fmt.Sprintf("Hey %s! Friendly reminder to leave your Gigamunch bag out tonight or tomorrow morning. Thank you! ^_^", sub.GetName())
+				err := messageC.SendBagSMS(sub.PhoneNumber, msg)
 				if err != nil {
-					utils.Criticalf(ctx, "error in SendBagReminder: failed to message.SendSMS to %s: %s", sub.PhoneNumber, err)
+					utils.Errorf(ctx, "error in SendBagReminder: failed to message.SendSMS to %s: %s", sub.PhoneNumber, err)
 					continue
 				}
 				utils.Infof(ctx, "notifed %s(%s)", sub.Name, sub.PhoneNumber)
+				// TODO: move to admin api
+
+				// if log != nil {
+				// 	payload := &logging.MessagePayload{
+				// 		Platform: "SMS",
+				// 		Body:     msg,
+				// 		From:     "Gigamunch",
+				// 		To:       sub.PhoneNumber,
+				// 	}
+				// 	log.SubMessage(s.ID, s.Email, payload)
+				// }
 			}
 		}
 	}

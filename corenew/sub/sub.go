@@ -720,6 +720,9 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute deleteSubLogStatement.")
 	}
+
+	// TODO: handle senario where customer has paid and is trying to unskip. so there is a duplicate entry error which causes panic since http codes don't go to thousands
+
 	// insert
 	err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
 	if err != nil {
@@ -1044,7 +1047,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 	}
 	utils.Infof(c.ctx, "adding %d subscribers to SubLog", len(subs))
 	taskC := tasks.New(c.ctx)
-	dayBeforeBox := date.Add(-2 * time.Hour) // TODO: change cron to timezone to make code easier to understand
+	dayBeforeBox := date.Add(-12 * time.Hour) // TODO: change cron to timezone to make code easier to understand
 	for _, v := range subs {
 		if (!v.FirstBoxDate.IsZero() && v.FirstBoxDate.After(dayBeforeBox)) || (!v.SubscriptionDate.IsZero() && v.SubscriptionDate.After(dayBeforeBox)) {
 			continue
@@ -1062,6 +1065,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 			}
 			return errors.Wrap("failed to sub.Setup", err)
 		}
+		utils.Infof(c.ctx, "setup sublog for %s on %s", v.Email, date)
 		// add to task queue
 		r := &tasks.ProcessSubscriptionParams{
 			SubEmail: v.Email,
