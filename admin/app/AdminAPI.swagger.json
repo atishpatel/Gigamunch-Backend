@@ -550,6 +550,33 @@
         ]
       }
     },
+    "/admin/api/v1/SetupActivities": {
+      "post": {
+        "summary": "SetupActivities unskips a sub for a date.",
+        "operationId": "SetupActivities",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISetupActivitiesReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/SkipActivity": {
       "post": {
         "summary": "SkipActivity skips a sub for a date.",
@@ -1244,6 +1271,15 @@
         }
       },
       "title": "**********************\nAuth\n**********************"
+    },
+    "AdminAPISetupActivitiesReq": {
+      "type": "object",
+      "properties": {
+        "hours": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
     },
     "AdminAPISkipActivityReq": {
       "type": "object",

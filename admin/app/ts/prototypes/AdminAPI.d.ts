@@ -79,6 +79,9 @@ interface UnskipActivityReq {
 interface UnskipActivityResp {
     error: Common.Error
 }
+interface SetupActivitiesReq {
+    hours: number
+}
 interface RefundActivityReq {
     email: string
     date: string

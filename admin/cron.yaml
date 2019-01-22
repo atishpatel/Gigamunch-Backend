@@ -2,12 +2,12 @@
 cron:
 - description: "Setup Subscriber Activities in 2 days"
   url: /admin/task/SetupActivites?hours=48
-  schedule: every day 20:00
+  schedule: every day 5:00
   timezone: America/Chicago
   target: admin
 - description: "Setup Subscriber Activities in 7 days"
   url: /admin/task/SetupActivites?hours=168
-  schedule: every day 20:00
+  schedule: every day 5:00
   timezone: America/Chicago
   target: admin
 - description: "Bag reminder"

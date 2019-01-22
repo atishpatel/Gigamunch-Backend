@@ -21,7 +21,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
-	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
@@ -42,22 +41,22 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 	return nil
 }
 
-func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	req := struct {
-		Hours int `json:"hours"`
-	}{}
-	_ = decodeRequest(ctx, r, &req)
-	if req.Hours == 0 {
-		req.Hours = 48
-	}
-	in2days := time.Now().Add(time.Duration(req.Hours) * time.Hour)
-	subC, _ := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-	err := subC.SetupActivities(in2days)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to sub.SetupActivities(Date:%v). Err:%+v", in2days, err)
-	}
-	return nil
-}
+// func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+// 	req := struct {
+// 		Hours int `json:"hours"`
+// 	}{}
+// 	_ = decodeRequest(ctx, r, &req)
+// 	if req.Hours == 0 {
+// 		req.Hours = 48
+// 	}
+// 	in2days := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+// 	subC, _ := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+// 	err := subC.SetupActivities(in2days)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "failed to sub.SetupActivities(Date:%v). Err:%+v", in2days, err)
+// 	}
+// 	return nil
+// }
 
 // SetupTags sets up tags for culture preview email and culture email 2 weeks in advance.
 func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {

@@ -3,14 +3,17 @@ package main
 import (
 	"context"
 	"net/http"
+	"time"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
+	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
 
-// SkipActivity gets a log.
+// SkipActivity skips an activity.
 func (s *server) SkipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pb.SkipActivityReq)
@@ -33,7 +36,7 @@ func (s *server) SkipActivity(ctx context.Context, w http.ResponseWriter, r *htt
 	return resp
 }
 
-// UnskipActivity gets a log.
+// UnskipActivity unskips an activity.
 func (s *server) UnskipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pb.UnskipActivityReq)
@@ -53,6 +56,31 @@ func (s *server) UnskipActivity(ctx context.Context, w http.ResponseWriter, r *h
 		return errors.Annotate(err, "failed to activity.UnskipActivity")
 	}
 	resp := &pb.UnskipActivityResp{}
+	return resp
+}
+
+// SetupActivities setups activities
+func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.SetupActivitiesReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	date := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.SetupActivities(date)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to sub.SetupActivities(Date:%v). Err:%+v", date, err)
+		return errors.Annotate(err, "failed to sub.SetupActivities")
+	}
+	resp := &pb.ErrorOnlyResp{}
 	return resp
 }
 
