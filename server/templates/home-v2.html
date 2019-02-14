@@ -48,6 +48,7 @@
       font-size: 30px;
       padding: 24px 10px;
       z-index: 2;
+      position: relative;
     }
 
     .interest-image {
@@ -96,37 +97,58 @@
 
     /* Spices */
 
-    .spices-section {
+    .spices-curve-section, .spices-star-section {
       position: relative;
-      height: 1;
+      height: 1px;
     }
 
-    .spices-image {
+    .spices-curve-image, .spices-star-image {
       position: absolute;
-      left: -38px;
-      top: -200px;
-      width: 100px;
       z-index: 0;
-      transform: rotate(45deg);
     }
 
-    .spices-image img {
+    .spices-curve-image img, .spices-star-image img {
       width: 100%;
     }
 
+    .spices-curve-image {
+      width: 100px;
+      top: -200px;
+      left: -38px;
+      transform: rotate(45deg);
+    }
+
+    .spices-star-image {
+      width: 70px;
+      top: -70px;
+      right: 18px;
+      transform: rotate(-40deg);
+    }
+
     @media (min-width: 1000px) {
-      .spices-image {
+      .spices-curve-image {
         width: 300px;
         left: -60px; 
         top: -200px;
       }
+
+      .spices-star-image {
+        left: 32%;
+        width: 100px;
+        top: -120px;
+      }
     }
 
     @media (min-width: 1500px) {
-      .spices-image {
+      .spices-curve-image {
         width: 400px;
         left: -70px; 
         top: -300px;
+      }
+
+      .spices-star-image {
+        width: 125px;
+        top: -150px;
       }
     }
 
@@ -150,6 +172,8 @@
     .problem-text-title {
       font-size: 30px;
       font-weight: 600;
+      z-index: 2;
+      position: relative;
     }
 
     .problem-text-subtitle {
@@ -254,6 +278,8 @@
     .solution-image {
       max-width: 100%;
       overflow: hidden;
+      z-index: 2;
+      position: relative;
     }
 
     .solution-image img {
@@ -929,10 +955,10 @@
       </div>
       <h1 class="interest-title">Discover the world<br>From your dinner table</h1>
     </section>
-    <div class="spices-section">
-      <div class="spices-image">
+    <div class="spices-curve-section">
+      <div class="spices-curve-image">
         <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/spices/spices_curve_line.jpg"
-             alt="Spies in a curved line">
+             alt="Spices in a curved line">
       </div>
     </div>
     <!-- Problem -->
@@ -950,6 +976,12 @@
         <p class="problem-text-subtitle">We feel you.</p>
       </div>
     </section>
+    <div class="spices-star-section">
+      <div class="spices-star-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/spices/star_anise.jpg"
+             alt="Spices star anise">
+      </div>
+    </div>
     <!-- Solution -->
     <section class="solution-section">
       <div class="solution-image">
