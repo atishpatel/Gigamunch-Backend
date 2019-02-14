@@ -99,6 +99,25 @@
                       value="[[routeOptimizeProgress]]"></paper-progress>
     </div>
 
+    <div style="padding-top:12px">
+      <p>---- Advance tools -----</p>
+      <span>To: </span>
+      <select
+          disabled="[[routeChangeInProcess]]"
+          value="{{driverNameTo::change}}"
+          required>
+        <option disabled selected value> -- select an driver -- </option>
+        <template is="dom-repeat"
+                  items="[[drivers]]"
+                  as="driver">
+          <option value="[[driver.name]]">[[driver.name]]</option>
+        </template>
+      </select>
+      <paper-button disabled="[[routeChangeInProcess]]"
+                    on-click="transferDeliveries">Transfer Deliveries</paper-button>
+      <p>--------------------------------</p>
+    </div>
+
     <div class="table-container">
       <h2>Optimized Routes</h2>
       <div>
@@ -415,6 +434,29 @@
         }, 1000)
       }
 
+      transferDeliveries() {
+        const from = this.driverName;
+        const to = this.driverNameTo;
+        if (!from || !to) {
+          alert(`Select a from(${from}) and to(${to}) driver.`)
+          return;
+        }
+        this.drivers.forEach((driver) => {
+          // find the driver
+          if (driver.name === from && driver.deliveries.length > 1) {
+            for (let i = driver.deliveries.length - 1; i >= 0; i--) {
+              this.setDriver(to, driver.deliveries[i].sub_email);
+            }
+            return;
+          }
+        });
+        let drivers = this.drivers;
+        this.set('drivers', []);
+        setTimeout(() => {
+          this.set('drivers', drivers);
+        }, 1000);
+      }
+
       // optimizeDriverRoute optimizes the route for a driver.
       optimizeDriverRoute() {
         const name = this.driverName;
@@ -592,6 +634,7 @@
           // add popup in map
           function addMarkerPopup(sublog, driver) {
             google.maps.event.addListener(sublog.marker, 'click', function(event) {
+              const container = '<div style="background-color:white;min-width:250px;padding:12px;">';
               const labelStr = '<b>' + sublog.name + '</b><br>';
               const driverStr = `Driver: ${driver.name}<br>`;
               const addrStr = sublog.addressStr + '<br>';
@@ -600,7 +643,7 @@
                 changeDriverList += `<span onclick="APP.Event.Fire(\'updateDriver\', {driverName:\'${drivers[i].name }\', deliveryEmail:\'${sublog.sub_email}\'})" style="color: #899BA3;cursor: pointer;text-decoration: underline;">Set driver to ${drivers[i].name}</span><br>`
               }
               const infoWindow = new google.maps.InfoWindow({
-                content: labelStr + driverStr + addrStr + changeDriverList,
+                content: container + labelStr + driverStr + addrStr + changeDriverList + '</div>',
                 position: sublog.marker.getPosition()
               });
               sublog.marker.infoWindow = infoWindow;
@@ -647,11 +690,19 @@
         this.updateDriver(e.detail.driverName, e.detail.deliveryEmail)
       }
 
-      // updateDriver reassinges a delivery to another driver.
       updateDriver(driverName, deliveryEmail) {
-        let delivery;
+        this.setDriver(driverName, deliveryEmail);
         let drivers = this.drivers;
         this.set('drivers', []);
+        setTimeout(() => {
+          this.set('drivers', drivers);
+        }, 1000);
+      }
+
+      // setDriver reassinges a delivery to another driver.
+      setDriver(driverName, deliveryEmail) {
+        let delivery;
+        let drivers = this.drivers;
         let cache = JSON.parse(window.localStorage.getItem(this.dateString));
         if (!cache) {
           cache = {};
@@ -680,9 +731,7 @@
         }
         cache[deliveryEmail] = driverName;
         window.localStorage.setItem(this.dateString, JSON.stringify(cache));
-        setTimeout(() => {
-          this.set('drivers', drivers);
-        }, 1000);
+        this.drivers = drivers;
       }
 
       // _inside checks if point is inside a geofence.
