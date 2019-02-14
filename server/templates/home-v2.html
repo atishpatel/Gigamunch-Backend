@@ -1,0 +1,1259 @@
+[[define "home-v2"]]
+<!doctype html>
+<html lang="en">
+
+<head>
+  [[template "head" .]]
+  <script src="https://unpkg.com/sweetalert2@7.33.1/dist/sweetalert2.all.min.js"></script>
+  <!--[if !IE]-->
+  <link rel="stylesheet"
+        href="https://unpkg.com/aos@3.0.0-beta.6/dist/aos.css" />
+  <!--[endif]-->
+</head>
+
+<body>
+  [[template "theme" .]]
+  <style>
+    /* * {
+  border: 1px solid #f00 !important;
+} */
+    body {
+      background-color: #fff;
+      max-width: 1920px;
+      margin: auto;
+      color: #333e48;
+    }
+
+    main button {
+      min-width: 200px;
+      margin: auto;
+      text-transform: uppercase;
+      font-size: 16px;
+      font-weight: 500;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    /* Intrest */
+    .interest-section {
+
+    }
+
+    .interest-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      font-size: 30px;
+      padding: 24px 10px;
+      z-index: 2;
+    }
+
+    .interest-image {
+
+    }
+
+    .interest-image img {
+      max-width: 100%;
+    }
+
+    @media (min-width: 1000px) {
+      .interest-section {
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .interest-image {
+        order: 2;
+      }
+
+      .interest-image img {
+        max-width: 700px;
+      }
+
+      .interest-title {
+        font-size: 50px;
+        margin-bottom: 165px;
+      }
+    }
+
+    @media (min-width: 1500px) {
+      .interest-image img {
+        max-width: 900px;
+      }
+
+      .interest-title {
+        font-size: 55px;
+        margin-bottom: 175px;
+      }
+    }
+
+    /* Spices */
+
+    .spices-section {
+      position: relative;
+      height: 1;
+    }
+
+    .spices-image {
+      position: absolute;
+      left: -38px;
+      top: -200px;
+      width: 100px;
+      z-index: 0;
+      transform: rotate(45deg);
+    }
+
+    .spices-image img {
+      width: 100%;
+    }
+
+    @media (min-width: 1000px) {
+      .spices-image {
+        width: 300px;
+        left: -60px; 
+        top: -200px;
+      }
+    }
+
+    @media (min-width: 1500px) {
+      .spices-image {
+        width: 400px;
+        left: -70px; 
+        top: -300px;
+      }
+    }
+
+    /* Problem */
+
+    .problem-section {
+      position: relative;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .problem-text {
+      padding: 12px;
+      margin: auto;
+    }
+
+    .problem-text-title {
+      font-size: 30px;
+      font-weight: 600;
+    }
+
+    .problem-text-subtitle {
+      font-size: 20px; 
+    }
+
+    .problem-card {}
+
+    .country-card img {
+      max-width: 100%;
+    }
+
+    @media (min-width: 1000px) {
+      .problem-section {
+        flex-direction: row-reverse;
+        justify-content: center;
+      }
+
+      .problem-text {
+        margin-right: 0;
+      }
+
+      .problem-text-title {
+        font-size: 40px;
+      }
+
+      .problem-text-subtitle {
+        font-size: 30px;
+      }
+
+      .problem-card {
+        margin: auto;
+      }
+
+      /* .country-card{
+        margin-right: 95px;
+      } */
+
+        .country-card img {
+        max-width: 550px;
+      }
+    }
+
+    @media (min-width: 1500px) {
+      .problem-text-title {
+        font-size: 45px;
+      }
+
+      .problem-text-subtitle {
+        font-size: 35px;
+      }
+
+      .country-card{
+        margin-right: 100px;
+      }
+
+        .country-card img {
+        max-width: 650px;
+      }
+    }
+
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+      /* IE10+ CSS styles go here */
+      .problem-section {
+        max-width: 80%;
+        margin: auto;
+      }
+    }
+
+
+    /* Solution */
+
+    .solution-section {
+      margin: auto;
+    }
+
+    .solution-text {
+      padding: 12px;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .solution-text-title {
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .solution-text-desc {
+      margin-bottom: 24px
+    }
+
+    .solution-text-button {
+      background-color: #f56538;
+      color: white;
+      margin: 0;
+    }
+
+    .solution-image {
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .solution-image img {
+      max-width: 100%;
+      /* transform: translateX(-32px);
+      min-width: 435px; */
+    }
+
+    @media (min-width: 1000px) {
+      .solution-section {
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin-right: 165px;
+      }
+
+      .solution-image { 
+        min-width: 650px;
+      }
+
+      .solution-image img {
+        transform: none;
+        max-width: 650px;
+      }
+
+      .solution-text {
+        max-width: 450px;
+        min-width: 450px;
+        margin-left: 24px;
+      }
+
+      .solution-text-title {
+        font-size: 35px;
+      }
+
+      .solution-text-desc {
+
+      }
+    }
+
+    @media (min-width: 1500px) {
+      .solution-image { 
+        min-width: 900px;
+      }
+
+      .solution-image img {
+        transform: none;
+        max-width: 900px;
+      }
+    }
+
+    /* Price */
+
+    .price-section {
+      margin-top: 40px;
+      max-width: 100%;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .price-text {
+      padding: 12px;
+      padding-right: 0;
+    }
+
+    .price-text-title {
+      font-weight: 400;
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .price-text-desc {}
+
+    .price-text-list {
+      margin-top: 24px;
+      margin-bottom: 0;
+    }
+
+    .price-text-adventure {
+      margin-top: 24px;
+    }
+
+    .price-text-price {
+      margin-top: 40px;
+    }
+
+    .price-text-price-14 {
+      font-size: 24px;
+    }
+
+    .price-text-price-delivery {
+      color: #000;
+      opacity: .6;
+    }
+
+    .price-image {
+      max-width: 100%;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .price-image img {
+      max-width: 100%;
+      min-width: 470px;
+    }
+
+    @media (min-width: 1000px) { 
+      .price-section {
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+      }
+
+      .price-text {
+        max-width: 450px;
+        min-width: 450px;
+      }
+
+      .price-text-title {
+        font-size: 35px;
+        margin-bottom: 16px;
+
+      }
+
+      .price-image {
+        max-width: 850px;
+      }
+    }
+
+    /* Stories */
+
+    .stories-section {
+      padding: 12px;
+    }
+
+    .stories-image {
+      transform: translateX(-100px)
+    }
+
+    .stories-image img {
+      max-width: 100%;
+    }
+
+    .stories-text {
+      margin-top: 16px;
+    }
+
+    .stories-text-title {
+      color: #dc6087;
+    }
+
+    .stories-text-desc {}
+
+    .stories-text-list {
+      margin-top: 24px;
+    }
+
+    @media (min-width: 1000px) { 
+      .stories-section {
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 125px;
+        padding-bottom: 0;
+      }
+
+      .stories-image {
+        max-width: 850px;
+        transform: translateX(-75px)
+      }
+
+      .stories-text {
+        max-width: 450px;
+        min-width: 450px;
+      }
+
+      .stories-text-title {
+        font-size: 35px;
+        margin-bottom: 16px;
+      }
+
+    }
+
+    /* As seen on */
+
+    .as-seen-on-section {
+      background-color: rgb(250, 250, 250);
+      text-align: center;
+      padding: 24px 12px;
+      margin: 24px 0;
+    }
+
+    .as-seen-on-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .company-logos {
+      margin: auto;
+    }
+
+    .company-logo {
+      display: inline-block;
+      padding: 8px;
+    }
+
+    .company-logo img {
+      height: 28px;
+    }
+
+    .fast-company,
+    .news-channel-5,
+    .style-blueprint,
+    .edible-nashville {
+      -webkit-filter: grayscale(100%);
+      filter: grayscale(100%);
+      opacity: .7;
+    }
+
+    .company-logo .news-channel-5 {
+      height: 35px;
+    }
+
+    .company-logo .edible-nashville {
+      height: 60px;
+    }
+
+    .company-logo .style-blueprint {
+      height: 35px;
+      opacity: 1;
+    }
+
+    @media (max-width: 800px) {
+      .company-logo img {
+        height: 20px;
+      }
+
+      .company-logo .edible-nashville {
+        height: 52px;
+      }
+    }
+
+    @media (min-width: 1000px) { 
+      .as-seen-on-section { 
+        margin-top: 0;
+      }
+    }
+
+    /* Features */
+    .features-section {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .features-title {
+      text-align: center;
+      font-size: 30px;
+    }
+
+    .features-desc {
+      text-align: center;
+
+    }
+
+    .features-list {
+      display: flex;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      flex-direction: column;
+      padding: 24px 12px 0;
+    }
+
+    .features-list-item {
+      display: flex;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+    }
+
+    .features-list-item-image {
+      width: 75px;
+      height: 75px;
+      min-width: 75px;
+      padding: 12px;
+    }
+
+    .features-list-item-image img {
+      max-width: 100%;
+    }
+
+    .features-list-item-text {
+      padding-bottom: 20px;
+    }
+
+    .features-list-item-title {
+      font-size: 18px;
+    }
+
+    .features-list-item-desc {}
+
+    .features-button {
+      background-color: #f56538;
+      color: white;
+      display: flex;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      margin: 24px auto;
+    }
+
+    @media (min-width: 1000px) {
+      .features-section {
+        margin-top: 45px;
+      }
+
+      .features-title {
+        font-size: 45px;
+        margin-bottom: 16px;
+      }
+
+      .features-desc {
+        font-size: 20px;
+      }
+
+      .features-list {
+        flex-direction: row;
+      }
+
+      .features-list-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin: 0 12px;
+        width: 300px;
+      }
+
+      .features-list-item-image {
+        width: 125px;
+        height: 125px;
+        min-width: 125px;
+        padding: 12px;
+      }
+
+      .features-button {
+        margin-top: 24px;
+      }
+    }
+
+
+    /* Testimonials */
+    .testimonials-section {
+      max-width: 750px;
+      margin: 40px auto;
+    }
+
+    .testimonials-title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 28px;
+    }
+
+    .testimonials-list {
+      margin: 24px 12px;
+    }
+
+    .testimonials-list-item {
+      padding: 12px 0;
+      display: flex;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      flex-direction: column;
+    }
+
+
+    .testimonials-list-item-image {
+      min-width: 50px;
+      min-height: 50px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: block;
+      margin: 6px 0;
+      background-color: #333e48;
+    }
+
+    .testimonials-martha {
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/homev2/martha.jpg');
+      background-size: contain;
+    }
+
+    .testimonials-louise {
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/homev2/louise.jpg');
+      background-size: contain;
+    }
+
+    .testimonials-beth {
+      background: url('https://storage.googleapis.com/gigamunch-omninexus-website/homev2/beth.jpg');
+      background-size: contain;
+    }
+
+    .testimonials-list-item-text {
+      max-width: 100%;
+      padding: 12px 0;
+    }
+
+    .testimonials-list-item-name {
+      text-align: right;
+      margin-right: 12px;
+    }
+
+    @media (min-width: 1000px) {
+      .testimonials-section {
+        margin: 50px auto;
+      }
+
+      .testimonials-title {
+        font-size: 40px;
+      }
+
+      .testimonials-list-item {
+        flex-direction: row;
+      }
+
+      .testimonials-list-item-image {
+        min-width: 75px;
+        min-height: 75px;
+        width: 75px;
+        height: 75px;
+        margin: 12px 24px;
+      }
+    }
+
+    /* eco-section */
+    .eco-section,
+    .no-commitment-section {
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      margin: 24px 12px;
+    }
+
+    .eco-card,
+    .no-commitment-card {
+      -webkit-box-flex: 1;
+      -moz-box-flex: 1;
+      width: 20%;
+      -webkit-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      padding: 12px;
+
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      background-color: #28a971;
+      color: #fff;
+      border-radius: 3px;
+      max-width: 700px;
+    }
+
+    .eco-image-text,
+    .no-commitment-image-text {
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      margin-bottom: 18px;
+    }
+
+    .eco-image,
+    .no-commitment-image {
+      font-size: 30px;
+      padding: 0 8px;
+      margin: auto;
+    }
+
+    .eco-image img {
+        width: 30px;
+        height: 30px;
+      }
+
+    .eco-text,
+    .no-commitment-text {
+      padding-left: 12px;
+      -webkit-box-flex: 1;
+      -moz-box-flex: 1;
+      width: 20%;
+      -webkit-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eco-title,
+    .no-commitment-title {
+      border-bottom: solid white 2px;
+      font-weight: bold;
+      padding: 8px 0;
+      font-weight: bold;
+    }
+
+    .eco-desc,
+    .no-commitment-desc {
+      padding-top: 8px;
+    }
+
+    .eco-button,
+    .no-commitment-button {
+      background-color: #f56538;
+      color: white;
+      margin: initial;
+    }
+
+    @media (min-width: 1000px) {
+
+      .eco-image-text,
+      .no-commitment-image-text {
+        margin-bottom: 24px;
+      }
+      .eco-image,
+      .no-commitment-image {
+        font-size: 64px;
+        padding: 0 12px;
+      }
+
+      .eco-image img {
+        width: 64px;
+        height: 64px;
+      }
+
+      .eco-title,
+      .no-commitment-title { 
+        font-size: 25px;
+      }
+    }
+
+    /* Checklist */
+
+    .checklist-section {
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #352e24 url("https://storage.googleapis.com/gigamunch-omninexus-website/homev2/bosnian_background_clean_center.jpg") no-repeat center center;
+      background-size: cover;
+      height: 80vh;
+      max-height: 1080px;
+      padding: 12px;
+    }
+
+    .checklist-card {
+      display: -webkit-box;
+      display: -moz-box;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 12px;
+    }
+
+    .checklist-title {
+      text-align: center;
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      color: #ff7043;
+      font-size: 30px;
+    }
+
+    .checklist-list {
+      list-style: none;
+      padding: 24px 0;
+    }
+
+    .checklist-button {
+      background-color: #f56538;
+      color: white;
+      margin: 0;
+    }
+
+    @media (max-width: 500px) {
+      .checklist-card {
+        padding: 40px 24px;
+      }
+    }
+
+    @media (min-width: 1000px) {
+      .checklist-title {
+        font-size: 35px;
+      }
+    }
+
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+     /* IE10+ CSS styles go here */
+     .checklist-section {
+       justify-content: flex-start;
+     }
+    }
+
+    .get-started-dialog {}
+
+    .get-started-form {
+      padding: 32px 12px;
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      justify-content: center
+    }
+
+    .get-started-title {
+      font-family: 'Merienda', 'Roboto';
+      font-weight: 700;
+      font-size: 36px;
+    }
+
+    .get-started-input {
+      margin: 12px 0;
+    }
+
+    .get-started-button {
+      padding: 12px 16px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+  </style>
+  <header class="nav-header">
+    [[ template "nav-v2" .]]
+  </header>
+  <main role="main">
+    [[if eq .ID "passport"]] [[template "passport-section" .]] [[end]] [[if eq .ID "referred"]] [[template "referred-section" .]] [[end]] [[if eq .ID "gifted"]] [[template "gifted-section" .]] [[end]]
+    <!-- Interest -->
+    <section class="interest-section">
+      <div class="interest-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/map.jpg"
+             alt="World map">
+      </div>
+      <h1 class="interest-title">Discover the world<br>From your dinner table</h1>
+    </section>
+    <div class="spices-section">
+      <div class="spices-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/spices/spices_curve_line.jpg"
+             alt="Spies in a curved line">
+      </div>
+    </div>
+    <!-- Problem -->
+    <section class="problem-section">
+      <div class="problem-card">
+        <div class="country-card"
+             data-aos="zoom-in-down"
+             data-aos-anchor-placement="center-bottom">
+          <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/laos_card.jpg"
+               alt="Laos food">
+        </div>
+      </div>
+      <div class="problem-text">
+        <h2 class="problem-text-title">Tired of the same<br>boring dinner?</h2>
+        <p class="problem-text-subtitle">We feel you.</p>
+      </div>
+    </section>
+    <!-- Solution -->
+    <section class="solution-section">
+      <div class="solution-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/cooks.jpg"
+             alt="Multiple ethnic people with their flags and food">
+      </div>
+      <div class="solution-text">
+        <h2 class="solution-text-title">Once every week,<br>
+            Eat dinner <br>
+            From around the world.</h2>
+        <p class="solution-text-desc">Get a full course dinner - including a dessert 😋 - delivered to your doorstep. Designed by local immigrants in Nashville to provide you with an experience of their country and their culture. And the best part is, it requires <span class="bold">no cooking.</span></p>
+        <button class="solution-text-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+      </div>
+    </section>
+
+    <!-- Price -->
+    <section class="price-section">
+      <div class="price-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/iraq_dinner_culture_guide.jpg"
+             alt="A delicious Iraqi dinner.">
+      </div>
+      <div class="price-text">
+        <h2 class="price-text-title">Delicious and <span class="bold" data-aos="fade-up" data-aos-delay="50">Affordable</span></h2>
+        <p class="price-text-desc">You don't need to waste time searching for a new resturant, or worse, cooking the same boring dinner. With Gigamunch, every week you get a ready-to-eat dinner from around the world delivered. </p>
+        <ul class="price-text-list">
+          <li data-aos="fade-right"
+              data-aos-delay="50">1 Main Entree 🍖 (vegetarian option 🌱)</li>
+          <li data-aos="fade-right"
+              data-aos-delay="100">2 Sides. Healthy and Filling!</li>
+          <li data-aos="fade-right"
+              data-aos-delay="150">1 Dessert to top it off</li>
+        </ul>
+        <p class="price-text-adventure"><span class="bold">One BIG Adventure</span><br>without breaking the bank</p>
+        <p class="price-text-price">
+          <span class="price-text-price-14 bold">$14</span> per serving <br>
+          <span class="price-text-price-delivery">+$5 for delivery</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- No commitment -->
+    <section class="no-commitment-section">
+      <div class="no-commitment-card">
+        <div class="no-commitment-image-text">
+          <div class="no-commitment-image"><i class="fa fa-check" aria-hidden="true"></i></div>
+          <div class="no-commitment-text">
+            <div class="no-commitment-title">No commitment. No, really.</div>
+            <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you love it, stick around. If you don't, you can cancel anytime without getting charged a dime.</div>
+          </div>
+        </div>
+        <button class="no-commitment-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+      </div>
+    </section>
+
+    <!-- Stories -->
+    <section class="stories-section">
+      <div class="stories-image">
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/cook.jpg"
+             alt="Iraq cook">
+      </div>
+      <div class="stories-text">
+        <h2 class="stories-text-title">More than just food</h2>
+        <p class="stories-text-desc">Each Gigamunch dinner is an immersive journey to a new country - a new culture. We work with local immigrants and refugees in Nashville so you get an authentic taste of a new country.</p>
+        <p class="stories-text-list">
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="50">Read their <span class="bold">stories.</span><br></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="100">Listen to their <span class="bold">music.</span><br></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="150">Learn their <span class="bold">culture.</span><br></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="200">Love their <span class="bold">food.</span></span>
+        </p>
+      </div>
+    </section>
+    <section class="as-seen-on-section bg-noise">
+      <h1 class="as-seen-on-title">As seen on</h1>
+      <div class="company-logos">
+        <div class="company-logo">
+          <img class="fast-company"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/fast_company.png"
+               alt="Fast Company">
+        </div>
+        <div class="company-logo">
+          <img class="news-channel-5"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/news_channel_5.png"
+               alt="Edible Nashville">
+        </div>
+        <div class="company-logo">
+          <img class="style-blueprint"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/style_blueprint.png"
+               alt="Edible Nashville">
+        </div>
+        <div class="company-logo">
+          <img class="edible-nashville"
+               src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/edible_nashville.png"
+               alt="Edible Nashville">
+
+        </div>
+      </div>
+    </section>
+    <!-- Features -->
+    <section class="features-section">
+      <h1 class="features-title">Easy. Convinent. Quality.</h1>
+      <p class="features-desc">Enjoy delicious international food <br>
+        from a different country every week.</p>
+      <div class="features-list">
+        <div class="features-list-item"
+             data-aos="fade-up"
+             data-aos-anchor-placement="center-bottom"
+             data-aos-delay="50">
+          <div class="features-list-item-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/no_cooking_icon.jpg"
+                 alt="No cooking icon">
+          </div>
+          <div class="testimonials-list-item-text">
+            <h2 class="features-list-item-title">No Cooking. No Hassle.</h2>
+            <p class="features-list-item-desc">With Gigamunch, no shopping. No cooking. No last minute take-out.</p>
+          </div>
+        </div>
+        <div class="features-list-item"
+             data-aos="fade-up"
+             data-aos-anchor-placement="center-bottom"
+             data-aos-delay="150">
+          <div class="features-list-item-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/plate_icon.jpg"
+                 alt="Plate icon">
+          </div>
+          <div class="testimonials-list-item-text">
+            <h2 class="features-list-item-title">Quality meals</h2>
+            <p class="features-list-item-desc">Gourmet dinner with a meaty protein, healthy veggies, filling carbs, and a delicious dessert. </p>
+          </div>
+        </div>
+        <div class="features-list-item"
+             data-aos="fade-up"
+             data-aos-anchor-placement="center-bottom"
+             data-aos-delay="250">
+          <div class="features-list-item-image">
+            <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/calendar_icon.jpg"
+                 alt="Calendar icon">
+          </div>
+          <div class="testimonials-list-item-text">
+            <h2 class="features-list-item-title">No commitment whatsoever</h2>
+            <p class="features-list-item-desc">Skipping weeks or cancelling is super easy.</p>
+          </div>
+        </div>
+      </div>
+      <button class="features-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+    </section>
+    <!-- Testimonials -->
+    <section class="testimonials-section">
+      <h1 class="testimonials-title">What Members Are Saying</h1>
+      <div class="testimonials-list">
+        <div class="testimonials-list-item">
+          <div class="testimonials-list-item-image testimonials-martha"></div>
+          <div class="testimonials-list-item-text">
+            <p class="testimonials-list-item-quote">"We are NOT the most adventurous eaters, and yet we have all <span class="bold">loved each one of our 4 menus so far.</span>
+              I cannot say enough about this company and the quality of the service and food.
+              <span class="bold">Thank you for expanding our horizons with delicious food!</span> :-)"</p>
+            <p class="testimonials-list-item-name">Martha</p>
+          </div>
+        </div>
+        <div class="testimonials-list-item"
+             data-aos="fade-up">
+          <div class="testimonials-list-item-image testimonials-louise"></div>
+          <div class="testimonials-list-item-text">
+            <p class="testimonials-list-item-quote">"What a <span class="bold">wonderful experience</span> all the way around the world! The food has been delectable! I <span class="bold">love learning</span> the history of the country and chef."</p>
+            <p class="testimonials-list-item-name">Louise</p>
+          </div>
+        </div>
+        <div class="testimonials-list-item"
+             data-aos="fade-up">
+          <div class="testimonials-list-item-image testimonials-beth"></div>
+          <div class="testimonials-list-item-text">
+            <p class="testimonials-list-item-quote">"Bravo! I love these meals, culture guides, and songs. They are <span class="bold">delicious, convenient, educational, and fun.</span>"</p>
+            <p class="testimonials-list-item-name">Beth</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Eco -->
+    <section class="eco-section">
+      <div class="eco-card">
+        <div class="eco-image-text">
+          <div class="eco-image"><img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/eco_icon.png"></div>
+          <div class="eco-text">
+            <div class="eco-title">No waste. No, really.</div>
+            <div class="eco-desc">When you eat with us, you’re helping our big beautiful Earth. We re-use 90% of our packaging, while the other 10% is easily recyclable by you.
+              We also donate 100% of our leftover food to charity. ❤️</div>
+          </div>
+        </div>
+        <button class="eco-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+      </div>
+    </section>
+    <!-- Checklist -->
+    <section class="checklist-section">
+      <div class="checklist-card"
+           data-aos="fade-up">
+        <h1 class="checklist-title">Let the world travel to you</h1>
+        <ul class="checklist-list">
+          <li class="checklist-list-item">
+            <i class="fa fa-check checkout-list-item-check"
+                 aria-hidden="true"></i>
+            <span class="checklist-list-item-text">Ready-to-eat meals. No need to prepare.</span>
+          </li>
+          <li class="checklist-list-item">
+            <i class="fa fa-check checkout-list-item-check"
+                 aria-hidden="true"></i>
+            <span class="checklist-list-item-text">Affordable and delicous</span>
+          </li>
+          <li class="checklist-list-item">
+            <i class="fa fa-check checkout-list-item-check"
+                 aria-hidden="true"></i>
+            <span class="checklist-list-item-text">Delivered to your doorstep</span>
+          </li>
+          <li class="checklist-list-item">
+            <i class="fa fa-check checkout-list-item-check"
+                 aria-hidden="true"></i>
+            <span class="checklist-list-item-text">Skip or cancel anytime</span>
+          </li>
+        </ul>
+        <button data-button-action="GetStartedDialog"
+                  class="checklist-button">
+                  [[if eq .ID "gifted"]] 
+                  Claim My Free Dinner
+                  [[else]] 
+                  Get Started with a free dinner
+                  [[end]]
+                </button>
+      </div>
+    </section>
+
+  </main>
+  <div class="hidden">
+    <div id="getStartedDialog"
+         class="get-started-dialog dialog">
+      <form action="[[.CheckoutPageURL]]"
+            method="GET"
+            class="get-started-form"
+            enctype="application/x-www-form-urlencoded">
+        <h1 class="get-started-title">JOURNEY THE WORLD</h1>
+        <p></p>
+        <input class="get-started-input"
+               name="email"
+               id="email"
+               placeholder="Enter Email Address Here"
+               pattern="\S+@\S+\.\S+"
+               required>
+        <button type="submit"
+                  class="orange-button get-started-button">
+                  [[if eq .ID "gifted"]] 
+                  Claim My Free Dinner
+                  [[else]] 
+                  Get My Free Dinner
+                  [[end]]
+          </button>
+      </form>
+      <div class="close-button">
+        <button type="button"
+                  class="close"
+                  data-close="getStarted"
+                  aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+      </div>
+    </div>
+  </div>
+  <!-- [[if eq .ID "gifted"]] 
+                Claim My Free Dinner
+                [[else]] 
+                Get Started with a free dinner
+                [[end]] -->
+  <script>
+    function dialogClosed() {}
+
+    function closeDialog() {
+      swal.close();
+    }
+
+    function openGetStartedDialog() {
+      swal({
+        html: document.getElementById('getStartedDialog').outerHTML,
+        showConfirmButton: false,
+        padding: 0,
+        onOpen: function() {
+          document.querySelectorAll('[data-close=getStarted]').forEach(function(e) {
+            e.addEventListener('click', closeDialog);
+          });
+        },
+      }).catch(dialogClosed);
+    }
+    document.querySelectorAll('[data-button-action=GetStartedDialog]').forEach(function(e) {
+      e.addEventListener('click', openGetStartedDialog);
+    });
+
+  </script>
+  <!-- AOS -->
+  <!--[if !IE]-->
+  <script src="https://unpkg.com/aos@3.0.0-beta.6/dist/aos.js"></script>
+  <script>
+    AOS.init();
+
+  </script>
+  <!--[endif]-->
+  <!-- END AOS -->
+  [[template "campaign-logger" .]] [[template "footer" .]]
+</body>
+
+</html>
+
+[[end]]

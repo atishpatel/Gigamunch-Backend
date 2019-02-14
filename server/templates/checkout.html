@@ -985,12 +985,12 @@
               <div class="order-summary">
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Meals <span id="meal_multiplier"
-                          class="multiplier">x2</span></div>
+                          class="multiplier">- x2</span></div>
                   <div class="order-summary-section-price"><span class="old_price">$<span id="box_total"></span></span> FREE</div>
                 </div>
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Delivery</div>
-                  <div class="order-summary-section-price">FREE</div>
+                  <div class="order-summary-section-price"><span class="old_price">$5.00</span> FREE</div>
                 </div>
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Tax</div>
@@ -1337,9 +1337,9 @@
       // var total = boxTotal + deliveryTotal + taxTotal;
       var total = boxTotal;
 
-      document.getElementById('meal_multiplier').innerHTML = 'x' + servingsPerBox;
+      document.getElementById('meal_multiplier').innerHTML = '- x' + servingsPerBox;
       document.getElementById('boxForTitle').innerHTML = boxForTitleText;
-      document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
+      document.getElementById('box_total').innerHTML = '14'; // boxTotal.toFixed(0);
       document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
       document.getElementById('total').innerHTML = total.toFixed(2);
     }

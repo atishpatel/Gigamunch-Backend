@@ -30,6 +30,8 @@ type Page struct {
 }
 
 func addTemplateRoutes(r *httprouter.Router) {
+	r.GET("/homev2", redirictOldHost(handleHomeV2))
+
 	r.GET("/", redirictOldHost(handleHome))
 	r.GET("/schedule", handleHome)
 	r.GET("/passport", handlePassport)
@@ -275,7 +277,7 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		},
 		CheckoutPageURL: "/checkout",
 	}
-	defer display(ctx, w, "home", page)
+	defer display(ctx, w, "home-v2", page)
 	email := req.FormValue("email")
 	if email == "" {
 		email = params.ByName("email")
@@ -352,7 +354,7 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 		},
 		CheckoutPageURL: "/checkout",
 	}
-	defer display(ctx, w, "home", page)
+	defer display(ctx, w, "home-v2", page)
 	email := req.FormValue("email")
 	if email == "" {
 		email = params.ByName("email")
@@ -397,6 +399,15 @@ func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Para
 	displayHome(w, req, params, page)
 }
 
+func handleHomeV2(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+	page := &homePage{
+		Page: Page{
+			ID: "home-v2",
+		},
+	}
+	displayHome(w, req, params, page)
+}
+
 func handleCampaignHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 	page := &homePage{
 		Page: Page{
@@ -420,12 +431,12 @@ func handlePassport(w http.ResponseWriter, req *http.Request, params httprouter.
 func displayHome(w http.ResponseWriter, req *http.Request, params httprouter.Params, page *homePage) {
 	ctx := appengine.NewContext(req)
 	if page.ID == "" {
-		page.ID = "home"
+		page.ID = "home-v2"
 	}
 	if page.CheckoutPageURL == "" {
 		page.CheckoutPageURL = "/checkout"
 	}
-	defer display(ctx, w, "home", page)
+	defer display(ctx, w, page.ID, page)
 }
 
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
