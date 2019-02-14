@@ -10,8 +10,8 @@ package geofence
 //
 // Driver geofence should look like:
 // type Geofence struct {
-// 	ID           : common.location.String(),
-// 	Name         : common.location.String(),
+// 	ID           : UserID,
+// 	Name         : User Full Name,
 // 	Type         : geofence.ServiceZone,
 // 	Points       : []Point,
 // }
@@ -109,6 +109,9 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 func (c *Client) UpdateGeofence(ctx context.Context, fence *Geofence) error {
 	if fence.ID == "" {
 		return errBadRequest.Annotate("id is empty")
+	}
+	if string(fence.Type) == "" {
+		return errBadRequest.Annotate("type no set")
 	}
 	polygon := NewPolygon(fence.Points)
 	if !polygon.IsClosed() {

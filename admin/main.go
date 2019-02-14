@@ -88,7 +88,7 @@ func main() {
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
 	// Zone
-	// http.HandleFunc("/admin/api/v1/UpdateGeofence", handler(s.UpdateGeofence))
+	http.HandleFunc("/admin/api/v1/UpdateGeofence", s.handler(s.userAdmin(s.UpdateGeofence)))
 	// **********************
 	// Culture Executions
 	// **********************
