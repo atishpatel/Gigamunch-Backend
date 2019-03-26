@@ -39,7 +39,7 @@ func addTemplateRoutes(r *httprouter.Router) {
 	r.GET("/terms", handleTerms)
 	r.GET("/privacy", handlePrivacy)
 	r.GET("/checkout", handleCheckout)
-	r.GET("/gift-checkout", handleGiftCheckout)
+	// r.GET("/gift-checkout", handleGiftCheckout)
 	r.GET("/scheduleform/:email", handleCheckout)
 	r.GET("/scheduleform", handleCheckout)
 	r.GET("/checkout-thank-you", handleCheckoutThankYou)
