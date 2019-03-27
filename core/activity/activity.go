@@ -28,6 +28,8 @@ const (
 	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
 	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
 	updateRefundedStatement                  = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
+	skipStatement                            = "UPDATE activity SET skip=1 WHERE date=? AND email=?"
+	unskipStatement                          = "UPDATE activity SET skip=0,active=1 WHERE date=? AND email=?"
 	insertStatement                          = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 	deleteFutureStatment                     = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
 	// TODO: switch to user id
@@ -319,6 +321,8 @@ func (c *Client) RefundAndSkip(date time.Time, email string, amount float32, pre
 // Skip skips a subscriber for an activity.
 func (c *Client) Skip(date time.Time, email, reason string) error {
 	// TODO: Reimplement
+
+	// TODO: Requires discount to be in a seperate table
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
 	return suboldC.Skip(date, email, reason)
 }
@@ -326,6 +330,13 @@ func (c *Client) Skip(date time.Time, email, reason string) error {
 // Unskip unskips a subscriber for an activity.
 func (c *Client) Unskip(date time.Time, email string) error {
 	// TODO: Reimplement
+
+	// TODO: Requires discount to be in a seperate table
+	// _, err = c.sqlDB.ExecContext(c.ctx, unskipStatement, date.Format(DateFormat), email)
+	// if err != nil {
+	// 	return errSQLDB.WithError(err).Wrap("failed to execute unskipStatement")
+	// }
+
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
 	return suboldC.Unskip(date, email)
 }

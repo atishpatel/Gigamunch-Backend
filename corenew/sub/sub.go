@@ -715,6 +715,14 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 	if err != nil {
 		return errors.Wrap("failed to sub.GetSubscriber", err)
 	}
+	sl, err := c.Get(date, subEmail)
+	if err != nil {
+		return errors.Wrap("failed to sub.Get", err)
+	}
+	if !sl.Skip {
+		// is already unskipped
+		return errInvalidParameter.WithMessage("User is already unskipped.")
+	}
 	st := fmt.Sprintf(deleteSubLogStatement, date.Format(dateFormat), subEmail)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
