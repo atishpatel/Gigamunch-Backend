@@ -103,7 +103,7 @@ func GetAddress(ctx context.Context, addressString, apt string) (*common.Address
 	if err != nil {
 		return nil, errMaps.WithError(err).Wrap("cannot get geopoint from address")
 	}
-	if len(mapsGeocodeResults) >= 1 || (mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated)) {
+	if len(mapsGeocodeResults) != 1 || (mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRooftop) && mapsGeocodeResults[0].Geometry.LocationType != string(maps.GeocodeAccuracyRangeInterpolated)) {
 		return nil, errInvalidParameter.WithMessage("Address is not valid. It must be a house address.")
 	}
 	location := mapsGeocodeResults[0].Geometry.Location

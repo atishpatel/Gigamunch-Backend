@@ -7,10 +7,14 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/maps"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
 // AddressFromPB Address From PB.
 func AddressFromPB(ctx context.Context, in *pbcommon.Address) (*common.Address, error) {
+	if in == nil {
+		return nil, errors.BadRequestError.WithMessage("Address is not valid.")
+	}
 	geopoint := common.GeoPoint{Latitude: in.Latitude, Longitude: in.Longitude}
 	if geopoint.Valid() && geopoint.Latitude != 0 && geopoint.Longitude != 0 {
 		return &common.Address{

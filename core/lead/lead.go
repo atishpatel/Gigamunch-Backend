@@ -16,8 +16,9 @@ import (
 
 // Errors
 var (
-	errDatastore = errors.InternalServerError
-	errInternal  = errors.InternalServerError
+	errDatastore  = errors.InternalServerError
+	errInternal   = errors.InternalServerError
+	errBadRequest = errors.BadRequestError
 )
 
 // Client is a client for manipulating activity.
@@ -49,6 +50,9 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, serverIn
 
 // Create creates or updates a business lead.
 func (c *Client) Create(email string, signupURL ...string) error {
+	if !strings.Contains(email, "@") {
+		return errBadRequest.WithMessage("Invalid email")
+	}
 	lead := &Lead{
 		Email:           email,
 		CreatedDatetime: time.Now(),
