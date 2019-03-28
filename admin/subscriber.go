@@ -39,8 +39,9 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	subC := subold.New(ctx)
 	subs, err := subC.GetSubscribers(req.Emails)
 	if err != nil {
-		return errors.Annotate(err, "failed to subold.GetSubscribers")
+		return errors.Annotate(err, "failed to subold.GetSubscribers. No SMS was sent.")
 	}
+	var errs []error
 	for _, s := range subs {
 		if s.PhoneNumber == "" {
 			continue
@@ -56,7 +57,11 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		msg = strings.Replace(msg, emailDilm, s.Email, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
 		if err != nil {
-			return errors.Annotate(err, "failed ot message.SendSMS")
+			errs = append(errs, errors.Annotate(err, "failed to message.SendSMS To("+s.PhoneNumber+")"))
+			if log != nil {
+				log.Errorf(ctx, "failed to message.SendDeliverySMS To(%s): %+v", s.PhoneNumber, err)
+			}
+			continue
 		}
 		// log
 		if log != nil {
@@ -68,6 +73,9 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 			}
 			log.SubMessage(s.ID, s.Email, payload)
 		}
+	}
+	if len(errs) >= 1 {
+		return errors.GetErrorWithCode(errs[0]).Annotatef("errors count: %d", len(errs))
 	}
 	return nil
 }
