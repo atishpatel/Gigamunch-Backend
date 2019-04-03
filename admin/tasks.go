@@ -41,39 +41,26 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 	return nil
 }
 
-// func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-// 	req := struct {
-// 		Hours int `json:"hours"`
-// 	}{}
-// 	_ = decodeRequest(ctx, r, &req)
-// 	if req.Hours == 0 {
-// 		req.Hours = 48
-// 	}
-// 	in2days := time.Now().Add(time.Duration(req.Hours) * time.Hour)
-// 	subC, _ := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-// 	err := subC.SetupActivities(in2days)
-// 	if err != nil {
-// 		utils.Criticalf(ctx, "failed to sub.SetupActivities(Date:%v). Err:%+v", in2days, err)
-// 	}
-// 	return nil
-// }
-
 // SetupTags sets up tags for culture preview email and culture email 2 weeks in advance.
 func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
-	// TODO: MONDAY FIX
 	nextCultureDate := time.Now().Add(time.Hour * 7 * 24)
 	for nextCultureDate.Weekday() != time.Monday {
 		nextCultureDate = nextCultureDate.Add(24 * time.Hour)
 	}
 	nextPreviewDate := nextCultureDate
+	nextCultureDateThursday := nextCultureDate.Add(time.Hour * 3 * 24)
+	for nextCultureDate.Weekday() != time.Monday {
+		nextCultureDate = nextCultureDate.Add(24 * time.Hour)
+	}
+	nextPreviewDateThursday := nextCultureDateThursday
 	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.NewClient")
 	}
 	mailReq := &mail.UserFields{
 		Email:   "atish@gigamunchapp.com",
-		AddTags: []mail.Tag{mail.GetCultureEmailTag(nextCultureDate), mail.GetPreviewEmailTag(nextPreviewDate)},
+		AddTags: []mail.Tag{mail.GetCultureEmailTag(nextCultureDate), mail.GetPreviewEmailTag(nextPreviewDate), mail.GetCultureEmailTag(nextCultureDateThursday), mail.GetPreviewEmailTag(nextPreviewDateThursday)},
 	}
 	err = mailC.UpdateUser(mailReq)
 	if err != nil {
