@@ -859,6 +859,7 @@ func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Cli
 	if !firstBagDate.IsZero() && time.Until(firstBagDate) < 0 {
 		return errInvalidParameter.WithMessage("First bag date must be after now")
 	}
+	// TODO: MONDAY FIX
 	if firstBagDate.IsZero() {
 		firstBagDate = time.Now().Add(4 * 24 * time.Hour)
 		for firstBagDate.Weekday() != time.Monday {

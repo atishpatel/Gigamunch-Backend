@@ -186,6 +186,7 @@ func UpdatePayment(ctx context.Context, r *http.Request) Response {
 
 // SubmitCheckout submits a checkout.
 func SubmitCheckout(ctx context.Context, r *http.Request) Response {
+	// TODO: MONDAY FIX DELETE CODE
 	var err error
 	req := new(pb.SubmitCheckoutReq)
 	// decode request
@@ -851,6 +852,7 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 	default:
 		servingsVegetarian = 4
 	}
+	// TODO: MONDAY FIX
 	firstBoxDate := time.Now().Add(81 * time.Hour)
 	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)

@@ -252,6 +252,7 @@ func (e *SubscriptionSignUp) GetSubscriber() *Subscriber {
 		ReferredPageOpens:     e.ReferredPageOpens,
 		Campaigns:             e.Campaigns,
 	}
+	// TODO: MONDAY FIX but mainly just move to core/sub
 	lastMonday := time.Now()
 	if e.SubscriptionDay == "" {
 		e.SubscriptionDay = time.Monday.String()

@@ -193,6 +193,7 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 
 	date := req.FormResponse.SubmittedAt.Add(time.Hour * -5)
+	// TODO: MONDAY FIX
 	skipDate := date
 	for skipDate.Weekday() != time.Monday {
 		skipDate = skipDate.Add(time.Hour * 24)

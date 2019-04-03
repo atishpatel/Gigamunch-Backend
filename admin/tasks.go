@@ -61,6 +61,7 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 // SetupTags sets up tags for culture preview email and culture email 2 weeks in advance.
 func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
+	// TODO: MONDAY FIX
 	nextCultureDate := time.Now().Add(time.Hour * 7 * 24)
 	for nextCultureDate.Weekday() != time.Monday {
 		nextCultureDate = nextCultureDate.Add(24 * time.Hour)

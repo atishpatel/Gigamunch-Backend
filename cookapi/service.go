@@ -332,6 +332,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	if !common.IsProd(projectID) {
 		return
 	}
+	// TODO: MONDAY FIX
 	cultureDate := time.Now()
 	for cultureDate.Weekday() != time.Monday {
 		cultureDate = cultureDate.Add(24 * time.Hour)
