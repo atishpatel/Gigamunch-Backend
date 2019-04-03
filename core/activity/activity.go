@@ -86,6 +86,7 @@ func (c *Client) Get(date time.Time, idOrEmail string) (*Activity, error) {
 		err = c.sqlDB.GetContext(c.ctx, act, selectActivityByUserIDStatement, date.Format(DateFormat), idOrEmail)
 	}
 	if err != nil {
+		// TODO: Wrap with errSQL
 		return nil, errors.Annotate(err, "failed to selectActivity")
 	}
 	return act, nil

@@ -13,7 +13,11 @@ type Discount struct {
 	FirstName       string    `json:"first_name" db:"first_name"`
 	LastName        string    `json:"last_name" db:"last_name"`
 	DateUsed        string    `json:"date_used" db:"date_used"`
-	Used            bool      `json:"used" db:"used"`
 	DiscountAmount  float32   `json:"discount_amount" db:"discount_amount"`
 	DiscountPercent int8      `json:"discount_percent" db:"discount_percent"`
+}
+
+// IsUsed returns if discount is used.
+func (d *Discount) IsUsed() bool {
+	return d.DateUsed != "0000-00-00"
 }
