@@ -68,7 +68,7 @@
           padding: 12px;
           z-index: 1000;
           position: absolute;
-          box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
         }
 
       </style>
@@ -188,6 +188,7 @@
       <p>How long people are with us based on week. This doesn't account for skip at all.</p>
       <div id="weeklyCohortByBagTypeChart"
            class="chart"></div>
+
       <h2>Bag Breakdown</h2>
       <div class="table-container-inline">
         <div class="table">
@@ -233,6 +234,36 @@
                 <div class="table-cell">[[bd.count]]</div>
                 <div class="table-cell">[[bd.active_count]]</div>
               </div>
+            </template>
+          </dom-repeat>
+        </div>
+      </div>
+
+      <h2>Churn Breakdown</h2>
+      <div class="table-container">
+        <div class="table">
+          <div class="table-row table-header-row">
+            <div class="table-cell"></div>
+            <div class="table-cell">Start Subs</div>
+            <dom-repeat items="[[churn_summary.0.churn_groups]]"
+                        as="cg">
+              <template>
+                <div class="table-cell">[[cg.label]]</div>
+              </template>
+            </dom-repeat>
+          </div>
+          <dom-repeat items="[[churn_summary]]"
+                      as="churn">
+            <template>
+              <div class="table-row">
+                <div class="table-cell table-header-row">[[churn.label]]</div>
+                <div class="table-cell table-header-row">[[churn.subs_at_time]]</div>
+                <dom-repeat items="[[churn.churn_groups]]"
+                            as="cg">
+                  <template>
+                    <div class="table-cell">[[cg.churn]] %</div>
+                  </template>
+                </dom-repeat>
             </template>
           </dom-repeat>
         </div>
@@ -320,6 +351,9 @@
           bag_price_break_down: {
             type: Array,
           },
+          churn_summary: {
+            type: Array,
+          }
         }
       }
 
@@ -397,6 +431,9 @@
             });
           }
           this.bag_price_break_down = resp.bag_price_break_down;
+          if (resp.monthly_churn) {
+            this.churn_summary = resp.monthly_churn.churn_list;
+          }
           // cohorts
           this.weeklyCohort = resp.weekly_cohort_analysis;
           this.weeklyCohortArray.push(resp.weekly_cohort_analysis, resp.projected_weekly_cohort_analysis);

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -60,6 +61,29 @@ type CohortAnalysisSummary struct {
 	Summary []*CohortSummary `json:"summary"`
 }
 
+type ChurnWithWeeksRetained struct {
+	Label         string  `json:"label"`
+	Operator      string  `json:"operator"`
+	WeeksRetained int     `json:"weeks_retained"`
+	Churn         float32 `json:"churn"`
+	CancelNum     int     `json:"cancel_num"`
+}
+
+type ChurnSummary struct {
+	Label       string                    `json:"label"`
+	Month       time.Month                `json:"month"`
+	Year        int                       `json:"year"`
+	MonthStart  time.Time                 `json:"month_start"`
+	MonthEnd    time.Time                 `json:"month_end"`
+	SubsAtTime  int                       `json:"subs_at_time"`
+	ChurnGroups []*ChurnWithWeeksRetained `json:"churn_groups"`
+}
+
+type ChurnAnalysisSummary struct {
+	ChurnList []*ChurnSummary `json:"churn_list"`
+	Interval  int16           `json:"interval,omitempty"`
+}
+
 type LTVHistogram struct {
 	AverageWeeks            float32   `json:"average_weeks,omitempty"`
 	AveragePaidWeeks        float32   `json:"average_paid_weeks,omitempty"`
@@ -105,6 +129,7 @@ type GetGeneralStatsResp struct {
 	BagTypeBreakDownActive        *BagTypeBreakDown      `json:"bag_type_break_down_active"`
 	BagPriceBreakDown             []*BagPriceBreakDown   `json:"bag_price_break_down"`
 	LifeTimeValue                 *LifeTimeValueSummary  `json:"life_time_value"`
+	MonthlyChurn                  *ChurnAnalysisSummary  `json:"monthly_churn"`
 	ErrorOnlyResp
 }
 
@@ -137,6 +162,7 @@ func (service *Service) GetGeneralStats(ctx context.Context, req *GetGeneralStat
 	}
 	resp.Activities = activities
 	resp.WeeklyCohortAnalysis = getWeeklyCohort(activities)
+	resp.MonthlyChurn = getMonthlyChurn(activities)
 	churn := getChurn(resp.WeeklyCohortAnalysis.Summary)
 	projectedActivites := projectActivites(ctx, activities, churn)
 	var activities2NonVeg []*subold.SublogSummary
@@ -279,13 +305,134 @@ func getWeeklyCohort(activities []*subold.SublogSummary) *CohortAnalysis {
 	return analysis
 }
 
+func getMonthlyChurn(activities []*subold.SublogSummary) *ChurnAnalysisSummary {
+	analysis := &ChurnAnalysisSummary{
+		Interval: 30,
+	}
+	if len(activities) == 0 {
+		return analysis
+	}
+	const labelFormat = "%s-%d"
+	const dateFormat = "2006-01-02"
+	// fill out array
+	timeIndex := activities[0].MinDate
+	now := time.Now()
+
+	getMonthString := func(m time.Month) string {
+		if m < 10 {
+			return fmt.Sprintf("0%d", m)
+		}
+		return fmt.Sprintf("%d", m)
+	}
+
+	for timeIndex.Before(now) {
+		monthStart, _ := time.Parse(dateFormat, fmt.Sprintf("%d-%s-01", timeIndex.Year(), getMonthString(timeIndex.Month())))
+		nextMonth := timeIndex.Month() + 1
+		nextYear := timeIndex.Year()
+		if int(nextMonth) > 12 {
+			nextYear++
+			nextMonth = time.January
+		}
+		tmp, _ := time.Parse(dateFormat, fmt.Sprintf("%d-%s-01", nextYear, getMonthString(nextMonth)))
+		monthEnd := tmp.Add(-1 * 24 * time.Hour)
+
+		row := &ChurnSummary{
+			Label:      fmt.Sprintf(labelFormat, timeIndex.Month().String(), timeIndex.Year()),
+			Month:      timeIndex.Month(),
+			Year:       timeIndex.Year(),
+			MonthStart: monthStart,
+			MonthEnd:   monthEnd,
+		}
+
+		row.ChurnGroups = []*ChurnWithWeeksRetained{
+			&ChurnWithWeeksRetained{
+				Label:         ">0",
+				Operator:      ">",
+				WeeksRetained: 0,
+			},
+			&ChurnWithWeeksRetained{
+				Label:         "<=4",
+				Operator:      "<",
+				WeeksRetained: 5,
+			},
+			&ChurnWithWeeksRetained{
+				Label:         ">4",
+				Operator:      ">",
+				WeeksRetained: 4,
+			},
+			&ChurnWithWeeksRetained{
+				Label:         "<=12",
+				Operator:      "<",
+				WeeksRetained: 13,
+			},
+			&ChurnWithWeeksRetained{
+				Label:         ">12",
+				Operator:      ">",
+				WeeksRetained: 12,
+			},
+			&ChurnWithWeeksRetained{
+				Label:         "<=20",
+				Operator:      "<",
+				WeeksRetained: 21,
+			},
+			&ChurnWithWeeksRetained{
+				Label:         ">20",
+				Operator:      ">",
+				WeeksRetained: 20,
+			},
+		}
+
+		analysis.ChurnList = append(analysis.ChurnList, row)
+		// next month
+		m := timeIndex.Month()
+		for timeIndex.Month() == m {
+			timeIndex = timeIndex.Add(time.Hour * 7 * 24)
+		}
+	}
+
+	for _, activity := range activities {
+		for _, monthAnalysis := range analysis.ChurnList {
+			if activity.MinDate.Before(monthAnalysis.MonthStart) && activity.MaxDate.After(monthAnalysis.MonthStart) {
+				// was sub at start of month
+				monthAnalysis.SubsAtTime++
+				if monthAnalysis.MonthStart.After(activity.MinDate) && monthAnalysis.MonthStart.Before(activity.MaxDate) && monthAnalysis.MonthEnd.After(activity.MaxDate) {
+					// canceled between this month
+					for _, a := range monthAnalysis.ChurnGroups {
+						if a.Operator == "" {
+							a.CancelNum++
+						} else if a.Operator == "<" {
+							if activity.NumTotal < a.WeeksRetained {
+								a.CancelNum++
+							}
+						} else if a.Operator == ">" {
+							if activity.NumTotal > a.WeeksRetained {
+								a.CancelNum++
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for _, month := range analysis.ChurnList {
+		for _, churnGroup := range month.ChurnGroups {
+			if month.SubsAtTime > 0 {
+				churnGroup.Churn = (float32(churnGroup.CancelNum) / float32(month.SubsAtTime)) * 100.0
+			}
+		}
+	}
+
+	return analysis
+}
+
 func getChurn(summaries []*CohortSummary) float32 {
 	var totalChurn float32
 	var totalCount float32
 	for i := 0; i < len(summaries)-2; i++ {
 		weekChurn := summaries[i].AverageRetention - summaries[i+1].AverageRetention
 		totalChurn += weekChurn
-		totalCount += 1
+		totalCount++
 		if i >= 10 || weekChurn < .01 {
 			break
 		}
