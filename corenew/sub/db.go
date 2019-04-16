@@ -1,10 +1,5 @@
 package sub
 
-import (
-	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
-)
-
 const (
 	kindSubscriptionSignUp = "ScheduleSignUp"
 )
@@ -39,30 +34,30 @@ const (
 // 	return dst, nil
 // }
 
-func oldput(ctx context.Context, id string, i *SubscriptionSignUp) error {
-	var err error
-	// process entity
-	if i.RawPhoneNumber == "" && i.PhoneNumber != "" {
-		i.UpdatePhoneNumber(i.PhoneNumber)
-	}
-	// end process
-	key := datastore.NewKey(ctx, kindSubscriptionSignUp, id, 0, nil)
-	_, err = datastore.Put(ctx, key, i)
-	return err
-}
+// func oldput(ctx context.Context, id string, i *SubscriptionSignUp) error {
+// 	var err error
+// 	// process entity
+// 	if i.RawPhoneNumber == "" && i.PhoneNumber != "" {
+// 		i.UpdatePhoneNumber(i.PhoneNumber)
+// 	}
+// 	// end process
+// 	key := datastore.NewKey(ctx, kindSubscriptionSignUp, id, 0, nil)
+// 	_, err = datastore.Put(ctx, key, i)
+// 	return err
+// }
 
 // func Put(ctx context.Context, id string, i *SubscriptionSignUp) error {
 // 	return put(ctx, id, i)
 // }
 
-func oldputMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
-	keys := make([]*datastore.Key, len(subs))
-	for i := range subs {
-		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
-	}
-	_, err := datastore.PutMulti(ctx, keys, subs)
-	return err
-}
+// func oldputMulti(ctx context.Context, subs []*SubscriptionSignUp) error {
+// 	keys := make([]*datastore.Key, len(subs))
+// 	for i := range subs {
+// 		keys[i] = datastore.NewKey(ctx, kindSubscriptionSignUp, subs[i].Email, 0, nil)
+// 	}
+// 	_, err := datastore.PutMulti(ctx, keys, subs)
+// 	return err
+// }
 
 // // getSubscribersByPhoneNumber returns the subscribers via phone number.
 // func getSubscribersByPhoneNumber(ctx context.Context, number string) ([]*SubscriptionSignUp, error) {
