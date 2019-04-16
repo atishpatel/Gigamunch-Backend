@@ -652,11 +652,19 @@ func (c *Client) RequestError(r *http.Request, ewc errors.ErrorWithCode) {
 	}
 	c.Log(e)
 	if c.sdReporter != nil {
-		c.sdReporter.Report(sdreporting.Entry{
-			Error: fmt.Errorf("request error: %v", ewc),
-			Req:   r,
-			User:  e.UserEmail,
-		})
+		if ewc.Code >= 400 && ewc.Code < 500 {
+			c.sdReporter.Report(sdreporting.Entry{
+				Error: fmt.Errorf("req bad: %v", ewc),
+				Req:   r,
+				User:  e.UserEmail,
+			})
+		} else {
+			c.sdReporter.Report(sdreporting.Entry{
+				Error: fmt.Errorf("req err: %v", ewc),
+				Req:   r,
+				User:  e.UserEmail,
+			})
+		}
 	}
 }
 

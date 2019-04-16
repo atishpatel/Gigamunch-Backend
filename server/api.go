@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
+	"github.com/jmoiron/sqlx"
 
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbserver"
@@ -383,9 +385,9 @@ func SubmitCheckout(ctx context.Context, r *http.Request) Response {
 		utils.Criticalf(ctx, "Failed to setup free sub box for new sign up(%s) for date(%v). Err:%v", req.Email, firstBoxDate, err)
 	}
 	if !strings.Contains(req.Email, "test.com") {
-		log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/api/SubmitCheckout")
+		log, serverInfo, _, _, err := setupAll(ctx, "/api/SubmitCheckout")
 		if err != nil {
-			return errors.Wrap("failed to setupLoggingAndServerInfo", err)
+			return errors.Wrap("failed to setupAll", err)
 		}
 		mailC, err := mail.NewClient(ctx, log, serverInfo)
 		mailReq := &mail.UserFields{
@@ -792,21 +794,29 @@ func DeviceCheckin(ctx context.Context, r *http.Request) Response {
 	return resp
 }
 
-func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {
+func setupAll(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, *sqlx.DB, error) {
 	dbC, err := db.NewClient(ctx, projID, nil)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get database client: %+v", err)
+		return nil, nil, nil, nil, fmt.Errorf("failed to get database client: %+v", err)
 	}
 	// Setup logging
 	serverInfo := &common.ServerInfo{
 		ProjectID:           projID,
 		IsStandardAppEngine: true,
 	}
-	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
+	log, err := logging.NewClient(ctx, "server", path, dbC, serverInfo)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
-	return log, serverInfo, dbC, nil
+	sqlConnectionString := os.Getenv("MYSQL_CONNECTION")
+	if sqlConnectionString == "" {
+		return nil, nil, nil, nil, fmt.Errorf(`You need to set the environment variable "MYSQL_CONNECTION"`)
+	}
+	sqlDB, err := sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
+	if err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("failed to get sql database client: %+v", err)
+	}
+	return log, serverInfo, dbC, sqlDB, nil
 }
 
 // SubmitCheckoutv2 submits a checkout.

@@ -138,8 +138,8 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request, _ httpr
 		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
 		return
 	}
-	log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/process-subscription")
-	activityC, _ := activity.NewClient(ctx, log, db, nil, serverInfo)
+	log, serverInfo, db, sqlDB, _ := setupAll(ctx, "/process-subscription")
+	activityC, _ := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = activityC.Process(parms.Date, parms.SubEmail)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
@@ -152,8 +152,8 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request, _ httpr
 func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 	in2days := time.Now().Add(48 * time.Hour)
-	log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/process-subscribers")
-	subC, _ := subnew.NewClient(ctx, log, db, nil, serverInfo)
+	log, serverInfo, db, sqlDB, _ := setupAll(ctx, "/process-subscribers")
+	subC, _ := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err := subC.SetupActivities(in2days)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.SetupSubLogs(Date:%v). Err:%+v", in2days, err)

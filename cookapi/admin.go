@@ -28,11 +28,11 @@ import (
 )
 
 func getUserFromRequest(ctx context.Context, req validatableTokenReq) (*common.User, error) {
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi")
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to setupLoggingAndServerInfo")
 	}
-	authC, err := authnew.NewClient(ctx, log, db, nil, serverInfo)
+	authC, err := authnew.NewClient(ctx, log, db, sqlDB, serverInfo)
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to get auth.NewClient")
 	}
@@ -204,7 +204,7 @@ func (service *Service) SendCustomerSMS(ctx context.Context, req *SendCustomerSM
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-	log, _, _, _ := setupLoggingAndServerInfo(ctx, "/cookapi/api/SendCusomterSMS")
+	log, _, _, _, _ := setupAll(ctx, "/cookapi/api/SendCusomterSMS")
 	dilm := "{{name}}"
 	// if !strings.Contains(req.Message, dilm) {
 	// 	resp.Err = errors.BadRequestError.WithMessage("Message requires {{name}}.")
@@ -305,13 +305,12 @@ func (service *Service) SetupSubLogs(ctx context.Context, req *DateReq) (*ErrorO
 		resp.Err = errors.BadRequestError.WithMessage("Date is before now.")
 		return resp, nil
 	}
-
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/setupsublogs")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/setupsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	subC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
+	subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = subC.SetupActivities(req.Date)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subnew.SetupActivities")
@@ -334,12 +333,12 @@ func (service *Service) ProcessSubLog(ctx context.Context, req *SubLogReq) (*Err
 		return resp, nil
 	}
 
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/processsublogs")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/processsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	activityC, err := activity.NewClient(ctx, log, db, nil, serverInfo)
+	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = activityC.Process(req.Date, req.SubEmail)
 	// subC := subold.New(ctx)
 	// err = subC.Process(req.Date, req.SubEmail)
@@ -401,12 +400,12 @@ func (service *Service) SkipSubLog(ctx context.Context, req *SubLogReq) (*ErrorO
 		return resp, nil
 	}
 
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/skipsublogs")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/skipsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	activityC, err := activity.NewClient(ctx, log, db, nil, serverInfo)
+	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = activityC.Skip(req.Date, req.SubEmail, "Admin skip.")
 
 	// subC := subold.New(ctx)
@@ -439,12 +438,12 @@ func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogR
 		return resp, nil
 	}
 
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/setupsublogs")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/setupsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	activityC, err := activity.NewClient(ctx, log, db, nil, serverInfo)
+	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = activityC.Discount(req.Date, req.SubEmail, req.Amount, req.Percent, req.OverrideDiscount)
 
 	// subC := subold.New(ctx)
@@ -476,12 +475,12 @@ func (service *Service) ChangeServingsPermanently(ctx context.Context, req *Chan
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/ChangeServingsPermanently")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/ChangeServingsPermanently")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	subC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
+	subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian)
 	// subC := subold.New(ctx)
 	// err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian, log, serverInfo)
@@ -512,12 +511,12 @@ func (service *Service) UpdatePaymentMethodToken(ctx context.Context, req *Updat
 		return resp, nil
 	}
 
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/setupsublogs")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/setupsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	subC, err := subnew.NewClient(ctx, log, db, nil, serverInfo)
+	subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = subC.UpdatePaymentToken(req.Email, req.PaymentMethodToken)
 	// subC := subold.New(ctx)
 	// err = subC.UpdatePaymentToken(req.Email, req.PaymentMethodToken)
@@ -548,12 +547,12 @@ func (service *Service) ChangeServingsForDate(ctx context.Context, req *ChangeSe
 		return resp, nil
 	}
 
-	log, serverInfo, db, err := setupLoggingAndServerInfo(ctx, "/cookapi/setupsublogs")
+	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/setupsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	activityC, err := activity.NewClient(ctx, log, db, nil, serverInfo)
+	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = activityC.ChangeServings(req.Date, req.SubEmail, req.Servings, subold.DerivePrice(req.Servings))
 
 	// subC := subold.New(ctx)
@@ -765,22 +764,6 @@ func (e *SendEmailReq) GetFirstDinnerDate() time.Time {
 	return e.FirstDinnerDate
 }
 
-func setupLoggingAndServerInfo(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, error) {
-	dbC, err := db.NewClient(ctx, projectID, nil)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get database client: %+v", err)
-	}
-	// Setup logging
-	serverInfo := &common.ServerInfo{
-		ProjectID:           projectID,
-		IsStandardAppEngine: true,
-	}
-	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	return log, serverInfo, dbC, nil
-}
 func setupAll(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, common.DB, *sqlx.DB, error) {
 	dbC, err := db.NewClient(ctx, projectID, nil)
 	if err != nil {

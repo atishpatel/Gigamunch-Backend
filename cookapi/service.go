@@ -547,7 +547,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	logging.Infof(ctx, "Params: %+v", params)
 
 	subC := sub.New(ctx)
-	log, serverInfo, _, err := setupLoggingAndServerInfo(ctx, "/cookapi/UpdateDrip")
+	log, serverInfo, _, _, err := setupAll(ctx, "/cookapi/UpdateDrip")
 	if err != nil {
 		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
 		return

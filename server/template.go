@@ -135,7 +135,7 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 		logging.Infof(ctx, "email: %s", email)
 
 		// save lead
-		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/checkout")
+		log, serverInfo, db, _, _ := setupAll(ctx, "/checkout")
 		leadC, err := lead.NewClient(ctx, log, db, serverInfo)
 		if err != nil {
 			log.Errorf(ctx, "failed to lead.NewClient: %+v", err)
@@ -257,8 +257,8 @@ func handleReferral(w http.ResponseWriter, req *http.Request, params httprouter.
 			page.FirstName = getFirstName(s.Name)
 		}
 		// increase page count
-		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/referral")
-		subC, err := sub.NewClient(ctx, log, db, nil, serverInfo)
+		log, serverInfo, db, sqlDB, _ := setupAll(ctx, "/referral")
+		subC, err := sub.NewClient(ctx, log, db, sqlDB, serverInfo)
 		if err == nil {
 			err = subC.IncrementPageCount(email, 1, 0)
 			if err != nil {
@@ -275,9 +275,8 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 			ID:           "referred",
 			CampaignName: "Referred",
 		},
-		CheckoutPageURL: "/checkout",
 	}
-	defer display(ctx, w, "home-v2", page)
+	defer displayHome(w, req, params, page)
 	email := req.FormValue("email")
 	if email == "" {
 		email = params.ByName("email")
@@ -303,8 +302,8 @@ func handleReferred(w http.ResponseWriter, req *http.Request, params httprouter.
 		page.ReferenceEmail = entry.Email
 
 		// increase page count
-		log, serverInfo, db, _ := setupLoggingAndServerInfo(ctx, "/referred")
-		subC, err := sub.NewClient(ctx, log, db, nil, serverInfo)
+		log, serverInfo, db, sqlDB, _ := setupAll(ctx, "/referred")
+		subC, err := sub.NewClient(ctx, log, db, sqlDB, serverInfo)
 		if err == nil {
 			err = subC.IncrementPageCount(email, 0, 1)
 			if err != nil {
@@ -352,9 +351,8 @@ func handleGifted(w http.ResponseWriter, req *http.Request, params httprouter.Pa
 			ID:           "gifted",
 			CampaignName: "Gifted",
 		},
-		CheckoutPageURL: "/checkout",
 	}
-	defer display(ctx, w, "home-v2", page)
+	defer displayHome(w, req, params, page)
 	email := req.FormValue("email")
 	if email == "" {
 		email = params.ByName("email")
@@ -436,7 +434,7 @@ func displayHome(w http.ResponseWriter, req *http.Request, params httprouter.Par
 	if page.CheckoutPageURL == "" {
 		page.CheckoutPageURL = "/checkout"
 	}
-	defer display(ctx, w, page.ID, page)
+	defer display(ctx, w, "home-v2", page)
 }
 
 func handleLogin(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
