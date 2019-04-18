@@ -50,9 +50,6 @@ func (s *server) SetupTags(ctx context.Context, w http.ResponseWriter, r *http.R
 	}
 	nextPreviewDate := nextCultureDate
 	nextCultureDateThursday := nextCultureDate.Add(time.Hour * 3 * 24)
-	for nextCultureDate.Weekday() != time.Monday {
-		nextCultureDate = nextCultureDate.Add(24 * time.Hour)
-	}
 	nextPreviewDateThursday := nextCultureDateThursday
 	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
 	if err != nil {
