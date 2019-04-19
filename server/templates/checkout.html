@@ -184,16 +184,20 @@
       .checkout-section {
         flex-direction: column;
       }
+
       .checkout-trust {
         flex: 1;
       }
+
       .checkout-trust-security-item {
         flex-direction: row;
         padding: 8px 0;
       }
+
       .checkout-trust-security-image img {
         margin: 0 12px 0 12px;
       }
+
       .checkout-form-container {
         flex: 3;
         border-top: solid #e1e1e1 1px;
@@ -488,6 +492,7 @@
     }
 
     @media (max-width: 500px) {
+
       .select-package-container-button,
       .select-package-container ul li:last-child .select-package-container-button,
       .select-package-container ul li:last-child .select-package-container-button {
@@ -657,7 +662,7 @@
                 <i class="fa fa-check checkout-trust-list-check"
                    aria-hidden="true"></i>
                 <div class="checkout-trust-list-text">
-                  A hassle free Monday
+                  A hassle free Thursday or Monday
                 </div>
               </li>
               <li class="checkout-trust-list-item">
@@ -862,7 +867,7 @@
             </div>
 
             <div class="form-section-desc">
-              Every Monday, you will get a bag that will take you on a new journey! How do you want your journey to be?
+              Every Thursday or Monday, you will get a bag that will take you on a new journey! How do you want your journey to be?
             </div>
             <br>
             <div class="select-input-group">
@@ -874,7 +879,7 @@
                     <option selected value="Monday">Monday</option>
                   </select>
             </div>
-            <div class="form-section-note">*Deliveries are only offered on Monday nights for now.</div>
+            <div class="form-section-note">*Deliveries are only offered on Thursday or Monday nights for now.</div>
             <div id="meal-selector"
                  class="select-package-container">
               <ul>
@@ -1349,34 +1354,73 @@
     document.getElementById('meal-option-3').addEventListener('change', updateOrderInfo);
 
     function generateDeliveryDays() {
-      var d = new Date();
-      d.setTime(d.getTime() + (24 * 4 + 8) * 3600 * 1000); // Thursday at 4 PM
-      while (d.getDay() !== 1) { // while not Monday
-        d.setDate(d.getDate() + 1);
-      }
-
-      var days = [];
-      for (var i = 0; i <= 5; d.setDate(d.getDate() + 7)) {
+      var weekday = new Array(7);
+      weekday[0] = "Sunday";
+      weekday[1] = "Monday";
+      weekday[2] = "Tuesday";
+      weekday[3] = "Wednesday";
+      weekday[4] = "Thursday";
+      weekday[5] = "Friday";
+      weekday[6] = "Saturday";
+      var getDisplayDate = function(d) {
         var dayArray = d.toString().split(' ');
         var display = d.toLocaleDateString();
         if (dayArray.length > 3) {
           display = dayArray[1] + ' ' + dayArray[2];
         }
-        // TODO: comment out after Dec 25, 2018
-        if (d.getMonth() === 11 && d.getDate() === 24) {
+        return display + ' - ' + weekday[d.getDay()];
+      }
+
+      var d = new Date();
+      d.setTime(d.getTime() + (24 * 4 + 8) * 3600 * 1000); // 4 days and 8 hours buffer - 4 PM
+
+      var mondays = [];
+      var thursdays = [];
+      var i = 0;
+      while (i <= 7) {
+        d.setDate(d.getDate() + 1);
+        if (d.getDay() !== 1 && d.getDay() !== 4) {
           continue;
         }
-        if (d.getMonth() === 0 && d.getDate() === 7) {
-          display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
-        }
-        // end TODO
         var day = {
-          display: display,
+          display: getDisplayDate(d),
           value: d.toISOString(),
-        };
-        days.push(day);
+          date: new Date(d),
+        }
+
+        // Holiday skip date code - Dec 25, 2018
+        // if (d.getMonth() === 11 && d.getDate() === 24) {
+        //   continue;
+        // }
+        // if (d.getMonth() === 0 && d.getDate() === 7) {
+        //   display = dayArray[1] + ' ' + dayArray[2] + ' - After Holidays';
+        // }
+        // end 
+
+        // TODO: remove after second day open up. remove after May 9
+        if ((d.getMonth() === 3 || d.getMonth() === 4) && (d.getDate() === 25 || d.getDate() === 2)) {
+          continue;
+        }
+        // TODO: end remove
+
+        if (d.getDay() === 1) {
+          mondays.push(day);
+        }
+        if (d.getDay() === 4) {
+          thursdays.push(day);
+        }
         i++;
       }
+      var days = [];
+      days.push(thursdays.shift());
+
+      var tmpArray = mondays.concat(thursdays);
+      tmpArray.sort(function(a, b) {
+        return a.date - b.date;
+      });
+
+      days = days.concat(tmpArray);
+
       var deliveryDayElement = document.getElementById('delivery-date');
       deliveryDayElement.innerHTML = '';
       for (var i = 0; i < days.length; i++) {

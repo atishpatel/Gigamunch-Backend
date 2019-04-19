@@ -188,6 +188,7 @@ type checkoutThankYouPage struct {
 	Page
 	FirstName         string
 	FirstDeliveryDate string
+	DayOfWeek         string
 }
 
 func handleCheckoutThankYou(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
@@ -210,6 +211,7 @@ func handleCheckoutThankYou(w http.ResponseWriter, req *http.Request, _ httprout
 		}
 		page.FirstName = entry.FirstName
 		page.FirstDeliveryDate = mail.DateString(entry.FirstBoxDate)
+		page.DayOfWeek = entry.SubscriptionDay
 	}
 }
 
