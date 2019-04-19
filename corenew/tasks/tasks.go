@@ -43,19 +43,21 @@ func New(ctx context.Context) *Client {
 
 // ProcessSubscriptionParams are the parms for ProcessSubscription.
 type ProcessSubscriptionParams struct {
-	SubEmail string
+	SubEmail string // Depecrated
+	UserID   string
 	Date     time.Time
 }
 
 // AddProcessSubscription adds a process subscription at specified time.
 func (c *Client) AddProcessSubscription(at time.Time, req *ProcessSubscriptionParams) error {
-	if req.SubEmail == "" || req.Date.IsZero() {
+	if req.UserID == "" || req.Date.IsZero() {
 		return errInvalidParameter.Wrapf("expected(recieved): email(%s) date(%s)", req.SubEmail, req.Date.String())
 	}
 	h := make(http.Header)
 	h.Set("Content-Type", "application/x-www-form-urlencoded")
 	v := url.Values{}
 	v.Set("sub_email", req.SubEmail)
+	v.Set("user_id", req.UserID)
 	d, err := req.Date.MarshalText()
 	if err != nil {
 		return errInvalidParameter.WithError(err).Wrap("failed to req.Date.MarshalText")
@@ -77,7 +79,8 @@ func (c *Client) AddProcessSubscription(at time.Time, req *ProcessSubscriptionPa
 
 // UpdateDripParams are the parms for UpdateDrip.
 type UpdateDripParams struct {
-	Email string
+	UserID string
+	Email  string
 }
 
 // AddUpdateDrip adds a process subscription at specified time.
@@ -90,6 +93,7 @@ func (c *Client) AddUpdateDrip(at time.Time, req *UpdateDripParams) error {
 	h.Set("Content-Type", "application/x-www-form-urlencoded")
 	v := url.Values{}
 	v.Set("email", req.Email)
+	v.Set("user_id", req.UserID)
 	task := &taskqueue.Task{
 		Path:    UpdateDripURL,
 		Payload: []byte(v.Encode()),
@@ -113,6 +117,7 @@ func ParseUpdateDripRequest(req *http.Request) (*UpdateDripParams, error) {
 	}
 	parms := new(UpdateDripParams)
 	parms.Email = req.FormValue("email")
+	parms.UserID = req.FormValue("user_id")
 	if parms.Email == "" {
 		return nil, errParse.Wrapf("Invalid request for UpdateDrip. SubEmail: %s", parms.Email)
 	}
@@ -127,7 +132,8 @@ func ParseProcessSubscriptionRequest(req *http.Request) (*ProcessSubscriptionPar
 	}
 	parms := new(ProcessSubscriptionParams)
 	parms.SubEmail = req.FormValue("sub_email")
-	if parms.SubEmail == "" {
+	parms.UserID = req.FormValue("user_id")
+	if parms.SubEmail == "" && parms.UserID == "" {
 		return nil, errParse.Wrapf("Invalid request for ProcessSubscription. SubEmail: %s", parms.SubEmail)
 	}
 	dateString := req.FormValue("date")

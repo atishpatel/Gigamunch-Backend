@@ -63,9 +63,9 @@ func main() {
 	addTemplateRoutes(r)
 	// route api
 	http.HandleFunc("/api/v1/Login", s.handler(s.Login))
-	http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
+	// http.HandleFunc("/api/v1/SubmitCheckout", handler(SubmitCheckout))
 	http.HandleFunc("/api/v2/SubmitCheckout", s.handler(s.SubmitCheckoutv2))
-	http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
+	// http.HandleFunc("/api/v1/SubmitGiftCheckout", handler(SubmitGiftCheckout))
 	http.HandleFunc("/api/v1/UpdatePayment", handler(UpdatePayment))
 	http.HandleFunc("/api/v1/DeviceCheckin", handler(DeviceCheckin))
 

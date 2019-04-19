@@ -57,3 +57,13 @@ type Activity struct {
 	Deviant       bool   `json:"deviant" db:"deviant"`
 	DeviantReason string `json:"deviant_reason" db:"deviant_reason"`
 }
+
+// DateParsed is Date as time.Time.
+func (act *Activity) DateParsed() time.Time {
+	var d time.Time
+	if act.Date == "" {
+		return d
+	}
+	d, _ = time.Parse(act.Date, DateFormat)
+	return d
+}

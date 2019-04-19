@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -87,7 +86,7 @@ func main() {
 	http.HandleFunc("/task/send-bag-reminder", handleSendBagReminder)
 	http.HandleFunc("/task/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/send-quantity-sms", handleSendQuantitySMS)
-	http.HandleFunc("/webhook/twilio-sms", handleTwilioSMS)
+	// http.HandleFunc("/webhook/twilio-sms", handleTwilioSMS)
 	http.HandleFunc("/testbra", testbra)
 	api, err := endpoints.RegisterService(&Service{}, "cookservice", "v1", "An endpoint service for cooks.", true)
 	if err != nil {
@@ -332,9 +331,8 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	if !common.IsProd(projectID) {
 		return
 	}
-	// TODO: MONDAY FIX
 	cultureDate := time.Now()
-	for cultureDate.Weekday() != time.Monday {
+	for cultureDate.Weekday() != time.Monday || cultureDate.Weekday() != time.Thursday {
 		cultureDate = cultureDate.Add(24 * time.Hour)
 	}
 	subC := sub.New(ctx)
@@ -489,53 +487,54 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 				}
 				utils.Infof(ctx, "notifed %s(%s)", sub.Name, sub.PhoneNumber)
 				// TODO: move to admin api
+				log, _, _, _, _ := setupAll(ctx, "/send-bag-reminder")
 
-				// if log != nil {
-				// 	payload := &logging.MessagePayload{
-				// 		Platform: "SMS",
-				// 		Body:     msg,
-				// 		From:     "Gigamunch",
-				// 		To:       sub.PhoneNumber,
-				// 	}
-				// 	log.SubMessage(s.ID, s.Email, payload)
-				// }
+				if log != nil {
+					payload := &logging.MessagePayload{
+						Platform: "SMS",
+						Body:     msg,
+						From:     "Gigamunch",
+						To:       sub.PhoneNumber,
+					}
+					log.SubMessage(sub.ID, sub.Email, payload)
+				}
 			}
 		}
 	}
 
 }
 
-func handleTwilioSMS(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	err := req.ParseForm()
-	utils.Infof(ctx, "req body: %s err: %s", req.Form, err)
-	from := req.FormValue("From")
-	l := len(from)
-	from = from[:l-7] + "-" + from[l-7:l-4] + "-" + from[l-4:]
-	body := req.FormValue("Body")
-	var name, email string
-	// TODO: auto get name and email
-	messageC := message.New(ctx)
-	if from == "+1615-545-4989" {
-		splitBody := strings.Split(body, "::")
-		if len(splitBody) < 2 {
-			return
-		}
-		err = messageC.SendDeliverySMS(splitBody[0], splitBody[1])
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to sub. Err: %+v", err)
-		}
-		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Message successfuly send to %s.", splitBody[0]))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
-		}
-	} else {
-		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
-		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
-		}
-	}
-}
+// func handleTwilioSMS(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	err := req.ParseForm()
+// 	utils.Infof(ctx, "req body: %s err: %s", req.Form, err)
+// 	from := req.FormValue("From")
+// 	l := len(from)
+// 	from = from[:l-7] + "-" + from[l-7:l-4] + "-" + from[l-4:]
+// 	body := req.FormValue("Body")
+// 	var name, email string
+// 	// TODO: auto get name and email
+// 	messageC := message.New(ctx)
+// 	if from == "+1615-545-4989" {
+// 		splitBody := strings.Split(body, "::")
+// 		if len(splitBody) < 2 {
+// 			return
+// 		}
+// 		err = messageC.SendDeliverySMS(splitBody[0], splitBody[1])
+// 		if err != nil {
+// 			utils.Criticalf(ctx, "failed to send sms to sub. Err: %+v", err)
+// 		}
+// 		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Message successfuly send to %s.", splitBody[0]))
+// 		if err != nil {
+// 			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+// 		}
+// 	} else {
+// 		err = messageC.SendDeliverySMS("6155454989", fmt.Sprintf("Customer Message:\nNumber: %s\nName: %s\nEmail: %s\nBody: %s", from, name, email, body))
+// 		if err != nil {
+// 			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+// 		}
+// 	}
+// }
 
 func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
