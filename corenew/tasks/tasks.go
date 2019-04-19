@@ -118,7 +118,7 @@ func ParseUpdateDripRequest(req *http.Request) (*UpdateDripParams, error) {
 	parms := new(UpdateDripParams)
 	parms.Email = req.FormValue("email")
 	parms.UserID = req.FormValue("user_id")
-	if parms.Email == "" {
+	if parms.Email == "" && parms.UserID == "" {
 		return nil, errParse.Wrapf("Invalid request for UpdateDrip. SubEmail: %s", parms.Email)
 	}
 	return parms, nil
