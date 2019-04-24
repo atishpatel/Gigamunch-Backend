@@ -9,6 +9,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
+	"github.com/atishpatel/Gigamunch-Backend/core/discount"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
@@ -43,9 +44,9 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	if log == nil {
 		return nil, errInternal.Annotate("failed to get logging client")
 	}
-	// if sqlC == nil {
-	// 	return nil, errInternal.Annotate("failed to get sql client")
-	// }
+	if sqlC == nil {
+		return nil, errInternal.Annotate("failed to get sql client")
+	}
 	if dbC == nil {
 		return nil, fmt.Errorf("failed to get db")
 	}
@@ -471,6 +472,97 @@ func (c *Client) SetupActivities(date time.Time) error {
 	// TODO: implement
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
 	return suboldC.SetupSubLogs(date)
+}
+
+// Process processes an activity.
+func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
+	c.log.Infof(c.ctx, "Processing Sub: date(%v) userIDOrEmail(%s)", date, userIDOrEmail)
+	// get sub
+	sub, err := c.getByIDOrEmail(userIDOrEmail)
+	if err != nil {
+		if err == c.db.ErrNoSuchEntity() {
+			return errInvalidParameter.WithError(err).Annotate("cannot find sub")
+		}
+		return errDatastore.WithError(err).Annotate("faield to getByIDOrEmail")
+	}
+	// check if deactivated
+	if !sub.Active && (sub.DeactivatedDatetime.IsZero() || sub.DeactivatedDatetime.Before(date)) {
+		// user is deactivated
+		c.log.Infof(c.ctx, "did not to proess: sub was deactivated before date")
+		return nil
+	}
+	// get activity
+
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	act, err := activityC.Get(date, sub.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.Get")
+	}
+	// check if should delay processing
+	taskC := tasks.New(c.ctx)
+	dayBeforeBox := act.DateParsed().Add(-24 * time.Hour)
+	if time.Now().Before(dayBeforeBox) {
+		// too early to process
+		r := &tasks.ProcessSubscriptionParams{
+			UserID:   sub.ID,
+			SubEmail: sub.Email(),
+			Date:     act.DateParsed(),
+		}
+		err = taskC.AddProcessSubscription(dayBeforeBox, r)
+		if err != nil {
+			return errors.Wrap("failed to tasks.AddProcessSubscription", err)
+		}
+		c.log.Infof(c.ctx, "Too early to process Sub. now(%v) < dayBeforeBox(%v)", time.Now(), dayBeforeBox)
+		return nil
+	}
+	r := &tasks.UpdateDripParams{
+		Email:  sub.Email(),
+		UserID: sub.ID,
+	}
+	err = taskC.AddUpdateDrip(dayBeforeBox, r)
+	if err != nil {
+		c.log.Errorf(c.ctx, "failed to tasks.AddUpdateDrip: %+v", err)
+	}
+	// done if paid
+	if act.Paid {
+		c.log.Infof(c.ctx, "Subscription is already finished. Paid(%v)", act.Paid)
+		return nil
+	}
+
+	amount := act.Amount
+	var discountAmount float32
+	var discountPercent int8
+
+	if act.DiscountAmount > 0.0 || act.DiscountPercent > 0 {
+		// handle old discount system
+
+	} else {
+		// new discount system
+
+		// get unused discount
+		discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+		if err != nil {
+			return errors.Annotate(err, "failed to discount.NewClient")
+		}
+		discnt, err := discountC.GetUnusedUserDiscount(sub.ID)
+		if err != nil {
+			return errors.Annotate(err, "failed to discount.NewClient")
+		}
+		if discnt != nil {
+
+			discountAmount = discnt.DiscountAmount
+			discountPercent = discnt.DiscountPercent
+			amount -= discountAmount
+			amount -= (float32(discountPercent) / 100) * amount
+		}
+	}
+
+	// mark as used
+
+	return nil
 }
 
 // IncrementPageCount is when a user just leaves their email.
