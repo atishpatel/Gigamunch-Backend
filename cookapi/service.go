@@ -332,7 +332,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	cultureDate := time.Now()
-	for cultureDate.Weekday() != time.Monday || cultureDate.Weekday() != time.Thursday {
+	for cultureDate.Weekday() != time.Monday && cultureDate.Weekday() != time.Thursday {
 		cultureDate = cultureDate.Add(24 * time.Hour)
 	}
 	subC := sub.New(ctx)
@@ -540,7 +540,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 	params, err := tasks.ParseUpdateDripRequest(req)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to tasks.ParseUpdateDripRequest: %+v", err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to tasks.ParseUpdateDripRequest: %+v", err)
 		return
 	}
 	logging.Infof(ctx, "Params: %+v", params)
@@ -548,14 +548,14 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	subC := sub.New(ctx)
 	log, serverInfo, _, _, err := setupAll(ctx, "/cookapi/UpdateDrip")
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
 		return
 	}
 
 	// make subscriber if date is same as give reveal date
 	sub, err := subC.GetSubscriber(params.Email)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriber: %s", err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriber: %s", err)
 		return
 	}
 	if !sub.IsSubscribed {
@@ -571,7 +571,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	// add num meals recieved
 	activites, err := subC.GetSubscriberActivities(params.Email)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriberActivities: %s", err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriberActivities: %s", err)
 		return
 	}
 	var numNonSkips int
@@ -619,19 +619,19 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	mailC, err := mail.NewClient(ctx, log, serverInfo)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.NewClient: %s", err)
 		return
 	}
 	err = mailC.SubActivated(mailReq)
 	if err != nil {
-		utils.Criticalf(ctx, "failed to handleUpdateDrip: failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
 	}
 	// send chris a message if user reached their set amout of gift meals
 	if !sub.GiftRevealDate.IsZero() && numNonSkips == sub.NumGiftDinners {
 		messageC := message.New(ctx)
 		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Person is done with their gifted meals \nName: %s\nEmail: %s", sub.Name, sub.Email))
 		if err != nil {
-			utils.Criticalf(ctx, "failed to send sms to Chris. Err: %+v", err)
+			utils.Errorf(ctx, "failed to send sms to Chris. Err: %+v", err)
 		}
 	}
 }

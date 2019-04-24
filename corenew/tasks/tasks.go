@@ -50,7 +50,7 @@ type ProcessSubscriptionParams struct {
 
 // AddProcessSubscription adds a process subscription at specified time.
 func (c *Client) AddProcessSubscription(at time.Time, req *ProcessSubscriptionParams) error {
-	if req.UserID == "" || req.Date.IsZero() {
+	if (req.UserID == "" && req.SubEmail == "") || req.Date.IsZero() {
 		return errInvalidParameter.Wrapf("expected(recieved): email(%s) date(%s)", req.SubEmail, req.Date.String())
 	}
 	h := make(http.Header)
@@ -86,7 +86,7 @@ type UpdateDripParams struct {
 // AddUpdateDrip adds a process subscription at specified time.
 func (c *Client) AddUpdateDrip(at time.Time, req *UpdateDripParams) error {
 	var err error
-	if req.Email == "" {
+	if req.Email == "" && req.UserID == "" {
 		return errInvalidParameter.Wrapf("expected(recieved): email(%s) date(%s)", req.Email)
 	}
 	h := make(http.Header)
