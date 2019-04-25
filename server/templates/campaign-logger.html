@@ -1,6 +1,5 @@
 [[define "campaign-logger"]]
 <!-- Page campaigns -->
-[[if .CampaignName]]
 <div id="CampaignName"
      style="display:none">[[.CampaignName]]</div>
 <script>
@@ -53,7 +52,7 @@
   addCampaign(getValue(urlParams, 'utm_campaign'), getValue(urlParams, 'utm_source'), getValue(urlParams, 'utm_medium'), getValue(urlParams, 'utm_term'), getValue(urlParams, 'utm_content'));
 
 </script>
-[[end]]
+
 <!-- Referred Email  -->
 [[if .ReferenceEmail]]
 <div id="ReferenceEmail"
