@@ -30,7 +30,9 @@
     }
   }
   var pageCampaignName = document.getElementById('CampaignName').innerHTML;
-  addCampaign(pageCampaignName, '', '', '', '');
+  if (pageCampaignName) {
+    addCampaign(pageCampaignName, '', '', '', '');
+  }
 
   function GetURLParmas() {
     var vars = {};
