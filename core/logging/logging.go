@@ -182,6 +182,16 @@ func (c *Client) Errorf(ctx context.Context, format string, args ...interface{})
 	Errorf(ctx, format, args...)
 }
 
+// Criticalf logs error messages that is critical and needs to be alerted and address immediately.
+func (c *Client) Criticalf(ctx context.Context, format string, args ...interface{}) {
+	if c.sdReporter != nil {
+		c.sdReporter.Report(sdreporting.Entry{
+			Error: fmt.Errorf("CRITICAL: "+format, args),
+		})
+	}
+	aelog.Criticalf(ctx, format, args...)
+}
+
 // GetAll gets logs.
 func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 	var dst []*Entry
