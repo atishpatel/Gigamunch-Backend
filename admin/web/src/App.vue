@@ -6,8 +6,8 @@
       clipped
       app
     >
-      <v-list dense>
-        <v-list-tile>
+      <v-list>
+        <v-list-tile to="subscribers">
           <v-list-tile-action>
             <v-icon></v-icon>
           </v-list-tile-action>
@@ -34,7 +34,7 @@
     </v-toolbar>
 
     <v-content>
-       <router-view />
+      <router-view />
     </v-content>
   </v-app>
 </template>
@@ -42,16 +42,17 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-// import { GetUserSummary } from './ts/service';
+import { IsAdmin } from './ts/auth';
 
-@Component({
-})
+@Component({})
 export default class App extends Vue {
   public drawer = false;
 
   public created() {
     // App ready
-
+    if (!IsAdmin()) {
+      alert('User is not admin');
+    }
   }
 }
 </script>

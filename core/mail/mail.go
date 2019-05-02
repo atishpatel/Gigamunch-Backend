@@ -183,6 +183,7 @@ type UserFields struct {
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
+	PlanWeekday       string    `json:"plan_weekday"`
 	GifterName        string    `json:"gifter_name"`
 	GifterEmail       string    `json:"gifter_email"`
 	VegServings       int8      `json:"veg_servings"`
@@ -213,6 +214,9 @@ func (c *Client) updateUser(req *UserFields, dripClient *drip.Client) error {
 	}
 	if !req.FirstDeliveryDate.IsZero() {
 		sub.CustomFields["FIRST_DELIVERY_DATE"] = DateString(req.FirstDeliveryDate)
+	}
+	if req.PlanWeekday != "" {
+		sub.CustomFields["PLAN_WEEKDAY"] = req.PlanWeekday
 	}
 	if req.GifterName != "" {
 		sub.CustomFields["GIFTER_NAME"] = req.GifterName

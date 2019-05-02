@@ -1,3 +1,4 @@
+declare namespace AdminAPI {
 interface ErrorOnlyResp {
     error: Common.Error
 }
@@ -190,7 +191,8 @@ interface SendCustomerSMSReq {
 	message: string
 }
 interface GetHasSubscribedReq {
-    date: string
+    start: number
+    limit: number
 }
 interface GetSubscriberSublogsReq {
     email: string
@@ -202,6 +204,10 @@ interface GetSubscriberSublogsResp {
 interface GetHasSubscribedResp {
     error: Common.Error
     subscribers: Subscriber[]
+}
+interface GetHasSubscribedRespV2 {
+    error: Common.Error
+    subscribers: Common.Subscriber[]
 }
 interface GetSubscriberReq {
     email: string
@@ -314,4 +320,5 @@ interface UpdateDeliveriesResp {
 interface UpdateDripReq {
     emails: string[]
     hours: number
+}
 }

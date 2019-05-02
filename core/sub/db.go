@@ -88,11 +88,22 @@ func (c *Client) getActive(ctx context.Context) ([]*subold.Subscriber, error) {
 	return results, nil
 }
 
+// getHasSubscribed returns the list of active or deactive Subscribers.
+func (c *Client) getHasSubscribed(start, limit int) ([]*subold.Subscriber, error) {
+	t := time.Now().Add(-1 * 100 * 365 * 24 * time.Hour)
+	var results []*subold.Subscriber
+	_, err := c.db.QueryFilter(c.ctx, kind, start, limit, "SignUpDatetime>", t, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 // getAll returns the list of Subscribers who are or were active.
-func (c *Client) getAll() ([]*subold.Subscriber, error) {
+func (c *Client) getAll(start, limit int) ([]*subold.Subscriber, error) {
 	yearsAgo := time.Now().Add(-1 * 100 * 365 * 24 * time.Hour)
 	var results []*subold.Subscriber
-	_, err := c.db.QueryFilter(c.ctx, kind, 0, 10, "SignUpDatetime>", yearsAgo, &results)
+	_, err := c.db.QueryFilter(c.ctx, kind, start, limit, "SignUpDatetime>", yearsAgo, &results)
 	if err != nil {
 		return nil, err
 	}

@@ -27,8 +27,8 @@ func (a Address) StringNoAPT() string {
 
 // GeoPoint represents a location as latitude/longitude in degrees.
 type GeoPoint struct {
-	Latitude  float64 `json:"latitude,string" datastore:",index"`
-	Longitude float64 `json:"longitude,string" datastore:",index"`
+	Latitude  float64 `json:"latitude" datastore:",index"`
+	Longitude float64 `json:"longitude" datastore:",index"`
 }
 
 // String returns Latitude,Longitude

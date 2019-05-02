@@ -97,6 +97,26 @@ func PBExecution(in *execution.Execution) (*pbcommon.Execution, error) {
 	return out, err
 }
 
+// PBSubscribers turns an array of subscribers into a protobuff array of subscribers.
+func PBSubscribers(in []*subold.Subscriber) ([]*pbcommon.Subscriber, error) {
+	out := make([]*pbcommon.Subscriber, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBSubscriber turns an subscriber into a protobuff subscriber.
+func PBSubscriber(in *subold.Subscriber) (*pbcommon.Subscriber, error) {
+	out := &pbcommon.Subscriber{}
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(in, out)
+	return out, err
+}
+
 // PBEmailPrefs turns an array of EmailPrefs into a protobuff array of EmailPrefs.
 func PBEmailPrefs(in []subold.EmailPref) ([]*pbcommon.EmailPref, error) {
 	out := make([]*pbcommon.EmailPref, len(in))

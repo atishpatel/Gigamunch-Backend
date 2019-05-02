@@ -135,6 +135,9 @@ func (c *Client) GetBeforeDateForUser(date time.Time, userID string) ([]*Activit
 	return acts, nil
 }
 
+// TODO: GetForDate
+//
+
 // CreateReq is the request for Create.
 type CreateReq struct {
 	Date      string          `json:"date" db:"date"`
@@ -255,11 +258,11 @@ func (c *Client) DeleteFuture(date time.Time, idOrEmail string) error {
 }
 
 // Process processes an actvity.
-func (c *Client) Process(date time.Time, email string) error {
-	// TODO: Reimplement
-	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.Process(date, email)
-}
+// func (c *Client) Process(date time.Time, email string) error {
+// 	// TODO: Reimplement
+// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
+// 	return suboldC.Process(date, email)
+// }
 
 // Discount gives an discount to an actvitiy.
 func (c *Client) Discount(date time.Time, email string, discountAmount float32, discountPercent int8, overrideDiscounts bool) error {
@@ -343,11 +346,11 @@ func (c *Client) Unskip(date time.Time, email string) error {
 }
 
 // Paid sets activity to paid.
-// func (c *Client) Paid() error {
-// 	// TODO: Reimplement
-// 	suboldC := subold.NewWithLogging(c.ctx, c.log)
-// 	return nil
-// }
+func (c *Client) Paid(date, userID string, amount float32, tID string) error {
+	// TODO: Reimplement
+
+	return nil
+}
 
 // ChangeServings for a day
 func (c *Client) ChangeServings(date time.Time, email string, servings int8, amount float32) error {

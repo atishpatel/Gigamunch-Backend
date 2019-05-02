@@ -13,7 +13,7 @@ export function IsStage(): boolean {
 }
 
 export function IsProd(): boolean {
-    if (location.hostname === 'gigamunch-omninexus-dev.appspot.com' || location.hostname !== 'localhost') {
+    if (location.hostname === 'gigamunch-omninexus-dev.appspot.com' || location.hostname === 'localhost') {
         return false;
     }
     return true;

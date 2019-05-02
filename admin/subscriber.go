@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 
@@ -120,10 +122,10 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 	}
 	// end decode request
 
-	date := getDatetime(req.Date)
+	var t time.Time
 
 	subC := subold.New(ctx)
-	subscribers, err := subC.GetHasSubscribed(date)
+	subscribers, err := subC.GetHasSubscribed(t)
 
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get all subscribers")
@@ -131,6 +133,37 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 
 	resp := &pb.GetHasSubscribedResp{
 		Subscribers: pbSubscribers(subscribers),
+	}
+
+	return resp
+}
+
+// GetHasSubscribedV2 gets all subscribers.
+func (s *server) GetHasSubscribedV2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.GetHasSubscribedReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed sub.NewClient")
+	}
+	subscribers, err := subC.GetHasSubscribed(int(req.Start), int(req.Limit))
+	if err != nil {
+		return errors.Annotate(err, "failed to get all subscribers")
+	}
+	ss, err := serverhelper.PBSubscribers(subscribers)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBSubscribers")
+	}
+	resp := &pb.GetHasSubscribedRespV2{
+		Subscribers: ss,
 	}
 
 	return resp

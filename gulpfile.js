@@ -78,6 +78,9 @@ function buildProto(file, path, callback) {
     if (file.path.indexOf('SubAPI.proto') > 0) {
       parsed += "declare namespace SubAPI {\n";
     }
+    if (file.path.indexOf('AdminAPI.proto') > 0) {
+      parsed += "declare namespace AdminAPI {\n";
+    }
     let pb = file.contents.toString();
 
     let inMessage = false;
@@ -93,7 +96,7 @@ function buildProto(file, path, callback) {
         inMessage = false;
       }
     }
-    if (file.path.indexOf('Common.proto') > 0 || file.path.indexOf('SubAPI.proto') > 0) {
+    if (file.path.indexOf('Common.proto') > 0 || file.path.indexOf('SubAPI.proto') > 0 || file.path.indexOf('AdminAPI.proto') > 0) {
       parsed += "}";
     }
     file.contents = Buffer(parsed)

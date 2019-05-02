@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
+
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -25,8 +27,13 @@ func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *ht
 	// end decode request
 
 	date := getDatetime(req.Date)
-	subC := subold.NewWithLogging(ctx, log)
-	err = subC.Process(date, req.Email)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to sub.NewClient")
+	}
+	err = subC.ProcessActivity(date, req.Email)
+	// subC := subold.NewWithLogging(ctx, log)
+	// err = subC.Process(date, req.Email)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
 	}

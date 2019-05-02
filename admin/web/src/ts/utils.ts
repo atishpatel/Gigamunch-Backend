@@ -37,3 +37,21 @@ export function GetFullDate(dateString: string): string {
     const year = d.getUTCFullYear();
     return `${monthNames[month]} ${date}, ${year}`;
 }
+
+export function GetAddressLink(a: Common.Address) {
+    if (a && a.street) {
+        return 'https://maps.google.com/?q=' + encodeURIComponent(a.apt + ' ' + a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip);
+    }
+    return '';
+}
+
+export function GetAddress(a: Common.Address) {
+    if (a && a.street) {
+        let apt = '';
+        if (a.apt !== undefined && a.apt !== '') {
+            apt = '#' + a.apt + ' ';
+        }
+        return apt + a.street + ', ' + a.city;
+    }
+    return '';
+}

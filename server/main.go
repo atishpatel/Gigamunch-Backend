@@ -20,7 +20,6 @@ import (
 
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbserver"
-	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -139,8 +138,10 @@ func handelProcessSubscription(w http.ResponseWriter, req *http.Request, _ httpr
 		return
 	}
 	log, serverInfo, db, sqlDB, _ := setupAll(ctx, "/process-subscription")
-	activityC, _ := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
-	err = activityC.Process(parms.Date, parms.SubEmail)
+	// activityC, _ := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
+	// err = activityC.Process(parms.Date, parms.SubEmail)
+	subC, _ := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
+	err = subC.ProcessActivity(parms.Date, parms.SubEmail)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
 		// TODO schedule for later?

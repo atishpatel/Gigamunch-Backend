@@ -15,6 +15,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/payment"
 	"github.com/atishpatel/Gigamunch-Backend/core/slack"
+	paymentold "github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -98,6 +99,15 @@ func (c *Client) GetActive(start, limit int) ([]*subold.Subscriber, error) {
 	return subs, nil
 }
 
+// GetHasSubscribed returns a list of all Subscribers.
+func (c *Client) GetHasSubscribed(start, limit int) ([]*subold.Subscriber, error) {
+	subs, err := c.getHasSubscribed(start, limit)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
+	}
+	return subs, nil
+}
+
 // GetByEmail gets a subscriber by email.
 
 // GetByPhoneNumber gets a subscriber by phone number.
@@ -111,6 +121,12 @@ func (c *Client) GetActive(start, limit int) ([]*subold.Subscriber, error) {
 // 	// TODO: implement
 // 	return nil
 // }
+
+// ChangeServings changes a subscriber's servings for a date.
+func (c *Client) ChangeServings(email string, nonvegServings, vegServings int8) error {
+	// TODO: implement
+	return nil
+}
 
 // ChangeServingsPermanently changes a subscriber's servings permanently.
 func (c *Client) ChangeServingsPermanently(email string, servings int8, vegetarian bool) error {
@@ -463,6 +479,8 @@ func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool
 	return nil
 }
 
+// func (c *Client) Discount()
+
 // SetupActivities updates a subscriber.
 func (c *Client) SetupActivities(date time.Time) error {
 	// subs, err := c.GetActive(0, 10000)
@@ -474,7 +492,7 @@ func (c *Client) SetupActivities(date time.Time) error {
 	return suboldC.SetupSubLogs(date)
 }
 
-// Process processes an activity.
+// ProcessActivity processes an activity.
 func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	c.log.Infof(c.ctx, "Processing Sub: date(%v) userIDOrEmail(%s)", date, userIDOrEmail)
 	// get sub
@@ -535,32 +553,77 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	amount := act.Amount
 	var discountAmount float32
 	var discountPercent int8
+	var discnt *discount.Discount
+	discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to discount.NewClient")
+	}
 
 	if act.DiscountAmount > 0.0 || act.DiscountPercent > 0 {
-		// handle old discount system
+		// handle applied discount or old discount system
+		discountAmount = act.DiscountAmount
+		discountPercent = act.DiscountPercent
 
 	} else {
 		// new discount system
-
 		// get unused discount
-		discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+		discnt, err = discountC.GetUnusedUserDiscount(sub.ID)
 		if err != nil {
 			return errors.Annotate(err, "failed to discount.NewClient")
 		}
-		discnt, err := discountC.GetUnusedUserDiscount(sub.ID)
-		if err != nil {
-			return errors.Annotate(err, "failed to discount.NewClient")
-		}
-		if discnt != nil {
-
+		if discnt != nil && !discnt.IsUsed() {
 			discountAmount = discnt.DiscountAmount
 			discountPercent = discnt.DiscountPercent
-			amount -= discountAmount
-			amount -= (float32(discountPercent) / 100) * amount
 		}
 	}
-
+	amount -= discountAmount
+	amount -= (float32(discountPercent) / 100) * amount
+	// charge
+	orderID := fmt.Sprintf("Gigamunch dinner for %s.", date.Format("01/02/2006"))
+	var tID string
+	if amount > 0.0 {
+		paymentC := paymentold.New(c.ctx)
+		saleReq := &paymentold.SaleReq{
+			CustomerID:         act.CustomerID,
+			Amount:             amount,
+			PaymentMethodToken: act.PaymentMethodToken,
+			OrderID:            orderID,
+		}
+		c.log.Infof(c.ctx, "Charging Customer(%s) %f on card(%s)", act.CustomerID, amount, act.PaymentMethodToken)
+		tID, err = paymentC.Sale(saleReq)
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate") {
+				// Dulicate transaction error because two customers have same card
+				r := &tasks.ProcessSubscriptionParams{
+					UserID:   sub.ID,
+					SubEmail: sub.Email(),
+					Date:     act.DateParsed(),
+				}
+				err = taskC.AddProcessSubscription(time.Now().Add(1*time.Hour), r)
+				if err != nil {
+					return errors.Annotate(err, "failed to tasks.AddProcessSubscription")
+				}
+				return nil
+			}
+			return errors.Annotate(err, "failed to payment.Sale")
+		}
+		c.log.Paid(sub.ID, sub.Email(), act.Date, act.Amount, amount, tID)
+	}
+	// update TransactionID
+	err = activityC.Paid(act.Date, act.UserID, amount, tID)
+	if err != nil {
+		c.log.Criticalf(c.ctx, "user paid but didn't get marked as paid: %+v", err)
+		return errors.Annotate(err, "user paid but didn't get marked as paid")
+	}
 	// mark as used
+	if discnt != nil && !discnt.IsUsed() {
+		t := act.DateParsed()
+		err = discountC.Used(discnt.ID, &t)
+		if err != nil {
+			c.log.Criticalf(c.ctx, "user paid but didn't get marked as paid: %+v", err)
+			return errors.Annotate(err, "failed to marked used discount as used")
+		}
+	}
 
 	return nil
 }
@@ -594,8 +657,22 @@ func GetCleanPhoneNumber(rawNumber string) string {
 	return cleanNumber
 }
 
+// DerivePrice returns the price for a set number of servings.
+func DerivePrice(servings int8) float32 {
+	switch servings {
+	case 1:
+		return 17 + 1.66
+	case 2:
+		return (16.5 * 2) + 3.22
+	case 4:
+		return (15.25 * 4) + 5.95
+	default:
+		return 15.25 * float32(servings) * 1.0975
+	}
+}
+
 func (c *Client) BatchUpdateActivityWithUserID(start, limit int32) error {
-	subs, err := c.getAll()
+	subs, err := c.getAll(0, 1000)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to getAll")
 	}

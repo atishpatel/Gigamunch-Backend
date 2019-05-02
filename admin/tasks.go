@@ -10,13 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
+
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 	"google.golang.org/appengine"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
@@ -32,8 +33,10 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
 	}
 
-	activityC, _ := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-	err = activityC.Process(parms.Date, parms.SubEmail)
+	// activityC, _ := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	// err = activityC.Process(parms.Date, parms.SubEmail)
+	subC, _ := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	err = subC.ProcessActivity(parms.Date, parms.SubEmail)
 	if err != nil {
 		log.Errorf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
 		return errors.GetErrorWithCode(err)

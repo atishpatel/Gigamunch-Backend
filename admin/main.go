@@ -84,6 +84,7 @@ func main() {
 	// Subscriber
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribed)))
+	http.HandleFunc("/admin/api/v2/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribedV2)))
 	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))

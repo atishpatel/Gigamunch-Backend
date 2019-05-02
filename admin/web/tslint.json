@@ -10,6 +10,10 @@
   },
   "rules": {
     "max-line-length": [false],
+    "import-name": [false],
+    "function-name": false,
+    "no-console": [false],
+    "variable-name": [false],
     "quotemark": [true, "single"],
     "indent": [true, "spaces", 2],
     "interface-name": false,

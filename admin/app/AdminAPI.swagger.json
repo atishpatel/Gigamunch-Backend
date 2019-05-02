@@ -202,33 +202,6 @@
         ]
       }
     },
-    "/admin/api/v1/GetHasSubscribed": {
-      "post": {
-        "summary": "GetHasSubscribed gets all the people who are or have subscribed at one point.",
-        "operationId": "GetHasSubscribed",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetHasSubscribedResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetHasSubscribedReq"
-            }
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
     "/admin/api/v1/GetLog": {
       "post": {
         "summary": "GetLog returns a log.",
@@ -735,6 +708,33 @@
           "Admin"
         ]
       }
+    },
+    "/admin/api/v2/GetHasSubscribed": {
+      "post": {
+        "summary": "GetHasSubscribed gets all the people who are or have subscribed at one point.",
+        "operationId": "GetHasSubscribed",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetHasSubscribedRespV2"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetHasSubscribedReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1020,12 +1020,17 @@
     "AdminAPIGetHasSubscribedReq": {
       "type": "object",
       "properties": {
-        "date": {
-          "type": "string"
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
-    "AdminAPIGetHasSubscribedResp": {
+    "AdminAPIGetHasSubscribedRespV2": {
       "type": "object",
       "properties": {
         "error": {
@@ -1034,7 +1039,7 @@
         "subscribers": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/AdminAPISubscriber"
+            "$ref": "#/definitions/CommonSubscriber"
           }
         }
       }
@@ -1371,118 +1376,6 @@
       },
       "title": "**********************\nSublogs\n**********************"
     },
-    "AdminAPISubscriber": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "date": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "first_name": {
-          "type": "string"
-        },
-        "last_name": {
-          "type": "string"
-        },
-        "address": {
-          "$ref": "#/definitions/CommonAddress"
-        },
-        "customer_id": {
-          "type": "string"
-        },
-        "subscription_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "first_payment_date": {
-          "type": "string"
-        },
-        "is_subscribed": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "subscription_date": {
-          "type": "string"
-        },
-        "unsubscribed_date": {
-          "type": "string"
-        },
-        "first_box_date": {
-          "type": "string"
-        },
-        "servings": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "vegetarian_servings": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "delivery_time": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "subscription_day": {
-          "type": "string"
-        },
-        "weekly_amount": {
-          "type": "number",
-          "format": "float"
-        },
-        "payment_method_token": {
-          "type": "string"
-        },
-        "reference": {
-          "type": "string"
-        },
-        "phone_number": {
-          "type": "string"
-        },
-        "delivery_tips": {
-          "type": "string"
-        },
-        "bag_reminder_sms": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "num_gift_dinners": {
-          "type": "integer",
-          "format": "int32",
-          "title": "gift"
-        },
-        "reference_email": {
-          "type": "string"
-        },
-        "gift_reveal_date": {
-          "type": "string"
-        },
-        "referral_page_opens": {
-          "type": "integer",
-          "format": "int32",
-          "title": "stats"
-        },
-        "referred_page_opens": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "gift_page_opens": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "gifted_page_opens": {
-          "type": "integer",
-          "format": "int32"
-        }
-      },
-      "title": "Subscriber"
-    },
     "AdminAPIUnskipActivityReq": {
       "type": "object",
       "properties": {
@@ -1618,6 +1511,29 @@
           "type": "string"
         },
         "description": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonCampaign": {
+      "type": "object",
+      "properties": {
+        "Source": {
+          "type": "string"
+        },
+        "Medium": {
+          "type": "string"
+        },
+        "Campaign": {
+          "type": "string"
+        },
+        "Term": {
+          "type": "string"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "Timestamp": {
           "type": "string"
         }
       }
@@ -1829,6 +1745,25 @@
       },
       "description": "Email is the email content a subscriber gets."
     },
+    "CommonEmailPref": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "description": "EmailPref is a pref for an email."
+    },
     "CommonError": {
       "type": "object",
       "properties": {
@@ -1947,6 +1882,20 @@
       },
       "description": "ExecutionProgressSummary summarizes execution progress."
     },
+    "CommonFoodPref": {
+      "type": "object",
+      "properties": {
+        "no_pork": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "no_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "FoodPref are pref for food."
+    },
     "CommonInfoBox": {
       "type": "object",
       "properties": {
@@ -2020,6 +1969,30 @@
       },
       "description": "Notifications are notifications the subscribers gets."
     },
+    "CommonPhonePref": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "raw_number": {
+          "type": "string"
+        },
+        "disable_bag_reminder": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "disable_delivered": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "disable_review": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "PhonePref is a pref for a phone."
+    },
     "CommonQandA": {
       "type": "object",
       "properties": {
@@ -2086,6 +2059,130 @@
         }
       },
       "description": "Sticker are reheat stickers for dishes."
+    },
+    "CommonSubscriber": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "sign_up_datetime": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "auth_id": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "photo_url": {
+          "type": "string"
+        },
+        "email_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonEmailPref"
+          },
+          "title": "Pref"
+        },
+        "phone_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonPhonePref"
+          }
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Account"
+        },
+        "payment_customer_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "activate_datetime": {
+          "type": "string"
+        },
+        "deactivated_datetime": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/CommonAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Plan"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "plan_interval": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "plan_weekday": {
+          "type": "string"
+        },
+        "interval_start_point": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "food_pref": {
+          "$ref": "#/definitions/CommonFoodPref"
+        },
+        "num_gift_dinners": {
+          "type": "string",
+          "format": "int64",
+          "title": "Gift"
+        },
+        "gift_reveal_datetime": {
+          "type": "string"
+        },
+        "referral_page_opens": {
+          "type": "string",
+          "format": "int64",
+          "title": "Marketing"
+        },
+        "referred_page_opens": {
+          "type": "string",
+          "format": "int64"
+        },
+        "referrer_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "reference_email": {
+          "type": "string"
+        },
+        "reference_text": {
+          "type": "string"
+        },
+        "campaigns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonCampaign"
+          }
+        }
+      },
+      "description": "Subscriber is a subscriber."
     }
   }
 }

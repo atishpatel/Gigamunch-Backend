@@ -79,10 +79,10 @@ func main() {
 
 	http.HandleFunc(tasks.UpdateDripURL, handleUpdateDrip)
 	http.HandleFunc("/process-subscribers", handelProcessSubscribers)
-	http.HandleFunc("/process-subscription", handelProcessSubscription)
+	// http.HandleFunc("/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/send-bag-reminder", handleSendBagReminder)
 	http.HandleFunc("/task/process-subscribers", handelProcessSubscribers)
-	http.HandleFunc("/task/process-subscription", handelProcessSubscription)
+	// http.HandleFunc("/task/process-subscription", handelProcessSubscription)
 	http.HandleFunc("/task/send-bag-reminder", handleSendBagReminder)
 	http.HandleFunc("/task/send-quantity-sms", handleSendQuantitySMS)
 	http.HandleFunc("/send-quantity-sms", handleSendQuantitySMS)
@@ -293,21 +293,21 @@ func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
 // 	w.WriteHeader(http.StatusOK)
 // }
 
-func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	parms, err := tasks.ParseProcessSubscriptionRequest(req)
-	if err != nil {
-		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
-		return
-	}
-	subC := sub.New(ctx)
-	err = subC.Process(parms.Date, parms.SubEmail)
-	if err != nil {
-		utils.Errorf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). \n\nErr:%+v", parms.Date.Format("2006-01-02"), parms.SubEmail, err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
+// func handelProcessSubscription(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	parms, err := tasks.ParseProcessSubscriptionRequest(req)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)
+// 		return
+// 	}
+// 	subC := sub.New(ctx)
+// 	err = subC.Process(parms.Date, parms.SubEmail)
+// 	if err != nil {
+// 		utils.Errorf(ctx, "failed to sub.Process(Date:%s SubEmail:%s). \n\nErr:%+v", parms.Date.Format("2006-01-02"), parms.SubEmail, err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
+// }
 
 func handelProcessSubscribers(w http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
@@ -613,6 +613,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 		FirstDeliveryDate: sub.FirstBoxDate,
 		GifterName:        sub.Reference,
 		GifterEmail:       sub.ReferenceEmail,
+		PlanWeekday:       sub.SubscriptionDay,
 		AddTags:           addTags,
 		VegServings:       sub.VegetarianServings,
 		NonVegServings:    sub.Servings,
