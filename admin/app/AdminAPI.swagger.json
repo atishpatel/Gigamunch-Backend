@@ -256,33 +256,6 @@
         ]
       }
     },
-    "/admin/api/v1/GetLogsByEmail": {
-      "post": {
-        "summary": "GetLogsByEmail returns a list of logs by email.",
-        "operationId": "GetLogsByEmail",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetLogsResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetLogsByEmailReq"
-            }
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
     "/admin/api/v1/GetLogsByExecution": {
       "post": {
         "summary": "GetLogsByExecution returns a list of logs by ExecutionID.",
@@ -302,6 +275,59 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsByExecutionReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetLogsForUser": {
+      "post": {
+        "summary": "GetLogsForUser returns a list of logs by email.",
+        "operationId": "GetLogsForUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsForUserReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetSubscriberActivities": {
+      "post": {
+        "operationId": "GetSubscriberActivities",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberActivitiesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUserIDReq"
             }
           }
         ],
@@ -735,6 +761,32 @@
           "Admin"
         ]
       }
+    },
+    "/admin/api/v2/GetSubscriber": {
+      "post": {
+        "operationId": "GetSubscriberV2",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberRespV2"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUserIDReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
     }
   },
   "definitions": {
@@ -1065,7 +1117,16 @@
         }
       }
     },
-    "AdminAPIGetLogsByEmailReq": {
+    "AdminAPIGetLogsByExecutionReq": {
+      "type": "object",
+      "properties": {
+        "execution_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "AdminAPIGetLogsForUserReq": {
       "type": "object",
       "properties": {
         "start": {
@@ -1076,17 +1137,8 @@
           "type": "integer",
           "format": "int32"
         },
-        "email": {
+        "id": {
           "type": "string"
-        }
-      }
-    },
-    "AdminAPIGetLogsByExecutionReq": {
-      "type": "object",
-      "properties": {
-        "execution_id": {
-          "type": "string",
-          "format": "int64"
         }
       }
     },
@@ -1114,6 +1166,31 @@
           "items": {
             "$ref": "#/definitions/CommonLog"
           }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberActivitiesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonActivity"
+          }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberRespV2": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "subscriber": {
+          "$ref": "#/definitions/CommonSubscriber"
         }
       }
     },
@@ -1467,6 +1544,155 @@
         },
         "execution_stats": {
           "$ref": "#/definitions/AdminAPIExecutionStats"
+        }
+      }
+    },
+    "AdminAPIUserIDReq": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonActivity": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "address_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "address_apt": {
+          "type": "string"
+        },
+        "address_string": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "skip": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "forgiven": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "amount_paid": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "paid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "paid_datetime": {
+          "type": "string"
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transaction_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "customer_id": {
+          "type": "string"
+        },
+        "refunded": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "refunded_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "refunded_datetime": {
+          "type": "string"
+        },
+        "refund_transaction_id": {
+          "type": "string"
+        },
+        "gift": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "gift_from_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deviant": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "deviant_reason": {
+          "type": "string"
         }
       }
     },

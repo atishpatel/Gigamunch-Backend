@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -12,6 +14,39 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
 )
+
+// GetSubscriberActivities gets all activties for a subscriber.
+func (s *server) GetSubscriberActivities(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.UserIDReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	activities, err := activityC.GetAllForUser(req.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to get activities")
+	}
+
+	aResp, err := serverhelper.PBActivities(activities)
+	if err != nil {
+		return errors.Annotate(err, "failed to encode")
+	}
+
+	resp := &pb.GetSubscriberActivitiesResp{
+		Activities: aResp,
+	}
+
+	return resp
+}
 
 // SkipActivity skips an activity.
 func (s *server) SkipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {

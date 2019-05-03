@@ -6,6 +6,27 @@ if (IsDev()) {
   baseURL = 'https://gigamunch-omninexus-dev.appspot.com/admin/api';
 }
 
+// Log
+
+export function GetLogsForUser(start: number, limit: number, id: string): Promise<AdminAPI.GetLogsResp> {
+  const url: string = baseURL + '/v1/GetLogsForUser';
+  const req: AdminAPI.GetLogsForUserReq = {
+    id,
+    start,
+    limit,
+  };
+  return callFetch(url, 'GET', req);
+}
+
+// Activitiy
+export function GetSubscriberActivities(id: string): Promise<AdminAPI.GetSubscriberActivitiesResp> {
+  const url: string = baseURL + '/v1/GetSubscriberActivities';
+  const req: AdminAPI.UserIDReq = {
+    ID: id,
+  };
+  return callFetch(url, 'GET', req);
+}
+
 // Subscribers
 export function GetHasSubscribed(start: number, limit: number): Promise<AdminAPI.GetHasSubscribedRespV2> {
   const url: string = baseURL + '/v2/GetHasSubscribed';
@@ -16,10 +37,10 @@ export function GetHasSubscribed(start: number, limit: number): Promise<AdminAPI
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecution(idOrDate: string): Promise<AdminAPI.GetExecutionResp> {
-  const url: string = baseURL + '/v1/GetExecution';
-  const req: AdminAPI.GetExecutionReq = {
-    idOrDate,
+export function GetSubscriber(id: string): Promise<AdminAPI.GetSubscriberRespV2> {
+  const url: string = baseURL + '/v2/GetSubscriber';
+  const req: AdminAPI.UserIDReq = {
+    ID: id,
   };
   return callFetch(url, 'GET', req);
 }
@@ -72,3 +93,4 @@ interface APIResponse {
   token: string;
   json(): APIResponse;
 }
+

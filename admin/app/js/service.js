@@ -78,10 +78,10 @@ export function GetLog(id) {
     };
     return callFetch(url, 'GET', req);
 }
-export function GetLogsByEmail(start, limit, email) {
+export function GetLogsByEmail(start, limit, id) {
     var url = baseURL + 'GetLogsByEmail';
     var req = {
-        email: email,
+        id: id,
         start: start,
         limit: limit,
     };

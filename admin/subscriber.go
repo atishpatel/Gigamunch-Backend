@@ -110,6 +110,39 @@ func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *ht
 	return resp
 }
 
+// GetSubscriberV2 gets all info about a subscriber.
+func (s *server) GetSubscriberV2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.UserIDReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(req.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to get subscriber")
+	}
+
+	sResp, err := serverhelper.PBSubscriber(subscriber)
+	if err != nil {
+		return errors.Annotate(err, "failed to encode")
+	}
+
+	resp := &pb.GetSubscriberRespV2{
+		Subscriber: sResp,
+	}
+
+	return resp
+}
+
 // GetHasSubscribed gets all subscribers.
 func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error

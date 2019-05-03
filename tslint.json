@@ -3,6 +3,7 @@
   "extends": "tslint-config-airbnb",
   "rules": {
     // Custom rules
+    "trailing-comma": [true],
     "no-increment-decrement": false,
     "max-line-length": [
       false

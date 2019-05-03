@@ -17,7 +17,7 @@ import { IsError } from '../ts/errors';
   },
 })
 export default class Subscribers extends Vue {
-  protected subs: SubscriberExtended[];
+  protected subs: Types.SubscriberExtended[];
 
   public constructor() {
     super();
@@ -34,7 +34,7 @@ export default class Subscribers extends Vue {
         console.error(resp);
         return;
       }
-      let subs = resp.subscribers as SubscriberExtended[];
+      const subs = resp.subscribers as Types.SubscriberExtended[];
       for (let i = 0; i < subs.length; i++) {
         subs[i].addressString = GetAddress(subs[i].address);
         subs[i].addressLink = GetAddressLink(subs[i].address);
@@ -61,17 +61,6 @@ export default class Subscribers extends Vue {
       this.subs = subs;
     });
   }
-}
-
-interface SubscriberExtended extends Common.Subscriber {
-  emails: string[];
-  emailsString: string;
-  names: string[];
-  namesString: string;
-  phonenumbers: string[];
-  phonenumbersString: string;
-  addressString: string;
-  addressLink: string;
 }
 </script>
 <style lang="scss">

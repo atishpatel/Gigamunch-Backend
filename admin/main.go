@@ -62,6 +62,7 @@ func main() {
 	// **********************
 	// Activity
 	// **********************
+	http.HandleFunc("/admin/api/v1/GetSubscriberActivities", s.handler(s.GetSubscriberActivities))
 	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
@@ -72,7 +73,8 @@ func main() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
-	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsByEmail)))
+	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsForUser)))
+	http.HandleFunc("/admin/api/v1/GetLogsForUser", s.handler(s.userAdmin(s.GetLogsForUser)))
 	http.HandleFunc("/admin/api/v1/GetLogsByExecution", s.handler(s.userAdmin(s.GetLogsByExecution)))
 	// **********************
 	// Sublogs
@@ -86,6 +88,7 @@ func main() {
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribed)))
 	http.HandleFunc("/admin/api/v2/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribedV2)))
 	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
+	http.HandleFunc("/admin/api/v2/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriberV2)))
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
 	// Zone

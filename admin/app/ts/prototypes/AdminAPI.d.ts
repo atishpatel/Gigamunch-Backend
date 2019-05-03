@@ -19,52 +19,9 @@ interface ReplaceSubscriberEmailReq {
     old_email: string
     new_email: string
 }
-interface Activity {
-    created_datetime: string
-    date: string
-    user_id: number
-    email: string
-    first_name: string
-    last_name: string
-    location: number
-    // Address
-    address_changed: boolean
-    address_apt: string
-    address_string: string
-    zip: string
-    latitude: number
-    longitude: number
-    // Detail
-    active: boolean
-    skip: boolean
-    // Bag detail
-    servings: number
-    vegetarian_servings: boolean
-    servings_changed: number
-    first: boolean
-    // Payment
-    amount: number
-    amount_paid: number
-    discount_amount: number
-    discount_percent: number
-    paid: boolean
-    paid_datetime: string
-    transaction_id: string
-    payment_method_token: string
-    customer_id: string
-    // Refund
-    refunded: boolean
-    refunded_amount: number
-    refunded_datetime: string
-    refund_transaction_id: string
-    payment_provider: number
-    forgiven: boolean
-    // Gift
-    gift: boolean
-    gift_from_user_id: number
-    // Deviant
-    deviant: boolean
-    deviant_reason: string
+interface GetSubscriberActivitiesResp {
+    error: Common.Error
+    activities: Common.Activity[]
 }
 interface SkipActivityReq {
     email: string
@@ -110,10 +67,10 @@ interface GetLogsResp {
     error: Common.Error
     logs: Common.Log[]
 }
-interface GetLogsByEmailReq {
+interface GetLogsForUserReq {
     start: number
     limit: number
-    email: string
+    id: string
 }
 interface GetLogsByExecutionReq {
     execution_id: number
@@ -215,6 +172,13 @@ interface GetSubscriberReq {
 interface GetSubscriberResp {
     error: Common.Error
     subscriber: Subscriber
+}
+interface GetSubscriberRespV2 {
+    error: Common.Error
+    subscriber: Common.Subscriber
+}
+interface UserIDReq {
+    ID: string
 }
 interface GetExecutionsReq {
     start: number

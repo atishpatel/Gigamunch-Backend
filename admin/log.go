@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -58,10 +59,10 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 	return resp
 }
 
-// GetLogsByEmail gets logs by email.
-func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+// GetLogsForUser gets logs by email.
+func (s *server) GetLogsForUser(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
-	req := new(pb.GetLogsByEmailReq)
+	req := new(pb.GetLogsForUserReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -69,10 +70,14 @@ func (s *server) GetLogsByEmail(ctx context.Context, w http.ResponseWriter, r *h
 		return failedToDecode(err)
 	}
 	// end decode request
-
-	logs, err := log.GetAllByEmail(req.Email, int(req.Start), int(req.Limit))
+	var logs []*logging.Entry
+	if strings.Contains(req.ID, "@") {
+		logs, err = log.GetAllByEmail(req.ID, int(req.Start), int(req.Limit))
+	} else {
+		logs, err = log.GetAllByID(req.ID, int(req.Start), int(req.Limit))
+	}
 	if err != nil {
-		return errors.Annotate(err, "failed to log.GetUserLogsByEmail")
+		return errors.Annotate(err, "failed to log.GetAllBy")
 	}
 	resp := &pb.GetLogsResp{}
 	resp.Logs, err = serverhelper.PBLogs(logs)

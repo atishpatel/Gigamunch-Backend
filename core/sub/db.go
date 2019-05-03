@@ -17,6 +17,9 @@ func (c *Client) getByIDOrEmail(idOrEmail string) (*subold.Subscriber, error) {
 	sub := new(subold.Subscriber)
 	err := c.db.Get(c.ctx, key, sub)
 	if err != nil {
+		if err == c.db.ErrNoSuchEntity() {
+			return nil, errNoSuchEntityDatastore.WithError(err).Annotate("user not found")
+		}
 		return nil, errDatastore.WithError(err).Annotate("failed to get")
 	}
 	return sub, nil

@@ -65,16 +65,7 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 
 // Get gets a subscriber.
 func (c *Client) Get(id string) (*subold.Subscriber, error) {
-	key := c.db.NameKey(c.ctx, kind, id)
-	sub := new(subold.Subscriber)
-	err := c.db.Get(c.ctx, key, sub)
-	if err != nil {
-		if err == c.db.ErrNoSuchEntity() {
-			return nil, errNoSuchEntityDatastore.WithError(err).Annotate("failed to get")
-		}
-		return nil, errDatastore.WithError(err).Annotate("failed to get")
-	}
-	return sub, nil
+	return c.getByIDOrEmail(id)
 }
 
 // GetByEmail gets a subscriber by email.
