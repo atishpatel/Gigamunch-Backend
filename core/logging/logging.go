@@ -39,6 +39,8 @@ const (
 	// User or Admin Actions
 	// ======================
 
+	// FailedSkip Action.
+	FailedSkip = Action("failed_skip")
 	// Skip Action.
 	Skip = Action("skip")
 	// Unskip Action.
@@ -588,6 +590,31 @@ func (c *Client) SubUnskip(date string, userID string, userEmail string) {
 			Date:               date,
 			UserIDString:       userID,
 			UserEmail:          userEmail,
+			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
+			ActionUserEmail:    actionUserEmail,
+		},
+	}
+	c.Log(e)
+}
+
+// SubFailedSkip logs a skip.
+func (c *Client) SubFailedSkip(date string, userID string, userEmail, reason string) {
+	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
+	e := &Entry{
+		Type:         Subscriber,
+		Action:       FailedSkip,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Failed to skip for " + date,
+			Description: fmt.Sprintf("%s failed to skip for %s by %s", userEmail, date, actionUserEmail),
+		},
+		SkipPayload: SkipPayload{
+			Date:               date,
+			UserIDString:       userID,
+			UserEmail:          userEmail,
+			Reason:             reason,
 			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
 			ActionUserEmail:    actionUserEmail,
 		},

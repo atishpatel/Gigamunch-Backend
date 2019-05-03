@@ -193,13 +193,27 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 	}
 
 	date := req.FormResponse.SubmittedAt.Add(time.Hour * -5)
-	// TODO: MONDAY FIX
+	weekday := time.Monday
+	weekdayBefore := time.Sunday
+	if subscriber.SubscriptionDay == time.Thursday.String() {
+		// Thrusday
+		weekday = time.Thursday
+		weekdayBefore = time.Wednesday
+	} else {
+		// assume Monday weekday
+		weekday = time.Monday
+		weekdayBefore = time.Sunday
+	}
+
 	skipDate := date
-	for skipDate.Weekday() != time.Monday {
+	for skipDate.Weekday() != weekday {
 		skipDate = skipDate.Add(time.Hour * 24)
 	}
 
-	if date.Weekday() == time.Monday || date.Weekday() == time.Sunday {
+	// if day before or day of skip
+	if date.Weekday() == weekdayBefore || date.Weekday() == weekday {
+		// log failed to skip
+		log.SubFailedSkip(date.Format(time.RFC3339), subscriber.ID, subscriber.Email, reason)
 		// check for phone number if yes, text them, if no, text me
 		if subscriber.PhoneNumber == "" {
 			messageC := message.New(ctx)
@@ -212,7 +226,7 @@ func (s *server) TypeformSkip(ctx context.Context, w http.ResponseWriter, r *htt
 		}
 
 		messageC := message.New(ctx)
-		err = messageC.SendAdminSMS(subscriber.PhoneNumber, fmt.Sprintf("Hey %s, this is Chris from Gigamunch. It looks like you tried to pass a Gigamunch dinner, but we've already started making your meal. 🙊 You need to submit your pass form before Sunday in order for it to work. You will still receive a dinner this Monday.  Feel free to respond directly if you have any questions.", subscriber.FirstName))
+		err = messageC.SendAdminSMS(subscriber.PhoneNumber, fmt.Sprintf("Hey %s, this is Chris from Gigamunch. It looks like you tried to pass a Gigamunch dinner, but we've already started making your meal. 🙊 You need to submit your pass form before %s in order for it to work. You will still receive a dinner this %s.  Feel free to respond directly if you have any questions.", subscriber.FirstName, weekdayBefore.String(), weekday.String()))
 		if err != nil {
 			utils.Criticalf(ctx, "failed to send sms to %s. Err: %+v", subscriber.Email, err)
 			return errInternalError.WithError(err).Annotatef("failed to send subscriber sms: %s", subscriber.Email)
