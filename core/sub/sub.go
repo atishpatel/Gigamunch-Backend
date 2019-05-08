@@ -417,7 +417,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	// Add to mail service
 	taskC := tasks.New(c.ctx)
 	// add to update drip
-	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{Email: req.Email})
+	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{UserID: sub.ID, Email: req.Email})
 	if err != nil {
 		c.log.Errorf(c.ctx, "failed to task.AddUpdateDrip: %+v", err)
 	}
@@ -510,6 +510,7 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.Get")
 	}
+	c.log.Infof(c.ctx, "act: %+v", act)
 	// check if should delay processing
 	taskC := tasks.New(c.ctx)
 	dayBeforeBox := act.DateParsed().Add(-24 * time.Hour)
@@ -533,7 +534,7 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	}
 	err = taskC.AddUpdateDrip(dayBeforeBox, r)
 	if err != nil {
-		c.log.Errorf(c.ctx, "failed to tasks.AddUpdateDrip: %+v", err)
+		c.log.Errorf(c.ctx, "failed to tasks.AddUpdateDrip at %s: %+v", dayBeforeBox, err)
 	}
 	// done if paid
 	if act.Paid {
@@ -598,10 +599,11 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 			}
 			return errors.Annotate(err, "failed to payment.Sale")
 		}
+		c.log.Infof(c.ctx, "Charge successful Customer(%s) %f TransactionID(%s)", act.CustomerID, amount, tID)
 		c.log.Paid(sub.ID, sub.Email(), act.Date, act.Amount, amount, tID)
 	}
 	// update TransactionID
-	err = activityC.Paid(act.Date, act.UserID, amount, tID)
+	err = activityC.Paid(act.DateParsed(), act.UserID, amount, tID)
 	if err != nil {
 		c.log.Criticalf(c.ctx, "user paid but didn't get marked as paid: %+v", err)
 		return errors.Annotate(err, "user paid but didn't get marked as paid")

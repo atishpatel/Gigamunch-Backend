@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	datetimeFormat = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	// DateFormat is the expected format of date in activity.
 	DateFormat                               = "2006-01-02" // "Jan 2, 2006"
 	selectActivityByEmailStatement           = "SELECT * FROM activity WHERE date=? AND email=?"
@@ -32,6 +33,7 @@ const (
 	unskipStatement                          = "UPDATE activity SET skip=0,active=1 WHERE date=? AND email=?"
 	insertStatement                          = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 	deleteFutureStatment                     = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
+	updatePaidStatement                      = "UPDATE activity SET amount_paid=?,paid=1,paid_dt=?,transaction_id=? WHERE date=? AND user_id=?"
 	// TODO: switch to user id
 	deleteFutureEmailStatment = "DELETE from activity WHERE date>? AND email=? AND paid=0"
 )
@@ -87,7 +89,7 @@ func (c *Client) Get(date time.Time, idOrEmail string) (*Activity, error) {
 	}
 	if err != nil {
 		// TODO: Wrap with errSQL
-		return nil, errors.Annotate(err, "failed to selectActivity")
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivity")
 	}
 	return act, nil
 }
@@ -100,7 +102,7 @@ func (c *Client) GetAll(limit int) ([]*Activity, error) {
 	acts := []*Activity{}
 	err := c.sqlDB.SelectContext(c.ctx, &acts, selectAllActivityStatement, limit)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to selectAllActivityStatement")
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectAllActivityStatement")
 	}
 	return acts, nil
 }
@@ -110,7 +112,7 @@ func (c *Client) GetAllForUser(userID string) ([]*Activity, error) {
 	acts := []*Activity{}
 	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityForUserStatement, userID)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to selectActivityForUserStatement")
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivityForUserStatement")
 	}
 	return acts, nil
 }
@@ -120,7 +122,7 @@ func (c *Client) GetAfterDateForUser(date time.Time, userID string) ([]*Activity
 	acts := []*Activity{}
 	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityAfterDateForUserStatement, userID, date.Format(DateFormat))
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to selectActivityAfterDateForUserStatement")
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivityAfterDateForUserStatement")
 	}
 	return acts, nil
 }
@@ -130,7 +132,7 @@ func (c *Client) GetBeforeDateForUser(date time.Time, userID string) ([]*Activit
 	acts := []*Activity{}
 	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityBeforeDateForUserStatement, userID, date.Format(DateFormat))
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to selectActivityBeforerDateForUserStatement")
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivityBeforerDateForUserStatement")
 	}
 	return acts, nil
 }
@@ -302,7 +304,7 @@ func (c *Client) Refund(date time.Time, email string, amount float32, precent in
 	// Update actvity
 	_, err = c.sqlDB.ExecContext(c.ctx, updateRefundedStatement, rID, amount, date.Format(DateFormat), email)
 	if err != nil {
-		return errSQLDB.WithError(err).Wrap("failed to execute updateRefundedAndSkipSubLogStatement")
+		return errSQLDB.WithError(err).Wrap("failed to execute updateRefundedStatement")
 	}
 	return nil
 }
@@ -346,9 +348,22 @@ func (c *Client) Unskip(date time.Time, email string) error {
 }
 
 // Paid sets activity to paid.
-func (c *Client) Paid(date, userID string, amount float32, tID string) error {
-	// TODO: Reimplement
-
+func (c *Client) Paid(date time.Time, userID string, amount float32, tID string) error {
+	if userID == "" || date.IsZero() {
+		return errBadRequest.Annotate("invalid UserID or Date")
+	}
+	act, err := c.Get(date, userID)
+	if err != nil {
+		return errBadRequest.WithError(err).Annotate("activity not found")
+	}
+	if act.Paid {
+		return errBadRequest.WithMessage("Failed. User has already paid.")
+	}
+	_, err = c.sqlDB.ExecContext(c.ctx, updatePaidStatement, amount, time.Now().Format(datetimeFormat), tID, date.Format(DateFormat), userID)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updatePaidStatement")
+	}
+	c.log.Paid(userID, act.Email, date.Format(time.RFC3339), act.Amount, amount, tID)
 	return nil
 }
 

@@ -64,6 +64,6 @@ func (act *Activity) DateParsed() time.Time {
 	if act.Date == "" {
 		return d
 	}
-	d, _ = time.Parse(act.Date, DateFormat)
+	d, _ = time.Parse(DateFormat, act.Date[:10])
 	return d
 }

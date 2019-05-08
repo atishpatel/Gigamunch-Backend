@@ -36,6 +36,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	nameDilm := "{{name}}"
 	firstNameDilm := "{{first_name}}"
 	emailDilm := "{{email}}"
+	userIDDilm := "{{user_id}}"
 
 	messageC := message.New(ctx)
 	subC := subold.New(ctx)
@@ -57,6 +58,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		msg = strings.Replace(msg, nameDilm, name, -1)
 		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
 		msg = strings.Replace(msg, emailDilm, s.Email, -1)
+		msg = strings.Replace(msg, userIDDilm, s.ID, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
 		if err != nil {
 			errs = append(errs, errors.Annotate(err, "failed to message.SendSMS To("+s.PhoneNumber+")"))

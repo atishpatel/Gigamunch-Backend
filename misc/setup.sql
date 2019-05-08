@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS activity(
 -- ALTER TABLE `activity` ADD COLUMN user_id VARCHAR(125) NOT NULL DEFAULT '';
 -- PRIMARY KEY (date, user_id, email)
 
-RENAME TABLE sub to activity;
+-- RENAME TABLE sub to activity;
 -- TODO: change primary key from date, email to date, user_id
 
 CREATE TABLE IF NOT EXISTS discount(
@@ -215,5 +215,5 @@ CREATE TABLE IF NOT EXISTS discount(
 	last_name VARCHAR(125) NOT NULL DEFAULT '',
 	date_used DATE NOT NULL DEFAULT '0000-00-00',
 	discount_amount FLOAT(6,2) NOT NULL DEFAULT 0,
-	discount_percent TINYINT NOT NULL DEFAULT 0,
+	discount_percent TINYINT NOT NULL DEFAULT 0
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;

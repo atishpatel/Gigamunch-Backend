@@ -338,10 +338,8 @@ func (service *Service) ProcessSubLog(ctx context.Context, req *SubLogReq) (*Err
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
-	err = activityC.Process(req.Date, req.SubEmail)
-	// subC := subold.New(ctx)
-	// err = subC.Process(req.Date, req.SubEmail)
+	subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
+	err = subC.ProcessActivity(req.Date, req.SubEmail)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to activity.Process")
 		return resp, nil
