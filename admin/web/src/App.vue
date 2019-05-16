@@ -7,7 +7,7 @@
       app
     >
       <v-list>
-        <v-list-tile to="subscribers">
+        <v-list-tile to="/subscribers">
           <v-list-tile-action>
             <v-icon></v-icon>
           </v-list-tile-action>

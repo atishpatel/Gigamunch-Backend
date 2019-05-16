@@ -859,13 +859,6 @@ func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Cli
 	if !firstBagDate.IsZero() && time.Until(firstBagDate) < 0 {
 		return errInvalidParameter.WithMessage("First bag date must be after now")
 	}
-	// TODO: MONDAY FIX
-	if firstBagDate.IsZero() {
-		firstBagDate = time.Now().Add(4 * 24 * time.Hour)
-		for firstBagDate.Weekday() != time.Monday {
-			firstBagDate = firstBagDate.Add(time.Hour * 24)
-		}
-	}
 
 	var tZero time.Time
 
@@ -874,13 +867,19 @@ func (c *Client) Activate(email string, firstBagDate time.Time, log *logging.Cli
 	if err != nil {
 		return errors.Wrap("failed to get sub", err)
 	}
+	if firstBagDate.IsZero() {
+		firstBagDate = time.Now().Add(4 * 24 * time.Hour)
+		for firstBagDate.Weekday().String() != sub.SubscriptionDay {
+			firstBagDate = firstBagDate.Add(time.Hour * 24)
+		}
+	}
 	if sub.IsSubscribed {
 		return errInvalidParameter.Wrapf("%s is already subscribed.", email)
 	}
 	sub.IsSubscribed = true
 	sub.UnSubscribedDate = tZero
 	sub.FirstBoxDate = firstBagDate
-	sub.WeeklyAmount = DerivePrice(sub.Servings)
+	sub.WeeklyAmount = DerivePrice(sub.Servings + sub.VegetarianServings)
 	err = put(c.ctx, email, sub)
 	if err != nil {
 		return errors.Wrap("failed to put sub", err)

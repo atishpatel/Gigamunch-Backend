@@ -18,8 +18,10 @@
     "gulp-typescript": "^4.0.0",
     "gulp-uglify-es": "^1.0.0",
     "gulp-watch": "^5.0.0",
+    "install": "^0.12.2",
     "plugin-error": "^1.0.1",
     "ts-protoc-gen": "^0.7.0",
+    "tslint": "^5.16.0",
     "tslint-config-airbnb": "^5.2.1",
     "typescript": "^3.0.0"
   }

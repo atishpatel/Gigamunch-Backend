@@ -16,9 +16,12 @@ import {
   GetSubscriberActivities,
   GetLogsForUser,
 } from '../ts/service';
-import { GetAddressLink, GetAddress } from '../ts/utils';
+import {
+  GetSubscriberExtended,
+  GetActivitiesExtended,
+  GetLogsExtended,
+} from '../ts/extended';
 import { IsError } from '../ts/errors';
-import { GetDayFullDate } from '../ts/utils';
 
 @Component({
   components: {
@@ -53,12 +56,8 @@ export default class Subscriber extends Vue {
         console.error(resp);
         return;
       }
-      const acts = resp.activities as Types.ActivitiyExtended[];
-      for (let i = 0; i < acts.length; i++) {
-        acts[i].dateFull = GetDayFullDate(acts[i].date);
-      }
 
-      this.acts = acts;
+      this.acts = GetActivitiesExtended(resp.activities);
     });
   }
 
@@ -68,27 +67,8 @@ export default class Subscriber extends Vue {
         console.error(resp);
         return;
       }
-      const sub = resp.subscriber as Types.SubscriberExtended;
-      sub.addressString = GetAddress(sub.address);
-      sub.addressLink = GetAddressLink(sub.address);
-      sub.emails = [];
-      sub.names = [];
-      sub.email_prefs.reduce((emails, emailPrefs, a, b) => {
-        emails.push(emailPrefs.email);
-        sub.names.push(`${emailPrefs.first_name} ${emailPrefs.last_name}`);
-        return emails;
-      }, sub.emails);
-      sub.emailsString = sub.emails.toString();
-      sub.namesString = sub.names.toString();
 
-      sub.phonenumbers = [];
-      sub.phone_prefs.reduce((numbers, phonePrefs, a, b) => {
-        numbers.push(phonePrefs.number);
-        return numbers;
-      }, sub.phonenumbers);
-      sub.phonenumbersString = sub.phonenumbers.toString();
-
-      this.sub = sub;
+      this.sub = GetSubscriberExtended(resp.subscriber);
     });
   }
 
@@ -98,7 +78,7 @@ export default class Subscriber extends Vue {
         console.error(resp);
         return;
       }
-      this.logs = resp.logs as Types.LogExtended[];
+      this.logs = GetLogsExtended(resp.logs);
     });
   }
 }

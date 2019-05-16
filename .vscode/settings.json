@@ -12,5 +12,8 @@
   "go.lintTool": "golangci-lint",
   "go.docsTool": "godoc",
   "gitlens.blame.ignoreWhitespace": true,
-  "go.lintFlags": ["--enable=golint", "--exclude-use-default=false"],
+  "go.lintFlags": [
+    "--enable=golint",
+    "--exclude-use-default=false"
+  ],
 }

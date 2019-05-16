@@ -10,7 +10,7 @@
   },
   "rules": {
     "trailing-comma": [true],
-    "max-line-length": [false],
+    "max-line-length": [false, 350],
     "import-name": [false],
     "function-name": false,
     "prefer-for-of": false,

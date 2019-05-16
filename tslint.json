@@ -5,9 +5,7 @@
     // Custom rules
     "trailing-comma": [true],
     "no-increment-decrement": false,
-    "max-line-length": [
-      false
-    ],
+    "max-line-length": [false, 350],
     "quotemark": [true, "single"],
     "indent": [true, "spaces", 2],
     "align": [true, "statements"],

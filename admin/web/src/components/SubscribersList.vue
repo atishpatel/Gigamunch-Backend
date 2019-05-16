@@ -19,7 +19,9 @@
         :pagination.sync="pagination"
       >
         <template v-slot:items="props">
-          <td>{{ props.item.emailsString }}</td>
+          <td>
+            <router-link :to="'/subscriber/' + props.item.emailsString"> {{ props.item.emailsString }} </router-link>
+          </td>
           <td class="text-xs-right">{{ props.item.namesString }}</td>
           <td class="text-xs-right">{{ props.item.phonenumbersString }}</td>
           <td class="text-xs-right">{{ props.item.addressString }}</td>

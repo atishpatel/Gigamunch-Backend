@@ -18,7 +18,6 @@ export function GetMonthDayDate(dateString: string): string {
     return `${monthNames[month]} ${date}`;
 }
 
-
 // Monday, January 1, 2018
 export function GetDayFullDate(dateString: string): string {
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wedensday', 'Thursday', 'Friday', 'Saturday'];
@@ -36,6 +35,11 @@ export function GetFullDate(dateString: string): string {
     const date = d.getUTCDate();
     const year = d.getUTCFullYear();
     return `${monthNames[month]} ${date}, ${year}`;
+}
+
+export function GetTimestamp(dateString: string): string {
+    const d = new Date(dateString);
+    return `${GetDayFullDate(dateString)} @ ${d.toLocaleTimeString().replace(/(.*)\D\d+/, '$1')}`;
 }
 
 export function GetAddressLink(a: Common.Address) {

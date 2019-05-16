@@ -11,10 +11,17 @@ declare global {
             phonenumbersString: string;
             addressString: string;
             addressLink: string;
+            signUpDatetimeTimestamp: string;
+            activateDatetimeTimestamp: string;
+            deactivatedDatetimeTimestamp: string;
         }
 
         interface ActivitiyExtended extends Common.Activity {
             dateFull: string;
+            status: string;
+            addressString: string;
+            paidDate: string;
+            discountString: string;
         }
 
         interface LogExtended extends Common.Log {
