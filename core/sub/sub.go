@@ -511,6 +511,10 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 		return errors.Annotate(err, "failed to activity.Get")
 	}
 	c.log.Infof(c.ctx, "act: %+v", act)
+	if act.Skip {
+		c.log.Infof(c.ctx, "user is skipped")
+		return nil
+	}
 	// check if should delay processing
 	taskC := tasks.New(c.ctx)
 	dayBeforeBox := act.DateParsed().Add(-24 * time.Hour)
@@ -664,8 +668,8 @@ func DerivePrice(servings int8) float32 {
 	}
 }
 
-func (c *Client) BatchUpdateActivityWithUserID(start, limit int32) error {
-	subs, err := c.getAll(0, 1000)
+func (c *Client) BatchUpdateActivityWithUserID(start, limit int) error {
+	subs, err := c.getAll(start, limit)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to getAll")
 	}
@@ -673,6 +677,7 @@ func (c *Client) BatchUpdateActivityWithUserID(start, limit int32) error {
 	if len(subs) < max {
 		max = len(subs)
 	}
+	c.log.Infof(c.ctx, "updating %s subs", len(subs))
 	subs = subs[start : max-1]
 	userIDs := make([]string, len(subs))
 	emails := make([]string, len(subs))
