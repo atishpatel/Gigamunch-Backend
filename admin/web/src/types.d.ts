@@ -16,5 +16,12 @@ declare global {
         interface ActivitiyExtended extends Common.Activity {
             dateFull: string;
         }
+
+        interface LogExtended extends Common.Log {
+            color: string;
+            icon: string;
+            timestampString: string;
+            basicPayloadDescriptionHTML: string;
+        }
     }
 }

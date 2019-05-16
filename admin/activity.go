@@ -38,7 +38,7 @@ func (s *server) GetSubscriberActivities(ctx context.Context, w http.ResponseWri
 
 	aResp, err := serverhelper.PBActivities(activities)
 	if err != nil {
-		return errors.Annotate(err, "failed to encode")
+		return errors.Annotate(err, "failed to PBActivities")
 	}
 
 	resp := &pb.GetSubscriberActivitiesResp{
@@ -155,9 +155,12 @@ func (s *server) RefundActivity(ctx context.Context, w http.ResponseWriter, r *h
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.NewClient")
 	}
-	err = activityC.Refund(getDatetime(req.Date), req.Email, req.Amount, req.Percent)
-	if err != nil {
-		return errors.Annotate(err, "failed to activity.RefundActivity")
+	date := getDatetime(req.Date)
+	for _, e := range req.Emails {
+		err = activityC.Refund(date, e, req.Amount, req.Percent)
+		if err != nil {
+			return errors.Annotate(err, "failed to activity.RefundActivity")
+		}
 	}
 	resp := &pb.ErrorOnlyResp{}
 	return resp

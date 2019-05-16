@@ -3,6 +3,7 @@ package serverhelper
 import (
 	"bytes"
 	"encoding/json"
+	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
@@ -72,6 +73,11 @@ func PBActivities(in []*activity.Activity) ([]*pbcommon.Activity, error) {
 	out := make([]*pbcommon.Activity, len(in))
 	if in == nil {
 		return out, nil
+	}
+	for _, a := range in {
+		a.PaidDatetimeJSON = a.PaidDatetime.Time.Format(time.RFC3339)
+		a.RefundedDatetimeJSON = a.RefundedDatetime.Time.Format(time.RFC3339)
+		a.GiftFromUserIDJSON = a.GiftFromUserID.Int64
 	}
 	err := marshalUnmarshal(&in, &out)
 	return out, err

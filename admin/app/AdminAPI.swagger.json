@@ -1281,8 +1281,11 @@
     "AdminAPIRefundActivityReq": {
       "type": "object",
       "properties": {
-        "email": {
-          "type": "string"
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "date": {
           "type": "string"

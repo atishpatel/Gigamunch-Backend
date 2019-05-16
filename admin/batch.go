@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
+	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 )
 
 // UpdateSubs updates Subs for subscribers.
@@ -19,15 +21,15 @@ func (s *server) UpdateSubs(ctx context.Context, w http.ResponseWriter, r *http.
 		return failedToDecode(err)
 	}
 	// end decode request
-
-	// subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-	// if err != nil {
-	// 	return errors.Annotate(err, "failed to sub.NewClient")
-	// }
-	// err = subC.BatchUpdateActivityWithUserID(req.Start, req.Limit)
-	// if err != nil {
-	// 	return errors.Annotate(err, "failed to sub.BatchUpdateActivityWithUserID")
-	// }
+	log.Infof(ctx, "updating subs")
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.BatchUpdateActivityWithUserID(int(req.Start), int(req.Limit))
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.BatchUpdateActivityWithUserID")
+	}
 	return nil
 }
 

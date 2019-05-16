@@ -41,7 +41,7 @@ interface SetupActivitiesReq {
     hours: number
 }
 interface RefundActivityReq {
-    email: string
+    emails: string[]
     date: string
     amount: number
     percent: number

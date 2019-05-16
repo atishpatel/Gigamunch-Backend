@@ -26,6 +26,7 @@ const (
 	selectActivityByUserIDStatement          = "SELECT * FROM activity WHERE date=? AND user_id=?"
 	selectAllActivityStatement               = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
 	selectActivityForUserStatement           = "SELECT * FROM activity WHERE user_id=? ORDER BY date DESC"
+	selectActivityForUserStatementEmail      = "SELECT * FROM activity WHERE email=? ORDER BY date DESC"
 	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
 	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
 	updateRefundedStatement                  = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
@@ -110,7 +111,12 @@ func (c *Client) GetAll(limit int) ([]*Activity, error) {
 // GetAllForUser gets a list of activity for a user.
 func (c *Client) GetAllForUser(userID string) ([]*Activity, error) {
 	acts := []*Activity{}
-	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityForUserStatement, userID)
+	var err error
+	if strings.Contains(userID, "@") {
+		err = c.sqlDB.SelectContext(c.ctx, &acts, selectActivityForUserStatementEmail, userID)
+	} else {
+		err = c.sqlDB.SelectContext(c.ctx, &acts, selectActivityForUserStatement, userID)
+	}
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivityForUserStatement")
 	}
@@ -282,6 +288,9 @@ func (c *Client) Refund(date time.Time, email string, amount float32, precent in
 	act, err := c.Get(date, email)
 	if err != nil {
 		return errors.Wrap("failed to Get", err)
+	}
+	if !act.Paid {
+		return errBadRequest.WithMessage("Activity has not paid.")
 	}
 	if act.Refunded {
 		return errBadRequest.WithMessage("Activity is already refunded.")

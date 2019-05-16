@@ -1,7 +1,8 @@
 <template>
   <div class="subscriber">
-    Subscriber
+    <SubscriberSummary :sub="sub"></SubscriberSummary>
     <SubscriberActivitiesList :activities="acts"></SubscriberActivitiesList>
+    <SubscriberLogs :logs="logs"></SubscriberLogs>
   </div>
 </template>
 
@@ -9,7 +10,12 @@
 import { Component, Vue } from 'vue-property-decorator';
 import SubscriberActivitiesList from '../components/SubscriberActivitiesList.vue';
 import SubscriberSummary from '../components/SubscriberSummary.vue';
-import { GetSubscriber, GetSubscriberActivities } from '../ts/service';
+import SubscriberLogs from '../components/SubscriberLogs.vue';
+import {
+  GetSubscriber,
+  GetSubscriberActivities,
+  GetLogsForUser,
+} from '../ts/service';
 import { GetAddressLink, GetAddress } from '../ts/utils';
 import { IsError } from '../ts/errors';
 import { GetDayFullDate } from '../ts/utils';
@@ -18,16 +24,19 @@ import { GetDayFullDate } from '../ts/utils';
   components: {
     SubscriberActivitiesList,
     SubscriberSummary,
+    SubscriberLogs,
   },
 })
 export default class Subscriber extends Vue {
   protected sub: Types.SubscriberExtended;
   protected acts: Types.ActivitiyExtended[];
+  protected logs: Types.LogExtended[];
 
   public constructor() {
     super();
     this.sub = {} as Types.SubscriberExtended;
     this.acts = [];
+    this.logs = [];
   }
 
   public created() {
@@ -35,6 +44,7 @@ export default class Subscriber extends Vue {
     const idOrEmail = decodeURIComponent(tmp[1]);
     this.getSubscriber(idOrEmail);
     this.getActivities(idOrEmail);
+    this.getLogs(idOrEmail);
   }
 
   public getActivities(idOrEmail: string) {
@@ -79,6 +89,16 @@ export default class Subscriber extends Vue {
       sub.phonenumbersString = sub.phonenumbers.toString();
 
       this.sub = sub;
+    });
+  }
+
+  public getLogs(idOrEmail: string) {
+    GetLogsForUser(0, 1000, idOrEmail).then((resp) => {
+      if (IsError(resp)) {
+        console.error(resp);
+        return;
+      }
+      this.logs = resp.logs as Types.LogExtended[];
     });
   }
 }

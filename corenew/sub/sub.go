@@ -60,7 +60,7 @@ var (
 	errDatastoreNotFound = errors.ErrorWithCode{Code: errors.CodeNotFound, Message: "Not found."}
 	errInvalidParameter  = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "Invalid parameter."}
 	errEntrySkipped      = errors.ErrorWithCode{Code: 401, Message: "Invalid parameter. Entry is skipped."}
-	errNoSuchEntry       = errors.ErrorWithCode{Code: 4001, Message: "Invalid parameter."}
+	errNoSuchEntry       = errors.ErrorWithCode{Code: 402, Message: "Invalid parameter."}
 	errDuplicateEntry    = errors.ErrorWithCode{Code: 4000, Message: "Invalid parameter."}
 )
 
