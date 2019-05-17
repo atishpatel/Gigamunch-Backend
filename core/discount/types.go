@@ -7,7 +7,7 @@ import (
 // Discount is a subscriber Discount.
 type Discount struct {
 	ID              int64     `json:"id" db:"id"`
-	CreatedDatetime time.Time `json:"created_datetime" db:"created_dt"`
+	CreatedDatetime time.Time `json:"created_datetime,string" db:"created_dt"`
 	UserID          string    `json:"user_id" db:"user_id"`
 	Email           string    `json:"email" db:"email"`
 	FirstName       string    `json:"first_name" db:"first_name"`
@@ -19,5 +19,5 @@ type Discount struct {
 
 // IsUsed returns if discount is used.
 func (d *Discount) IsUsed() bool {
-	return d.DateUsed != "0000-00-00"
+	return d.DateUsed[:10] > "1001-01-01"
 }

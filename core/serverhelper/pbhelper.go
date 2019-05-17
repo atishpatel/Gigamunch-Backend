@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/discount"
+
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -136,6 +138,16 @@ func PBEmailPrefs(in []subold.EmailPref) ([]*pbcommon.EmailPref, error) {
 // PBPhonePrefs turns an array of PhonePrefs into a protobuff array of PhonePrefs.
 func PBPhonePrefs(in []subold.PhonePref) ([]*pbcommon.PhonePref, error) {
 	out := make([]*pbcommon.PhonePref, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBDiscounts turns an array of discounts into a protobuff array of discounts.
+func PBDiscounts(in []*discount.Discount) ([]*pbcommon.Discount, error) {
+	out := make([]*pbcommon.Discount, len(in))
 	if in == nil {
 		return out, nil
 	}

@@ -401,16 +401,34 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 			ServingsNonVegetarian: sub.ServingsNonVegetarian,
 			ServingsVegetarain:    sub.ServingsVegetarian,
 			Amount:                sub.Amount,
-			DiscountAmount:        req.DiscountAmount,
-			DiscountPercent:       req.DiscountPercent,
-			PaymentProvider:       sub.PaymentProvider,
-			PaymentMethodToken:    sub.PaymentMethodToken,
-			CustomerID:            sub.PaymentCustomerID,
+			// DiscountAmount:        req.DiscountAmount, // switched to new discount system
+			// DiscountPercent:       req.DiscountPercent,
+			PaymentProvider:    sub.PaymentProvider,
+			PaymentMethodToken: sub.PaymentMethodToken,
+			CustomerID:         sub.PaymentCustomerID,
 		}
 		createReq.SetAddress(&req.Address)
 		err = activityC.Create(createReq)
 		if err != nil {
 			c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to activity.Create"))
+		}
+	}
+	// create discount
+	discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to discount.NewClient"))
+	} else {
+		createReq := &discount.CreateReq{
+			UserID:          sub.ID,
+			Email:           sub.Email(),
+			FirstName:       sub.FirstName(),
+			LastName:        sub.LastName(),
+			DiscountAmount:  req.DiscountAmount,
+			DiscountPercent: req.DiscountPercent,
+		}
+		err = discountC.Create(createReq)
+		if err != nil {
+			c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to discount.Create"))
 		}
 	}
 
@@ -568,6 +586,7 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 			return errors.Annotate(err, "failed to discount.NewClient")
 		}
 		if discnt != nil && !discnt.IsUsed() {
+			c.log.Infof(c.ctx, "Using discount: %+v", discnt)
 			discountAmount = discnt.DiscountAmount
 			discountPercent = discnt.DiscountPercent
 		}
@@ -607,7 +626,7 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 		c.log.Paid(sub.ID, sub.Email(), act.Date, act.Amount, amount, tID)
 	}
 	// update TransactionID
-	err = activityC.Paid(act.DateParsed(), act.UserID, amount, tID)
+	err = activityC.Paid(act.DateParsed(), act.UserID, amount, discountAmount, discountPercent, tID)
 	if err != nil {
 		c.log.Criticalf(c.ctx, "user paid but didn't get marked as paid: %+v", err)
 		return errors.Annotate(err, "user paid but didn't get marked as paid")

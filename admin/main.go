@@ -69,6 +69,11 @@ func main() {
 	http.HandleFunc("/admin/api/v1/RefundActivity", s.handler(s.userAdmin(s.RefundActivity)))
 	http.HandleFunc("/admin/api/v1/RefundAndSkipActivity", s.handler(s.userAdmin(s.RefundAndSkipActivity)))
 	// **********************
+	// Discount
+	// **********************
+	http.HandleFunc("/admin/api/v1/DiscountSubscriber", s.handler(s.userAdmin(s.DiscountSubscriber)))
+	http.HandleFunc("/admin/api/v1/GetSubscriberDiscounts", s.handler(s.userAdmin(s.GetSubscriberDiscounts)))
+	// **********************
 	// Logs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
@@ -80,7 +85,7 @@ func main() {
 	// Sublogs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
-	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
+	http.HandleFunc("/admin/api/v1/ProcessSublogs", s.handler(s.userAdmin(s.ProcessSublogs)))
 	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
 	// **********************
 	// Subscriber

@@ -34,7 +34,7 @@ const (
 	unskipStatement                          = "UPDATE activity SET skip=0,active=1 WHERE date=? AND email=?"
 	insertStatement                          = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 	deleteFutureStatment                     = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
-	updatePaidStatement                      = "UPDATE activity SET amount_paid=?,paid=1,paid_dt=?,transaction_id=? WHERE date=? AND user_id=?"
+	updatePaidStatement                      = "UPDATE activity SET amount_paid=?,discount_amount=?,discount_percent=?,paid=1,paid_dt=?,transaction_id=? WHERE date=? AND user_id=?"
 	// TODO: switch to user id
 	deleteFutureEmailStatment = "DELETE from activity WHERE date>? AND email=? AND paid=0"
 )
@@ -357,7 +357,7 @@ func (c *Client) Unskip(date time.Time, email string) error {
 }
 
 // Paid sets activity to paid.
-func (c *Client) Paid(date time.Time, userID string, amount float32, tID string) error {
+func (c *Client) Paid(date time.Time, userID string, amount, discountAmount float32, discountPercent int8, tID string) error {
 	if userID == "" || date.IsZero() {
 		return errBadRequest.Annotate("invalid UserID or Date")
 	}
@@ -368,7 +368,7 @@ func (c *Client) Paid(date time.Time, userID string, amount float32, tID string)
 	if act.Paid {
 		return errBadRequest.WithMessage("Failed. User has already paid.")
 	}
-	_, err = c.sqlDB.ExecContext(c.ctx, updatePaidStatement, amount, time.Now().Format(datetimeFormat), tID, date.Format(DateFormat), userID)
+	_, err = c.sqlDB.ExecContext(c.ctx, updatePaidStatement, amount, discountAmount, discountPercent, time.Now().Format(datetimeFormat), tID, date.Format(DateFormat), userID)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updatePaidStatement")
 	}

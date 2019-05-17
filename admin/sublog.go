@@ -14,8 +14,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// ProcessSublog runs sub.Process.
-func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+// ProcessSublogs runs sub.Process.
+func (s *server) ProcessSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pb.ProcessSublogsReq)
 

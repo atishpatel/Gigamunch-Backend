@@ -207,7 +207,7 @@ CREATE TABLE IF NOT EXISTS activity(
 -- TODO: change primary key from date, email to date, user_id
 
 CREATE TABLE IF NOT EXISTS discount(
-	id BIGINT NOT NULL PRIMARY KEY,
+	id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
 	user_id VARCHAR(125) NOT NULL DEFAULT '',
 	email VARCHAR(175) NOT NULL,
