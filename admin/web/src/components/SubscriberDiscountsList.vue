@@ -1,9 +1,13 @@
 <template>
   <div class="el-container">
-    <v-card class="discounts">
+    <div class="discounts">
       <v-card-title>
         Discounts
         <v-spacer></v-spacer>
+        <DialogNewDiscount
+          :sub="sub"
+          @dialog-success="$emit('dialog-success')"
+        ></DialogNewDiscount>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -33,19 +37,24 @@
           </v-alert>
         </template>
       </v-data-table>
-    </v-card>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import DialogNewDiscount from './DialogNewDiscount.vue';
 
 @Component({
-  components: {},
+  components: {
+    DialogNewDiscount,
+  },
 })
 export default class SubscriberDiscountsList extends Vue {
   @Prop()
   public discounts!: Common.Discount[];
+  @Prop()
+  public sub!: Types.SubscriberExtended;
   public pagination = {
     rowsPerPage: -1,
   };
@@ -79,7 +88,10 @@ export default class SubscriberDiscountsList extends Vue {
 }
 
 .discounts {
-  max-width: 1500px;
-  margin: auto;
+  // max-width: 1500px;
+  // margin: auto;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 </style>

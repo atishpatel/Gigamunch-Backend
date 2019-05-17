@@ -33,7 +33,7 @@
       <v-spacer></v-spacer>
     </v-toolbar>
 
-    <v-content>
+    <v-content class="main">
       <router-view />
     </v-content>
   </v-app>
@@ -58,6 +58,10 @@ export default class App extends Vue {
 </script>
 <style lang="scss">
 .app-toolbar div {
+  background: white;
+}
+
+.main {
   background: white;
 }
 </style>

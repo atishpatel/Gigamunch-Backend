@@ -1,8 +1,17 @@
 <template>
   <div class="subscriber">
     <SubscriberSummary :sub="sub"></SubscriberSummary>
-    <SubscriberDiscountsList :discounts="discounts"></SubscriberDiscountsList>
-    <SubscriberActivitiesList :activities="acts"></SubscriberActivitiesList>
+    <SubscriberDiscountsList
+      class="list"
+      :discounts="discounts"
+      :sub="sub"
+      v-on:dialog-success="getDiscounts"
+    ></SubscriberDiscountsList>
+    <SubscriberActivitiesList
+      class="list"
+      :activities="acts"
+      :sub="sub"
+    ></SubscriberActivitiesList>
     <SubscriberLogs :logs="logs"></SubscriberLogs>
   </div>
 </template>
@@ -39,6 +48,7 @@ export default class Subscriber extends Vue {
   protected discounts: Common.Discount[];
   protected acts: Types.ActivitiyExtended[];
   protected logs: Types.LogExtended[];
+  protected id: string;
 
   public constructor() {
     super();
@@ -46,19 +56,20 @@ export default class Subscriber extends Vue {
     this.acts = [];
     this.discounts = [];
     this.logs = [];
+    const tmp = window.location.pathname.split('/subscriber/');
+    const idOrEmail = decodeURIComponent(tmp[1]);
+    this.id = idOrEmail;
   }
 
   public created() {
-    const tmp = window.location.pathname.split('/subscriber/');
-    const idOrEmail = decodeURIComponent(tmp[1]);
-    this.getSubscriber(idOrEmail);
-    this.getActivities(idOrEmail);
-    this.getLogs(idOrEmail);
-    this.getDiscounts(idOrEmail);
+    this.getSubscriber();
+    this.getActivities();
+    this.getLogs();
+    this.getDiscounts();
   }
 
-  public getActivities(idOrEmail: string) {
-    GetSubscriberActivities(idOrEmail).then((resp) => {
+  public getActivities() {
+    GetSubscriberActivities(this.id).then((resp) => {
       if (IsError(resp)) {
         console.error(resp);
         return;
@@ -68,8 +79,8 @@ export default class Subscriber extends Vue {
     });
   }
 
-  public getDiscounts(id: string) {
-    GetSubscriberDiscounts(id).then((resp) => {
+  public getDiscounts() {
+    GetSubscriberDiscounts(this.id).then((resp) => {
       if (IsError(resp)) {
         console.error(resp);
         return;
@@ -79,8 +90,8 @@ export default class Subscriber extends Vue {
     });
   }
 
-  public getSubscriber(idOrEmail: string) {
-    GetSubscriber(idOrEmail).then((resp) => {
+  public getSubscriber() {
+    GetSubscriber(this.id).then((resp) => {
       if (IsError(resp)) {
         console.error(resp);
         return;
@@ -90,8 +101,8 @@ export default class Subscriber extends Vue {
     });
   }
 
-  public getLogs(idOrEmail: string) {
-    GetLogsForUser(0, 1000, idOrEmail).then((resp) => {
+  public getLogs() {
+    GetLogsForUser(0, 1000, this.id).then((resp) => {
       if (IsError(resp)) {
         console.error(resp);
         return;
@@ -102,4 +113,17 @@ export default class Subscriber extends Vue {
 }
 </script>
 <style lang="scss">
+.subscriber {
+  background-color: white;
+  max-width: 1500px;
+  margin: auto;
+  padding: 24px;
+}
+
+.list {
+  padding: 24px 0;
+  // border: 1px solid #dadce0;
+  // border-radius: 8px;
+  // overflow: hidden;
+}
 </style>

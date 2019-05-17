@@ -15,8 +15,27 @@
             </a>
           </div>
         </div>
-        <div :class="[{ 'sub-active': sub.active, 'sub-deactive': !sub.active},'subscriber-status']">
-          {{computedSubStatus}}
+        <div>
+          <div :class="[{ 'sub-active': sub.active, 'sub-deactive': !sub.active},'subscriber-status']">
+            {{computedSubStatus}}
+          </div>
+          <v-btn
+            outline
+            round
+            :disabled="sub.active"
+            @click="activateSubscriber"
+          >Activate</v-btn>
+          <v-btn
+            outline
+            round
+            :disabled="!sub.active"
+            @click="deactivateSubscriber"
+          >Deactivate</v-btn>
+          <v-btn
+            outline
+            round
+            @click="updateSubscriber"
+          >Update Subscriber</v-btn>
         </div>
 
         <!-- Subsriber Info Table -->
@@ -43,10 +62,16 @@
                 :href="sub.addressLink"
               >{{sub.addressString}}</a>
             </div>
+            <v-spacer></v-spacer>
+            <v-btn
+              outline
+              round
+              @click="updateAddress"
+            >Update Address</v-btn>
           </div>
 
           <div class="info-row">
-            <div class="info-label">Delivery Tip:</div>
+            <div class="info-label">Delivery Notes:</div>
             <div class="info-value subscriber-delivery-tip">
               {{sub.delivery_notes}}
             </div>
@@ -57,6 +82,12 @@
             <div class="info-value servings">
               {{computedServings}}
             </div>
+            <v-spacer></v-spacer>
+            <v-btn
+              outline
+              round
+              @click="changeServingsPermanently"
+            >Change Servings Permanently</v-btn>
           </div>
           <div class="info-row">
             <div class="info-label">Customer ID:</div>
@@ -117,6 +148,16 @@ export default class SubscriberSummary extends Vue {
     return v;
   }
 
+  protected changeServingsPermanently() {}
+
+  protected updateAddress() {}
+
+  protected updateSubscriber() {}
+
+  protected activateSubscriber() {}
+
+  protected deactivateSubscriber() {}
+
   get computedSubStatus() {
     if (this.sub.active) {
       return '• Active';
@@ -142,17 +183,19 @@ export default class SubscriberSummary extends Vue {
 <style scoped lang="scss">
 .summary {
   background: white;
-  padding-bottom: 24px;
 }
 
 .summary > div {
   margin: auto;
-  max-width: 1000px;
+  // max-width: 1000px;
 }
 
 .subscriber-table-info {
   display: flex;
   flex-direction: column;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .subscriber-name {

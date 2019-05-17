@@ -1,9 +1,14 @@
 <template>
   <div class="el-container">
-    <v-card class="activities">
+    <div class="activities">
       <v-card-title>
         Activities
         <v-spacer></v-spacer>
+        <v-btn
+          outline
+          round
+          @click="setupActivity"
+        >Setup Activity</v-btn>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -40,6 +45,18 @@
               :disabled="!props.item.skip"
               @click="unskip(props.item)"
             >Unskip</v-btn>
+            <v-btn
+              outline
+              round
+              :disabled="!props.item.paid"
+              @click="processAcitivity(props.item)"
+            >Process</v-btn>
+            <v-btn
+              outline
+              round
+              :disabled="!props.item.paid"
+              @click="changeServingsForDay(props.item)"
+            >Change Servings for Day</v-btn>
           </v-card>
           <v-card-text v-html="detailHTML(props.item)"></v-card-text>
         </template>
@@ -54,7 +71,7 @@
           </v-alert>
         </template>
       </v-data-table>
-    </v-card>
+    </div>
   </div>
 </template>
 
@@ -83,7 +100,6 @@ export default class SubscriberActivitiesList extends Vue {
   ];
 
   protected detailHTML(act: any) {
-    console.log(act);
     let table = '<table>';
     const keys = Object.keys(act);
     for (let i = 0; i < keys.length; i++) {
@@ -103,6 +119,16 @@ export default class SubscriberActivitiesList extends Vue {
   protected unskip(act: Types.ActivitiyExtended) {
     console.log(act);
   }
+
+  protected processAcitivity(act: Types.ActivitiyExtended) {
+    console.log(act);
+  }
+
+  protected changeServingsForDay(act: Types.ActivitiyExtended) {
+    console.log(act);
+  }
+
+  protected setupActivity() {}
 }
 </script>
 
@@ -122,7 +148,10 @@ export default class SubscriberActivitiesList extends Vue {
 }
 
 .activities {
-  max-width: 1500px;
-  margin: auto;
+  // max-width: 1500px;
+  // margin: auto;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 </style>

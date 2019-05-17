@@ -49,7 +49,7 @@ export default class SubscriberLogs extends Vue {
 
 <style scoped lang="scss">
 .timeline {
-  max-width: 1100px;
+  max-width: 1250px;
 }
 
 .description {

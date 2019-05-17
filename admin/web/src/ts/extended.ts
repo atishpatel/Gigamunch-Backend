@@ -130,6 +130,8 @@ function getActivityStatus(act: Types.ActivitiyExtended) {
         return 'First';
     } else if (act.paid) {
         return 'Paid $' + act.amount_paid;
+    } else if (act.discount_percent === 100) {
+        return `Discounted ${act.discount_percent}%`;
     }
     const today = new Date();
     const d = new Date(act.date);

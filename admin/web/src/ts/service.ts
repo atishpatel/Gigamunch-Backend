@@ -27,6 +27,16 @@ export function GetSubscriberDiscounts(id: string): Promise<AdminAPI.GetSubscrib
   return callFetch(url, 'GET', req);
 }
 
+export function DiscountSubscriber(user_id: string, discount_amount: number, discount_percent: number): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/DiscountSubscriber';
+  const req: AdminAPI.DiscountSubscriberReq = {
+    user_id,
+    discount_amount,
+    discount_percent,
+  };
+  return callFetch(url, 'GET', req);
+}
+
 // Activitiy
 export function GetSubscriberActivities(id: string): Promise<AdminAPI.GetSubscriberActivitiesResp> {
   const url: string = baseURL + '/v1/GetSubscriberActivities';

@@ -72,6 +72,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.vue",
+    "**/types.d.ts",
     "Gigamunch-Proto/pbcommon/*.d.ts",
     "Gigamunch-Proto/pbsub/*.d.ts",
     "Gigamunch-Proto/pbadmin/*.d.ts"
