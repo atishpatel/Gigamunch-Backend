@@ -1,6 +1,7 @@
 <template>
   <div class="subscriber">
     <SubscriberSummary :sub="sub"></SubscriberSummary>
+    <SubscriberDiscountsList :discounts="discounts"></SubscriberDiscountsList>
     <SubscriberActivitiesList :activities="acts"></SubscriberActivitiesList>
     <SubscriberLogs :logs="logs"></SubscriberLogs>
   </div>
@@ -9,11 +10,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import SubscriberActivitiesList from '../components/SubscriberActivitiesList.vue';
+import SubscriberDiscountsList from '../components/SubscriberDiscountsList.vue';
 import SubscriberSummary from '../components/SubscriberSummary.vue';
 import SubscriberLogs from '../components/SubscriberLogs.vue';
 import {
   GetSubscriber,
   GetSubscriberActivities,
+  GetSubscriberDiscounts,
   GetLogsForUser,
 } from '../ts/service';
 import {
@@ -26,12 +29,14 @@ import { IsError } from '../ts/errors';
 @Component({
   components: {
     SubscriberActivitiesList,
+    SubscriberDiscountsList,
     SubscriberSummary,
     SubscriberLogs,
   },
 })
 export default class Subscriber extends Vue {
   protected sub: Types.SubscriberExtended;
+  protected discounts: Common.Discount[];
   protected acts: Types.ActivitiyExtended[];
   protected logs: Types.LogExtended[];
 
@@ -39,6 +44,7 @@ export default class Subscriber extends Vue {
     super();
     this.sub = {} as Types.SubscriberExtended;
     this.acts = [];
+    this.discounts = [];
     this.logs = [];
   }
 
@@ -48,6 +54,7 @@ export default class Subscriber extends Vue {
     this.getSubscriber(idOrEmail);
     this.getActivities(idOrEmail);
     this.getLogs(idOrEmail);
+    this.getDiscounts(idOrEmail);
   }
 
   public getActivities(idOrEmail: string) {
@@ -58,6 +65,17 @@ export default class Subscriber extends Vue {
       }
 
       this.acts = GetActivitiesExtended(resp.activities);
+    });
+  }
+
+  public getDiscounts(id: string) {
+    GetSubscriberDiscounts(id).then((resp) => {
+      if (IsError(resp)) {
+        console.error(resp);
+        return;
+      }
+
+      this.discounts = resp.discounts;
     });
   }
 

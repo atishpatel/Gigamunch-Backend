@@ -19,6 +19,15 @@ interface ReplaceSubscriberEmailReq {
     old_email: string
     new_email: string
 }
+interface DiscountSubscriberReq {
+    user_id: string
+    discount_amount: number
+    discount_percent: number
+}
+interface GetSubscriberDiscountsResp {
+    error: Common.Error
+    discounts: Common.Discount[]
+}
 interface GetSubscriberActivitiesResp {
     error: Common.Error
     activities: Common.Activity[]

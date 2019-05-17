@@ -70,6 +70,32 @@
         ]
       }
     },
+    "/admin/api/v1/DiscountSubscriber": {
+      "post": {
+        "operationId": "DiscountSubscriber",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIDiscountSubscriberReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetAllExecutionStats": {
       "post": {
         "operationId": "GetAllExecutionStats",
@@ -318,6 +344,32 @@
             "description": "",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberActivitiesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUserIDReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetSubscriberDiscounts": {
+      "post": {
+        "operationId": "GetSubscriberDiscounts",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberDiscountsResp"
             }
           }
         },
@@ -867,6 +919,22 @@
       },
       "title": "**********************\nDeliveries\n**********************"
     },
+    "AdminAPIDiscountSubscriberReq": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "AdminAPIErrorOnlyResp": {
       "type": "object",
       "properties": {
@@ -1179,6 +1247,20 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/CommonActivity"
+          }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberDiscountsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "discounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonDiscount"
           }
         }
       }
@@ -1909,6 +1991,41 @@
         }
       },
       "description": "CultureGuide is content related to the culture guide."
+    },
+    "CommonDiscount": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "date_used": {
+          "type": "string"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
     },
     "CommonDish": {
       "type": "object",

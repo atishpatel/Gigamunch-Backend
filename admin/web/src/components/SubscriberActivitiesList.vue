@@ -24,7 +24,10 @@
         </template>
 
         <template v-slot:expand="props">
-          <v-card flat>
+          <v-card
+            flat
+            class="actions"
+          >
             <v-btn
               outline
               round
@@ -79,7 +82,7 @@ export default class SubscriberActivitiesList extends Vue {
     { text: 'Status', value: 'status', sortable: false },
   ];
 
-  detailHTML(act: any) {
+  protected detailHTML(act: any) {
     console.log(act);
     let table = '<table>';
     const keys = Object.keys(act);
@@ -93,11 +96,11 @@ export default class SubscriberActivitiesList extends Vue {
     return table + '</table>';
   }
 
-  skip(act: Types.ActivitiyExtended) {
+  protected skip(act: Types.ActivitiyExtended) {
     console.log(act);
   }
 
-  unskip(act: Types.ActivitiyExtended) {
+  protected unskip(act: Types.ActivitiyExtended) {
     console.log(act);
   }
 }
@@ -106,6 +109,12 @@ export default class SubscriberActivitiesList extends Vue {
 <style scoped lang="scss">
 .paid-date {
   color: #bbbbbb;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
 }
 
 .el-container {

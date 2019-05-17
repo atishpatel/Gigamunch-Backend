@@ -81,6 +81,17 @@ interface Activity {
   deviant: boolean
   deviant_reason: string
 }
+interface Discount {
+	id: number
+	created_datetime: string
+	user_id: string
+	email: string
+	first_name: string
+	last_name: string
+	date_used: string
+	discount_amount: number
+	discount_percent: number
+}
 interface Execution {
   id: number
   date: string

@@ -18,6 +18,15 @@ export function GetLogsForUser(start: number, limit: number, id: string): Promis
   return callFetch(url, 'GET', req);
 }
 
+// Discount
+export function GetSubscriberDiscounts(id: string): Promise<AdminAPI.GetSubscriberDiscountsResp> {
+  const url: string = baseURL + '/v1/GetSubscriberDiscounts';
+  const req: AdminAPI.UserIDReq = {
+    ID: id,
+  };
+  return callFetch(url, 'GET', req);
+}
+
 // Activitiy
 export function GetSubscriberActivities(id: string): Promise<AdminAPI.GetSubscriberActivitiesResp> {
   const url: string = baseURL + '/v1/GetSubscriberActivities';

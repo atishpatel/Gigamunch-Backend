@@ -125,6 +125,9 @@ export default class SubscriberSummary extends Vue {
   }
 
   get computedDatastoreLink() {
+    if (!this.sub || !this.sub.email_prefs) {
+      return '';
+    }
     let project = 'gigamunch-omninexus';
     if (!IsProd()) {
       project += '-dev';

@@ -441,6 +441,10 @@ func (service *Service) DiscountSubLog(ctx context.Context, req *DiscountSubLogR
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
+
+	// discountC, err := discount.NewClient(ctx, log, db, sqlDB, serverInfo)
+	// err = discountC.Discount(req.Date, req.SubEmail, req.Amount, req.Percent, req.OverrideDiscount)
+
 	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
 	err = activityC.Discount(req.Date, req.SubEmail, req.Amount, req.Percent, req.OverrideDiscount)
 

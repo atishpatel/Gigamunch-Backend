@@ -147,6 +147,6 @@ function getActivityDiscountString(discountAmount: number, discountPercent: numb
     } else if (discountPercent > 0) {
         return `${discountPercent}%`;
     } else {
-        return "–";
+        return '–';
     }
 }
