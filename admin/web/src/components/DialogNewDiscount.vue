@@ -62,7 +62,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { DiscountSubscriber } from '../ts/service';
-import { IsError } from '../ts/errors';
+import { IsError, ErrorAlert } from '../ts/errors';
 
 @Component({
   components: {},
@@ -84,7 +84,7 @@ export default class DialogNewDiscount extends Vue {
     DiscountSubscriber(this.sub.id, this.req.amount, this.req.percent).then(
       (resp) => {
         if (IsError(resp)) {
-          console.error(resp);
+          ErrorAlert(resp);
           return;
         }
 

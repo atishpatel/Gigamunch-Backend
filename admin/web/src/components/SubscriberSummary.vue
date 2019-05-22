@@ -19,22 +19,17 @@
           <div :class="[{ 'sub-active': sub.active, 'sub-deactive': !sub.active},'subscriber-status']">
             {{computedSubStatus}}
           </div>
+          <ButtonActivate
+            :sub="sub"
+            v-on:dialog-success="getSubscriber"
+          ></ButtonActivate>
+          <ButtonDeactivate
+            :sub="sub"
+            v-on:dialog-success="getSubscriber"
+          ></ButtonDeactivate>
           <v-btn
             outline
             round
-            :disabled="sub.active"
-            @click="activateSubscriber"
-          >Activate</v-btn>
-          <v-btn
-            outline
-            round
-            :disabled="!sub.active"
-            @click="deactivateSubscriber"
-          >Deactivate</v-btn>
-          <v-btn
-            outline
-            round
-            @click="updateSubscriber"
           >Update Subscriber</v-btn>
         </div>
 
@@ -60,7 +55,7 @@
               <a
                 target="_blank"
                 :href="sub.addressLink"
-              >{{sub.addressString}}</a>
+              >{{sub.addressString}}</a> --- {{sub.address.latitude}}, {{sub.address.longitude}}
             </div>
             <v-spacer></v-spacer>
             <v-btn
@@ -83,11 +78,10 @@
               {{computedServings}}
             </div>
             <v-spacer></v-spacer>
-            <v-btn
-              outline
-              round
-              @click="changeServingsPermanently"
-            >Change Servings Permanently</v-btn>
+            <ButtonChangeServings
+              :sub="sub"
+              changePermanently="true"
+            ></ButtonChangeServings>
           </div>
           <div class="info-row">
             <div class="info-label">Customer ID:</div>
@@ -125,9 +119,16 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { IsProd } from '../ts/env';
+import ButtonActivate from './ButtonActivate.vue';
+import ButtonDeactivate from './ButtonDeactivate.vue';
+import ButtonChangeServings from './ButtonChangeServings.vue';
 
 @Component({
-  components: {},
+  components: {
+    ButtonActivate,
+    ButtonDeactivate,
+    ButtonChangeServings,
+  },
 })
 export default class SubscriberSummary extends Vue {
   @Prop()
@@ -148,15 +149,11 @@ export default class SubscriberSummary extends Vue {
     return v;
   }
 
-  protected changeServingsPermanently() {}
-
   protected updateAddress() {}
 
-  protected updateSubscriber() {}
-
-  protected activateSubscriber() {}
-
-  protected deactivateSubscriber() {}
+  protected getSubscriber() {
+    this.$emit('get-subscriber');
+  }
 
   get computedSubStatus() {
     if (this.sub.active) {

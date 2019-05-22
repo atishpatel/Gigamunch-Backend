@@ -636,7 +636,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/AdminAPISkipActivityResp"
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
           }
         },
@@ -663,7 +663,7 @@
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/AdminAPIUnskipActivityResp"
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
           }
         },
@@ -1456,14 +1456,9 @@
         },
         "date": {
           "type": "string"
-        }
-      }
-    },
-    "AdminAPISkipActivityResp": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "$ref": "#/definitions/CommonError"
+        },
+        "id": {
+          "type": "string"
         }
       }
     },
@@ -1546,14 +1541,9 @@
         },
         "date": {
           "type": "string"
-        }
-      }
-    },
-    "AdminAPIUnskipActivityResp": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "$ref": "#/definitions/CommonError"
+        },
+        "id": {
+          "type": "string"
         }
       }
     },

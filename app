@@ -14,6 +14,8 @@ if [[ $1 == "build" ]]; then
     echo "Building admin/app:"
     cd admin/app
     gulp build
+    cd ../web
+    yarn build
     cd ../..
   fi
   if [[ $* == *server* ]]; then

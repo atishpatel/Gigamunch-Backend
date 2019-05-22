@@ -59,15 +59,18 @@ func (s *server) SkipActivity(ctx context.Context, w http.ResponseWriter, r *htt
 		return failedToDecode(err)
 	}
 	// end decode request
+	if req.ID == "" {
+		req.ID = req.Email
+	}
 	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.NewClient")
 	}
-	err = activityC.Skip(getDatetime(req.Date), req.Email, "Admin skip.")
+	err = activityC.Skip(getDatetime(req.Date), req.ID, "Admin skip.")
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.SkipActivity")
 	}
-	resp := &pb.SkipActivityResp{}
+	resp := &pb.ErrorOnlyResp{}
 	return resp
 }
 
@@ -82,15 +85,18 @@ func (s *server) UnskipActivity(ctx context.Context, w http.ResponseWriter, r *h
 		return failedToDecode(err)
 	}
 	// end decode request
+	if req.ID == "" {
+		req.ID = req.Email
+	}
 	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.NewClient")
 	}
-	err = activityC.Unskip(getDatetime(req.Date), req.Email)
+	err = activityC.Unskip(getDatetime(req.Date), req.ID)
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.UnskipActivity")
 	}
-	resp := &pb.UnskipActivityResp{}
+	resp := &pb.ErrorOnlyResp{}
 	return resp
 }
 

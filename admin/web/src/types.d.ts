@@ -16,7 +16,7 @@ declare global {
             deactivatedDatetimeTimestamp: string;
         }
 
-        interface ActivitiyExtended extends Common.Activity {
+        interface ActivityExtended extends Common.Activity {
             dateFull: string;
             status: string;
             addressString: string;

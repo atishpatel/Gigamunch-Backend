@@ -64,6 +64,44 @@ export function GetSubscriber(id: string): Promise<AdminAPI.GetSubscriberRespV2>
   return callFetch(url, 'GET', req);
 }
 
+export function ActivateSubscriber(idOrEmail: string, first_bag_date: string): Promise<AdminAPI.GetHasSubscribedRespV2> {
+  const url: string = baseURL + '/v1/ActivateSubscriber';
+  const req: AdminAPI.ActivateSubscriberReq = {
+    email: idOrEmail,
+    first_bag_date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function DeactivateSubscriber(id: string, reason: string): Promise<AdminAPI.GetHasSubscribedRespV2> {
+  const url: string = baseURL + '/v1/DeactivateSubscriber';
+  const req: AdminAPI.DeactivateSubscriberReq = {
+    id,
+    reason,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function SkipActivity(id: string, date: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/SkipActivity';
+  const req: AdminAPI.SkipActivityReq = {
+    id,
+    date,
+    email: '',
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function UnskipActivity(id: string, date: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/UnskipActivity';
+  const req: AdminAPI.UnskipActivityReq = {
+    id,
+    date,
+    email: '',
+  };
+  return callFetch(url, 'POST', req);
+}
+
 function callFetch(url: string, method: string, body: object): Promise<any> {
   return GetToken().then((token) => {
     return callFetchWithToken(url, method, body, token);

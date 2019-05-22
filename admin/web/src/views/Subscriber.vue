@@ -1,16 +1,21 @@
 <template>
   <div class="subscriber">
-    <SubscriberSummary :sub="sub"></SubscriberSummary>
+    <SubscriberSummary
+      :sub="sub"
+      v-on:get-subscriber="getSubscriber"
+    ></SubscriberSummary>
     <SubscriberDiscountsList
       class="list"
       :discounts="discounts"
       :sub="sub"
       v-on:dialog-success="getDiscounts"
+      v-on:get-subscriber="getSubscriber"
     ></SubscriberDiscountsList>
     <SubscriberActivitiesList
       class="list"
       :activities="acts"
       :sub="sub"
+      v-on:get-activities="getActivities"
     ></SubscriberActivitiesList>
     <SubscriberLogs :logs="logs"></SubscriberLogs>
   </div>
@@ -46,13 +51,15 @@ import { IsError } from '../ts/errors';
 export default class Subscriber extends Vue {
   protected sub: Types.SubscriberExtended;
   protected discounts: Common.Discount[];
-  protected acts: Types.ActivitiyExtended[];
+  protected acts: Types.ActivityExtended[];
   protected logs: Types.LogExtended[];
   protected id: string;
 
   public constructor() {
     super();
-    this.sub = {} as Types.SubscriberExtended;
+    this.sub = {
+      address: {},
+    } as Types.SubscriberExtended;
     this.acts = [];
     this.discounts = [];
     this.logs = [];

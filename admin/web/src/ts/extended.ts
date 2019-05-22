@@ -41,16 +41,16 @@ export function GetSubscriberExtended(s: Types.SubscriberExtended | Common.Subsc
 }
 
 
-export function GetActivitiesExtended(v: Types.ActivitiyExtended[] | Common.Activity[]): Types.ActivitiyExtended[] {
-    const acts = v as Types.ActivitiyExtended[];
+export function GetActivitiesExtended(v: Types.ActivityExtended[] | Common.Activity[]): Types.ActivityExtended[] {
+    const acts = v as Types.ActivityExtended[];
     for (let i = 0; i < acts.length; i++) {
         acts[i] = GetActivityExtended(acts[i]);
     }
     return acts;
 }
 
-export function GetActivityExtended(v: Types.ActivitiyExtended | Common.Activity): Types.ActivitiyExtended {
-    const act = v as Types.ActivitiyExtended;
+export function GetActivityExtended(v: Types.ActivityExtended | Common.Activity): Types.ActivityExtended {
+    const act = v as Types.ActivityExtended;
     act.dateFull = GetDayFullDate(act.date);
     act.status = getActivityStatus(act);
     act.addressString = act.address_string;
@@ -121,7 +121,7 @@ function getLogIcon(log: Types.LogExtended) {
 }
 
 
-function getActivityStatus(act: Types.ActivitiyExtended) {
+function getActivityStatus(act: Types.ActivityExtended) {
     if (act.refunded) {
         return 'Refunded $' + act.refunded_amount;
     } else if (act.skip) {

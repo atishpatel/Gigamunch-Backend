@@ -31,6 +31,7 @@ const (
 	insertSubLogStatement                 = "INSERT INTO activity (date,user_id,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?,?)"
 	selectSubLogEmails                    = "SELECT DISTINCT email from activity where date>? and date<?"
 	selectSubLogStatement                 = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND email='%s'"
+	selectSubLogByUserIDStatement         = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND user_id='%s'"
 	selectSubscriberSubLogsStatement      = "SELECT date,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
 	selectAllSubLogStatement              = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity ORDER BY date DESC LIMIT %d"
 	selectUnpaidSubLogStatement           = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE paid=0 AND discount_percent<>100 AND skip=0 AND refunded=0 ORDER BY date DESC LIMIT %d"
@@ -39,7 +40,7 @@ const (
 	selectSubLogFromSubscriberStatement   = "SELECT date,email,created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE email=? ORDER BY date DESC"
 	selectSublogSummaryStatement          = "SELECT email,amount,min(date) as mn,max(date) as mx,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount),sum(servings),sum(veg_servings) FROM activity WHERE date<NOW() GROUP BY email HAVING mn<? && mn>? ORDER BY mn,mx"
 	updatePaidSubLogStatement             = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
-	updateSkipSubLogStatement             = "UPDATE activity SET skip=1 WHERE date='%s' AND email='%s'"
+	updateSkipSubLogStatement             = "UPDATE activity SET skip=1 WHERE date='%s' AND user_id='%s'"
 	deleteSubLogStatement                 = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
 	// updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
 	updateFirstSubLogStatment                = "UPDATE activity SET first=1,discount_percent=100 WHERE date='%s' AND email='%s'"
@@ -360,7 +361,12 @@ func (c *Client) Get(date time.Time, subEmail string) (*SubscriptionLog, error) 
 	if date.IsZero() || subEmail == "" {
 		return nil, errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) ", date, subEmail)
 	}
-	st := fmt.Sprintf(selectSubLogStatement, date.Format(dateFormat), subEmail)
+	var st string
+	if strings.Contains(subEmail, "@") {
+		st = fmt.Sprintf(selectSubLogStatement, date.Format(dateFormat), subEmail)
+	} else {
+		st = fmt.Sprintf(selectSubLogByUserIDStatement, date.Format(dateFormat), subEmail)
+	}
 	rows, err := mysqlDB.Query(st)
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Wrap("failed to query selectSubLogStatement statement.")
@@ -653,6 +659,9 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 	}
 	// insert or update
 	sl, err := c.Get(date, subEmail)
+	// TODO: handle situation where err != nil but its not because 404 not found
+	c.log.Infof(c.ctx, "sublog :%+v", sl)
+	c.log.Infof(c.ctx, "err :%+v", err)
 	if err != nil {
 		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
 			return errors.Wrap("failed to sub.Get", err)
@@ -695,7 +704,7 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 			}
 		}
 	}
-	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), subEmail)
+	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), s.ID)
 	_, err = mysqlDB.Exec(st)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateSkipSubLogStatement statement.")
@@ -829,6 +838,7 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 func (c *Client) Free(date time.Time, subEmail string) error {
 	// insert or update
 	_, err := c.Get(date, subEmail)
+	// TODO: handle situation where err != nil but its not because 404 not found
 	if err != nil {
 		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
 			return errors.Wrap("failed to sub.Get", err)

@@ -35,16 +35,12 @@ interface GetSubscriberActivitiesResp {
 interface SkipActivityReq {
     email: string
     date: string
-}
-interface SkipActivityResp {
-    error: Common.Error
+    id: string
 }
 interface UnskipActivityReq {
     email: string
     date: string
-}
-interface UnskipActivityResp {
-    error: Common.Error
+    id: string
 }
 interface SetupActivitiesReq {
     hours: number

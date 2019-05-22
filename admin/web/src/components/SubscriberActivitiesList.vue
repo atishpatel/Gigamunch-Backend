@@ -4,11 +4,7 @@
       <v-card-title>
         Activities
         <v-spacer></v-spacer>
-        <v-btn
-          outline
-          round
-          @click="setupActivity"
-        >Setup Activity</v-btn>
+        <ButtonSetupActivity v-on:dialog-success="getActivities"></ButtonSetupActivity>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -33,30 +29,16 @@
             flat
             class="actions"
           >
-            <v-btn
-              outline
-              round
-              :disabled="props.item.skip"
-              @click="skip(props.item)"
-            >Skip</v-btn>
-            <v-btn
-              outline
-              round
-              :disabled="!props.item.skip"
-              @click="unskip(props.item)"
-            >Unskip</v-btn>
+            <ButtonSkip :activity="props.item"></ButtonSkip>
+            <ButtonUnskip :activity="props.item"></ButtonUnskip>
             <v-btn
               outline
               round
               :disabled="!props.item.paid"
               @click="processAcitivity(props.item)"
             >Process</v-btn>
-            <v-btn
-              outline
-              round
-              :disabled="!props.item.paid"
-              @click="changeServingsForDay(props.item)"
-            >Change Servings for Day</v-btn>
+
+            <ButtonChangeServings :activity="props.item"></ButtonChangeServings>
           </v-card>
           <v-card-text v-html="detailHTML(props.item)"></v-card-text>
         </template>
@@ -77,14 +59,22 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-// import { SkipActivity, UnskipActivity } from '../ts/service';
+import ButtonSkip from './ButtonSkip.vue';
+import ButtonUnskip from './ButtonUnskip.vue';
+import ButtonSetupActivity from './ButtonSetupActivity.vue';
+import ButtonChangeServings from './ButtonChangeServings.vue';
 
 @Component({
-  components: {},
+  components: {
+    ButtonSkip,
+    ButtonUnskip,
+    ButtonSetupActivity,
+    ButtonChangeServings,
+  },
 })
 export default class SubscriberActivitiesList extends Vue {
   @Prop()
-  public activities!: Types.ActivitiyExtended[];
+  public activities!: Types.ActivityExtended[];
   public search = '';
   public pagination = {
     rowsPerPage: -1,
@@ -103,32 +93,36 @@ export default class SubscriberActivitiesList extends Vue {
     let table = '<table>';
     const keys = Object.keys(act);
     for (let i = 0; i < keys.length; i++) {
-      if (act[keys[i]]) {
-        table += `<tr><td class="font-weight-bold">${keys[i]}</td><td>${
-          act[keys[i]]
-        }</td></tr>`;
+      table += '<tr>';
+      while (!act[keys[i]] && i < keys.length) {
+        i++;
       }
+      if (act[keys[i]]) {
+        table += `<td class="font-weight-bold">${keys[i]}</td><td>${
+          act[keys[i]]
+        }</td>`;
+      }
+      i++;
+      while (!act[keys[i]] && i < keys.length) {
+        i++;
+      }
+      if (act[keys[i]]) {
+        table += `<td class="font-weight-bold">${keys[i]}</td><td>${
+          act[keys[i]]
+        }</td>`;
+      }
+      table += '</tr>';
     }
     return table + '</table>';
   }
 
-  protected skip(act: Types.ActivitiyExtended) {
+  protected processAcitivity(act: Types.ActivityExtended) {
     console.log(act);
   }
 
-  protected unskip(act: Types.ActivitiyExtended) {
-    console.log(act);
+  protected getActivities() {
+    this.$emit('get-activities');
   }
-
-  protected processAcitivity(act: Types.ActivitiyExtended) {
-    console.log(act);
-  }
-
-  protected changeServingsForDay(act: Types.ActivitiyExtended) {
-    console.log(act);
-  }
-
-  protected setupActivity() {}
 }
 </script>
 
