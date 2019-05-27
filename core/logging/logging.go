@@ -281,8 +281,8 @@ func (c *Client) Paid(userID string, userEmail, date string, amountDue, amountPa
 		UserIDString: userID,
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
-			Title:       "Paid for " + date,
-			Description: fmt.Sprintf("%s successfully paid %.2f for %s", userEmail, amountPaid, date),
+			Title:       "Paid for " + date[:10],
+			Description: fmt.Sprintf("%s successfully paid $%.2f for %s", userEmail, amountPaid, date[:10]),
 		},
 		SalePayload: SalePayload{
 			Date:          date,
@@ -484,15 +484,17 @@ func (c *Client) SubRating(userID string, userEmail string, payload *RatingPaylo
 
 // ServingsChangedPayload is a ServingsChanged entry.
 type ServingsChangedPayload struct {
-	Date              string `json:"date,omniempty" datastore:",omitempty,noindex"`
-	OldNonVegServings int8   `json:"old_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
-	NewNonVegServings int8   `json:"new_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
-	OldVegServings    int8   `json:"old_veg_servings,omitempty" datastore:",omitempty,noindex"`
-	NewVegServings    int8   `json:"new_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	Date              string  `json:"date,omniempty" datastore:",omitempty,noindex"`
+	OldNonVegServings int8    `json:"old_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	NewNonVegServings int8    `json:"new_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	OldVegServings    int8    `json:"old_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	NewVegServings    int8    `json:"new_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	OldAmount         float32 `json:"old_amount,omitempty" datastore:",omitempty,noindex"`
+	NewAmount         float32 `json:"new_amount,omitempty" datastore:",omitempty,noindex"`
 }
 
 // SubServingsChangedPermanently logs a servings change.
-func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8, oldAmount, newAmount float32) {
 	e := &Entry{
 		Type:         Subscriber,
 		Action:       ServingsChangedPermanently,
@@ -501,13 +503,15 @@ func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, 
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Servings changed permanently",
-			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
+			Description: fmt.Sprintf("Servings changed from non-veg(%d->%d), veg(%d->%d), amount(%.2f->%.2f) ", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings, oldAmount, newAmount),
 		},
 		ServingsChangedPayload: ServingsChangedPayload{
 			OldNonVegServings: oldNonVegServings,
 			NewNonVegServings: newNonVegServings,
 			OldVegServings:    oldVegServings,
 			NewVegServings:    newVegServings,
+			OldAmount:         oldAmount,
+			NewAmount:         newAmount,
 		},
 	}
 	c.Log(e)
@@ -522,8 +526,8 @@ func (c *Client) SubServingsChanged(userID string, userEmail string, date string
 		UserIDString: userID,
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
-			Title:       "Servings changed for " + date,
-			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
+			Title:       "Servings changed for " + date[:10],
+			Description: fmt.Sprintf("Servings changed from non-veg(%d->%d), veg(%d->%d) for %s", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings, date[:10]),
 		},
 		ServingsChangedPayload: ServingsChangedPayload{
 			Date:              date,

@@ -19,6 +19,11 @@ interface ReplaceSubscriberEmailReq {
     old_email: string
     new_email: string
 }
+interface ChangeSubscriberServingsReq {
+    id: string
+    servings_non_veg: number
+    servings_veg: number
+}
 interface DiscountSubscriberReq {
     user_id: string
     discount_amount: number
@@ -56,6 +61,12 @@ interface RefundAndSkipActivityReq {
     date: string
     amount: number
     percent: number
+}
+interface ChangeActivityServingsReq {
+    id: string
+    servings_non_veg: number
+    servings_veg: number
+    date: string
 }
 interface GetLogReq {
     id: number
@@ -141,11 +152,11 @@ interface GetUnpaidSublogsResp {
     error: Common.Error
     sublogs: Sublog[]
 }
-interface ProcessSublogsReq {
+interface ProcessActivityReq {
     email: string
     date: string
 }
-interface ProcessSublogsResp {
+interface ProcessActivityResp {
     error: Common.Error
 }
 interface SendCustomerSMSReq {

@@ -113,17 +113,60 @@ func (c *Client) GetHasSubscribed(start, limit int) ([]*subold.Subscriber, error
 // 	return nil
 // }
 
-// ChangeServings changes a subscriber's servings for a date.
-func (c *Client) ChangeServings(email string, nonvegServings, vegServings int8) error {
-	// TODO: implement
-	return nil
-}
-
 // ChangeServingsPermanently changes a subscriber's servings permanently.
-func (c *Client) ChangeServingsPermanently(email string, servings int8, vegetarian bool) error {
-	// TODO: implement
-	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.ChangeServingsPermanently(email, servings, vegetarian, c.serverInfo)
+func (c *Client) ChangeServingsPermanently(id string, servingsNonVeg, servingsVeg int8) error {
+	if servingsNonVeg < 0 {
+		return errInvalidParameter.WithMessage("Servings non-veg cannot be less than zero.")
+	}
+	if servingsVeg < 0 {
+		return errInvalidParameter.WithMessage("Servings veg cannot be less than zero.")
+	}
+	if servingsNonVeg < 0 && servingsVeg < 0 {
+		return errInvalidParameter.WithMessage("Servings non-veg and servings both cannot be less than zero.")
+	}
+	sub, err := c.getByIDOrEmail(id)
+	if err != nil {
+		return errors.Annotate(err, "failed to Get")
+	}
+	oldWeeklyAmount := sub.Amount
+	oldServingsNonVeg := sub.ServingsNonVegetarian
+	oldServingsVeg := sub.ServingsVegetarian
+
+	if (servingsNonVeg + servingsVeg) != (sub.ServingsNonVegetarian + sub.ServingsVegetarian) {
+		sub.Amount = DerivePrice(servingsNonVeg + servingsVeg)
+	}
+	sub.ServingsNonVegetarian = servingsNonVeg
+	sub.ServingsVegetarian = servingsVeg
+	err = c.put(id, sub)
+	if err != nil {
+		return errors.Annotate(err, "failed to put")
+	}
+	// update activities
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	err = activityC.ChangeFutureServings(time.Now(), sub.ID, sub.ServingsNonVegetarian, sub.ServingsVegetarian, sub.Amount)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.ChangeFutureServings")
+	}
+	// log
+	c.log.SubServingsChangedPermanently(sub.ID, sub.Email(), oldServingsNonVeg, sub.ServingsNonVegetarian, oldServingsVeg, sub.ServingsVegetarian, oldWeeklyAmount, sub.Amount)
+	// mail
+	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
+	mailReq := &mail.UserFields{
+		Email:          sub.Email(),
+		VegServings:    sub.ServingsVegetarian,
+		NonVegServings: sub.ServingsNonVegetarian,
+	}
+	err = mailC.UpdateUser(mailReq)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.UpdateUser")
+	}
+	return nil
 }
 
 // UpdatePaymentToken updates a user payment method token.
@@ -349,7 +392,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		sub.IntervalStartPoint = req.FirstDeliveryDate
 		sub.ServingsNonVegetarian = req.ServingsNonVegetarian
 		sub.ServingsVegetarian = req.ServingsVegetarian
-		sub.Amount = subold.DerivePrice(req.ServingsNonVegetarian + req.ServingsVegetarian)
+		sub.Amount = DerivePrice(req.ServingsNonVegetarian + req.ServingsVegetarian)
 		sub.Active = true
 		now := time.Now()
 		sub.SignUpDatetime = now

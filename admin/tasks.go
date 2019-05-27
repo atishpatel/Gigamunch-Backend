@@ -27,7 +27,7 @@ import (
 
 // TODO: UpdateDrip
 
-func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func (s *server) ProcessActivityTask(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	parms, err := tasks.ParseProcessSubscriptionRequest(r)
 	if err != nil {
 		utils.Criticalf(ctx, "failed to tasks.ParseProcessSubscriptionRequest. Err:%+v", err)

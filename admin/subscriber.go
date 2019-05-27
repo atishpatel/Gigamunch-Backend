@@ -81,7 +81,8 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	if len(errs) >= 1 {
 		return errors.GetErrorWithCode(errs[0]).Annotatef("errors count: %d", len(errs))
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // GetSubscriber gets all info about a subscriber from their email address
@@ -204,6 +205,30 @@ func (s *server) GetHasSubscribedV2(ctx context.Context, w http.ResponseWriter, 
 	return resp
 }
 
+// ChangeSubscriberServings change a subscriber's servings.
+func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ChangeSubscriberServingsReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.ChangeServingsPermanently(req.ID, int8(req.ServingsNonVeg), int8(req.ServingsNonVeg))
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.ChangeServingsPermanently")
+	}
+	resp := &pb.ErrorOnlyResp{}
+	return resp
+}
+
 // ActivateSubscriber activates a subscriber account.
 func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
@@ -226,8 +251,8 @@ func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, 
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Activate")
 	}
-
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // DeactivateSubscriber activates a subscriber account.
@@ -250,7 +275,8 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Deactivate")
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // UpdateDrip updates drip.
@@ -274,7 +300,8 @@ func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.
 			return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
 		}
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // ReplaceSubscriberEmail replaces a subscriber's old email with a new email.
@@ -322,7 +349,8 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.Update")
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 func pbSubscribers(subscribers []subold.SubscriptionSignUp) []*pb.Subscriber {

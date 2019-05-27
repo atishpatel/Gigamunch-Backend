@@ -43,6 +43,58 @@
         ]
       }
     },
+    "/admin/api/v1/ChangeActivityServings": {
+      "post": {
+        "operationId": "ChangeActivityServings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIChangeActivityServingsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ChangeSubscriberServings": {
+      "post": {
+        "operationId": "ChangeSubscriberServings",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIChangeSubscriberServingsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/DeactivateSubscriber": {
       "post": {
         "summary": "DeactivateSubscriber deactivates a subscriber.",
@@ -440,14 +492,14 @@
         ]
       }
     },
-    "/admin/api/v1/ProcessSublogs": {
+    "/admin/api/v1/ProcessActivity": {
       "post": {
-        "operationId": "ProcessSublogs",
+        "operationId": "ProcessActivity",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/AdminAPIProcessSublogsResp"
+              "$ref": "#/definitions/AdminAPIProcessActivityResp"
             }
           }
         },
@@ -457,7 +509,33 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/AdminAPIProcessSublogsReq"
+              "$ref": "#/definitions/AdminAPIProcessActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ProcessSublogs": {
+      "post": {
+        "operationId": "ProcessSublogs",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessActivityResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessActivityReq"
             }
           }
         ],
@@ -851,6 +929,41 @@
         "first_bag_date": {
           "type": "string",
           "title": "optional"
+        }
+      }
+    },
+    "AdminAPIChangeActivityServingsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "servings_non_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIChangeSubscriberServingsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "servings_non_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_veg": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -1341,7 +1454,7 @@
       },
       "description": "Payroll is the payroll."
     },
-    "AdminAPIProcessSublogsReq": {
+    "AdminAPIProcessActivityReq": {
       "type": "object",
       "properties": {
         "email": {
@@ -1352,7 +1465,7 @@
         }
       }
     },
-    "AdminAPIProcessSublogsResp": {
+    "AdminAPIProcessActivityResp": {
       "type": "object",
       "properties": {
         "error": {

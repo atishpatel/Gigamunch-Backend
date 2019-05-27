@@ -29,8 +29,14 @@
             flat
             class="actions"
           >
-            <ButtonSkip :activity="props.item"></ButtonSkip>
-            <ButtonUnskip :activity="props.item"></ButtonUnskip>
+            <ButtonSkip
+              :activity="props.item"
+              v-on:dialog-success="getActivities"
+            ></ButtonSkip>
+            <ButtonUnskip
+              :activity="props.item"
+              v-on:dialog-success="getActivities"
+            ></ButtonUnskip>
             <v-btn
               outline
               round
@@ -38,7 +44,10 @@
               @click="processAcitivity(props.item)"
             >Process</v-btn>
 
-            <ButtonChangeServings :activity="props.item"></ButtonChangeServings>
+            <ButtonChangeServings
+              :activity="props.item"
+              v-on:dialog-success="getActivities"
+            ></ButtonChangeServings>
           </v-card>
           <v-card-text v-html="detailHTML(props.item)"></v-card-text>
         </template>

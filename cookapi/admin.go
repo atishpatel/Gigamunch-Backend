@@ -477,15 +477,15 @@ func (service *Service) ChangeServingsPermanently(ctx context.Context, req *Chan
 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
 		return resp, nil
 	}
-	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/ChangeServingsPermanently")
+	log, serverInfo, _, _, err := setupAll(ctx, "/cookapi/ChangeServingsPermanently")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
-	err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian)
-	// subC := subold.New(ctx)
-	// err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian, log, serverInfo)
+	// subC, err := subnew.NewClient(ctx, log, db, sqlDB, serverInfo)
+	// err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian)
+	subC := subold.NewWithLogging(ctx, log)
+	err = subC.ChangeServingsPermanently(req.Email, req.Servings, req.Vegetarian, serverInfo)
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to subnew.ChangeServingsPermanently")
 		return resp, nil
@@ -549,16 +549,16 @@ func (service *Service) ChangeServingsForDate(ctx context.Context, req *ChangeSe
 		return resp, nil
 	}
 
-	log, serverInfo, db, sqlDB, err := setupAll(ctx, "/cookapi/setupsublogs")
+	log, _, _, _, err := setupAll(ctx, "/cookapi/setupsublogs")
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err)
 		return resp, nil
 	}
-	activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
-	err = activityC.ChangeServings(req.Date, req.SubEmail, req.Servings, subold.DerivePrice(req.Servings))
+	// activityC, err := activity.NewClient(ctx, log, db, sqlDB, serverInfo)
+	// err = activityC.ChangeServings(req.Date, req.SubEmail, req.Servings, subold.DerivePrice(req.Servings))
 
-	// subC := subold.New(ctx)
-	// err = subC.ChangeServings(req.Date, req.SubEmail, req.Servings, subold.DerivePrice(req.Servings))
+	subC := subold.NewWithLogging(ctx, log)
+	err = subC.ChangeServings(req.Date, req.SubEmail, req.Servings, subold.DerivePrice(req.Servings))
 	if err != nil {
 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to activity.ChangeServings")
 		return resp, nil

@@ -102,6 +102,27 @@ export function UnskipActivity(id: string, date: string): Promise<AdminAPI.Error
   return callFetch(url, 'POST', req);
 }
 
+export function ChangeActivityServings(id: string, servings_non_veg: number, servings_veg: number, date: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/ChangeActivityServings';
+  const req: AdminAPI.ChangeActivityServingsReq = {
+    id,
+    servings_non_veg,
+    servings_veg,
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ChangeSubscriberServings(id: string, servings_non_veg: number, servings_veg: number): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/ChangeSubscriberServings';
+  const req: AdminAPI.ChangeSubscriberServingsReq = {
+    id,
+    servings_non_veg,
+    servings_veg,
+  };
+  return callFetch(url, 'POST', req);
+}
+
 function callFetch(url: string, method: string, body: object): Promise<any> {
   return GetToken().then((token) => {
     return callFetchWithToken(url, method, body, token);

@@ -598,7 +598,7 @@ func (c *Client) ChangeServingsPermanently(subEmail string, servings int8, veget
 		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsPermanentlySubLogStatement statement")
 	}
 	if c.log != nil {
-		c.log.SubServingsChangedPermanently(s.ID, subEmail, oldServings, nonvegServings, oldVegServings, vegServings)
+		c.log.SubServingsChangedPermanently(s.ID, subEmail, oldServings, nonvegServings, oldVegServings, vegServings, oldWeeklyAmount, weeklyAmount)
 	}
 
 	mailC, err := mail.NewClient(c.ctx, c.log, serverInfo)

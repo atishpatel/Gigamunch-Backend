@@ -92,7 +92,12 @@ function getLogColor(log: Types.LogExtended) {
         case 'rating':
             return 'cyan';
         case 'update':
+        case 'servings_changed':
+        case 'servings_changed_permanently':
+        case 'card_updated':
             return 'amber';
+        case 'refund':
+            return 'red';
     }
     return 'blue-grey';
 }
@@ -113,9 +118,14 @@ function getLogIcon(log: Types.LogExtended) {
         case 'rating':
             return 'star_rate';
         case 'update':
+        case 'servings_changed':
+        case 'servings_changed_permanently':
+        case 'card_updated':
             return 'cloud_upload';
         case 'paid':
             return 'attach_money';
+        case 'refund':
+            return 'money_off';
     }
     return 'bubble_chart';
 }

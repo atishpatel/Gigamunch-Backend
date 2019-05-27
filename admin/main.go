@@ -54,12 +54,6 @@ func main() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/SetAdmin", s.handler(s.userAdmin(s.SetAdmin)))
 	// **********************
-	// Subscriber
-	// **********************
-	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
-	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
-	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
-	// **********************
 	// Activity
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetSubscriberActivities", s.handler(s.GetSubscriberActivities))
@@ -68,6 +62,9 @@ func main() {
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
 	http.HandleFunc("/admin/api/v1/RefundActivity", s.handler(s.userAdmin(s.RefundActivity)))
 	http.HandleFunc("/admin/api/v1/RefundAndSkipActivity", s.handler(s.userAdmin(s.RefundAndSkipActivity)))
+	http.HandleFunc("/admin/api/v1/ChangeActivityServings", s.handler(s.userAdmin(s.ChangeActivityServings)))
+	http.HandleFunc("/admin/api/v1/ProcessActivity", s.handler(s.userAdmin(s.ProcessActivity)))
+
 	// **********************
 	// Discount
 	// **********************
@@ -85,17 +82,22 @@ func main() {
 	// Sublogs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
-	http.HandleFunc("/admin/api/v1/ProcessSublogs", s.handler(s.userAdmin(s.ProcessSublogs)))
+	http.HandleFunc("/admin/api/v1/ProcessSublogs", s.handler(s.userAdmin(s.ProcessActivity)))
 	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
 	// **********************
 	// Subscriber
 	// **********************
+	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
+	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
+	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribed)))
 	http.HandleFunc("/admin/api/v2/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribedV2)))
 	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
 	http.HandleFunc("/admin/api/v2/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriberV2)))
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
+	http.HandleFunc("/admin/api/v1/ChangeSubscriberServings", s.handler(s.userAdmin(s.ChangeSubscriberServings)))
+
 	// Zone
 	http.HandleFunc("/admin/api/v1/UpdateGeofence", s.handler(s.userAdmin(s.UpdateGeofence)))
 	// **********************
@@ -114,7 +116,7 @@ func main() {
 	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
 	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
 
-	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivity))
+	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivityTask))
 	http.HandleFunc("/process-subscription", s.handler(s.ProcessActivity))
 	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
 	// **********************

@@ -14,10 +14,10 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// ProcessSublogs runs sub.Process.
-func (s *server) ProcessSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+// ProcessActivity runs sub.Process.
+func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
-	req := new(pb.ProcessSublogsReq)
+	req := new(pb.ProcessActivityReq)
 
 	// decode request
 	err = decodeRequest(ctx, r, req)
@@ -37,7 +37,7 @@ func (s *server) ProcessSublogs(ctx context.Context, w http.ResponseWriter, r *h
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
 	}
-	resp := &pb.ProcessSublogsResp{}
+	resp := &pb.ProcessActivityResp{}
 	return resp
 }
 

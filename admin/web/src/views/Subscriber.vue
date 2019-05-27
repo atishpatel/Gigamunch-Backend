@@ -3,6 +3,7 @@
     <SubscriberSummary
       :sub="sub"
       v-on:get-subscriber="getSubscriber"
+      v-on:get-activities="getActivities"
     ></SubscriberSummary>
     <SubscriberDiscountsList
       class="list"

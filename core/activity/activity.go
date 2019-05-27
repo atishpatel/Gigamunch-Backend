@@ -29,12 +29,15 @@ const (
 	selectActivityForUserStatementEmail      = "SELECT * FROM activity WHERE email=? ORDER BY date DESC"
 	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
 	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
-	updateRefundedStatement                  = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
-	skipStatement                            = "UPDATE activity SET skip=1 WHERE date=? AND email=?"
-	unskipStatement                          = "UPDATE activity SET skip=0,active=1 WHERE date=? AND email=?"
-	insertStatement                          = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
-	deleteFutureStatment                     = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
-	updatePaidStatement                      = "UPDATE activity SET amount_paid=?,discount_amount=?,discount_percent=?,paid=1,paid_dt=?,transaction_id=? WHERE date=? AND user_id=?"
+	updateServingsStatement                  = "UPDATE activity SET servings=?,veg_servings=?,amount=?,servings_changed=1 WHERE date=? AND user_id=?"
+	updateFutureServingsStatement            = "UPDATE activity SET servings=?,veg_servings=?,amount=? WHERE date>? AND user_id=? AND paid=0 AND servings_changed=0"
+
+	updateRefundedStatement = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
+	skipStatement           = "UPDATE activity SET skip=1 WHERE date=? AND user_id=?"
+	unskipStatement         = "UPDATE activity SET skip=0,active=1 WHERE date=? AND user_id=?"
+	insertStatement         = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
+	deleteFutureStatment    = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
+	updatePaidStatement     = "UPDATE activity SET amount_paid=?,discount_amount=?,discount_percent=?,paid=1,paid_dt=?,transaction_id=? WHERE date=? AND user_id=?"
 	// TODO: switch to user id
 	deleteFutureEmailStatment = "DELETE from activity WHERE date>? AND email=? AND paid=0"
 )
@@ -376,11 +379,57 @@ func (c *Client) Paid(date time.Time, userID string, amount, discountAmount floa
 	return nil
 }
 
-// ChangeServings for a day
-func (c *Client) ChangeServings(date time.Time, email string, servings int8, amount float32) error {
-	// TODO: Reimplement
-	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.ChangeServings(date, email, servings, amount)
+// ChangeServings for an activity.
+func (c *Client) ChangeServings(date time.Time, id string, servingsNonVeg, servingsVeg int8, amount float32) error {
+	if servingsNonVeg < 0 {
+		return errBadRequest.WithMessage("Servings non-veg cannot be less than zero.")
+	}
+	if servingsVeg < 0 {
+		return errBadRequest.WithMessage("Servings veg cannot be less than zero.")
+	}
+	if servingsNonVeg < 0 && servingsVeg < 0 {
+		return errBadRequest.WithMessage("Servings non-veg and servings both cannot be less than zero.")
+	}
+	if amount < 0.01 {
+		return errBadRequest.WithMessage("Amount cannot be less than 0.")
+	}
+	act, err := c.Get(date, id)
+	if err != nil {
+		return errors.Annotate(err, "failed to Get")
+	}
+	if act.Paid {
+		return errBadRequest.WithMessage("Activity is already paid.")
+	}
+	if act.Skip {
+		return errBadRequest.WithMessage("Activity is already skipped.")
+	}
+	_, err = c.sqlDB.ExecContext(c.ctx, updateServingsStatement, servingsNonVeg, servingsVeg, amount, date.Format(DateFormat), id)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateServingsStatement")
+	}
+	c.log.SubServingsChanged(id, act.Email, date.Format(DateFormat), act.ServingsNonVegetarian, servingsNonVeg, act.ServingsVegetarain, servingsVeg)
+	return nil
+}
+
+// ChangeFutureServings for an activity.
+func (c *Client) ChangeFutureServings(date time.Time, id string, servingsNonVeg, servingsVeg int8, amount float32) error {
+	if servingsNonVeg < 0 {
+		return errBadRequest.WithMessage("Servings non-veg cannot be less than zero.")
+	}
+	if servingsVeg < 0 {
+		return errBadRequest.WithMessage("Servings veg cannot be less than zero.")
+	}
+	if servingsNonVeg < 0 && servingsVeg < 0 {
+		return errBadRequest.WithMessage("Servings non-veg and servings both cannot be less than zero.")
+	}
+	if amount < 0.01 {
+		return errBadRequest.WithMessage("Amount cannot be less than 0.")
+	}
+	_, err := c.sqlDB.ExecContext(c.ctx, updateFutureServingsStatement, servingsNonVeg, servingsVeg, amount, date.Format(DateFormat), id)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateFutureServingsStatement")
+	}
+	return nil
 }
 
 // Free f

@@ -48,8 +48,11 @@ export default class SubscriberLogs extends Vue {
 </script>
 
 <style scoped lang="scss">
-.timeline {
-  max-width: 1250px;
+@media (min-width: 1000px) {
+  .timeline {
+    max-width: 1250px;
+    margin-left: -125px;
+  }
 }
 
 .description {

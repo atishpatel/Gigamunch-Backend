@@ -81,6 +81,7 @@
             <ButtonChangeServings
               :sub="sub"
               changePermanently="true"
+              v-on:dialog-success="getSubscriberAndActivities"
             ></ButtonChangeServings>
           </div>
           <div class="info-row">
@@ -153,6 +154,11 @@ export default class SubscriberSummary extends Vue {
 
   protected getSubscriber() {
     this.$emit('get-subscriber');
+  }
+
+  protected getSubscriberAndActivities() {
+    this.$emit('get-subscriber');
+    this.$emit('get-activities');
   }
 
   get computedSubStatus() {

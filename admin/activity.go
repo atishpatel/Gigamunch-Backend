@@ -125,7 +125,7 @@ func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *
 	return resp
 }
 
-// RefundAndSkipActivity gets a log.
+// RefundAndSkipActivity refunds and skips an activity.
 func (s *server) RefundAndSkipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pb.RefundAndSkipActivityReq)
@@ -147,7 +147,7 @@ func (s *server) RefundAndSkipActivity(ctx context.Context, w http.ResponseWrite
 	return resp
 }
 
-// RefundActivity gets a log.
+// RefundActivity refunds an activity.
 func (s *server) RefundActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
 	req := new(pb.RefundActivityReq)
@@ -167,6 +167,29 @@ func (s *server) RefundActivity(ctx context.Context, w http.ResponseWriter, r *h
 		if err != nil {
 			return errors.Annotate(err, "failed to activity.RefundActivity")
 		}
+	}
+	resp := &pb.ErrorOnlyResp{}
+	return resp
+}
+
+// ChangeActivityServings changes the servings for an activity.
+func (s *server) ChangeActivityServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ChangeActivityServingsReq)
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	date := getDatetime(req.Date)
+	err = activityC.ChangeServings(date, req.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg), sub.DerivePrice(int8(req.ServingsNonVeg+req.ServingsVeg)))
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.ChangeServings")
 	}
 	resp := &pb.ErrorOnlyResp{}
 	return resp

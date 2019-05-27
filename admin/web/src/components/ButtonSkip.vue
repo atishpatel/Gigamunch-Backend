@@ -6,7 +6,6 @@
     ConfirmText="Skip"
     :ButtonDisabled="activity.skip"
     v-on:dialog-success="submit"
-    :dialog.sync="dialog"
   >
     <template v-slot:dialog-content>
       <v-card-text>Skip <span class="bold">{{activity.first_name}} {{activity.last_name}}</span> for <span class="bold">{{activity.dateFull}}</span>?</v-card-text>
