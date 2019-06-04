@@ -3,35 +3,7 @@ CREATE DATABASE IF NOT EXISTS gigamunch CHARACTER SET utf8mb4;
 -- use database
 USE gigamunch;
 -- create live_posts table
--- CREATE TABLE IF NOT EXISTS `active_items` (
---   `id` BIGINT NOT NULL PRIMARY KEY,
---   `menu_id` BIGINT NOT NULL,
---   `cook_id` VARCHAR(45) NOT NULL,
---   `created_datetime` DATETIME NOT NULL,
---   `cook_price_per_serving` FLOAT(10, 2) NOT NULL,
---   `min_servings` TINYINT UNSIGNED NOT NULL,
---   `max_servings` SMALLINT UNSIGNED NOT NULL,
---   `latitude` FLOAT( 10, 6 ) NOT NULL,
---   `longitude` FLOAT( 10, 6 ) NOT NULL,
---   `vegan` BOOLEAN NOT NULL DEFAULT 0,
---   `vegetarian` BOOLEAN NOT NULL DEFAULT 0, 
---   `paleo` BOOLEAN NOT NULL DEFAULT 0, 
---   `gluten_free` BOOLEAN NOT NULL DEFAULT 0, 
---   `kosher` BOOLEAN NOT NULL DEFAULT 0,
---   INDEX(`latitude`),
---   INDEX(`longitude`),
---   INDEX(`created_datetime`),
---   INDEX(`menu_id`)
--- ) ENGINE = InnoDB CHARACTER SET utf8mb4;
--- create like table
--- CREATE TABLE IF NOT EXISTS `likes` (
---   `user_id` VARCHAR(45) NOT NULL,
---   `item_id` BIGINT NOT NULL,
---   `cook_id` VARCHAR(45) NOT NULL,
---   `menu_id` BIGINT NOT NULL,
---   `created_datetime` DATETIME NOT NULL,
---   PRIMARY KEY (`item_id`, `user_id`)
--- ) ENGINE = InnoDB;
+
 -- create review table
 -- CREATE TABLE IF NOT EXISTS `review` (
 --   `id` BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -93,26 +65,6 @@ USE gigamunch;
 --   INDEX(`cook_id`)
 -- ) ENGINE = InnoDB;
 -- create sub
--- CREATE TABLE IF NOT EXISTS `sub`(
---   `date` DATE NOT NULL,
---   `sub_email` VARCHAR(175) NOT NULL,
---   `created_datetime` DATETIME NOT NULL DEFAULT NOW(),
---   `skip` BOOLEAN NOT NULL DEFAULT 0,
---   `servings` TINYINT NOT NULL,
---   `amount` FLOAT(6,2) NOT NULL,
---   `amount_paid` FLOAT(6,2) NOT NULL DEFAULT 0,
---   `paid` BOOLEAN NOT NULL DEFAULT 0,
---   `paid_datetime` DATETIME,
---   `refunded` BOOLEAN NOT NULL DEFAULT 0,
---   `delivery_time` TINYINT NOT NULL,
---   `payment_method_token` VARCHAR(37) NOT NULL DEFAULT '',
---   `transaction_id` VARCHAR(37) NOT NULL DEFAULT '',
---   `free` BOOLEAN NOT NULL DEFAULT 0,
---   `discount_amount` FLOAT(6,2) NOT NULL DEFAULT 0,
---   `discount_percent` TINYINT NOT NULL DEFAULT 0,
---   `customer_id` VARCHAR(37) NOT NULL,
---    PRIMARY KEY (`date`, `sub_email`)
--- ) ENGINE = InnoDB;
 -- create coupon
 -- create promo
 -- create driver_assignment
@@ -171,39 +123,6 @@ CREATE TABLE IF NOT EXISTS activity(
 	PRIMARY KEY (date, user_id)
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 
--- ALTER TABLE `sub` CHANGE COLUMN `sub_email` `email` VARCHAR(175) NOT NULL;
--- ALTER TABLE `sub` CHANGE `created_datetime` `created_dt` DATETIME NOT NULL DEFAULT NOW();
--- ALTER TABLE `sub` CHANGE `paid_datetime` `paid_dt` DATETIME;
--- ALTER TABLE `sub` CHANGE `free` `first` BOOLEAN NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN user_id BIGINT NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN first_name VARCHAR(125) NOT NULL DEFAULT '';
--- ALTER TABLE `sub` ADD COLUMN last_name VARCHAR(125) NOT NULL DEFAULT '';
--- ALTER TABLE `sub` ADD COLUMN location INT NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN addr_changed BOOLEAN NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN addr_apt VARCHAR(50) NOT NULL DEFAULT '';
--- ALTER TABLE `sub` ADD COLUMN addr_string VARCHAR(175) NOT NULL DEFAULT '';
--- ALTER TABLE `sub` ADD COLUMN zip VARCHAR(30) NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN lat FLOAT( 10, 6 ) NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN `long` FLOAT( 10, 6 ) NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN active BOOLEAN NOT NULL DEFAULT 1;
--- ALTER TABLE `sub` ADD COLUMN veg_servings TINYINT NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN servings_changed BOOLEAN NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN refunded_amount FLOAT(6,2) NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN refunded_dt DATETIME;
--- ALTER TABLE `sub` ADD COLUMN refund_transaction_id VARCHAR(37) NOT NULL DEFAULT '';
--- ALTER TABLE `sub` ADD COLUMN payment_provider TINYINT NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN forgiven BOOLEAN NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN gift BOOLEAN NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN gift_from_user_id BIGINT;
--- ALTER TABLE `sub` ADD COLUMN deviant BOOLEAN NOT NULL DEFAULT 0;
--- ALTER TABLE `sub` ADD COLUMN deviant_reason VARCHAR(225) NOT NULL DEFAULT '';
--- ALTER TABLE `sub` DROP COLUMN delivery_time;
-
--- ALTER TABLE `activity` DROP COLUMN user_id;
--- ALTER TABLE `activity` ADD COLUMN user_id VARCHAR(125) NOT NULL DEFAULT '';
--- PRIMARY KEY (date, user_id, email)
-
-RENAME TABLE sub to activity;
 -- TODO: change primary key from date, email to date, user_id
 
 CREATE TABLE IF NOT EXISTS discount(
@@ -215,5 +134,5 @@ CREATE TABLE IF NOT EXISTS discount(
 	last_name VARCHAR(125) NOT NULL DEFAULT '',
 	date_used DATE NOT NULL DEFAULT '0000-00-00',
 	discount_amount FLOAT(6,2) NOT NULL DEFAULT 0,
-	discount_percent TINYINT NOT NULL DEFAULT 0,
+	discount_percent TINYINT NOT NULL DEFAULT 0
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
