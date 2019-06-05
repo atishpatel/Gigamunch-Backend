@@ -155,6 +155,7 @@ interface GetUnpaidSublogsResp {
 interface ProcessActivityReq {
     email: string
     date: string
+    id: string
 }
 interface ProcessActivityResp {
     error: Common.Error

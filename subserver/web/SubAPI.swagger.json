@@ -22,7 +22,7 @@
         "operationId": "GetAccountInfo",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetAccountInfoResp"
             }
@@ -49,7 +49,7 @@
         "operationId": "GetExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionResp"
             }
@@ -76,7 +76,7 @@
         "operationId": "GetExecutions",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionsResp"
             }
@@ -103,7 +103,7 @@
         "operationId": "GetExecutionsAfterDate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionsResp"
             }
@@ -130,7 +130,7 @@
         "operationId": "GetExecutionsBeforeDate",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionsResp"
             }
@@ -157,7 +157,7 @@
         "operationId": "GetUserSummary",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetUserSummaryResp"
             }

@@ -37,13 +37,10 @@
               :activity="props.item"
               v-on:dialog-success="getActivities"
             ></ButtonUnskip>
-            <v-btn
-              outline
-              round
-              :disabled="!props.item.paid"
-              @click="processAcitivity(props.item)"
-            >Process</v-btn>
-
+            <ButtonProcessActivity
+              :activity="props.item"
+              v-on:dialog-success="getActivities"
+            ></ButtonProcessActivity>
             <ButtonChangeServings
               :activity="props.item"
               v-on:dialog-success="getActivities"
@@ -72,6 +69,7 @@ import ButtonSkip from './ButtonSkip.vue';
 import ButtonUnskip from './ButtonUnskip.vue';
 import ButtonSetupActivity from './ButtonSetupActivity.vue';
 import ButtonChangeServings from './ButtonChangeServings.vue';
+import ButtonProcessActivity from './ButtonProcessActivity.vue';
 
 @Component({
   components: {
@@ -79,6 +77,7 @@ import ButtonChangeServings from './ButtonChangeServings.vue';
     ButtonUnskip,
     ButtonSetupActivity,
     ButtonChangeServings,
+    ButtonProcessActivity,
   },
 })
 export default class SubscriberActivitiesList extends Vue {

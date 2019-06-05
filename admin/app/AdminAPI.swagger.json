@@ -22,7 +22,7 @@
         "operationId": "ActivateSubscriber",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -48,7 +48,7 @@
         "operationId": "ChangeActivityServings",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -74,7 +74,7 @@
         "operationId": "ChangeSubscriberServings",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -101,7 +101,7 @@
         "operationId": "DeactivateSubscriber",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -127,7 +127,7 @@
         "operationId": "DiscountSubscriber",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -153,7 +153,7 @@
         "operationId": "GetAllExecutionStats",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetAllExecutionStatsResp"
             }
@@ -179,7 +179,7 @@
         "operationId": "GetDeliveries",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetDeliveriesResp"
             }
@@ -206,7 +206,7 @@
         "operationId": "GetExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionResp"
             }
@@ -232,7 +232,7 @@
         "operationId": "GetExecutionStats",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionStatsResp"
             }
@@ -259,7 +259,7 @@
         "operationId": "GetExecutions",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionsResp"
             }
@@ -286,7 +286,7 @@
         "operationId": "GetLog",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogResp"
             }
@@ -313,7 +313,7 @@
         "operationId": "GetLogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
@@ -340,7 +340,7 @@
         "operationId": "GetLogsByExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
@@ -367,7 +367,7 @@
         "operationId": "GetLogsForUser",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
@@ -393,7 +393,7 @@
         "operationId": "GetSubscriberActivities",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberActivitiesResp"
             }
@@ -419,7 +419,7 @@
         "operationId": "GetSubscriberDiscounts",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberDiscountsResp"
             }
@@ -445,7 +445,7 @@
         "operationId": "GetSubscriberSublogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberSublogsResp"
             }
@@ -471,7 +471,7 @@
         "operationId": "GetUnpaidSublogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetUnpaidSublogsResp"
             }
@@ -497,7 +497,7 @@
         "operationId": "ProcessActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIProcessActivityResp"
             }
@@ -523,7 +523,7 @@
         "operationId": "ProcessSublogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIProcessActivityResp"
             }
@@ -550,7 +550,7 @@
         "operationId": "RefundActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -577,7 +577,7 @@
         "operationId": "RefundAndSkipActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -604,7 +604,7 @@
         "operationId": "ReplaceSubscriberEmail",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -631,7 +631,7 @@
         "operationId": "SendCustomerSMS",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -658,7 +658,7 @@
         "operationId": "SetAdmin",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -685,7 +685,7 @@
         "operationId": "SetupActivities",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -712,7 +712,7 @@
         "operationId": "SkipActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -739,7 +739,7 @@
         "operationId": "UnskipActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -765,7 +765,7 @@
         "operationId": "UpdateDeliveries",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateDeliveriesResp"
             }
@@ -791,7 +791,7 @@
         "operationId": "UpdateDrip",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -818,7 +818,7 @@
         "operationId": "UpdateExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateExecutionResp"
             }
@@ -844,7 +844,7 @@
         "operationId": "UpdateExecutionStats",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateExecutionStatsResp"
             }
@@ -871,7 +871,7 @@
         "operationId": "GetHasSubscribed",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetHasSubscribedRespV2"
             }
@@ -897,7 +897,7 @@
         "operationId": "GetSubscriberV2",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberRespV2"
             }
@@ -1461,6 +1461,9 @@
           "type": "string"
         },
         "date": {
+          "type": "string"
+        },
+        "id": {
           "type": "string"
         }
       }

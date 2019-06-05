@@ -4,10 +4,10 @@
       <v-card-title>
         Discounts
         <v-spacer></v-spacer>
-        <DialogNewDiscount
+        <ButtonNewDiscount
           :sub="sub"
           @dialog-success="$emit('dialog-success')"
-        ></DialogNewDiscount>
+        ></ButtonNewDiscount>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -43,11 +43,11 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DialogNewDiscount from './DialogNewDiscount.vue';
+import ButtonNewDiscount from './ButtonNewDiscount.vue';
 
 @Component({
   components: {
-    DialogNewDiscount,
+    ButtonNewDiscount,
   },
 })
 export default class SubscriberDiscountsList extends Vue {

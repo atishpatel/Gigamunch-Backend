@@ -21,7 +21,7 @@
         "operationId": "Login",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/ServerAPITokenOnlyResp"
             }
@@ -48,7 +48,7 @@
         "operationId": "SumbitCheckout",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/ServerAPIErrorOnlyResp"
             }
@@ -74,7 +74,7 @@
         "operationId": "UpdatePayment",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/ServerAPIErrorOnlyResp"
             }

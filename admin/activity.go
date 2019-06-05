@@ -194,3 +194,31 @@ func (s *server) ChangeActivityServings(ctx context.Context, w http.ResponseWrit
 	resp := &pb.ErrorOnlyResp{}
 	return resp
 }
+
+// ProcessActivity processes an activity.
+func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ProcessActivityReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	if req.ID == "" {
+		req.ID = req.Email
+	}
+
+	date := getDatetime(req.Date)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to sub.NewClient")
+	}
+	err = subC.ProcessActivity(date, req.ID)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
+	}
+	resp := &pb.ProcessActivityResp{}
+	return resp
+}

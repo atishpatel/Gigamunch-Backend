@@ -82,7 +82,7 @@ func main() {
 	// Sublogs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
-	http.HandleFunc("/admin/api/v1/ProcessSublogs", s.handler(s.userAdmin(s.ProcessActivity)))
+	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessActivity)))
 	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
 	// **********************
 	// Subscriber

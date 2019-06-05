@@ -221,7 +221,7 @@ func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWr
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.NewClient")
 	}
-	err = subC.ChangeServingsPermanently(req.ID, int8(req.ServingsNonVeg), int8(req.ServingsNonVeg))
+	err = subC.ChangeServingsPermanently(req.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg))
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.ChangeServingsPermanently")
 	}

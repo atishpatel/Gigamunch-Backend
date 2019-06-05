@@ -5,41 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/sub"
-
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
-
-// ProcessActivity runs sub.Process.
-func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	var err error
-	req := new(pb.ProcessActivityReq)
-
-	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
-	}
-	// end decode request
-
-	date := getDatetime(req.Date)
-	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-	if err != nil {
-		return errors.GetErrorWithCode(err).Annotate("failed to sub.NewClient")
-	}
-	err = subC.ProcessActivity(date, req.Email)
-	// subC := subold.NewWithLogging(ctx, log)
-	// err = subC.Process(date, req.Email)
-	if err != nil {
-		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
-	}
-	resp := &pb.ProcessActivityResp{}
-	return resp
-}
 
 // GetUnpaidSublogs gets a list of unpaid sublogs log.
 func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {

@@ -21,7 +21,7 @@
   <template>
     <shared-styles>
       <style include="shared-styles">
-         :host {
+        :host {
           display: block;
           padding: 10px;
         }
@@ -91,7 +91,8 @@
                       checked="{{overrideDiscount}}">Override other discounts
       </paper-checkbox>
       <br>
-      <paper-button on-tap="submitDiscount">Submit Discount</paper-button>
+      <paper-button disabled
+                    on-tap="submitDiscount">Submit Discount</paper-button>
     </div>
   </template>
 
