@@ -553,37 +553,45 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// make subscriber if date is same as give reveal date
-	sub, err := subC.GetSubscriber(params.Email)
+	s, err := subC.GetSubscriber(params.Email)
 	if err != nil {
 		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriber: %s", err)
 		return
 	}
-	if !sub.IsSubscribed {
+	if !s.IsSubscribed {
 		utils.Infof(ctx, "%s is not a subscriber", params.Email)
 		return
 	}
-	timeTillGiftReveal := sub.GiftRevealDate.Sub(time.Now())
-	if !sub.GiftRevealDate.IsZero() && timeTillGiftReveal > time.Hour*12 {
+	timeTillGiftReveal := s.GiftRevealDate.Sub(time.Now())
+	if !s.GiftRevealDate.IsZero() && timeTillGiftReveal > time.Hour*12 {
 		utils.Infof(ctx, "%s is not ready for gift reveal", params.Email)
 		return
 	}
 
 	// add num meals recieved
-	activites, err := subC.GetSubscriberActivities(params.Email)
+	activities, err := subC.GetSubscriberActivities(params.Email)
 	if err != nil {
-		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to sub.GetSubscriberActivities: %s", err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to s.GetSubscriberActivities: %s", err)
 		return
 	}
 	var numNonSkips int
-	for _, activity := range activites {
-		if !activity.Skip && activity.Date.Before(time.Now().Add(time.Hour*48)) {
+	var upcomingActivity *sub.SubscriptionLog
+	minDuration := time.Duration(time.Hour * 24 * 100)
+	now := time.Now()
+	for _, activity := range activities {
+		if !activity.Skip && activity.Date.Before(now.Add(time.Hour*48)) {
 			numNonSkips++
+		}
+		diff := activity.Date.Sub(now)
+		if !activity.Skip && activity.Date.After(now) && diff < minDuration { // TODO: activity.inactive
+			upcomingActivity = activity
+			minDuration = diff
 		}
 	}
 
 	addTags := []mail.Tag{mail.Subscribed, mail.Subscriber}
 	// add gift tag
-	if !sub.GiftRevealDate.IsZero() {
+	if !s.GiftRevealDate.IsZero() {
 		addTags = append(addTags, mail.Gifted)
 	}
 	// add journey tags
@@ -600,23 +608,30 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 		addTags = append(addTags, mail.GetReceivedJourneyTag(5))
 	}
 	// add preview tag
-	durationTillFirstMeal := time.Until(sub.FirstBoxDate.UTC().Truncate(24 * time.Hour))
+	durationTillFirstMeal := time.Until(s.FirstBoxDate.UTC().Truncate(24 * time.Hour))
 	if durationTillFirstMeal > 0 && durationTillFirstMeal < ((6*24)-12)*time.Hour {
-		addTags = append(addTags, mail.GetPreviewEmailTag(sub.FirstBoxDate))
+		addTags = append(addTags, mail.GetPreviewEmailTag(s.FirstBoxDate))
+	}
+
+	servingsNonVeg := s.Servings
+	servingsVeg := s.VegetarianServings
+	if upcomingActivity != nil {
+		servingsVeg = upcomingActivity.VegServings
+		servingsNonVeg = upcomingActivity.Servings
 	}
 
 	// Update Drip
 	mailReq := &mail.UserFields{
-		Email:             sub.Email,
-		FirstName:         sub.FirstName,
-		LastName:          sub.LastName,
-		FirstDeliveryDate: sub.FirstBoxDate,
-		GifterName:        sub.Reference,
-		GifterEmail:       sub.ReferenceEmail,
-		PlanWeekday:       sub.SubscriptionDay,
+		Email:             s.Email,
+		FirstName:         s.FirstName,
+		LastName:          s.LastName,
+		FirstDeliveryDate: s.FirstBoxDate,
+		GifterName:        s.Reference,
+		GifterEmail:       s.ReferenceEmail,
+		PlanWeekday:       s.SubscriptionDay,
 		AddTags:           addTags,
-		VegServings:       sub.VegetarianServings,
-		NonVegServings:    sub.Servings,
+		VegServings:       servingsVeg,
+		NonVegServings:    servingsNonVeg,
 	}
 	mailC, err := mail.NewClient(ctx, log, serverInfo)
 	if err != nil {
@@ -625,12 +640,12 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	}
 	err = mailC.SubActivated(mailReq)
 	if err != nil {
-		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.SubActivated email(%s). Err: %+v", sub.Email, err)
+		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to mail.SubActivated email(%s). Err: %+v", s.Email, err)
 	}
 	// send chris a message if user reached their set amout of gift meals
-	if !sub.GiftRevealDate.IsZero() && numNonSkips == sub.NumGiftDinners {
+	if !s.GiftRevealDate.IsZero() && numNonSkips == s.NumGiftDinners {
 		messageC := message.New(ctx)
-		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Person is done with their gifted meals \nName: %s\nEmail: %s", sub.Name, sub.Email))
+		err = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Person is done with their gifted meals \nName: %s\nEmail: %s", s.Name, s.Email))
 		if err != nil {
 			utils.Errorf(ctx, "failed to send sms to Chris. Err: %+v", err)
 		}
