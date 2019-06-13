@@ -495,6 +495,9 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 
 // SetupActivity sets up an activity for a subscriber.
 func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool, discountAmount float32, discountPrecent int8) error {
+	if date.IsZero() || userIDOrEmail == "" {
+		return errInvalidParameter.Annotate("date or user id is nil")
+	}
 	sub, err := c.getByIDOrEmail(userIDOrEmail)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.GetByIDOrEmail")
@@ -522,6 +525,7 @@ func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool
 		PaymentProvider:       sub.PaymentProvider,
 		PaymentMethodToken:    sub.PaymentMethodToken,
 		CustomerID:            sub.PaymentCustomerID,
+		// First: TODO: check activities if any are not skipped
 	}
 	createReq.SetAddress(&sub.Address)
 	err = activityC.Create(createReq)
