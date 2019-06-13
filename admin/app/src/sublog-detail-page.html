@@ -80,7 +80,7 @@
       <p>
         <a href="delivery/[[urlDate]]">
           Link to new delivery tool
-      </a>
+        </a>
       </p>
       <sublog-sortable-table id="unskipped"
                              sublogs="[[sublogsByDate.unskippedSublogs]]">
@@ -166,23 +166,40 @@
         const tmp = window.location.pathname.split('/sublogdetail/');
         const dateString = decodeURIComponent(tmp[1]);
         this.urlDate = dateString;
+        let d = this.getDateFromURL(dateString);
+        this.getSubLogsForDate(d);
+      }
+
+      getDateFromURL(dateString) {
         let d;
         if (dateString === 'next') {
           d = new Date();
-          while (d.getDay() !== 1) {
+          while (d.getDay() !== 1 && d.getDay() !== 4) {
             d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
           d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else if (dateString === 'previous') {
           d = new Date();
-          while (d.getDay() !== 1) {
+          while (d.getDay() !== 1 && d.getDay() !== 4) {
             d.setTime(d.getTime() - 24 * 3600 * 1000); // previous day
+          }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        } else if (dateString === 'nextMonday') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
+          }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        } else if (dateString === 'nextThursday') {
+          d = new Date();
+          while (d.getDay() !== 4) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
           d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else {
           d = new Date(dateString);
         }
-        this.getSubLogsForDate(d);
+        return d;
       }
 
       getSubLogsForDate(d) {
