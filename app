@@ -124,16 +124,15 @@ if [[ $1 == "serve" ]]; then
     echo "Starting admin:"
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     cd admin
-    dev_appserver.py --datastore_path ../.datastore ./app.yaml&
-    cd app
-    # gulp build&
-    gulp watch
+    dev_appserver.py --datastore_path ../.datastore --port 8081 ./app.yaml& 
+    cd web
+    yarn serve
     cd ../..
   fi
   if [[ $2 == "server" ]]; then
     echo "Starting server:"
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore server/app.yaml&
+    dev_appserver.py --datastore_path ./.datastore --port 8081 server/app.yaml& 
     cd server
     # gulp build&
     gulp watch
@@ -142,7 +141,7 @@ if [[ $1 == "serve" ]]; then
   if [[ $2 == "sub" ]]; then
     echo "Starting sub:"
     cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
-    # dev_appserver.py --datastore_path ./.datastore subserver/app.yaml&
+    dev_appserver.py --datastore_path ./.datastore --port 8081 subserver/app.yaml& 
     cd subserver/web 
     yarn run serve
     cd ../..
