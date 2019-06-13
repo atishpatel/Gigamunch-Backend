@@ -46,12 +46,21 @@ export function GetSubscriberActivities(id: string): Promise<AdminAPI.GetSubscri
   return callFetch(url, 'GET', req);
 }
 
-export function ProcessActivity(id: string, date: string): Promise<AdminAPI.GetHasSubscribedRespV2> {
+export function ProcessActivity(id: string, date: string): Promise<AdminAPI.ErrorOnlyResp> {
   const url: string = baseURL + '/v1/ProcessActivity';
   const req: AdminAPI.ProcessActivityReq = {
     id,
     date,
     email: '',
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function SetupActivity(id: string, date: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/SetupActivity';
+  const req: AdminAPI.SetupActivityReq = {
+    id,
+    date,
   };
   return callFetch(url, 'POST', req);
 }

@@ -21,11 +21,11 @@
           </div>
           <ButtonActivate
             :sub="sub"
-            v-on:dialog-success="getSubscriber"
+            v-on:dialog-success="getSubscriberAndActivities"
           ></ButtonActivate>
           <ButtonDeactivate
             :sub="sub"
-            v-on:dialog-success="getSubscriber"
+            v-on:dialog-success="getSubscriberAndActivities"
           ></ButtonDeactivate>
           <v-btn
             outline

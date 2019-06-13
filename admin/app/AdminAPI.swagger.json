@@ -546,7 +546,7 @@
     },
     "/admin/api/v1/RefundActivity": {
       "post": {
-        "summary": "RefundActivity unskips a sub for a date.",
+        "summary": "RefundActivity refunds an activity.",
         "operationId": "RefundActivity",
         "responses": {
           "200": {
@@ -573,7 +573,7 @@
     },
     "/admin/api/v1/RefundAndSkipActivity": {
       "post": {
-        "summary": "RefundAndSkipActivity unskips a sub for a date.",
+        "summary": "RefundAndSkipActivityrefunds and skips an activty.",
         "operationId": "RefundAndSkipActivity",
         "responses": {
           "200": {
@@ -681,7 +681,7 @@
     },
     "/admin/api/v1/SetupActivities": {
       "post": {
-        "summary": "SetupActivities unskips a sub for a date.",
+        "summary": "SetupActivities setups up all activities for date.",
         "operationId": "SetupActivities",
         "responses": {
           "200": {
@@ -698,6 +698,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPISetupActivitiesReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/SetupActivity": {
+      "post": {
+        "summary": "SetupActivity unskips a sub for a date.",
+        "operationId": "SetupActivity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISetupActivityReq"
             }
           }
         ],
@@ -1561,6 +1588,17 @@
         "hours": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "AdminAPISetupActivityReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
         }
       }
     },

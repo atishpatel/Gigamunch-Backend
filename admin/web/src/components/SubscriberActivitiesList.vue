@@ -4,7 +4,10 @@
       <v-card-title>
         Activities
         <v-spacer></v-spacer>
-        <ButtonSetupActivity v-on:dialog-success="getActivities"></ButtonSetupActivity>
+        <ButtonSetupActivity
+          v-on:dialog-success="getActivities"
+          :sub="sub"
+        ></ButtonSetupActivity>
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -83,6 +86,8 @@ import ButtonProcessActivity from './ButtonProcessActivity.vue';
 export default class SubscriberActivitiesList extends Vue {
   @Prop()
   public activities!: Types.ActivityExtended[];
+  @Prop()
+  public sub!: Types.SubscriberExtended;
   public search = '';
   public pagination = {
     rowsPerPage: -1,

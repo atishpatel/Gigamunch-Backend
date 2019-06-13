@@ -22,7 +22,7 @@ import DialogConfirm from './DialogConfirm.vue';
     DialogConfirm,
   },
 })
-export default class ButtonSkip extends Vue {
+export default class ButtonProcessActivity extends Vue {
   @Prop()
   public activity!: Types.ActivityExtended;
   public dialog = false;

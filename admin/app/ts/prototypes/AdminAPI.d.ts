@@ -50,6 +50,10 @@ interface UnskipActivityReq {
 interface SetupActivitiesReq {
     hours: number
 }
+interface SetupActivityReq {
+    id: string
+    date: string
+}
 interface RefundActivityReq {
     emails: string[]
     date: string

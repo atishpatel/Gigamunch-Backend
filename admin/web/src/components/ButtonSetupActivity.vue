@@ -7,14 +7,18 @@
     v-on:dialog-success="submit"
   >
     <template v-slot:dialog-content>
-      <!-- TODO: -->
+      <v-date-picker
+        landscape
+        v-model="req.date"
+        :allowed-dates="allowedDates"
+      ></v-date-picker>
     </template>
   </DialogConfirm>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DeactivateSubscriber } from '../ts/service';
+import { SetupActivity } from '../ts/service';
 import { IsError, ErrorAlert } from '../ts/errors';
 import DialogConfirm from './DialogConfirm.vue';
 
@@ -27,7 +31,7 @@ export default class ButtonSetupActivity extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
   public req = {
-    reason: '',
+    date: '',
   };
 
   protected submit() {
@@ -35,7 +39,8 @@ export default class ButtonSetupActivity extends Vue {
       alert('sub not found');
       return;
     }
-    DeactivateSubscriber(this.sub.id, this.req.reason).then((resp) => {
+    const d = new Date(this.req.date);
+    SetupActivity(this.sub.id, d.toISOString()).then((resp) => {
       if (IsError(resp)) {
         ErrorAlert(resp);
         return;
@@ -44,6 +49,16 @@ export default class ButtonSetupActivity extends Vue {
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('dialog-success');
     });
+  }
+
+  protected allowedDates(v: string) {
+    const d = new Date(v);
+    const day = d.getDay();
+    if (day === 0 || day === 3) {
+      // Monday or Thursday
+      return true;
+    }
+    return false;
   }
 }
 </script>
