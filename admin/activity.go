@@ -125,6 +125,30 @@ func (s *server) SetupActivities(ctx context.Context, w http.ResponseWriter, r *
 	return resp
 }
 
+// SetupActivity setup an activity.
+func (s *server) SetupActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.SetupActivityReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	date := getDatetime(req.Date)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.SetupActivity(date, req.ID, true, 0, 0)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.SetupActivity")
+	}
+	resp := &pb.ErrorOnlyResp{}
+	return resp
+}
+
 // RefundAndSkipActivity refunds and skips an activity.
 func (s *server) RefundAndSkipActivity(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error

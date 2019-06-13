@@ -58,6 +58,7 @@ func main() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetSubscriberActivities", s.handler(s.GetSubscriberActivities))
 	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
+	http.HandleFunc("/admin/api/v1/SetupActivity", s.handler(s.SetupActivity))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
 	http.HandleFunc("/admin/api/v1/RefundActivity", s.handler(s.userAdmin(s.RefundActivity)))
