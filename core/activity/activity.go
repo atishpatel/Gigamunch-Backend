@@ -29,8 +29,11 @@ const (
 	selectActivityForUserStatementEmail      = "SELECT * FROM activity WHERE email=? ORDER BY date DESC"
 	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
 	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
-	updateServingsStatement                  = "UPDATE activity SET servings=?,veg_servings=?,amount=?,servings_changed=1 WHERE date=? AND user_id=?"
-	updateFutureServingsStatement            = "UPDATE activity SET servings=?,veg_servings=?,amount=? WHERE date>? AND user_id=? AND paid=0 AND servings_changed=0"
+	selectUnpaidSummaries                    = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx DESC"
+	selectUnpaidSummaryForUser               = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx DESC"
+
+	updateServingsStatement       = "UPDATE activity SET servings=?,veg_servings=?,amount=?,servings_changed=1 WHERE date=? AND user_id=?"
+	updateFutureServingsStatement = "UPDATE activity SET servings=?,veg_servings=?,amount=? WHERE date>? AND user_id=? AND paid=0 AND servings_changed=0"
 
 	updateRefundedStatement = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
 	skipStatement           = "UPDATE activity SET skip=1 WHERE date=? AND user_id=?"

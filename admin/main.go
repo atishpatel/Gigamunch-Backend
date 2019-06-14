@@ -129,8 +129,7 @@ func main() {
 	// **********************
 	// Batch
 	// **********************
-	http.HandleFunc("/admin/batch/UpdateSubs", s.handler(s.UpdateSubs))
-	// http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
+	// http.HandleFunc("/admin/batch/UpdateSubs", s.handler(s.UpdateSubs))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))

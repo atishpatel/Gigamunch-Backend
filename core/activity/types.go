@@ -79,3 +79,15 @@ func (act *Activity) DateParsed() time.Time {
 	d, _ = time.Parse(DateFormat, act.Date[:10])
 	return d
 }
+
+// UnpaidSummary is summary of outstanding payments
+type UnpaidSummary struct {
+	MinDate   string `json:"min_date" db:"mn"`
+	MaxDate   string `json:"max_date" db:"mx"`
+	UserID    string `json:"user_id" db:"user_id"`
+	Email     string `json:"email" db:"email"`
+	FirstName string `json:"first_name" db:"first_name"`
+	LastName  string `json:"last_name" db:"last_name"`
+	NumUnpaid string `json:"num_unpaid" db:"num_unpaid"`
+	AmountDue string `json:"amount_due" db:"amount_due"`
+}

@@ -492,6 +492,32 @@
         ]
       }
     },
+    "/admin/api/v1/GetUnpaidSummaries": {
+      "post": {
+        "operationId": "GetUnpaidSummaries",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetUnpaidSummariesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIEmptyReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/ProcessActivity": {
       "post": {
         "operationId": "ProcessActivity",
@@ -1075,6 +1101,9 @@
         }
       }
     },
+    "AdminAPIEmptyReq": {
+      "type": "object"
+    },
     "AdminAPIErrorOnlyResp": {
       "type": "object",
       "properties": {
@@ -1461,6 +1490,20 @@
         }
       }
     },
+    "AdminAPIGetUnpaidSummariesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "unpaid_summaries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIUnpaidSummary"
+          }
+        }
+      }
+    },
     "AdminAPIPayroll": {
       "type": "object",
       "properties": {
@@ -1686,6 +1729,35 @@
         }
       },
       "title": "**********************\nSublogs\n**********************"
+    },
+    "AdminAPIUnpaidSummary": {
+      "type": "object",
+      "properties": {
+        "min_date": {
+          "type": "string"
+        },
+        "max_date": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "num_unpaid": {
+          "type": "string"
+        },
+        "amount_due": {
+          "type": "string"
+        }
+      }
     },
     "AdminAPIUnskipActivityReq": {
       "type": "object",

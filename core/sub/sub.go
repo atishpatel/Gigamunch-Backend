@@ -739,12 +739,15 @@ func (c *Client) BatchUpdateActivityWithUserID(start, limit int) error {
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to getAll")
 	}
+	if len(subs) == 0 {
+		return nil
+	}
 	max := int(start + limit)
 	if len(subs) < max {
 		max = len(subs)
 	}
 	c.log.Infof(c.ctx, "updating %s subs", len(subs))
-	subs = subs[start : max-1]
+	subs = subs[0 : max-1]
 	userIDs := make([]string, len(subs))
 	emails := make([]string, len(subs))
 	for i := range subs {

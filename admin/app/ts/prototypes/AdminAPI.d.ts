@@ -164,6 +164,10 @@ interface ProcessActivityReq {
 interface ProcessActivityResp {
     error: Common.Error
 }
+interface GetUnpaidSummariesResp {
+    error: Common.Error
+    unpaid_summaries: UnpaidSummary[]
+}
 interface SendCustomerSMSReq {
     emails: string[]
 	message: string
@@ -200,6 +204,9 @@ interface GetSubscriberRespV2 {
 }
 interface UserIDReq {
     ID: string
+}
+interface EmptyReq {
+
 }
 interface GetExecutionsReq {
     start: number
@@ -305,5 +312,15 @@ interface UpdateDeliveriesResp {
 interface UpdateDripReq {
     emails: string[]
     hours: number
+}
+interface UnpaidSummary {
+    min_date: string
+	max_date: string
+	user_id: string
+	email: string
+	first_name: string
+	last_name: string
+	num_unpaid: string
+	amount_due: string
 }
 }
