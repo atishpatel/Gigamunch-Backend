@@ -7,6 +7,7 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/discount"
 
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -80,6 +81,16 @@ func PBActivities(in []*activity.Activity) ([]*pbcommon.Activity, error) {
 		a.PaidDatetimeJSON = a.PaidDatetime.Time.Format(time.RFC3339)
 		a.RefundedDatetimeJSON = a.RefundedDatetime.Time.Format(time.RFC3339)
 		a.GiftFromUserIDJSON = a.GiftFromUserID.Int64
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBUnpaidSummaries turns an array of UnpaidSummary into a protobuff array of UnpaidSummary.
+func PBUnpaidSummaries(in []*activity.UnpaidSummary) ([]*pbadmin.UnpaidSummary, error) {
+	out := make([]*pbadmin.UnpaidSummary, len(in))
+	if in == nil {
+		return out, nil
 	}
 	err := marshalUnmarshal(&in, &out)
 	return out, err

@@ -76,6 +76,20 @@ export function GetLogExtended(v: Types.LogExtended | Common.Log): Types.LogExte
     return log;
 }
 
+export function GetUnpaidSummariesExtended(v: Types.UnpaidSummaryExtended[] | AdminAPI.UnpaidSummary[]): Types.UnpaidSummaryExtended[] {
+    const ves = v as Types.UnpaidSummaryExtended[];
+    for (let i = 0; i < ves.length; i++) {
+        ves[i] = GetUnpaidSummaryExtended(ves[i]);
+    }
+    return ves;
+}
+
+export function GetUnpaidSummaryExtended(v: Types.UnpaidSummaryExtended | AdminAPI.UnpaidSummary): Types.UnpaidSummaryExtended {
+    const ve = v as Types.UnpaidSummaryExtended;
+    ve.name = `${v.first_name} ${v.last_name}`;
+    return ve;
+}
+
 function getLogColor(log: Types.LogExtended) {
     const type = log.type;
     const action = log.action;
@@ -85,7 +99,7 @@ function getLogColor(log: Types.LogExtended) {
         case 'unskip':
             return 'pink';
         case 'message':
-            if (log.basic_payload.title.indexOf('from(Gigamunch)')) {
+            if (log.basic_payload.title.includes('from(Gigamunch)')) {
                 return 'green';
             }
             return 'light-green';
@@ -111,7 +125,7 @@ function getLogIcon(log: Types.LogExtended) {
         case 'unskip':
             return 'add_shopping_cart';
         case 'message':
-            if (log.basic_payload.title.indexOf('from(Gigamunch)')) {
+            if (log.basic_payload.title.includes('from(Gigamunch)')) {
                 return 'reply';
             }
             return 'message';

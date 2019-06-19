@@ -65,6 +65,13 @@ export function SetupActivity(id: string, date: string): Promise<AdminAPI.ErrorO
   return callFetch(url, 'POST', req);
 }
 
+export function GetUnpaidSummaries(): Promise<AdminAPI.GetUnpaidSummariesResp> {
+  const url: string = baseURL + '/v1/GetUnpaidSummaries';
+  const req: AdminAPI.EmptyReq = {
+  };
+  return callFetch(url, 'GET', req);
+}
+
 // Subscribers
 export function GetHasSubscribed(start: number, limit: number): Promise<AdminAPI.GetHasSubscribedRespV2> {
   const url: string = baseURL + '/v2/GetHasSubscribed';

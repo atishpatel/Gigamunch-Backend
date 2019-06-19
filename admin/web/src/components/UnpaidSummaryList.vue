@@ -2,7 +2,7 @@
   <div>
     <v-card>
       <v-card-title>
-        Subscribers
+        Unpaid Summary
         <v-spacer></v-spacer>
         <v-text-field
           v-model="search"
@@ -14,19 +14,20 @@
       </v-card-title>
       <v-data-table
         :headers="headers"
-        :items="subs"
+        :items="summaries"
         :search="search"
         :pagination.sync="pagination"
       >
         <template v-slot:items="props">
           <td>
-            <router-link :to="'/subscriber/' + props.item.emailsString"> {{ props.item.emailsString }} </router-link>
+            <router-link :to="'/subscriber/' + props.item.email"> {{ props.item.email }} </router-link>
           </td>
-          <td class="text-xs-right">{{ props.item.namesString }}</td>
-          <td class="text-xs-right">{{ props.item.phonenumbersString }}</td>
-          <td class="text-xs-right">{{ props.item.addressString }}</td>
-          <td class="text-xs-right">{{ props.item.id }}</td>
-          <td class="text-xs-right">{{ props.item.active }}</td>
+          <td class="text-xs-right">{{ props.item.user_id }}</td>
+          <td class="text-xs-right">{{ props.item.min_date }}</td>
+          <td class="text-xs-right">{{ props.item.max_date }}</td>
+          <td class="text-xs-right">{{ props.item.name }}</td>
+          <td class="text-xs-right">{{ props.item.num_unpaid }}</td>
+          <td class="text-xs-right">{{ props.item.amount_due }}</td>
         </template>
         <template v-slot:no-results>
           <v-alert
@@ -48,20 +49,21 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component({
   components: {},
 })
-export default class SubscribersList extends Vue {
+export default class UnpaidSummaryList extends Vue {
   @Prop()
-  public subs!: Common.Subscriber[];
+  public summaries!: Types.UnpaidSummaryExtended[];
   public search = '';
   public pagination = {
     rowsPerPage: -1,
   };
   public headers = [
-    { text: 'Emails', value: 'emailsString' },
+    { text: 'First Unpaid', value: 'min_date' },
+    { text: 'Last Unpaid', value: 'max_date' },
     { text: 'Name', value: 'name' },
-    { text: 'Phone Numbers', value: 'phonenumbersString' },
-    { text: 'Address', value: 'addressString', sortable: false },
-    { text: 'ID', value: 'id' },
-    { text: 'Active', value: 'active' },
+    { text: 'Email', value: 'email' },
+    { text: 'ID', value: 'user_id' },
+    { text: 'Num Unpaid', value: 'num_unpaid' },
+    { text: 'Amount Due', value: 'amount_due' },
   ];
 }
 </script>

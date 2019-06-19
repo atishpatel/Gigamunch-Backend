@@ -256,6 +256,7 @@ export default class SubscriberSummary extends Vue {
   background-color: rgb(243, 243, 243);
   border: 1px solid #d6d6d6;
   padding: 6px 10px;
+  flex-wrap: wrap;
 }
 
 .info-label {

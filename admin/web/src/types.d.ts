@@ -30,5 +30,9 @@ declare global {
             timestampString: string;
             basicPayloadDescriptionHTML: string;
         }
+
+        interface UnpaidSummaryExtended extends AdminAPI.UnpaidSummary {
+            name: string;
+        }
     }
 }

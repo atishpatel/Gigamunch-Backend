@@ -246,3 +246,36 @@ func (s *server) ProcessActivity(ctx context.Context, w http.ResponseWriter, r *
 	resp := &pb.ProcessActivityResp{}
 	return resp
 }
+
+// GetUnpaidSummaries gets all activties for a subscriber.
+func (s *server) GetUnpaidSummaries(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.EmptyReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	unpaidSummaries, err := activityC.GetUnpaidSummaries()
+	if err != nil {
+		return errors.Annotate(err, "failed to GetUnpaidSummaries")
+	}
+
+	aResp, err := serverhelper.PBUnpaidSummaries(unpaidSummaries)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBUnpaidSummaries")
+	}
+
+	resp := &pb.GetUnpaidSummariesResp{
+		UnpaidSummaries: aResp,
+	}
+
+	return resp
+}

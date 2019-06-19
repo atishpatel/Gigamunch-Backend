@@ -152,6 +152,16 @@ func (c *Client) GetBeforeDateForUser(date time.Time, userID string) ([]*Activit
 // TODO: GetForDate
 //
 
+// GetUnpaidSummaries gets a list of activity.
+func (c *Client) GetUnpaidSummaries() ([]*UnpaidSummary, error) {
+	dist := []*UnpaidSummary{}
+	err := c.sqlDB.SelectContext(c.ctx, &dist, selectUnpaidSummaries)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectUnpaidSummaries")
+	}
+	return dist, nil
+}
+
 // CreateReq is the request for Create.
 type CreateReq struct {
 	Date      string          `json:"date" db:"date"`
