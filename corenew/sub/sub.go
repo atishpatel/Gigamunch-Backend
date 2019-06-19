@@ -40,7 +40,7 @@ const (
 	selectSublogSummaryStatement          = "SELECT email,amount,min(date) as mn,max(date) as mx,count(email),sum(skip),sum(paid),sum(refunded),sum(amount),sum(amount_paid),sum(discount_amount),sum(refunded_amount),sum(servings),sum(veg_servings) FROM activity WHERE date<NOW() GROUP BY email HAVING mn<? && mn>? ORDER BY mn,mx"
 	updatePaidSubLogStatement             = "UPDATE activity SET amount_paid=%f,paid=1,paid_dt='%s',transaction_id='%s' WHERE date='%s' AND email='%s'"
 	updateSkipSubLogStatement             = "UPDATE activity SET skip=1 WHERE date='%s' AND user_id='%s'"
-	deleteSubLogStatement                 = "DELETE from activity WHERE date='%s' AND email='%s' AND paid=0"
+	deleteSubLogStatement                 = "DELETE from activity WHERE date=? AND user_id=? AND paid=0"
 	// updateRefundedAndSkipSubLogStatement     = "UPDATE activity SET skip=1,refunded=1 WHERE date=? AND email=?"
 	updateFirstSubLogStatment                = "UPDATE activity SET first=1,discount_percent=100 WHERE date='%s' AND email='%s'"
 	updateDiscountSubLogStatment             = "UPDATE activity SET discount_amount=?, discount_percent=? WHERE date=? AND email=?"
@@ -731,8 +731,7 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 		// is already unskipped
 		return errInvalidParameter.WithMessage("User is already unskipped.")
 	}
-	st := fmt.Sprintf(deleteSubLogStatement, date.Format(dateFormat), subEmail)
-	_, err = mysqlDB.Exec(st)
+	_, err = mysqlDB.Exec(deleteSubLogStatement, date.Format(dateFormat), s.ID)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute deleteSubLogStatement.")
 	}
@@ -797,14 +796,14 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 	if !s.IsSubscribed {
 		return errInvalidParameter.WithMessage(subEmail + " is no longer a subscriber. :(")
 	}
-	sl, err := c.Get(date, subEmail)
+	sl, err := c.Get(date, s.Email)
 	if err != nil {
 		if errors.GetErrorWithCode(err).Code != errNoSuchEntry.Code {
 			return errors.Wrap("failed to sub.Get", err)
 		}
 		// insert
 		var s *SubscriptionSignUp
-		s, err = get(c.ctx, subEmail)
+		s, err = get(c.ctx, s.Email)
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
