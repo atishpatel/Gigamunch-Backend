@@ -45,7 +45,12 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		return errors.Annotate(err, "failed to subold.GetSubscribers. No SMS was sent.")
 	}
 	var errs []error
-	for _, s := range subs {
+	for i, s := range subs {
+		if s == nil {
+			errs = append(errs, errors.BadRequestError.Annotate("failed to GetSubscriber ("+req.Emails[i]+")"))
+			log.Errorf(ctx, "failed to GetSubscriber To(%s):", req.Emails[i])
+			continue
+		}
 		if s.PhoneNumber == "" {
 			continue
 		}

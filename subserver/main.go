@@ -7,9 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 
@@ -179,6 +181,17 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
+		defer func() {
+			// handle panic, recover
+			if r := recover(); r != nil {
+				errString := fmt.Sprintf("PANICKING: %+v\n%s", r, debug.Stack())
+				logging.Errorf(ctx, errString)
+				messageC := message.New(ctx)
+				_ = messageC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), errString)
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(fmt.Sprintf("{\"code\":500,\"message\":\"Woops! Something went wrong. Please try again later.\"}")))
+			}
+		}()
 		// create logging client
 		log, err := logging.NewClient(ctx, "admin", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
