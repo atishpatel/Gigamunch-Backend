@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -220,7 +221,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		defer func() {
 			// handle panic, recover
 			if r := recover(); r != nil {
-				errString := fmt.Sprintf("PANICKING: %+v", r)
+				errString := fmt.Sprintf("PANICKING: %+v\n%s", r, debug.Stack())
 				logging.Errorf(ctx, errString)
 				messageC := message.New(ctx)
 				_ = messageC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), errString)

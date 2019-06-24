@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -23,8 +24,8 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 	"github.com/atishpatel/Gigamunch-Backend/utils"
@@ -117,11 +118,11 @@ func handleCookSignup(w http.ResponseWriter, req *http.Request) {
 			utils.Criticalf(c, "Error putting CookSignupEmail in datastore ", err)
 		}
 		messageC := message.New(c)
-		err = messageC.SendSMS("6153975516", fmt.Sprintf("Cook %s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
+		err = messageC.SendAdminSMS("6153975516", fmt.Sprintf("Cook %s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
 		if err != nil {
 			utils.Criticalf(c, "failed to send sms to Enis. Err: %+v", err)
 		}
-		_ = messageC.SendSMS("6155454989", fmt.Sprintf("Cook %s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
+		_ = messageC.SendAdminSMS("6155454989", fmt.Sprintf("Cook %s just signed up using becomecook page. Get on that booty. \nEmail: %s", name, emailAddress))
 		_, _ = w.Write(cookSignupPage)
 		return
 	}
@@ -234,6 +235,17 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		ctx := appengine.NewContext(r)
 		ctx = context.WithValue(ctx, common.ContextUserID, "")
 		ctx = context.WithValue(ctx, common.ContextUserEmail, "")
+		defer func() {
+			// handle panic, recover
+			if r := recover(); r != nil {
+				errString := fmt.Sprintf("PANICKING: %+v\n%s", r, debug.Stack())
+				logging.Errorf(ctx, errString)
+				messageC := message.New(ctx)
+				_ = messageC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), errString)
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(fmt.Sprintf("{\"code\":500,\"message\":\"Woops! Something went wrong. Please try again later.\"}")))
+			}
+		}()
 		// create logging client
 		log, err := logging.NewClient(ctx, "server", r.URL.Path, s.db, s.serverInfo)
 		if err != nil {
