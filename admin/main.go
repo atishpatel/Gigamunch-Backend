@@ -66,6 +66,7 @@ func main() {
 	http.HandleFunc("/admin/api/v1/RefundAndSkipActivity", s.handler(s.userAdmin(s.RefundAndSkipActivity)))
 	http.HandleFunc("/admin/api/v1/ChangeActivityServings", s.handler(s.userAdmin(s.ChangeActivityServings)))
 	http.HandleFunc("/admin/api/v1/ProcessActivity", s.handler(s.userAdmin(s.ProcessActivity)))
+	http.HandleFunc("/admin/api/v1/GetUnpaidSummaries", s.handler(s.userAdmin(s.GetUnpaidSummaries)))
 
 	// **********************
 	// Discount

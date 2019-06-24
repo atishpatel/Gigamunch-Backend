@@ -6,14 +6,25 @@
       clipped
       app
     >
+      <div class="drawer-nav-header">Menu</div>
       <v-list>
         <v-list-tile to="/subscribers">
           <v-list-tile-action>
-            <v-icon></v-icon>
+            <v-icon>people</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>
               Subscribers
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile to="/unpaid-summary">
+          <v-list-tile-action>
+            <v-icon>sentiment_dissatisfied</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Unpaid Summary
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
@@ -63,5 +74,21 @@ export default class App extends Vue {
 
 .main {
   background: white;
+}
+
+.drawer-nav-header {
+  background-color: #009688;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  padding: 24px 20px;
+}
+
+.theme--light.v-list .v-list__tile--link:hover {
+  background-color: #dce0e2;
+}
+
+.v-list__tile--active {
+  background-color: #eceff1;
 }
 </style>

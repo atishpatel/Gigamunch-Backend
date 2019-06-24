@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UnpaidSummaryList :subs="subs"></UnpaidSummaryList>
+    <UnpaidSummaryList :summaries="summaries"></UnpaidSummaryList>
   </div>
 </template>
 

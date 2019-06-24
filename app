@@ -132,7 +132,7 @@ if [[ $1 == "serve" ]]; then
   if [[ $2 == "server" ]]; then
     echo "Starting server:"
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore --port 8081 server/app.yaml& 
+    dev_appserver.py --datastore_path ./.datastore server/app.yaml& 
     cd server
     # gulp build&
     gulp watch

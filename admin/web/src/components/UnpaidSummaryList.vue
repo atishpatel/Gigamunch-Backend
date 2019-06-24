@@ -17,17 +17,28 @@
         :items="summaries"
         :search="search"
         :pagination.sync="pagination"
+        :expand="expand"
+        item-key="user_id"
       >
         <template v-slot:items="props">
-          <td>
-            <router-link :to="'/subscriber/' + props.item.email"> {{ props.item.email }} </router-link>
-          </td>
-          <td class="text-xs-right">{{ props.item.user_id }}</td>
-          <td class="text-xs-right">{{ props.item.min_date }}</td>
-          <td class="text-xs-right">{{ props.item.max_date }}</td>
-          <td class="text-xs-right">{{ props.item.name }}</td>
-          <td class="text-xs-right">{{ props.item.num_unpaid }}</td>
-          <td class="text-xs-right">{{ props.item.amount_due }}</td>
+          <tr @click="props.expanded = !props.expanded">
+            <td class="text-xs-right">{{ props.item.min_date }}</td>
+            <td class="text-xs-right">{{ props.item.max_date }}</td>
+            <td class="text-xs-right">{{ props.item.name }}</td>
+            <td>
+              <router-link :to="'/subscriber/' + props.item.user_id"> {{ props.item.email }} </router-link>
+            </td>
+            <td class="text-xs-right">{{ props.item.num_unpaid }}</td>
+            <td class="text-xs-right">${{ props.item.amount_due }}</td>
+          </tr>
+        </template>
+        <template v-slot:expand="props">
+          <table>
+            <tr>
+              <td>ID</td>
+              <td>{{props.item.user_id}}</td>
+            </tr>
+          </table>
         </template>
         <template v-slot:no-results>
           <v-alert
@@ -56,13 +67,13 @@ export default class UnpaidSummaryList extends Vue {
   public pagination = {
     rowsPerPage: -1,
   };
+  public expand = true;
   public headers = [
     { text: 'First Unpaid', value: 'min_date' },
     { text: 'Last Unpaid', value: 'max_date' },
     { text: 'Name', value: 'name' },
     { text: 'Email', value: 'email' },
-    { text: 'ID', value: 'user_id' },
-    { text: 'Num Unpaid', value: 'num_unpaid' },
+    { text: 'Num Unpaid Dinners', value: 'num_unpaid' },
     { text: 'Amount Due', value: 'amount_due' },
   ];
 }

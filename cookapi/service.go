@@ -150,6 +150,15 @@ func main() {
 	// register("SendWelcomeEmail", "SendWelcomeEmail", "POST", "cookservice/SendWelcomeEmail", "Admin func. Sends welcome email.")
 	// register("SendIntroEmail", "SendIntroEmail", "POST", "cookservice/SendIntroEmail", "Admin func. Sends email for people who just left email.")
 	endpoints.HandleHTTP()
+	// FIX: If you get a "blocked by CORS policy" error. Add the following to the endpoints.Server.ServeHTTP function. Click above function to find function.
+	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Origin, Access-Control-Allow-Headers, Access-Control-Allow-Origin, auth-token")
+	//	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//	w.Header().Set("Content-Type", "application/json")
+	//	if r.Method == http.MethodOptions {
+	//		w.WriteHeader(http.StatusOK)
+	//		return
+	//	}
+
 	appengine.Main()
 }
 
