@@ -19,7 +19,7 @@ handlers:
     secure: always
 
   - url: /admin/swagger
-    static_dir: app/swagger-ui/dist
+    static_dir: app/swagger-ui
     secure: always
 
   - url: /admin/swagger.json
