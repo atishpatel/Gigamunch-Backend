@@ -696,12 +696,12 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 			}
 		}
 		// if first
-		if sl.Free {
-			err = c.Free(date.Add(7*24*time.Hour), s.Email)
-			if err != nil {
-				return errors.Wrap("failed to Free", err)
-			}
-		}
+		// if sl.Free {
+		// 	err = c.Free(date.Add(7*24*time.Hour), s.Email)
+		// 	if err != nil {
+		// 		return errors.Wrap("failed to Free", err)
+		// 	}
+		// }
 	}
 	st := fmt.Sprintf(updateSkipSubLogStatement, date.Format(dateFormat), s.ID)
 	_, err = mysqlDB.Exec(st)
@@ -1075,6 +1075,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 		if amt < .01 {
 			utils.Errorf(c.ctx, "WeeklyAmount is less than .01 for %s", v.Email)
 		}
+		// TODO: set first based on if calculation
 		err = c.Setup(date, v.Email, v.Servings, v.VegetarianServings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID)
 		if err != nil {
 			if errors.GetErrorWithCode(err).Code == errDuplicateEntry.Code {
