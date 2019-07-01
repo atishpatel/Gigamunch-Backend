@@ -50,6 +50,8 @@ const (
 	LeftWebsiteEmail Tag = "LEFT_WEBSITE_EMAIL"
 	// HasOutstandingCharge if unsubed and has outstanding charge.
 	HasOutstandingCharge Tag = "HAS_OUTSTANDING_CHARGE"
+	// CancelWithOutstandingCharge if deactived with outstanding charges.
+	CancelWithOutstandingCharge Tag = "CANCELED_WITH_OUTSTANDING_CHARGE"
 
 	// ==================
 	// Both drip
@@ -170,7 +172,7 @@ func (c *Client) SubActivated(req *UserFields) error {
 }
 
 // SubDeactivated is when a subscriber account is deactivated.
-func (c *Client) SubDeactivated(req *UserFields) error {
+func (c *Client) SubDeactivated(req *UserFields, outstandingCharges bool) error {
 	var err error
 	req.AddTags = append(req.AddTags, Deactivated)
 	req.RemoveTags = append(req.RemoveTags, Subscriber)
@@ -178,6 +180,9 @@ func (c *Client) SubDeactivated(req *UserFields) error {
 	err = c.updateUser(req, c.dripSubC)
 	if err != nil {
 		return err
+	}
+	if outstandingCharges {
+		req.AddTags = append(req.AddTags, CancelWithOutstandingCharge)
 	}
 	// For Marketing Drip account
 	err = c.updateUser(req, c.dripMarketingC)

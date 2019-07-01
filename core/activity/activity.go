@@ -167,6 +167,16 @@ func (c *Client) GetUnpaidSummaries() ([]*UnpaidSummary, error) {
 	return dist, nil
 }
 
+// GetUnpaidSummary gets a list of activity.
+func (c *Client) GetUnpaidSummary(userID string) (*UnpaidSummary, error) {
+	dist := &UnpaidSummary{}
+	err := c.sqlDB.SelectContext(c.ctx, dist, selectUnpaidSummaryForUser, userID)
+	if err != nil {
+		return nil, errSQLDB.WithError(err).Annotate("failed to selectUnpaidSummaryForUser")
+	}
+	return dist, nil
+}
+
 // CreateReq is the request for Create.
 type CreateReq struct {
 	Date      string          `json:"date" db:"date"`

@@ -241,6 +241,16 @@ func (c *Client) Deactivate(idOrEmail, reason string) error {
 	if err != nil {
 		return errors.Annotate(err, "failed to Update")
 	}
+	// check of unpaid activities
+	outstandingCharges := false
+	unpaidSummary, err := activityC.GetUnpaidSummary(sub.ID)
+	if err != nil {
+		c.log.Errorf(c.ctx, "failed to GetUnpaidSummary: %+v", err)
+	} else {
+		if unpaidSummary.NumUnpaid != "0" && unpaidSummary.NumUnpaid != "" {
+			outstandingCharges = true
+		}
+	}
 	// update mail client
 	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
 	if err != nil {
@@ -252,7 +262,7 @@ func (c *Client) Deactivate(idOrEmail, reason string) error {
 			FirstName: emailPref.FirstName,
 			LastName:  emailPref.LastName,
 		}
-		err = mailC.SubDeactivated(mailReq)
+		err = mailC.SubDeactivated(mailReq, outstandingCharges)
 		if err != nil {
 			return errors.Annotate(err, "failed to mail.SubDeactivated")
 		}
