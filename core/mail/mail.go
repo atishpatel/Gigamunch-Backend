@@ -48,6 +48,9 @@ const (
 
 	// LeftWebsiteEmail if they left email on website.
 	LeftWebsiteEmail Tag = "LEFT_WEBSITE_EMAIL"
+	// HasOutstandingCharge if unsubed and has outstanding charge.
+	HasOutstandingCharge Tag = "HAS_OUTSTANDING_CHARGE"
+
 	// ==================
 	// Both drip
 	// ==================
@@ -76,6 +79,11 @@ const (
 	Gifted Tag = "GIFTED"
 	// Dev if they are development server subscriber.
 	Dev Tag = "DEV"
+
+	// UpdateCreditCard if they need to update credit card.
+	UpdateCreditCard Tag = "UPDATE_CREDIT_CARD"
+	// UpdateCreditCardSerious if they need to update credit card.
+	UpdateCreditCardSerious Tag = "UPDATE_CREDIT_CARD_SERIOUS"
 )
 
 // GetPreviewEmailTag returns the tag that needs to be added to get the preview email based on date provided. Date should be date the person is recieving their meal.
@@ -314,8 +322,15 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 }
 
 // AddBatchTags adds tags to emails. This often triggers a workflow.
-func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
+func (c *Client) AddBatchTags(emailsUnverified []string, tags []Tag, marketing bool) error {
 	// TODO: batch limit is 1000 emails so update to split those into two request
+	var emails []string
+	for _, v := range emailsUnverified {
+		if !ignoreEmail(v) {
+			emails = append(emails, v)
+		}
+	}
+
 	tagsString := make([]string, len(tags))
 	for i, tag := range tags {
 		tagsString[i] = tag.String()
@@ -339,7 +354,13 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 			},
 		},
 	}
-	resp, err := c.dripSubC.UpdateBatchSubscribers(req)
+	var err error
+	var resp *drip.SubscribersResp
+	if marketing {
+		resp, err = c.dripMarketingC.UpdateBatchSubscribers(req)
+	} else {
+		resp, err = c.dripSubC.UpdateBatchSubscribers(req)
+	}
 	if err != nil {
 		if strings.Contains(err.Error(), "<html>") {
 			err = fmt.Errorf("drip returned an html page")

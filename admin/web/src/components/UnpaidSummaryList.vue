@@ -18,12 +18,13 @@
         :search="search"
         :pagination.sync="pagination"
         :expand="expand"
+        disable-initial-sort="true"
         item-key="user_id"
       >
         <template v-slot:items="props">
           <tr @click="props.expanded = !props.expanded">
-            <td class="text-xs-right">{{ props.item.min_date }}</td>
-            <td class="text-xs-right">{{ props.item.max_date }}</td>
+            <td class="text-xs-right">{{ props.item.first_date }}</td>
+            <td class="text-xs-right">{{ props.item.last_date }}</td>
             <td class="text-xs-right">{{ props.item.name }}</td>
             <td>
               <router-link :to="'/subscriber/' + props.item.user_id"> {{ props.item.email }} </router-link>

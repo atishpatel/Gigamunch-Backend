@@ -113,6 +113,20 @@ func (c *Client) getAll(start, limit int) ([]*subold.Subscriber, error) {
 	return results, nil
 }
 
+// getMulti returns the list of Subscribers.
+func (c *Client) getMulti(userIDs []string) ([]*subold.Subscriber, error) {
+	keys := make([]common.Key, len(userIDs))
+	for i := range userIDs {
+		keys[i] = c.db.NameKey(c.ctx, kind, userIDs[i])
+	}
+	var results []*subold.Subscriber
+	err := c.db.GetMulti(c.ctx, keys, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 // getActiveForWeekday returns the list of Subscribers for that day.
 // func (c *Client) getActiveForWeekday(weekday string) ([]*Subscriber, error) {
 // 	query := datastore.NewQuery(kind).

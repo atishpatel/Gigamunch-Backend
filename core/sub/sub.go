@@ -68,6 +68,15 @@ func (c *Client) Get(id string) (*subold.Subscriber, error) {
 	return c.getByIDOrEmail(id)
 }
 
+// GetMulti gets a subscriber.
+func (c *Client) GetMulti(ids []string) ([]*subold.Subscriber, error) {
+	subs, err := c.getMulti(ids)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to getMulti")
+	}
+	return subs, nil
+}
+
 // GetByEmail gets a subscriber by email.
 func (c *Client) GetByEmail(email string) (*subold.Subscriber, error) {
 	sub, err := c.getByEmail(email)
@@ -432,15 +441,15 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to activity.NewClient"))
 	} else {
 		createReq := &activity.CreateReq{
-			Date:      sub.IntervalStartPoint.Format(activity.DateFormat),
-			UserID:    sub.ID,
-			Email:     sub.Email(),
-			FirstName: sub.FirstName(),
-			LastName:  sub.LastName(),
-			Location:  sub.Location,
-			Active:    true,
-			Skip:      false,
-			First:     true,
+			Date:                  sub.IntervalStartPoint.Format(activity.DateFormat),
+			UserID:                sub.ID,
+			Email:                 sub.Email(),
+			FirstName:             sub.FirstName(),
+			LastName:              sub.LastName(),
+			Location:              sub.Location,
+			Active:                true,
+			Skip:                  false,
+			First:                 true,
 			ServingsNonVegetarian: sub.ServingsNonVegetarian,
 			ServingsVegetarain:    sub.ServingsVegetarian,
 			Amount:                sub.Amount,
@@ -509,14 +518,14 @@ func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool
 	}
 
 	createReq := &activity.CreateReq{
-		Date:      date.Format(activity.DateFormat),
-		UserID:    sub.ID,
-		Email:     sub.Email(),
-		FirstName: sub.FirstName(),
-		LastName:  sub.LastName(),
-		Location:  sub.Location,
-		Active:    active,
-		Skip:      false,
+		Date:                  date.Format(activity.DateFormat),
+		UserID:                sub.ID,
+		Email:                 sub.Email(),
+		FirstName:             sub.FirstName(),
+		LastName:              sub.LastName(),
+		Location:              sub.Location,
+		Active:                active,
+		Skip:                  false,
 		ServingsNonVegetarian: sub.ServingsNonVegetarian,
 		ServingsVegetarain:    sub.ServingsVegetarian,
 		Amount:                sub.Amount,

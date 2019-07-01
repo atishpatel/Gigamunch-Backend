@@ -33,6 +33,8 @@ declare global {
 
         interface UnpaidSummaryExtended extends AdminAPI.UnpaidSummary {
             name: string;
+            first_date: string;
+            last_date: string;
         }
     }
 }

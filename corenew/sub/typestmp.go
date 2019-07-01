@@ -88,6 +88,14 @@ func (sub *Subscriber) Email() string {
 	return v
 }
 
+func (sub *Subscriber) PhoneNumber() string {
+	var v string
+	if len(sub.PhonePrefs) >= 1 {
+		v = sub.PhonePrefs[0].Number
+	}
+	return v
+}
+
 func (sub *Subscriber) FirstName() string {
 	var v string
 	for _, emailPref := range sub.EmailPrefs {

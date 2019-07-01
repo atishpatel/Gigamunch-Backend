@@ -87,6 +87,8 @@ export function GetUnpaidSummariesExtended(v: Types.UnpaidSummaryExtended[] | Ad
 export function GetUnpaidSummaryExtended(v: Types.UnpaidSummaryExtended | AdminAPI.UnpaidSummary): Types.UnpaidSummaryExtended {
     const ve = v as Types.UnpaidSummaryExtended;
     ve.name = `${v.first_name} ${v.last_name}`;
+    ve.first_date = GetFullDate(ve.min_date);
+    ve.last_date = GetDayFullDate(ve.max_date);
     return ve;
 }
 

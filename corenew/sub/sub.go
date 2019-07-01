@@ -925,44 +925,44 @@ func (c *Client) Activate(id string, firstBagDate time.Time, log *logging.Client
 }
 
 // Cancel cancels an user's subscription.
-func (c *Client) Cancel(subEmail string, log *logging.Client, serverInfo *common.ServerInfo) error {
-	if subEmail == "" {
-		return errInvalidParameter.Wrap("sub email cannot be empty.")
-	}
-	// remove any SubLog that are > now
-	_, err := mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
-	if err != nil {
-		return errSQLDB.WithError(err).Wrapf("failed to execute statement: %s", deleteSubLogStatment)
-	}
-	// change isSubscribed to false
-	sub, err := get(c.ctx, subEmail)
-	if err != nil {
-		return errors.Wrap("failed to get sub", err)
-	}
-	if !sub.IsSubscribed {
-		return errInvalidParameter.WithMessage("User is already unsubscribed.").Wrapf("%s is already not subscribed.", subEmail)
-	}
-	sub.IsSubscribed = false
-	sub.UnSubscribedDate = time.Now()
-	err = put(c.ctx, subEmail, sub)
-	if err != nil {
-		return errors.Wrap("failed to put sub", err)
-	}
-	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
-	if err != nil {
-		return errors.Annotate(err, "failed to mail.NewClient")
-	}
-	mailReq := &mail.UserFields{
-		Email:     subEmail,
-		FirstName: sub.FirstName,
-		LastName:  sub.LastName,
-	}
-	err = mailC.SubDeactivated(mailReq)
-	if err != nil {
-		return errors.Annotate(err, "failed to mail.SubDeactivated")
-	}
-	return nil
-}
+// func (c *Client) Cancel(subEmail string, log *logging.Client, serverInfo *common.ServerInfo) error {
+// 	if subEmail == "" {
+// 		return errInvalidParameter.Wrap("sub email cannot be empty.")
+// 	}
+// 	// remove any SubLog that are > now
+// 	_, err := mysqlDB.Exec(deleteSubLogStatment, time.Now().Format(dateFormat), subEmail)
+// 	if err != nil {
+// 		return errSQLDB.WithError(err).Wrapf("failed to execute statement: %s", deleteSubLogStatment)
+// 	}
+// 	// change isSubscribed to false
+// 	sub, err := get(c.ctx, subEmail)
+// 	if err != nil {
+// 		return errors.Wrap("failed to get sub", err)
+// 	}
+// 	if !sub.IsSubscribed {
+// 		return errInvalidParameter.WithMessage("User is already unsubscribed.").Wrapf("%s is already not subscribed.", subEmail)
+// 	}
+// 	sub.IsSubscribed = false
+// 	sub.UnSubscribedDate = time.Now()
+// 	err = put(c.ctx, subEmail, sub)
+// 	if err != nil {
+// 		return errors.Wrap("failed to put sub", err)
+// 	}
+// 	mailC, err := mail.NewClient(c.ctx, log, serverInfo)
+// 	if err != nil {
+// 		return errors.Annotate(err, "failed to mail.NewClient")
+// 	}
+// 	mailReq := &mail.UserFields{
+// 		Email:     subEmail,
+// 		FirstName: sub.FirstName,
+// 		LastName:  sub.LastName,
+// 	}
+// 	err = mailC.SubDeactivated(mailReq)
+// 	if err != nil {
+// 		return errors.Annotate(err, "failed to mail.SubDeactivated")
+// 	}
+// 	return nil
+// }
 
 // Process process a SubLog.
 // func (c *Client) Process(date time.Time, subEmail string) error {

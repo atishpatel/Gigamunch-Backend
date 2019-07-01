@@ -21,7 +21,8 @@ import (
 const (
 	datetimeFormat = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	// DateFormat is the expected format of date in activity.
-	DateFormat                               = "2006-01-02" // "Jan 2, 2006"
+	DateFormat = "2006-01-02" // "Jan 2, 2006"
+	// Select
 	selectActivityByEmailStatement           = "SELECT * FROM activity WHERE date=? AND email=?"
 	selectActivityByUserIDStatement          = "SELECT * FROM activity WHERE date=? AND user_id=?"
 	selectAllActivityStatement               = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
@@ -29,18 +30,22 @@ const (
 	selectActivityForUserStatementEmail      = "SELECT * FROM activity WHERE email=? ORDER BY date DESC"
 	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
 	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
-	selectUnpaidSummaries                    = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx DESC"
-	selectUnpaidSummaryForUser               = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx DESC"
-
+	selectUnpaidSummaries                    = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx"
+	selectUnpaidSummaryForUser               = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx"
+	// selectUnpaidActivities                   = "SELECT * FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 ORDER BY user_id,date"
+	// update and insert
 	updateServingsStatement       = "UPDATE activity SET servings=?,veg_servings=?,amount=?,servings_changed=1 WHERE date=? AND user_id=?"
 	updateFutureServingsStatement = "UPDATE activity SET servings=?,veg_servings=?,amount=? WHERE date>? AND user_id=? AND paid=0 AND servings_changed=0"
 
+	insertStatement         = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
 	updateRefundedStatement = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
 	skipStatement           = "UPDATE activity SET skip=1 WHERE date=? AND user_id=?"
 	unskipStatement         = "UPDATE activity SET skip=0,active=1 WHERE date=? AND user_id=?"
-	insertStatement         = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
-	deleteFutureStatment    = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
+	updateForgiveStatement  = "UPDATE activity SET forgiven=1 WHERE date=? AND user_id=?"
 	updatePaidStatement     = "UPDATE activity SET amount_paid=?,discount_amount=?,discount_percent=?,paid=1,paid_dt=?,transaction_id=? WHERE date=? AND user_id=?"
+
+	// delete
+	deleteFutureStatment = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
 	// TODO: switch to user id
 	deleteFutureEmailStatment = "DELETE from activity WHERE date>? AND email=? AND paid=0"
 )
@@ -370,6 +375,23 @@ func (c *Client) Unskip(date time.Time, email string) error {
 
 	suboldC := subold.NewWithLogging(c.ctx, c.log)
 	return suboldC.Unskip(date, email)
+}
+
+// Forgive forgives a subscriber for an activity.
+func (c *Client) Forgive(date time.Time, userID string) error {
+	if userID == "" || date.IsZero() {
+		return errBadRequest.Annotate("invalid UserID or Date")
+	}
+	act, err := c.Get(date, userID)
+	if err != nil {
+		return errBadRequest.WithError(err).Annotate("activity not found")
+	}
+	_, err = c.sqlDB.ExecContext(c.ctx, updateForgiveStatement, date.Format(DateFormat), userID)
+	if err != nil {
+		return errSQLDB.WithError(err).Wrap("failed to execute updateForgiveStatement")
+	}
+	c.log.Forgiven(userID, act.Email, date.Format(time.RFC3339), act.Amount, act.AmountPaid-act.Amount)
+	return nil
 }
 
 // Paid sets activity to paid.

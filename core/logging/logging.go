@@ -304,7 +304,7 @@ func (c *Client) Refund(userID string, userEmail, date string, amountDue, amount
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Refunded for " + date,
-			Description: fmt.Sprintf("%s was refunded %.2f", userEmail, amountRefunded),
+			Description: fmt.Sprintf("%s was refunded $%.2f", userEmail, amountRefunded),
 		},
 		SalePayload: SalePayload{
 			Date:           date,
@@ -326,7 +326,7 @@ func (c *Client) Forgiven(userID string, userEmail, date string, amountDue, amou
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Forgiven for " + date,
-			Description: fmt.Sprintf("%s was forgiven for %.2f", userEmail, amountForgiven),
+			Description: fmt.Sprintf("%s was forgiven for $%.2f", userEmail, amountForgiven),
 		},
 		SalePayload: SalePayload{
 			Date:           date,
@@ -347,7 +347,7 @@ func (c *Client) CardDeclined(userID string, userEmail, date string, amountDue, 
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Card declined for " + date,
-			Description: fmt.Sprintf("%s's card was declined for %.2f", userEmail, amountDeclined),
+			Description: fmt.Sprintf("%s's card was declined for $%.2f", userEmail, amountDeclined),
 		},
 		SalePayload: SalePayload{
 			Date:           date,

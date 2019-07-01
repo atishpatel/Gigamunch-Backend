@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 
 	"github.com/atishpatel/Gigamunch-Backend/corenew/healthcheck"
@@ -39,6 +41,183 @@ func (s *server) ProcessActivityTask(ctx context.Context, w http.ResponseWriter,
 	err = subC.ProcessActivity(parms.Date, parms.SubEmail)
 	if err != nil {
 		log.Errorf(ctx, "failed to activity.Process(Date:%s SubEmail:%s). Err:%+v", parms.Date, parms.SubEmail, err)
+		return errors.GetErrorWithCode(err)
+	}
+	return nil
+}
+
+func sendAndLogMessage(ctx context.Context, log *logging.Client, msg string, s *subold.Subscriber) bool {
+	messageC := message.New(ctx)
+	nameDilm := "{{name}}"
+	emailDilm := "{{email}}"
+	userIDDilm := "{{user_id}}"
+	msg = strings.Replace(msg, nameDilm, s.FullName(), -1)
+	msg = strings.Replace(msg, emailDilm, s.Email(), -1)
+	msg = strings.Replace(msg, userIDDilm, s.ID, -1)
+	number := s.PhoneNumber()
+	if number == "" {
+		return false
+	}
+	err := messageC.SendDeliverySMS(number, msg)
+	if err != nil {
+		log.Errorf(ctx, "failed to message.SendDeliverySMS To(%s): %+v", number, err)
+		return false
+	}
+	// log sms send
+	payload := &logging.MessagePayload{
+		Platform: "SMS",
+		Body:     msg,
+		From:     "Gigamunch",
+		To:       number,
+	}
+	log.SubMessage(s.ID, s.Email(), payload)
+	return true
+}
+
+// ProcessUnpaidPreDelivery 3 days before delivery
+func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	const smsMessage = "Hey {{name}}, just a heads up, you will not receive this week's meal because your account has been suspended due to multiple outstanding charges. Please update your card and settle from declined transactions, we'd love to have you back! Feel free to respond if you have any questions, we'll be happy to clarify. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		log.Errorf(ctx, "failed to activity.NewClient. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	summaries, err := activityC.GetUnpaidSummaries()
+	if err != nil {
+		log.Errorf(ctx, "failed to activity.Process. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	// TODO: Try charging card?
+	// get subs
+	var threePlusUnpaidUserID []string
+	for _, v := range summaries {
+		numUnpaid, err := strconv.ParseInt(v.NumUnpaid, 10, 64)
+		if err != nil {
+			log.Errorf(ctx, "failed to strconv.ParseInt. Err:%+v", err)
+			continue
+		}
+		if numUnpaid >= 3 {
+			threePlusUnpaidUserID = append(threePlusUnpaidUserID, v.UserID)
+		}
+	}
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		log.Errorf(ctx, "failed to sub.NewClient. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	subs, err := subC.GetMulti(threePlusUnpaidUserID)
+	if err != nil {
+		log.Errorf(ctx, "failed to sub.GetMulti. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	deliveryDay := time.Now().Add(3 * 24 * time.Hour)
+	for _, s := range subs {
+		// check if still subscribed and is for the correct plan day
+		if s.Active && s.PlanWeekday == deliveryDay.Weekday().String() {
+			nextAct, err := activityC.Get(deliveryDay, s.ID)
+			if err != nil {
+				log.Errorf(ctx, "failed to process %s: %+v skipping...", s.Email(), err)
+				continue
+			}
+			if !nextAct.Skip {
+				// Skip next
+				err = activityC.Skip(deliveryDay, s.ID, "Unpaid count")
+				if err != nil {
+					log.Errorf(ctx, "failed to process %s: failed to skip: %+v skipping...", s.Email(), err)
+					continue
+				}
+				// Send sms
+				sendAndLogMessage(ctx, log, smsMessage, s)
+			}
+		}
+	}
+
+	return nil
+}
+
+// ProcessUnpaidPostDelivery 1 day after delivery
+func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	const smsMessageTwo = "Hey {{name}}, please don't dine and dash on a local small business. You owe Gigamunch money from declined transactions. Please respond if you have any questions, we'll be happy to clarify. Just tap the link below to settle your outstanding charges. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
+	const smsMessageThreePlus = "{{name}}, we had to suspend your account for this week because your card was declined 3 times in a row. Please tap the link below to settle your outstanding charges. Feel free to respond if you have any questions, we'll be happy to clarify. Thank you! \n https://eatgigamunch.com/update-payment?email={{email}}"
+	const smsMessageDeactive = "Hey {{name}}, please don't dine and dash on a local small business. You owe Gigamunch money from declined transactions. Please respond if you have any questions, we'll be happy to clarify. Just tap the link below to settle your outstanding charges. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
+
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		log.Errorf(ctx, "failed to activity.NewClient. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	summaries, err := activityC.GetUnpaidSummaries()
+	if err != nil {
+		log.Errorf(ctx, "failed to activity.Process. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	var userIDs []string
+	for _, v := range summaries {
+		userIDs = append(userIDs, v.UserID)
+	}
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		log.Errorf(ctx, "failed to sub.NewClient. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	subs, err := subC.GetMulti(userIDs)
+	if err != nil {
+		log.Errorf(ctx, "failed to sub.GetMulti. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+
+	var mailOutstandCharges []string
+	var mailUpdateCC []string
+	var mailUpdateCCSerious []string
+
+	deliveryDay := time.Now().Add(-1 * 24 * time.Hour)
+	for i, s := range subs {
+		if s.PlanWeekday != deliveryDay.Weekday().String() {
+			// wrong day for sub
+			continue
+		}
+		if !s.Active {
+			// deactive sub
+			mailOutstandCharges = append(mailOutstandCharges, s.Email())
+			sendAndLogMessage(ctx, log, smsMessageDeactive, s)
+			continue
+		} else {
+			// active sub
+			switch summaries[i].NumUnpaid {
+			case "1":
+				mailUpdateCC = append(mailUpdateCC, s.Email())
+			case "2":
+				mailUpdateCC = append(mailUpdateCC, s.Email())
+				sendAndLogMessage(ctx, log, smsMessageTwo, s)
+			default:
+				// 3+
+				mailUpdateCCSerious = append(mailUpdateCCSerious, s.Email())
+				sendAndLogMessage(ctx, log, smsMessageThreePlus, s)
+			}
+		}
+	}
+	// send mail
+	log.Infof(ctx, "mailOutstandCharges: %s", mailOutstandCharges)
+	log.Infof(ctx, "mailUpdateCC: %s", mailUpdateCC)
+	log.Infof(ctx, "mailUpdateCCSerious: %s", mailUpdateCCSerious)
+	mailC, err := mail.NewClient(ctx, log, s.serverInfo)
+	if err != nil {
+		log.Errorf(ctx, "failed to mail.NewClient: %+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	err = mailC.AddBatchTags(mailOutstandCharges, []mail.Tag{mail.HasOutstandingCharge}, true)
+	if err != nil {
+		log.Errorf(ctx, "failed to mail.AddBatchTags: %+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	err = mailC.AddBatchTags(mailUpdateCC, []mail.Tag{mail.UpdateCreditCard}, false)
+	if err != nil {
+		log.Errorf(ctx, "failed to mail.AddBatchTags: %+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	err = mailC.AddBatchTags(mailUpdateCCSerious, []mail.Tag{mail.UpdateCreditCardSerious}, false)
+	if err != nil {
+		log.Errorf(ctx, "failed to mail.AddBatchTags: %+v", err)
 		return errors.GetErrorWithCode(err)
 	}
 	return nil
@@ -95,7 +274,7 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 		if err != nil {
 			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
 		}
-		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag}, false)
 		if err != nil {
 			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.AddBatchTag")
 		}
@@ -131,7 +310,7 @@ func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r 
 		if err != nil {
 			return errors.Annotate(err, "failed to SendPreviewCultureEmail: failed to mail.NewClient")
 		}
-		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag})
+		err = mailC.AddBatchTags(nonSkippers, []mail.Tag{tag}, false)
 		if err != nil {
 			return errors.Annotate(err, "failed to SendCultureEmail: failed to mail.AddBatchTag")
 		}
