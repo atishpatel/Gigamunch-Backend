@@ -158,6 +158,8 @@ function getActivityStatus(act: Types.ActivityExtended) {
         return 'Paid $' + act.amount_paid;
     } else if (act.discount_percent === 100) {
         return `Discounted ${act.discount_percent}%`;
+    } else if (act.forgiven) {
+        return `Forgiven ${act.amount - act.amount_paid}`;
     }
     const today = new Date();
     const d = new Date(act.date);

@@ -74,8 +74,25 @@ func sendAndLogMessage(ctx context.Context, log *logging.Client, msg string, s *
 	return true
 }
 
+type hoursReq struct {
+	Hours int `json:"hours"`
+}
+
 // ProcessUnpaidPreDelivery 3 days before delivery
 func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(hoursReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	if req.Hours <= 0 {
+		req.Hours = 3 * 24
+	}
+
 	const smsMessage = "Hey {{name}}, just a heads up, you will not receive this week's meal because your account has been suspended due to multiple outstanding charges. Please update your card and settle from declined transactions, we'd love to have you back! Feel free to respond if you have any questions, we'll be happy to clarify. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
 	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
@@ -110,7 +127,7 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 		log.Errorf(ctx, "failed to sub.GetMulti. Err:%+v", err)
 		return errors.GetErrorWithCode(err)
 	}
-	deliveryDay := time.Now().Add(3 * 24 * time.Hour)
+	deliveryDay := time.Now().Add(time.Duration(req.Hours) * time.Hour)
 	for _, s := range subs {
 		// check if still subscribed and is for the correct plan day
 		if s.Active && s.PlanWeekday == deliveryDay.Weekday().String() {
@@ -137,6 +154,19 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 
 // ProcessUnpaidPostDelivery 1 day after delivery
 func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(hoursReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	if req.Hours <= 0 {
+		req.Hours = 24
+	}
+
 	const smsMessageTwo = "Hey {{name}}, please don't dine and dash on a local small business. You owe Gigamunch money from declined transactions. Please respond if you have any questions, we'll be happy to clarify. Just tap the link below to settle your outstanding charges. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
 	const smsMessageThreePlus = "{{name}}, we had to suspend your account for this week because your card was declined 3 times in a row. Please tap the link below to settle your outstanding charges. Feel free to respond if you have any questions, we'll be happy to clarify. Thank you! \n https://eatgigamunch.com/update-payment?email={{email}}"
 	const smsMessageDeactive = "Hey {{name}}, please don't dine and dash on a local small business. You owe Gigamunch money from declined transactions. Please respond if you have any questions, we'll be happy to clarify. Just tap the link below to settle your outstanding charges. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
@@ -170,7 +200,7 @@ func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseW
 	var mailUpdateCC []string
 	var mailUpdateCCSerious []string
 
-	deliveryDay := time.Now().Add(-1 * 24 * time.Hour)
+	deliveryDay := time.Now().Add(-1 * time.Duration(req.Hours) * time.Hour)
 	for i, s := range subs {
 		if s.PlanWeekday != deliveryDay.Weekday().String() {
 			// wrong day for sub

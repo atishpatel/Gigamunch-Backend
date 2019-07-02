@@ -251,6 +251,7 @@ func (c *Client) Deactivate(idOrEmail, reason string) error {
 			outstandingCharges = true
 		}
 	}
+	c.log.Infof(c.ctx, "Has outstanding Charges? %s", outstandingCharges)
 	// update mail client
 	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
 	if err != nil {

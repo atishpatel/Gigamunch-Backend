@@ -122,6 +122,9 @@ func main() {
 	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivityTask))
 	http.HandleFunc("/process-subscription", s.handler(s.ProcessActivity))
 	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
+
+	http.HandleFunc("/admin/task/ProcessUnpaidPreDelivery", s.handler(s.ProcessUnpaidPreDelivery))
+	http.HandleFunc("/admin/task/ProcessUnpaidPostDelivery", s.handler(s.ProcessUnpaidPostDelivery))
 	// **********************
 	// Webhooks
 	// **********************
