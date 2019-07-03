@@ -20,6 +20,16 @@ cron:
 #   schedule: every 30 mins
 #   target: admin
 # Drip tags
+- description: "Process Unpaid subs - 3 days pre delivery day"
+  url: /admin/task/ProcessUnpaidPreDelivery
+  schedule: every friday,monday 12:00
+  timezone: America/Chicago
+  target: admin
+- description: "Process Unpaid subs - post delivery day"
+  url: /admin/task/ProcessUnpaidPostDelivery
+  schedule: every thursday,sunday 12:00
+  timezone: America/Chicago
+  target: admin
 - description: "Setup Preview and Culture Tags"
   url: /admin/task/SetupTags
   schedule: every day 01:00

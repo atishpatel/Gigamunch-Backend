@@ -89,7 +89,7 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 		return failedToDecode(err)
 	}
 	// end decode request
-	if req.Hours <= 0 {
+	if req.Hours == 0 {
 		req.Hours = 3 * 24
 	}
 
@@ -117,6 +117,7 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 			threePlusUnpaidUserID = append(threePlusUnpaidUserID, v.UserID)
 		}
 	}
+	log.Infof(ctx, "number of unpaid subs: %d", len(threePlusUnpaidUserID))
 	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		log.Errorf(ctx, "failed to sub.NewClient. Err:%+v", err)
@@ -128,6 +129,7 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 		return errors.GetErrorWithCode(err)
 	}
 	deliveryDay := time.Now().Add(time.Duration(req.Hours) * time.Hour)
+	log.Infof(ctx, "Delivery day: %s", deliveryDay)
 	for _, s := range subs {
 		// check if still subscribed and is for the correct plan day
 		if s.Active && s.PlanWeekday == deliveryDay.Weekday().String() {
@@ -163,7 +165,7 @@ func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseW
 		return failedToDecode(err)
 	}
 	// end decode request
-	if req.Hours <= 0 {
+	if req.Hours == 0 {
 		req.Hours = 24
 	}
 
@@ -201,6 +203,8 @@ func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseW
 	var mailUpdateCCSerious []string
 
 	deliveryDay := time.Now().Add(-1 * time.Duration(req.Hours) * time.Hour)
+	log.Infof(ctx, "Delivery day: %s", deliveryDay)
+
 	for i, s := range subs {
 		if s.PlanWeekday != deliveryDay.Weekday().String() {
 			// wrong day for sub
@@ -226,6 +230,7 @@ func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseW
 			}
 		}
 	}
+	log.Infof(ctx, "number of unpaid subs: %d", len(mailOutstandCharges)+len(mailUpdateCC)+len(mailUpdateCCSerious))
 	// send mail
 	log.Infof(ctx, "mailOutstandCharges: %s", mailOutstandCharges)
 	log.Infof(ctx, "mailUpdateCC: %s", mailUpdateCC)

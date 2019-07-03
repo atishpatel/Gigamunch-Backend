@@ -119,8 +119,8 @@ func (c *Client) getMulti(userIDs []string) ([]*subold.Subscriber, error) {
 	for i := range userIDs {
 		keys[i] = c.db.NameKey(c.ctx, kind, userIDs[i])
 	}
-	var results []*subold.Subscriber
-	err := c.db.GetMulti(c.ctx, keys, &results)
+	results := make([]*subold.Subscriber, len(userIDs))
+	err := c.db.GetMulti(c.ctx, keys, results)
 	if err != nil {
 		return nil, err
 	}

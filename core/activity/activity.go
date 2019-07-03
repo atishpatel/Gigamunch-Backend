@@ -169,12 +169,15 @@ func (c *Client) GetUnpaidSummaries() ([]*UnpaidSummary, error) {
 
 // GetUnpaidSummary gets a list of activity.
 func (c *Client) GetUnpaidSummary(userID string) (*UnpaidSummary, error) {
-	dist := &UnpaidSummary{}
-	err := c.sqlDB.SelectContext(c.ctx, dist, selectUnpaidSummaryForUser, userID)
+	dist := []*UnpaidSummary{}
+	err := c.sqlDB.SelectContext(c.ctx, &dist, selectUnpaidSummaryForUser, userID)
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Annotate("failed to selectUnpaidSummaryForUser")
 	}
-	return dist, nil
+	if len(dist) != 1 {
+		return nil, errBadRequest.Annotate("dist len does not equal 1")
+	}
+	return dist[0], nil
 }
 
 // CreateReq is the request for Create.
