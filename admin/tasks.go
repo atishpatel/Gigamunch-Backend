@@ -93,7 +93,7 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 		req.Hours = 3 * 24
 	}
 
-	const smsMessage = "Hey {{name}}, just a heads up, you will not receive this week's meal because your account has been suspended due to multiple outstanding charges. Please update your card and settle from declined transactions, we'd love to have you back! Feel free to respond if you have any questions, we'll be happy to clarify. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
+	const smsMessage = "Hey {{name}}, this is Chris from Gigamunch. Just a heads up, you will not receive this week's meal because your account has been suspended due to multiple outstanding charges. Please update your card and settle from declined transactions, we'd love to have you back! Feel free to respond if you have any questions, we'll be happy to clarify. Thank you \n https://eatgigamunch.com/update-payment?email={{email}}"
 	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		log.Errorf(ctx, "failed to activity.NewClient. Err:%+v", err)
