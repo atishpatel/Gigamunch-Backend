@@ -174,10 +174,15 @@ func (c *Client) GetUnpaidSummary(userID string) (*UnpaidSummary, error) {
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Annotate("failed to selectUnpaidSummaryForUser")
 	}
-	if len(dist) != 1 {
+
+	if len(dist) > 1 {
 		return nil, errBadRequest.Annotate("dist len does not equal 1")
 	}
-	return dist[0], nil
+	if len(dist) == 1 {
+		return dist[0], nil
+	}
+	// no unpaid
+	return &UnpaidSummary{}, nil
 }
 
 // CreateReq is the request for Create.

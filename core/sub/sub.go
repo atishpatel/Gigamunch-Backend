@@ -247,7 +247,7 @@ func (c *Client) Deactivate(idOrEmail, reason string) error {
 	if err != nil {
 		c.log.Errorf(c.ctx, "failed to GetUnpaidSummary: %+v", err)
 	} else {
-		if unpaidSummary.NumUnpaid != "0" && unpaidSummary.NumUnpaid != "" {
+		if unpaidSummary != nil && unpaidSummary.NumUnpaid != "0" && unpaidSummary.NumUnpaid != "" {
 			outstandingCharges = true
 		}
 	}
