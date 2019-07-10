@@ -36,6 +36,13 @@
         <!-- Subsriber Info Table -->
         <div class="subscriber-table-info">
           <div class="info-row">
+            <div class="info-label">ID:</div>
+            <div class="info-value subscriber-email">
+              {{sub.id}}
+            </div>
+          </div>
+
+          <div class="info-row">
             <div class="info-label">Email:</div>
             <div class="info-value subscriber-email">
               {{sub.emailsString}}
