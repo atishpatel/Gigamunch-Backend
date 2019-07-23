@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -108,16 +107,18 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 	// get subs
 	var threePlusUnpaidUserID []string
 	for _, v := range summaries {
-		numUnpaid, err := strconv.ParseInt(v.NumUnpaid, 10, 64)
-		if err != nil {
-			log.Errorf(ctx, "failed to strconv.ParseInt. Err:%+v", err)
+		switch v.NumUnpaid {
+		case "":
+		case "0":
+		case "1":
+		case "2":
 			continue
-		}
-		if numUnpaid >= 3 {
+		default:
+			// 3=+
 			threePlusUnpaidUserID = append(threePlusUnpaidUserID, v.UserID)
 		}
 	}
-	log.Infof(ctx, "number of unpaid subs: %d", len(threePlusUnpaidUserID))
+	log.Infof(ctx, "number of 3+ unpaid / unpaid subs: %d / %d", len(threePlusUnpaidUserID), len(summaries))
 	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		log.Errorf(ctx, "failed to sub.NewClient. Err:%+v", err)
