@@ -40,20 +40,8 @@ if [[ $1 == "build" ]]; then
     # Server
     protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/pbserver/ -I Gigamunch-Proto/pbcommon/ Gigamunch-Proto/pbserver/*.proto --go_out=plugins=grpc:Gigamunch-Proto/pbserver --swagger_out=logtostderr=true:server
     
-    # Fix swagger json for auth
-    ls */*/*.swagger.json */*.swagger.json | xargs -n1 -IX bash -c "sed -e 's/\"http\",//g;s/\"2.0\",/\"2.0\",\n\"securityDefinitions\": {\"auth-token\": {\"type\": \"apiKey\",\"in\": \"header\",\"name\": \"auth-token\"}},\"security\": [{\"auth-token\": []}],/g' X > X.tmp && mv X{.tmp,}"
-
-    # fix *.pb.go generated code
-    # cd Gigamunch-Proto
-    # ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/..\/pbcommon/github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/pbcommon/g;' X > X.tmp && mv X{.tmp,}"
-    # ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/,omitempty//g;s/Url/URL/g;s/Id/ID/g;s/Sms/SMS/g;' X > X.tmp && mv X{.tmp,}"
-    # ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/Option_1/Option1/g;s/Option_2/Option2/g;s/Instructions_1/Instructions1/g;s/Instructions_2/Instructions2/g;s/Time_1/Time1/g;s/Time_2/Time2/g;' X > X.tmp && mv X{.tmp,}"
-    # cd ..
-    # Typescript
+    # generate, fix, and copy files
     gulp build
-    # Copy Typescript definitions to folder
-    cp Gigamunch-Proto/pbadmin/*.d.ts admin/app/ts/prototypes
-    cp Gigamunch-Proto/pbcommon/*.d.ts admin/app/ts/prototypes
   fi
   timestamp
   exit 0
