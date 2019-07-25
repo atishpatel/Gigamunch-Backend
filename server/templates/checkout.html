@@ -1412,9 +1412,10 @@
         i++;
       }
       var days = [];
-      days.push(thursdays.shift());
+      // days.push(thursdays.shift());
 
-      var tmpArray = mondays.concat(thursdays);
+      // var tmpArray = mondays.concat(thursdays);
+      var tmpArray = mondays;
       tmpArray.sort(function(a, b) {
         return a.date - b.date;
       });
