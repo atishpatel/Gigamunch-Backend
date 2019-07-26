@@ -28,6 +28,21 @@
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile
+          target="_blank"
+          href="/admin/swagger/index.html"
+        >
+          <v-list-tile-action>
+            <v-icon>code</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content class="nav-tile-content">
+            <v-list-tile-title>
+              Admin API
+            </v-list-tile-title>
+            <v-spacer></v-spacer>
+            <v-icon>open_in_new</v-icon>
+          </v-list-tile-content>
+        </v-list-tile>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar
@@ -82,6 +97,11 @@ export default class App extends Vue {
   font-weight: bold;
   font-size: 24px;
   padding: 24px 20px;
+}
+
+.nav-tile-content {
+  flex-direction: row;
+  align-items: center;
 }
 
 .theme--light.v-list .v-list__tile--link:hover {
