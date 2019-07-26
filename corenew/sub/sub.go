@@ -1066,7 +1066,7 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 	taskC := tasks.New(c.ctx)
 	dayBeforeBox := date.Add(-12 * time.Hour) // TODO: change cron to timezone to make code easier to understand
 	for _, v := range subs {
-		if (!v.FirstBoxDate.IsZero() && v.FirstBoxDate.After(dayBeforeBox)) || (!v.SubscriptionDate.IsZero() && v.SubscriptionDate.After(dayBeforeBox)) {
+		if (!v.FirstBoxDate.IsZero() && v.FirstBoxDate.Add(-24*time.Hour).After(dayBeforeBox)) || (!v.SubscriptionDate.IsZero() && v.SubscriptionDate.Add(-24*time.Hour).After(dayBeforeBox)) {
 			continue
 		}
 		// TODO: instead of inserting all in this task, split it into many tasks?
