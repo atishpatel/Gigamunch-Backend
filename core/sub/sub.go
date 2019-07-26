@@ -146,7 +146,7 @@ func (c *Client) ChangeServingsPermanently(id string, servingsNonVeg, servingsVe
 	}
 	sub.ServingsNonVegetarian = servingsNonVeg
 	sub.ServingsVegetarian = servingsVeg
-	err = c.put(id, sub)
+	err = c.put(sub.ID, sub)
 	if err != nil {
 		return errors.Annotate(err, "failed to put")
 	}
@@ -174,6 +174,50 @@ func (c *Client) ChangeServingsPermanently(id string, servingsNonVeg, servingsVe
 	err = mailC.UpdateUser(mailReq)
 	if err != nil {
 		return errors.Annotate(err, "failed to mail.UpdateUser")
+	}
+	return nil
+}
+
+// ChangePlanDay changes a subscriber's plan day.
+func (c *Client) ChangePlanDay(id string, planDay string, intervalStartPoint *time.Time) error {
+	if planDay != time.Monday.String() && planDay != time.Thursday.String() {
+		return errInvalidParameter.WithMessage("Invalid plan day.")
+	}
+	if intervalStartPoint == nil || intervalStartPoint.IsZero() {
+		return errInvalidParameter.WithMessage("Invalid interval start date.")
+	}
+	sub, err := c.getByIDOrEmail(id)
+	if err != nil {
+		return errors.Annotate(err, "failed to Get")
+	}
+	oldSub := *sub
+	sub.PlanWeekday = planDay
+	sub.IntervalStartPoint = *intervalStartPoint
+	for sub.IntervalStartPoint.Weekday().String() != sub.PlanWeekday {
+		sub.IntervalStartPoint = sub.IntervalStartPoint.Add(12 * time.Hour)
+	}
+	err = c.put(sub.ID, sub)
+	if err != nil {
+		return errors.Annotate(err, "failed to put")
+	}
+	// update activities
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	err = activityC.DeleteFutureUnskipped(intervalStartPoint, sub.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.DeleteFutureUnskipped")
+	}
+	// log
+	c.log.SubUpdated(sub.ID, sub.Email(), &oldSub, sub)
+	// mail
+	taskC := tasks.New(c.ctx)
+	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{
+		UserID: sub.ID,
+	})
+	if err != nil {
+		return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
 	}
 	return nil
 }

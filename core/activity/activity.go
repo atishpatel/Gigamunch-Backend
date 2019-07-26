@@ -47,7 +47,8 @@ const (
 	// delete
 	deleteFutureStatment = "DELETE from activity WHERE date>? AND user_id=? AND paid=0"
 	// TODO: switch to user id
-	deleteFutureEmailStatment = "DELETE from activity WHERE date>? AND email=? AND paid=0"
+	deleteFutureEmailStatment     = "DELETE from activity WHERE date>? AND email=? AND paid=0"
+	deleteFutureUnskippedStatment = "DELETE from activity WHERE date>? AND user_id=? AND paid=0 AND skip=0"
 )
 
 // Errors
@@ -300,6 +301,20 @@ func (c *Client) DeleteFuture(date time.Time, idOrEmail string) error {
 	}
 	if err != nil {
 		return errSQLDB.WithError(err).Annotate("failed to execute deleteFutureStatment")
+	}
+	return nil
+}
+
+// DeleteFutureUnskipped deletes activities for future subscriber that are unpaid and upskipped.
+func (c *Client) DeleteFutureUnskipped(date *time.Time, id string) error {
+	if id == "" {
+		return errBadRequest.Annotate("invalid user_id or email")
+	}
+	// Update actvity
+	var err error
+	_, err = c.sqlDB.ExecContext(c.ctx, deleteFutureUnskippedStatment, date.Format(DateFormat), id)
+	if err != nil {
+		return errSQLDB.WithError(err).Annotate("failed to execute deleteFutureUnskippedStatment")
 	}
 	return nil
 }
