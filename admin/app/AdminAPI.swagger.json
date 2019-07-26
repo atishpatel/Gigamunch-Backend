@@ -69,6 +69,32 @@
         ]
       }
     },
+    "/admin/api/v1/ChangeSubscriberPlanDay": {
+      "post": {
+        "operationId": "ChangeSubscriberPlanDay",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIChangeSubscriberPlanDayReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/ChangeSubscriberServings": {
       "post": {
         "operationId": "ChangeSubscriberServings",
@@ -1000,6 +1026,20 @@
           "format": "int32"
         },
         "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIChangeSubscriberPlanDayReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "new_plan_day": {
+          "type": "string"
+        },
+        "activity_switch_date": {
           "type": "string"
         }
       }

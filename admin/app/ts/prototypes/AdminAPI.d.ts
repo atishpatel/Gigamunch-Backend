@@ -24,6 +24,11 @@ interface ChangeSubscriberServingsReq {
     servings_non_veg: number
     servings_veg: number
 }
+interface ChangeSubscriberPlanDayReq {
+    id: string
+    new_plan_day: string
+    activity_switch_date: string
+}
 interface DiscountSubscriberReq {
     user_id: string
     discount_amount: number

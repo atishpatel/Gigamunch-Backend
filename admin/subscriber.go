@@ -309,6 +309,30 @@ func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.
 	return resp
 }
 
+// ChangeSubscriberPlanDay change a subscriber's PlanDay.
+func (s *server) ChangeSubscriberPlanDay(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ChangeSubscriberPlanDayReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	activitySwitchDate := getDatetime(req.ActivitySwitchDate)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.ChangePlanDay(req.ID, req.NewPlanDay, &activitySwitchDate)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.ChangePlanDay")
+	}
+	resp := &pb.ErrorOnlyResp{}
+	return resp
+}
+
 // ReplaceSubscriberEmail replaces a subscriber's old email with a new email.
 func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error

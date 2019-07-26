@@ -100,7 +100,7 @@ func main() {
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
 	http.HandleFunc("/admin/api/v1/ChangeSubscriberServings", s.handler(s.userAdmin(s.ChangeSubscriberServings)))
-
+	http.HandleFunc("/admin/api/v1/ChangeSubscriberPlanDay", s.handler(s.userAdmin(s.ChangeSubscriberPlanDay)))
 	// Zone
 	http.HandleFunc("/admin/api/v1/UpdateGeofence", s.handler(s.userAdmin(s.UpdateGeofence)))
 	// **********************
