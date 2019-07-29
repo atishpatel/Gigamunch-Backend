@@ -57,6 +57,7 @@ var (
 	errBadRequest     = errors.BadRequestError
 	errSQLDB          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
 	errDuplicateEntry = errors.ErrorWithCode{Code: errors.CodeBadRequest, Message: "Duplicate entry."}
+	errNotFound = errors.NotFoundError
 )
 
 // Client is a client for manipulating activity.
@@ -102,6 +103,9 @@ func (c *Client) Get(date time.Time, idOrEmail string) (*Activity, error) {
 	}
 	if err != nil {
 		// TODO: Wrap with errSQL
+		if strings.Contains(err.Error(), "no rows in result") {
+			return nil, errNotFound.WithError(err).Annotate("failed to selectActivity")
+		}
 		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivity")
 	}
 	return act, nil

@@ -111,6 +111,11 @@
             <div class="info-value subscription-day">
               {{sub.plan_weekday}}
             </div>
+            <v-spacer></v-spacer>
+            <ButtonChangePlanDay
+              :sub="sub"
+              v-on:dialog-success="getSubscriberAndActivities"
+            ></ButtonChangePlanDay>
           </div>
           <div class="info-row">
             <div class="info-label">Deactivate Date:</div>
@@ -130,12 +135,14 @@ import { IsProd } from '../ts/env';
 import ButtonActivate from './ButtonActivate.vue';
 import ButtonDeactivate from './ButtonDeactivate.vue';
 import ButtonChangeServings from './ButtonChangeServings.vue';
+import ButtonChangePlanDay from './ButtonChangePlanDay.vue';
 
 @Component({
   components: {
     ButtonActivate,
     ButtonDeactivate,
     ButtonChangeServings,
+    ButtonChangePlanDay,
   },
 })
 export default class SubscriberSummary extends Vue {
@@ -183,9 +190,7 @@ export default class SubscriberSummary extends Vue {
     if (!IsProd()) {
       project += '-dev';
     }
-    return `https://console.cloud.google.com/datastore/entities;kind=Subscriber;ns=__$DEFAULT$__/query/kind;filter=%5B%2216%2FEmailPrefs.Email%7CSTR%7CEQ%7C26%2F${
-      this.sub.email_prefs[0].email
-    }%22%5D?project=${project}`;
+    return `https://console.cloud.google.com/datastore/entities;kind=Subscriber;ns=__$DEFAULT$__/query/kind;filter=%5B%2216%2FEmailPrefs.Email%7CSTR%7CEQ%7C26%2F${this.sub.email_prefs[0].email}%22%5D?project=${project}`;
   }
 }
 </script>

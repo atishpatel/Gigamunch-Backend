@@ -149,6 +149,16 @@ export function ChangeSubscriberServings(id: string, servings_non_veg: number, s
   return callFetch(url, 'POST', req);
 }
 
+export function ChangeSubscriberPlanDay(id: string, new_plan_day: string, activity_switch_date: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/ChangeSubscriberPlanDay';
+  const req: AdminAPI.ChangeSubscriberPlanDayReq = {
+    id,
+    new_plan_day,
+    activity_switch_date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
 function callFetch(url: string, method: string, body: object): Promise<any> {
   return GetToken().then((token) => {
     return callFetchWithToken(url, method, body, token);

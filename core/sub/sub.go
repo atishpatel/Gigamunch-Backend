@@ -219,6 +219,18 @@ func (c *Client) ChangePlanDay(id string, planDay string, intervalStartPoint *ti
 	if err != nil {
 		return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
 	}
+	// setup next activity
+	act, err := activityC.Get(sub.IntervalStartPoint, sub.ID)
+	if err != nil && errors.GetErrorWithCode(err).Code != errors.CodeNotFound {
+		return errors.Annotate(err, "failed to activity.Get")
+	}
+	if (act == nil || act.Date == "") && sub.IntervalStartPoint.After(time.Now()) {
+		// no activity so set up an activity
+		err = c.SetupActivity(sub.IntervalStartPoint, sub.ID, true, 0, 0)
+		if err != nil {
+			return errors.Annotate(err, "failed to sub.SetupActivity")
+		}
+	}
 	return nil
 }
 
