@@ -138,8 +138,4 @@ CREATE TABLE IF NOT EXISTS discount(
 	date_used DATE NOT NULL DEFAULT '0000-00-00',
 	discount_amount FLOAT(6,2) NOT NULL DEFAULT 0,
 	discount_percent TINYINT NOT NULL DEFAULT 0
-<<<<<<< HEAD
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
-=======
-) ENGINE = InnoDB CHARACTER SET utf8mb4;
->>>>>>> feature/sub-app-v1
