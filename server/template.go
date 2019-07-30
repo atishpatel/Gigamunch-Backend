@@ -404,7 +404,6 @@ type homePage struct {
 	ReferrerName    string
 	CheckoutPageURL string
 	DiscountAmount  string
-	Promo           string
 }
 
 func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
@@ -453,13 +452,11 @@ func displayHome(w http.ResponseWriter, req *http.Request, params httprouter.Par
 		page.CheckoutPageURL = "/checkout"
 	}
 	promo := req.URL.Query().Get("promo")
-	if page.Promo == "" {
-		page.Promo = promo
+	if promo != "" {
+		page.CheckoutPageURL += "?promo=" + promo
 	}
-	if page.DiscountAmount == "" {
-		promoBreakdown := discount.GetPromoBreakdown(promo)
-		page.DiscountAmount = promoBreakdown.String()
-	}
+	promoBreakdown := discount.GetPromoBreakdown(promo)
+	page.DiscountAmount = promoBreakdown.String()
 	defer display(ctx, w, "home-v2", page)
 }
 
