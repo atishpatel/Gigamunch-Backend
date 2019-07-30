@@ -196,6 +196,7 @@ func (c *Client) ChangePlanDay(id string, planDay string, intervalStartPoint *ti
 	for sub.IntervalStartPoint.Weekday().String() != sub.PlanWeekday {
 		sub.IntervalStartPoint = sub.IntervalStartPoint.Add(12 * time.Hour)
 	}
+	sub.IntervalStartPoint = sub.IntervalStartPoint.Add(12 * time.Hour) // set to midday
 	err = c.put(sub.ID, sub)
 	if err != nil {
 		return errors.Annotate(err, "failed to put")
