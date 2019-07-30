@@ -126,6 +126,9 @@ func (req *CreateReq) validate() error {
 	if req.DiscountAmount < .01 && req.DiscountPercent == 0 {
 		return errBadRequest.WithMessage("There must be a discount.")
 	}
+	if req.DiscountPercent > 100 {
+		return errBadRequest.WithMessage("Invalid discount.")
+	}
 	return nil
 }
 

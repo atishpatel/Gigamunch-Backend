@@ -39,6 +39,8 @@ const (
 	// User or Admin Actions
 	// ======================
 
+	// FailedSkip Action.
+	FailedSkip = Action("failed_skip")
 	// Skip Action.
 	Skip = Action("skip")
 	// Unskip Action.
@@ -182,6 +184,16 @@ func (c *Client) Errorf(ctx context.Context, format string, args ...interface{})
 	Errorf(ctx, format, args...)
 }
 
+// Criticalf logs error messages that is critical and needs to be alerted and address immediately.
+func (c *Client) Criticalf(ctx context.Context, format string, args ...interface{}) {
+	if c.sdReporter != nil {
+		c.sdReporter.Report(sdreporting.Entry{
+			Error: fmt.Errorf("CRITICAL: "+format, args),
+		})
+	}
+	aelog.Criticalf(ctx, format, args...)
+}
+
 // GetAll gets logs.
 func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 	var dst []*Entry
@@ -269,8 +281,8 @@ func (c *Client) Paid(userID string, userEmail, date string, amountDue, amountPa
 		UserIDString: userID,
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
-			Title:       "Paid for " + date,
-			Description: fmt.Sprintf("%s successfully paid %.2f for %s", userEmail, amountPaid, date),
+			Title:       "Paid for " + date[:10],
+			Description: fmt.Sprintf("%s successfully paid $%.2f for %s", userEmail, amountPaid, date[:10]),
 		},
 		SalePayload: SalePayload{
 			Date:          date,
@@ -292,7 +304,7 @@ func (c *Client) Refund(userID string, userEmail, date string, amountDue, amount
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Refunded for " + date,
-			Description: fmt.Sprintf("%s was refunded %.2f", userEmail, amountRefunded),
+			Description: fmt.Sprintf("%s was refunded $%.2f", userEmail, amountRefunded),
 		},
 		SalePayload: SalePayload{
 			Date:           date,
@@ -314,7 +326,7 @@ func (c *Client) Forgiven(userID string, userEmail, date string, amountDue, amou
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Forgiven for " + date,
-			Description: fmt.Sprintf("%s was forgiven for %.2f", userEmail, amountForgiven),
+			Description: fmt.Sprintf("%s was forgiven for $%.2f", userEmail, amountForgiven),
 		},
 		SalePayload: SalePayload{
 			Date:           date,
@@ -335,7 +347,7 @@ func (c *Client) CardDeclined(userID string, userEmail, date string, amountDue, 
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Card declined for " + date,
-			Description: fmt.Sprintf("%s's card was declined for %.2f", userEmail, amountDeclined),
+			Description: fmt.Sprintf("%s's card was declined for $%.2f", userEmail, amountDeclined),
 		},
 		SalePayload: SalePayload{
 			Date:           date,
@@ -472,15 +484,17 @@ func (c *Client) SubRating(userID string, userEmail string, payload *RatingPaylo
 
 // ServingsChangedPayload is a ServingsChanged entry.
 type ServingsChangedPayload struct {
-	Date              string `json:"date,omniempty" datastore:",omitempty,noindex"`
-	OldNonVegServings int8   `json:"old_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
-	NewNonVegServings int8   `json:"new_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
-	OldVegServings    int8   `json:"old_veg_servings,omitempty" datastore:",omitempty,noindex"`
-	NewVegServings    int8   `json:"new_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	Date              string  `json:"date,omniempty" datastore:",omitempty,noindex"`
+	OldNonVegServings int8    `json:"old_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	NewNonVegServings int8    `json:"new_non_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	OldVegServings    int8    `json:"old_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	NewVegServings    int8    `json:"new_veg_servings,omitempty" datastore:",omitempty,noindex"`
+	OldAmount         float32 `json:"old_amount,omitempty" datastore:",omitempty,noindex"`
+	NewAmount         float32 `json:"new_amount,omitempty" datastore:",omitempty,noindex"`
 }
 
 // SubServingsChangedPermanently logs a servings change.
-func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8) {
+func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, oldNonVegServings, newNonVegServings, oldVegServings, newVegServings int8, oldAmount, newAmount float32) {
 	e := &Entry{
 		Type:         Subscriber,
 		Action:       ServingsChangedPermanently,
@@ -489,13 +503,15 @@ func (c *Client) SubServingsChangedPermanently(userID string, userEmail string, 
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
 			Title:       "Servings changed permanently",
-			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
+			Description: fmt.Sprintf("Servings changed from non-veg(%d->%d), veg(%d->%d), amount(%.2f->%.2f) ", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings, oldAmount, newAmount),
 		},
 		ServingsChangedPayload: ServingsChangedPayload{
 			OldNonVegServings: oldNonVegServings,
 			NewNonVegServings: newNonVegServings,
 			OldVegServings:    oldVegServings,
 			NewVegServings:    newVegServings,
+			OldAmount:         oldAmount,
+			NewAmount:         newAmount,
 		},
 	}
 	c.Log(e)
@@ -510,8 +526,8 @@ func (c *Client) SubServingsChanged(userID string, userEmail string, date string
 		UserIDString: userID,
 		UserEmail:    userEmail,
 		BasicPayload: BasicPayload{
-			Title:       "Servings changed for " + date,
-			Description: fmt.Sprintf("Servings changed from %d to %d non-veg and %d to %d veg", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings),
+			Title:       "Servings changed for " + date[:10],
+			Description: fmt.Sprintf("Servings changed from non-veg(%d->%d), veg(%d->%d) for %s", oldNonVegServings, newNonVegServings, oldVegServings, newVegServings, date[:10]),
 		},
 		ServingsChangedPayload: ServingsChangedPayload{
 			Date:              date,
@@ -578,6 +594,31 @@ func (c *Client) SubUnskip(date string, userID string, userEmail string) {
 			Date:               date,
 			UserIDString:       userID,
 			UserEmail:          userEmail,
+			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
+			ActionUserEmail:    actionUserEmail,
+		},
+	}
+	c.Log(e)
+}
+
+// SubFailedSkip logs a skip.
+func (c *Client) SubFailedSkip(date string, userID string, userEmail, reason string) {
+	actionUserEmail := c.getStringFromCtx(common.ContextUserEmail)
+	e := &Entry{
+		Type:         Subscriber,
+		Action:       FailedSkip,
+		Severity:     SeverityInfo,
+		UserIDString: userID,
+		UserEmail:    userEmail,
+		BasicPayload: BasicPayload{
+			Title:       "Failed to skip for " + date,
+			Description: fmt.Sprintf("%s failed to skip for %s by %s", userEmail, date, actionUserEmail),
+		},
+		SkipPayload: SkipPayload{
+			Date:               date,
+			UserIDString:       userID,
+			UserEmail:          userEmail,
+			Reason:             reason,
 			ActionUserIDString: c.getStringFromCtx(common.ContextUserID),
 			ActionUserEmail:    actionUserEmail,
 		},

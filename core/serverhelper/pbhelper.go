@@ -3,7 +3,11 @@ package serverhelper
 import (
 	"bytes"
 	"encoding/json"
+	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/discount"
+
+	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -73,6 +77,21 @@ func PBActivities(in []*activity.Activity) ([]*pbcommon.Activity, error) {
 	if in == nil {
 		return out, nil
 	}
+	for _, a := range in {
+		a.PaidDatetimeJSON = a.PaidDatetime.Time.Format(time.RFC3339)
+		a.RefundedDatetimeJSON = a.RefundedDatetime.Time.Format(time.RFC3339)
+		a.GiftFromUserIDJSON = a.GiftFromUserID.Int64
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBUnpaidSummaries turns an array of UnpaidSummary into a protobuff array of UnpaidSummary.
+func PBUnpaidSummaries(in []*activity.UnpaidSummary) ([]*pbadmin.UnpaidSummary, error) {
+	out := make([]*pbadmin.UnpaidSummary, len(in))
+	if in == nil {
+		return out, nil
+	}
 	err := marshalUnmarshal(&in, &out)
 	return out, err
 }
@@ -97,6 +116,26 @@ func PBExecution(in *execution.Execution) (*pbcommon.Execution, error) {
 	return out, err
 }
 
+// PBSubscribers turns an array of subscribers into a protobuff array of subscribers.
+func PBSubscribers(in []*subold.Subscriber) ([]*pbcommon.Subscriber, error) {
+	out := make([]*pbcommon.Subscriber, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBSubscriber turns an subscriber into a protobuff subscriber.
+func PBSubscriber(in *subold.Subscriber) (*pbcommon.Subscriber, error) {
+	out := &pbcommon.Subscriber{}
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(in, out)
+	return out, err
+}
+
 // PBEmailPrefs turns an array of EmailPrefs into a protobuff array of EmailPrefs.
 func PBEmailPrefs(in []subold.EmailPref) ([]*pbcommon.EmailPref, error) {
 	out := make([]*pbcommon.EmailPref, len(in))
@@ -110,6 +149,16 @@ func PBEmailPrefs(in []subold.EmailPref) ([]*pbcommon.EmailPref, error) {
 // PBPhonePrefs turns an array of PhonePrefs into a protobuff array of PhonePrefs.
 func PBPhonePrefs(in []subold.PhonePref) ([]*pbcommon.PhonePref, error) {
 	out := make([]*pbcommon.PhonePref, len(in))
+	if in == nil {
+		return out, nil
+	}
+	err := marshalUnmarshal(&in, &out)
+	return out, err
+}
+
+// PBDiscounts turns an array of discounts into a protobuff array of discounts.
+func PBDiscounts(in []*discount.Discount) ([]*pbcommon.Discount, error) {
+	out := make([]*pbcommon.Discount, len(in))
 	if in == nil {
 		return out, nil
 	}

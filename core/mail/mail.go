@@ -48,6 +48,11 @@ const (
 
 	// LeftWebsiteEmail if they left email on website.
 	LeftWebsiteEmail Tag = "LEFT_WEBSITE_EMAIL"
+	// HasOutstandingCharge if unsubed and has outstanding charge.
+	HasOutstandingCharge Tag = "HAS_OUTSTANDING_CHARGE"
+	// CancelWithOutstandingCharge if deactived with outstanding charges.
+	CancelWithOutstandingCharge Tag = "CANCELED_WITH_OUTSTANDING_CHARGE"
+
 	// ==================
 	// Both drip
 	// ==================
@@ -76,6 +81,11 @@ const (
 	Gifted Tag = "GIFTED"
 	// Dev if they are development server subscriber.
 	Dev Tag = "DEV"
+
+	// UpdateCreditCard if they need to update credit card.
+	UpdateCreditCard Tag = "UPDATE_CREDIT_CARD"
+	// UpdateCreditCardSerious if they need to update credit card.
+	UpdateCreditCardSerious Tag = "UPDATE_CREDIT_CARD_SERIOUS"
 )
 
 // GetPreviewEmailTag returns the tag that needs to be added to get the preview email based on date provided. Date should be date the person is recieving their meal.
@@ -162,7 +172,7 @@ func (c *Client) SubActivated(req *UserFields) error {
 }
 
 // SubDeactivated is when a subscriber account is deactivated.
-func (c *Client) SubDeactivated(req *UserFields) error {
+func (c *Client) SubDeactivated(req *UserFields, outstandingCharges bool) error {
 	var err error
 	req.AddTags = append(req.AddTags, Deactivated)
 	req.RemoveTags = append(req.RemoveTags, Subscriber)
@@ -170,6 +180,9 @@ func (c *Client) SubDeactivated(req *UserFields) error {
 	err = c.updateUser(req, c.dripSubC)
 	if err != nil {
 		return err
+	}
+	if outstandingCharges {
+		req.AddTags = append(req.AddTags, CancelWithOutstandingCharge)
 	}
 	// For Marketing Drip account
 	err = c.updateUser(req, c.dripMarketingC)
@@ -183,6 +196,7 @@ type UserFields struct {
 	FirstName         string    `json:"first_name"`
 	LastName          string    `json:"last_name"`
 	FirstDeliveryDate time.Time `json:"first_delivery_date"`
+	PlanWeekday       string    `json:"plan_weekday"`
 	GifterName        string    `json:"gifter_name"`
 	GifterEmail       string    `json:"gifter_email"`
 	VegServings       int8      `json:"veg_servings"`
@@ -213,6 +227,9 @@ func (c *Client) updateUser(req *UserFields, dripClient *drip.Client) error {
 	}
 	if !req.FirstDeliveryDate.IsZero() {
 		sub.CustomFields["FIRST_DELIVERY_DATE"] = DateString(req.FirstDeliveryDate)
+	}
+	if req.PlanWeekday != "" {
+		sub.CustomFields["PLAN_WEEKDAY"] = req.PlanWeekday
 	}
 	if req.GifterName != "" {
 		sub.CustomFields["GIFTER_NAME"] = req.GifterName
@@ -310,8 +327,15 @@ func (c *Client) RemoveTag(email string, tag Tag) error {
 }
 
 // AddBatchTags adds tags to emails. This often triggers a workflow.
-func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
+func (c *Client) AddBatchTags(emailsUnverified []string, tags []Tag, marketing bool) error {
 	// TODO: batch limit is 1000 emails so update to split those into two request
+	var emails []string
+	for _, v := range emailsUnverified {
+		if !ignoreEmail(v) {
+			emails = append(emails, v)
+		}
+	}
+
 	tagsString := make([]string, len(tags))
 	for i, tag := range tags {
 		tagsString[i] = tag.String()
@@ -335,7 +359,13 @@ func (c *Client) AddBatchTags(emails []string, tags []Tag) error {
 			},
 		},
 	}
-	resp, err := c.dripSubC.UpdateBatchSubscribers(req)
+	var err error
+	var resp *drip.SubscribersResp
+	if marketing {
+		resp, err = c.dripMarketingC.UpdateBatchSubscribers(req)
+	} else {
+		resp, err = c.dripSubC.UpdateBatchSubscribers(req)
+	}
 	if err != nil {
 		if strings.Contains(err.Error(), "<html>") {
 			err = fmt.Errorf("drip returned an html page")

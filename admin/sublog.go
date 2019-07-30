@@ -12,28 +12,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
-// ProcessSublog runs sub.Process.
-func (s *server) ProcessSublog(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
-	var err error
-	req := new(pb.ProcessSublogsReq)
-
-	// decode request
-	err = decodeRequest(ctx, r, req)
-	if err != nil {
-		return failedToDecode(err)
-	}
-	// end decode request
-
-	date := getDatetime(req.Date)
-	subC := subold.NewWithLogging(ctx, log)
-	err = subC.Process(date, req.Email)
-	if err != nil {
-		return errors.GetErrorWithCode(err).Annotate("failed to sub.Process")
-	}
-	resp := &pb.ProcessSublogsResp{}
-	return resp
-}
-
 // GetUnpaidSublogs gets a list of unpaid sublogs log.
 func (s *server) GetUnpaidSublogs(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error

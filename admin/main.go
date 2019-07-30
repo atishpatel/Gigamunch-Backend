@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -54,39 +55,52 @@ func main() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/SetAdmin", s.handler(s.userAdmin(s.SetAdmin)))
 	// **********************
-	// Subscriber
-	// **********************
-	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
-	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
-	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
-	// **********************
 	// Activity
 	// **********************
-	http.HandleFunc("/admin/api/v1/SetupActivites", s.handler(s.SetupActivities))
+	http.HandleFunc("/admin/api/v1/GetSubscriberActivities", s.handler(s.GetSubscriberActivities))
+	http.HandleFunc("/admin/api/v1/SetupActivities", s.handler(s.SetupActivities))
+	http.HandleFunc("/admin/api/v1/SetupActivity", s.handler(s.SetupActivity))
 	http.HandleFunc("/admin/api/v1/SkipActivity", s.handler(s.userAdmin(s.SkipActivity)))
 	http.HandleFunc("/admin/api/v1/UnskipActivity", s.handler(s.userAdmin(s.UnskipActivity)))
 	http.HandleFunc("/admin/api/v1/RefundActivity", s.handler(s.userAdmin(s.RefundActivity)))
 	http.HandleFunc("/admin/api/v1/RefundAndSkipActivity", s.handler(s.userAdmin(s.RefundAndSkipActivity)))
+	http.HandleFunc("/admin/api/v1/ChangeActivityServings", s.handler(s.userAdmin(s.ChangeActivityServings)))
+	http.HandleFunc("/admin/api/v1/ProcessActivity", s.handler(s.userAdmin(s.ProcessActivity)))
+	http.HandleFunc("/admin/api/v1/GetUnpaidSummaries", s.handler(s.userAdmin(s.GetUnpaidSummaries)))
+
+	// **********************
+	// Discount
+	// **********************
+	http.HandleFunc("/admin/api/v1/DiscountSubscriber", s.handler(s.userAdmin(s.DiscountSubscriber)))
+	http.HandleFunc("/admin/api/v1/GetSubscriberDiscounts", s.handler(s.userAdmin(s.GetSubscriberDiscounts)))
 	// **********************
 	// Logs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
-	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsByEmail)))
+	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsForUser)))
+	http.HandleFunc("/admin/api/v1/GetLogsForUser", s.handler(s.userAdmin(s.GetLogsForUser)))
 	http.HandleFunc("/admin/api/v1/GetLogsByExecution", s.handler(s.userAdmin(s.GetLogsByExecution)))
 	// **********************
 	// Sublogs
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetUnpaidSublogs", s.handler(s.userAdmin(s.GetUnpaidSublogs)))
-	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessSublog)))
+	http.HandleFunc("/admin/api/v1/ProcessSublog", s.handler(s.userAdmin(s.ProcessActivity)))
 	http.HandleFunc("/admin/api/v1/GetSubscriberSublogs", s.handler(s.userAdmin(s.GetSubscriberSublogs)))
 	// **********************
 	// Subscriber
 	// **********************
+	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
+	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
+	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
 	http.HandleFunc("/admin/api/v1/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribed)))
+	http.HandleFunc("/admin/api/v2/GetHasSubscribed", s.handler(s.userAdmin(s.GetHasSubscribedV2)))
 	http.HandleFunc("/admin/api/v1/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriber)))
+	http.HandleFunc("/admin/api/v2/GetSubscriber", s.handler(s.userAdmin(s.GetSubscriberV2)))
 	http.HandleFunc("/admin/api/v1/SendCustomerSMS", s.handler(s.userAdmin(s.SendCustomerSMS)))
 	http.HandleFunc("/admin/api/v1/UpdateDrip", s.handler(s.userAdmin(s.UpdateDrip)))
+	http.HandleFunc("/admin/api/v1/ChangeSubscriberServings", s.handler(s.userAdmin(s.ChangeSubscriberServings)))
+	http.HandleFunc("/admin/api/v1/ChangeSubscriberPlanDay", s.handler(s.userAdmin(s.ChangeSubscriberPlanDay)))
 	// Zone
 	http.HandleFunc("/admin/api/v1/UpdateGeofence", s.handler(s.userAdmin(s.UpdateGeofence)))
 	// **********************
@@ -105,9 +119,12 @@ func main() {
 	http.HandleFunc("/admin/task/SendStatsSMS", s.handler(s.SendStatsSMS))
 	http.HandleFunc("/admin/task/BackupDatastore", s.handler(s.BackupDatastore))
 
-	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivity))
+	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivityTask))
 	http.HandleFunc("/process-subscription", s.handler(s.ProcessActivity))
 	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
+
+	http.HandleFunc("/admin/task/ProcessUnpaidPreDelivery", s.handler(s.ProcessUnpaidPreDelivery))
+	http.HandleFunc("/admin/task/ProcessUnpaidPostDelivery", s.handler(s.ProcessUnpaidPostDelivery))
 	// **********************
 	// Webhooks
 	// **********************
@@ -117,8 +134,7 @@ func main() {
 	// **********************
 	// Batch
 	// **********************
-	http.HandleFunc("/admin/batch/UpdateSubs", s.handler(s.UpdateSubs))
-	// http.HandleFunc("/admin/batch/MigrateToNewSubscribersStruct", s.handler(s.MigrateToNewSubscribersStruct))
+	// http.HandleFunc("/admin/batch/UpdateSubs", s.handler(s.UpdateSubs))
 	//
 	http.HandleFunc("/admin/api/v1/Test", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("success"))
@@ -209,7 +225,7 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		defer func() {
 			// handle panic, recover
 			if r := recover(); r != nil {
-				errString := fmt.Sprintf("PANICKING: %+v", r)
+				errString := fmt.Sprintf("PANICKING: %+v\n%s", r, debug.Stack())
 				logging.Errorf(ctx, errString)
 				messageC := message.New(ctx)
 				_ = messageC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), errString)

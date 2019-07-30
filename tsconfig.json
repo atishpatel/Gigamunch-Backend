@@ -72,7 +72,10 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.vue",
-    // "Gigamunch-Proto/pbadmin/AdminAPI.d.ts"
+    "**/types.d.ts",
+    "Gigamunch-Proto/pbcommon/*.d.ts",
+    "Gigamunch-Proto/pbsub/*.d.ts",
+    "Gigamunch-Proto/pbadmin/*.d.ts"
   ],
   "exclude": [
     "node_modules",

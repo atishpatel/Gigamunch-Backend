@@ -88,6 +88,14 @@ func (sub *Subscriber) Email() string {
 	return v
 }
 
+func (sub *Subscriber) PhoneNumber() string {
+	var v string
+	if len(sub.PhonePrefs) >= 1 {
+		v = sub.PhonePrefs[0].Number
+	}
+	return v
+}
+
 func (sub *Subscriber) FirstName() string {
 	var v string
 	for _, emailPref := range sub.EmailPrefs {
@@ -421,9 +429,22 @@ func (e *SubscriptionSignUp) GetSubscriber() *Subscriber {
 // }
 
 func get(ctx context.Context, id string) (*SubscriptionSignUp, error) {
+	if !strings.Contains(id, "@") {
+		// id search
+
+		key := datastore.NewKey(ctx, kindSubscriber, id, 0, nil)
+		sub := new(Subscriber)
+		err := datastore.Get(ctx, key, sub)
+		if err != nil {
+			if err == datastore.ErrNoSuchEntity {
+				return nil, errNoSuchEntry.WithError(err).Annotate("user not found")
+			}
+			return nil, errDatastore.WithError(err).Annotate("failed to get")
+		}
+		return sub.GetSubscriptionSignUp(), nil
+	}
 	query := datastore.NewQuery(kindSubscriber).
 		Filter("EmailPrefs.Email=", id)
-
 	var results []*Subscriber
 	_, err := query.GetAll(ctx, &results)
 	if err != nil {

@@ -20,6 +20,16 @@ cron:
 #   schedule: every 30 mins
 #   target: admin
 # Drip tags
+- description: "Process Unpaid subs - 3 days pre delivery day"
+  url: /admin/task/ProcessUnpaidPreDelivery
+  schedule: every friday,monday 12:00
+  timezone: America/Chicago
+  target: admin
+- description: "Process Unpaid subs - post delivery day"
+  url: /admin/task/ProcessUnpaidPostDelivery
+  schedule: every thursday,sunday 12:00
+  timezone: America/Chicago
+  target: admin
 - description: "Setup Preview and Culture Tags"
   url: /admin/task/SetupTags
   schedule: every day 01:00
@@ -54,6 +64,16 @@ cron:
 - description: "Send Monday Quantity sms 3"
   url: /task/send-quantity-sms
   schedule: every monday 8:30
+  timezone: America/Chicago
+  target: cookapi
+- description: "Send Monday Quantity sms 2"
+  url: /task/send-quantity-sms
+  schedule: every wednesday 12:00
+  timezone: America/Chicago
+  target: cookapi
+- description: "Send Monday Quantity sms 3"
+  url: /task/send-quantity-sms
+  schedule: every thursday 8:30
   timezone: America/Chicago
   target: cookapi
 # Datastore backup

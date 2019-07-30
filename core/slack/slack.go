@@ -80,11 +80,11 @@ func (c *Client) SendMissedSubscriber(email, name, reference string, campaigns [
 	message := "Missed out on subscriber. Out of zone."
 	attachment := slack.Attachment{
 		Fallback: fmt.Sprintf("%s out of zone", email),
-		Title:    fmt.Sprintf("%s - <https://eatgigamunch.com/admin/subscriber/%s|%s>", name, email, email),
+		Title:    fmt.Sprintf("%s - <https://eatgigamunch.com/admin/n/subscriber/%s|%s>", name, email, email),
 		Fields: []slack.AttachmentField{
 			slack.AttachmentField{
 				Title: "Email",
-				Value: fmt.Sprintf("<https://eatgigamunch.com/admin/subscriber/%s|%s>", email, email),
+				Value: fmt.Sprintf("<https://eatgigamunch.com/admin/n/subscriber/%s|%s>", email, email),
 				Short: true,
 			},
 			slack.AttachmentField{
@@ -124,11 +124,11 @@ func (c *Client) SendNewSignup(email, name, reference string, campaigns []common
 	message := "New Subscriber!!!"
 	attachment := slack.Attachment{
 		Fallback: fmt.Sprintf("%s just signed up", email),
-		Title:    fmt.Sprintf("%s - <https://eatgigamunch.com/admin/subscriber/%s|%s>", name, email, email),
+		Title:    fmt.Sprintf("%s - <https://eatgigamunch.com/admin/n/subscriber/%s|%s>", name, email, email),
 		Fields: []slack.AttachmentField{
 			slack.AttachmentField{
 				Title: "Email",
-				Value: fmt.Sprintf("<https://eatgigamunch.com/admin/subscriber/%s|%s>", email, email),
+				Value: fmt.Sprintf("<https://eatgigamunch.com/admin/n/subscriber/%s|%s>", email, email),
 				Short: true,
 			},
 			slack.AttachmentField{
@@ -163,11 +163,11 @@ func (c *Client) SendDeactivate(email, name, reason string, daysActive int) erro
 	message := "Subscriber Deactivated"
 	attachment := slack.Attachment{
 		Fallback: fmt.Sprintf("%s just deactivated", email),
-		Title:    fmt.Sprintf("%s - <https://eatgigamunch.com/admin/subscriber/%s|%s>", name, email, email),
+		Title:    fmt.Sprintf("%s - <https://eatgigamunch.com/admin/n/subscriber/%s|%s>", name, email, email),
 		Fields: []slack.AttachmentField{
 			slack.AttachmentField{
 				Title: "Email",
-				Value: fmt.Sprintf("<https://eatgigamunch.com/admin/subscriber/%s|%s>", email, email),
+				Value: fmt.Sprintf("<https://eatgigamunch.com/admin/n/subscriber/%s|%s>", email, email),
 				Short: true,
 			},
 			slack.AttachmentField{
@@ -220,7 +220,7 @@ func (c *Client) HandleWebhook(req *WebhookRequest) error {
 		if ("#"+channelInfo.Name) == customerSupportChannel && strings.Contains(req.Event.Text, "@") && strings.Contains(req.Event.Text, "<mailto:") {
 			// add subscriber link if there is an email
 			email := req.Event.Text[strings.Index(req.Event.Text, "<mailto:")+8 : strings.Index(req.Event.Text, "|")]
-			txt := fmt.Sprintf("https://eatgigamunch.com/admin/subscriber/%s", email)
+			txt := fmt.Sprintf("https://eatgigamunch.com/admin/n/subscriber/%s", email)
 			err = c.SendCustomerSupportMessage(txt)
 			if err != nil {
 				return errSlack.WithError(err).Annotate("failed to SendCustoemrSupportMessage")

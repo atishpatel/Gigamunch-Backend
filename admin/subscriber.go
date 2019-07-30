@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
+
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 
@@ -34,6 +36,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	nameDilm := "{{name}}"
 	firstNameDilm := "{{first_name}}"
 	emailDilm := "{{email}}"
+	userIDDilm := "{{user_id}}"
 
 	messageC := message.New(ctx)
 	subC := subold.New(ctx)
@@ -42,7 +45,12 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		return errors.Annotate(err, "failed to subold.GetSubscribers. No SMS was sent.")
 	}
 	var errs []error
-	for _, s := range subs {
+	for i, s := range subs {
+		if s == nil {
+			errs = append(errs, errors.BadRequestError.Annotate("failed to GetSubscriber ("+req.Emails[i]+")"))
+			log.Errorf(ctx, "failed to GetSubscriber To(%s):", req.Emails[i])
+			continue
+		}
 		if s.PhoneNumber == "" {
 			continue
 		}
@@ -55,6 +63,7 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 		msg = strings.Replace(msg, nameDilm, name, -1)
 		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
 		msg = strings.Replace(msg, emailDilm, s.Email, -1)
+		msg = strings.Replace(msg, userIDDilm, s.ID, -1)
 		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
 		if err != nil {
 			errs = append(errs, errors.Annotate(err, "failed to message.SendSMS To("+s.PhoneNumber+")"))
@@ -77,7 +86,8 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	if len(errs) >= 1 {
 		return errors.GetErrorWithCode(errs[0]).Annotatef("errors count: %d", len(errs))
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // GetSubscriber gets all info about a subscriber from their email address
@@ -108,6 +118,39 @@ func (s *server) GetSubscriber(ctx context.Context, w http.ResponseWriter, r *ht
 	return resp
 }
 
+// GetSubscriberV2 gets all info about a subscriber.
+func (s *server) GetSubscriberV2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.UserIDReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(req.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to get subscriber")
+	}
+
+	sResp, err := serverhelper.PBSubscriber(subscriber)
+	if err != nil {
+		return errors.Annotate(err, "failed to encode")
+	}
+
+	resp := &pb.GetSubscriberRespV2{
+		Subscriber: sResp,
+	}
+
+	return resp
+}
+
 // GetHasSubscribed gets all subscribers.
 func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
@@ -120,10 +163,10 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 	}
 	// end decode request
 
-	date := getDatetime(req.Date)
+	var t time.Time
 
 	subC := subold.New(ctx)
-	subscribers, err := subC.GetHasSubscribed(date)
+	subscribers, err := subC.GetHasSubscribed(t)
 
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get all subscribers")
@@ -133,6 +176,61 @@ func (s *server) GetHasSubscribed(ctx context.Context, w http.ResponseWriter, r 
 		Subscribers: pbSubscribers(subscribers),
 	}
 
+	return resp
+}
+
+// GetHasSubscribedV2 gets all subscribers.
+func (s *server) GetHasSubscribedV2(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.GetHasSubscribedReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed sub.NewClient")
+	}
+	subscribers, err := subC.GetHasSubscribed(int(req.Start), int(req.Limit))
+	if err != nil {
+		return errors.Annotate(err, "failed to get all subscribers")
+	}
+	ss, err := serverhelper.PBSubscribers(subscribers)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBSubscribers")
+	}
+	resp := &pb.GetHasSubscribedRespV2{
+		Subscribers: ss,
+	}
+
+	return resp
+}
+
+// ChangeSubscriberServings change a subscriber's servings.
+func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ChangeSubscriberServingsReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.ChangeServingsPermanently(req.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg))
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.ChangeServingsPermanently")
+	}
+	resp := &pb.ErrorOnlyResp{}
 	return resp
 }
 
@@ -158,8 +256,8 @@ func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, 
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Activate")
 	}
-
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // DeactivateSubscriber activates a subscriber account.
@@ -182,7 +280,8 @@ func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Deactivate")
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // UpdateDrip updates drip.
@@ -206,7 +305,32 @@ func (s *server) UpdateDrip(ctx context.Context, w http.ResponseWriter, r *http.
 			return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
 		}
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
+}
+
+// ChangeSubscriberPlanDay change a subscriber's PlanDay.
+func (s *server) ChangeSubscriberPlanDay(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.ChangeSubscriberPlanDayReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	activitySwitchDate := getDatetime(req.ActivitySwitchDate)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	err = subC.ChangePlanDay(req.ID, req.NewPlanDay, &activitySwitchDate)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.ChangePlanDay")
+	}
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 // ReplaceSubscriberEmail replaces a subscriber's old email with a new email.
@@ -254,7 +378,8 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to mail.Update")
 	}
-	return nil
+	resp := &pb.ErrorOnlyResp{}
+	return resp
 }
 
 func pbSubscribers(subscribers []subold.SubscriptionSignUp) []*pb.Subscriber {

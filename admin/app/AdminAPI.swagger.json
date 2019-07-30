@@ -22,7 +22,7 @@
         "operationId": "ActivateSubscriber",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -43,13 +43,91 @@
         ]
       }
     },
+    "/admin/api/v1/ChangeActivityServings": {
+      "post": {
+        "operationId": "ChangeActivityServings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIChangeActivityServingsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ChangeSubscriberPlanDay": {
+      "post": {
+        "operationId": "ChangeSubscriberPlanDay",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIChangeSubscriberPlanDayReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ChangeSubscriberServings": {
+      "post": {
+        "operationId": "ChangeSubscriberServings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIChangeSubscriberServingsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/DeactivateSubscriber": {
       "post": {
         "summary": "DeactivateSubscriber deactivates a subscriber.",
         "operationId": "DeactivateSubscriber",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -70,12 +148,38 @@
         ]
       }
     },
+    "/admin/api/v1/DiscountSubscriber": {
+      "post": {
+        "operationId": "DiscountSubscriber",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIDiscountSubscriberReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetAllExecutionStats": {
       "post": {
         "operationId": "GetAllExecutionStats",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetAllExecutionStatsResp"
             }
@@ -101,7 +205,7 @@
         "operationId": "GetDeliveries",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetDeliveriesResp"
             }
@@ -128,7 +232,7 @@
         "operationId": "GetExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionResp"
             }
@@ -154,7 +258,7 @@
         "operationId": "GetExecutionStats",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionStatsResp"
             }
@@ -181,7 +285,7 @@
         "operationId": "GetExecutions",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionsResp"
             }
@@ -202,40 +306,13 @@
         ]
       }
     },
-    "/admin/api/v1/GetHasSubscribed": {
-      "post": {
-        "summary": "GetHasSubscribed gets all the people who are or have subscribed at one point.",
-        "operationId": "GetHasSubscribed",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetHasSubscribedResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetHasSubscribedReq"
-            }
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
     "/admin/api/v1/GetLog": {
       "post": {
         "summary": "GetLog returns a log.",
         "operationId": "GetLog",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogResp"
             }
@@ -262,7 +339,7 @@
         "operationId": "GetLogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
@@ -283,40 +360,13 @@
         ]
       }
     },
-    "/admin/api/v1/GetLogsByEmail": {
-      "post": {
-        "summary": "GetLogsByEmail returns a list of logs by email.",
-        "operationId": "GetLogsByEmail",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetLogsResp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AdminAPIGetLogsByEmailReq"
-            }
-          }
-        ],
-        "tags": [
-          "Admin"
-        ]
-      }
-    },
     "/admin/api/v1/GetLogsByExecution": {
       "post": {
         "summary": "GetLogsByExecution returns a list of logs by ExecutionID.",
         "operationId": "GetLogsByExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
@@ -337,12 +387,91 @@
         ]
       }
     },
+    "/admin/api/v1/GetLogsForUser": {
+      "post": {
+        "summary": "GetLogsForUser returns a list of logs by email.",
+        "operationId": "GetLogsForUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsForUserReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetSubscriberActivities": {
+      "post": {
+        "operationId": "GetSubscriberActivities",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberActivitiesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUserIDReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetSubscriberDiscounts": {
+      "post": {
+        "operationId": "GetSubscriberDiscounts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberDiscountsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUserIDReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/GetSubscriberSublogs": {
       "post": {
         "operationId": "GetSubscriberSublogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberSublogsResp"
             }
@@ -368,7 +497,7 @@
         "operationId": "GetUnpaidSublogs",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetUnpaidSublogsResp"
             }
@@ -389,14 +518,14 @@
         ]
       }
     },
-    "/admin/api/v1/ProcessSublogs": {
+    "/admin/api/v1/GetUnpaidSummaries": {
       "post": {
-        "operationId": "ProcessSublogs",
+        "operationId": "GetUnpaidSummaries",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/AdminAPIProcessSublogsResp"
+              "$ref": "#/definitions/AdminAPIGetUnpaidSummariesResp"
             }
           }
         },
@@ -406,7 +535,59 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/AdminAPIProcessSublogsReq"
+              "$ref": "#/definitions/AdminAPIEmptyReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ProcessActivity": {
+      "post": {
+        "operationId": "ProcessActivity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessActivityResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/ProcessSublogs": {
+      "post": {
+        "operationId": "ProcessSublogs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessActivityResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIProcessActivityReq"
             }
           }
         ],
@@ -417,11 +598,11 @@
     },
     "/admin/api/v1/RefundActivity": {
       "post": {
-        "summary": "RefundActivity unskips a sub for a date.",
+        "summary": "RefundActivity refunds an activity.",
         "operationId": "RefundActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -444,11 +625,11 @@
     },
     "/admin/api/v1/RefundAndSkipActivity": {
       "post": {
-        "summary": "RefundAndSkipActivity unskips a sub for a date.",
+        "summary": "RefundAndSkipActivityrefunds and skips an activty.",
         "operationId": "RefundAndSkipActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -475,7 +656,7 @@
         "operationId": "ReplaceSubscriberEmail",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -502,7 +683,7 @@
         "operationId": "SendCustomerSMS",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -529,7 +710,7 @@
         "operationId": "SetAdmin",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -552,11 +733,11 @@
     },
     "/admin/api/v1/SetupActivities": {
       "post": {
-        "summary": "SetupActivities unskips a sub for a date.",
+        "summary": "SetupActivities setups up all activities for date.",
         "operationId": "SetupActivities",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -577,15 +758,42 @@
         ]
       }
     },
+    "/admin/api/v1/SetupActivity": {
+      "post": {
+        "summary": "SetupActivity unskips a sub for a date.",
+        "operationId": "SetupActivity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPISetupActivityReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/SkipActivity": {
       "post": {
         "summary": "SkipActivity skips a sub for a date.",
         "operationId": "SkipActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/AdminAPISkipActivityResp"
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
           }
         },
@@ -610,9 +818,9 @@
         "operationId": "UnskipActivity",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/AdminAPIUnskipActivityResp"
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
           }
         },
@@ -636,7 +844,7 @@
         "operationId": "UpdateDeliveries",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateDeliveriesResp"
             }
@@ -662,7 +870,7 @@
         "operationId": "UpdateDrip",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
@@ -689,7 +897,7 @@
         "operationId": "UpdateExecution",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateExecutionResp"
             }
@@ -715,7 +923,7 @@
         "operationId": "UpdateExecutionStats",
         "responses": {
           "200": {
-            "description": "",
+            "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateExecutionStatsResp"
             }
@@ -735,6 +943,59 @@
           "Admin"
         ]
       }
+    },
+    "/admin/api/v2/GetHasSubscribed": {
+      "post": {
+        "summary": "GetHasSubscribed gets all the people who are or have subscribed at one point.",
+        "operationId": "GetHasSubscribed",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetHasSubscribedRespV2"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetHasSubscribedReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v2/GetSubscriber": {
+      "post": {
+        "operationId": "GetSubscriberV2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetSubscriberRespV2"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUserIDReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
     }
   },
   "definitions": {
@@ -747,6 +1008,55 @@
         "first_bag_date": {
           "type": "string",
           "title": "optional"
+        }
+      }
+    },
+    "AdminAPIChangeActivityServingsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "servings_non_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIChangeSubscriberPlanDayReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "new_plan_day": {
+          "type": "string"
+        },
+        "activity_switch_date": {
+          "type": "string"
+        }
+      }
+    },
+    "AdminAPIChangeSubscriberServingsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "servings_non_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_veg": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -814,6 +1124,25 @@
         }
       },
       "title": "**********************\nDeliveries\n**********************"
+    },
+    "AdminAPIDiscountSubscriberReq": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "AdminAPIEmptyReq": {
+      "type": "object"
     },
     "AdminAPIErrorOnlyResp": {
       "type": "object",
@@ -1020,12 +1349,17 @@
     "AdminAPIGetHasSubscribedReq": {
       "type": "object",
       "properties": {
-        "date": {
-          "type": "string"
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
-    "AdminAPIGetHasSubscribedResp": {
+    "AdminAPIGetHasSubscribedRespV2": {
       "type": "object",
       "properties": {
         "error": {
@@ -1034,7 +1368,7 @@
         "subscribers": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/AdminAPISubscriber"
+            "$ref": "#/definitions/CommonSubscriber"
           }
         }
       }
@@ -1060,7 +1394,16 @@
         }
       }
     },
-    "AdminAPIGetLogsByEmailReq": {
+    "AdminAPIGetLogsByExecutionReq": {
+      "type": "object",
+      "properties": {
+        "execution_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "AdminAPIGetLogsForUserReq": {
       "type": "object",
       "properties": {
         "start": {
@@ -1071,17 +1414,8 @@
           "type": "integer",
           "format": "int32"
         },
-        "email": {
+        "id": {
           "type": "string"
-        }
-      }
-    },
-    "AdminAPIGetLogsByExecutionReq": {
-      "type": "object",
-      "properties": {
-        "execution_id": {
-          "type": "string",
-          "format": "int64"
         }
       }
     },
@@ -1109,6 +1443,45 @@
           "items": {
             "$ref": "#/definitions/CommonLog"
           }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberActivitiesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonActivity"
+          }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberDiscountsResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "discounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonDiscount"
+          }
+        }
+      }
+    },
+    "AdminAPIGetSubscriberRespV2": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "subscriber": {
+          "$ref": "#/definitions/CommonSubscriber"
         }
       }
     },
@@ -1157,6 +1530,20 @@
         }
       }
     },
+    "AdminAPIGetUnpaidSummariesResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        },
+        "unpaid_summaries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminAPIUnpaidSummary"
+          }
+        }
+      }
+    },
     "AdminAPIPayroll": {
       "type": "object",
       "properties": {
@@ -1177,7 +1564,7 @@
       },
       "description": "Payroll is the payroll."
     },
-    "AdminAPIProcessSublogsReq": {
+    "AdminAPIProcessActivityReq": {
       "type": "object",
       "properties": {
         "email": {
@@ -1185,10 +1572,13 @@
         },
         "date": {
           "type": "string"
+        },
+        "id": {
+          "type": "string"
         }
       }
     },
-    "AdminAPIProcessSublogsResp": {
+    "AdminAPIProcessActivityResp": {
       "type": "object",
       "properties": {
         "error": {
@@ -1199,8 +1589,11 @@
     "AdminAPIRefundActivityReq": {
       "type": "object",
       "properties": {
-        "email": {
-          "type": "string"
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "date": {
           "type": "string"
@@ -1281,6 +1674,17 @@
         }
       }
     },
+    "AdminAPISetupActivityReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
     "AdminAPISkipActivityReq": {
       "type": "object",
       "properties": {
@@ -1289,14 +1693,9 @@
         },
         "date": {
           "type": "string"
-        }
-      }
-    },
-    "AdminAPISkipActivityResp": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "$ref": "#/definitions/CommonError"
+        },
+        "id": {
+          "type": "string"
         }
       }
     },
@@ -1371,16 +1770,19 @@
       },
       "title": "**********************\nSublogs\n**********************"
     },
-    "AdminAPISubscriber": {
+    "AdminAPIUnpaidSummary": {
       "type": "object",
       "properties": {
+        "min_date": {
+          "type": "string"
+        },
+        "max_date": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
         "email": {
-          "type": "string"
-        },
-        "date": {
-          "type": "string"
-        },
-        "name": {
           "type": "string"
         },
         "first_name": {
@@ -1389,99 +1791,13 @@
         "last_name": {
           "type": "string"
         },
-        "address": {
-          "$ref": "#/definitions/CommonAddress"
-        },
-        "customer_id": {
+        "num_unpaid": {
           "type": "string"
         },
-        "subscription_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "first_payment_date": {
+        "amount_due": {
           "type": "string"
-        },
-        "is_subscribed": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "subscription_date": {
-          "type": "string"
-        },
-        "unsubscribed_date": {
-          "type": "string"
-        },
-        "first_box_date": {
-          "type": "string"
-        },
-        "servings": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "vegetarian_servings": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "delivery_time": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "subscription_day": {
-          "type": "string"
-        },
-        "weekly_amount": {
-          "type": "number",
-          "format": "float"
-        },
-        "payment_method_token": {
-          "type": "string"
-        },
-        "reference": {
-          "type": "string"
-        },
-        "phone_number": {
-          "type": "string"
-        },
-        "delivery_tips": {
-          "type": "string"
-        },
-        "bag_reminder_sms": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "num_gift_dinners": {
-          "type": "integer",
-          "format": "int32",
-          "title": "gift"
-        },
-        "reference_email": {
-          "type": "string"
-        },
-        "gift_reveal_date": {
-          "type": "string"
-        },
-        "referral_page_opens": {
-          "type": "integer",
-          "format": "int32",
-          "title": "stats"
-        },
-        "referred_page_opens": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "gift_page_opens": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "gifted_page_opens": {
-          "type": "integer",
-          "format": "int32"
         }
-      },
-      "title": "Subscriber"
+      }
     },
     "AdminAPIUnskipActivityReq": {
       "type": "object",
@@ -1491,14 +1807,9 @@
         },
         "date": {
           "type": "string"
-        }
-      }
-    },
-    "AdminAPIUnskipActivityResp": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "$ref": "#/definitions/CommonError"
+        },
+        "id": {
+          "type": "string"
         }
       }
     },
@@ -1577,6 +1888,155 @@
         }
       }
     },
+    "AdminAPIUserIDReq": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonActivity": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "address_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "address_apt": {
+          "type": "string"
+        },
+        "address_string": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "skip": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "forgiven": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_changed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "amount_paid": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "paid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "paid_datetime": {
+          "type": "string"
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "transaction_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "customer_id": {
+          "type": "string"
+        },
+        "refunded": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "refunded_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "refunded_datetime": {
+          "type": "string"
+        },
+        "refund_transaction_id": {
+          "type": "string"
+        },
+        "gift": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "gift_from_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deviant": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "deviant_reason": {
+          "type": "string"
+        }
+      }
+    },
     "CommonAddress": {
       "type": "object",
       "properties": {
@@ -1618,6 +2078,29 @@
           "type": "string"
         },
         "description": {
+          "type": "string"
+        }
+      }
+    },
+    "CommonCampaign": {
+      "type": "object",
+      "properties": {
+        "Source": {
+          "type": "string"
+        },
+        "Medium": {
+          "type": "string"
+        },
+        "Campaign": {
+          "type": "string"
+        },
+        "Term": {
+          "type": "string"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "Timestamp": {
           "type": "string"
         }
       }
@@ -1765,6 +2248,41 @@
       },
       "description": "CultureGuide is content related to the culture guide."
     },
+    "CommonDiscount": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_datetime": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "date_used": {
+          "type": "string"
+        },
+        "discount_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "discount_percent": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "CommonDish": {
       "type": "object",
       "properties": {
@@ -1828,6 +2346,25 @@
         }
       },
       "description": "Email is the email content a subscriber gets."
+    },
+    "CommonEmailPref": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "description": "EmailPref is a pref for an email."
     },
     "CommonError": {
       "type": "object",
@@ -1947,6 +2484,20 @@
       },
       "description": "ExecutionProgressSummary summarizes execution progress."
     },
+    "CommonFoodPref": {
+      "type": "object",
+      "properties": {
+        "no_pork": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "no_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "FoodPref are pref for food."
+    },
     "CommonInfoBox": {
       "type": "object",
       "properties": {
@@ -2020,6 +2571,30 @@
       },
       "description": "Notifications are notifications the subscribers gets."
     },
+    "CommonPhonePref": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "string"
+        },
+        "raw_number": {
+          "type": "string"
+        },
+        "disable_bag_reminder": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "disable_delivered": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "disable_review": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "PhonePref is a pref for a phone."
+    },
     "CommonQandA": {
       "type": "object",
       "properties": {
@@ -2086,6 +2661,130 @@
         }
       },
       "description": "Sticker are reheat stickers for dishes."
+    },
+    "CommonSubscriber": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "sign_up_datetime": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "auth_id": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "photo_url": {
+          "type": "string"
+        },
+        "email_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonEmailPref"
+          },
+          "title": "Pref"
+        },
+        "phone_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonPhonePref"
+          }
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Account"
+        },
+        "payment_customer_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "activate_datetime": {
+          "type": "string"
+        },
+        "deactivated_datetime": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/CommonAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Plan"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "plan_interval": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "plan_weekday": {
+          "type": "string"
+        },
+        "interval_start_point": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "food_pref": {
+          "$ref": "#/definitions/CommonFoodPref"
+        },
+        "num_gift_dinners": {
+          "type": "string",
+          "format": "int64",
+          "title": "Gift"
+        },
+        "gift_reveal_datetime": {
+          "type": "string"
+        },
+        "referral_page_opens": {
+          "type": "string",
+          "format": "int64",
+          "title": "Marketing"
+        },
+        "referred_page_opens": {
+          "type": "string",
+          "format": "int64"
+        },
+        "referrer_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "reference_email": {
+          "type": "string"
+        },
+        "reference_text": {
+          "type": "string"
+        },
+        "campaigns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonCampaign"
+          }
+        }
+      },
+      "description": "Subscriber is a subscriber."
     }
   }
 }

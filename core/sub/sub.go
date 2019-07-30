@@ -15,6 +15,7 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/payment"
 	"github.com/atishpatel/Gigamunch-Backend/core/slack"
+	paymentold "github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
@@ -64,16 +65,16 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 
 // Get gets a subscriber.
 func (c *Client) Get(id string) (*subold.Subscriber, error) {
-	key := c.db.NameKey(c.ctx, kind, id)
-	sub := new(subold.Subscriber)
-	err := c.db.Get(c.ctx, key, sub)
+	return c.getByIDOrEmail(id)
+}
+
+// GetMulti gets a subscriber.
+func (c *Client) GetMulti(ids []string) ([]*subold.Subscriber, error) {
+	subs, err := c.getMulti(ids)
 	if err != nil {
-		if err == c.db.ErrNoSuchEntity() {
-			return nil, errNoSuchEntityDatastore.WithError(err).Annotate("failed to get")
-		}
-		return nil, errDatastore.WithError(err).Annotate("failed to get")
+		return nil, errDatastore.WithError(err).Annotate("failed to getMulti")
 	}
-	return sub, nil
+	return subs, nil
 }
 
 // GetByEmail gets a subscriber by email.
@@ -98,6 +99,15 @@ func (c *Client) GetActive(start, limit int) ([]*subold.Subscriber, error) {
 	return subs, nil
 }
 
+// GetHasSubscribed returns a list of all Subscribers.
+func (c *Client) GetHasSubscribed(start, limit int) ([]*subold.Subscriber, error) {
+	subs, err := c.getHasSubscribed(start, limit)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Wrap("failed to getHasSubscribed")
+	}
+	return subs, nil
+}
+
 // GetByEmail gets a subscriber by email.
 
 // GetByPhoneNumber gets a subscriber by phone number.
@@ -113,10 +123,116 @@ func (c *Client) GetActive(start, limit int) ([]*subold.Subscriber, error) {
 // }
 
 // ChangeServingsPermanently changes a subscriber's servings permanently.
-func (c *Client) ChangeServingsPermanently(email string, servings int8, vegetarian bool) error {
-	// TODO: implement
-	suboldC := subold.NewWithLogging(c.ctx, c.log)
-	return suboldC.ChangeServingsPermanently(email, servings, vegetarian, c.serverInfo)
+func (c *Client) ChangeServingsPermanently(id string, servingsNonVeg, servingsVeg int8) error {
+	if servingsNonVeg < 0 {
+		return errInvalidParameter.WithMessage("Servings non-veg cannot be less than zero.")
+	}
+	if servingsVeg < 0 {
+		return errInvalidParameter.WithMessage("Servings veg cannot be less than zero.")
+	}
+	if servingsNonVeg < 0 && servingsVeg < 0 {
+		return errInvalidParameter.WithMessage("Servings non-veg and servings both cannot be less than zero.")
+	}
+	sub, err := c.getByIDOrEmail(id)
+	if err != nil {
+		return errors.Annotate(err, "failed to Get")
+	}
+	oldWeeklyAmount := sub.Amount
+	oldServingsNonVeg := sub.ServingsNonVegetarian
+	oldServingsVeg := sub.ServingsVegetarian
+
+	if (servingsNonVeg + servingsVeg) != (sub.ServingsNonVegetarian + sub.ServingsVegetarian) {
+		sub.Amount = DerivePrice(servingsNonVeg + servingsVeg)
+	}
+	sub.ServingsNonVegetarian = servingsNonVeg
+	sub.ServingsVegetarian = servingsVeg
+	err = c.put(sub.ID, sub)
+	if err != nil {
+		return errors.Annotate(err, "failed to put")
+	}
+	// update activities
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	err = activityC.ChangeFutureServings(time.Now(), sub.ID, sub.ServingsNonVegetarian, sub.ServingsVegetarian, sub.Amount)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.ChangeFutureServings")
+	}
+	// log
+	c.log.SubServingsChangedPermanently(sub.ID, sub.Email(), oldServingsNonVeg, sub.ServingsNonVegetarian, oldServingsVeg, sub.ServingsVegetarian, oldWeeklyAmount, sub.Amount)
+	// mail
+	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.NewClient")
+	}
+	mailReq := &mail.UserFields{
+		Email:          sub.Email(),
+		VegServings:    sub.ServingsVegetarian,
+		NonVegServings: sub.ServingsNonVegetarian,
+	}
+	err = mailC.UpdateUser(mailReq)
+	if err != nil {
+		return errors.Annotate(err, "failed to mail.UpdateUser")
+	}
+	return nil
+}
+
+// ChangePlanDay changes a subscriber's plan day.
+func (c *Client) ChangePlanDay(id string, planDay string, intervalStartPoint *time.Time) error {
+	if planDay != time.Monday.String() && planDay != time.Thursday.String() {
+		return errInvalidParameter.WithMessage("Invalid plan day.")
+	}
+	if intervalStartPoint == nil || intervalStartPoint.IsZero() {
+		return errInvalidParameter.WithMessage("Invalid interval start date.")
+	}
+	sub, err := c.getByIDOrEmail(id)
+	if err != nil {
+		return errors.Annotate(err, "failed to Get")
+	}
+	oldSub := *sub
+	sub.PlanWeekday = planDay
+	sub.IntervalStartPoint = *intervalStartPoint
+	for sub.IntervalStartPoint.Weekday().String() != sub.PlanWeekday {
+		sub.IntervalStartPoint = sub.IntervalStartPoint.Add(12 * time.Hour)
+	}
+	sub.IntervalStartPoint = sub.IntervalStartPoint.Add(12 * time.Hour) // set to midday
+	err = c.put(sub.ID, sub)
+	if err != nil {
+		return errors.Annotate(err, "failed to put")
+	}
+	// update activities
+	activityC, err := activity.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.NewClient")
+	}
+	err = activityC.DeleteFutureUnskipped(intervalStartPoint, sub.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to activity.DeleteFutureUnskipped")
+	}
+	// log
+	c.log.SubUpdated(sub.ID, sub.Email(), &oldSub, sub)
+	// mail
+	taskC := tasks.New(c.ctx)
+	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{
+		UserID: sub.ID,
+	})
+	if err != nil {
+		return errors.Annotate(err, "failed to tasks.AddUpdateDrip")
+	}
+	// setup next activity
+	act, err := activityC.Get(sub.IntervalStartPoint, sub.ID)
+	if err != nil && errors.GetErrorWithCode(err).Code != errors.CodeNotFound {
+		return errors.Annotate(err, "failed to activity.Get")
+	}
+	if (act == nil || act.Date == "") && sub.IntervalStartPoint.After(time.Now()) {
+		// no activity so set up an activity
+		err = c.SetupActivity(sub.IntervalStartPoint, sub.ID, true, 0, 0)
+		if err != nil {
+			return errors.Annotate(err, "failed to sub.SetupActivity")
+		}
+	}
+	return nil
 }
 
 // UpdatePaymentToken updates a user payment method token.
@@ -182,6 +298,17 @@ func (c *Client) Deactivate(idOrEmail, reason string) error {
 	if err != nil {
 		return errors.Annotate(err, "failed to Update")
 	}
+	// check of unpaid activities
+	outstandingCharges := false
+	unpaidSummary, err := activityC.GetUnpaidSummary(sub.ID)
+	if err != nil {
+		c.log.Errorf(c.ctx, "failed to GetUnpaidSummary: %+v", err)
+	} else {
+		if unpaidSummary != nil && unpaidSummary.NumUnpaid != "0" && unpaidSummary.NumUnpaid != "" {
+			outstandingCharges = true
+		}
+	}
+	c.log.Infof(c.ctx, "Has outstanding Charges? %v", outstandingCharges)
 	// update mail client
 	mailC, err := mail.NewClient(c.ctx, c.log, c.serverInfo)
 	if err != nil {
@@ -193,7 +320,7 @@ func (c *Client) Deactivate(idOrEmail, reason string) error {
 			FirstName: emailPref.FirstName,
 			LastName:  emailPref.LastName,
 		}
-		err = mailC.SubDeactivated(mailReq)
+		err = mailC.SubDeactivated(mailReq, outstandingCharges)
 		if err != nil {
 			return errors.Annotate(err, "failed to mail.SubDeactivated")
 		}
@@ -342,7 +469,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		sub.IntervalStartPoint = req.FirstDeliveryDate
 		sub.ServingsNonVegetarian = req.ServingsNonVegetarian
 		sub.ServingsVegetarian = req.ServingsVegetarian
-		sub.Amount = subold.DerivePrice(req.ServingsNonVegetarian + req.ServingsVegetarian)
+		sub.Amount = DerivePrice(req.ServingsNonVegetarian + req.ServingsVegetarian)
 		sub.Active = true
 		now := time.Now()
 		sub.SignUpDatetime = now
@@ -382,23 +509,23 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 		c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to activity.NewClient"))
 	} else {
 		createReq := &activity.CreateReq{
-			Date:      sub.IntervalStartPoint.Format(activity.DateFormat),
-			UserID:    sub.ID,
-			Email:     sub.Email(),
-			FirstName: sub.FirstName(),
-			LastName:  sub.LastName(),
-			Location:  sub.Location,
-			Active:    true,
-			Skip:      false,
-			First:     true,
+			Date:                  sub.IntervalStartPoint.Format(activity.DateFormat),
+			UserID:                sub.ID,
+			Email:                 sub.Email(),
+			FirstName:             sub.FirstName(),
+			LastName:              sub.LastName(),
+			Location:              sub.Location,
+			Active:                true,
+			Skip:                  false,
+			First:                 true,
 			ServingsNonVegetarian: sub.ServingsNonVegetarian,
 			ServingsVegetarain:    sub.ServingsVegetarian,
 			Amount:                sub.Amount,
-			DiscountAmount:        req.DiscountAmount,
-			DiscountPercent:       req.DiscountPercent,
-			PaymentProvider:       sub.PaymentProvider,
-			PaymentMethodToken:    sub.PaymentMethodToken,
-			CustomerID:            sub.PaymentCustomerID,
+			// DiscountAmount:        req.DiscountAmount, // switched to new discount system
+			// DiscountPercent:       req.DiscountPercent,
+			PaymentProvider:    sub.PaymentProvider,
+			PaymentMethodToken: sub.PaymentMethodToken,
+			CustomerID:         sub.PaymentCustomerID,
 		}
 		createReq.SetAddress(&req.Address)
 		err = activityC.Create(createReq)
@@ -406,11 +533,29 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 			c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to activity.Create"))
 		}
 	}
+	// create discount
+	discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to discount.NewClient"))
+	} else {
+		createReq := &discount.CreateReq{
+			UserID:          sub.ID,
+			Email:           sub.Email(),
+			FirstName:       sub.FirstName(),
+			LastName:        sub.LastName(),
+			DiscountAmount:  req.DiscountAmount,
+			DiscountPercent: req.DiscountPercent,
+		}
+		err = discountC.Create(createReq)
+		if err != nil {
+			c.log.Errorf(c.ctx, "%+v", errors.Annotate(err, "failed to discount.Create"))
+		}
+	}
 
 	// Add to mail service
 	taskC := tasks.New(c.ctx)
 	// add to update drip
-	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{Email: req.Email})
+	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{UserID: sub.ID, Email: req.Email})
 	if err != nil {
 		c.log.Errorf(c.ctx, "failed to task.AddUpdateDrip: %+v", err)
 	}
@@ -427,6 +572,9 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 
 // SetupActivity sets up an activity for a subscriber.
 func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool, discountAmount float32, discountPrecent int8) error {
+	if date.IsZero() || userIDOrEmail == "" {
+		return errInvalidParameter.Annotate("date or user id is nil")
+	}
 	sub, err := c.getByIDOrEmail(userIDOrEmail)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.GetByIDOrEmail")
@@ -438,14 +586,14 @@ func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool
 	}
 
 	createReq := &activity.CreateReq{
-		Date:      date.Format(activity.DateFormat),
-		UserID:    sub.ID,
-		Email:     sub.Email(),
-		FirstName: sub.FirstName(),
-		LastName:  sub.LastName(),
-		Location:  sub.Location,
-		Active:    active,
-		Skip:      false,
+		Date:                  date.Format(activity.DateFormat),
+		UserID:                sub.ID,
+		Email:                 sub.Email(),
+		FirstName:             sub.FirstName(),
+		LastName:              sub.LastName(),
+		Location:              sub.Location,
+		Active:                active,
+		Skip:                  false,
 		ServingsNonVegetarian: sub.ServingsNonVegetarian,
 		ServingsVegetarain:    sub.ServingsVegetarian,
 		Amount:                sub.Amount,
@@ -454,6 +602,7 @@ func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool
 		PaymentProvider:       sub.PaymentProvider,
 		PaymentMethodToken:    sub.PaymentMethodToken,
 		CustomerID:            sub.PaymentCustomerID,
+		// First: TODO: check activities if any are not skipped
 	}
 	createReq.SetAddress(&sub.Address)
 	err = activityC.Create(createReq)
@@ -462,6 +611,8 @@ func (c *Client) SetupActivity(date time.Time, userIDOrEmail string, active bool
 	}
 	return nil
 }
+
+// func (c *Client) Discount()
 
 // SetupActivities updates a subscriber.
 func (c *Client) SetupActivities(date time.Time) error {
@@ -474,7 +625,7 @@ func (c *Client) SetupActivities(date time.Time) error {
 	return suboldC.SetupSubLogs(date)
 }
 
-// Process processes an activity.
+// ProcessActivity processes an activity.
 func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	c.log.Infof(c.ctx, "Processing Sub: date(%v) userIDOrEmail(%s)", date, userIDOrEmail)
 	// get sub
@@ -501,6 +652,11 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.Get")
 	}
+	c.log.Infof(c.ctx, "act: %+v", act)
+	if act.Skip {
+		c.log.Infof(c.ctx, "user is skipped")
+		return nil
+	}
 	// check if should delay processing
 	taskC := tasks.New(c.ctx)
 	dayBeforeBox := act.DateParsed().Add(-24 * time.Hour)
@@ -524,7 +680,7 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	}
 	err = taskC.AddUpdateDrip(dayBeforeBox, r)
 	if err != nil {
-		c.log.Errorf(c.ctx, "failed to tasks.AddUpdateDrip: %+v", err)
+		c.log.Errorf(c.ctx, "failed to tasks.AddUpdateDrip at %s: %+v", dayBeforeBox, err)
 	}
 	// done if paid
 	if act.Paid {
@@ -535,32 +691,79 @@ func (c *Client) ProcessActivity(date time.Time, userIDOrEmail string) error {
 	amount := act.Amount
 	var discountAmount float32
 	var discountPercent int8
+	var discnt *discount.Discount
+	discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to discount.NewClient")
+	}
 
 	if act.DiscountAmount > 0.0 || act.DiscountPercent > 0 {
-		// handle old discount system
+		// handle applied discount or old discount system
+		discountAmount = act.DiscountAmount
+		discountPercent = act.DiscountPercent
 
 	} else {
 		// new discount system
-
 		// get unused discount
-		discountC, err := discount.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+		discnt, err = discountC.GetUnusedUserDiscount(sub.ID)
 		if err != nil {
 			return errors.Annotate(err, "failed to discount.NewClient")
 		}
-		discnt, err := discountC.GetUnusedUserDiscount(sub.ID)
-		if err != nil {
-			return errors.Annotate(err, "failed to discount.NewClient")
-		}
-		if discnt != nil {
-
+		if discnt != nil && !discnt.IsUsed() {
+			c.log.Infof(c.ctx, "Using discount: %+v", discnt)
 			discountAmount = discnt.DiscountAmount
 			discountPercent = discnt.DiscountPercent
-			amount -= discountAmount
-			amount -= (float32(discountPercent) / 100) * amount
 		}
 	}
-
+	amount -= discountAmount
+	amount -= (float32(discountPercent) / 100) * amount
+	// charge
+	orderID := fmt.Sprintf("Gigamunch dinner for %s.", date.Format("01/02/2006"))
+	var tID string
+	if amount > 0.0 {
+		paymentC := paymentold.New(c.ctx)
+		saleReq := &paymentold.SaleReq{
+			CustomerID:         act.CustomerID,
+			Amount:             amount,
+			PaymentMethodToken: act.PaymentMethodToken,
+			OrderID:            orderID,
+		}
+		c.log.Infof(c.ctx, "Charging Customer(%s) %f on card(%s)", act.CustomerID, amount, act.PaymentMethodToken)
+		tID, err = paymentC.Sale(saleReq)
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate") {
+				// Dulicate transaction error because two customers have same card
+				r := &tasks.ProcessSubscriptionParams{
+					UserID:   sub.ID,
+					SubEmail: sub.Email(),
+					Date:     act.DateParsed(),
+				}
+				err = taskC.AddProcessSubscription(time.Now().Add(1*time.Hour), r)
+				if err != nil {
+					return errors.Annotate(err, "failed to tasks.AddProcessSubscription")
+				}
+				return nil
+			}
+			return errors.Annotate(err, "failed to payment.Sale")
+		}
+		c.log.Infof(c.ctx, "Charge successful Customer(%s) %f TransactionID(%s)", act.CustomerID, amount, tID)
+		c.log.Paid(sub.ID, sub.Email(), act.Date, act.Amount, amount, tID)
+	}
+	// update TransactionID
+	err = activityC.Paid(act.DateParsed(), act.UserID, amount, discountAmount, discountPercent, tID)
+	if err != nil {
+		c.log.Criticalf(c.ctx, "user paid but didn't get marked as paid: %+v", err)
+		return errors.Annotate(err, "user paid but didn't get marked as paid")
+	}
 	// mark as used
+	if discnt != nil && !discnt.IsUsed() {
+		t := act.DateParsed()
+		err = discountC.Used(discnt.ID, &t)
+		if err != nil {
+			c.log.Criticalf(c.ctx, "user paid but didn't get marked as paid: %+v", err)
+			return errors.Annotate(err, "failed to marked used discount as used")
+		}
+	}
 
 	return nil
 }
@@ -594,16 +797,34 @@ func GetCleanPhoneNumber(rawNumber string) string {
 	return cleanNumber
 }
 
-func (c *Client) BatchUpdateActivityWithUserID(start, limit int32) error {
-	subs, err := c.getAll()
+// DerivePrice returns the price for a set number of servings.
+func DerivePrice(servings int8) float32 {
+	switch servings {
+	case 1:
+		return 17 + 1.66
+	case 2:
+		return (16.5 * 2) + 3.22
+	case 4:
+		return (15.25 * 4) + 5.95
+	default:
+		return 15.25 * float32(servings) * 1.0975
+	}
+}
+
+func (c *Client) BatchUpdateActivityWithUserID(start, limit int) error {
+	subs, err := c.getAll(start, limit)
 	if err != nil {
 		return errDatastore.WithError(err).Annotate("failed to getAll")
+	}
+	if len(subs) == 0 {
+		return nil
 	}
 	max := int(start + limit)
 	if len(subs) < max {
 		max = len(subs)
 	}
-	subs = subs[start : max-1]
+	c.log.Infof(c.ctx, "updating %s subs", len(subs))
+	subs = subs[0 : max-1]
 	userIDs := make([]string, len(subs))
 	emails := make([]string, len(subs))
 	for i := range subs {

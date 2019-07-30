@@ -1,11 +1,9 @@
 #!/bin/bash
-
 # Define a timestamp function
-timestamp() {
+timestamp(){ 
   date +"%T"
 }
 timestamp
-
 ################################################################################
 # build
 ################################################################################
@@ -14,6 +12,8 @@ if [[ $1 == "build" ]]; then
     echo "Building admin/app:"
     cd admin/app
     gulp build
+    cd ../web
+    yarn build
     cd ../..
   fi
   if [[ $* == *server* ]]; then
@@ -40,20 +40,8 @@ if [[ $1 == "build" ]]; then
     # Server
     protoc -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis -I Gigamunch-Proto/pbserver/ -I Gigamunch-Proto/pbcommon/ Gigamunch-Proto/pbserver/*.proto --go_out=plugins=grpc:Gigamunch-Proto/pbserver --swagger_out=logtostderr=true:server
     
-    # Fix swagger json for auth
-    ls */*/*.swagger.json */*.swagger.json | xargs -n1 -IX bash -c "sed -e 's/\"http\",//g;s/\"2.0\",/\"2.0\",\n\"securityDefinitions\": {\"auth-token\": {\"type\": \"apiKey\",\"in\": \"header\",\"name\": \"auth-token\"}},\"security\": [{\"auth-token\": []}],/g' X > X.tmp && mv X{.tmp,}"
-
-    # fix *.pb.go generated code
-    cd Gigamunch-Proto
-    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/..\/pbcommon/github.com\/atishpatel\/Gigamunch-Backend\/Gigamunch-Proto\/pbcommon/g;' X > X.tmp && mv X{.tmp,}"
-    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/,omitempty//g;s/Url/URL/g;s/Id/ID/g;s/Sms/SMS/g;' X > X.tmp && mv X{.tmp,}"
-    ls */*.pb.go | xargs -n1 -IX bash -c "sed -e 's/Option_1/Option1/g;s/Option_2/Option2/g;s/Instructions_1/Instructions1/g;s/Instructions_2/Instructions2/g;s/Time_1/Time1/g;s/Time_2/Time2/g;' X > X.tmp && mv X{.tmp,}"
-    cd ..
-    # Typescript
+    # generate, fix, and copy files
     gulp build
-    # Copy Typescript definitions to folder
-    cp Gigamunch-Proto/pbadmin/*.d.ts admin/app/ts/prototypes
-    cp Gigamunch-Proto/pbcommon/*.d.ts admin/app/ts/prototypes
   fi
   timestamp
   exit 0
@@ -121,16 +109,15 @@ if [[ $1 == "serve" ]]; then
     echo "Starting admin:"
     cat admin/app.template.yaml | sed "s/PROJECTID/$project/g; s/SQL_IP/$sqlip/g; s/_DOMAIN_/$domain/g" > admin/app.yaml
     cd admin
-    dev_appserver.py --datastore_path ../.datastore ./app.yaml&
-    cd app
-    # gulp build&
-    gulp watch
+    dev_appserver.py --datastore_path ../.datastore --port 8081 ./app.yaml& 
+    cd web
+    yarn serve
     cd ../..
   fi
   if [[ $2 == "server" ]]; then
     echo "Starting server:"
     cat server/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/server/g; " > server/app.yaml
-    dev_appserver.py --datastore_path ./.datastore server/app.yaml&
+    dev_appserver.py --datastore_path ./.datastore server/app.yaml& 
     cd server
     # gulp build&
     gulp watch
@@ -139,7 +126,7 @@ if [[ $1 == "serve" ]]; then
   if [[ $2 == "sub" ]]; then
     echo "Starting sub:"
     cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
-    # dev_appserver.py --datastore_path ./.datastore subserver/app.yaml&
+    dev_appserver.py --datastore_path ./.datastore --port 8081 subserver/app.yaml& 
     cd subserver/web 
     yarn run serve
     cd ../..

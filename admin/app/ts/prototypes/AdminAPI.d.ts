@@ -1,3 +1,4 @@
+declare namespace AdminAPI {
 interface ErrorOnlyResp {
     error: Common.Error
 }
@@ -18,72 +19,48 @@ interface ReplaceSubscriberEmailReq {
     old_email: string
     new_email: string
 }
-interface Activity {
-    created_datetime: string
-    date: string
-    user_id: number
-    email: string
-    first_name: string
-    last_name: string
-    location: number
-    // Address
-    address_changed: boolean
-    address_apt: string
-    address_string: string
-    zip: string
-    latitude: number
-    longitude: number
-    // Detail
-    active: boolean
-    skip: boolean
-    // Bag detail
-    servings: number
-    vegetarian_servings: boolean
-    servings_changed: number
-    first: boolean
-    // Payment
-    amount: number
-    amount_paid: number
+interface ChangeSubscriberServingsReq {
+    id: string
+    servings_non_veg: number
+    servings_veg: number
+}
+interface ChangeSubscriberPlanDayReq {
+    id: string
+    new_plan_day: string
+    activity_switch_date: string
+}
+interface DiscountSubscriberReq {
+    user_id: string
     discount_amount: number
     discount_percent: number
-    paid: boolean
-    paid_datetime: string
-    transaction_id: string
-    payment_method_token: string
-    customer_id: string
-    // Refund
-    refunded: boolean
-    refunded_amount: number
-    refunded_datetime: string
-    refund_transaction_id: string
-    payment_provider: number
-    forgiven: boolean
-    // Gift
-    gift: boolean
-    gift_from_user_id: number
-    // Deviant
-    deviant: boolean
-    deviant_reason: string
+}
+interface GetSubscriberDiscountsResp {
+    error: Common.Error
+    discounts: Common.Discount[]
+}
+interface GetSubscriberActivitiesResp {
+    error: Common.Error
+    activities: Common.Activity[]
 }
 interface SkipActivityReq {
     email: string
     date: string
-}
-interface SkipActivityResp {
-    error: Common.Error
+    id: string
 }
 interface UnskipActivityReq {
     email: string
     date: string
-}
-interface UnskipActivityResp {
-    error: Common.Error
+    id: string
 }
 interface SetupActivitiesReq {
     hours: number
 }
+interface SetupActivityReq {
+    id: string
+    date: string
+}
 interface RefundActivityReq {
-    email: string
+    emails: string[]
     date: string
     amount: number
     percent: number
@@ -93,6 +70,12 @@ interface RefundAndSkipActivityReq {
     date: string
     amount: number
     percent: number
+}
+interface ChangeActivityServingsReq {
+    id: string
+    servings_non_veg: number
+    servings_veg: number
+    date: string
 }
 interface GetLogReq {
     id: number
@@ -109,10 +92,10 @@ interface GetLogsResp {
     error: Common.Error
     logs: Common.Log[]
 }
-interface GetLogsByEmailReq {
+interface GetLogsForUserReq {
     start: number
     limit: number
-    email: string
+    id: string
 }
 interface GetLogsByExecutionReq {
     execution_id: number
@@ -178,19 +161,25 @@ interface GetUnpaidSublogsResp {
     error: Common.Error
     sublogs: Sublog[]
 }
-interface ProcessSublogsReq {
+interface ProcessActivityReq {
     email: string
     date: string
+    id: string
 }
-interface ProcessSublogsResp {
+interface ProcessActivityResp {
     error: Common.Error
+}
+interface GetUnpaidSummariesResp {
+    error: Common.Error
+    unpaid_summaries: UnpaidSummary[]
 }
 interface SendCustomerSMSReq {
     emails: string[]
 	message: string
 }
 interface GetHasSubscribedReq {
-    date: string
+    start: number
+    limit: number
 }
 interface GetSubscriberSublogsReq {
     email: string
@@ -203,12 +192,25 @@ interface GetHasSubscribedResp {
     error: Common.Error
     subscribers: Subscriber[]
 }
+interface GetHasSubscribedRespV2 {
+    error: Common.Error
+    subscribers: Common.Subscriber[]
+}
 interface GetSubscriberReq {
     email: string
 }
 interface GetSubscriberResp {
     error: Common.Error
     subscriber: Subscriber
+}
+interface GetSubscriberRespV2 {
+    error: Common.Error
+    subscriber: Common.Subscriber
+}
+interface UserIDReq {
+    ID: string
+}
+interface EmptyReq {
 }
 interface GetExecutionsReq {
     start: number
@@ -314,4 +316,15 @@ interface UpdateDeliveriesResp {
 interface UpdateDripReq {
     emails: string[]
     hours: number
+}
+interface UnpaidSummary {
+    min_date: string
+	max_date: string
+	user_id: string
+	email: string
+	first_name: string
+	last_name: string
+	num_unpaid: string
+	amount_due: string
+}
 }

@@ -2,6 +2,7 @@
 CREATE DATABASE IF NOT EXISTS gigamunch CHARACTER SET utf8mb4;
 -- use database
 USE gigamunch;
+<<<<<<< HEAD
 -- create live_posts table
 
 -- create review table
@@ -67,6 +68,8 @@ USE gigamunch;
 -- create sub
 -- create coupon
 -- create promo
+=======
+>>>>>>> feature/sub-app-v1
 -- create driver_assignment
 CREATE TABLE IF NOT EXISTS deliveries (
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
@@ -79,7 +82,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
 	order INT NOT NULL DEFAULT -1,
 	delivered BOOLEAN DEFAULT 0,
 	PRIMARY KEY (date, sub_email)
-)
+);
 -- create activity
 CREATE TABLE IF NOT EXISTS activity(
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
@@ -124,9 +127,9 @@ CREATE TABLE IF NOT EXISTS activity(
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
 
 -- TODO: change primary key from date, email to date, user_id
-
+-- create discount
 CREATE TABLE IF NOT EXISTS discount(
-	id BIGINT NOT NULL PRIMARY KEY,
+	id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	created_dt DATETIME NOT NULL DEFAULT NOW(),
 	user_id VARCHAR(125) NOT NULL DEFAULT '',
 	email VARCHAR(175) NOT NULL,
@@ -135,4 +138,8 @@ CREATE TABLE IF NOT EXISTS discount(
 	date_used DATE NOT NULL DEFAULT '0000-00-00',
 	discount_amount FLOAT(6,2) NOT NULL DEFAULT 0,
 	discount_percent TINYINT NOT NULL DEFAULT 0
+<<<<<<< HEAD
 ) ENGINE = InnoDB CHARACTER SET utf8mb4;
+=======
+) ENGINE = InnoDB CHARACTER SET utf8mb4;
+>>>>>>> feature/sub-app-v1

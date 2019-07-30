@@ -331,24 +331,41 @@
       selected() {
         const tmp = window.location.pathname.split('/delivery/');
         const dateString = decodeURIComponent(tmp[1]);
+        let d = this.getDateFromURL(dateString);
+        this.dateValue = d.toISOString().substr(0, 10);
+        this.getSubLogsForDate(d);
+      }
+
+      getDateFromURL(dateString) {
         let d;
         if (dateString === 'next') {
           d = new Date();
-          while (d.getDay() !== 1) {
+          while (d.getDay() !== 1 && d.getDay() !== 4) {
             d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
           d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else if (dateString === 'previous') {
           d = new Date();
-          while (d.getDay() !== 1) {
+          while (d.getDay() !== 1 && d.getDay() !== 4) {
             d.setTime(d.getTime() - 24 * 3600 * 1000); // previous day
+          }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        } else if (dateString === 'nextMonday') {
+          d = new Date();
+          while (d.getDay() !== 1) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
+          }
+          d = new Date(d.toLocaleDateString() + ' 12:00:00');
+        } else if (dateString === 'nextThursday') {
+          d = new Date();
+          while (d.getDay() !== 4) {
+            d.setTime(d.getTime() + 24 * 3600 * 1000); // next day
           }
           d = new Date(d.toLocaleDateString() + ' 12:00:00');
         } else {
           d = new Date(dateString);
         }
-        this.dateValue = d.toISOString().substr(0, 10);
-        this.getSubLogsForDate(d);
+        return d;
       }
 
       getSubLogsForDate(d) {
@@ -788,7 +805,7 @@
             ],
           },
           {
-            name: 'Wofford',
+            name: 'Debbie',
             desc: 'Belle Meade',
             color: '#E91E63',
             round_trip: true,
@@ -895,7 +912,7 @@
             ],
           },
           {
-            name: 'Steven',
+            name: 'Abdinoor',
             desc: 'Downtown',
             color: '#795548',
             round_trip: true,
@@ -919,7 +936,7 @@
             ],
           },
           {
-            name: 'Benjamin',
+            name: 'Heidi',
             desc: 'Unknown',
             color: '#03A9F4',
             round_trip: true,
@@ -941,6 +958,29 @@
               [-86.7713279, 36.0930572],
               [-86.7980138, 36.1095138],
               [-86.8029066, 36.1198455],
+            ],
+          },
+          {
+            name: 'Katina',
+            desc: 'Hermitage',
+            color: '#4CAF50',
+            round_trip: true,
+            start_latlng: {
+              lat: 36.127325,
+              lng: -86.710504
+            },
+            end_latlng: {
+              lat: 36.268554,
+              lng: -86.628631
+            },
+            geofence: [
+              [-86.6934586, 36.0631905],
+              [-86.5997315, 36.1070282],
+              [-86.5447999, 36.1292152],
+              [-86.6011048, 36.1913054],
+              [-86.6889954, 36.1824384],
+              [-86.7185211, 36.1389201],
+              [-86.6934586, 36.0631905],
             ],
           },
           {

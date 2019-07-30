@@ -202,10 +202,10 @@ function GetLog(id) {
     };
     return callFetch(url, 'GET', req);
 }
-function GetLogsByEmail(start, limit, email) {
+function GetLogsByEmail(start, limit, id) {
     var url = baseURL + 'GetLogsByEmail';
     var req = {
-        email: email,
+        id: id,
         start: start,
         limit: limit,
     };
