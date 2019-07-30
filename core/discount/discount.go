@@ -3,6 +3,7 @@ package discount
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -143,4 +144,32 @@ func (c *Client) Create(req *CreateReq) error {
 		return errSQL.WithError(err).Annotate("failed to insertStatement")
 	}
 	return nil
+}
+
+type PromoBreakdown struct {
+	DiscountAmount  float32
+	DiscountPercent int
+}
+
+func (p *PromoBreakdown) String() string {
+	if p.DiscountPercent > 0 {
+		return fmt.Sprintf("%d%%", p.DiscountPercent)
+	}
+	if p.DiscountAmount > 1 {
+		return fmt.Sprintf("$%.0f", p.DiscountAmount)
+	}
+	return ""
+}
+
+func GetPromoBreakdown(promo string) *PromoBreakdown {
+	promoBreakdown := &PromoBreakdown{}
+	if promo == "null" {
+		return promoBreakdown
+	}
+	if strings.Contains(promo, "gree") {
+		promoBreakdown.DiscountPercent = 100
+		return promoBreakdown
+	}
+	promoBreakdown.DiscountPercent = 50
+	return promoBreakdown
 }
