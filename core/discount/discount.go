@@ -148,7 +148,7 @@ func (c *Client) Create(req *CreateReq) error {
 
 type PromoBreakdown struct {
 	DiscountAmount  float32
-	DiscountPercent int
+	DiscountPercent int8
 }
 
 func (p *PromoBreakdown) String() string {

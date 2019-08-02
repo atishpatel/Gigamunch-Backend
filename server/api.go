@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/discount"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/jmoiron/sqlx"
@@ -327,6 +329,7 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 	if err != nil {
 		return errors.Annotate(err, "failed to decode address")
 	}
+	promoBreakdown := discount.GetPromoBreakdown(req.Promo)
 
 	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
@@ -346,7 +349,8 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 		ServingsVegetarian:    servingsVegetarian,
 		FirstDeliveryDate:     firstBoxDate,
 		Campaigns:             campaigns,
-		DiscountPercent:       100,
+		DiscountPercent:       promoBreakdown.DiscountPercent,
+		DiscountAmount:        promoBreakdown.DiscountAmount,
 	}
 	_, err = subC.Create(createReq)
 	if err != nil {

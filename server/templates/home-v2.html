@@ -1275,6 +1275,10 @@
                placeholder="Enter Email Address Here"
                pattern="\S+@\S+\.\S+"
                required>
+        <input style="display:none"
+               name="promo"
+               id="promo"
+               value="[[.Promo]]">
         <button type="submit"
                   class="orange-button get-started-button">
                   [[if eq .ID "gifted"]] 
