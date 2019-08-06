@@ -559,14 +559,6 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	if err != nil {
 		c.log.Errorf(c.ctx, "failed to task.AddUpdateDrip: %+v", err)
 	}
-	// add to task queue
-	err = taskC.AddProcessSubscription(sub.IntervalStartPoint.Add(-24*time.Hour), &tasks.ProcessSubscriptionParams{
-		SubEmail: req.Email,
-		Date:     sub.IntervalStartPoint,
-	})
-	if err != nil {
-		c.log.Errorf(c.ctx, "failed to task.AddProcessSubscription: %+v", err)
-	}
 	return sub, nil
 }
 

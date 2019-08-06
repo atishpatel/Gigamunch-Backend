@@ -16,6 +16,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 )
 
 const (
@@ -57,7 +58,7 @@ var (
 	errBadRequest     = errors.BadRequestError
 	errSQLDB          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
 	errDuplicateEntry = errors.ErrorWithCode{Code: errors.CodeBadRequest, Message: "Duplicate entry."}
-	errNotFound = errors.NotFoundError
+	errNotFound       = errors.NotFoundError
 )
 
 // Client is a client for manipulating activity.
@@ -287,6 +288,20 @@ func (c *Client) Create(req *CreateReq) error {
 			}
 		}
 		return errSQLDB.WithError(err).Annotate("failed to insertStatement")
+	}
+
+	// Add to process activity
+	d, _ := time.Parse(DateFormat, req.Date)
+	dayBeforeActivity := d.Add(-24 * time.Hour)
+	taskC := tasks.New(c.ctx)
+	r := &tasks.ProcessSubscriptionParams{
+		UserID:   req.UserID,
+		SubEmail: req.Email,
+		Date:     d,
+	}
+	err = taskC.AddProcessSubscription(dayBeforeActivity, r)
+	if err != nil {
+		return errors.Wrap("failed to tasks.AddProcessSubscription", err)
 	}
 	return nil
 }
