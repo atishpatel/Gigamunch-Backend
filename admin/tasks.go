@@ -243,15 +243,15 @@ func (s *server) ProcessUnpaidAutocharge(ctx context.Context, w http.ResponseWri
 	}
 	// TODO: If older than a year, forgive?
 	tasksC := tasks.New(ctx)
-	for i := range summaries {
+	for _, summary := range summaries {
 		req := &tasks.ProcessSubscriptionParams{
-			UserID:   summaries[i].UserID,
-			SubEmail: summaries[i].Email,
-			Date:     summaries[i].MaxDateTime(),
+			UserID:   summary.UserID,
+			SubEmail: summary.Email,
+			Date:     summary.MaxDateTime(),
 		}
 		err = tasksC.AddProcessSubscription(time.Now(), req)
 		if err != nil {
-			log.Errorf(ctx, "failed to AddProcessSubscription: %+v", err)
+			utils.Errorf(ctx, "failed to AddProcessSubscription: %+v", err)
 		}
 	}
 	return nil
