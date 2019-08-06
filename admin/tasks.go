@@ -155,6 +155,34 @@ func (s *server) ProcessUnpaidPreDelivery(ctx context.Context, w http.ResponseWr
 	return nil
 }
 
+// ProcessUnpaidAutocharge tries to charge unpaid activities.
+func (s *server) ProcessUnpaidAutocharge(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		log.Errorf(ctx, "failed to activity.NewClient. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	summaries, err := activityC.GetUnpaidSummaries()
+	if err != nil {
+		log.Errorf(ctx, "failed to activity.Process. Err:%+v", err)
+		return errors.GetErrorWithCode(err)
+	}
+	// TODO: If older than a year, forgive?
+	tasksC := tasks.New(ctx)
+	for _, summary := range summaries {
+		req := &tasks.ProcessSubscriptionParams{
+			UserID:   summary.UserID,
+			SubEmail: summary.Email,
+			Date:     summary.MaxDateTime(),
+		}
+		err = tasksC.AddProcessSubscription(time.Now(), req)
+		if err != nil {
+			utils.Errorf(ctx, "failed to AddProcessSubscription: %+v", err)
+		}
+	}
+	return nil
+}
+
 // ProcessUnpaidPostDelivery 1 day after delivery
 func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error

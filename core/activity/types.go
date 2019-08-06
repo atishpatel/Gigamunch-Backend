@@ -91,3 +91,13 @@ type UnpaidSummary struct {
 	NumUnpaid string `json:"num_unpaid" db:"num_unpaid"`
 	AmountDue string `json:"amount_due" db:"amount_due"`
 }
+
+func (u *UnpaidSummary) MaxDateTime() time.Time {
+	t, _ := time.Parse(DateFormat, u.MaxDate)
+	return t
+}
+
+func (u *UnpaidSummary) MinDateTime() time.Time {
+	t, _ := time.Parse(DateFormat, u.MinDate)
+	return t
+}
