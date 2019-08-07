@@ -421,7 +421,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to s.getByAddress")
 	}
-	if subSameAddress != nil {
+	if subSameAddress != nil && subSameAddress.Email() != req.Email {
 		// same address person
 		return nil, errInvalidParameter.WithMessage("Someone in your household is already a subscriber. Please ask them to reactivate their account. If this is not the case, please email: hello@eatgigamunch.com")
 	}
