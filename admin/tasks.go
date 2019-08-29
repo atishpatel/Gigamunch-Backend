@@ -259,7 +259,7 @@ func (s *server) ProcessUnpaidPostDelivery(ctx context.Context, w http.ResponseW
 			}
 		}
 	}
-	log.Infof(ctx, "number of unpaid subs: %d", len(mailOutstandCharges)+len(mailUpdateCC)+len(mailUpdateCCSerious))
+	log.Infof(ctx, "number of unpaid subs: %d / %d", len(mailOutstandCharges)+len(mailUpdateCC)+len(mailUpdateCCSerious), len(subs))
 	// send mail
 	log.Infof(ctx, "mailOutstandCharges: %s", mailOutstandCharges)
 	log.Infof(ctx, "mailUpdateCC: %s", mailUpdateCC)

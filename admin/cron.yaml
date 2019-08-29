@@ -23,7 +23,7 @@ cron:
   target: admin
 - description: "Process Unpaid subs - post delivery day"
   url: /admin/task/ProcessUnpaidPostDelivery
-  schedule: every thursday,sunday 12:00
+  schedule: every tuesday,friday 12:00
   timezone: America/Chicago
   target: admin
 - description: "Try auto-charging unpaid subs"
