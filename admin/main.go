@@ -248,10 +248,10 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 		// check ping errors
 		err = s.sqlDB.Ping()
 		if err != nil {
-			logging.Errorf(ctx, "prerequests sqlDB.Ping failed: %+v", err)
+			logging.Errorf(ctx, "prerequests sqlDB.Ping failed: ", err)
 			err = s.setup()
 			if err != nil {
-				logging.Errorf(ctx, "prerequests sqlDB.Ping failed and setup failed: %+v", err)
+				logging.Errorf(ctx, "prerequests sqlDB.Ping failed and setup failed: ", err)
 			}
 		}
 		// call function
