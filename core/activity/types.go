@@ -93,11 +93,25 @@ type UnpaidSummary struct {
 }
 
 func (u *UnpaidSummary) MaxDateTime() time.Time {
-	t, _ := time.Parse(DateFormat, u.MaxDate)
+	s := u.MaxDate
+	if len(s) > 10 {
+		s = s[:10]
+	}
+	if len(s) == 10 {
+		s += "T12:12:12.000Z"
+	}
+	t, _ := time.Parse(time.RFC3339, s)
 	return t
 }
 
 func (u *UnpaidSummary) MinDateTime() time.Time {
-	t, _ := time.Parse(DateFormat, u.MinDate)
+	s := u.MinDate
+	if len(s) > 10 {
+		s = s[:10]
+	}
+	if len(s) == 10 {
+		s += "T12:12:12.000Z"
+	}
+	t, _ := time.Parse(time.RFC3339, s)
 	return t
 }
