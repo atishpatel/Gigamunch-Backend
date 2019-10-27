@@ -34,6 +34,7 @@ const (
 	selectUnpaidSummaries                    = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx"
 	selectUnpaidSummaryForUser               = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx"
 	// selectUnpaidActivities                   = "SELECT * FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 ORDER BY user_id,date"
+	selectFirstActivity = "SELECT * FROM activity WHERE first=1 AND skip=0 AND user_id=?"
 	// update and insert
 	updateServingsStatement       = "UPDATE activity SET servings=?,veg_servings=?,amount=?,servings_changed=1 WHERE date=? AND user_id=?"
 	updateFutureServingsStatement = "UPDATE activity SET servings=?,veg_servings=?,amount=? WHERE date>? AND user_id=? AND paid=0 AND servings_changed=0"
@@ -280,6 +281,17 @@ func (c *Client) Create(req *CreateReq) error {
 	if err != nil {
 		return err
 	}
+	// set if first meal or not
+	act := &Activity{}
+	err = c.sqlDB.GetContext(c.ctx, act, selectFirstActivity, req.UserID)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result") {
+			req.First = true
+		} else {
+			return errSQLDB.WithError(err).Annotate("failed to selectFirstActivity")
+		}
+	}
+	// insert
 	_, err = c.sqlDB.NamedExecContext(c.ctx, insertStatement, req)
 	if err != nil {
 		if merr, ok := err.(*mysql.MySQLError); ok {
