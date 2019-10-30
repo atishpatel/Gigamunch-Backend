@@ -17,8 +17,6 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/inquiry"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
@@ -71,10 +69,10 @@ func main() {
 	if projectID == "" {
 		projectID = os.Getenv("PROJECT_ID")
 	}
-	http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
-	http.HandleFunc("/sub-merchant-approved", handleSubMerchantApproved)
-	http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
-	http.HandleFunc("/sub-merchant-disbursement-exception", handleDisbursementException)
+	// http.HandleFunc(tasks.ProcessInquiryURL, handleProcessInquiry)
+	// http.HandleFunc("/sub-merchant-approved", handleSubMerchantApproved)
+	// http.HandleFunc("/sub-merchant-declined", handleSubMerchantDeclined)
+	// http.HandleFunc("/sub-merchant-disbursement-exception", handleDisbursementException)
 	// http.HandleFunc("/on-message-sent", handleOnMessageSent)
 
 	http.HandleFunc(tasks.UpdateDripURL, handleUpdateDrip)
@@ -102,45 +100,45 @@ func main() {
 		i.Name, i.HTTPMethod, i.Path, i.Desc = name, method, path, desc
 	}
 	// Page stuff
-	register("FinishOnboarding", "finishOnboarding", "POST", "cookservice/finishOnboarding", "Updates cook and submerchant")
-	// Refresh stuff
-	register("RefreshToken", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
-	// Cook stuff
-	register("GetCook", "getCook", "GET", "cookservice/getCook", "Get the cook info.")
-	register("UpdateCook", "updateCook", "POST", "cookservice/updateCook", "Update cook information.")
-	register("SchedulePhoneCall", "schedulePhoneCall", "POST", "cookservice/schedulePhoneCall", "Schedule a phone call.")
-	// Submerchant stuff
-	register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
-	register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
-	// Item stuff
-	register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save an item.")
-	register("GetItem", "getItem", "GET", "cookservice/getItem", "Get an item.")
-	register("ActivateItem", "activateItem", "POST", "cookservice/activateItem", "Activate an item.")
-	register("DeactivateItem", "deactivateItem", "POST", "cookservice/deactivateItem", "Deactivate an item.")
-	// Menu stuff
-	register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
-	register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")
-	// Inquiry stuffffffffff
-	register("GetMessageToken", "getMessageToken", "GET", "cookservice/getMessageToken", "Gets the a token for messaging.")
-	register("GetInquiries", "getInquiries", "GET", "cookservice/getInquiries", "GetInquiries gets a cook's inquiries.")
-	register("GetInquiry", "getInquiry", "GET", "cookservice/getInquiry", "GetInquiry gets a cook's inquiry.")
-	register("AcceptInquiry", "acceptInquiry", "POST", "cookservice/acceptInquiry", "AcceptInquiry accepts an inquiry for a cook.")
-	register("DeclineInquiry", "declineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
+	// register("FinishOnboarding", "finishOnboarding", "POST", "cookservice/finishOnboarding", "Updates cook and submerchant")
+	// // Refresh stuff
+	// register("RefreshToken", "refreshToken", "POST", "cookservice/refreshToken", "Refresh a token.")
+	// // Cook stuff
+	// register("GetCook", "getCook", "GET", "cookservice/getCook", "Get the cook info.")
+	// register("UpdateCook", "updateCook", "POST", "cookservice/updateCook", "Update cook information.")
+	// register("SchedulePhoneCall", "schedulePhoneCall", "POST", "cookservice/schedulePhoneCall", "Schedule a phone call.")
+	// // Submerchant stuff
+	// register("UpdateSubMerchant", "updateSubMerchant", "POST", "gigachefservice/updateSubMerchant", "Update or create sub-merchant.")
+	// register("GetSubMerchant", "getSubMerchant", "GET", "gigachefservice/getSubMerchant", "Get the sub merchant info.")
+	// // Item stuff
+	// register("SaveItem", "saveItem", "POST", "cookservice/saveItem", "Save an item.")
+	// register("GetItem", "getItem", "GET", "cookservice/getItem", "Get an item.")
+	// register("ActivateItem", "activateItem", "POST", "cookservice/activateItem", "Activate an item.")
+	// register("DeactivateItem", "deactivateItem", "POST", "cookservice/deactivateItem", "Deactivate an item.")
+	// // Menu stuff
+	// register("GetMenus", "getMenus", "GET", "cookservice/getMenus", "Gets the menus for a cook.")
+	// register("SaveMenu", "saveMenu", "POST", "cookservice/saveMenu", "Save a menu.")
+	// // Inquiry stuffffffffff
+	// register("GetMessageToken", "getMessageToken", "GET", "cookservice/getMessageToken", "Gets the a token for messaging.")
+	// register("GetInquiries", "getInquiries", "GET", "cookservice/getInquiries", "GetInquiries gets a cook's inquiries.")
+	// register("GetInquiry", "getInquiry", "GET", "cookservice/getInquiry", "GetInquiry gets a cook's inquiry.")
+	// register("AcceptInquiry", "acceptInquiry", "POST", "cookservice/acceptInquiry", "AcceptInquiry accepts an inquiry for a cook.")
+	// register("DeclineInquiry", "declineInquiry", "POST", "cookservice/declineInquiry", "DeclineInquiry declines an inquiry for a cook.")
 	// Admin stuffffffffffffffff
-	register("AddToProcessInquiryQueue", "addToProcessInquiryQueue", "POST", "cookservice/addToProcessInquiryQueue", "Admin func.")
-	register("CreateFakeGigatoken", "createFakeGigatoken", "POST", "cookservice/createFakeGigatoken", "Admin func.")
-	register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
+	// register("AddToProcessInquiryQueue", "addToProcessInquiryQueue", "POST", "cookservice/addToProcessInquiryQueue", "Admin func.")
+	// register("CreateFakeGigatoken", "createFakeGigatoken", "POST", "cookservice/createFakeGigatoken", "Admin func.")
+	// register("CreateFakeSubmerchant", "createFakeSubmerchant", "POST", "cookservice/createFakeSubmerchant", "Admin func.")
 	register("SendSMS", "sendSMS", "POST", "cookservice/sendSMS", "Admin func.")
 	register("SendCustomerSMS", "sendCustomerSMS", "POST", "cookservice/sendCustomerSMS", "Admin func.")
-	register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
+	// register("CreatePromoCode", "createPromoCode", "POST", "cookservice/createPromoCode", "Admin func.")
 	register("SetupSubLogs", "SetupSubLogs", "POST", "cookservice/SetupSubLogs", "Setup subscription activty for a date. Admin func. Do this one Chris.")
 	register("ProcessSubLog", "ProcessSubLog", "POST", "cookservice/ProcessSubLog", "Admin func.")
-	register("CancelSub", "CancelSub", "POST", "cookservice/CancelSub", "Admin func.")
+	// register("CancelSub", "CancelSub", "POST", "cookservice/CancelSub", "Admin func.")
 	register("GetSubEmails", "getSubEmails", "POST", "cookservice/getSubEmails", "Admin func.")
 	register("SkipSubLog", "skipSubLog", "POST", "cookservice/skipSubLog", "Admin func.")
 	register("GetGeneralStats", "GetGeneralStats", "POST", "cookservice/GetGeneralStats", "Returns general stats. Admin func.")
 	// register("FreeSubLog", "freeSubLog", "POST", "cookservice/freeSubLog", "Give free meal to a customer for a date. Admin func.")
-	register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
+	// register("DiscountSubLog", "DiscountSubLog", "POST", "cookservice/DiscountSubLog", "Give discount to customer. Admin func. ")
 	register("ChangeServingsForDate", "ChangeServingsForDate", "POST", "cookservice/ChangeServingsForDate", "Change number of servings for a week. Admin func.")
 	register("UpdatePaymentMethodToken", "UpdatePaymentMethodToken", "POST", "cookservice/UpdatePaymentMethodToken", "Updates the payment method token. Admin func.")
 	register("ChangeServingsPermanently", "ChangeServingsPermanently", "POST", "cookservice/ChangeServingsPermanently", "Change number of servings permanently. Admin func.")
@@ -162,88 +160,88 @@ func main() {
 	appengine.Main()
 }
 
-func handleProcessInquiry(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	inquiryID, err := tasks.ParseInquiryID(req)
-	if err != nil {
-		utils.Criticalf(ctx, "Failed to parse process inquiry request. Err: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	inquiryC := inquiry.New(ctx)
-	err = inquiryC.Process(inquiryID)
-	if err != nil {
-		utils.Criticalf(ctx, "Failed to process inquiry(%d). Err: %v", inquiryID, err)
-		taskC := tasks.New(ctx)
-		err = taskC.AddProcessInquiry(inquiryID, time.Now().Add(1*time.Hour))
-		if err != nil {
-			utils.Criticalf(ctx, "Failed to add inquiry(%d) in processInquiry queue. Err: %v", inquiryID, err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	}
-	w.WriteHeader(http.StatusOK)
-}
+// func handleProcessInquiry(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	inquiryID, err := tasks.ParseInquiryID(req)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Failed to parse process inquiry request. Err: %v", err)
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	inquiryC := inquiry.New(ctx)
+// 	err = inquiryC.Process(inquiryID)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Failed to process inquiry(%d). Err: %v", inquiryID, err)
+// 		taskC := tasks.New(ctx)
+// 		err = taskC.AddProcessInquiry(inquiryID, time.Now().Add(1*time.Hour))
+// 		if err != nil {
+// 			utils.Criticalf(ctx, "Failed to add inquiry(%d) in processInquiry queue. Err: %v", inquiryID, err)
+// 			w.WriteHeader(http.StatusBadRequest)
+// 			return
+// 		}
+// 	}
+// 	w.WriteHeader(http.StatusOK)
+// }
 
-func handleSubMerchantApproved(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	paymentC := payment.New(ctx)
-	btNotification(ctx, w, req, "SubMerchantApproved", paymentC.SubMerchantApproved)
-}
+// func handleSubMerchantApproved(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	paymentC := payment.New(ctx)
+// 	btNotification(ctx, w, req, "SubMerchantApproved", paymentC.SubMerchantApproved)
+// }
 
-func handleSubMerchantDeclined(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	paymentC := payment.New(ctx)
-	btNotification(ctx, w, req, "SubMerchantDeclined", paymentC.SubMerchantDeclined)
-}
+// func handleSubMerchantDeclined(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	paymentC := payment.New(ctx)
+// 	btNotification(ctx, w, req, "SubMerchantDeclined", paymentC.SubMerchantDeclined)
+// }
 
-func btNotification(ctx context.Context, w http.ResponseWriter, req *http.Request, fnName string, fn func(string, string) error) {
-	err := req.ParseForm()
-	if err != nil {
-		utils.Criticalf(ctx, "Error parsing %s request form: %v", fnName, err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	payload := req.FormValue("bt_payload")
-	signature := req.FormValue("bt_signature")
-	utils.Infof(ctx, "payload:%#v signature: %s", payload, signature)
-	err = fn(signature, payload)
-	if err != nil {
-		utils.Criticalf(ctx, "Error doing %s: %v", fnName, err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-}
+// func btNotification(ctx context.Context, w http.ResponseWriter, req *http.Request, fnName string, fn func(string, string) error) {
+// 	err := req.ParseForm()
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Error parsing %s request form: %v", fnName, err)
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	payload := req.FormValue("bt_payload")
+// 	signature := req.FormValue("bt_signature")
+// 	utils.Infof(ctx, "payload:%#v signature: %s", payload, signature)
+// 	err = fn(signature, payload)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Error doing %s: %v", fnName, err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
+// 	w.WriteHeader(http.StatusOK)
+// }
 
-func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-	err := req.ParseForm()
-	if err != nil {
-		utils.Criticalf(ctx, "Error parsing %s request form: %v", "DisbursementException", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	paymentC := payment.New(ctx)
-	payload := req.FormValue("bt_payload")
-	signature := req.FormValue("bt_signature")
-	_, err = paymentC.DisbursementException(signature, payload)
-	if err != nil {
-		utils.Criticalf(ctx, "Error doing %s: %v", "DisbursementException", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	// set inquiries to fulfilled
-	// TODO Braintree auto release when a submerchant updates their banking info?
-	// inquiryC := inquiry.New(ctx)
-	// _, err = inquiryC.SetToFulfilledByTransactionIDs(transactionIDs)
-	// if err != nil {
-	// 	utils.Criticalf(ctx, "Error doing %s: %v", "inquiry.SetToFulfilledByTransactionIDs", err)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	w.WriteHeader(http.StatusOK)
-}
+// func handleDisbursementException(w http.ResponseWriter, req *http.Request) {
+// 	ctx := appengine.NewContext(req)
+// 	err := req.ParseForm()
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Error parsing %s request form: %v", "DisbursementException", err)
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		return
+// 	}
+// 	paymentC := payment.New(ctx)
+// 	payload := req.FormValue("bt_payload")
+// 	signature := req.FormValue("bt_signature")
+// 	_, err = paymentC.DisbursementException(signature, payload)
+// 	if err != nil {
+// 		utils.Criticalf(ctx, "Error doing %s: %v", "DisbursementException", err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		return
+// 	}
+// 	// set inquiries to fulfilled
+// 	// TODO Braintree auto release when a submerchant updates their banking info?
+// 	// inquiryC := inquiry.New(ctx)
+// 	// _, err = inquiryC.SetToFulfilledByTransactionIDs(transactionIDs)
+// 	// if err != nil {
+// 	// 	utils.Criticalf(ctx, "Error doing %s: %v", "inquiry.SetToFulfilledByTransactionIDs", err)
+// 	// 	w.WriteHeader(http.StatusInternalServerError)
+// 	// 	return
+// 	// }
+// 	w.WriteHeader(http.StatusOK)
+// }
 
 // func handleOnMessageSent(w http.ResponseWriter, req *http.Request) {
 // 	ctx := appengine.NewContext(req)
@@ -455,7 +453,7 @@ func handleSendQuantitySMS(w http.ResponseWriter, req *http.Request) {
 	4+ veg bags list: %v`
 	msg = fmt.Sprintf(msg, cultureDate.Format("Jan 2"), twoBags, specialTwoBags, fourBags, specialFourBags, twoVegBags, specialTwoVegBags, fourVegBags, specialFourVegBags, totalStandardBags, listOfMoreThanFourBags, listOfMoreThanFourVegBags)
 	messageC := message.New(ctx)
-	numbers := []string{"9316445311", "6155454989", "6153975516", "9316446755", "6154913694"}
+	numbers := []string{message.EmployeeNumbers.Mike()}
 	for _, number := range numbers {
 		err = messageC.SendDeliverySMS(number, msg)
 		if err != nil {
@@ -496,7 +494,7 @@ func handleSendBagReminder(w http.ResponseWriter, req *http.Request) {
 				}
 				utils.Infof(ctx, "notifed %s(%s)", sub.Name, sub.PhoneNumber)
 				// TODO: move to admin api
-				log, _, _, _, _ := setupAll(ctx, "/send-bag-reminder")
+				log, _, _ := setupLog(ctx, "/send-bag-reminder")
 
 				if log != nil {
 					payload := &logging.MessagePayload{
@@ -555,7 +553,7 @@ func handleUpdateDrip(w http.ResponseWriter, req *http.Request) {
 	logging.Infof(ctx, "Params: %+v", params)
 
 	subC := sub.New(ctx)
-	log, serverInfo, _, _, err := setupAll(ctx, "/cookapi/UpdateDrip")
+	log, serverInfo, err := setupLog(ctx, "/cookapi/UpdateDrip")
 	if err != nil {
 		utils.Errorf(ctx, "failed to handleUpdateDrip: failed to setupLoggingAndServerInfo: %s", err)
 		return
