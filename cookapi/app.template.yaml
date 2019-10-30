@@ -22,9 +22,6 @@ handlers:
     script: auto
     secure: always
 
-beta_settings:
-    cloud_sql_instances: gigasqldb
-
 env_variables:
     MYSQL_CONNECTION: server:gigamunch@unix(/cloudsql/PROJECTID:us-central1:gigasqldb)/gigamunch
     PROJECT_ID: PROJECTID
