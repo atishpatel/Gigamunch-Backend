@@ -149,7 +149,7 @@ function getLogIcon(log: Types.LogExtended) {
 
 function getActivityStatus(act: Types.ActivityExtended) {
     if (act.refunded) {
-        return 'Refunded $' + act.refunded_amount;
+        return 'Refunded $' + act.refunded_amount + ' of $' + act.amount_paid;
     } else if (act.skip) {
         return 'Skipped';
     } else if (act.first) {

@@ -48,6 +48,14 @@
               :activity="props.item"
               v-on:dialog-success="getActivities"
             ></ButtonChangeServings>
+            <ButtonRefund
+              :activity="props.item"
+              v-on:dialog-success="getActivities"
+            ></ButtonRefund>
+            <ButtonRefundAndSkip
+              :activity="props.item"
+              v-on:dialog-success="getActivities"
+            ></ButtonRefundAndSkip>
           </v-card>
           <v-card-text v-html="detailHTML(props.item)"></v-card-text>
         </template>
@@ -73,6 +81,8 @@ import ButtonUnskip from './ButtonUnskip.vue';
 import ButtonSetupActivity from './ButtonSetupActivity.vue';
 import ButtonChangeServings from './ButtonChangeServings.vue';
 import ButtonProcessActivity from './ButtonProcessActivity.vue';
+import ButtonRefund from './ButtonRefund.vue';
+import ButtonRefundAndSkip from './ButtonRefundAndSkip.vue';
 
 @Component({
   components: {
@@ -81,6 +91,8 @@ import ButtonProcessActivity from './ButtonProcessActivity.vue';
     ButtonSetupActivity,
     ButtonChangeServings,
     ButtonProcessActivity,
+    ButtonRefund,
+    ButtonRefundAndSkip,
   },
 })
 export default class SubscriberActivitiesList extends Vue {

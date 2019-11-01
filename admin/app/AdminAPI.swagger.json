@@ -1595,6 +1595,12 @@
             "type": "string"
           }
         },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "date": {
           "type": "string"
         },
@@ -1611,6 +1617,9 @@
     "AdminAPIRefundAndSkipActivityReq": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "email": {
           "type": "string"
         },

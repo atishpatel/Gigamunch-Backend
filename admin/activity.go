@@ -163,7 +163,10 @@ func (s *server) RefundAndSkipActivity(ctx context.Context, w http.ResponseWrite
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.NewClient")
 	}
-	err = activityC.RefundAndSkip(getDatetime(req.Date), req.Email, req.Amount, req.Percent)
+	if req.ID == "" {
+		req.ID = req.Email
+	}
+	err = activityC.RefundAndSkip(getDatetime(req.Date), req.ID, req.Amount, req.Percent)
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.RefundAndSkipActivity")
 	}
@@ -186,7 +189,10 @@ func (s *server) RefundActivity(ctx context.Context, w http.ResponseWriter, r *h
 		return errors.Annotate(err, "failed to activity.NewClient")
 	}
 	date := getDatetime(req.Date)
-	for _, e := range req.Emails {
+	if len(req.IDs) == 0 {
+		req.IDs = req.Emails
+	}
+	for _, e := range req.IDs {
 		err = activityC.Refund(date, e, req.Amount, req.Percent)
 		if err != nil {
 			return errors.Annotate(err, "failed to activity.RefundActivity")

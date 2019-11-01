@@ -31,8 +31,8 @@ export function DiscountSubscriber(user_id: string, discount_amount: number, dis
   const url: string = baseURL + '/v1/DiscountSubscriber';
   const req: AdminAPI.DiscountSubscriberReq = {
     user_id,
-    discount_amount,
-    discount_percent,
+    discount_amount: Number(discount_amount),
+    discount_percent: Number(discount_percent),
   };
   return callFetch(url, 'GET', req);
 }
@@ -114,6 +114,30 @@ export function SkipActivity(id: string, date: string): Promise<AdminAPI.ErrorOn
     id,
     date,
     email: '',
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function RefundActivity(ids: string[], date: string, amount: number, percent: number): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/RefundActivity';
+  const req: AdminAPI.RefundActivityReq = {
+    ids,
+    emails: [],
+    date,
+    amount: Number(amount),
+    percent: Number(percent),
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function RefundAndSkipActivity(id: string, date: string, amount: number, percent: number): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/RefundAndSkipActivity';
+  const req: AdminAPI.RefundAndSkipActivityReq = {
+    id,
+    email: '',
+    date,
+    amount: Number(amount),
+    percent: Number(percent),
   };
   return callFetch(url, 'POST', req);
 }
