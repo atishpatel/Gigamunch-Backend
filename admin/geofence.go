@@ -29,10 +29,18 @@ func (s *server) UpdateGeofence(ctx context.Context, w http.ResponseWriter, r *h
 		return errors.Annotate(err, "failed to geofence.NewClient")
 	}
 	points := []common.GeoPoint{
-		common.GeoPoint{Longitude: -86.6292572, Latitude: 36.2509183},
-		common.GeoPoint{Longitude: -86.6388705, Latitude: 36.2777685},
-		common.GeoPoint{Longitude: -86.6539764, Latitude: 36.2885632},
-		common.GeoPoint{Longitude: -86.7157746, Latitude: 36.2702966},
+		common.GeoPoint{Longitude: -86.5674591, Latitude: 36.272511},
+		common.GeoPoint{Longitude: -86.5564718, Latitude: 36.3194122},
+		common.GeoPoint{Longitude: -86.5283206, Latitude: 36.2871782},
+		common.GeoPoint{Longitude: -86.4239502, Latitude: 36.2863493},
+		common.GeoPoint{Longitude: -86.389567, Latitude: 36.3114654},
+		common.GeoPoint{Longitude: -86.3970799, Latitude: 36.34098},
+		common.GeoPoint{Longitude: -86.3887165, Latitude: 36.4066105},
+		common.GeoPoint{Longitude: -86.4406676, Latitude: 36.4151519},
+		common.GeoPoint{Longitude: -86.5004994, Latitude: 36.531158},
+		common.GeoPoint{Longitude: -86.6299439, Latitude: 36.5664606},
+		common.GeoPoint{Longitude: -86.727698, Latitude: 36.4144326},
+		common.GeoPoint{Longitude: -86.7319105, Latitude: 36.3264684},
 		common.GeoPoint{Longitude: -86.7576599, Latitude: 36.2719574},
 		common.GeoPoint{Longitude: -86.8139649, Latitude: 36.2459345},
 		common.GeoPoint{Longitude: -86.8805695, Latitude: 36.2304274},
@@ -50,7 +58,7 @@ func (s *server) UpdateGeofence(ctx context.Context, w http.ResponseWriter, r *h
 		common.GeoPoint{Longitude: -86.5956116, Latitude: 36.1323292},
 		common.GeoPoint{Longitude: -86.5647125, Latitude: 36.1927545},
 		common.GeoPoint{Longitude: -86.6004181, Latitude: 36.2498108},
-		common.GeoPoint{Longitude: -86.6292572, Latitude: 36.2509183},
+		common.GeoPoint{Longitude: -86.5674591, Latitude: 36.272511},
 	}
 
 	fence := &geofence.Geofence{
