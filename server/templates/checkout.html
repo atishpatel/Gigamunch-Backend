@@ -645,12 +645,18 @@
             <h2 class="checkout-trust-title">What you get</h2>
             <ul class="checkout-trust-list">
               <li class="checkout-trust-list-item">
+                [[if ne .DiscountAmount "" ]]
                 <i class="fa fa-check checkout-trust-list-check"
                    aria-hidden="true"></i>
                 <div class="checkout-trust-list-text">
+                  [[if eq .DiscountAmount "100%"]]
                   100% FREE first week
+                  [[else]]
+                  [[.DiscountAmount]] off your first week
+                  [[end]]
                 </div>
               </li>
+              [[ end]]
               <li class="checkout-trust-list-item">
                 <i class="fa fa-check checkout-trust-list-check"
                    aria-hidden="true"></i>
@@ -897,7 +903,7 @@
                     <label class="num-meals-label"
                            for="meal-option-2">2 MEAL BAG</label>
                     <label class="price-per-meal-label"
-                           for="meal-option-2">$16.50 PER MEAL</label>
+                           for="meal-option-2">$14 PER MEAL</label>
                   </div>
                 </li>
 
@@ -914,7 +920,7 @@
                     <label class="num-meals-label"
                            for="meal-option-3">4 MEAL BAG</label>
                     <label class="price-per-meal-label"
-                           for="meal-option-3">$15.25 PER MEAL</label>
+                           for="meal-option-3">$14 PER MEAL</label>
                   </div>
                 </li>
               </ul>
@@ -933,9 +939,26 @@
             <div id="why-free"
                  class="why-free">
               <div class="form-section-title">
-                <h2 class="why-free-title">Why Free Meal?</h2>
+                <h2 class="why-free-title">
+
+                  [[if eq .DiscountAmount "100%"]] 
+                  Why Free Meal?
+                  [[else if eq .DiscountAmount "50%"]]
+                  Why 50% off my first meal?
+                  [[else]] 
+                  Why give us a try?
+                  [[end]]
+                </h2>
               </div>
-              <p class="form-section-desc">We believe in trying before buying. We're so confident you'll love it; we're willing to take the risk.</p>
+              <p class="form-section-desc">
+                [[if eq .DiscountAmount "100%"]]
+                We believe in trying before buying. We're so confident you'll love it; we're willing to take the risk.
+                [[else if eq .DiscountAmount "50%"]]
+                We believe in trying before buying. We're so confident you'll love it; we're willing to take the risk.
+                [[else]]
+                We're so confident you'll love it. But, if you don't you can easily cancel without any fee!
+                [[end]]
+              </p>
             </div>
 
             <div class="no-commitment">
@@ -944,7 +967,15 @@
                    aria-hidden="true"></i></div>
               <div class="no-commitment-text">
                 <div class="no-commitment-title">No commitment. No, really.</div>
-                <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 4 days after your first meal to cancel without getting charged a dime.</div>
+                <div class="no-commitment-desc">
+                  [[if eq .DiscountAmount "100%"]]
+                  Your first bag is on us because we know you'll love it! If you don't want to continue, you'll have 4 days after your first meal to cancel without getting charged a dime.
+                  [[else if eq .DiscountAmount "50%"]]
+                  Your first bag is 50% off because we know you'll love it! If you don't want to continue, you'll have 4 days after your first meal to cancel without a cancelation fee.
+                  [[else]]
+                  You can skip whenever you want and if you don't like the service, you can canel without a fee. You only pay if you love using our service.
+                  [[end]]
+                </div>
               </div>
             </div>
             <div class="form-section-title">
@@ -967,6 +998,12 @@
               <div class="hosted-field"
                    id="expiration-date"></div>
             </div>
+            <input type="text"
+                   name="promo"
+                   id="promo"
+                   value="[[.Promo]]"
+                   disabled
+                   style="display:none" />
             <div class="review-order">
               <div class="form-section-title">
                 <h2>Order Summary</h2>
@@ -980,7 +1017,7 @@
                   <div class="item-text">
                     <div class="item-title"><span id="boxForTitle">Bag for Two</span></div>
                     <div class="item-desc">
-                      Today's total: FREE! Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="total"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime
+                      Today's total: <span id="new_final_total2">FREE!</span> Your first bill will be on <span id="first_date">__first_date__</span>. Then, a recurring fee of $<span id="box_total2"></span> (+ tax) will charged every week. Skip a week or cancel your subscription anytime
                       with
                       a 4 day notice.
                     </div>
@@ -991,19 +1028,37 @@
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Meals <span id="meal_multiplier"
                           class="multiplier">- x2</span></div>
-                  <div class="order-summary-section-price"><span class="old_price">$<span id="box_total"></span></span> FREE</div>
+                  <div class="order-summary-section-price">
+                    [[if ne .DiscountAmount ""]]
+                    <span class="old_price">$<span id="box_total"></span></span>
+                    [[end]]
+                    <span id="new_box_total">FREE</span>
+                  </div>
                 </div>
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Delivery</div>
-                  <div class="order-summary-section-price"><span class="old_price">$5.00</span> FREE</div>
+                  <div class="order-summary-section-price">
+                    [[if ne .DiscountAmount ""]]
+                    <span class="old_price">$5.00</span>
+                    [[end]]
+                    <span id="new_delivery_total">FREE</span>
+                  </div>
                 </div>
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Tax</div>
-                  <div class="order-summary-section-price"><span class="old_price">$<span id="tax_total"></span></span> FREE</div>
+                  <div class="order-summary-section-price">
+                    [[if ne .DiscountAmount ""]]
+                    <span class="old_price">$<span id="tax_total"></span></span>
+                    [[end]]
+                    <span id="new_tax_total">FREE</span>
+                  </div>
                 </div>
                 <div class="order-summary-section">
                   <div class="order-summary-section-name">Total</div>
-                  <div class="order-summary-section-price">$0.00</div>
+                  <div class="order-summary-section-price">
+                    <span class="old_price"><span id="final_total"></span></span>
+                    <span id="new_final_total">$0.00</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1026,7 +1081,8 @@
       </div>
     </div>
   </div>
-
+  <div id="DiscountAmount"
+       style="display:none">[[.DiscountAmount]]</div>
   <script>
     function logError(desc) {
       ga('send', 'event', 'schedule_checkout_error', desc);
@@ -1112,7 +1168,7 @@
     }
 
     // BrainTree
-    var authorization = 'production_fzp6pdxg_wsgmypp8c46cnbpc';
+    var authorization = 'production_tv5qygvt_wsgmypp8c46cnbpc';
     if (!APP.IsProd) {
       authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
     }
@@ -1231,6 +1287,7 @@
             if (!address.street) {
               address.full_address = document.getElementById('address-input').value;
             }
+            var promo = document.getElementById('promo').value;
             var req = {
               'email': email,
               'address': address,
@@ -1245,6 +1302,7 @@
               'phone_number': phoneNumber,
               'campaigns': campaigns,
               'reference_email': referenceEmail,
+              'promo': promo,
             };
 
             var xhr = new XMLHttpRequest();
@@ -1306,9 +1364,14 @@
     }
 
     function updateOrderInfo() {
+      var discount = document.getElementById('DiscountAmount').innerHTML;
       var deliveryDayElement = document.getElementById('delivery-date');
       var firstChargeDate = new Date(deliveryDayElement.value);
-      firstChargeDate.setDate(firstChargeDate.getDate() + 5);
+      if (discount.includes('100%')) {
+        firstChargeDate.setDate(firstChargeDate.getDate() + 5);
+      } else {
+        firstChargeDate.setDate(firstChargeDate.getDate() - 2);
+      }
       document.getElementById('first_date').innerHTML = firstChargeDate.toLocaleDateString();
       var oneBoxPrice = 0.0;
       var servingsPerBox = 0;
@@ -1324,29 +1387,71 @@
       }
       var boxForTitleText;
       var taxTotal;
+      var deliveryTotal = 5;
       switch (val) {
         case '2':
-          oneBoxPrice = 16.50;
+          oneBoxPrice = 14;
           servingsPerBox = 2;
           boxForTitleText = 'Bag for Two';
           taxTotal = 3.22;
           break;
         case '4':
-          oneBoxPrice = 15.25;
+          oneBoxPrice = 14;
           servingsPerBox = 4;
           boxForTitleText = 'Bag for Four';
           taxTotal = 5.95;
           break;
       }
       var boxTotal = oneBoxPrice * servingsPerBox;
-      // var total = boxTotal + deliveryTotal + taxTotal;
-      var total = boxTotal;
+      var total = boxTotal + deliveryTotal + taxTotal;
 
       document.getElementById('meal_multiplier').innerHTML = '- x' + servingsPerBox;
       document.getElementById('boxForTitle').innerHTML = boxForTitleText;
-      document.getElementById('box_total').innerHTML = '14'; // boxTotal.toFixed(0);
+      document.getElementById('box_total').innerHTML = boxTotal.toFixed(0);
+      document.getElementById('box_total2').innerHTML = boxTotal.toFixed(2);
       document.getElementById('tax_total').innerHTML = taxTotal.toFixed(2);
-      document.getElementById('total').innerHTML = total.toFixed(2);
+
+      var newBoxTotal = boxTotal;
+      var newDeliveryTotal = deliveryTotal;
+      var newTaxTotal = taxTotal
+      var newFinalTotal = total;
+      var oldFinalTotal = total;
+      if (discount.includes('%')) {
+        // percent discount
+        var discountNumber = Number(discount.replace('%', '')) / 100;
+        newBoxTotal = newBoxTotal - (newBoxTotal * discountNumber);
+        newDeliveryTotal = newDeliveryTotal - (newDeliveryTotal * discountNumber);
+        newTaxTotal = newTaxTotal - (newTaxTotal * discountNumber);
+        newFinalTotal = newFinalTotal - (newFinalTotal * discountNumber);
+      }
+      if (discount.includes('$')) {
+        // amount discount
+        var discountNumber = Number(discount.replace('$', ''));
+        newBoxTotal = newBoxTotal - discountNumber;
+        newDeliveryTotal = newDeliveryTotal - discountNumber;
+        newTaxTotal = newTaxTotal - discountNumber;
+        newFinalTotal = newFinalTotal - discountNumber;
+      }
+      if (newFinalTotal <= 0) {
+        newBoxTotal = 'FREE';
+        newDeliveryTotal = 'FREE';
+        newTaxTotal = 'FREE';
+        newFinalTotal = '$0.00';
+        oldFinalTotal = '';
+      } else {
+        newBoxTotal = '$' + newBoxTotal.toFixed(2);
+        newDeliveryTotal = '$' + newDeliveryTotal.toFixed(2);
+        newTaxTotal = '$' + newTaxTotal.toFixed(2);
+        newFinalTotal = '$' + newFinalTotal.toFixed(2);
+        oldFinalTotal = '$' + oldFinalTotal.toFixed(2);
+      }
+      document.getElementById('new_box_total').innerHTML = newBoxTotal;
+      document.getElementById('new_delivery_total').innerHTML = newDeliveryTotal;
+      document.getElementById('new_tax_total').innerHTML = newTaxTotal;
+      document.getElementById('new_final_total').innerHTML = newFinalTotal;
+      document.getElementById('new_final_total2').innerHTML = newFinalTotal;
+      document.getElementById('final_total').innerHTML = oldFinalTotal;
+
     }
 
     document.getElementById('delivery-date').addEventListener('change', updateOrderInfo);

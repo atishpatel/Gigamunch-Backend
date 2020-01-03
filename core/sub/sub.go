@@ -421,7 +421,7 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	if err != nil {
 		return nil, errors.Annotate(err, "failed to s.getByAddress")
 	}
-	if subSameAddress != nil {
+	if subSameAddress != nil && subSameAddress.Email() != req.Email {
 		// same address person
 		return nil, errInvalidParameter.WithMessage("Someone in your household is already a subscriber. Please ask them to reactivate their account. If this is not the case, please email: hello@eatgigamunch.com")
 	}
@@ -558,14 +558,6 @@ func (c *Client) Create(req *CreateReq) (*subold.Subscriber, error) {
 	err = taskC.AddUpdateDrip(time.Now(), &tasks.UpdateDripParams{UserID: sub.ID, Email: req.Email})
 	if err != nil {
 		c.log.Errorf(c.ctx, "failed to task.AddUpdateDrip: %+v", err)
-	}
-	// add to task queue
-	err = taskC.AddProcessSubscription(sub.IntervalStartPoint.Add(-24*time.Hour), &tasks.ProcessSubscriptionParams{
-		SubEmail: req.Email,
-		Date:     sub.IntervalStartPoint,
-	})
-	if err != nil {
-		c.log.Errorf(c.ctx, "failed to task.AddProcessSubscription: %+v", err)
 	}
 	return sub, nil
 }

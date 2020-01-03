@@ -22,6 +22,7 @@ interface SubmitCheckoutReq {
     first_delivery_date: string
     campaigns: Common.Campaign[]
     reference_email: string
+    promo: string
 }
 interface UpdatePaymentReq {
     email: string

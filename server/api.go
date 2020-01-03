@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/discount"
+
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/jmoiron/sqlx"
@@ -294,7 +296,8 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 		servingsVegetarian = 4
 	}
 	firstBoxDate := time.Now().Add(81 * time.Hour)
-	for firstBoxDate.Weekday() != time.Monday && firstBoxDate.Weekday() != time.Thursday {
+	// for firstBoxDate.Weekday() != time.Monday && firstBoxDate.Weekday() != time.Thursday {
+	for firstBoxDate.Weekday() != time.Monday {
 		firstBoxDate = firstBoxDate.Add(time.Hour * 24)
 	}
 	if req.FirstDeliveryDate != "" {
@@ -305,12 +308,12 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 		if err != nil || firstBoxDate.Weekday() == time.Sunday {
 			firstBoxDate = firstBoxDate.Add(12 * time.Hour)
 		}
-		if err != nil || firstBoxDate.Weekday() == time.Friday {
-			firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
-		}
-		if err != nil || firstBoxDate.Weekday() == time.Wednesday {
-			firstBoxDate = firstBoxDate.Add(12 * time.Hour)
-		}
+		// if err != nil || firstBoxDate.Weekday() == time.Friday {
+		// 	firstBoxDate = firstBoxDate.Add(-12 * time.Hour)
+		// }
+		// if err != nil || firstBoxDate.Weekday() == time.Wednesday {
+		// 	firstBoxDate = firstBoxDate.Add(12 * time.Hour)
+		// }
 
 		if err != nil || (firstBoxDate.Weekday() != time.Monday && firstBoxDate.Weekday() != time.Thursday) {
 			resp.Error = errBadRequest.WithMessage("Invalid first delivery day selected.").SharedError()
@@ -327,6 +330,7 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 	if err != nil {
 		return errors.Annotate(err, "failed to decode address")
 	}
+	promoBreakdown := discount.GetPromoBreakdown(req.Promo)
 
 	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
@@ -346,7 +350,8 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 		ServingsVegetarian:    servingsVegetarian,
 		FirstDeliveryDate:     firstBoxDate,
 		Campaigns:             campaigns,
-		DiscountPercent:       100,
+		DiscountPercent:       promoBreakdown.DiscountPercent,
+		DiscountAmount:        promoBreakdown.DiscountAmount,
 	}
 	_, err = subC.Create(createReq)
 	if err != nil {

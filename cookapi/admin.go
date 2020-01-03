@@ -10,7 +10,6 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	authnew "github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
@@ -18,13 +17,10 @@ import (
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	subnew "github.com/atishpatel/Gigamunch-Backend/core/sub"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/cook"
-	"github.com/atishpatel/Gigamunch-Backend/corenew/payment"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/promo"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
-	"github.com/atishpatel/Gigamunch-Backend/types"
 )
 
 func getUserFromRequest(ctx context.Context, req validatableTokenReq) (*common.User, error) {
@@ -42,34 +38,6 @@ func getUserFromRequest(ctx context.Context, req validatableTokenReq) (*common.U
 		return nil, errors.Annotate(err, "failed to get auth.Verify")
 	}
 	return user, err
-}
-
-// CreateFakeGigatokenReq is the request for CreateFakeGigatoken.
-type CreateFakeGigatokenReq struct {
-	GigatokenReq
-	UserID string `json:"user_id"`
-}
-
-// CreateFakeGigatoken creates a fake Gigatoken if user is an admin.
-func (service *Service) CreateFakeGigatoken(ctx context.Context, req *CreateFakeGigatokenReq) (*RefreshTokenResp, error) {
-	resp := new(RefreshTokenResp)
-	defer handleResp(ctx, "CreateFakeGigatoken", resp.Err)
-	user, err := validateRequestAndGetUser(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.IsAdmin() {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	gigatoken, err := auth.GetGigatokenViaAdmin(ctx, user, req.UserID)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to auth.GetGigatokenViaAdmin")
-		return resp, nil
-	}
-	resp.Gigatoken = gigatoken
-	return resp, nil
 }
 
 // AddToProcessInquiryQueueReq is the request for AddToProcessInquiryQueue.
@@ -104,48 +72,48 @@ func (service *Service) AddToProcessInquiryQueue(ctx context.Context, req *AddTo
 }
 
 // CreateFakeSubmerchantReq is the request for CreateFakeSubmerchant.
-type CreateFakeSubmerchantReq struct {
-	GigatokenReq
-	CookID string `json:"cook_id"`
-}
+// type CreateFakeSubmerchantReq struct {
+// 	GigatokenReq
+// 	CookID string `json:"cook_id"`
+// }
 
-// CreateFakeSubmerchant creates a fake submerchant for cook.
-func (service *Service) CreateFakeSubmerchant(ctx context.Context, req *CreateFakeSubmerchantReq) (*ErrorOnlyResp, error) {
-	resp := new(ErrorOnlyResp)
-	defer handleResp(ctx, "CreateFakeSubmerchant", resp.Err)
-	user, err := getUserFromRequest(ctx, req)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err)
-		return resp, nil
-	}
-	if !user.Admin {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
-		return resp, nil
-	}
-	cookC := cook.New(ctx)
-	ck, err := cookC.Get(req.CookID)
-	if err != nil {
-		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to cook.Get")
-		return resp, nil
-	}
-	if ck.BTSubMerchantID == "" {
-		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "BTSubMerchantID is empty."}
-		return resp, nil
-	}
-	ckUser := &types.User{
-		ID:       ck.ID,
-		Name:     ck.Name,
-		Email:    ck.Email,
-		PhotoURL: ck.PhotoURL,
-	}
-	paymentC := payment.New(ctx)
-	err = paymentC.CreateFakeSubMerchant(ckUser, ck.BTSubMerchantID)
-	if err != nil {
-		resp.Err = errors.Wrap("failed to paymentC.CreateFakeSubMerchant", err)
-		return resp, nil
-	}
-	return resp, nil
-}
+// // CreateFakeSubmerchant creates a fake submerchant for cook.
+// func (service *Service) CreateFakeSubmerchant(ctx context.Context, req *CreateFakeSubmerchantReq) (*ErrorOnlyResp, error) {
+// 	resp := new(ErrorOnlyResp)
+// 	defer handleResp(ctx, "CreateFakeSubmerchant", resp.Err)
+// 	user, err := getUserFromRequest(ctx, req)
+// 	if err != nil {
+// 		resp.Err = errors.GetErrorWithCode(err)
+// 		return resp, nil
+// 	}
+// 	if !user.Admin {
+// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeUnauthorizedAccess, Message: "User is not an admin."}
+// 		return resp, nil
+// 	}
+// 	cookC := cook.New(ctx)
+// 	ck, err := cookC.Get(req.CookID)
+// 	if err != nil {
+// 		resp.Err = errors.GetErrorWithCode(err).Wrap("failed to cook.Get")
+// 		return resp, nil
+// 	}
+// 	if ck.BTSubMerchantID == "" {
+// 		resp.Err = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "BTSubMerchantID is empty."}
+// 		return resp, nil
+// 	}
+// 	ckUser := &types.User{
+// 		ID:       ck.ID,
+// 		Name:     ck.Name,
+// 		Email:    ck.Email,
+// 		PhotoURL: ck.PhotoURL,
+// 	}
+// 	paymentC := payment.New(ctx)
+// 	err = paymentC.CreateFakeSubMerchant(ckUser, ck.BTSubMerchantID)
+// 	if err != nil {
+// 		resp.Err = errors.Wrap("failed to paymentC.CreateFakeSubMerchant", err)
+// 		return resp, nil
+// 	}
+// 	return resp, nil
+// }
 
 // SendSMSReq is the request for CreateFakeSubmerchant.
 type SendSMSReq struct {
@@ -789,4 +757,21 @@ func setupAll(ctx context.Context, path string) (*logging.Client, *common.Server
 		return nil, nil, nil, nil, fmt.Errorf("failed to get sql database client: %+v", err)
 	}
 	return log, serverInfo, dbC, sqlDB, nil
+}
+
+func setupLog(ctx context.Context, path string) (*logging.Client, *common.ServerInfo, error) {
+	dbC, err := db.NewClient(ctx, projectID, nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get database client: %+v", err)
+	}
+	// Setup logging
+	serverInfo := &common.ServerInfo{
+		ProjectID:           projectID,
+		IsStandardAppEngine: true,
+	}
+	log, err := logging.NewClient(ctx, "admin", path, dbC, serverInfo)
+	if err != nil {
+		return nil, nil, err
+	}
+	return log, serverInfo, nil
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
+	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
 )
 
 const (
@@ -33,12 +34,13 @@ const (
 	selectUnpaidSummaries                    = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx"
 	selectUnpaidSummaryForUser               = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx"
 	// selectUnpaidActivities                   = "SELECT * FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 ORDER BY user_id,date"
+	selectFirstActivity = "SELECT * FROM activity WHERE first=1 AND skip=0 AND user_id=?"
 	// update and insert
 	updateServingsStatement       = "UPDATE activity SET servings=?,veg_servings=?,amount=?,servings_changed=1 WHERE date=? AND user_id=?"
 	updateFutureServingsStatement = "UPDATE activity SET servings=?,veg_servings=?,amount=? WHERE date>? AND user_id=? AND paid=0 AND servings_changed=0"
 
 	insertStatement         = "INSERT INTO activity (date,user_id,email,first_name,last_name,location,addr_apt,addr_string,zip,lat,`long`,active,skip,servings,veg_servings,first,amount,discount_amount,discount_percent,payment_provider,payment_method_token,customer_id) VALUES (:date,:user_id,:email,:first_name,:last_name,:location,:addr_apt,:addr_string,:zip,:lat,:long,:active,:skip,:servings,:veg_servings,:first,:amount,:discount_amount,:discount_percent,:payment_provider,:payment_method_token,:customer_id)"
-	updateRefundedStatement = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND email=?"
+	updateRefundedStatement = "UPDATE activity SET refunded_dt=NOW(),refunded=1,refund_transaction_id=?,refunded_amount=? WHERE date=? AND user_id=?"
 	skipStatement           = "UPDATE activity SET skip=1 WHERE date=? AND user_id=?"
 	unskipStatement         = "UPDATE activity SET skip=0,active=1 WHERE date=? AND user_id=?"
 	updateForgiveStatement  = "UPDATE activity SET forgiven=1 WHERE date=? AND user_id=?"
@@ -57,7 +59,7 @@ var (
 	errBadRequest     = errors.BadRequestError
 	errSQLDB          = errors.ErrorWithCode{Code: errors.CodeInternalServerErr, Message: "Error with cloud sql database."}
 	errDuplicateEntry = errors.ErrorWithCode{Code: errors.CodeBadRequest, Message: "Duplicate entry."}
-	errNotFound = errors.NotFoundError
+	errNotFound       = errors.NotFoundError
 )
 
 // Client is a client for manipulating activity.
@@ -279,6 +281,17 @@ func (c *Client) Create(req *CreateReq) error {
 	if err != nil {
 		return err
 	}
+	// set if first meal or not
+	act := &Activity{}
+	err = c.sqlDB.GetContext(c.ctx, act, selectFirstActivity, req.UserID)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result") {
+			req.First = true
+		} else {
+			return errSQLDB.WithError(err).Annotate("failed to selectFirstActivity")
+		}
+	}
+	// insert
 	_, err = c.sqlDB.NamedExecContext(c.ctx, insertStatement, req)
 	if err != nil {
 		if merr, ok := err.(*mysql.MySQLError); ok {
@@ -287,6 +300,20 @@ func (c *Client) Create(req *CreateReq) error {
 			}
 		}
 		return errSQLDB.WithError(err).Annotate("failed to insertStatement")
+	}
+
+	// Add to process activity
+	d, _ := time.Parse(DateFormat, req.Date)
+	dayBeforeActivity := d.Add(-24 * time.Hour)
+	taskC := tasks.New(c.ctx)
+	r := &tasks.ProcessSubscriptionParams{
+		UserID:   req.UserID,
+		SubEmail: req.Email,
+		Date:     d,
+	}
+	err = taskC.AddProcessSubscription(dayBeforeActivity, r)
+	if err != nil {
+		return errors.Wrap("failed to tasks.AddProcessSubscription", err)
 	}
 	return nil
 }
@@ -338,12 +365,12 @@ func (c *Client) Discount(date time.Time, email string, discountAmount float32, 
 }
 
 // Refund refunds and skips a subscriber.
-func (c *Client) Refund(date time.Time, email string, amount float32, precent int32) error {
+func (c *Client) Refund(date time.Time, idOrEmail string, amount float32, precent int32) error {
 	if amount > 0 && precent > 0 {
 		return errBadRequest.WithMessage("Only amount or percent can be specified.")
 	}
 	// Get activity
-	act, err := c.Get(date, email)
+	act, err := c.Get(date, idOrEmail)
 	if err != nil {
 		return errors.Wrap("failed to Get", err)
 	}
@@ -369,7 +396,7 @@ func (c *Client) Refund(date time.Time, email string, amount float32, precent in
 	c.log.Refund(act.UserID, act.Email, act.Date, act.Amount, amount, rID)
 	c.log.Infof(c.ctx, "Refunding Customer(%s) on transaction(%s): refundID(%s)", act.CustomerID, act.TransactionID, rID)
 	// Update actvity
-	_, err = c.sqlDB.ExecContext(c.ctx, updateRefundedStatement, rID, amount, date.Format(DateFormat), email)
+	_, err = c.sqlDB.ExecContext(c.ctx, updateRefundedStatement, rID, amount, date.Format(DateFormat), act.UserID)
 	if err != nil {
 		return errSQLDB.WithError(err).Wrap("failed to execute updateRefundedStatement")
 	}
@@ -377,14 +404,14 @@ func (c *Client) Refund(date time.Time, email string, amount float32, precent in
 }
 
 // RefundAndSkip refunds and skips a subscriber.
-func (c *Client) RefundAndSkip(date time.Time, email string, amount float32, precent int32) error {
+func (c *Client) RefundAndSkip(date time.Time, idOrEmail string, amount float32, precent int32) error {
 	// Refund
-	err := c.Refund(date, email, amount, precent)
+	err := c.Refund(date, idOrEmail, amount, precent)
 	if err != nil {
 		return errors.Annotate(err, "failed to Refund")
 	}
 	// Skip
-	err = c.Skip(date, email, "Refunded")
+	err = c.Skip(date, idOrEmail, "Refunded")
 	if err != nil {
 		return errors.Annotate(err, "failed to Skip")
 	}

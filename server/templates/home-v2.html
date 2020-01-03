@@ -38,9 +38,7 @@
     }
 
     /* Intrest */
-    .interest-section {
-
-    }
+    .interest-section {}
 
     .interest-title {
       font-family: 'Merienda', 'Roboto';
@@ -51,9 +49,7 @@
       position: relative;
     }
 
-    .interest-image {
-
-    }
+    .interest-image {}
 
     .interest-image img {
       max-width: 100%;
@@ -97,17 +93,20 @@
 
     /* Spices */
 
-    .spices-curve-section, .spices-star-section {
+    .spices-curve-section,
+    .spices-star-section {
       position: relative;
       height: 1px;
     }
 
-    .spices-curve-image, .spices-star-image {
+    .spices-curve-image,
+    .spices-star-image {
       position: absolute;
       z-index: 0;
     }
 
-    .spices-curve-image img, .spices-star-image img {
+    .spices-curve-image img,
+    .spices-star-image img {
       width: 100%;
     }
 
@@ -128,7 +127,7 @@
     @media (min-width: 1000px) {
       .spices-curve-image {
         width: 300px;
-        left: -60px; 
+        left: -60px;
         top: -200px;
       }
 
@@ -142,7 +141,7 @@
     @media (min-width: 1500px) {
       .spices-curve-image {
         width: 400px;
-        left: -70px; 
+        left: -70px;
         top: -300px;
       }
 
@@ -177,7 +176,7 @@
     }
 
     .problem-text-subtitle {
-      font-size: 20px; 
+      font-size: 20px;
     }
 
     .problem-card {}
@@ -212,7 +211,7 @@
         margin-right: 95px;
       } */
 
-        .country-card img {
+      .country-card img {
         max-width: 550px;
       }
     }
@@ -226,16 +225,18 @@
         font-size: 35px;
       }
 
-      .country-card{
+      .country-card {
         margin-right: 100px;
       }
 
-        .country-card img {
+      .country-card img {
         max-width: 650px;
       }
     }
 
-    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    @media all and (-ms-high-contrast: none),
+    (-ms-high-contrast: active) {
+
       /* IE10+ CSS styles go here */
       .problem-section {
         max-width: 80%;
@@ -301,7 +302,7 @@
         margin-right: 165px;
       }
 
-      .solution-image { 
+      .solution-image {
         min-width: 650px;
       }
 
@@ -320,13 +321,11 @@
         font-size: 35px;
       }
 
-      .solution-text-desc {
-
-      }
+      .solution-text-desc {}
     }
 
     @media (min-width: 1500px) {
-      .solution-image { 
+      .solution-image {
         min-width: 900px;
       }
 
@@ -391,7 +390,7 @@
       min-width: 470px;
     }
 
-    @media (min-width: 1000px) { 
+    @media (min-width: 1000px) {
       .price-section {
         display: -webkit-box;
         display: -moz-box;
@@ -446,7 +445,7 @@
       margin-top: 24px;
     }
 
-    @media (min-width: 1000px) { 
+    @media (min-width: 1000px) {
       .stories-section {
         display: -webkit-box;
         display: -moz-box;
@@ -536,8 +535,8 @@
       }
     }
 
-    @media (min-width: 1000px) { 
-      .as-seen-on-section { 
+    @media (min-width: 1000px) {
+      .as-seen-on-section {
         margin-top: 0;
       }
     }
@@ -784,9 +783,9 @@
     }
 
     .eco-image img {
-        width: 30px;
-        height: 30px;
-      }
+      width: 30px;
+      height: 30px;
+    }
 
     .eco-text,
     .no-commitment-text {
@@ -831,6 +830,7 @@
       .no-commitment-image-text {
         margin-bottom: 24px;
       }
+
       .eco-image,
       .no-commitment-image {
         font-size: 64px;
@@ -843,7 +843,7 @@
       }
 
       .eco-title,
-      .no-commitment-title { 
+      .no-commitment-title {
         font-size: 25px;
       }
     }
@@ -909,11 +909,13 @@
       }
     }
 
-    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-     /* IE10+ CSS styles go here */
-     .checklist-section {
-       justify-content: flex-start;
-     }
+    @media all and (-ms-high-contrast: none),
+    (-ms-high-contrast: active) {
+
+      /* IE10+ CSS styles go here */
+      .checklist-section {
+        justify-content: flex-start;
+      }
     }
 
     .get-started-dialog {}
@@ -941,6 +943,7 @@
       text-transform: uppercase;
       font-weight: 500;
     }
+
   </style>
   <header class="nav-header">
     [[ template "nav-v2" .]]
@@ -986,6 +989,7 @@
     <section class="solution-section">
       <div class="solution-image">
         <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/cooks.jpg"
+             loading="lazy"
              alt="Multiple ethnic people with their flags and food">
       </div>
       <div class="solution-text">
@@ -993,7 +997,15 @@
             Eat dinner <br>
             From around the world.</h2>
         <p class="solution-text-desc">Get a full course dinner - including a dessert 😋 - delivered to your doorstep. Designed by local immigrants in Nashville to provide you with an experience of their country and their culture. And the best part is, it requires <span class="bold">no cooking.</span></p>
-        <button class="solution-text-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+        <button class="solution-text-button" data-button-action="GetStartedDialog">
+          [[if eq .DiscountAmount "100%"]] 
+          Get Started with a free dinner
+          [[else if eq .DiscountAmount "50%"]]
+          Get Started with 50% Off your First Dinner
+          [[else]] 
+          Get Started with a dinner
+          [[end]]
+        </button>
       </div>
     </section>
 
@@ -1001,6 +1013,7 @@
     <section class="price-section">
       <div class="price-image">
         <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/iraq_dinner_culture_guide.jpg"
+             loading="lazy"
              alt="A delicious Iraqi dinner.">
       </div>
       <div class="price-text">
@@ -1029,10 +1042,26 @@
           <div class="no-commitment-image"><i class="fa fa-check" aria-hidden="true"></i></div>
           <div class="no-commitment-text">
             <div class="no-commitment-title">No commitment. No, really.</div>
-            <div class="no-commitment-desc">Your first bag is on us because we know you'll love it! If you love it, stick around. If you don't, you can cancel anytime without getting charged a dime.</div>
+            <div class="no-commitment-desc">
+              [[if eq .DiscountAmount "100%"]]
+              Your first bag is on us because we know you'll love it!
+              [[else if eq .DiscountAmount "50%"]]
+              Your first bag is half on us because we know you'll love it!
+              [[else]]
+              There's no minimum contract so sign up.
+              [[end]]
+              If you love it, stick around. If you don't, you can cancel anytime without getting charged a dime.</div>
           </div>
         </div>
-        <button class="no-commitment-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+        <button class="no-commitment-button" data-button-action="GetStartedDialog">
+            [[if eq .DiscountAmount "100%"]] 
+            Get Started with a free dinner
+            [[else if eq .DiscountAmount "50%"]]
+            Get Started with 50% Off your First Dinner
+            [[else]] 
+            Get Started with a dinner
+            [[end]]
+        </button>
       </div>
     </section>
 
@@ -1040,6 +1069,7 @@
     <section class="stories-section">
       <div class="stories-image">
         <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/cook.jpg"
+             loading="lazy"
              alt="Iraq cook">
       </div>
       <div class="stories-text">
@@ -1059,21 +1089,25 @@
         <div class="company-logo">
           <img class="fast-company"
                src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/fast_company.png"
+               loading="lazy"
                alt="Fast Company">
         </div>
         <div class="company-logo">
           <img class="news-channel-5"
                src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/news_channel_5.png"
+               loading="lazy"
                alt="Edible Nashville">
         </div>
         <div class="company-logo">
           <img class="style-blueprint"
                src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/style_blueprint.png"
+               loading="lazy"
                alt="Edible Nashville">
         </div>
         <div class="company-logo">
           <img class="edible-nashville"
                src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/edible_nashville.png"
+               loading="lazy"
                alt="Edible Nashville">
 
         </div>
@@ -1091,6 +1125,7 @@
              data-aos-delay="50">
           <div class="features-list-item-image">
             <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/no_cooking_icon.jpg"
+                 loading="lazy"
                  alt="No cooking icon">
           </div>
           <div class="testimonials-list-item-text">
@@ -1104,6 +1139,7 @@
              data-aos-delay="150">
           <div class="features-list-item-image">
             <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/plate_icon.jpg"
+                 loading="lazy"
                  alt="Plate icon">
           </div>
           <div class="testimonials-list-item-text">
@@ -1117,6 +1153,7 @@
              data-aos-delay="250">
           <div class="features-list-item-image">
             <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/calendar_icon.jpg"
+                 loading="lazy"
                  alt="Calendar icon">
           </div>
           <div class="testimonials-list-item-text">
@@ -1125,7 +1162,15 @@
           </div>
         </div>
       </div>
-      <button class="features-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+      <button class="features-button" data-button-action="GetStartedDialog">
+          [[if eq .DiscountAmount "100%"]] 
+          Get Started with a free dinner
+          [[else if eq .DiscountAmount "50%"]]
+          Get Started with 50% Off your First Dinner
+          [[else]] 
+          Get Started with a dinner
+          [[end]]
+      </button>
     </section>
     <!-- Testimonials -->
     <section class="testimonials-section">
@@ -1162,14 +1207,24 @@
     <section class="eco-section">
       <div class="eco-card">
         <div class="eco-image-text">
-          <div class="eco-image"><img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/eco_icon.png"></div>
+          <div class="eco-image"><img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/eco_icon.png"
+                 loading="lazy"
+                 alt="eco icon"></div>
           <div class="eco-text">
             <div class="eco-title">No waste. No, really.</div>
             <div class="eco-desc">When you eat with us, you’re helping our big beautiful Earth. We re-use 90% of our packaging, while the other 10% is easily recyclable by you.
               We also donate 100% of our leftover food to charity. ❤️</div>
           </div>
         </div>
-        <button class="eco-button" data-button-action="GetStartedDialog">Get started with a FREE dinner</button>
+        <button class="eco-button" data-button-action="GetStartedDialog">
+            [[if eq .DiscountAmount "100%"]] 
+            Get Started with a free dinner
+            [[else if eq .DiscountAmount "50%"]]
+            Get Started with 50% Off your First Dinner
+            [[else]] 
+            Get Started with a dinner
+            [[end]]
+        </button>
       </div>
     </section>
     <!-- Checklist -->
@@ -1204,7 +1259,13 @@
                   [[if eq .ID "gifted"]] 
                   Claim My Free Dinner
                   [[else]] 
+                  [[if eq .DiscountAmount "100%"]] 
                   Get Started with a free dinner
+                  [[else if eq .DiscountAmount "50%"]]
+                  Get Started with 50% Off your First Dinner
+                  [[else]] 
+                  Get Started with a dinner
+                  [[end]]
                   [[end]]
                 </button>
       </div>
@@ -1226,12 +1287,20 @@
                placeholder="Enter Email Address Here"
                pattern="\S+@\S+\.\S+"
                required>
+        <input style="display:none"
+               name="promo"
+               id="promo"
+               value="[[.Promo]]">
         <button type="submit"
                   class="orange-button get-started-button">
                   [[if eq .ID "gifted"]] 
                   Claim My Free Dinner
                   [[else]] 
-                  Get My Free Dinner
+                  [[if eq .DiscountAmount "100%"]] 
+                  Get My free dinner
+                  [[else]] 
+                  Get my first dinner
+                  [[end]]
                   [[end]]
           </button>
       </form>
@@ -1245,11 +1314,6 @@
       </div>
     </div>
   </div>
-  <!-- [[if eq .ID "gifted"]] 
-                Claim My Free Dinner
-                [[else]] 
-                Get Started with a free dinner
-                [[end]] -->
   <script>
     function dialogClosed() {}
 

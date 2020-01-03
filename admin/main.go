@@ -124,6 +124,7 @@ func main() {
 	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
 
 	http.HandleFunc("/admin/task/ProcessUnpaidPreDelivery", s.handler(s.ProcessUnpaidPreDelivery))
+	http.HandleFunc("/admin/task/ProcessUnpaidAutocharge", s.handler(s.ProcessUnpaidAutocharge))
 	http.HandleFunc("/admin/task/ProcessUnpaidPostDelivery", s.handler(s.ProcessUnpaidPostDelivery))
 	// **********************
 	// Webhooks
@@ -241,6 +242,15 @@ func (s *server) handler(f handle) func(http.ResponseWriter, *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(errString))
 			return
+		}
+		// check ping errors
+		err = s.sqlDB.Ping()
+		if err != nil {
+			logging.Errorf(ctx, "prerequests sqlDB.Ping failed: %+v", err)
+			err = s.setup()
+			if err != nil {
+				logging.Errorf(ctx, "prerequests sqlDB.Ping failed and setup failed: %+v", err)
+			}
 		}
 		// call function
 		resp := f(ctx, w, r, log)

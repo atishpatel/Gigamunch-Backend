@@ -61,11 +61,13 @@ interface SetupActivityReq {
 }
 interface RefundActivityReq {
     emails: string[]
+    ids: string[]
     date: string
     amount: number
     percent: number
 }
 interface RefundAndSkipActivityReq {
+    id: string
     email: string
     date: string
     amount: number

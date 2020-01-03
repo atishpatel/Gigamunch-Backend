@@ -15,10 +15,6 @@ cron:
   schedule: every day 18:00
   timezone: America/Chicago
   target: cookapi
-# - description: "Check power sensors"
-#   url: /admin/task/CheckPowerSensors
-#   schedule: every 30 mins
-#   target: admin
 # Drip tags
 - description: "Process Unpaid subs - 3 days pre delivery day"
   url: /admin/task/ProcessUnpaidPreDelivery
@@ -27,7 +23,12 @@ cron:
   target: admin
 - description: "Process Unpaid subs - post delivery day"
   url: /admin/task/ProcessUnpaidPostDelivery
-  schedule: every thursday,sunday 12:00
+  schedule: every tuesday,friday 12:00
+  timezone: America/Chicago
+  target: admin
+- description: "Try auto-charging unpaid subs"
+  url: /admin/task/ProcessUnpaidAutocharge
+  schedule: every friday 11:00
   timezone: America/Chicago
   target: admin
 - description: "Setup Preview and Culture Tags"

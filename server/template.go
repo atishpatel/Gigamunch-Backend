@@ -9,6 +9,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/discount"
 	"github.com/atishpatel/Gigamunch-Backend/core/lead"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
@@ -92,6 +93,8 @@ func display(ctx context.Context, w http.ResponseWriter, tmplName string, data i
 
 type checkoutPage struct {
 	Page
+	DiscountAmount  string
+	Promo           string
 	Email           string
 	FirstName       string
 	LastName        string
@@ -122,6 +125,14 @@ func displayCheckout(w http.ResponseWriter, req *http.Request, params httprouter
 	page.ID = "checkout"
 	if page.ThankYouPageURL == "" {
 		page.ThankYouPageURL = "/checkout-thank-you"
+	}
+	promo := req.URL.Query().Get("promo")
+	if page.Promo == "" {
+		page.Promo = promo
+	}
+	if page.DiscountAmount == "" {
+		promoBreakdown := discount.GetPromoBreakdown(promo)
+		page.DiscountAmount = promoBreakdown.String()
 	}
 	email := req.FormValue("email")
 	terp := req.FormValue("terp")
@@ -392,6 +403,8 @@ type homePage struct {
 	Page
 	ReferrerName    string
 	CheckoutPageURL string
+	DiscountAmount  string
+	Promo           string
 }
 
 func handleHome(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
@@ -424,6 +437,9 @@ func handlePassport(w http.ResponseWriter, req *http.Request, params httprouter.
 			ID:           "passport",
 			CampaignName: "Passport",
 		},
+		DiscountAmount:  "100%",
+		CheckoutPageURL: "/checkout?promo=pass-gree100",
+		Promo:           "pass-gree100",
 	}
 	displayHome(w, req, params, page)
 }
@@ -435,6 +451,14 @@ func displayHome(w http.ResponseWriter, req *http.Request, params httprouter.Par
 	}
 	if page.CheckoutPageURL == "" {
 		page.CheckoutPageURL = "/checkout"
+	}
+	promo := req.URL.Query().Get("promo")
+	if page.Promo == "" {
+		page.Promo = promo
+	}
+	if page.DiscountAmount == "" {
+		promoBreakdown := discount.GetPromoBreakdown(promo)
+		page.DiscountAmount = promoBreakdown.String()
 	}
 	defer display(ctx, w, "home-v2", page)
 }

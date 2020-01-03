@@ -9,6 +9,7 @@ var (
 		enis:   "615-397-5516",
 		atish:  "931-644-5311",
 		piyush: "931-644-6755",
+		mike:   "615-415-9854",
 	}
 )
 
@@ -17,6 +18,7 @@ type employeeNumbers struct {
 	enis   string
 	atish  string
 	piyush string
+	mike   string
 }
 
 func (f *employeeNumbers) Chris() string {
@@ -31,12 +33,12 @@ func (f *employeeNumbers) Atish() string {
 	return f.atish
 }
 
-func (f *employeeNumbers) Piyush() string {
-	return f.piyush
+func (f *employeeNumbers) Mike() string {
+	return f.mike
 }
 
 func (f *employeeNumbers) CustomerSupport() string {
-	return f.chris
+	return f.mike
 }
 
 func (f *employeeNumbers) OnCallDeveloper() string {
@@ -45,7 +47,7 @@ func (f *employeeNumbers) OnCallDeveloper() string {
 
 func (f *employeeNumbers) IsEmployee(number string) bool {
 	cleanNumber := GetCleanPhoneNumber(number)
-	if cleanNumber == f.chris || cleanNumber == f.atish || cleanNumber == f.enis || cleanNumber == f.piyush {
+	if cleanNumber == f.chris || cleanNumber == f.atish || cleanNumber == f.enis || cleanNumber == f.piyush || cleanNumber == f.mike {
 		return true
 	}
 	return false
