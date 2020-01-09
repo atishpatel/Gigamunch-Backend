@@ -41,7 +41,7 @@
     .interest-section {}
 
     .interest-title {
-      font-family: 'Merienda', 'Roboto';
+      font-family: 'Laila', 'Poppins', 'Roboto';
       font-weight: 700;
       font-size: 30px;
       padding: 24px 10px;
@@ -485,7 +485,7 @@
     }
 
     .as-seen-on-title {
-      font-family: 'Merienda', 'Roboto';
+      font-family: 'Laila', 'Poppins', 'Roboto';
       font-weight: 700;
       font-size: 20px;
     }
@@ -880,7 +880,7 @@
 
     .checklist-title {
       text-align: center;
-      font-family: 'Merienda', 'Roboto';
+      font-family: 'Laila', 'Poppins', 'Roboto';
       font-weight: 700;
       color: #ff7043;
       font-size: 30px;
@@ -929,7 +929,7 @@
     }
 
     .get-started-title {
-      font-family: 'Merienda', 'Roboto';
+      font-family: 'Laila', 'Poppins', 'Roboto';
       font-weight: 700;
       font-size: 36px;
     }
@@ -949,11 +949,13 @@
     [[ template "nav-v2" .]]
   </header>
   <main role="main">
-    [[if eq .ID "passport"]] [[template "passport-section" .]] [[end]] [[if eq .ID "referred"]] [[template "referred-section" .]] [[end]] [[if eq .ID "gifted"]] [[template "gifted-section" .]] [[end]]
+    [[if eq .ID "passport"]] [[template "passport-section" .]] [[end]]
+    [[if eq .ID "referred"]] [[template "referred-section" .]] [[end]]
+    [[if eq .ID "gifted"]] [[template "gifted-section" .]] [[end]]
     <!-- Interest -->
     <section class="interest-section">
       <div class="interest-image">
-        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/map.jpg"
+        <img src="https://storage.googleapis.com/gigamunch-omninexus-website/homev2/map-food-paint.jpg"
              alt="World map">
       </div>
       <h1 class="interest-title">Discover the world<br>From your dinner table</h1>
@@ -994,15 +996,17 @@
       </div>
       <div class="solution-text">
         <h2 class="solution-text-title">Once every week,<br>
-            Eat dinner <br>
-            From around the world.</h2>
-        <p class="solution-text-desc">Get a full course dinner - including a dessert 😋 - delivered to your doorstep. Designed by local immigrants in Nashville to provide you with an experience of their country and their culture. And the best part is, it requires <span class="bold">no cooking.</span></p>
+          Eat dinner <br>
+          From around the world.</h2>
+        <p class="solution-text-desc">Get a full course dinner - including a dessert 😋 - delivered to your doorstep.
+          Designed by local immigrants in Nashville to provide you with an experience of their country and their
+          culture. And the best part is, it requires <span class="bold">no cooking.</span></p>
         <button class="solution-text-button" data-button-action="GetStartedDialog">
-          [[if eq .DiscountAmount "100%"]] 
+          [[if eq .DiscountAmount "100%"]]
           Get Started with a free dinner
           [[else if eq .DiscountAmount "50%"]]
           Get Started with 50% Off your First Dinner
-          [[else]] 
+          [[else]]
           Get Started with a dinner
           [[end]]
         </button>
@@ -1017,8 +1021,11 @@
              alt="A delicious Iraqi dinner.">
       </div>
       <div class="price-text">
-        <h2 class="price-text-title">Delicious and <span class="bold" data-aos="fade-up" data-aos-delay="50">Affordable</span></h2>
-        <p class="price-text-desc">You don't need to waste time searching for a new resturant, or worse, cooking the same boring dinner. With Gigamunch, every week you get a ready-to-eat dinner from around the world delivered. </p>
+        <h2 class="price-text-title">Delicious and <span class="bold" data-aos="fade-up"
+            data-aos-delay="50">Affordable</span></h2>
+        <p class="price-text-desc">You don't need to waste time searching for a new resturant, or worse, cooking the
+          same boring dinner. With Gigamunch, every week you get a ready-to-eat dinner from around the world delivered.
+        </p>
         <ul class="price-text-list">
           <li data-aos="fade-right"
               data-aos-delay="50">1 Main Entree 🍖 (vegetarian option 🌱)</li>
@@ -1054,13 +1061,13 @@
           </div>
         </div>
         <button class="no-commitment-button" data-button-action="GetStartedDialog">
-            [[if eq .DiscountAmount "100%"]] 
-            Get Started with a free dinner
-            [[else if eq .DiscountAmount "50%"]]
-            Get Started with 50% Off your First Dinner
-            [[else]] 
-            Get Started with a dinner
-            [[end]]
+          [[if eq .DiscountAmount "100%"]]
+          Get Started with a free dinner
+          [[else if eq .DiscountAmount "50%"]]
+          Get Started with 50% Off your First Dinner
+          [[else]]
+          Get Started with a dinner
+          [[end]]
         </button>
       </div>
     </section>
@@ -1074,12 +1081,17 @@
       </div>
       <div class="stories-text">
         <h2 class="stories-text-title">More than just food</h2>
-        <p class="stories-text-desc">Each Gigamunch dinner is an immersive journey to a new country - a new culture. We work with local immigrants and refugees in Nashville so you get an authentic taste of a new country.</p>
+        <p class="stories-text-desc">Each Gigamunch dinner is an immersive journey to a new country - a new culture. We
+          work with local immigrants and refugees in Nashville so you get an authentic taste of a new country.</p>
         <p class="stories-text-list">
-          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="50">Read their <span class="bold">stories.</span><br></span>
-          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="100">Listen to their <span class="bold">music.</span><br></span>
-          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="150">Learn their <span class="bold">culture.</span><br></span>
-          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="200">Love their <span class="bold">food.</span></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="50">Read their <span
+              class="bold">stories.</span><br></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="100">Listen to their <span
+              class="bold">music.</span><br></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="150">Learn their <span
+              class="bold">culture.</span><br></span>
+          <span data-aos="fade-up" data-aos-anchor-placement="bottom-bottom" data-aos-delay="200">Love their <span
+              class="bold">food.</span></span>
         </p>
       </div>
     </section>
@@ -1144,7 +1156,8 @@
           </div>
           <div class="testimonials-list-item-text">
             <h2 class="features-list-item-title">Quality meals</h2>
-            <p class="features-list-item-desc">Gourmet dinner with a meaty protein, healthy veggies, filling carbs, and a delicious dessert. </p>
+            <p class="features-list-item-desc">Gourmet dinner with a meaty protein, healthy veggies, filling carbs, and
+              a delicious dessert. </p>
           </div>
         </div>
         <div class="features-list-item"
@@ -1163,13 +1176,13 @@
         </div>
       </div>
       <button class="features-button" data-button-action="GetStartedDialog">
-          [[if eq .DiscountAmount "100%"]] 
-          Get Started with a free dinner
-          [[else if eq .DiscountAmount "50%"]]
-          Get Started with 50% Off your First Dinner
-          [[else]] 
-          Get Started with a dinner
-          [[end]]
+        [[if eq .DiscountAmount "100%"]]
+        Get Started with a free dinner
+        [[else if eq .DiscountAmount "50%"]]
+        Get Started with 50% Off your First Dinner
+        [[else]]
+        Get Started with a dinner
+        [[end]]
       </button>
     </section>
     <!-- Testimonials -->
@@ -1179,7 +1192,8 @@
         <div class="testimonials-list-item">
           <div class="testimonials-list-item-image testimonials-martha"></div>
           <div class="testimonials-list-item-text">
-            <p class="testimonials-list-item-quote">"We are NOT the most adventurous eaters, and yet we have all <span class="bold">loved each one of our 4 menus so far.</span>
+            <p class="testimonials-list-item-quote">"We are NOT the most adventurous eaters, and yet we have all <span
+                class="bold">loved each one of our 4 menus so far.</span>
               I cannot say enough about this company and the quality of the service and food.
               <span class="bold">Thank you for expanding our horizons with delicious food!</span> :-)"</p>
             <p class="testimonials-list-item-name">Martha</p>
@@ -1189,7 +1203,9 @@
              data-aos="fade-up">
           <div class="testimonials-list-item-image testimonials-louise"></div>
           <div class="testimonials-list-item-text">
-            <p class="testimonials-list-item-quote">"What a <span class="bold">wonderful experience</span> all the way around the world! The food has been delectable! I <span class="bold">love learning</span> the history of the country and chef."</p>
+            <p class="testimonials-list-item-quote">"What a <span class="bold">wonderful experience</span> all the way
+              around the world! The food has been delectable! I <span class="bold">love learning</span> the history of
+              the country and chef."</p>
             <p class="testimonials-list-item-name">Louise</p>
           </div>
         </div>
@@ -1197,7 +1213,8 @@
              data-aos="fade-up">
           <div class="testimonials-list-item-image testimonials-beth"></div>
           <div class="testimonials-list-item-text">
-            <p class="testimonials-list-item-quote">"Bravo! I love these meals, culture guides, and songs. They are <span class="bold">delicious, convenient, educational, and fun.</span>"</p>
+            <p class="testimonials-list-item-quote">"Bravo! I love these meals, culture guides, and songs. They are
+              <span class="bold">delicious, convenient, educational, and fun.</span>"</p>
             <p class="testimonials-list-item-name">Beth</p>
           </div>
         </div>
@@ -1212,18 +1229,19 @@
                  alt="eco icon"></div>
           <div class="eco-text">
             <div class="eco-title">No waste. No, really.</div>
-            <div class="eco-desc">When you eat with us, you’re helping our big beautiful Earth. We re-use 90% of our packaging, while the other 10% is easily recyclable by you.
+            <div class="eco-desc">When you eat with us, you’re helping our big beautiful Earth. We re-use 90% of our
+              packaging, while the other 10% is easily recyclable by you.
               We also donate 100% of our leftover food to charity. ❤️</div>
           </div>
         </div>
         <button class="eco-button" data-button-action="GetStartedDialog">
-            [[if eq .DiscountAmount "100%"]] 
-            Get Started with a free dinner
-            [[else if eq .DiscountAmount "50%"]]
-            Get Started with 50% Off your First Dinner
-            [[else]] 
-            Get Started with a dinner
-            [[end]]
+          [[if eq .DiscountAmount "100%"]]
+          Get Started with a free dinner
+          [[else if eq .DiscountAmount "50%"]]
+          Get Started with 50% Off your First Dinner
+          [[else]]
+          Get Started with a dinner
+          [[end]]
         </button>
       </div>
     </section>
@@ -1234,40 +1252,35 @@
         <h1 class="checklist-title">Let the world travel to you</h1>
         <ul class="checklist-list">
           <li class="checklist-list-item">
-            <i class="fa fa-check checkout-list-item-check"
-                 aria-hidden="true"></i>
+            <i class="fa fa-check checkout-list-item-check" aria-hidden="true"></i>
             <span class="checklist-list-item-text">Ready-to-eat meals. No need to prepare.</span>
           </li>
           <li class="checklist-list-item">
-            <i class="fa fa-check checkout-list-item-check"
-                 aria-hidden="true"></i>
+            <i class="fa fa-check checkout-list-item-check" aria-hidden="true"></i>
             <span class="checklist-list-item-text">Affordable and delicous</span>
           </li>
           <li class="checklist-list-item">
-            <i class="fa fa-check checkout-list-item-check"
-                 aria-hidden="true"></i>
+            <i class="fa fa-check checkout-list-item-check" aria-hidden="true"></i>
             <span class="checklist-list-item-text">Delivered to your doorstep</span>
           </li>
           <li class="checklist-list-item">
-            <i class="fa fa-check checkout-list-item-check"
-                 aria-hidden="true"></i>
+            <i class="fa fa-check checkout-list-item-check" aria-hidden="true"></i>
             <span class="checklist-list-item-text">Skip or cancel anytime</span>
           </li>
         </ul>
-        <button data-button-action="GetStartedDialog"
-                  class="checklist-button">
-                  [[if eq .ID "gifted"]] 
-                  Claim My Free Dinner
-                  [[else]] 
-                  [[if eq .DiscountAmount "100%"]] 
-                  Get Started with a free dinner
-                  [[else if eq .DiscountAmount "50%"]]
-                  Get Started with 50% Off your First Dinner
-                  [[else]] 
-                  Get Started with a dinner
-                  [[end]]
-                  [[end]]
-                </button>
+        <button data-button-action="GetStartedDialog" class="checklist-button">
+          [[if eq .ID "gifted"]]
+          Claim My Free Dinner
+          [[else]]
+          [[if eq .DiscountAmount "100%"]]
+          Get Started with a free dinner
+          [[else if eq .DiscountAmount "50%"]]
+          Get Started with 50% Off your First Dinner
+          [[else]]
+          Get Started with a dinner
+          [[end]]
+          [[end]]
+        </button>
       </div>
     </section>
 
@@ -1291,26 +1304,22 @@
                name="promo"
                id="promo"
                value="[[.Promo]]">
-        <button type="submit"
-                  class="orange-button get-started-button">
-                  [[if eq .ID "gifted"]] 
-                  Claim My Free Dinner
-                  [[else]] 
-                  [[if eq .DiscountAmount "100%"]] 
-                  Get My free dinner
-                  [[else]] 
-                  Get my first dinner
-                  [[end]]
-                  [[end]]
-          </button>
+        <button type="submit" class="orange-button get-started-button">
+          [[if eq .ID "gifted"]]
+          Claim My Free Dinner
+          [[else]]
+          [[if eq .DiscountAmount "100%"]]
+          Get My free dinner
+          [[else]]
+          Get my first dinner
+          [[end]]
+          [[end]]
+        </button>
       </form>
       <div class="close-button">
-        <button type="button"
-                  class="close"
-                  data-close="getStarted"
-                  aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
+        <button type="button" class="close" data-close="getStarted" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
     </div>
   </div>

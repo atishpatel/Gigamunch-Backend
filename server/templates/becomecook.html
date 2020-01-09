@@ -11,7 +11,7 @@
     body {
       display: block;
       background-color: white;
-      font-family: 'FontRegular', 'Roboto', sans-serif;
+      font-family: 'Poppins', 'Roboto', sans-serif;
       line-height: 1.5;
       letter-spacing: .5px;
       font-smoothing: antialiased;
@@ -62,23 +62,23 @@
       color: white;
     }
 
-     ::-webkit-input-placeholder {
+    ::-webkit-input-placeholder {
       /* Chrome */
       color: black;
     }
 
-     :-ms-input-placeholder {
+    :-ms-input-placeholder {
       /* IE 10+ */
       color: black;
     }
 
-     ::-moz-placeholder {
+    ::-moz-placeholder {
       /* Firefox 19+ */
       color: black;
       opacity: 1;
     }
 
-     :-moz-placeholder {
+    :-moz-placeholder {
       /* Firefox 4 - 18 */
       color: black;
       opacity: 1;
@@ -275,6 +275,7 @@
         font-size: 24px;
         line-height: 25px;
       }
+
       .love-desc {
         padding: 0 24px;
         font-size: 20px;
@@ -287,6 +288,7 @@
         font-size: 32px;
         line-height: 33px;
       }
+
       .love-desc {
         font-size: 28px;
         line-height: 29px;
@@ -362,13 +364,16 @@
       .why-point-list {
         flex-direction: row;
       }
+
       .why-point {
         flex-direction: column;
         padding: 0 12px;
       }
+
       .why-image>img {
         max-width: 150px;
       }
+
       .why-point-text {
         text-align: center;
       }
@@ -451,6 +456,7 @@
       .step-detail-list {
         flex-direction: row;
       }
+
       .step-detail {
         padding: 6px 18px 6px 0;
       }
@@ -581,6 +587,7 @@
       .for-who-list {
         margin: 0 auto;
       }
+
       .for-who-image {
         height: 123px;
         width: 220px;
@@ -608,7 +615,7 @@
       position: absolute;
       top: 24px;
       left: 24px;
-      font-family: 'NexaBold', 'FontRegular', sans-serif;
+      font-family: 'Laila', 'Poppins', 'Roboto', sans-serif;
       font-weight: bold;
       font-size: 18px;
       color: white;
@@ -627,7 +634,7 @@
 
   </script>
   <header class="nav-header">
-    [[ template "nav" .]]
+    [[ template "nav-v2" .]]
   </header>
   <header class="header-section">
     <div id="topHeader"
@@ -764,21 +771,21 @@
       <a class="contact-us-link"
          href="mailto:enis@eatgigamunch.com"
          onclick="emailUsTapped()">
-              <button raised
+        <button raised
                       class="contact-us-button">
                 <div class="contact-us-button-title">EMAIL US</div>
                 <div class="contact-us-button-desc">enis@eatgigamunch.com</div>
               </button>
-            </a>
+      </a>
       <a class="contact-us-link"
          href="tel:+6153975516"
          onclick="callUsTapped()">
-              <button raised
+        <button raised
                       class="contact-us-button">
                 <div class="contact-us-button-title">CALL US</div>
                 <div class="contact-us-button-desc">615-397-5516</div>
               </button>
-            </a>
+      </a>
     </div>
   </div>
   <div class="for-who-section">
@@ -856,7 +863,7 @@
   <style>
     /* Fix issue with font not importing */
 
-    @font-face {
+    /* @font-face {
       font-family: 'NexaBold';
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/nexa_bold.otf') format('opentype');
     }
@@ -870,7 +877,7 @@
       font-family: 'FontRegular';
       font-weight: bold;
       src: url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.woff2') format('woff2'), url('https://storage.googleapis.com/gigamunch-omninexus-website/fonts/font_bold.ttf') format('truetype');
-    }
+    } */
 
   </style>
   [[template "footer" .]]
