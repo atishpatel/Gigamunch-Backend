@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/atishpatel/Gigamunch-Backend/corenew/message"
+	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"google.golang.org/appengine"
 	aelog "google.golang.org/appengine/log"
 )
@@ -40,8 +40,7 @@ func Warningf(ctx context.Context, format string, args ...interface{}) {
 func Criticalf(ctx context.Context, format string, args ...interface{}) {
 	formatedMessage := fmt.Sprintf(format, args...)
 	msgC := message.New(ctx)
-	_ = msgC.SendSMS("9316445311", formatedMessage)
-	_ = msgC.SendSMS("6155454989", formatedMessage)
+	_ = msgC.SendAdminSMS(message.EmployeeNumbers.OnCallDeveloper(), formatedMessage)
 	aelog.Criticalf(ctx, formatedMessage)
 }
 
