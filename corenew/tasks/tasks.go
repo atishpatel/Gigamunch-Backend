@@ -17,7 +17,7 @@ const (
 	UpdateDripQueue          = "update-drip"
 	UpdateDripURL            = "/task/update-drip"
 	SendSMSQueue             = "send-sms"
-	SendSMSURL               = "/admin/task/send-sms"
+	SendSMSURL               = "/admin/task/SendSMS"
 	ProcessSubscriptionQueue = "process-subscription"
 	ProcessSubscriptionURL   = "/admin/task/ProcessActivity"
 	// SendEmailQueue           = "send-email"
