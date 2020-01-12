@@ -18,6 +18,16 @@ export function GetLogsForUser(start: number, limit: number, id: string): Promis
   return callFetch(url, 'GET', req);
 }
 
+export function GetLogsByAction(start: number, limit: number, action: string): Promise<AdminAPI.GetLogsResp> {
+  const url: string = baseURL + '/v1/GetLogsByAction';
+  const req: AdminAPI.GetLogsByActionReq = {
+    action,
+    start,
+    limit,
+  };
+  return callFetch(url, 'GET', req);
+}
+
 // Discount
 export function GetSubscriberDiscounts(id: string): Promise<AdminAPI.GetSubscriberDiscountsResp> {
   const url: string = baseURL + '/v1/GetSubscriberDiscounts';
@@ -88,6 +98,15 @@ export function GetSubscriber(id: string): Promise<AdminAPI.GetSubscriberRespV2>
     ID: id,
   };
   return callFetch(url, 'GET', req);
+}
+
+export function SendCustomerSMS(emails: string[], message: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/SendCustomerSMS';
+  const req: AdminAPI.SendCustomerSMSReq = {
+    emails,
+    message,
+  };
+  return callFetch(url, 'POST', req);
 }
 
 export function ActivateSubscriber(idOrEmail: string, first_bag_date: string): Promise<AdminAPI.GetHasSubscribedRespV2> {

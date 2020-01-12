@@ -24,6 +24,11 @@ export default new Router({
       component: () => import(/* webpackChunkName: "subscriber" */ './views/Subscriber.vue'),
     },
     {
+      path: '/message',
+      name: 'message',
+      component: () => import(/* webpackChunkName: "message" */ './views/Message.vue'),
+    },
+    {
       path: '/unpaid-summary',
       name: 'unpaid-summary',
       component: () => import(/* webpackChunkName: "unpaid-summary" */ './views/UnpaidSummary.vue'),

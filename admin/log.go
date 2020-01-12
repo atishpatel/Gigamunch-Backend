@@ -59,6 +59,30 @@ func (s *server) GetLogs(ctx context.Context, w http.ResponseWriter, r *http.Req
 	return resp
 }
 
+// GetLogsByAction gets logs.
+func (s *server) GetLogsByAction(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.GetLogsByActionReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	action := logging.Action(req.Action)
+	logs, err := log.GetAllByAction(action, int(req.Start), int(req.Limit))
+	if err != nil {
+		return errors.Annotate(err, "failed to log.GetLogs")
+	}
+	resp := &pb.GetLogsResp{}
+	resp.Logs, err = serverhelper.PBLogs(logs)
+	if err != nil {
+		return errors.Annotate(err, "failed to PBLogs")
+	}
+	return resp
+}
+
 // GetLogsForUser gets logs by email.
 func (s *server) GetLogsForUser(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error

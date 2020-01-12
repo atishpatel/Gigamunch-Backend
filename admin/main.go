@@ -78,6 +78,7 @@ func main() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
+	http.HandleFunc("/admin/api/v1/GetLogsByAction", s.handler(s.userAdmin(s.GetLogsByAction)))
 	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsForUser)))
 	http.HandleFunc("/admin/api/v1/GetLogsForUser", s.handler(s.userAdmin(s.GetLogsForUser)))
 	http.HandleFunc("/admin/api/v1/GetLogsByExecution", s.handler(s.userAdmin(s.GetLogsByExecution)))

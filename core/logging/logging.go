@@ -116,8 +116,9 @@ const (
 
 var (
 	// Errors
-	errDatastore = errors.InternalServerError
-	errInternal  = errors.InternalServerError
+	errDatastore        = errors.InternalServerError
+	errInternal         = errors.InternalServerError
+	errInvalidParameter = errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: "An invalid parameter was used."}
 )
 
 // Infof logs info.
@@ -211,6 +212,22 @@ func (c *Client) GetAll(start, limit int) ([]*Entry, error) {
 func (c *Client) GetAllByID(userID string, start, limit int) ([]*Entry, error) {
 	var dst []*Entry
 	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "UserIDString=", userID, &dst)
+	if err != nil {
+		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
+	}
+	for i := range dst {
+		dst[i].ID = keys[i].IntID()
+	}
+	return dst, nil
+}
+
+// GetAllByAction gets logs with UserID.
+func (c *Client) GetAllByAction(action Action, start, limit int) ([]*Entry, error) {
+	if string(action) == "" {
+		return nil, errInvalidParameter.Annotate("action cannot be empty")
+	}
+	var dst []*Entry
+	keys, err := c.db.QueryFilterOrdered(c.ctx, kind, start, limit, "-Timestamp", "Action=", action, &dst)
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to db.QueryFilterOrdered")
 	}
