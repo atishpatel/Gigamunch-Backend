@@ -24,8 +24,8 @@
           max-width: 1000px;
         }
 
-        .textarea-json {
-          height: 1000px;
+        .textarea-code {
+          height: 150px;
           width: 700px;
         }
 
@@ -33,16 +33,66 @@
     </shared-styles>
 
     <div>
-      <h1 class="page-title">Culture Execution</h1>
+
+      <h1 class="page-title">Preview Email</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <textarea id="previewEmail"
+                disabled
+                class="textarea-code">
+      </textarea>
+
+      <h1 class="page-title">Culture Email</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <textarea id="cultureEmail"
+                disabled
+                class="textarea-code">
+      </textarea>
+
+      <h1 class="page-title">Marketing Email</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <textarea id="marketingEmail"
+                disabled
+                class="textarea-code">
+      </textarea>
+
+      <h1 class="page-title">Social Media Text</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <textarea id="socialMediaText"
+                disabled
+                class="textarea-code">
+      </textarea>
+
+      <h1 class="page-title">SMS Messages</h1>
+      <paper-spinner hidden$="[[!loading]]"
+                     active="[[loading]]">
+      </paper-spinner>
+
+      <textarea id="smsMessages"
+                disabled
+                class="textarea-code">
+      </textarea>
+
+      <h1 class="page-title">Culture Code (JSON)</h1>
       <paper-spinner hidden$="[[!loading]]"
                      active="[[loading]]">
       </paper-spinner>
 
       <textarea id="executionJSON"
                 disabled
-                class="textarea-json">
+                class="textarea-code">
       </textarea>
-
 
   </template>
   </dom-repeat>
@@ -107,6 +157,11 @@
 
       setExecution(exe) {
         this.execution = exe;
+        this.$.previewEmail.value = JSON.stringify(exe, null, 2);
+        this.$.cultureEmail.value = JSON.stringify(exe, null, 2);
+        this.$.marketingEmail.value = JSON.stringify(exe, null, 2);
+        this.$.socialMediaText.value = JSON.stringify(exe, null, 2);
+        this.$.smsMessages.value = JSON.stringify(exe, null, 2);
         this.$.executionJSON.value = JSON.stringify(exe, null, 2);
       }
     }
