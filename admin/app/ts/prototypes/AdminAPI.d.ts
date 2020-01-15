@@ -94,6 +94,11 @@ interface GetLogsResp {
     error: Common.Error
     logs: Common.Log[]
 }
+interface GetLogsByActionReq {
+    start: number
+    limit: number
+    action: string
+}
 interface GetLogsForUserReq {
     start: number
     limit: number

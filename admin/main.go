@@ -78,6 +78,7 @@ func main() {
 	// **********************
 	http.HandleFunc("/admin/api/v1/GetLog", s.handler(s.userAdmin(s.GetLog)))
 	http.HandleFunc("/admin/api/v1/GetLogs", s.handler(s.userAdmin(s.GetLogs)))
+	http.HandleFunc("/admin/api/v1/GetLogsByAction", s.handler(s.userAdmin(s.GetLogsByAction)))
 	http.HandleFunc("/admin/api/v1/GetLogsByEmail", s.handler(s.userAdmin(s.GetLogsForUser)))
 	http.HandleFunc("/admin/api/v1/GetLogsForUser", s.handler(s.userAdmin(s.GetLogsForUser)))
 	http.HandleFunc("/admin/api/v1/GetLogsByExecution", s.handler(s.userAdmin(s.GetLogsByExecution)))
@@ -122,6 +123,7 @@ func main() {
 	http.HandleFunc("/admin/task/ProcessActivity", s.handler(s.ProcessActivityTask))
 	http.HandleFunc("/process-subscription", s.handler(s.ProcessActivity))
 	http.HandleFunc("/admin/task/SetupActivites", s.handler(s.SetupActivities))
+	http.HandleFunc("/admin/task/SendSMS", s.handler(s.SendSMS))
 
 	http.HandleFunc("/admin/task/ProcessUnpaidPreDelivery", s.handler(s.ProcessUnpaidPreDelivery))
 	http.HandleFunc("/admin/task/ProcessUnpaidAutocharge", s.handler(s.ProcessUnpaidAutocharge))

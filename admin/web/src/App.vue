@@ -18,6 +18,16 @@
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile to="/message">
+          <v-list-tile-action>
+            <v-icon>message</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Message
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
         <v-list-tile to="/unpaid-summary">
           <v-list-tile-action>
             <v-icon>sentiment_dissatisfied</v-icon>

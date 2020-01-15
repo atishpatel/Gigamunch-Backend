@@ -3,7 +3,6 @@ package tasks
 import (
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"golang.org/x/net/context"
@@ -17,12 +16,12 @@ import (
 const (
 	UpdateDripQueue          = "update-drip"
 	UpdateDripURL            = "/task/update-drip"
-	ProcessInquiryQueue      = "process-inquiry"
-	ProcessInquiryURL        = "/process-inquiry"
+	SendSMSQueue             = "send-sms"
+	SendSMSURL               = "/admin/task/SendSMS"
 	ProcessSubscriptionQueue = "process-subscription"
 	ProcessSubscriptionURL   = "/admin/task/ProcessActivity"
-	SendEmailQueue           = "send-email"
-	SendEmailURL             = "/send-email"
+	// SendEmailQueue           = "send-email"
+	// SendEmailURL             = "/send-email"
 )
 
 var (
@@ -189,42 +188,51 @@ func ParseProcessSubscriptionRequest(req *http.Request) (*ProcessSubscriptionPar
 // 	return parms, nil
 // }
 
-// AddProcessInquiry adds a process inquiry at specified time.
-func (c *Client) AddProcessInquiry(inquiryID int64, at time.Time) error {
-	if inquiryID == 0 {
-		return errInvalidParameter.Wrap("inquriyID cannot be 0")
+type SendSMSParam struct {
+	Number  string
+	Email   string
+	Message string
+}
+
+// AddSendSMS sends an sms at certain time and at a rate.
+func (c *Client) AddSendSMS(req *SendSMSParam, at time.Time) error {
+	var err error
+	if req.Message == "" {
+		return errInvalidParameter.Wrap("bad param for SendSMS")
 	}
 	h := make(http.Header)
 	h.Set("Content-Type", "application/x-www-form-urlencoded")
 	v := url.Values{}
-	v.Set("inquiry_id", strconv.FormatInt(inquiryID, 10))
+	v.Set("email", req.Email)
+	v.Set("number", req.Number)
+	v.Set("message", req.Message)
 	task := &taskqueue.Task{
-		Path:    ProcessInquiryURL,
+		Path:    SendSMSURL,
 		Payload: []byte(v.Encode()),
 		Header:  h,
 		Method:  "POST",
 		ETA:     at,
 	}
-	_, err := taskqueue.Add(c.ctx, task, ProcessInquiryQueue)
+	_, err = taskqueue.Add(c.ctx, task, SendSMSQueue)
 	if err != nil {
 		return errTasks.WithError(err).Wrapf("failed to task.Add. Task: %v", task)
 	}
+	utils.Infof(c.ctx, "added tasks SendSMS at %s for %s - %s", at, req.Email, req.Number)
 	return nil
 }
 
-// ParseInquiryID parses an inquiryID from a task request.
-func ParseInquiryID(req *http.Request) (int64, error) {
+// ParseSendSMSParam parses an SendSMSParam from a task request.
+func ParseSendSMSParam(req *http.Request) (*SendSMSParam, error) {
 	err := req.ParseForm()
 	if err != nil {
-		return 0, errParse.WithError(err).Wrap("failed to parse from from request")
+		return nil, errParse.WithError(err).Wrap("failed to parse from from request")
 	}
-	inquiryIDString := req.FormValue("inquiry_id")
-	if inquiryIDString == "" {
-		return 0, errParse.Wrapf("Invalid task for close inquiry. inquiryID: %s", inquiryIDString)
+	parms := new(SendSMSParam)
+	parms.Email = req.FormValue("email")
+	parms.Number = req.FormValue("number")
+	parms.Message = req.FormValue("message")
+	if parms.Number == "" && parms.Email == "" {
+		return nil, errParse.Wrapf("Invalid request for SendSMS")
 	}
-	inquiryID, err := strconv.ParseInt(inquiryIDString, 10, 64)
-	if err != nil {
-		return 0, errParse.WithError(err).Wrapf("Failed to parse inquiryID(%s). Err: ", inquiryIDString, err)
-	}
-	return inquiryID, nil
+	return parms, nil
 }

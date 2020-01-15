@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 
@@ -27,6 +28,79 @@ import (
 )
 
 // TODO: UpdateDrip
+
+// SendSMS sends an Customer an SMS from Gigamunch to number.
+func (s *server) SendSMS(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	params, err := tasks.ParseSendSMSParam(r)
+	if err != nil {
+		utils.Criticalf(ctx, "failed to tasks.ParseSendSMS. Err:%+v", err)
+	}
+	log.Infof(ctx, "params: %+v", params)
+	resp := &pb.ErrorOnlyResp{}
+	nameDilm := "{{name}}"
+	firstNameDilm := "{{first_name}}"
+	emailDilm := "{{email}}"
+	userIDDilm := "{{user_id}}"
+
+	messageC := message.New(ctx)
+	subC := subold.New(ctx)
+	var subs []*subold.SubscriptionSignUp
+	var sb *subold.SubscriptionSignUp
+	if params.Email != "" {
+		sb, err = subC.GetSubscriber(params.Email)
+	} else {
+		subs, err = subC.GetSubscribersByPhoneNumber(params.Number)
+	}
+	if err != nil {
+		log.Errorf(ctx, "failed to subold.GetSubscriber: %+v", params)
+		return errors.Annotate(err, "failed to subold.GetSubscribers. No SMS was sent.")
+	}
+	if len(subs) > 0 {
+		sb = subs[0]
+	}
+	if sb == nil {
+		if params.Number != "" {
+			err = messageC.SendDeliverySMS(params.Number, params.Message)
+			if err != nil {
+				return errors.Annotate(err, "failed to message.SendDeliverySMS to none sub number To:"+params.Number)
+			}
+			log.Infof(ctx, "message sent for: %+v", params)
+			return resp
+		}
+		log.Errorf(ctx, "failed to GetSubscriber: %+v", params)
+		return errors.Annotate(err, "failed to GetSubscriber")
+	}
+	if sb.PhoneNumber == "" {
+		log.Infof(ctx, "no phone number")
+		return resp
+	}
+	name := sb.FirstName
+	if name == "" {
+		name = sb.Name
+	}
+	name = strings.Title(name)
+	msg := params.Message
+	msg = strings.Replace(msg, nameDilm, name, -1)
+	msg = strings.Replace(msg, firstNameDilm, sb.FirstName, -1)
+	msg = strings.Replace(msg, emailDilm, sb.Email, -1)
+	msg = strings.Replace(msg, userIDDilm, sb.ID, -1)
+	err = messageC.SendDeliverySMS(sb.PhoneNumber, msg)
+	if err != nil {
+		return errors.Annotate(err, "failed to message.SendDeliverySMS To:"+sb.PhoneNumber)
+	}
+	// log
+	log.Infof(ctx, "message sent for: %+v", params)
+	payload := &logging.MessagePayload{
+		Platform: "SMS",
+		Body:     msg,
+		From:     "Gigamunch",
+		To:       sb.PhoneNumber,
+	}
+	log.SubMessage(sb.ID, sb.Email, payload)
+
+	return resp
+}
 
 func (s *server) ProcessActivityTask(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	parms, err := tasks.ParseProcessSubscriptionRequest(r)
@@ -350,7 +424,7 @@ func (s *server) SendPreviewCultureEmail(ctx context.Context, w http.ResponseWri
 // SendCultureEmail sends the culture email to all subscribers who are not skipped.
 func (s *server) SendCultureEmail(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	cultureDate := time.Now()
-	log.Infof(ctx, "culture date: s", cultureDate)
+	log.Infof(ctx, "culture date: %s", cultureDate)
 	subC := subold.New(ctx)
 	subLogs, err := subC.GetForDate(cultureDate)
 	if err != nil {

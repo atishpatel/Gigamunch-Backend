@@ -13,7 +13,6 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
-	"github.com/atishpatel/Gigamunch-Backend/core/message"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	subold "github.com/atishpatel/Gigamunch-Backend/corenew/sub"
 	"github.com/atishpatel/Gigamunch-Backend/corenew/tasks"
@@ -33,54 +32,23 @@ func (s *server) SendCustomerSMS(ctx context.Context, w http.ResponseWriter, r *
 	}
 	// end decode request
 
-	nameDilm := "{{name}}"
-	firstNameDilm := "{{first_name}}"
-	emailDilm := "{{email}}"
-	userIDDilm := "{{user_id}}"
-
-	messageC := message.New(ctx)
-	subC := subold.New(ctx)
-	subs, err := subC.GetSubscribers(req.Emails)
-	if err != nil {
-		return errors.Annotate(err, "failed to subold.GetSubscribers. No SMS was sent.")
-	}
+	tasksC := tasks.New(ctx)
 	var errs []error
-	for i, s := range subs {
-		if s == nil {
-			errs = append(errs, errors.BadRequestError.Annotate("failed to GetSubscriber ("+req.Emails[i]+")"))
-			log.Errorf(ctx, "failed to GetSubscriber To(%s):", req.Emails[i])
-			continue
+	for _, v := range req.Emails {
+		params := &tasks.SendSMSParam{
+			Message: req.Message,
 		}
-		if s.PhoneNumber == "" {
-			continue
+		if strings.Contains(v, "@") {
+			params.Email = v
+		} else if strings.Contains(v, "-") {
+			params.Number = v
+		} else {
+			params.Email = v
 		}
-		name := s.FirstName
-		if name == "" {
-			name = s.Name
-		}
-		name = strings.Title(name)
-		msg := req.Message
-		msg = strings.Replace(msg, nameDilm, name, -1)
-		msg = strings.Replace(msg, firstNameDilm, s.FirstName, -1)
-		msg = strings.Replace(msg, emailDilm, s.Email, -1)
-		msg = strings.Replace(msg, userIDDilm, s.ID, -1)
-		err = messageC.SendDeliverySMS(s.PhoneNumber, msg)
+		err = tasksC.AddSendSMS(params, time.Now())
 		if err != nil {
-			errs = append(errs, errors.Annotate(err, "failed to message.SendSMS To("+s.PhoneNumber+")"))
-			if log != nil {
-				log.Errorf(ctx, "failed to message.SendDeliverySMS To(%s): %+v", s.PhoneNumber, err)
-			}
+			errs = append(errs, errors.Annotate(err, "failed to message.SendSMS To("+v+")"))
 			continue
-		}
-		// log
-		if log != nil {
-			payload := &logging.MessagePayload{
-				Platform: "SMS",
-				Body:     msg,
-				From:     "Gigamunch",
-				To:       s.PhoneNumber,
-			}
-			log.SubMessage(s.ID, s.Email, payload)
 		}
 	}
 	if len(errs) >= 1 {

@@ -5,10 +5,6 @@
     "title": "AdminAPI.proto",
     "version": "version not set"
   },
-  "schemes": [
-    
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],
@@ -352,6 +348,33 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
+    "/admin/api/v1/GetLogsByAction": {
+      "post": {
+        "summary": "GetLogsByAction returns a list of logs.",
+        "operationId": "GetLogsByAction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIGetLogsByActionReq"
             }
           }
         ],
@@ -1391,6 +1414,22 @@
         },
         "log": {
           "$ref": "#/definitions/CommonLog"
+        }
+      }
+    },
+    "AdminAPIGetLogsByActionReq": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "action": {
+          "type": "string"
         }
       }
     },
