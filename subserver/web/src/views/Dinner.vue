@@ -1,6 +1,5 @@
 <template>
   <div>
-    <LoadingView hide="loading"></LoadingView>
     <!-- v-if="userSummary.has_subscribed" -->
     <DinnerPublished
       :exe="exe"
@@ -13,7 +12,6 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import LoadingView from './subviews/LoadingView.vue';
 import DinnerPublished from './subviews/DinnerPublished.vue';
 // import DinnerLead from '../subview/DinnerLead.vue';
 import { GetExecution } from '../ts/service';
@@ -21,7 +19,6 @@ import { IsError } from '../ts/errors';
 
 @Component({
   components: {
-    LoadingView,
     DinnerPublished,
     // DinnerLead,
   },

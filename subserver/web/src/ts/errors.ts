@@ -11,3 +11,12 @@ export function IsError(resp: any): boolean {
     }
     return false;
 }
+
+export function ErrorAlert(resp: any) {
+    console.error(resp);
+    if (resp.error) {
+        alert(`Error:\n-Code: ${resp.error.code}\n-Message: ${resp.error.message}\n-Detail: ${resp.error.detail}`);
+        return;
+    }
+    alert('Error: ' + JSON.stringify(resp));
+}

@@ -9,12 +9,15 @@
     ]
   },
   "rules": {
-    "max-line-length": [false],
+    "trailing-comma": [true],
+    "max-line-length": [false, 350],
     "import-name": [false],
     "function-name": false,
+    "prefer-for-of": false,
     "no-console": [false],
+    "variable-name": [false],
     "quotemark": [true, "single"],
-    "indent": [true, "spaces", 2],
+    "indent": [true, "spaces", 4],
     "interface-name": false,
     "ordered-imports": false,
     "object-literal-sort-keys": false,

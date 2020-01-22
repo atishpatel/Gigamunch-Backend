@@ -1,18 +1,11 @@
 import Vue from 'vue';
-import router from './router';
-import store from './store';
+import './plugins/vuetify';
 import App from './App.vue';
-import './registerServiceWorker';
-
-import VueMDCAdapter from 'vue-mdc-adapter';
-import './scss/theme.scss';
+import router from './router';
 
 Vue.config.productionTip = false;
 
-Vue.use(VueMDCAdapter);
-
 new Vue({
   router,
-  store,
-  render: (h) => h(App),
+  render: h => h(App)
 }).$mount('#app');

@@ -31,7 +31,7 @@ export default class ExecutionsList extends Vue {
   margin: 0 24px;
   padding-bottom: 6px;
   font-size: 1.5em;
-  color: $mdc-theme-secondary;
-  border-bottom: 4px solid $mdc-theme-accent;
+  color: $app-theme-secondary;
+  border-bottom: 4px solid $app-theme-accent;
 }
 </style>

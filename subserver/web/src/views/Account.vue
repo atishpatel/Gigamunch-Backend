@@ -1,6 +1,5 @@
 <template>
   <div>
-    <LoadingView hide="loading"></LoadingView>
     <h1>Account</h1>
     <section>
       <div class="field">
@@ -20,10 +19,9 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { GetAccountInfo } from '../ts/service';
 import { IsError } from '../ts/errors';
-import LoadingView from './subviews/LoadingView.vue';
 
 @Component({
-  components: { LoadingView },
+  components: {},
 })
 export default class Dinner extends Vue {
   protected accountInfo!: SubAPI.GetAccountInfoResp;

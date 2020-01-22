@@ -1,76 +1,81 @@
 <template>
-  <mdc-layout-app id="app">
-    <mdc-drawer
-      slot="drawer"
-      temporary
-      toggle-on="toggle-drawer"
+  <v-app>
+    <v-navigation-drawer
+      v-model="drawer"
+      fixed
+      clipped
+      app
     >
-      <!-- Drawer -->
-      <div class="drawer-top">
-        <div class="drawer-top-logo">Gigamunch</div>
+      <div class="drawer-nav-header">Menu</div>
+      <v-list>
+        <v-list-tile to="/">
+          <v-list-tile-action>
+            <v-icon>inbox</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              My Dinners
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile to="/history">
+          <v-list-tile-action>
+            <v-icon>drafts</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Dinner History
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile to="/account">
+          <v-list-tile-action>
+            <v-icon>drafts</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Account
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+    <v-toolbar
+      fixed
+      flat
+      clipped-left
+      app
+      class="app-toolbar"
+    >
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title class="headline">
+        <span></span>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <div>
+        <a
+          v-if="userSummary.has_subscribed === true && userSummary.is_active === false"
+          class="nav-link"
+          href="account"
+        >Sign up</a>
+        <a
+          v-if="userSummary.has_subscribed === false"
+          class="nav-link"
+          href="/checkout"
+        >Sign up</a>
+        <a
+          v-if="userSummary.is_logged_in === false"
+          class="nav-link"
+          href="/login"
+        >Login</a>
       </div>
-      <mdc-drawer-list>
-        <mdc-drawer-item
-          to="/"
-          start-icon="inbox"
-        >
-          My Dinners
-        </mdc-drawer-item>
-        <mdc-drawer-item
-          to="/history"
-          start-icon="send"
-        >
-          Dinner History
-        </mdc-drawer-item>
-        <mdc-drawer-item
-          to="/account"
-          start-icon="drafts"
-        >
-          Account
-        </mdc-drawer-item>
-      </mdc-drawer-list>
-    </mdc-drawer>
+    </v-toolbar>
 
-    <mdc-toolbar slot="toolbar">
-      <!-- Toolbar -->
-      <mdc-toolbar-row>
-        <mdc-toolbar-section align-start>
-          <mdc-toolbar-menu-icon event="toggle-drawer"></mdc-toolbar-menu-icon>
-          <mdc-toolbar-title>Gigamunch</mdc-toolbar-title>
-        </mdc-toolbar-section>
-        <mdc-toolbar-section align-end>
-          <a
-            v-if="userSummary.has_subscribed === true && userSummary.is_active === false"
-            class="nav-link"
-            href="account"
-          >Sign up</a>
-          <a
-            v-if="userSummary.has_subscribed === false"
-            class="nav-link"
-            href="/checkout"
-          >Sign up</a>
-          <a
-            v-if="userSummary.is_logged_in === false"
-            class="nav-link"
-            href="/login"
-          >Login</a>
-        </mdc-toolbar-section>
-      </mdc-toolbar-row>
-    </mdc-toolbar>
-
-    <main>
-      <div
-        class="main-loading-screen"
-        :hidden-fade="hideLoadingScreen"
-      >
-        TODO: Add loading animation
-      </div>
-      <!-- Main Content -->
-      <router-view :userSummary="userSummary" />
-    </main>
-  </mdc-layout-app>
+    <v-content class="main">
+      <router-view />
+    </v-content>
+  </v-app>
 </template>
-
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { GetUserSummary } from './ts/service';
@@ -99,44 +104,40 @@ export default class App extends Vue {
 }
 </script>
 <style lang="scss">
-// global
-@import 'scss/theme';
-@import 'scss/shared-styles';
-
-#app {
-  font-family: 'Roboto', 'Avenir', Helvetica, Arial, sans-serif;
+v-app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: $mdc-theme-on-primary;
+  text-align: center;
+  color: #2c3e50;
 }
 
-.main-loading-screen {
-  background-color: pink;
-  height: 100%;
-  width: 100%;
-  z-index: 1000;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: auto;
-  opacity: 1;
-  transition: visibility 0s 2s, opacity 2s ease-in-out;
-}
-.main-loading-screen[hidden-fade] {
-  opacity: 0;
-  visibility: hidden;
+.app-toolbar div {
+  background: white;
 }
 
-.drawer-top {
-  min-height: 200px;
-  background-color: $mdc-theme-accent;
+.main {
+  background: white;
 }
-.drawer-top-logo {
-  padding: 12px;
+
+.drawer-nav-header {
+  background-color: #009688;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  padding: 24px 20px;
 }
-</style>
-<style lang="scss" scoped>
-.nav-link {
-  padding: 12px;
+
+.nav-tile-content {
+  flex-direction: row;
+  align-items: center;
+}
+
+.theme--light.v-list .v-list__tile--link:hover {
+  background-color: #dce0e2;
+}
+
+.v-list__tile--active {
+  background-color: #eceff1;
 }
 </style>
