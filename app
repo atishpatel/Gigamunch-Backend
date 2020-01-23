@@ -97,11 +97,11 @@ fi
 ################################################################################
 if [[ $1 == "serve" ]]; then
   # setup mysql
-  # if [[ $OSTYPE == "linux-gnu" ]]; then
-  #   service mysql start&
-  # else
-  #   /usr/local/opt/mysql@5.6/bin/mysql.server start
-  # fi
+  if [[ $OSTYPE == "linux-gnu" ]]; then
+    service mysql start&
+  else
+    /usr/local/opt/mysql@5.7/bin/mysql.server start
+  fi
   # start goapp serve
   project="gigamunch-omninexus-dev"
   sqlip="104.154.108.220"
@@ -133,11 +133,11 @@ if [[ $1 == "serve" ]]; then
   fi
   # stop mysql
 
-  # if [[ $OSTYPE == "linux-gnu" ]]; then
-  #   service mysql stop&
-  # else
-  #   /usr/local/opt/mysql@5.6/bin/mysql.server stop
-  # fi
+  if [[ $OSTYPE == "linux-gnu" ]]; then
+    service mysql stop&
+  else
+    /usr/local/opt/mysql@5.7/bin/mysql.server stop
+  fi
   # kill background processes
   trap 'kill $(jobs -p)' EXIT
   timestamp
