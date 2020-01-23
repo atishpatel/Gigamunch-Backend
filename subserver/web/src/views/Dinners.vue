@@ -1,7 +1,10 @@
 <template>
   <div>
     <div>
-      <ExecutionsList class="list-component" :executionAndActivityList="executionAndActivityList"></ExecutionsList>
+      <ExecutionsList
+        class="list-component"
+        :executionAndActivityList="executionAndActivityList"
+      ></ExecutionsList>
     </div>
   </div>
 </template>

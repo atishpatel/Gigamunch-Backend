@@ -49,7 +49,7 @@
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="headline">
-        <span></span>
+        <span>Sub</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div>
@@ -76,6 +76,7 @@
     </v-content>
   </v-app>
 </template>
+
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { GetUserSummary } from './ts/service';
@@ -103,6 +104,7 @@ export default class App extends Vue {
   }
 }
 </script>
+
 <style lang="scss">
 v-app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
