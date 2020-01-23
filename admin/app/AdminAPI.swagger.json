@@ -1312,6 +1312,21 @@
         },
         "execution": {
           "$ref": "#/definitions/CommonExecution"
+        },
+        "preview_email": {
+          "type": "string"
+        },
+        "culture_email": {
+          "type": "string"
+        },
+        "marketing_email": {
+          "type": "string"
+        },
+        "social_media_text": {
+          "type": "string"
+        },
+        "sms_messages": {
+          "type": "string"
         }
       }
     },
@@ -2614,6 +2629,12 @@
           "type": "string"
         },
         "rating_sms": {
+          "type": "string"
+        },
+        "rating_link_veg": {
+          "type": "string"
+        },
+        "rating_link_nonveg": {
           "type": "string"
         }
       },

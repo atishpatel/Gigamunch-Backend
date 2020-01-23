@@ -72,8 +72,19 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to PBExecution")
 	}
+	// get html
+
+	contentResponse, err := getExecutionContent(execution)
+	if err != nil {
+		return errors.GetErrorWithCode(err).Annotate("failed to get execution content")
+	}
+
 	resp := &pb.GetExecutionResp{
-		Execution: exe,
+		Execution:       exe,
+		PreviewEmail:    contentResponse.previewEmail,
+		CultureEmail:    contentResponse.cultureEmail,
+		MarketingEmail:  contentResponse.offerEmail,
+		SocialMediaText: contentResponse.socialMediaText,
 	}
 	return resp
 }

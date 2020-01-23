@@ -46,8 +46,10 @@ type Email struct {
 
 // Notifications are notifications the subscribers gets.
 type Notifications struct {
-	DeliverySMS string `json:"delivery_sms" datastore:",noindex"`
-	RatingSMS   string `json:"rating_sms" datastore:",noindex"`
+	DeliverySMS      string `json:"delivery_sms" datastore:",noindex"`
+	RatingSMS        string `json:"rating_sms" datastore:",noindex"`
+	RatingLinkVeg    string `json:"rating_link_veg" datastore:",noindex"`
+	RatingLinkNonveg string `json:"rating_link_nonveg" datastore:",noindex"`
 }
 
 // InfoBox is the infobox in a culture guide.

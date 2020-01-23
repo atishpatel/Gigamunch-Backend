@@ -234,6 +234,11 @@ interface GetExecutionReq {
 interface GetExecutionResp {
     error: Common.Error
     execution: Common.Execution
+    preview_email: string
+    culture_email: string
+    marketing_email: string
+    social_media_text: string
+    sms_messages: string
 }
 interface UpdateExecutionReq {
     execution: Common.Execution

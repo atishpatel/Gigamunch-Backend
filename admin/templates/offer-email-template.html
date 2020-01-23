@@ -1,0 +1,715 @@
+[[define "offer-email"]]
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:v="urn:schemas-microsoft-com:vml"
+      xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+  <meta charset="utf-8">
+  <!-- utf-8 works for most cases -->
+  <meta name="viewport"
+        content="width=device-width">
+  <!-- Forcing initial-scale shouldn't be necessary -->
+  <meta http-equiv="X-UA-Compatible"
+        content="IE=edge">
+  <!-- Use the latest (edge) version of IE rendering engine -->
+  <meta name="x-apple-disable-message-reformatting">
+  <!-- Disable auto-scale in iOS 10 Mail entirely -->
+  <title></title>
+  <!-- The title tag shows in email notifications, like Android 4.4. -->
+
+  <!-- Web Font / @font-face : BEGIN -->
+  <!-- NOTE: If web fonts are not required, lines 10 - 27 can be safely removed. -->
+
+  <!-- Desktop Outlook chokes on web font references and defaults to Times New Roman, so we force a safe fallback font. -->
+  <!--[if mso]>
+        <style>
+            * {
+                font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif !important;
+            }
+        </style>
+    <![endif]-->
+
+  <!-- All other clients get the webfont reference; some will render the font and others will silently fail to the fallbacks. More on that here: http://stylecampaign.com/blog/2015/02/webfont-support-in-email/ -->
+  <!--[if !mso]><!-->
+  <!-- insert web font reference, eg: <link href='https://fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'> -->
+  <!--<![endif]-->
+
+  <!-- Web Font / @font-face : END -->
+
+  <!-- CSS Reset : BEGIN -->
+  <style>
+    /* What it does: Remove spaces around the email design added by some email clients. */
+
+    /* Beware: It can remove the padding / margin and add a background color to the compose a reply window. */
+
+    html,
+    body {
+      margin: 0 auto !important;
+      padding: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    /* What it does: Stops email clients resizing small text. */
+
+    * {
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+      -webkit-font-smoothing: antialiased !important;
+    }
+
+    img {
+      border: 0 !important;
+      outline: none !important;
+    }
+
+    p,
+    h1,
+    h2,
+      {
+      Margin: 0px !important;
+      Padding: 0px !important;
+    }
+
+    table {
+      border-collapse: collapse;
+      mso-table-lspace: 0px;
+      mso-table-rspace: 0px;
+    }
+
+    td,
+    a,
+    span {
+      border-collapse: collapse;
+      mso-line-height-rule: exactly;
+    }
+
+    /* What it does: Centers email on Android 4.4 */
+
+    div[style*="margin: 16px 0"] {
+      margin: 0 !important;
+    }
+
+    /* What it does: Stops Outlook from adding extra spacing to tables. */
+
+    table,
+    td {
+      mso-table-lspace: 0pt !important;
+      mso-table-rspace: 0pt !important;
+    }
+
+    /* What it does: Fixes webkit padding issue. Fix for Yahoo mail table alignment bug. Applies table-layout to the first 2 tables then removes for anything nested deeper. */
+
+    table {
+      border-spacing: 0 !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+      margin: 0 auto !important;
+    }
+
+    table table table {
+      table-layout: auto;
+    }
+
+    /* What it does: Uses a better rendering method when resizing images in IE. */
+
+    img {
+      -ms-interpolation-mode: bicubic;
+    }
+
+    /* What it does: A work-around for email clients meddling in triggered links. */
+
+    *[x-apple-data-detectors],
+    /* iOS */
+
+    .x-gmail-data-detectors,
+    /* Gmail */
+
+    .x-gmail-data-detectors *,
+    .aBn {
+      border-bottom: 0 !important;
+      cursor: default !important;
+      color: inherit !important;
+      text-decoration: none !important;
+      font-size: inherit !important;
+      font-family: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+    }
+
+    /* What it does: Prevents Gmail from displaying an download button on large, non-linked images. */
+
+    .a6S {
+      display: none !important;
+      opacity: 0.01 !important;
+    }
+
+    /* If the above doesn't work, add a .g-img class to any image in question. */
+
+    img.g-img+div {
+      display: none !important;
+    }
+
+    /* What it does: Prevents underlining the button text in Windows 10 */
+
+    .button-link {
+      text-decoration: none !important;
+    }
+
+    /* What it does: Removes right gutter in Gmail iOS app: https://github.com/TedGoas/Cerberus/issues/89  */
+
+    /* Create one of these media queries for each additional viewport size you'd like to fix */
+
+    /* Thanks to Eric Lepetit (@ericlepetitsf) for help troubleshooting */
+
+    @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+
+      /* iPhone 6 and 6+ */
+      .email-container {
+        min-width: 375px !important;
+      }
+    }
+
+  </style>
+  <!-- CSS Reset : END -->
+
+  <!-- Progressive Enhancements : BEGIN -->
+  <style>
+    /* What it does: Hover styles for buttons */
+
+    .button-td,
+    .button-a {
+      transition: all 100ms ease-in;
+    }
+
+    .button-td:hover,
+    .button-a:hover {
+      background: #ffffff !important;
+      border-color: #FD8563 !important;
+      color: #FD8563 !important;
+    }
+
+    /* Media Queries */
+
+    @media screen and (max-width: 600px) {
+
+      /* What it does: Adjust typography on small screens to improve readability */
+      .email-container span {
+        font-size: 17px !important;
+        line-height: 22px !important;
+      }
+    }
+
+  </style>
+  <!-- Progressive Enhancements : END -->
+
+  <!-- What it does: Makes background images in 72ppi Outlook render at correct size. -->
+  <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:AllowPNG/>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+    </xml>
+    <![endif]-->
+
+</head>
+
+<body width="100%"
+      bgcolor="#f2f2f2"
+      style="margin: 0; mso-line-height-rule: exactly;">
+  <center style="width: 100%; background: #f2f2f2; text-align: left;">
+    <div style="display: none; max-height: 0px; overflow: hidden;">
+      Don't miss out on the fun of diving into diversity! Please enjoy this Music Playlist that our subscribers get to listen to while they eat their cultural dinner. 😊🎶
+    </div>
+    <!-- Insert &zwnj;&nbsp; hack after hidden preview text -->
+    <div style="display: none; max-height: 0px; overflow: hidden;">
+      &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+    </div>
+    <!--*|IF:MC_PREVIEW_TEXT|*-->
+    <!--[if !gte mso 9]><!----><span class="mcnPreviewText"
+          style="display:none; font-size:0px; line-height:0px; max-height:0px; max-width:0px; opacity:0; overflow:hidden; visibility:hidden; mso-hide:all;">Don't miss out on the fun of diving into diversity! Please enjoy this Music Playlist that our subscribers get to listen to while they eat their cultural dinner. 😊🎶</span>
+    <!--<![endif]-->
+    <!--*|END:IF|*-->
+
+    <div style="max-width: 620px; margin: auto;"
+         class="email-container">
+      <!--[if mso]>
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" align="center">
+            <tr>
+            <td>
+            <![endif]-->
+
+      <!-- Email Header : BEGIN -->
+      <table role="presentation"
+             cellspacing="0"
+             cellpadding="0"
+             border="0"
+             align="center"
+             width="100%"
+             style="max-width: 620px;">
+        <tr>
+          <td style="padding: 15px 0 7px 0; text-align: center">
+            <a target="_blank"
+               href="https://eatgigamunch.com/?utm_source=weekly-playlist-email[[.Culture.Country]]&utm_medium=email&utm_content=email-header">
+              <img src="https://storage.googleapis.com/gigamunch-omninexus-website/email/email-logo-light.png" style="width: 200px; max-width: 200px; height: 34px; max-height: 34px;" width="200" height="34" alt="" border="0" style="height: auto;"> </a>
+          </td>
+        </tr>
+        <tr>
+          <td align="center"
+              valign="top"
+              style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size:11px; line-height: 1.5; color: #999999;">
+            Email looking strange?
+            <a target="_blank"
+               href="{{ view_in_browser_url }}"
+               style="color:#999999">
+              <strong>View in browser</strong>
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td height="20"
+              style="font-size:1px; line-height:1px;">&nbsp;</td>
+        </tr>
+      </table>
+      <!-- Email Header : END -->
+
+      <!-- Email Body : BEGIN -->
+      <table role="presentation"
+             cellspacing="0"
+             cellpadding="0"
+             border="0"
+             align="center"
+             width="100%"
+             style="max-width: 620px;">
+
+        <!-- Hero Image : BEGIN -->
+        <tr>
+          <td valign="top"
+              bgcolor="#ffffff"
+              align="center"
+              style="box-shadow: 0px -2px 4px 0px #dadfe1, 0 9px 0px 0px #ffffff, 4px 0 4px -4px #dadfe1, -4px 0 4px -4px #dadfe1;">
+            <img src="[[.Email.LandscapeImageURL]]" width="620" height="" alt="" border="0" align="center" style="width: 100%; max-width: 620px; height: auto; background: #dddddd; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48; margin: auto;" class="g-img">
+          </td>
+        </tr>
+        <!-- Hero Image : BEGIN -->
+
+        <!--White Background : BEGIN -->
+        <tr>
+          <td align="center"
+              valign="top"
+              bgcolor="#ffffff"
+              style="padding: 2px; box-shadow: 0px 0px 10px #dadfe1; width: 100%;">
+            <table align="center"
+                   width="100%"
+                   border="0"
+                   cellspacing="0"
+                   cellpadding="0"
+                   style="max-width: 500px;">
+
+              <!-- Intro : BEGIN -->
+              <tr>
+                <td height="35"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td align="left"
+                    valign="top"
+                    style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <span>Next week we are whisking our subscribers away on a delicious journey to [[.Culture.Country]]! [[.Culture.FlagEmoji]] 
+                   </a>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td height="25"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td align="left"
+                    valign="top"
+                    style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <span>Don't miss out on the fun of diving into diversity! Please enjoy this <strong>[[.Culture.Nationality]] Music Playlist </strong> our subscribers get to listen to while they eat their dinner. 😊🎶  </span>
+                </td>
+              </tr>
+              <tr>
+                <td height="15"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <!-- Intro : END -->
+              <!-- Playlist Button : BEGIN -->
+              <tr>
+                <td style="padding: 20px 0; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <table role="presentation"
+                         cellspacing="0"
+                         cellpadding="0"
+                         border="0"
+                         align="center"
+                         style="margin: auto;">
+                    <tr>
+                      <td style="border-radius: 5px; background: #FD8563;"
+                          class="button-td-youtube">
+                        <a href="[[.Content.YoutubeURL]]"
+                             style="padding: 12px 25px; font-size: 16px; font-weight: bold; background: #FD8563; border: 2px solid #FD8563; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; text-align: center; text-decoration: none; display: block; border-radius: 5px; color:#ffffff;"
+
+                             class="button-a-youtube"
+                             target="_blank">
+                                <span class="button-link">LISTEN ON YOUTUBE</span> 
+                            </a>
+                      </td>
+                      <td style="border-radius: 5px; background: #ffffff;"
+                          class="button-td">
+
+                        <span style="color:#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        </a>
+                      </td>
+                      <td style="border-radius: 5px; background: #FD8563;"
+                          class="button-td-spotify">
+                        <a href="[[.Content.SpotifyURL]]"
+                             style="padding: 12px 25px; font-size: 16px; font-weight: bold; background: #FD8563; border: 2px solid #FD8563; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; text-align: center; text-decoration: none; display: block; border-radius: 5px; color:#ffffff;"
+
+                             class="button-a-spotify"
+                             target="_blank">
+                            <span class="button-link">LISTEN ON SPOTIFY</span> 
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <!-- Playlist Button : END -->
+
+              <tr>
+                <td height="5"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+
+              <tr>
+                <td>
+                  <hr style="margin: 40px 0px; border: 0; border-bottom: 1px solid #dadfe1;">
+                </td>
+              </tr>
+
+              <tr>
+                <td height="14"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+
+              <!-- Dinner : BEGIN -->
+              {% if subscriber.tags contains "DEACTIVATED" %}
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 30px;font-weight: 500; line-height: 1.25; color: #333e48;">
+                  Get this [[.Culture.Nationality]] Dinner
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 30px;font-weight: 500; line-height: 1.25; color: #333e48;">
+                  Get this [[.Culture.Nationality]] Dinner FREE
+                </td>
+              </tr>
+              {% endif %}
+              <tr>
+                <td height="5"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 14px; line-height: 1.5; color: #8698a0;">
+                  <span>Fully prepared and delivered, just for you</span>
+                </td>
+              </tr>
+              <tr>
+                <td height="20"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td bgcolor="#ffffff"
+                    align="center">
+                  <img src="[[.Email.DinnerNonVegImageURL]]"
+                       alt=""
+                       width="600"
+                       height=""
+                       alt=""
+                       border="0"
+                       align="center"
+                       style="width: 100%; max-width: 600px; height: auto; background: #dddddd; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48; margin: auto;border-radius: 15px;"
+                       class="g-img"> </td>
+              </tr>
+              <tr>
+                <td height="15"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+
+              <tr>
+                <td style="padding: 2px 2px 0 0;">
+                  <table style="width:100%;">
+                    <tbody>
+                      <tr>
+                        <td align="left"
+                            style="width: 100px;">
+                          <table style="width:100%;">
+                            <tbody>
+                              <tr>
+                                <td align="center"> <img src="[[.Email.CookFaceImageURL]]" width="100" height="" alt="" border="0" align="center" style="width: 100%; max-width: 100px; height: auto; background: #dddddd; margin: auto;border-radius: 50px;" class="g-img"> </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                        <td align="left"
+                            style="padding: 0px 0px 0px 25px; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 14px; line-height: 1.5; color: #8698a0;">
+                          <span>a [[.Culture.Nationality]] dinner experience hosted by: </span>
+                          <span style="font-size: 36px; color: #333e48;"><br><strong>[[.CultureCook.FirstName]] [[.CultureCook.LastName]]</strong></span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td height="25"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <span>Gigamunch delivers meals from a different country each week so you can explore the world from your own dinner table. Each meal is designed by a local immigrant or refugee in Nashville who wants to share their culture with you!</span>
+                </td>
+              </tr>
+              <!-- Dinner : END -->
+
+              {% if subscriber.tags contains "DEACTIVATED" %}
+              <tr>
+                <td height="40"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 30px;font-weight: 500; line-height: 1.25; color: #333e48;">
+                  We'd love to have you back! 😊
+                </td>
+              </tr>
+              <tr>
+              <tr>
+                <td height="20"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <span><strong>Reply to this email</strong> to rejoin Gigamunch, and get your next dinner delivered as early as a few days!</span>
+                </td>
+              </tr>
+              {% else %}
+              <!-- CTA : BEGIN -->
+              <tr>
+                <td height="10"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="padding: 20px 0; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <table role="presentation"
+                         cellspacing="0"
+                         cellpadding="0"
+                         border="0"
+                         align="left"
+                         style="margin: auto;">
+                    <tr>
+                      <td style="border-radius: 5px; background: #FD8563;"
+                          class="button-td"> <a href="https://eatgigamunch.com/checkout?email={{ subscriber.email | downcase }}&?utm_source=weekly-playlist-email[[.Culture.Country]]&utm_medium=email&utm_content=cta-button"
+                               style="padding: 12px 25px; font-size: 16px; font-weight: bold; background: #FD8563; border: 2px solid #FD8563; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; text-align: center; text-decoration: none; display: block; border-radius: 5px; color:#ffffff;"
+
+                               class="button-a"
+                               target="_blank"> <span class="button-link">GET THIS DINNER FREE</span> </a> </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <!-- CTA : END -->
+              <tr>
+                <td height="35"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <span>Your first bag is on us because we know you'll love it! If you don't, you can cancel anytime without getting charged a dime. No commitment.</span>
+                </td>
+              </tr>
+              <tr>
+                <td height="25"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #333e48;">
+                  <span>We hope you make use of this offer so you can bring diversity into your home while getting to know our beautiful neighbors in Nashville! 🙌</span>
+                </td>
+              </tr>
+              {% endif %}
+
+              <tr>
+                <td height="35"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+
+              <!-- Signature : BEGIN -->
+              <tr>
+                <td style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 16px; line-height: 1.5; color: #8698a0;">
+                  <span>💛&nbsp;&nbsp;[[.CultureCook.FirstName]] and The Gigamunch Team</span>
+                </td>
+              </tr>
+              <tr>
+                <td height="50"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <!-- Signature : END -->
+
+            </table>
+          </td>
+        </tr>
+        <!--White Background : END -->
+
+        <!--Social Bar : BEGIN -->
+        <tr>
+          <td align="center"
+              valign="top"
+              bgcolor="#FD8563"
+              style=" padding: 2px; box-shadow: 0px 2px 4px 0px #dadfe1, 0 -9px 0px 0px #ffffff, 4px 0 4px -4px #dadfe1, -4px 0 4px -4px #dadfe1;">
+            <table align="center"
+                   width="100%"
+                   border="0"
+                   cellspacing="0"
+                   cellpadding="0"
+                   style="max-width: 500px; background-color:#FD8563;">
+              <tr>
+                <td height="20"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td align="center"
+                    valign="top"
+                    mc:edit="news"
+                    style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size: 14px; line-height: 1.5; color:#ffffff;">
+                  <span>Gigamunch delivers meals from a different country each week so you can explore the world from your own dinner table.</span>
+                </td>
+              </tr>
+              <tr>
+                <td height="20"
+                    style="font-size:1px; line-height:1px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td align="center"
+                    valign="top">
+                  <table border="0"
+                         cellspacing="0"
+                         cellpadding="0"
+                         align="center">
+                    <tr>
+                      <td align="center"
+                          valign="top">
+                        <a href="https://www.facebook.com/eatgigamunch/"
+                           target="_blank"
+                           style="text-decoration:none;">
+                        <img mc:edit="FB" src="https://storage.googleapis.com/gigamunch-omninexus-website/email/facebook-icon-small.png" width="35" height="35" alt="FB" style="display:block; font-family:Arial, sans-serif; font-size:12px;line-height:16px;color:#ffffff;font-weight:bold; max-width:35px;" border="0"/>
+                      </a>
+                      </td>
+                      <td width="30"
+                          style="font-size:1px; line-height:1px;">&nbsp;</td>
+                      <td align="center"
+                          valign="middle">
+                        <a href="https://www.instagram.com/eatgigamunch/"
+                           target="_blank"
+                           style="text-decoration:none;">
+                        <img mc:edit="IN" src="https://storage.googleapis.com/gigamunch-omninexus-website/email/instagram-icon-small.png" width="35" height="35" alt="IN" style="display:block; font-family:Arial, sans-serif; font-size:12px;line-height:16px;color:#ffffff;font-weight:bold; max-width:35px;" border="0"/>
+                      </a>
+                      </td>
+                      <td width="35"
+                          style="font-size:1px; line-height:1px;">&nbsp;</td>
+                      <td align="center"
+                          valign="middle">
+                        <a href="https://open.spotify.com/user/gigamunch"
+                           target="_blank"
+                           style="text-decoration:none;">
+                          <img mc:edit="SP" src="https://storage.googleapis.com/gigamunch-omninexus-website/email/spotify-icon-small.png" width="35" height="35" alt="SP" style="display:block; font-family:Arial, sans-serif; font-size:12px;line-height:16px;color:#ffffff;font-weight:bold;max-width:35px;" border="0"/>
+                        </a>
+                      </td>
+                      <td width="35"
+                          style="font-size:1px; line-height:1px;">&nbsp;
+                      </td>
+                      <td align="center"
+                          valign="middle">
+                        <a href="https://www.youtube.com/channel/UC9phh10XipBAsKRQfRlpFoQ/playlists"
+                           target="_blank"
+                           style="text-decoration:none;">
+                          <img mc:edit="YT" src="https://storage.googleapis.com/gigamunch-omninexus-website/email/youtube-icon-small.png" width="35" height="35" alt="YT" style="display:block; font-family:Arial, sans-serif; font-size:12px;line-height:16px;color:#ffffff;font-weight:bold;max-width:35px;" border="0"/>
+                      </a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td height="20"
+                    style="font-size:1px; line-height:1px;">&nbsp;
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!--Social Bar : END -->
+
+      </table>
+      <!--Email Body : END -->
+
+      <!-- Email Footer : BEGIN -->
+      <table role="presentation"
+             cellspacing="0"
+             cellpadding="0"
+             border="0"
+             align="center"
+             width="100%"
+             style="max-width: 620px;">
+        <tr>
+          <td height="32"
+              style="font-size:1px; line-height:1px;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="center"
+              valign="top"
+              style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size:11px; line-height: 1.5; color: #999999;"> This email was sent to <strong> {{ subscriber.email | downcase }} </strong> </td>
+        </tr>
+        <tr>
+          <td height="5"
+              style="font-size:1px; line-height:1px;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="center"
+              valign="top"
+              style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size:11px; line-height: 1.5; color: #999999;"> Want out of the loop? <strong> {{ unsubscribe_link }} </strong></td>
+        </tr>
+        <tr>
+          <td height="15"
+              style="font-size:1px; line-height:1px;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td align="center"
+              valign="top"
+              style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size:11px; line-height: 1.5; color: #999999;"> <strong>Made with 💛 in Nashville, TN </strong> </td>
+        </tr>
+        <tr>
+          <td align="center"
+              valign="top"
+              style="font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; font-size:11px; line-height: 1.5; color: #999999;"> {{ postal_address }} </td>
+        </tr>
+        <tr>
+          <td height="30"
+              style="font-size:1px; line-height:1px;">&nbsp;</td>
+        </tr>
+      </table>
+      <!-- Email Footer : END -->
+
+      <div style="white-space: nowrap; display: none; font-size:0px; line-height:0px;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      </div>
+    </div>
+  </center>
+</body>
+
+</html>
+[[end]]

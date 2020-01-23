@@ -134,6 +134,8 @@ interface Email {
 interface Notifications {
   delivery_sms: string
   rating_sms: string
+  rating_link_veg: string
+  rating_link_nonveg: string
 }
 interface InfoBox {
   title: string

@@ -695,6 +695,12 @@
         },
         "rating_sms": {
           "type": "string"
+        },
+        "rating_link_veg": {
+          "type": "string"
+        },
+        "rating_link_nonveg": {
+          "type": "string"
         }
       },
       "description": "Notifications are notifications the subscribers gets."
