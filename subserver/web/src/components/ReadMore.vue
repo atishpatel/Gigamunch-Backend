@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     formattedString() {
-      var val_container = this.text;
+      let val_container = this.text;
       if (!this.isReadMore && this.text.length > this.maxChars) {
         val_container = val_container.substring(0, this.maxChars) + '...';
       }
@@ -58,10 +58,12 @@ export default {
   },
   methods: {
     triggerReadMore(e, b) {
-      if (this.link == '#') {
+      if (this.link === '#') {
         e.preventDefault();
       }
-      if (this.lessStr !== null || this.lessStr !== '') this.isReadMore = b;
+      if (this.lessStr !== null || this.lessStr !== '') {
+        this.isReadMore = b;
+      }
     },
   },
 };
