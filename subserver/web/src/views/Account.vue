@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Prop, Component, Vue } from 'vue-property-decorator';
 import { GetAccountInfo } from '../ts/service';
 import { IsError } from '../ts/errors';
 
@@ -25,6 +25,7 @@ import { IsError } from '../ts/errors';
 })
 export default class Dinner extends Vue {
   protected accountInfo!: SubAPI.GetAccountInfoResp;
+  @Prop()
   protected name!: string;
   protected loading!: boolean;
 
