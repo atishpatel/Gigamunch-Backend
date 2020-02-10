@@ -83,7 +83,7 @@ import { GetUserSummary } from './ts/service';
 
 @Component({})
 export default class App extends Vue {
-  public drawerOpen = false;
+  public drawer = false;
   public hideLoadingScreen = false;
   public userSummary = {
     is_active: false,
