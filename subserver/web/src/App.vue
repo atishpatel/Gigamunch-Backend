@@ -89,8 +89,8 @@ export default class App extends Vue {
     is_active: false,
     is_logged_in: false,
     has_subscribed: false,
-    is_admin: false,
-    on_probation: false,
+    // is_admin: false,
+    // on_probation: false,
     error: {} as Common.Error,
   } as SubAPI.GetUserSummaryResp;
 
