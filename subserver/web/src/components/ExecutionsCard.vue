@@ -6,14 +6,14 @@
     <div class="image unset-link">
       <img
         :src="dinner_image_src"
-        :alt="computedImageAlt"
+        :alt="computedDinnerImageAlt"
       >
     </div>
     <div class="cook-info-row">
       <div class="image cook-face-image unset-link">
         <img
           :src="cook_face_image_src"
-          :alt="computedImageAlt"
+          :alt="computedCookImageAlt"
         >
       </div>
       <div>
@@ -43,14 +43,20 @@ export default class ExecutionsItem extends Vue {
   @Prop()
   public cook_face_image_src!: string;
   @Prop()
+  public nationality!: string;
+  @Prop()
   public to!: object;
 
-  get computedImageAlt(): string {
+  get computedCookImageAlt(): string {
     return this.cook_name + ' image';
   }
 
+  get computedDinnerImageAlt(): string {
+    return this.nationality + 'dinner image';
+  }
+
   get subtitle(): string {
-    return 'your immigrant host';
+    return 'your ' + this.nationality + ' host';
   }
 }
 </script>
