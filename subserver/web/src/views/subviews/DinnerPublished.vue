@@ -49,7 +49,29 @@
           :ingredients="dish.ingredients"
         ></Dish>
       </div>
-
+      <div class="section-title">
+        <h2 class="playlist-title-text">{{playlistTitle}}</h2>
+      </div>
+      <v-row no-gutters>
+        <v-btn
+          outline
+          outlined
+          large
+          color="#E8554E"
+          :href="spotifyUrl"
+          target="_blank"
+          :cols="n === 1 ? 8 : 4"
+        >Listen on Spotfiy</v-btn>
+        <v-btn
+          outline
+          outlined
+          large
+          color="#E8554E"
+          :href="youtubeUrl"
+          target="_blank"
+          :cols="n === 1 ? 8 : 4"
+        >Listen on Youtube</v-btn>
+      </v-row>
     </div>
   </div>
 </template>
@@ -103,8 +125,16 @@ export default class DinnerPublished extends Vue {
     return this.exe.dishes;
   }
 
-  get dish1(): string {
-    return this.exe.dishes[0].name;
+  get playlistTitle(): string {
+    return this.exe.culture.nationality + ' Music Playlist';
+  }
+
+  get spotifyUrl(): string {
+    return this.exe.content.spotify_url;
+  }
+
+  get youtubeUrl(): string {
+    return this.exe.content.youtube_url;
   }
 }
 </script>
@@ -139,12 +169,12 @@ $view-edge-padding-mobile: 24px;
 .hero-image-text {
   position: absolute;
   color: white;
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
   top: 24px;
   left: 28px;
 }
-@media (min-width: 800px) {
+@media (min-width: 700px) {
   .hero-image-text {
     font-size: 40px;
   }
@@ -153,7 +183,7 @@ $view-edge-padding-mobile: 24px;
 .content-container {
   padding: 0 $view-edge-padding-mobile;
 }
-@media (min-width: 800px) {
+@media (min-width: 700px) {
   .content-container {
     padding: 0 $view-edge-padding-desktop;
   }
@@ -174,8 +204,8 @@ $view-edge-padding-mobile: 24px;
 }
 .host-image-image {
   margin: auto;
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
   background-size: cover;
   border-radius: 50%;
 }
@@ -185,13 +215,29 @@ $view-edge-padding-mobile: 24px;
   justify-content: flex-end;
   padding-left: 12px;
 }
-.host-text-hosted-by {
-  margin: 0 0 10px 0;
-  opacity: 0.75;
-}
 .host-text-name {
+  font-size: 15px;
   margin: 6px 0 0 0;
 }
+.host-text-hosted-by {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.75;
+}
+@media (min-width: 500px) {
+  .host-text-name {
+    font-size: 24px;
+  }
+  .host-text-hosted-by {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+  }
+  .host-image-image {
+    width: 100px;
+    height: 100px;
+  }
+}
+
 .section-title {
   margin: 36px 0 18px 0;
 }
