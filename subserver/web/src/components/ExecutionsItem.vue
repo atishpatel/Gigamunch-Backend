@@ -1,11 +1,12 @@
 <template>
   <div>
-    <h2 class="date">{{titleDate}}</h2>
+    <h2 class="date">{{titleDate}} – {{culture}}</h2>
     <div class="cards">
       <!-- Culture Card -->
       <ExecutionsCard
         class="card"
         :cook_name="cookName"
+        :nationality="nationality"
         :dinner_image_src="execution.content.hands_plate_non_veg_image_url"
         :cook_face_image_src="execution.email.cook_face_image_url"
         :to="{path: 'dinner/'+executionURLID+'#culture'}"
@@ -34,12 +35,20 @@ export default class ExecutionsItem extends Vue {
     return GetDayMonthDayDate(this.execution.date);
   }
 
+  get culture() {
+    return this.execution.culture.country;
+  }
+
   get cookName() {
     return (
       this.execution.culture_cook.first_name +
       ' ' +
       this.execution.culture_cook.last_name
     );
+  }
+
+  get nationality() {
+    return this.execution.culture.nationality;
   }
 
   get cultureTitle() {
@@ -75,6 +84,7 @@ export default class ExecutionsItem extends Vue {
   font-weight: 500;
   font-size: 1.5em;
   padding-left: 24px;
+  margin: 40px 0 15px 0;
 }
 .cards {
   display: flex;
