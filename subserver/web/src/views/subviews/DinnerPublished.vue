@@ -32,10 +32,13 @@
       <div class="culture-description">
         <p class="culture-description-text">{{cultureDescription}}</p>
       </div>
-      <div class="dinner-image-title">
+      <div class="section-title">
         <h2 class="dinner-image-title-text">{{dinnerImageTitle}}</h2>
       </div>
-
+      <Image169
+        :src="dinnerImageSrc"
+        :rounded=true
+      ></Image169>
     </div>
   </div>
 </template>
@@ -77,6 +80,10 @@ export default class DinnerPublished extends Vue {
 
   get dinnerImageTitle(): string {
     return this.exe.culture_cook.first_name + "'s Dinner";
+  }
+
+  get dinnerImageSrc(): string {
+    return this.exe.content.hands_plate_non_veg_image_url;
   }
 }
 </script>
@@ -164,6 +171,7 @@ $view-edge-padding-mobile: 24px;
 .host-text-name {
   margin: 6px 0 0 0;
 }
-.culture-description-text {
+.section-title {
+  margin: 36px 0 18px 0;
 }
 </style>
