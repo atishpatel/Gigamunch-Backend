@@ -61,12 +61,6 @@ export default class Dinner extends Vue {
       this.activity = resp.execution_and_activity.activity;
     });
   }
-  get computedLandscapeImageAlt() {
-    return this.exe.culture.country + 'landscape image';
-  }
-  get landscapeImageSrc() {
-    return this.exe.email.landscape_image_url;
-  }
 }
 </script>
 
