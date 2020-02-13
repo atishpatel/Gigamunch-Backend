@@ -4,8 +4,8 @@ declare var APP: any;
 declare var firebase: any;
 declare var firebaseui: any;
 
-export function SignOut() {
-  firebase.auth().signOut();
+export function SignOut(callback: Function) {
+  firebase.auth().signOut().then(callback);
 }
 
 export function SetupFirebase() {
@@ -39,9 +39,12 @@ export function SetupFirebaseAuthUI(elementID: string) {
     tosUrl: '/terms',
     privacyPolicyUrl: '/privacy',
     signInSuccessUrl: '/sub/',
-    signInOptions: [
-      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    signInOptions: [{
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      requireDisplayName: false,
+    },
     ],
+    credentialHelper: firebaseui.auth.CredentialHelper.NONE,
   };
 
   // Initialize the FirebaseUI Widget using Firebase.

@@ -98,7 +98,9 @@
 
   <script>
     document.getElementById('login-sign-out').addEventListener('click', function() {
-      APP.Auth.SignOut();
+      APP.Auth.SignOut(() => {
+        window.location.reload();
+      });
     });
 
     function display(elementID) {
@@ -113,7 +115,6 @@
       console.log('user is signed in');
       hide('loading');
       hide('user-sign-in');
-      document.getElementById('login-name').textContent = APP.User.displayName;
       document.getElementById('login-email').textContent = APP.User.email;
       display('user-sign-out');
     }

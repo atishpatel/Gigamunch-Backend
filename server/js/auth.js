@@ -1,6 +1,6 @@
 import { Login } from './service';
-export function SignOut() {
-    firebase.auth().signOut();
+export function SignOut(callback) {
+    firebase.auth().signOut().then(callback);
 }
 export function SetupFirebase() {
     var config;
@@ -31,9 +31,12 @@ export function SetupFirebaseAuthUI(elementID) {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
         signInSuccessUrl: '/sub/',
-        signInOptions: [
-            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInOptions: [{
+                provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                requireDisplayName: false,
+            },
         ],
+        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
     };
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);

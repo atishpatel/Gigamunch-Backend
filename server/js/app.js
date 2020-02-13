@@ -65,8 +65,8 @@ var service = /*#__PURE__*/Object.freeze({
     Login: Login
 });
 
-function SignOut() {
-    firebase.auth().signOut();
+function SignOut(callback) {
+    firebase.auth().signOut().then(callback);
 }
 function SetupFirebase() {
     var config;
@@ -97,9 +97,12 @@ function SetupFirebaseAuthUI(elementID) {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
         signInSuccessUrl: '/sub/',
-        signInOptions: [
-            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInOptions: [{
+                provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                requireDisplayName: false,
+            },
         ],
+        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
     };
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);
