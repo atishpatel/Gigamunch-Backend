@@ -242,11 +242,11 @@ func setupAll(ctx context.Context, path string) (*logging.Client, *common.Server
 		return nil, nil, nil, nil, err
 	}
 	sqlConnectionString := os.Getenv("MYSQL_CONNECTION")
-	if sqlConnectionString == "" {
+	if sqlConnectionString == "" && !appengine.IsDevAppServer() {
 		return nil, nil, nil, nil, fmt.Errorf(`You need to set the environment variable "MYSQL_CONNECTION"`)
 	}
 	sqlDB, err := sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
-	if err != nil {
+	if err != nil && !appengine.IsDevAppServer() {
 		return nil, nil, nil, nil, fmt.Errorf("failed to get sql database client: %+v", err)
 	}
 	return log, serverInfo, dbC, sqlDB, nil

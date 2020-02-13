@@ -4,13 +4,13 @@
 
 <head>
   [[template "head" .]]
-  <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
   <link type="text/css"
         rel="stylesheet"
-        href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css" />
-  <script src="https://www.gstatic.com/firebasejs/5.5.1/firebase-app.js"></script>
+        href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
+  <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-app.js"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/5.5.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-auth.js"></script>
   <script src="../js/app.min.js"></script>
 </head>
 
@@ -50,9 +50,25 @@
       color: #757575;
     }
 
-    .login-email {
+    #login-email {
       color: #212529;
       font-weight: 600;
+    }
+
+    .card {
+      padding: 12px;
+    }
+
+    .card>* {
+      padding: 12px 0;
+    }
+
+    .dinner-button {
+      display: flex
+    }
+
+    .dinner-button button {
+      width: 100%;
     }
 
   </style>
@@ -65,9 +81,9 @@
     <div id="user-sign-out"
          class="hidden">
       <div class="card">
-        <div id="login-name"></div>
         <div id="login-email"></div>
-        <a href="/sub"><button>My dinners</button></a>
+        <a class="dinner-button"
+           href="/sub"><button>My dinners</button></a>
         <button id="login-sign-out">Sign out</button>
       </div>
 

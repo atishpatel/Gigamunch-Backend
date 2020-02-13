@@ -96,7 +96,7 @@ function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: 'login',
+        signInSuccessUrl: '/sub/',
         signInOptions: [
             firebase.auth.EmailAuthProvider.PROVIDER_ID,
         ],
