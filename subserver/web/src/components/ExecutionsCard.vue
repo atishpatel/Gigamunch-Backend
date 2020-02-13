@@ -1,13 +1,34 @@
 <template>
-  <div>
-    <router-link :to="to" tag="div" class="image unset-link">
-      <img :src="src" :alt="computedImageAlt">
-    </router-link>
-    <div>
-      <router-link :to="to" tag="h3" class="title unset-link" v-html="title"></router-link>
-      <p class="description" v-html="description"></p>
+  <router-link
+    :to="to"
+    tag="div"
+  >
+    <div class="image unset-link">
+      <img
+        :src="dinner_image_src"
+        :alt="computedImageAlt"
+      >
     </div>
-  </div>
+    <div class="cook-info-row">
+      <div class="image cook-face-image unset-link">
+        <img
+          :src="cook_face_image_src"
+          :alt="computedImageAlt"
+        >
+      </div>
+      <div>
+        <h3
+          class="cook_name unset-link"
+          v-html="cook_name"
+        ></h3>
+        <p
+          class="subtitle"
+          v-html="subtitle"
+        ></p>
+      </div>
+    </div>
+
+  </router-link>
 </template>
 
 <script lang="ts">
@@ -16,22 +37,31 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class ExecutionsItem extends Vue {
   @Prop()
-  public title!: string;
+  public cook_name!: string;
   @Prop()
-  public description!: string;
+  public dinner_image_src!: string;
   @Prop()
-  public src!: string;
+  public cook_face_image_src!: string;
   @Prop()
   public to!: object;
 
   get computedImageAlt(): string {
-    return this.title + ' image';
+    return this.cook_name + ' image';
+  }
+
+  get subtitle(): string {
+    return 'your immigrant host';
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.cook-info-row {
+  display: flex;
+  flex-direction: row;
+  margin: 15px 0 0 0;
+}
 .image {
   display: block;
   width: 100%;
@@ -52,12 +82,21 @@ export default class ExecutionsItem extends Vue {
     margin: auto;
   }
 }
-.title {
+.cook-face-image {
+  height: 100px;
+  width: 100px;
+  margin: 0 15px 0 0;
+  img {
+    margin: 0;
+    border-radius: 50%;
+  }
+}
+.cook_name {
   font-weight: 500;
   padding: 16px 0;
   margin: 0;
 }
-.description {
+.subtitle {
   padding: 0px;
   margin: 0px;
 }

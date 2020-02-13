@@ -5,19 +5,10 @@
       <!-- Culture Card -->
       <ExecutionsCard
         class="card"
-        :title="cultureTitle"
-        :description="cultureDescription"
-        :src="execution.content.landscape_image_url"
+        :cook_name="cookName"
+        :dinner_image_src="execution.content.hands_plate_non_veg_image_url"
+        :cook_face_image_src="execution.email.cook_face_image_url"
         :to="{path: 'dinner/'+executionURLID+'#culture'}"
-      ></ExecutionsCard>
-
-      <!-- Cook Card -->
-      <ExecutionsCard
-        class="card"
-        :title="cookName"
-        :description="cookDescription"
-        :src="execution.content.cook_image_url"
-        :to="{path: 'dinner/'+executionURLID+'#culture-cook'}"
       ></ExecutionsCard>
 
     </div>
@@ -43,6 +34,14 @@ export default class ExecutionsItem extends Vue {
     return GetDayMonthDayDate(this.execution.date);
   }
 
+  get cookName() {
+    return (
+      this.execution.culture_cook.first_name +
+      ' ' +
+      this.execution.culture_cook.last_name
+    );
+  }
+
   get cultureTitle() {
     return this.execution.culture.greeting;
   }
@@ -52,12 +51,6 @@ export default class ExecutionsItem extends Vue {
       return this.execution.culture.description.substr(0, 60) + '...';
     }
     return this.execution.culture.description;
-  }
-
-  get cookName() {
-    return `Meet ${this.execution.culture_cook.first_name} ${
-      this.execution.culture_cook.last_name
-    }`;
   }
 
   get cookDescription() {
