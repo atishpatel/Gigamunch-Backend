@@ -873,7 +873,7 @@ func (c *Client) VerifyAndUpdateAuth(token string) (*common.User, error) {
 			if err != nil {
 				return nil, errors.Annotate(err, "failed to sub.Update")
 			}
-			err = authC.UpdateUserID(usr.AuthID, sb.ID)
+			err = authC.UpdateUser(usr.AuthID, sb.ID, sb.Email(), sb.FirstName(), sb.LastName())
 			if err != nil {
 				return nil, errors.Annotate(err, "failed to auth.UpdateUserID")
 			}
