@@ -202,11 +202,11 @@ func (s *server) setup() error {
 		sqlConnectionString = "server:gigamunch@/gigamunch"
 	}
 	s.sqlDB, err = sqlx.Connect("mysql", sqlConnectionString+"?collation=utf8mb4_general_ci&parseTime=true")
-	if err != nil {
+	if err != nil && !appengine.IsDevAppServer() {
 		return fmt.Errorf("failed to get sql database client: %+v", err)
 	}
 	s.db, err = db.NewClient(context.Background(), projID, nil)
-	if err != nil {
+	if err != nil && !appengine.IsDevAppServer() {
 		return fmt.Errorf("failed to get database client: %+v", err)
 	}
 	s.serverInfo = &common.ServerInfo{
