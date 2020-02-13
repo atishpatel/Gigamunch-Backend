@@ -39,6 +39,17 @@
         :src="dinnerImageSrc"
         :rounded=true
       ></Image169>
+      <div
+        v-for="dish in dishes"
+        v-bind:key="dish.name"
+      >
+        <Dish
+          :name="dish.name"
+          :description="dish.description"
+          :ingredients="dish.ingredients"
+        ></Dish>
+      </div>
+
     </div>
   </div>
 </template>
@@ -46,10 +57,12 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Image169 from '../../components/Image169.vue';
+import Dish from '../../components/Dish.vue';
 
 @Component({
   components: {
     Image169,
+    Dish,
   },
 })
 export default class DinnerPublished extends Vue {
@@ -61,7 +74,7 @@ export default class DinnerPublished extends Vue {
   public userSummary!: SubAPI.GetUserSummaryResp;
 
   get heroImageText(): string {
-    return 'Your Jorney to ' + this.exe.culture.country;
+    return 'Your Journey to ' + this.exe.culture.country;
   }
 
   get hostSubtitle(): string {
@@ -84,6 +97,14 @@ export default class DinnerPublished extends Vue {
 
   get dinnerImageSrc(): string {
     return this.exe.content.hands_plate_non_veg_image_url;
+  }
+
+  get dishes(): Common.Dish[] {
+    return this.exe.dishes;
+  }
+
+  get dish1(): string {
+    return this.exe.dishes[0].name;
   }
 }
 </script>
