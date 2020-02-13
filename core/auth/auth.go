@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	userIDClaim = "user_id"
+	userIDClaim = "giga_user_id"
 	delim       = ";%~&~%;"
 )
 
