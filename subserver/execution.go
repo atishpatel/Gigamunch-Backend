@@ -186,6 +186,7 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 
 	// get activity
 	var act *activity.Activity
+	var acts []*activity.Activity
 	if user != nil && exe.Date != "" {
 		activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 		if err != nil {
@@ -202,8 +203,11 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 				return ewc.Annotate("failed to get activity.GetBeforeDateForUser")
 			}
 		}
+		if act != nil {
+			acts = []*activity.Activity{act}
+		}
 	}
-	exesResp, err := getExecutionsResp([]*execution.Execution{exe}, []*activity.Activity{act})
+	exesResp, err := getExecutionsResp([]*execution.Execution{exe}, acts)
 	if err != nil {
 		return errors.GetErrorWithCode(err)
 	}
