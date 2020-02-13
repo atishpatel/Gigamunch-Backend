@@ -96,7 +96,7 @@ function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: '/sub/',
+        signInSuccessUrl: '/login',
         signInOptions: [{
                 provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
                 requireDisplayName: false,
@@ -121,7 +121,9 @@ firebase.auth().onAuthStateChanged(function (user) {
     else {
         eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
-            Login(idToken);
+            Login(idToken).then(function () {
+                window.location.href = '/sub/';
+            });
         });
         APP.User = user;
         var event_1 = document.createEvent('Event');
