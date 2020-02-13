@@ -30,6 +30,16 @@ func (s *server) GetUserSummary(ctx context.Context, w http.ResponseWriter, r *h
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution client")
 	}
+	// verify and update auth
+	token := r.Header.Get("auth-token")
+	if token != "" {
+		usr, err := subC.VerifyAndUpdateAuth(token)
+		if err != nil {
+			return errors.Annotate(err, "failed to sub.VerifyAndUpdateAuth")
+		}
+		user = usr
+	}
+
 	var subscriber *subold.Subscriber
 	if user != nil {
 		resp.IsLoggedIn = true

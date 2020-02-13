@@ -16,8 +16,6 @@ import (
 
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbserver"
-	authold "github.com/atishpatel/Gigamunch-Backend/auth"
-	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -48,27 +46,16 @@ func (s *server) Login(ctx context.Context, w http.ResponseWriter, r *http.Reque
 		return failedToDecode(err)
 	}
 	// end decode request
-	resp := &pb.TokenOnlyResp{}
+	resp := &pb.ErrorOnlyResp{}
 
-	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
-		return errors.Annotate(err, "failed to get auth.NewClient")
+		return errors.Annotate(err, "failed to sub.NewClient")
 	}
-
-	usr, err := authC.Verify(req.Token)
+	_, err = subC.VerifyAndUpdateAuth(req.Token)
 	if err != nil {
-		return errors.Annotate(err, "failed to auth.Verify")
+		return errors.Annotate(err, "failed to sub.VerifyAndUpdateAuth")
 	}
-	// TODO: remove log
-	log.Infof(ctx, "usr: %+v", usr)
-	// TODO: find / create user and update token
-
-	_, authToken, err := authold.GetSessionWithGToken(ctx, req.Token)
-	if err != nil {
-		resp.Error = errors.GetSharedError(err)
-		return resp
-	}
-	resp.Token = authToken
 	return resp
 }
 
