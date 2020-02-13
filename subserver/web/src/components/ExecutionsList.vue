@@ -1,7 +1,10 @@
 <template>
   <div>
     <h1 class="title">Upcomming Dinners</h1>
-    <div v-for="executionAndActivity in executionAndActivityList" v-bind:key="executionAndActivity.execution.id">
+    <div
+      v-for="executionAndActivity in executionAndActivityList"
+      v-bind:key="executionAndActivity.execution.id"
+    >
       <ExecutionsItem :execution="executionAndActivity.execution"></ExecutionsItem>
     </div>
   </div>
@@ -29,7 +32,7 @@ export default class ExecutionsList extends Vue {
   display: inline-block;
   text-align: start;
   margin: 0 24px;
-  padding-bottom: 6px;
+  padding-bottom: 16px;
   font-size: 1.5em;
   color: $app-theme-secondary;
   border-bottom: 4px solid $app-theme-accent;
