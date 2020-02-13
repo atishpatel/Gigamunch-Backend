@@ -1,17 +1,21 @@
 <template>
   <div>
-    <h2 class="date">{{titleDate}} – {{culture}}</h2>
-    <div class="cards">
+    <h2 class="culture-title">{{date}} – {{culture}}</h2>
+    <div class="execution-item-row">
+      <!-- <div class="date-section">
+        <h2 class="date">{{date}}</h2>
+      </div> -->
       <!-- Culture Card -->
       <ExecutionsCard
         class="card"
-        :cook_name="cookName"
+        :cookName="cookName"
         :nationality="nationality"
-        :dinner_image_src="execution.content.hands_plate_non_veg_image_url"
-        :cook_face_image_src="execution.email.cook_face_image_url"
+        :dinnerImageSource="execution.content.hands_plate_non_veg_image_url"
+        :cookFaceImageSource="execution.email.cook_face_image_url"
         :to="{path: 'dinner/'+executionURLID+'#culture'}"
       ></ExecutionsCard>
-
+      <!-- <div class="dishes-section">
+      </div> -->
     </div>
   </div>
 </template>
@@ -31,7 +35,7 @@ export default class ExecutionsItem extends Vue {
   public execution!: Common.Execution;
 
   // computed
-  get titleDate() {
+  get date() {
     return GetDayMonthDayDate(this.execution.date);
   }
 
@@ -80,14 +84,29 @@ export default class ExecutionsItem extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.date {
+// .date {
+//   flex: 0 0 auto;
+//   font-weight: 500;
+//   font-size: 1.5em;
+//   padding-left: 24px;
+//   margin: 40px 0 15px 0;
+// }
+
+.culture-title {
   font-weight: 500;
-  font-size: 1.5em;
+  font-size: 1.2em;
   padding-left: 24px;
   margin: 40px 0 15px 0;
 }
-.cards {
+@media (min-width: 800px) {
+  .culture-title {
+    font-size: 2em;
+  }
+}
+.execution-item-row {
   display: flex;
+  flex-direction: row;
+  align-items: center;
   flex-wrap: nowrap;
   overflow-x: auto;
   transition: 0.5s ease 0s;
@@ -95,7 +114,8 @@ export default class ExecutionsItem extends Vue {
   -webkit-overflow-scrolling: touch;
   .card {
     flex: 0 0 auto;
-    max-width: 77vw;
+    width: 100%;
+    max-width: 100%;
     min-height: 250px;
   }
   @media (min-width: 800px) {
@@ -104,9 +124,7 @@ export default class ExecutionsItem extends Vue {
       width: 500px;
     }
   }
-  .card:not(:first-child) {
-    margin-left: 24px;
-  }
+
   &::-webkit-scrollbar {
     display: none;
   }
