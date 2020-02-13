@@ -9,26 +9,34 @@
         v-html="heroImageText"
       ></div>
     </div>
-    <div class="host-action">
-      <div class="host">
-        <div class="host-image">
-          <div
-            class="host-image-image"
-            :style="{ backgroundImage: 'url(\'' + exe.email.cook_face_image_url + '\')' }"
-          ></div>
+    <div class="content-container">
+      <div class="host-action">
+        <div class="host">
+          <div class="host-image">
+            <div
+              class="host-image-image"
+              :style="{ backgroundImage: 'url(\'' + exe.email.cook_face_image_url + '\')' }"
+            ></div>
+          </div>
+          <div class="host-text">
+            <h2 class="host-text-name">{{cultureCookName}}</h2>
+            <p class="host-text-hosted-by">{{hostSubtitle}}</p>
+          </div>
         </div>
-        <div class="host-text">
-          <p class="host-text-hosted-by">hosted by</p>
-          <h2 class="host-text-name">{{cultureCookName}}</h2>
-        </div>
-      </div>
-      <!-- <div class="action">
+        <!-- <div class="action">
         <div v-if="userSummary.is_logged_in === true">signed in view</div>
         <div v-else>singed out</div>
         <p>action</p>
       </div> -->
-    </div>
+      </div>
+      <div class="culture-description">
+        <p class="culture-description-text">{{cultureDescription}}</p>
+      </div>
+      <div class="dinner-image-title">
+        <h2 class="dinner-image-title-text">{{dinnerImageTitle}}</h2>
+      </div>
 
+    </div>
   </div>
 </template>
 
@@ -53,20 +61,34 @@ export default class DinnerPublished extends Vue {
     return 'Your Jorney to ' + this.exe.culture.country;
   }
 
+  get hostSubtitle(): string {
+    return 'your ' + this.exe.culture.nationality + ' host';
+  }
+
   get cultureCookName(): string {
     return (
       this.exe.culture_cook.first_name + ' ' + this.exe.culture_cook.last_name
     );
   }
+
+  get cultureDescription(): string {
+    return this.exe.culture.description;
+  }
+
+  get dinnerImageTitle(): string {
+    return this.exe.culture_cook.first_name + "'s Dinner";
+  }
 }
 </script>
 <style scoped lang="scss">
 .view {
-  max-width: 1024px;
+  max-width: 850px;
   margin: auto;
+  box-shadow: 0 0 15px grey;
 }
 
-$view-edge-padding: 24px;
+$view-edge-padding-desktop: 120px;
+$view-edge-padding-mobile: 24px;
 // hero image
 .hero-image {
   position: relative;
@@ -79,7 +101,7 @@ $view-edge-padding: 24px;
   position: absolute;
   top: 0;
   background-image: linear-gradient(
-    rgba(100, 100, 100, 0.45),
+    rgba(100, 100, 100, 0.69),
     rgba(0, 0, 0, 0)
   );
   height: 15vw;
@@ -89,11 +111,26 @@ $view-edge-padding: 24px;
 .hero-image-text {
   position: absolute;
   color: white;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
-  top: 12px;
-  left: 12px;
+  top: 24px;
+  left: 28px;
 }
+@media (min-width: 800px) {
+  .hero-image-text {
+    font-size: 40px;
+  }
+}
+
+.content-container {
+  padding: 0 $view-edge-padding-mobile;
+}
+@media (min-width: 800px) {
+  .content-container {
+    padding: 0 $view-edge-padding-desktop;
+  }
+}
+
 // host-action
 .host-action {
 }
@@ -101,7 +138,6 @@ $view-edge-padding: 24px;
   display: flex;
   position: relative;
   top: -35px;
-  padding-left: $view-edge-padding;
 }
 .host-image {
   background-color: white;
@@ -122,10 +158,12 @@ $view-edge-padding: 24px;
   padding-left: 12px;
 }
 .host-text-hosted-by {
-  margin: 0;
+  margin: 0 0 10px 0;
   opacity: 0.75;
 }
 .host-text-name {
-  margin: 6px 0;
+  margin: 6px 0 0 0;
+}
+.culture-description-text {
 }
 </style>
