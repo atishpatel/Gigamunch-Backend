@@ -6,6 +6,12 @@
       :activity="activity"
       :userSummary="userSummary"
     ></DinnerPublished>
+    <div class="hero-image unset-link">
+      <img
+        :src="landscape_image_src"
+        :alt="computedLandscapeImageAlt"
+      >
+    </div>
 
   </div>
 </template>
@@ -61,7 +67,33 @@ export default class Dinner extends Vue {
       this.activity = resp.execution_and_activity.activity;
     });
   }
+  get computedLandscapeImageAlt() {
+    return this.exe.culture.country + 'landscape image';
+  }
+  get landscape_image_src() {
+    return this.exe.content.landscape_image_url;
+  }
 }
 </script>
 <style scoped lang="scss">
+.hero-image {
+  display: block;
+  width: 100%;
+  position: relative;
+  height: 0;
+  padding: 56.25% 0 0 0;
+  overflow: hidden;
+  background-color: white;
+  border-radius: 5px;
+  img {
+    position: absolute;
+    display: block;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+  }
+}
 </style>
