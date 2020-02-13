@@ -98,16 +98,6 @@ function SetupFirebaseAuthUI(elementID) {
         privacyPolicyUrl: '/privacy',
         signInSuccessUrl: 'login',
         signInOptions: [
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            {
-                provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-                scopes: [
-                    'public_profile',
-                    'email',
-                    'user_likes',
-                    'user_friends',
-                ],
-            },
             firebase.auth.EmailAuthProvider.PROVIDER_ID,
         ],
     };
