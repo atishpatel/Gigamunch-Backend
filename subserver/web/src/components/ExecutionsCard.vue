@@ -10,7 +10,7 @@
       >
     </div>
     <div class="cook-info-row">
-      <div class="image cook-face-image unset-link">
+      <div class="cook-face-image unset-link">
         <img
           :src="cook_face_image_src"
           :alt="computedCookImageAlt"
@@ -93,6 +93,7 @@ export default class ExecutionsItem extends Vue {
   width: 100px;
   margin: 0 15px 0 0;
   img {
+    width: 100%;
     margin: 0;
     border-radius: 50%;
   }
