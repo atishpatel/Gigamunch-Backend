@@ -93,6 +93,7 @@ export default class ExecutionsItem extends Vue {
 .cook-face-image {
   height: 100px;
   width: 100px;
+  position: relative;
   margin: 0 15px 0 0;
   img {
     position: absolute;
