@@ -42,7 +42,7 @@ func getExecutionsResp(exes []*execution.Execution, activities []*activity.Activ
 		}
 		if hasActivtites && exespb[i] != nil {
 			for j := range activitiespb {
-				if activitiespb[i] != nil && exespb[i].Date == activitiespb[j].Date {
+				if activitiespb[j] != nil && exespb[i].Date == activitiespb[j].Date {
 					resp.ExecutionAndActivity[i].Activity = activitiespb[j]
 					break
 				}
@@ -197,7 +197,10 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 		}
 		act, err = activityC.Get(t, user.ID)
 		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to get activity.GetBeforeDateForUser")
+			ewc := errors.GetErrorWithCode(err)
+			if ewc.Code != errors.CodeNotFound {
+				return ewc.Annotate("failed to get activity.GetBeforeDateForUser")
+			}
 		}
 	}
 	exesResp, err := getExecutionsResp([]*execution.Execution{exe}, []*activity.Activity{act})
