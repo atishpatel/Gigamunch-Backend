@@ -25,7 +25,7 @@ if [[ $1 == "build" ]]; then
   if [[ $* == *sub* ]]; then
     echo "Building server/sub:"
     cd subserver/web
-    yarn run build
+    yarn build
     cd ../..
   fi
   if [[ $* == *proto* ]]; then
