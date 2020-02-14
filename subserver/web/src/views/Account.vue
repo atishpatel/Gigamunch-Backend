@@ -38,7 +38,7 @@
           large
           color="#E8554E"
           class="white--text"
-        >Cancel</v-btn>
+        >Cancel Account</v-btn>
       </div>
       <hr class="divider-line">
       <div class="footer-message">
