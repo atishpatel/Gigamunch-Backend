@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
@@ -42,12 +43,15 @@ func getExecutionsResp(exes []*execution.Execution, activities []*activity.Activ
 		}
 		if hasActivtites && exespb[i] != nil {
 			for j := range activitiespb {
-				if activitiespb[j] != nil && exespb[i].Date == activitiespb[j].Date {
+				if activitiespb[j] != nil && strings.Contains(activitiespb[j].Date, exespb[i].Date) {
 					resp.ExecutionAndActivity[i].Activity = activitiespb[j]
 					break
 				}
 			}
 		}
+	}
+	if hasActivtites {
+		resp.Activities = activitiespb
 	}
 	return resp, nil
 }
