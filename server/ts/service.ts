@@ -40,4 +40,3 @@ interface APIResponse {
   token: string;
   json(): APIResponse;
 }
-

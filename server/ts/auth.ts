@@ -4,8 +4,8 @@ declare var APP: any;
 declare var firebase: any;
 declare var firebaseui: any;
 
-export function SignOut() {
-  firebase.auth().signOut();
+export function SignOut(callback: Function) {
+  firebase.auth().signOut().then(callback);
 }
 
 export function SetupFirebase() {
@@ -38,22 +38,13 @@ export function SetupFirebaseAuthUI(elementID: string) {
   let uiConfig = {
     tosUrl: '/terms',
     privacyPolicyUrl: '/privacy',
-    signInSuccessUrl: 'login',
-    signInOptions: [
-      // TODO: setup facebook perms
-      // Leave the lines as is for the providers you want to offer your users.
-      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: [
-          'public_profile',
-          'email',
-          'user_likes',
-          'user_friends',
-        ],
-      },
-      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    signInSuccessUrl: '/login',
+    signInOptions: [{
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      requireDisplayName: false,
+    },
     ],
+    credentialHelper: firebaseui.auth.CredentialHelper.NONE,
   };
 
   // Initialize the FirebaseUI Widget using Firebase.
@@ -81,7 +72,9 @@ firebase.auth().onAuthStateChanged((user: FBUser) => {
     // is signed in
     eventName = Events.SignedIn;
     user.getIdToken(false).then((idToken: string) => {
-      Login(idToken);
+      Login(idToken).then(() => {
+        window.location.href = '/sub/';
+      });
     });
     APP.User = user;
     // fire event

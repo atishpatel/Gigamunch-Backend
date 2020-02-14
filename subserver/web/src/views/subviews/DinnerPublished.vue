@@ -9,82 +9,24 @@
         v-html="heroImageText"
       ></div>
     </div>
-    <div class="content-container">
-      <div class="host-action">
-        <div class="host">
-          <div class="host-image">
-            <div
-              class="host-image-image"
-              :style="{ backgroundImage: 'url(\'' + exe.email.cook_face_image_url + '\')' }"
-            ></div>
-          </div>
-          <div class="host-text">
-            <h2 class="host-text-name">{{cultureCookName}}</h2>
-            <p class="host-text-hosted-by">{{hostSubtitle}}</p>
-          </div>
+    <div class="host-action">
+      <div class="host">
+        <div class="host-image">
+          <div
+            class="host-image-image"
+            :style="{ backgroundImage: 'url(\'' + exe.email.cook_face_image_url + '\')' }"
+          ></div>
         </div>
-        <!-- <div class="action">
+        <div class="host-text">
+          <p class="host-text-hosted-by">hosted by</p>
+          <h2 class="host-text-name">{{cultureCookName}}</h2>
+        </div>
+      </div>
+      <!-- <div class="action">
         <div v-if="userSummary.is_logged_in === true">signed in view</div>
         <div v-else>singed out</div>
         <p>action</p>
       </div> -->
-      </div>
-      <div class="culture-description">
-        <p class="culture-description-text">{{cultureDescription}}</p>
-      </div>
-      <div class="section-title">
-        <h2 class="dinner-image-title-text">{{dinnerImageTitle}}</h2>
-      </div>
-      <Image169
-        :src="dinnerImageSrc"
-        :rounded=true
-      ></Image169>
-      <div
-        v-for="dish in dishes"
-        v-bind:key="dish.name"
-      >
-        <Dish
-          :name="dish.name"
-          :description="dish.description"
-          :ingredients="dish.ingredients"
-        ></Dish>
-      </div>
-      <hr class="divider-line">
-      <div class="section-title">
-        <h2 class="playlist-title-text">{{playlistTitle}}</h2>
-      </div>
-      <p>A Gigamunch dinner isn’t complete without some cultural music to listen to while you eat.</p>
-      <v-row no-gutters>
-        <v-btn
-          depressed
-          large
-          color="#E8554E"
-          class="white--text"
-          :cols="n === 1 ? 8 : 4"
-          :href="spotifyUrl"
-          target="_blank"
-        >Listen on Spotfiy</v-btn>
-        <v-btn
-          depressed
-          large
-          color="#E8554E"
-          class="white--text"
-          :cols="n === 1 ? 8 : 4"
-          :href="youtubeUrl"
-          target="_blank"
-        >Listen on Youtube</v-btn>
-      </v-row>
-      <hr class="divider-line">
-      <div class="section-title">
-        <h2 class="cook-title-text">{{cookTitle}}</h2>
-      </div>
-      <Image169
-        :src="cookImageSrc"
-        :rounded=true
-      ></Image169>
-      <div>
-        <p class="cook-story">{{cookStory}}</p>
-      </div>
     </div>
     <div class="footer-message">
       <p class="footer-message-text">Feel free to talk to us at</p>

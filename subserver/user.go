@@ -33,15 +33,11 @@ func (s *server) GetUserSummary(ctx context.Context, w http.ResponseWriter, r *h
 	var subscriber *subold.Subscriber
 	if user != nil {
 		resp.IsLoggedIn = true
-		if user.ID == "" {
-			subscriber, err = subC.Get(user.ID)
-		} else {
-			subscriber, err = subC.GetByEmail(user.Email)
-		}
+		subscriber, err = subC.GetByEmail(user.Email)
 		if err != nil {
 			ewc := errors.GetErrorWithCode(err)
 			if ewc.Code != errors.CodeNotFound {
-				return errors.GetErrorWithCode(err).Annotate("failed to get all sub")
+				return errors.GetErrorWithCode(err).Annotate("failed to Sub.GetByEmail")
 			}
 		} else {
 			resp.IsActive = subscriber.Active
@@ -70,11 +66,7 @@ func (s *server) GetAccountInfo(ctx context.Context, w http.ResponseWriter, r *h
 	}
 	var subscriber *subold.Subscriber
 	if user != nil {
-		if user.ID == "" {
-			subscriber, err = subC.Get(user.ID)
-		} else {
-			subscriber, err = subC.GetByEmail(user.Email)
-		}
+		subscriber, err = subC.GetByEmail(user.Email)
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get subscriber")
 		}

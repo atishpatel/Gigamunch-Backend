@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
@@ -42,12 +43,15 @@ func getExecutionsResp(exes []*execution.Execution, activities []*activity.Activ
 		}
 		if hasActivtites && exespb[i] != nil {
 			for j := range activitiespb {
-				if activitiespb[j] != nil && exespb[i].Date == activitiespb[j].Date {
+				if activitiespb[j] != nil && strings.Contains(activitiespb[j].Date, exespb[i].Date) {
 					resp.ExecutionAndActivity[i].Activity = activitiespb[j]
 					break
 				}
 			}
 		}
+	}
+	if hasActivtites {
+		resp.Activities = activitiespb
 	}
 	return resp, nil
 }
@@ -77,7 +81,7 @@ func (s *server) GetExecutions(ctx context.Context, w http.ResponseWriter, r *ht
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.NewClient")
 		}
-		activities, err = activityC.GetAllForUser(user.ID)
+		activities, err = activityC.GetAllForUser(user.Email)
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.GetAllForUser")
 		}
@@ -114,7 +118,7 @@ func (s *server) GetExecutionsAfterDate(ctx context.Context, w http.ResponseWrit
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.NewClient")
 		}
-		activities, err = activityC.GetAfterDateForUser(getDatetime(req.Date), user.ID)
+		activities, err = activityC.GetAfterDateForUser(getDatetime(req.Date), user.Email)
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.GetAfterDateForUser")
 		}
@@ -151,7 +155,7 @@ func (s *server) GetExecutionsBeforeDate(ctx context.Context, w http.ResponseWri
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.NewClient")
 		}
-		activities, err = activityC.GetBeforeDateForUser(getDatetime(req.Date), user.ID)
+		activities, err = activityC.GetBeforeDateForUser(getDatetime(req.Date), user.Email)
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.GetBeforeDateForUser")
 		}
@@ -196,7 +200,7 @@ func (s *server) GetExecution(ctx context.Context, w http.ResponseWriter, r *htt
 		if err != nil {
 			return errInternalError.WithError(err).Annotate("failed to get time.Parse")
 		}
-		act, err = activityC.Get(t, user.ID)
+		act, err = activityC.Get(t, user.Email)
 		if err != nil {
 			ewc := errors.GetErrorWithCode(err)
 			if ewc.Code != errors.CodeNotFound {

@@ -5,6 +5,10 @@
     "title": "SubAPI.proto",
     "version": "version not set"
   },
+  "schemes": [
+    
+    "https"
+  ],
   "consumes": [
     "application/json"
   ],
@@ -875,6 +879,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/CommonExecutionAndActivity"
+          }
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonActivity"
           }
         }
       }

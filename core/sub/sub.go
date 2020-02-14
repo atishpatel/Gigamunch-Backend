@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/atishpatel/Gigamunch-Backend/core/activity"
+	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/discount"
 	"github.com/atishpatel/Gigamunch-Backend/core/geofence"
@@ -259,6 +260,18 @@ func (c *Client) Update(sub *subold.Subscriber) error {
 	c.log.SubUpdated(sub.ID, sub.Email(), subold, sub)
 	return nil
 }
+
+// Put puts the user into the db. Use Update instead in most cases.
+// func (c *Client) Put(sub *subold.Subscriber) (sub, error) {
+// 	if sub == nil {
+// 		return nil,errInvalidParameter.WithMessage("sub doesn't have an id")
+// 	}
+// 	err = c.put(sub.ID, sub)
+// 	if err != nil {
+// 		return nil,errDatastore.WithError(err).Annotate("failed to put")
+// 	}
+// 	return sub, nil
+// }
 
 // Activate activates an account.
 func (c *Client) Activate(email string, firstBagDate time.Time) error {
@@ -832,4 +845,39 @@ func (c *Client) BatchUpdateActivityWithUserID(start, limit int) error {
 		return errors.Annotate(err, "failed to activity.BatchUpdateActivityWithUserID")
 	}
 	return nil
+}
+
+func (c *Client) VerifyAndUpdateAuth(token string) (*common.User, error) {
+	authC, err := auth.NewClient(c.ctx, c.log, c.db, c.sqlDB, c.serverInfo)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to get auth.NewClient")
+	}
+
+	usr, err := authC.Verify(token)
+	if err != nil {
+		return nil, errors.Annotate(err, "failed to auth.Verify")
+	}
+	// find / create user and update token
+	sb, err := c.GetByEmail(usr.Email)
+	if err != nil {
+		ewc := errors.GetErrorWithCode(err)
+		if ewc.Code != errors.CodeNotFound {
+			return nil, errors.Annotate(err, "failed to sub.GetByEmail")
+		}
+	}
+	if sb != nil {
+		if sb.AuthID != usr.AuthID {
+			sb.AuthID = usr.AuthID
+			usr.ID = sb.ID
+			err = c.Update(sb)
+			if err != nil {
+				return nil, errors.Annotate(err, "failed to sub.Update")
+			}
+			err = authC.UpdateUser(usr.AuthID, sb.ID, sb.Email(), sb.FirstName(), sb.LastName())
+			if err != nil {
+				return nil, errors.Annotate(err, "failed to auth.UpdateUserID")
+			}
+		}
+	}
+	return usr, nil
 }

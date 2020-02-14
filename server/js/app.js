@@ -65,8 +65,8 @@ var service = /*#__PURE__*/Object.freeze({
     Login: Login
 });
 
-function SignOut() {
-    firebase.auth().signOut();
+function SignOut(callback) {
+    firebase.auth().signOut().then(callback);
 }
 function SetupFirebase() {
     var config;
@@ -96,20 +96,13 @@ function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: 'login',
-        signInOptions: [
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            {
-                provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-                scopes: [
-                    'public_profile',
-                    'email',
-                    'user_likes',
-                    'user_friends',
-                ],
+        signInSuccessUrl: '/login',
+        signInOptions: [{
+                provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                requireDisplayName: false,
             },
-            firebase.auth.EmailAuthProvider.PROVIDER_ID,
         ],
+        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
     };
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);
@@ -128,7 +121,9 @@ firebase.auth().onAuthStateChanged(function (user) {
     else {
         eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
-            Login(idToken);
+            Login(idToken).then(function () {
+                window.location.href = '/sub/';
+            });
         });
         APP.User = user;
         var event_1 = document.createEvent('Event');
