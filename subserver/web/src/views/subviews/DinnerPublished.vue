@@ -206,24 +206,20 @@ export default class DinnerPublished extends Vue {
   }
 
   get patternImageSrc(): string {
-    // return this.exe.content.cover_image_url.replace('cook.jpg', 'cover.jpg');
-    return this.exe.content.cover_image_url;
-    // let originalSrc = this.exe.content.cover_image_url;
-    // if (originalSrc.length > 8) {
-    //   if (originalSrc.substr(originalSrc.length - 8) == 'cook.jpg') {
-    //     return originalSrc.replace('cook.jpg', 'cover.jpg');
-    //     return originalSrc;
-    //   }
-    // }
-    // return originalSrc;
-    // return 'https://storage.googleapis.com/gigamunch-omninexus-website/cultures/2019-09-30-vietnam/website-cover.jpg';
+    if (this.exe && this.exe.content && this.exe.content.cook_image_url) {
+      let originalSrc = this.exe.content.cover_image_url;
+      if (originalSrc.includes('cook.jpg')) {
+        return originalSrc.replace('cook.jpg', 'cover.jpg');
+      }
+    }
+    return '';
   }
 }
 </script>
 <style scoped lang="scss">
 .background {
   background-repeat: repeat;
-  background-size: 400px;
+  background-size: 800px;
 }
 .white-filter {
   background-color: rgba(255, 255, 255, 0.9);
