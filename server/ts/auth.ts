@@ -32,13 +32,12 @@ export function SetupFirebase() {
   firebase.initializeApp(config);
 }
 
-
 export function SetupFirebaseAuthUI(elementID: string) {
   // FirebaseUI config.
-  let uiConfig = {
+  const uiConfig = {
     tosUrl: '/terms',
     privacyPolicyUrl: '/privacy',
-    signInSuccessUrl: '/login',
+    signInSuccessUrl: '/sub/',
     signInOptions: [{
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
       requireDisplayName: false,
@@ -72,9 +71,7 @@ firebase.auth().onAuthStateChanged((user: FBUser) => {
     // is signed in
     eventName = Events.SignedIn;
     user.getIdToken(false).then((idToken: string) => {
-      Login(idToken).then(() => {
-        window.location.href = '/sub/';
-      });
+      Login(idToken);
     });
     APP.User = user;
     // fire event

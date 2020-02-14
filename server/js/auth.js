@@ -30,7 +30,7 @@ export function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: '/login',
+        signInSuccessUrl: '/sub/',
         signInOptions: [{
                 provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
                 requireDisplayName: false,
@@ -55,9 +55,7 @@ firebase.auth().onAuthStateChanged(function (user) {
     else {
         eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
-            Login(idToken).then(function () {
-                window.location.href = '/sub/';
-            });
+            Login(idToken);
         });
         APP.User = user;
         var event_1 = document.createEvent('Event');
