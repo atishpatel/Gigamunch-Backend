@@ -29,11 +29,6 @@
                 <p class="host-text-hosted-by">{{hostSubtitle}}</p>
               </div>
             </div>
-            <!-- <div class="action">
-        <div v-if="userSummary.is_logged_in === true">signed in view</div>
-        <div v-else>singed out</div>
-        <p>action</p>
-      </div> -->
           </div>
           <div class="culture-description">
             <p class="culture-description-text">{{cultureDescription}}</p>
@@ -45,6 +40,28 @@
             :src="dinnerImageSrc"
             :rounded=true
           ></Image169>
+          <div class="servings">
+            <p class="servings-text">
+              {{servingText}}
+            </p>
+          </div>
+          <div class="buttons-row">
+            <v-btn
+              depressed
+              color="#E8554E"
+              class="white--text"
+            >Skip</v-btn>
+            <v-btn
+              depressed
+              color="#E8554E"
+              class="white--text"
+            >Change Servings</v-btn>
+            <v-btn
+              depressed
+              color="#E8554E"
+              class="white--text"
+            >See vegetarian option</v-btn>
+          </div>
           <div
             v-for="dish in dishes"
             v-bind:key="dish.name"
@@ -60,13 +77,12 @@
             <h2 class="playlist-title-text">{{playlistTitle}}</h2>
           </div>
           <p>A Gigamunch dinner isn’t complete without some cultural music to listen to while you eat.</p>
-          <v-row no-gutters>
+          <div class="buttons-row">
             <v-btn
               depressed
               large
               color="#E8554E"
               class="white--text"
-              :cols="n === 1 ? 8 : 4"
               :href="spotifyUrl"
               target="_blank"
             >Listen on Spotfiy</v-btn>
@@ -75,11 +91,10 @@
               large
               color="#E8554E"
               class="white--text"
-              :cols="n === 1 ? 8 : 4"
               :href="youtubeUrl"
               target="_blank"
             >Listen on Youtube</v-btn>
-          </v-row>
+          </div>
           <hr class="divider-line">
           <div class="section-title">
             <h2 class="cook-title-text">{{cookTitle}}</h2>
@@ -113,6 +128,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Image169 from '../../components/Image169.vue';
 import Dish from '../../components/Dish.vue';
+import { storage } from 'firebase';
 
 @Component({
   components: {
@@ -182,6 +198,11 @@ export default class DinnerPublished extends Vue {
     return this.exe.culture_cook.story;
   }
 
+  get servingText(): string {
+    // TODO: change from hardcode to if skipped, and check serving amounts
+    return 'You will receive 4 servings on Monday, Jan 2.';
+  }
+
   get patternImageSrc(): string {
     // return this.exe.content.cover_image_url.replace('cook.jpg', 'cover.jpg');
     return this.exe.content.cover_image_url;
@@ -212,7 +233,7 @@ export default class DinnerPublished extends Vue {
 
 $view-edge-padding-desktop: 120px;
 $view-edge-padding-mobile: 24px;
-// hero image
+
 .hero-image {
   position: relative;
 }
@@ -306,6 +327,22 @@ $view-edge-padding-mobile: 24px;
   margin: 24px 0 12px 0;
 }
 
+.servings-text {
+  text-align: center;
+  margin: 28px 0 8px 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+@media (min-width: 550px) {
+  .servings-text {
+    font-size: 20px;
+  }
+}
+
+.buttons-row {
+  text-align: center;
+}
+
 .divider-line {
   margin: 50px 0px;
   border: 0;
@@ -315,7 +352,6 @@ $view-edge-padding-mobile: 24px;
 .section-title {
   margin: 0 0 12px 0;
 }
-
 @media (min-width: 500px) {
   .section-title {
     font-size: 20px;
