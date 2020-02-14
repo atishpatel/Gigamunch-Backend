@@ -106,19 +106,21 @@
           <div>
             <p class="cook-story">{{cookStory}}</p>
           </div>
+          <hr class="divider-line">
+          <div class="footer-message">
+            <p class="footer-message-text">Feel free to talk to us at</p>
+            <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
+            <p
+              class="footer-message-text"
+              style="margin-top: 12px;"
+            ><strong>We're here for you.</strong></p>
+            <p
+              class="footer-message-text"
+              style="margin-top: 32px;"
+            >💛&nbsp;&nbsp;The Gigamunch Team</p>
+          </div>
         </div>
-        <div class="footer-message">
-          <p class="footer-message-text">Feel free to talk to us at</p>
-          <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
-          <p
-            class="footer-message-text"
-            style="margin-top: 12px;"
-          ><strong>We're here for you.</strong></p>
-          <p
-            class="footer-message-text"
-            style="margin-top: 32px;"
-          >💛&nbsp;&nbsp;The Gigamunch Team</p>
-        </div>
+
       </div>
     </div>
   </div>
@@ -364,7 +366,7 @@ $view-edge-padding-mobile: 24px;
 }
 
 .footer-message {
-  padding: 50px 0 50px 0;
+  padding: 0 0 50px 0;
   // background-color: #dadfe1;
   align-content: center;
 }
