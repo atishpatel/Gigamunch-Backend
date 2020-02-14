@@ -49,31 +49,57 @@
           :ingredients="dish.ingredients"
         ></Dish>
       </div>
+      <hr class="divider-line">
       <div class="section-title">
         <h2 class="playlist-title-text">{{playlistTitle}}</h2>
       </div>
+      <p>A Gigamunch dinner isn’t complete without some cultural music to listen to while you eat.</p>
       <v-row no-gutters>
         <v-btn
-          outline
-          outlined
+          depressed
           large
           color="#E8554E"
+          class="white--text"
+          :cols="n === 1 ? 8 : 4"
           :href="spotifyUrl"
           target="_blank"
-          :cols="n === 1 ? 8 : 4"
         >Listen on Spotfiy</v-btn>
         <v-btn
-          outline
-          outlined
+          depressed
           large
           color="#E8554E"
+          class="white--text"
+          :cols="n === 1 ? 8 : 4"
           :href="youtubeUrl"
           target="_blank"
-          :cols="n === 1 ? 8 : 4"
         >Listen on Youtube</v-btn>
       </v-row>
+      <hr class="divider-line">
+      <div class="section-title">
+        <h2 class="cook-title-text">{{cookTitle}}</h2>
+      </div>
+      <Image169
+        :src="cookImageSrc"
+        :rounded=true
+      ></Image169>
+      <div>
+        <p class="cook-story">{{cookStory}}</p>
+      </div>
+    </div>
+    <div class="footer-message">
+      <p class="footer-message-text">Feel free to talk to us at</p>
+      <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
+      <p
+        class="footer-message-text"
+        style="margin-top: 12px;"
+      ><strong>We're here for you.</strong></p>
+      <p
+        class="footer-message-text"
+        style="margin-top: 32px;"
+      >💛&nbsp;&nbsp;The Gigamunch Team</p>
     </div>
   </div>
+
 </template>
 
 <script lang="ts">
@@ -136,13 +162,24 @@ export default class DinnerPublished extends Vue {
   get youtubeUrl(): string {
     return this.exe.content.youtube_url;
   }
+
+  get cookImageSrc(): string {
+    return this.exe.content.cook_image_url;
+  }
+
+  get cookTitle(): string {
+    return this.exe.culture_cook.first_name + "'s Story";
+  }
+
+  get cookStory(): string {
+    return this.exe.culture_cook.story;
+  }
 }
 </script>
 <style scoped lang="scss">
 .view {
   max-width: 850px;
   margin: auto;
-  box-shadow: 0 0 15px grey;
 }
 
 $view-edge-padding-desktop: 120px;
@@ -181,11 +218,12 @@ $view-edge-padding-mobile: 24px;
 }
 
 .content-container {
-  padding: 0 $view-edge-padding-mobile;
+  padding: 0 $view-edge-padding-mobile 25px $view-edge-padding-mobile;
+  box-shadow: 0 0 15px grey;
 }
 @media (min-width: 700px) {
   .content-container {
-    padding: 0 $view-edge-padding-desktop;
+    padding: 0 $view-edge-padding-desktop 25px $view-edge-padding-desktop;
   }
 }
 
@@ -238,7 +276,41 @@ $view-edge-padding-mobile: 24px;
   }
 }
 
+.dinner-image-title-text {
+  margin: 24px 0 12px 0;
+}
+
+.divider-line {
+  margin: 50px 0px;
+  border: 0;
+  border-bottom: 1px solid #dadfe1;
+}
+
 .section-title {
-  margin: 36px 0 18px 0;
+  margin: 0 0 12px 0;
+}
+
+@media (min-width: 500px) {
+  .section-title {
+    font-size: 20px;
+  }
+}
+
+.cook-story {
+  margin: 24px 6px;
+  text-align: justify;
+}
+
+.footer-message {
+  padding: 50px 0 50px 0;
+  // background-color: #dadfe1;
+  align-content: center;
+}
+
+.footer-message-text {
+  align-content: center;
+  text-align: center;
+  margin: 0;
+  font-size: 16px;
 }
 </style>
