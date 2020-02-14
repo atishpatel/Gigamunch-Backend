@@ -1,10 +1,4 @@
 <template>
-  <!-- <div
-    class="dish-name"
-    :style="{ backgroundImage: 'url(\'' + src + '\')' }"
-    v-bind:class="{ rounded: rounded }"
-  >
-  </div> -->
   <div class="dish-container">
     <p class="description"><strong>{{name}}</strong> – {{description}}</p>
     <p class="ingredients">{{ingredients}}</p>
