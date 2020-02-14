@@ -14,7 +14,7 @@
         <div class="host-image">
           <div
             class="host-image-image"
-            :style="{ backgroundImage: 'url(\'' + exe.content.cook_face_image_url + '\')' }"
+            :style="{ backgroundImage: 'url(\'' + exe.email.cook_face_image_url + '\')' }"
           ></div>
         </div>
         <div class="host-text">
@@ -22,11 +22,11 @@
           <h2 class="host-text-name">{{cultureCookName}}</h2>
         </div>
       </div>
-      <div class="action">
+      <!-- <div class="action">
         <div v-if="userSummary.is_logged_in === true">signed in view</div>
         <div v-else>singed out</div>
         <p>action</p>
-      </div>
+      </div> -->
     </div>
 
   </div>

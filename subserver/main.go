@@ -17,7 +17,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -123,40 +122,13 @@ func (s *server) getUserFromRequest(ctx context.Context, w http.ResponseWriter, 
 	if token == "" {
 		return nil, errBadRequest.Annotate("auth-token is empty")
 	}
-	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to get auth.NewClient")
+		return nil, errors.Annotate(err, "failed to get sub.NewClient")
 	}
-	user, err := authC.Verify(token)
+	user, err := subC.VerifyAndUpdateAuth(token)
 	if err != nil {
-		return nil, errors.Annotate(err, "failed to get auth.Verify")
-	}
-	if user.ID == "" {
-		// check if subscriber exists with this email
-		subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
-		if err != nil {
-			return nil, errors.Annotate(err, "failed to get sub.NewClient")
-		}
-		subscriber, err := subC.GetByEmail(user.Email)
-		if err != nil {
-			log.Errorf(ctx, "failed to sub.GetByEmail: ", err)
-		} else {
-			// add auth id to subscriber
-			if subscriber.AuthID == "" {
-				subscriber.AuthID = user.AuthID
-				err = subC.Update(subscriber)
-				if err != nil {
-					log.Errorf(ctx, "failed to sub.Update: ", err)
-				}
-			}
-			// update auth user
-			err = authC.UpdateUser(user.AuthID, subscriber.ID, subscriber.Email(), subscriber.FirstName(), subscriber.LastName())
-			if err != nil {
-				log.Errorf(ctx, "failed to auth.UpdateUser: ", err)
-			} else {
-				user.ID = subscriber.ID
-			}
-		}
+		return nil, errors.Annotate(err, "failed to VerifyAndUpdateAuth")
 	}
 	return user, nil
 }

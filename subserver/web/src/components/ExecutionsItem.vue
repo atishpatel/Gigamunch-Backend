@@ -1,25 +1,21 @@
 <template>
   <div>
-    <h2 class="date">{{titleDate}}</h2>
-    <div class="cards">
+    <h2 class="culture-title">{{date}} – {{culture}}</h2>
+    <div class="execution-item-row">
+      <!-- <div class="date-section">
+        <h2 class="date">{{date}}</h2>
+      </div> -->
       <!-- Culture Card -->
       <ExecutionsCard
         class="card"
-        :title="cultureTitle"
-        :description="cultureDescription"
-        :src="execution.content.landscape_image_url"
+        :cookName="cookName"
+        :nationality="nationality"
+        :dinnerImageSource="execution.content.hands_plate_non_veg_image_url"
+        :cookFaceImageSource="execution.email.cook_face_image_url"
         :to="{path: 'dinner/'+executionURLID+'#culture'}"
       ></ExecutionsCard>
-
-      <!-- Cook Card -->
-      <ExecutionsCard
-        class="card"
-        :title="cookName"
-        :description="cookDescription"
-        :src="execution.content.cook_image_url"
-        :to="{path: 'dinner/'+executionURLID+'#culture-cook'}"
-      ></ExecutionsCard>
-
+      <!-- <div class="dishes-section">
+      </div> -->
     </div>
   </div>
 </template>
@@ -39,8 +35,24 @@ export default class ExecutionsItem extends Vue {
   public execution!: Common.Execution;
 
   // computed
-  get titleDate() {
+  get date() {
     return GetDayMonthDayDate(this.execution.date);
+  }
+
+  get culture() {
+    return this.execution.culture.country;
+  }
+
+  get cookName() {
+    return (
+      this.execution.culture_cook.first_name +
+      ' ' +
+      this.execution.culture_cook.last_name
+    );
+  }
+
+  get nationality() {
+    return this.execution.culture.nationality;
   }
 
   get cultureTitle() {
@@ -52,12 +64,6 @@ export default class ExecutionsItem extends Vue {
       return this.execution.culture.description.substr(0, 60) + '...';
     }
     return this.execution.culture.description;
-  }
-
-  get cookName() {
-    return `Meet ${this.execution.culture_cook.first_name} ${
-      this.execution.culture_cook.last_name
-    }`;
   }
 
   get cookDescription() {
@@ -78,13 +84,29 @@ export default class ExecutionsItem extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.date {
+// .date {
+//   flex: 0 0 auto;
+//   font-weight: 500;
+//   font-size: 1.5em;
+//   padding-left: 24px;
+//   margin: 40px 0 15px 0;
+// }
+
+.culture-title {
   font-weight: 500;
-  font-size: 1.5em;
+  font-size: 1.2em;
   padding-left: 24px;
+  margin: 40px 0 15px 0;
 }
-.cards {
+@media (min-width: 800px) {
+  .culture-title {
+    font-size: 2em;
+  }
+}
+.execution-item-row {
   display: flex;
+  flex-direction: row;
+  align-items: center;
   flex-wrap: nowrap;
   overflow-x: auto;
   transition: 0.5s ease 0s;
@@ -92,7 +114,8 @@ export default class ExecutionsItem extends Vue {
   -webkit-overflow-scrolling: touch;
   .card {
     flex: 0 0 auto;
-    max-width: 77vw;
+    width: 100%;
+    max-width: 100%;
     min-height: 250px;
   }
   @media (min-width: 800px) {
@@ -101,9 +124,7 @@ export default class ExecutionsItem extends Vue {
       width: 500px;
     }
   }
-  .card:not(:first-child) {
-    margin-left: 24px;
-  }
+
   &::-webkit-scrollbar {
     display: none;
   }

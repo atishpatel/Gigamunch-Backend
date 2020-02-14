@@ -1,6 +1,6 @@
 import { Login } from './service';
-export function SignOut() {
-    firebase.auth().signOut();
+export function SignOut(callback) {
+    firebase.auth().signOut().then(callback);
 }
 export function SetupFirebase() {
     var config;
@@ -30,10 +30,13 @@ export function SetupFirebaseAuthUI(elementID) {
     var uiConfig = {
         tosUrl: '/terms',
         privacyPolicyUrl: '/privacy',
-        signInSuccessUrl: 'login',
-        signInOptions: [
-            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInSuccessUrl: '/login',
+        signInOptions: [{
+                provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                requireDisplayName: false,
+            },
         ],
+        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
     };
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start(elementID, uiConfig);
@@ -52,7 +55,9 @@ firebase.auth().onAuthStateChanged(function (user) {
     else {
         eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
-            Login(idToken);
+            Login(idToken).then(function () {
+                window.location.href = '/sub/';
+            });
         });
         APP.User = user;
         var event_1 = document.createEvent('Event');

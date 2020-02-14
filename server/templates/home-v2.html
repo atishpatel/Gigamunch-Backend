@@ -996,17 +996,15 @@
       </div>
       <div class="solution-text">
         <h2 class="solution-text-title">Once every week,<br>
-          Eat dinner <br>
-          From around the world.</h2>
-        <p class="solution-text-desc">Get a full course dinner - including a dessert 😋 - delivered to your doorstep.
-          Designed by local immigrants in Nashville to provide you with an experience of their country and their
-          culture. And the best part is, it requires <span class="bold">no cooking.</span></p>
+            Eat dinner <br>
+            From around the world.</h2>
+        <p class="solution-text-desc">Get a full course dinner - including a dessert 😋 - delivered to your doorstep. Designed by local immigrants in Nashville to provide you with an experience of their country and their culture. And the best part is, it requires <span class="bold">no cooking.</span></p>
         <button class="solution-text-button" data-button-action="GetStartedDialog">
-          [[if eq .DiscountAmount "100%"]]
+          [[if eq .DiscountAmount "100%"]] 
           Get Started with a free dinner
           [[else if eq .DiscountAmount "50%"]]
           Get Started with 50% Off your First Dinner
-          [[else]]
+          [[else]] 
           Get Started with a dinner
           [[end]]
         </button>
@@ -1061,13 +1059,13 @@
           </div>
         </div>
         <button class="no-commitment-button" data-button-action="GetStartedDialog">
-          [[if eq .DiscountAmount "100%"]]
-          Get Started with a free dinner
-          [[else if eq .DiscountAmount "50%"]]
-          Get Started with 50% Off your First Dinner
-          [[else]]
-          Get Started with a dinner
-          [[end]]
+            [[if eq .DiscountAmount "100%"]] 
+            Get Started with a free dinner
+            [[else if eq .DiscountAmount "50%"]]
+            Get Started with 50% Off your First Dinner
+            [[else]] 
+            Get Started with a dinner
+            [[end]]
         </button>
       </div>
     </section>
@@ -1176,13 +1174,13 @@
         </div>
       </div>
       <button class="features-button" data-button-action="GetStartedDialog">
-        [[if eq .DiscountAmount "100%"]]
-        Get Started with a free dinner
-        [[else if eq .DiscountAmount "50%"]]
-        Get Started with 50% Off your First Dinner
-        [[else]]
-        Get Started with a dinner
-        [[end]]
+          [[if eq .DiscountAmount "100%"]] 
+          Get Started with a free dinner
+          [[else if eq .DiscountAmount "50%"]]
+          Get Started with 50% Off your First Dinner
+          [[else]] 
+          Get Started with a dinner
+          [[end]]
       </button>
     </section>
     <!-- Testimonials -->
@@ -1235,13 +1233,13 @@
           </div>
         </div>
         <button class="eco-button" data-button-action="GetStartedDialog">
-          [[if eq .DiscountAmount "100%"]]
-          Get Started with a free dinner
-          [[else if eq .DiscountAmount "50%"]]
-          Get Started with 50% Off your First Dinner
-          [[else]]
-          Get Started with a dinner
-          [[end]]
+            [[if eq .DiscountAmount "100%"]] 
+            Get Started with a free dinner
+            [[else if eq .DiscountAmount "50%"]]
+            Get Started with 50% Off your First Dinner
+            [[else]] 
+            Get Started with a dinner
+            [[end]]
         </button>
       </div>
     </section>
@@ -1268,19 +1266,20 @@
             <span class="checklist-list-item-text">Skip or cancel anytime</span>
           </li>
         </ul>
-        <button data-button-action="GetStartedDialog" class="checklist-button">
-          [[if eq .ID "gifted"]]
-          Claim My Free Dinner
-          [[else]]
-          [[if eq .DiscountAmount "100%"]]
-          Get Started with a free dinner
-          [[else if eq .DiscountAmount "50%"]]
-          Get Started with 50% Off your First Dinner
-          [[else]]
-          Get Started with a dinner
-          [[end]]
-          [[end]]
-        </button>
+        <button data-button-action="GetStartedDialog"
+                  class="checklist-button">
+                  [[if eq .ID "gifted"]] 
+                  Claim My Free Dinner
+                  [[else]] 
+                  [[if eq .DiscountAmount "100%"]] 
+                  Get Started with a free dinner
+                  [[else if eq .DiscountAmount "50%"]]
+                  Get Started with 50% Off your First Dinner
+                  [[else]] 
+                  Get Started with a dinner
+                  [[end]]
+                  [[end]]
+                </button>
       </div>
     </section>
 
@@ -1304,17 +1303,18 @@
                name="promo"
                id="promo"
                value="[[.Promo]]">
-        <button type="submit" class="orange-button get-started-button">
-          [[if eq .ID "gifted"]]
-          Claim My Free Dinner
-          [[else]]
-          [[if eq .DiscountAmount "100%"]]
-          Get My free dinner
-          [[else]]
-          Get my first dinner
-          [[end]]
-          [[end]]
-        </button>
+        <button type="submit"
+                  class="orange-button get-started-button">
+                  [[if eq .ID "gifted"]] 
+                  Claim My Free Dinner
+                  [[else]] 
+                  [[if eq .DiscountAmount "100%"]] 
+                  Get My free dinner
+                  [[else]] 
+                  Get my first dinner
+                  [[end]]
+                  [[end]]
+          </button>
       </form>
       <div class="close-button">
         <button type="button" class="close" data-close="getStarted" aria-label="Close">

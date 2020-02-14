@@ -83,14 +83,15 @@ import { GetUserSummary } from './ts/service';
 
 @Component({})
 export default class App extends Vue {
-  public drawerOpen = false;
+  public drawer = false;
   public hideLoadingScreen = false;
   public userSummary = {
+    //TODO: set these back to false and uncomment the GetUserSummary()
     is_active: false,
     is_logged_in: false,
     has_subscribed: false,
-    is_admin: false,
-    on_probation: false,
+    // is_admin: false,
+    // on_probation: false,
     error: {} as Common.Error,
   } as SubAPI.GetUserSummaryResp;
 
@@ -99,7 +100,7 @@ export default class App extends Vue {
     GetUserSummary().then((resp) => {
       this.hideLoadingScreen = true;
       // this.userSummary = resp;
-      console.log(resp);
+      // console.log(resp);
     });
   }
 }

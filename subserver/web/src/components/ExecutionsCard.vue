@@ -1,13 +1,29 @@
 <template>
-  <div>
-    <router-link :to="to" tag="div" class="image unset-link">
-      <img :src="src" :alt="computedImageAlt">
-    </router-link>
-    <div>
-      <router-link :to="to" tag="h3" class="title unset-link" v-html="title"></router-link>
-      <p class="description" v-html="description"></p>
+  <router-link
+    :to="to"
+    tag="div"
+    class="card-container"
+  >
+    <div class="dinner-image unset-link">
+      <img
+        :src="dinnerImageSource"
+        :alt="computedDinnerImageAlt"
+      >
     </div>
-  </div>
+    <div class="cook-info-row">
+      <div class="cook-face-image unset-link">
+        <img
+          :src="cookFaceImageSource"
+          :alt="computedCookImageAlt"
+        >
+      </div>
+      <div>
+        <h3 class="cook-name unset-link">{{cookName}}</h3>
+        <p class="subtitle">{{subtitle}}</p>
+      </div>
+    </div>
+
+  </router-link>
 </template>
 
 <script lang="ts">
@@ -16,23 +32,45 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class ExecutionsItem extends Vue {
   @Prop()
-  public title!: string;
+  public cookName!: string;
   @Prop()
-  public description!: string;
+  public dinnerImageSource!: string;
   @Prop()
-  public src!: string;
+  public cookFaceImageSource!: string;
+  @Prop()
+  public nationality!: string;
   @Prop()
   public to!: object;
 
-  get computedImageAlt(): string {
-    return this.title + ' image';
+  get computedCookImageAlt(): string {
+    return this.cookName + ' image';
+  }
+
+  get computedDinnerImageAlt(): string {
+    return this.nationality + 'dinner image';
+  }
+
+  get subtitle(): string {
+    return 'your ' + this.nationality + ' host';
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-.image {
+.card-container {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.cook-info-row {
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  margin: 15px 0 0 0;
+}
+.dinner-image {
+  flex: none;
   display: block;
   width: 100%;
   position: relative;
@@ -52,12 +90,29 @@ export default class ExecutionsItem extends Vue {
     margin: auto;
   }
 }
-.title {
+.cook-face-image {
+  height: 100px;
+  width: 100px;
+  position: relative;
+  margin: 0 15px 0 0;
+  img {
+    position: absolute;
+    display: block;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    border-radius: 50%;
+  }
+}
+.cook-name {
   font-weight: 500;
   padding: 16px 0;
   margin: 0;
 }
-.description {
+.subtitle {
   padding: 0px;
   margin: 0px;
 }

@@ -24,15 +24,17 @@ const (
 	// DateFormat is the expected format of date in activity.
 	DateFormat = "2006-01-02" // "Jan 2, 2006"
 	// Select
-	selectActivityByEmailStatement           = "SELECT * FROM activity WHERE date=? AND email=?"
-	selectActivityByUserIDStatement          = "SELECT * FROM activity WHERE date=? AND user_id=?"
-	selectAllActivityStatement               = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
-	selectActivityForUserStatement           = "SELECT * FROM activity WHERE user_id=? ORDER BY date DESC"
-	selectActivityForUserStatementEmail      = "SELECT * FROM activity WHERE email=? ORDER BY date DESC"
-	selectActivityAfterDateForUserStatement  = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
-	selectActivityBeforeDateForUserStatement = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
-	selectUnpaidSummaries                    = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx"
-	selectUnpaidSummaryForUser               = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx"
+	selectActivityByEmailStatement                  = "SELECT * FROM activity WHERE date=? AND email=?"
+	selectActivityByUserIDStatement                 = "SELECT * FROM activity WHERE date=? AND user_id=?"
+	selectAllActivityStatement                      = "SELECT * FROM activity ORDER BY date DESC LIMIT ?"
+	selectActivityForUserStatement                  = "SELECT * FROM activity WHERE user_id=? ORDER BY date DESC"
+	selectActivityForUserStatementEmail             = "SELECT * FROM activity WHERE email=? ORDER BY date DESC"
+	selectActivityAfterDateForUserStatement         = "SELECT * FROM activity WHERE user_id=? AND date>=? ORDER BY date DESC"
+	selectActivityBeforeDateForUserStatement        = "SELECT * FROM activity WHERE user_id=? AND date<=? ORDER BY date DESC"
+	selectActivityAfterDateForUserStatementByEmail  = "SELECT * FROM activity WHERE email=? AND date>=? ORDER BY date DESC"
+	selectActivityBeforeDateForUserStatementByEmail = "SELECT * FROM activity WHERE email=? AND date<=? ORDER BY date DESC"
+	selectUnpaidSummaries                           = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 GROUP BY user_id ORDER BY mx"
+	selectUnpaidSummaryForUser                      = "SELECT min(date) as mn,max(date) as mx,user_id,email,first_name,last_name,sum(amount) as amount_due,count(user_id) as num_unpaid FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 AND user_id=? GROUP BY user_id ORDER BY mx"
 	// selectUnpaidActivities                   = "SELECT * FROM activity WHERE date<NOW() AND discount_percent<>100 AND paid=0 AND skip=0 AND refunded=0 AND forgiven=0 ORDER BY user_id,date"
 	selectFirstActivity = "SELECT * FROM activity WHERE first=1 AND skip=0 AND user_id=?"
 	// update and insert
@@ -144,7 +146,12 @@ func (c *Client) GetAllForUser(userID string) ([]*Activity, error) {
 // GetAfterDateForUser gets a list of activity for a user.
 func (c *Client) GetAfterDateForUser(date time.Time, userID string) ([]*Activity, error) {
 	acts := []*Activity{}
-	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityAfterDateForUserStatement, userID, date.Format(DateFormat))
+	var err error
+	if strings.Contains(userID, "@") {
+		err = c.sqlDB.SelectContext(c.ctx, &acts, selectActivityAfterDateForUserStatementByEmail, userID, date.Format(DateFormat))
+	} else {
+		err = c.sqlDB.SelectContext(c.ctx, &acts, selectActivityAfterDateForUserStatement, userID, date.Format(DateFormat))
+	}
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivityAfterDateForUserStatement")
 	}
@@ -154,7 +161,12 @@ func (c *Client) GetAfterDateForUser(date time.Time, userID string) ([]*Activity
 // GetBeforeDateForUser gets a list of activity for a user.
 func (c *Client) GetBeforeDateForUser(date time.Time, userID string) ([]*Activity, error) {
 	acts := []*Activity{}
-	err := c.sqlDB.SelectContext(c.ctx, &acts, selectActivityBeforeDateForUserStatement, userID, date.Format(DateFormat))
+	var err error
+	if strings.Contains(userID, "@") {
+		err = c.sqlDB.SelectContext(c.ctx, &acts, selectActivityBeforeDateForUserStatementByEmail, userID, date.Format(DateFormat))
+	} else {
+		err = c.sqlDB.SelectContext(c.ctx, &acts, selectActivityBeforeDateForUserStatement, userID, date.Format(DateFormat))
+	}
 	if err != nil {
 		return nil, errSQLDB.WithError(err).Annotate("failed to selectActivityBeforerDateForUserStatement")
 	}
