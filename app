@@ -132,10 +132,10 @@ if [[ $1 == "serve" ]]; then
   fi
   if [[ $2 == "sub" ]]; then
     echo "Starting sub:"
-    cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
-    dev_appserver.py --datastore_path ./.datastore --port 8081 subserver/app.yaml& 
+    # cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
+    # dev_appserver.py --datastore_path ./.datastore --port 8081 subserver/app.yaml& 
     cd subserver/web 
-    yarn run serve
+    yarn serve
     cd ../..
   fi
   # stop mysql
