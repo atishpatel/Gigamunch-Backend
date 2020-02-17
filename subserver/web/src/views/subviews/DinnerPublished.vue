@@ -45,7 +45,20 @@
               {{servingText}}
             </p>
           </div>
-          <div class="buttons-row">
+          <div
+            v-if="!userSummary.has_subscribed"
+            class="buttons-row"
+          >
+            <v-btn
+              depressed
+              color="#E8554E"
+              class="white--text"
+            >Get this dinner</v-btn>
+          </div>
+          <div
+            v-else
+            class="buttons-row"
+          >
             <v-btn
               depressed
               color="#E8554E"
@@ -130,7 +143,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Image169 from '../../components/Image169.vue';
 import Dish from '../../components/Dish.vue';
-import { storage } from 'firebase';
+import { GetDayMonthDayDate } from '../../ts/utils';
 
 @Component({
   components: {
@@ -145,6 +158,8 @@ export default class DinnerPublished extends Vue {
   public activity!: Common.Activity;
   @Prop()
   public userSummary!: SubAPI.GetUserSummaryResp;
+  @Prop()
+  public showingVegetarianDinner!: false;
 
   get heroImageText(): string {
     return 'Your Journey to ' + this.exe.culture.country;
@@ -201,8 +216,40 @@ export default class DinnerPublished extends Vue {
   }
 
   get servingText(): string {
-    // TODO: change from hardcode to if skipped, and check serving amounts
-    return 'You will receive 4 servings on Monday, Jan 2.';
+    if (!this.userSummary.has_subscribed) {
+      return `You could receive this dinner on ${GetDayMonthDayDate(
+        this.exe.date
+      )}`;
+    } else {
+      if (this.activity.skip) {
+        return `You will not receive this dinner on ${GetDayMonthDayDate(
+          this.exe.date
+        )}`;
+      } else {
+        if (
+          this.activity.servings_non_vegetarian > 0 &&
+          this.activity.servings_vegetarian > 0
+        ) {
+          return `You will receive ${
+            this.activity.servings_non_vegetarian
+          } meat servings and ${
+            this.activity.servings_vegetarian
+          } vegetarian servings on ${GetDayMonthDayDate(this.exe.date)}`;
+        } else if (this.activity.servings_vegetarian > 0) {
+          return `You will receive ${
+            this.activity.servings_vegetarian
+          } vegetarian servings on ${GetDayMonthDayDate(this.exe.date)}`;
+        } else if (this.showingVegetarianDinner) {
+          return `You will receive ${
+            this.activity.servings_non_vegetarian
+          } meat servings on ${GetDayMonthDayDate(this.exe.date)}`;
+        } else {
+          return `You will receive ${
+            this.activity.servings_non_vegetarian
+          } servings on ${GetDayMonthDayDate(this.exe.date)}`;
+        }
+      }
+    }
   }
 
   get patternImageSrc(): string {

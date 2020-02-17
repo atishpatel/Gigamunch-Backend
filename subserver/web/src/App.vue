@@ -72,7 +72,8 @@
     </v-toolbar>
 
     <v-content class="main">
-      <router-view />
+      <router-view :userSummary="userSummary" />
+
     </v-content>
   </v-app>
 </template>
@@ -86,7 +87,6 @@ export default class App extends Vue {
   public drawer = false;
   public hideLoadingScreen = false;
   public userSummary = {
-    //TODO: set these back to false and uncomment the GetUserSummary()
     is_active: false,
     is_logged_in: false,
     has_subscribed: false,
@@ -99,7 +99,7 @@ export default class App extends Vue {
     // App ready
     GetUserSummary().then((resp) => {
       this.hideLoadingScreen = true;
-      // this.userSummary = resp;
+      this.userSummary = resp;
       // console.log(resp);
     });
   }
