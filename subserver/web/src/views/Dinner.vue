@@ -5,6 +5,7 @@
       :exe="exe"
       :activity="activity"
       :userSummary="userSummary"
+      v-on:get-activity="getIDandGetExecution"
     ></DinnerPublished>
 
   </div>
@@ -47,8 +48,12 @@ export default class Dinner extends Vue {
   }
 
   public created() {
-    this.getExecution(this.$route.params.date);
+    this.getIDandGetExecution();
     window.scrollTo(0, 0);
+  }
+
+  public getIDandGetExecution() {
+    this.getExecution(this.$route.params.date);
   }
 
   public getExecution(id: string) {

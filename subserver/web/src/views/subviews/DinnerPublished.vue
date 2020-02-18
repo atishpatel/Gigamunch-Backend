@@ -63,11 +63,14 @@
               depressed
               color="#E8554E"
               class="white--text"
-            >Skip</v-btn>
+              :disabled="disableSkip"
+              @click="skipClicked"
+            >{{skipButtonText}}</v-btn>
             <v-btn
               depressed
               color="#E8554E"
               class="white--text"
+              :disabled="disableChangeServings"
             >Change Servings</v-btn>
             <v-btn
               depressed
@@ -144,6 +147,9 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Image169 from '../../components/Image169.vue';
 import Dish from '../../components/Dish.vue';
 import { GetDayMonthDayDate } from '../../ts/utils';
+import { IsError, ErrorAlert } from '../../ts/errors';
+import { SkipActivity } from '../../ts/service';
+import { UnskipActivity } from '../../ts/service';
 
 @Component({
   components: {
@@ -158,8 +164,18 @@ export default class DinnerPublished extends Vue {
   public activity!: Common.Activity;
   @Prop()
   public userSummary!: SubAPI.GetUserSummaryResp;
-  @Prop()
-  public showingVegetarianDinner!: false;
+
+  protected showingVegetarianDinner = false;
+  protected disableSkip = false;
+
+  get disableChangeServings(): boolean {
+    if (this.activity) {
+      if (this.activity.skip) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   get heroImageText(): string {
     return 'Your Journey to ' + this.exe.culture.country;
@@ -221,35 +237,49 @@ export default class DinnerPublished extends Vue {
         this.exe.date
       )}`;
     } else {
-      if (this.activity.skip) {
-        return `You will not receive this dinner on ${GetDayMonthDayDate(
-          this.exe.date
-        )}`;
-      } else {
-        if (
-          this.activity.servings_non_vegetarian > 0 &&
-          this.activity.servings_vegetarian > 0
-        ) {
-          return `You will receive ${
-            this.activity.servings_non_vegetarian
-          } meat servings and ${
-            this.activity.servings_vegetarian
-          } vegetarian servings on ${GetDayMonthDayDate(this.exe.date)}`;
-        } else if (this.activity.servings_vegetarian > 0) {
-          return `You will receive ${
-            this.activity.servings_vegetarian
-          } vegetarian servings on ${GetDayMonthDayDate(this.exe.date)}`;
-        } else if (this.showingVegetarianDinner) {
-          return `You will receive ${
-            this.activity.servings_non_vegetarian
-          } meat servings on ${GetDayMonthDayDate(this.exe.date)}`;
+      if (this.activity) {
+        if (this.activity.skip) {
+          return `You will not receive this dinner on ${GetDayMonthDayDate(
+            this.exe.date
+          )}`;
         } else {
-          return `You will receive ${
-            this.activity.servings_non_vegetarian
-          } servings on ${GetDayMonthDayDate(this.exe.date)}`;
+          if (
+            this.activity.servings_non_vegetarian > 0 &&
+            this.activity.servings_vegetarian > 0
+          ) {
+            return `You will receive ${
+              this.activity.servings_non_vegetarian
+            } meat servings and ${
+              this.activity.servings_vegetarian
+            } vegetarian servings on ${GetDayMonthDayDate(this.exe.date)}`;
+          } else if (this.activity.servings_vegetarian > 0) {
+            return `You will receive ${
+              this.activity.servings_vegetarian
+            } vegetarian servings on ${GetDayMonthDayDate(this.exe.date)}`;
+          } else if (this.showingVegetarianDinner) {
+            return `You will receive ${
+              this.activity.servings_non_vegetarian
+            } meat servings on ${GetDayMonthDayDate(this.exe.date)}`;
+          } else {
+            return `You will receive ${
+              this.activity.servings_non_vegetarian
+            } servings on ${GetDayMonthDayDate(this.exe.date)}`;
+          }
         }
       }
+      return '';
     }
+  }
+
+  get skipButtonText(): string {
+    if (this.activity) {
+      if (this.activity.skip) {
+        return 'Unskip';
+      } else {
+        return 'Skip';
+      }
+    }
+    return 'Skip';
   }
 
   get patternImageSrc(): string {
@@ -260,6 +290,37 @@ export default class DinnerPublished extends Vue {
       }
     }
     return '';
+  }
+
+  protected skipClicked() {
+    if (!this.activity) {
+      alert('activity not found');
+      return;
+    }
+    this.disableSkip = true;
+    if (this.activity.skip) {
+      UnskipActivity(this.activity.date).then((resp) => {
+        if (IsError(resp)) {
+          ErrorAlert(resp);
+          window.location.reload();
+          return;
+        }
+        this.$emit('get-activity');
+        this.disableSkip = false;
+      });
+    } else {
+      SkipActivity(this.activity.date).then((resp) => {
+        if (IsError(resp)) {
+          ErrorAlert(resp);
+          window.location.reload();
+          return;
+        }
+
+        this.$emit('get-activity');
+        this.disableSkip = false;
+      });
+    }
+    this.activity.skip = true;
   }
 }
 </script>

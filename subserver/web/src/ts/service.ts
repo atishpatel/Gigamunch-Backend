@@ -71,6 +71,22 @@ export function GetExecution(idOrDate: string): Promise<SubAPI.GetExecutionResp>
   return callFetch(url, 'GET', req);
 }
 
+export function SkipActivity(date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'SkipActivity';
+  const req: SubAPI.DateReq = {
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function UnskipActivity(date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'UnskipActivity';
+  const req: SubAPI.DateReq = {
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
 function callFetch(url: string, method: string, body: object): Promise<any> {
   return GetToken().then((token) => {
     return callFetchWithToken(url, method, body, token);
