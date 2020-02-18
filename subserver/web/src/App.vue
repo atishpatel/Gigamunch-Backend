@@ -49,7 +49,7 @@
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title class="headline">
-        <span>Sub</span>
+        <span>Gigamunch</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div>
@@ -64,7 +64,7 @@
           href="/checkout"
         >Sign up</a>
         <a
-          v-if="userSummary.is_logged_in === false"
+          v-else
           class="nav-link"
           href="/login"
         >Login</a>
