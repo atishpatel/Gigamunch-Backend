@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuetify from 'vuetify/lib';
+import Vuetify from 'vuetify';
 import 'vuetify/src/stylus/app.styl';
 
 Vue.use(Vuetify, {
@@ -13,4 +13,11 @@ Vue.use(Vuetify, {
     success: '#4CAF50',
     warning: '#FFC107',
   },
+});
+
+// @ts-ignore
+import VuetifyGoogleAutocomplete from 'vuetify-google-autocomplete/lib';
+
+Vue.use(VuetifyGoogleAutocomplete, {
+  apiKey: 'AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y',
 });
