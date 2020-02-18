@@ -34,6 +34,8 @@ export default class Dinners extends Vue {
 
   public getExecutions() {
     var today = new Date();
+    today.setHours(today.getHours() - 6);
+    console.log(today.toISOString());
     GetExecutionsAfterDate(today).then((resp) => {
       if (IsError(resp)) {
         return;
