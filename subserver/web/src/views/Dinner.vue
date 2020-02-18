@@ -48,6 +48,7 @@ export default class Dinner extends Vue {
 
   public created() {
     this.getExecution(this.$route.params.date);
+    window.scrollTo(0, 0);
   }
 
   public getExecution(id: string) {
