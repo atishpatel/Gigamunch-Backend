@@ -14,7 +14,7 @@
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>
-              My Dinners
+              Upcoming Dinners
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
