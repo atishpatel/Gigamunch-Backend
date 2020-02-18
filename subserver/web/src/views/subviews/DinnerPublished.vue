@@ -352,7 +352,7 @@ $view-edge-padding-mobile: 24px;
 .host-text-hosted-by {
   font-size: 13px;
   margin: 0;
-  opacity: 0.75;
+  color: #869995;
 }
 @media (min-width: 500px) {
   .host-text-name {

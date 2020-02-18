@@ -48,8 +48,8 @@
       class="app-toolbar"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title class="headline">
-        <span>Gigamunch</span>
+      <v-toolbar-title>
+        <span class="logo-headline">Gigamunch</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div>
@@ -142,5 +142,11 @@ v-app {
 
 .v-list__tile--active {
   background-color: #eceff1;
+}
+
+.logo-headline {
+  color: #d0782c;
+  font-family: 'Laila', serif;
+  font-weight: 500;
 }
 </style>
