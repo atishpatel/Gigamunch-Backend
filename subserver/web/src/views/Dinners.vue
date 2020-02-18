@@ -12,7 +12,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import ExecutionsList from '../components/ExecutionsList.vue';
-import { GetExecutions } from '../ts/service';
+import { GetExecutionsAfterDate } from '../ts/service';
 import { IsError } from '../ts/errors';
 
 @Component({
@@ -33,7 +33,8 @@ export default class Dinners extends Vue {
   }
 
   public getExecutions() {
-    GetExecutions(0, 10).then((resp) => {
+    var today = new Date();
+    GetExecutionsAfterDate(today).then((resp) => {
       if (IsError(resp)) {
         return;
       }

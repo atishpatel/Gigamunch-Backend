@@ -35,20 +35,30 @@ export function GetExecutions(start: number, limit: number): Promise<SubAPI.GetE
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecutionsAfterDate(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
+export function GetExecutionsAfterDate(date: Date | string): Promise<SubAPI.GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutionsAfterDate';
-  const req: SubAPI.GetExecutionsReq = {
-    start,
-    limit,
+  let dateString = '';
+  if (typeof (date) === 'string') {
+    dateString = date;
+  } else if (typeof (date) === 'object') {
+    dateString = date.toISOString();
+  }
+  const req: SubAPI.GetExecutionsDateReq = {
+    date: dateString,
   };
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecutionsBeforeDate(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
+export function GetExecutionsBeforeDate(date: Date | string): Promise<SubAPI.GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutionsBeforeDate';
-  const req: SubAPI.GetExecutionsReq = {
-    start,
-    limit,
+  let dateString = '';
+  if (typeof (date) === 'string') {
+    dateString = date;
+  } else if (typeof (date) === 'object') {
+    dateString = date.toISOString();
+  }
+  const req: SubAPI.GetExecutionsDateReq = {
+    date: dateString,
   };
   return callFetch(url, 'GET', req);
 }

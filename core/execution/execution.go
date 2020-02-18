@@ -107,6 +107,7 @@ func (c *Client) GetAfterDate(t time.Time) ([]*Execution, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to QueryFilterOrdered")
 	}
+	//filter here
 	return exes, nil
 }
 
@@ -117,6 +118,7 @@ func (c *Client) GetBeforeDate(t time.Time) ([]*Execution, error) {
 	if err != nil {
 		return nil, errDatastore.WithError(err).Annotate("failed to QueryFilterOrdered")
 	}
+	// filter here
 	return exes, nil
 }
 
