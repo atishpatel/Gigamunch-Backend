@@ -5,10 +5,6 @@
     "title": "AdminAPI.proto",
     "version": "version not set"
   },
-  "schemes": [
-    
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],
@@ -25,6 +21,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -52,6 +54,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -78,6 +86,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -103,6 +117,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -131,6 +151,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -156,6 +182,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -183,6 +215,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetAllExecutionStatsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -208,6 +246,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetDeliveriesResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -236,6 +280,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -261,6 +311,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionStatsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -289,6 +345,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetExecutionsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -315,6 +377,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -343,6 +411,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -369,6 +443,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -397,6 +477,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -424,6 +510,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetLogsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -449,6 +541,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberActivitiesResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -476,6 +574,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberDiscountsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -501,6 +605,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberSublogsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -528,6 +638,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetUnpaidSublogsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -553,6 +669,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetUnpaidSummariesResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -580,6 +702,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIProcessActivityResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -605,6 +733,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIProcessActivityResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -633,6 +767,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -659,6 +799,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -687,6 +833,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -713,6 +865,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -741,6 +899,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -767,6 +931,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -795,6 +965,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -821,6 +997,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -849,6 +1031,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -866,6 +1054,38 @@
         ]
       }
     },
+    "/admin/api/v1/UpdateAddress": {
+      "post": {
+        "operationId": "UpdateAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminAPIUpdateAddressReq"
+            }
+          }
+        ],
+        "tags": [
+          "Admin"
+        ]
+      }
+    },
     "/admin/api/v1/UpdateDeliveries": {
       "post": {
         "operationId": "UpdateDeliveries",
@@ -874,6 +1094,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateDeliveriesResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -900,6 +1126,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -928,6 +1160,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateExecutionResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -953,6 +1191,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIUpdateExecutionStatsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -981,6 +1225,12 @@
             "schema": {
               "$ref": "#/definitions/AdminAPIGetHasSubscribedRespV2"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -1006,6 +1256,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/AdminAPIGetSubscriberRespV2"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -1702,6 +1958,12 @@
         },
         "new_email": {
           "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
         }
       }
     },
@@ -1877,6 +2139,17 @@
         },
         "id": {
           "type": "string"
+        }
+      }
+    },
+    "AdminAPIUpdateAddressReq": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/CommonAddress"
         }
       }
     },
@@ -2858,6 +3131,39 @@
         }
       },
       "description": "Subscriber is a subscriber."
+    },
+    "gatewayruntimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
     }
   }
 }

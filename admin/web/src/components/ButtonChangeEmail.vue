@@ -1,9 +1,9 @@
 <template>
   <DialogConfirm
     ref="dialog"
-    Title="Change Email"
-    ButtonText="Change Email"
-    ConfirmText="Change Email"
+    Title="Change Email and Name"
+    ButtonText="Change Email and Name"
+    ConfirmText="Change Email and Name"
     v-on:dialog-success="submit"
   >
     <template v-slot:dialog-content>
@@ -16,6 +16,26 @@
           round
         ></v-text-field>
       </v-flex>
+      <v-layout>
+        <v-flex>
+          <v-text-field
+            class="field-right-padding"
+            v-model="req.first_name"
+            label="First Name"
+            outline
+            round
+          ></v-text-field>
+        </v-flex>
+        <v-flex>
+          <v-text-field
+            class="field-right-padding"
+            v-model="req.last_name"
+            label="Last Name"
+            outline
+            round
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
     </template>
   </DialogConfirm>
 </template>
@@ -35,9 +55,8 @@ export default class ButtonChangeEmail extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
   public dialog = false;
-  public req = {
-    new_email: '',
-  };
+  @Prop()
+  public req!: any;
 
   protected submit() {
     if (!this.sub) {
@@ -49,7 +68,12 @@ export default class ButtonChangeEmail extends Vue {
       return;
     }
     const old_email = this.sub.emails[0];
-    ReplaceSubscriberEmail(old_email, this.req.new_email).then((resp) => {
+    ReplaceSubscriberEmail(
+      old_email,
+      this.req.new_email,
+      this.req.first_name,
+      this.req.last_name
+    ).then((resp) => {
       if (IsError(resp)) {
         ErrorAlert(resp);
         return;

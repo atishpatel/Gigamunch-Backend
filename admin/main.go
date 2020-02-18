@@ -91,6 +91,7 @@ func main() {
 	// **********************
 	// Subscriber
 	// **********************
+	http.HandleFunc("/admin/api/v1/UpdateAddress", s.handler(s.userAdmin(s.UpdateAddress)))
 	http.HandleFunc("/admin/api/v1/ActivateSubscriber", s.handler(s.userAdmin(s.ActivateSubscriber)))
 	http.HandleFunc("/admin/api/v1/DeactivateSubscriber", s.handler(s.userAdmin(s.DeactivateSubscriber)))
 	http.HandleFunc("/admin/api/v1/ReplaceSubscriberEmail", s.handler(s.userAdmin(s.ReplaceSubscriberEmail)))
