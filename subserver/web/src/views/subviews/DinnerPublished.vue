@@ -76,7 +76,8 @@
               depressed
               color="#E8554E"
               class="white--text"
-            >See vegetarian option</v-btn>
+              @click="seeVegClicked"
+            >{{seeVegButtonText}}</v-btn>
           </div>
           <div
             v-for="dish in dishes"
@@ -164,8 +165,8 @@ export default class DinnerPublished extends Vue {
   public activity!: Common.Activity;
   @Prop()
   public userSummary!: SubAPI.GetUserSummaryResp;
-
-  protected showingVegetarianDinner = false;
+  @Prop({ default: false })
+  public showingVegetarianDinner!: boolean;
   protected disableSkip = false;
 
   get disableChangeServings(): boolean {
@@ -196,15 +197,50 @@ export default class DinnerPublished extends Vue {
   }
 
   get dinnerImageTitle(): string {
-    return this.exe.culture_cook.first_name + "'s Dinner";
+    if (this.showingVegetarianDinner) {
+      return this.exe.culture_cook.first_name + "'s Vegetarian Dinner";
+    } else {
+      return this.exe.culture_cook.first_name + "'s Dinner";
+    }
+  }
+
+  get seeVegButtonText(): string {
+    if (this.showingVegetarianDinner) {
+      return 'See meat option';
+    } else {
+      return 'See vegetarian option';
+    }
   }
 
   get dinnerImageSrc(): string {
-    return this.exe.content.hands_plate_non_veg_image_url;
+    if (this.showingVegetarianDinner) {
+      return this.exe.content.hands_plate_veg_image_url;
+    } else {
+      return this.exe.content.hands_plate_non_veg_image_url;
+    }
   }
 
   get dishes(): Common.Dish[] {
-    return this.exe.dishes;
+    var vegDishes: Common.Dish[] = [];
+    var meatDishes: Common.Dish[] = [];
+
+    if (this.exe && this.exe.dishes) {
+      for (let i = 0; i < this.exe.dishes.length; i++) {
+        const dish = this.exe.dishes[i];
+        if (dish.is_for_non_vegetarian) {
+          meatDishes.push(dish);
+        }
+        if (dish.is_for_vegetarian) {
+          vegDishes.push(dish);
+        }
+      }
+    }
+
+    if (this.showingVegetarianDinner) {
+      return vegDishes;
+    } else {
+      return meatDishes;
+    }
   }
 
   get playlistTitle(): string {
@@ -321,6 +357,14 @@ export default class DinnerPublished extends Vue {
       });
     }
     this.activity.skip = true;
+  }
+
+  protected seeVegClicked() {
+    if (this.showingVegetarianDinner) {
+      this.showingVegetarianDinner = false;
+    } else {
+      this.showingVegetarianDinner = true;
+    }
   }
 }
 </script>

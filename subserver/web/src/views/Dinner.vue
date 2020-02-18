@@ -5,6 +5,7 @@
       :exe="exe"
       :activity="activity"
       :userSummary="userSummary"
+      :showingVegetarianDinner="showingVegetarianDinner"
       v-on:get-activity="getIDandGetExecution"
     ></DinnerPublished>
 
@@ -31,6 +32,7 @@ export default class Dinner extends Vue {
   protected exe!: Common.Execution;
   protected loading!: boolean;
   protected activity!: Common.Activity;
+  protected showingVegetarianDinner = false;
 
   public constructor() {
     super();
@@ -65,6 +67,10 @@ export default class Dinner extends Vue {
       }
       this.exe = resp.execution_and_activity.execution;
       this.activity = resp.execution_and_activity.activity;
+      if (this.activity) {
+        this.showingVegetarianDinner =
+          resp.execution_and_activity.activity.servings_vegetarian > 0;
+      }
     });
   }
   get computedLandscapeImageAlt() {
