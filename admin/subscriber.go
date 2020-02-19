@@ -215,8 +215,6 @@ func (s *server) UpdateAddress(ctx context.Context, w http.ResponseWriter, r *ht
 	}
 	// end decode request
 
-	firstBagDate := getDatetime(req.FirstBagDate)
-
 	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.NewClient")

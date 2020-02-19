@@ -63,10 +63,6 @@ export default class ButtonChangeEmail extends Vue {
       alert('sub not found');
       return;
     }
-    if (!this.req.new_email) {
-      alert('new email cannot be empty');
-      return;
-    }
     const old_email = this.sub.emails[0];
     ReplaceSubscriberEmail(
       old_email,
