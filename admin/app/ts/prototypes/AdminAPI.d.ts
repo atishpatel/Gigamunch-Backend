@@ -18,6 +18,8 @@ interface DeactivateSubscriberReq {
 interface ReplaceSubscriberEmailReq {
     old_email: string
     new_email: string
+    first_name: string
+    last_name: string
 }
 interface ChangeSubscriberServingsReq {
     id: string
@@ -28,6 +30,11 @@ interface ChangeSubscriberPlanDayReq {
     id: string
     new_plan_day: string
     activity_switch_date: string
+}
+interface UpdateAddressReq {
+    user_id: string
+    address: Common.Address
+    delivery_notes: string
 }
 interface DiscountSubscriberReq {
     user_id: string

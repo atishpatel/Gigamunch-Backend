@@ -517,6 +517,29 @@
         }
       }
     },
+    "CommonCampaign": {
+      "type": "object",
+      "properties": {
+        "Source": {
+          "type": "string"
+        },
+        "Medium": {
+          "type": "string"
+        },
+        "Campaign": {
+          "type": "string"
+        },
+        "Term": {
+          "type": "string"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "Timestamp": {
+          "type": "string"
+        }
+      }
+    },
     "CommonCode": {
       "type": "string",
       "enum": [
@@ -835,6 +858,20 @@
         }
       }
     },
+    "CommonFoodPref": {
+      "type": "object",
+      "properties": {
+        "no_pork": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "no_beef": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "FoodPref are pref for food."
+    },
     "CommonInfoBox": {
       "type": "object",
       "properties": {
@@ -962,6 +999,130 @@
       },
       "description": "Sticker are reheat stickers for dishes."
     },
+    "CommonSubscriber": {
+      "type": "object",
+      "properties": {
+        "created_datetime": {
+          "type": "string"
+        },
+        "sign_up_datetime": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "auth_id": {
+          "type": "string"
+        },
+        "location": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "photo_url": {
+          "type": "string"
+        },
+        "email_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonEmailPref"
+          },
+          "title": "Pref"
+        },
+        "phone_prefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonPhonePref"
+          }
+        },
+        "payment_provider": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Account"
+        },
+        "payment_customer_id": {
+          "type": "string"
+        },
+        "payment_method_token": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "activate_datetime": {
+          "type": "string"
+        },
+        "deactivated_datetime": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/CommonAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
+        },
+        "servings_non_vegetarian": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Plan"
+        },
+        "servings_vegetarian": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "plan_interval": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "plan_weekday": {
+          "type": "string"
+        },
+        "interval_start_point": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "food_pref": {
+          "$ref": "#/definitions/CommonFoodPref"
+        },
+        "num_gift_dinners": {
+          "type": "string",
+          "format": "int64",
+          "title": "Gift"
+        },
+        "gift_reveal_datetime": {
+          "type": "string"
+        },
+        "referral_page_opens": {
+          "type": "string",
+          "format": "int64",
+          "title": "Marketing"
+        },
+        "referred_page_opens": {
+          "type": "string",
+          "format": "int64"
+        },
+        "referrer_user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "reference_email": {
+          "type": "string"
+        },
+        "reference_text": {
+          "type": "string"
+        },
+        "campaigns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonCampaign"
+          }
+        }
+      },
+      "description": "Subscriber is a subscriber."
+    },
     "SubAPIChangeActivityServingsReq": {
       "type": "object",
       "properties": {
@@ -1023,20 +1184,8 @@
         "error": {
           "$ref": "#/definitions/CommonError"
         },
-        "email_prefs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CommonEmailPref"
-          }
-        },
-        "phone_prefs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CommonPhonePref"
-          }
-        },
-        "address": {
-          "$ref": "#/definitions/CommonAddress"
+        "subscriber": {
+          "$ref": "#/definitions/CommonSubscriber"
         },
         "payment_info": {
           "$ref": "#/definitions/SubAPIPaymentInfo"

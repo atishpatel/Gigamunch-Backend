@@ -23,6 +23,7 @@ interface SubmitCheckoutReq {
     campaigns: Common.Campaign[]
     reference_email: string
     promo: string
+    password: string
 }
 interface UpdatePaymentReq {
     email: string
