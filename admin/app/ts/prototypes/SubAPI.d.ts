@@ -50,4 +50,15 @@ interface GetExecutionResp {
   error: Common.Error
   execution_and_activity: Common.ExecutionAndActivity
 }
+interface ChangeActivityServingsReq {
+  id: string
+  servings_non_veg: number
+  servings_veg: number
+  date: string
+}
+interface ChangeSubscriberServingsReq {
+  id: string
+  servings_non_veg: number
+  servings_veg: number
+}
 }

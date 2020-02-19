@@ -54,6 +54,10 @@ func main() {
 	// Activity
 	http.HandleFunc("/sub/api/v1/SkipActivity", s.handler(s.getUser(true, s.SkipActivity)))
 	http.HandleFunc("/sub/api/v1/UnskipActivity", s.handler(s.getUser(true, s.UnskipActivity)))
+	http.HandleFunc("/sub/api/v1/ChangeActivityServings", s.handler(s.getUser(true, s.ChangeActivityServings)))
+
+	// Subscriber
+	http.HandleFunc("/sub/api/v1/ChangeSubscriberServings", s.handler(s.getUser(true, s.ChangeSubscriberServings)))
 
 	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.getUser(false, s.GetExecutions)))
 	http.HandleFunc("/sub/api/v1/GetExecutionsAfterDate", s.handler(s.getUser(false, s.GetExecutionsAfterDate)))

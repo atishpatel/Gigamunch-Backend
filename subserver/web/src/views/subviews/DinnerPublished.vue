@@ -66,12 +66,14 @@
               :disabled="disableSkip"
               @click="skipClicked"
             >{{skipButtonText}}</v-btn>
-            <v-btn
+            <ButtonChangeServings
+              :activity="activity"
+              v-on:dialog-success="updatedServings"
               depressed
               color="#E8554E"
               class="white--text"
-              :disabled="disableChangeServings"
-            >Change Servings</v-btn>
+              :ButtonDisabled="disableChangeServings"
+            ></ButtonChangeServings>
             <v-btn
               depressed
               color="#E8554E"
@@ -147,6 +149,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import Image169 from '../../components/Image169.vue';
 import Dish from '../../components/Dish.vue';
+import ButtonChangeServings from '../../components/ButtonChangeServings.vue';
 import { GetDayMonthDayDate } from '../../ts/utils';
 import { IsError, ErrorAlert } from '../../ts/errors';
 import { SkipActivity } from '../../ts/service';
@@ -156,6 +159,7 @@ import { UnskipActivity } from '../../ts/service';
   components: {
     Image169,
     Dish,
+    ButtonChangeServings,
   },
 })
 export default class DinnerPublished extends Vue {
@@ -361,6 +365,10 @@ export default class DinnerPublished extends Vue {
       });
     }
     this.activity.skip = true;
+  }
+
+  protected updatedServings() {
+    this.$emit('get-activity');
   }
 
   protected seeVegClicked() {

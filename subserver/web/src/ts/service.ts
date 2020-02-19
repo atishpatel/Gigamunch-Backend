@@ -87,6 +87,27 @@ export function UnskipActivity(date: string): Promise<SubAPI.ErrorOnlyResp> {
   return callFetch(url, 'POST', req);
 }
 
+export function ChangeActivityServings(id: string, servings_non_veg: number, servings_veg: number, date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'ChangeActivityServings';
+  const req: SubAPI.ChangeActivityServingsReq = {
+    id,
+    servings_non_veg,
+    servings_veg,
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ChangeSubscriberServings(id: string, servings_non_veg: number, servings_veg: number): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'ChangeSubscriberServings';
+  const req: SubAPI.ChangeSubscriberServingsReq = {
+    id,
+    servings_non_veg,
+    servings_veg,
+  };
+  return callFetch(url, 'POST', req);
+}
+
 function callFetch(url: string, method: string, body: object): Promise<any> {
   return GetToken().then((token) => {
     return callFetchWithToken(url, method, body, token);
