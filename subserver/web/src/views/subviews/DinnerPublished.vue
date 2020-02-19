@@ -165,8 +165,8 @@ export default class DinnerPublished extends Vue {
   public activity!: Common.Activity;
   @Prop()
   public userSummary!: SubAPI.GetUserSummaryResp;
-  @Prop({ default: false })
-  public showingVegetarianDinner!: boolean;
+
+  public showingVegetarianDinner = false;
   protected disableSkip = false;
 
   get disableChangeServings(): boolean {
@@ -365,6 +365,10 @@ export default class DinnerPublished extends Vue {
     } else {
       this.showingVegetarianDinner = true;
     }
+  }
+
+  public setVegShowing(v: boolean) {
+    this.showingVegetarianDinner = v;
   }
 }
 </script>

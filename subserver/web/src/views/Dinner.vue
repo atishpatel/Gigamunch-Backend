@@ -2,6 +2,7 @@
   <div>
     <!-- v-if="userSummary.has_subscribed" -->
     <DinnerPublished
+      ref="dinnerPublished"
       :exe="exe"
       :activity="activity"
       :userSummary="userSummary"
@@ -68,8 +69,9 @@ export default class Dinner extends Vue {
       this.exe = resp.execution_and_activity.execution;
       this.activity = resp.execution_and_activity.activity;
       if (this.activity) {
-        this.showingVegetarianDinner =
-          resp.execution_and_activity.activity.servings_vegetarian > 0;
+        (this.$refs.dinnerPublished as DinnerPublished).setVegShowing(
+          resp.execution_and_activity.activity.servings_vegetarian > 0
+        );
       }
     });
   }
