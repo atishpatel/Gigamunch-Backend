@@ -27,7 +27,7 @@ import (
 const (
 	datetimeFormat                        = "2006-01-02 15:04:05" // "Jan 2, 2006 at 3:04pm (MST)"
 	dateFormat                            = "2006-01-02"          // "Jan 2, 2006"
-	insertSubLogStatement                 = "INSERT INTO activity (date,user_id,email,servings,veg_servings,amount,payment_method_token,customer_id) VALUES (?,?,?,?,?,?,?,?)"
+	insertSubLogStatement                 = "INSERT INTO activity (date,user_id,email,servings,veg_servings,amount,payment_method_token,customer_id,active,skip) VALUES (?,?,?,?,?,?,?,?,?,?)"
 	selectSubLogEmails                    = "SELECT DISTINCT email from activity where date>? and date<?"
 	selectSubLogStatement                 = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND email='%s'"
 	selectSubLogByUserIDStatement         = "SELECT created_dt,skip,servings,veg_servings,amount,amount_paid,paid,paid_dt,payment_method_token,transaction_id,first,discount_amount,discount_percent,refunded,refunded_amount FROM activity WHERE date='%s' AND user_id='%s'"
@@ -471,7 +471,7 @@ func (c *Client) GetSubscriberActivities(email string) ([]*SubscriptionLog, erro
 // }
 
 // Setup sets up a SubLog.
-func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string) error {
+func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings int8, amount float32, deliveryTime int8, paymentMethodToken, customerID string, active, skip bool) error {
 	if date.IsZero() || subEmail == "" || amount == 0 || paymentMethodToken == "" || customerID == "" {
 		return errInvalidParameter.Wrapf("expected(actual): date(%v) subEmail(%s) amount(%f) deliveryTime(%d) paymentMethodToken(%s) customerID(%s)", date, subEmail, amount, deliveryTime, paymentMethodToken, customerID)
 	}
@@ -480,7 +480,7 @@ func (c *Client) Setup(date time.Time, subEmail string, servings, vegServings in
 		return errDatastore.WithError(err).Annotate("failed to get sub")
 	}
 
-	_, err = mysqlDB.Exec(insertSubLogStatement, date.Format(dateFormat), sub.ID, sub.Email, servings, vegServings, amount, paymentMethodToken, customerID)
+	_, err = mysqlDB.Exec(insertSubLogStatement, date.Format(dateFormat), sub.ID, sub.Email, servings, vegServings, amount, paymentMethodToken, customerID, active, skip)
 	if merr, ok := err.(*mysql.MySQLError); ok {
 		if merr.Number == 1062 {
 			return errDuplicateEntry.WithError(err).Wrap("failed to execute insertSubLogStatement statement.")
@@ -533,7 +533,7 @@ func (c *Client) ChangeServings(date time.Time, subEmail string, servings int8, 
 			return errors.Wrap("failed to sub.Get", err)
 		}
 		// insert
-		err = c.Setup(date, s.Email, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, s.Email, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID, true, false)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -671,7 +671,7 @@ func (c *Client) Skip(date time.Time, subEmail, reason string) error {
 		// if err != nil {
 		// 	return errDatastore.WithError(err).Wrap("failed to get")
 		// }
-		err = c.Setup(date, s.Email, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, s.Email, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID, true, false)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -739,7 +739,7 @@ func (c *Client) Unskip(date time.Time, subEmail string) error {
 	// TODO: handle senario where customer has paid and is trying to unskip. so there is a duplicate entry error which causes panic since http codes don't go to thousands
 
 	// insert
-	err = c.Setup(date, s.Email, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+	err = c.Setup(date, s.Email, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID, true, false)
 	if err != nil {
 		return errors.Wrap("failed to sub.Setup", err)
 	}
@@ -807,7 +807,7 @@ func (c *Client) Discount(date time.Time, subEmail string, discountAmount float3
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID, true, false)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -847,7 +847,7 @@ func (c *Client) Free(date time.Time, subEmail string) error {
 		if err != nil {
 			return errDatastore.WithError(err).Wrap("failed to get")
 		}
-		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID)
+		err = c.Setup(date, subEmail, s.Servings, s.VegetarianServings, s.WeeklyAmount, s.DeliveryTime, s.PaymentMethodToken, s.CustomerID, true, false)
 		if err != nil {
 			return errors.Wrap("failed to sub.Setup", err)
 		}
@@ -894,7 +894,7 @@ func (c *Client) Activate(id string, firstBagDate time.Time, log *logging.Client
 		return errors.Wrap("failed to put sub", err)
 	}
 	// add sublog
-	err = c.Setup(firstBagDate, sub.Email, sub.Servings, sub.VegetarianServings, sub.WeeklyAmount, 0, sub.PaymentMethodToken, sub.CustomerID)
+	err = c.Setup(firstBagDate, sub.Email, sub.Servings, sub.VegetarianServings, sub.WeeklyAmount, 0, sub.PaymentMethodToken, sub.CustomerID, true, false)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Setup")
 	}
@@ -1058,7 +1058,10 @@ func (c *Client) Activate(id string, firstBagDate time.Time, log *logging.Client
 func (c *Client) SetupSubLogs(date time.Time) error {
 	// get all SubSignups
 	dayName := date.Weekday().String()
-	subs, err := getSubscribersForWeekday(c.ctx, dayName)
+	if dayName != time.Monday.String() && dayName != time.Thursday.String() {
+		return nil
+	}
+	subs, err := getSubscribers(c.ctx)
 	if err != nil {
 		return errDatastore.WithError(err).Wrap("failed to getSubscribers")
 	}
@@ -1076,7 +1079,9 @@ func (c *Client) SetupSubLogs(date time.Time) error {
 			utils.Errorf(c.ctx, "WeeklyAmount is less than .01 for %s", v.Email)
 		}
 		// TODO: set first based on if calculation
-		err = c.Setup(date, v.Email, v.Servings, v.VegetarianServings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID)
+		active := v.SubscriptionDay == dayName
+		skip := !active
+		err = c.Setup(date, v.Email, v.Servings, v.VegetarianServings, amt, v.DeliveryTime, v.PaymentMethodToken, v.CustomerID, active, skip)
 		if err != nil {
 			if errors.GetErrorWithCode(err).Code == errDuplicateEntry.Code {
 				continue
