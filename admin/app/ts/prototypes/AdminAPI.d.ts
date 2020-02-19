@@ -34,6 +34,7 @@ interface ChangeSubscriberPlanDayReq {
 interface UpdateAddressReq {
     user_id: string
     address: Common.Address
+    delivery_notes: string
 }
 interface DiscountSubscriberReq {
     user_id: string

@@ -1,13 +1,12 @@
 <template>
   <DialogConfirm
     ref="dialog"
-    Title="Update Address"
-    ButtonText="Update Address"
+    Title="Update Address And Notes"
+    ButtonText="Update Address And Notes"
     ConfirmText="Update"
     v-on:dialog-success="submit"
   >
     <template v-slot:dialog-content>
-      <v-card-text>{{dialogText}}</v-card-text>
       <v-layout>
         <v-flex>
           <v-text-field
@@ -22,6 +21,7 @@
       </v-layout>
       <v-flex>
         <vuetify-google-autocomplete
+          ref="elAddress"
           id="map"
           append-icon="search"
           classname="form-control"
@@ -29,9 +29,19 @@
           v-on:placechanged="getAddressData"
           country="us"
           outlined
+          aria-autocomplete="false"
+          autocomplete="false"
         >
         </vuetify-google-autocomplete>
       </v-flex>
+      <v-textarea
+        class="field-right-padding"
+        v-model="deliveryNotes"
+        label="Delivery Notes"
+        outline
+        round
+        auto-grow
+      ></v-textarea>
     </template>
   </DialogConfirm>
 </template>
@@ -54,7 +64,19 @@ export default class ButtonChangeServings extends Vue {
     apt: '',
     full_address: '',
   } as Common.Address;
-  public dialogText = '';
+  public deliveryNotes = '';
+
+  public setAddressAndNotes(addr: Common.Address, dNotes: string) {
+    if (!addr.full_address) {
+      addr.full_address = `${addr.street}, ${addr.city}, ${addr.state}, ${addr.zip}, ${addr.country}`;
+    }
+    if (this.$refs.elAddress) {
+      // @ts-ignore
+      this.$refs.elAddress.update(addr.full_address);
+    }
+    this.address = addr;
+    this.deliveryNotes = dNotes;
+  }
 
   protected getAddressData(addressData: any, placeResultData: any) {
     console.log('placeResultData', placeResultData);
@@ -68,15 +90,17 @@ export default class ButtonChangeServings extends Vue {
     }
     this.address.latitude = 0;
     this.address.longitude = 0;
-    UpdateAddress(this.sub.id, this.address).then((resp: any) => {
-      if (IsError(resp)) {
-        ErrorAlert(resp);
-        return;
-      }
+    UpdateAddress(this.sub.id, this.address, this.deliveryNotes).then(
+      (resp: any) => {
+        if (IsError(resp)) {
+          ErrorAlert(resp);
+          return;
+        }
 
-      (this.$refs.dialog as DialogConfirm).Dismiss();
-      this.$emit('dialog-success');
-    });
+        (this.$refs.dialog as DialogConfirm).Dismiss();
+        this.$emit('dialog-success');
+      }
+    );
   }
 }
 </script>

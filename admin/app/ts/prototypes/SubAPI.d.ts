@@ -1,4 +1,10 @@
 declare namespace SubAPI {
+interface ErrorOnlyResp {
+    error: Common.Error
+}
+interface DateReq {
+    date: string
+}
 interface GetUserSummaryReq {
 undefined: undefined
 }

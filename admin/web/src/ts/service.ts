@@ -109,11 +109,12 @@ export function SendCustomerSMS(emails: string[], message: string): Promise<Admi
   return callFetch(url, 'POST', req);
 }
 
-export function UpdateAddress(user_id: string, address: Common.Address): Promise<AdminAPI.ErrorOnlyResp> {
+export function UpdateAddress(user_id: string, address: Common.Address, delivery_notes: string): Promise<AdminAPI.ErrorOnlyResp> {
   const url: string = baseURL + '/v1/UpdateAddress';
   const req: AdminAPI.UpdateAddressReq = {
     user_id,
     address,
+    delivery_notes,
   };
   return callFetch(url, 'POST', req);
 }

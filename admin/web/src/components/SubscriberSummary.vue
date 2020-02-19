@@ -75,6 +75,7 @@
             </div>
             <v-spacer></v-spacer>
             <ButtonUpdateAddress
+              ref="updateAddress"
               :sub="sub"
               changePermanently="true"
               v-on:dialog-success="getSubscriberAndActivities"
@@ -183,6 +184,12 @@ export default class SubscriberSummary extends Vue {
     if (this.sub.email_prefs) {
       this.changeEmailReq.first_name = this.sub.email_prefs[0].first_name;
       this.changeEmailReq.last_name = this.sub.email_prefs[0].last_name;
+    }
+    if (this.sub.address && this.$refs.updateAddress) {
+      (this.$refs.updateAddress as ButtonUpdateAddress).setAddressAndNotes(
+        this.sub.address,
+        this.sub.delivery_notes
+      );
     }
     return v;
   }

@@ -2150,6 +2150,9 @@
         },
         "address": {
           "$ref": "#/definitions/CommonAddress"
+        },
+        "delivery_notes": {
+          "type": "string"
         }
       }
     },
