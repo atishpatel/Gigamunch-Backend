@@ -59,4 +59,17 @@ interface ChangeSubscriberServingsReq {
   servings_non_veg: number
   servings_veg: number
 }
+interface UpdateSubscriberReq {
+  first_name: string
+  last_name: string
+  address: Common.Address
+  delivery_notes: string
+  phone_number: string
+}
+interface UpdatePaymentReq {
+  payment_method_nonce: string
+}
+interface ChangePlanDayReq {
+  new_plan_day: string
+}
 }
