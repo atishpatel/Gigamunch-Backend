@@ -34,8 +34,6 @@ export default class AccountChangeServings extends Vue {
   public sub!: Types.SubscriberExtended;
   @Prop()
   public activity!: Types.ActivityExtended;
-  @Prop()
-  protected accountInfo!: SubAPI.GetAccountInfoResp;
 
   get title(): string {
     return 'Default Serving Size';

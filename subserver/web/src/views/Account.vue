@@ -3,10 +3,7 @@
     <div class="content-container">
       <h1>Account</h1>
       <div class="list">
-        <AccountListItem
-          title="Name"
-          value="Chris Sipe"
-        ></AccountListItem>
+        <AccountChangeName :sub="accountInfo.subscriber"></AccountChangeName>
         <AccountListItem
           title="Payment Method"
           value="xxxx-xxxx-xxxx-4444"
@@ -65,14 +62,16 @@ import { GetAccountInfo } from '../ts/service';
 import { IsError, ErrorAlert } from '../ts/errors';
 import AccountListItem from '../components/AccountListItem.vue';
 import AccountChangeServings from '../components/AccountChangeServings.vue';
+import AccountChangeName from '../components/AccountChangeName.vue';
 
 @Component({
   components: {
     AccountListItem,
     AccountChangeServings,
+    AccountChangeName,
   },
 })
-export default class Dinner extends Vue {
+export default class Account extends Vue {
   public accountInfo!: SubAPI.GetAccountInfoResp;
   protected loading!: boolean;
 
