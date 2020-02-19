@@ -6,13 +6,14 @@ import (
 
 	"github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbsub"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/sub"
 	"github.com/atishpatel/Gigamunch-Backend/errors"
 )
 
 // ChangeSubscriberServings change a subscriber's servings.
-func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
 	var err error
 	req := new(pbsub.ChangeSubscriberServingsReq)
 
@@ -27,7 +28,7 @@ func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWr
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.NewClient")
 	}
-	err = subC.ChangeServingsPermanently(req.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg))
+	err = subC.ChangeServingsPermanently(user.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg))
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.ChangeServingsPermanently")
 	}

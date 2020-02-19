@@ -63,7 +63,7 @@ func (s *server) UnskipActivity(ctx context.Context, w http.ResponseWriter, r *h
 }
 
 // ChangeActivityServings changes the servings for an activity.
-func (s *server) ChangeActivityServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+func (s *server) ChangeActivityServings(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
 	var err error
 	req := new(pbsub.ChangeActivityServingsReq)
 	// decode request
@@ -77,7 +77,7 @@ func (s *server) ChangeActivityServings(ctx context.Context, w http.ResponseWrit
 		return errors.Annotate(err, "failed to activity.NewClient")
 	}
 	date := getDatetime(req.Date)
-	err = activityC.ChangeServings(date, req.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg), sub.DerivePrice(int8(req.ServingsNonVeg+req.ServingsVeg)))
+	err = activityC.ChangeServings(date, user.ID, int8(req.ServingsNonVeg), int8(req.ServingsVeg), sub.DerivePrice(int8(req.ServingsNonVeg+req.ServingsVeg)))
 	if err != nil {
 		return errors.Annotate(err, "failed to activity.ChangeServings")
 	}

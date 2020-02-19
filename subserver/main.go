@@ -58,7 +58,9 @@ func main() {
 
 	// Subscriber
 	http.HandleFunc("/sub/api/v1/ChangeSubscriberServings", s.handler(s.getUser(true, s.ChangeSubscriberServings)))
+	http.HandleFunc("/sub/api/v1/GetAccountInfo", s.handler(s.getUser(true, s.GetAccountInfo)))
 
+	// Executions
 	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.getUser(false, s.GetExecutions)))
 	http.HandleFunc("/sub/api/v1/GetExecutionsAfterDate", s.handler(s.getUser(false, s.GetExecutionsAfterDate)))
 	http.HandleFunc("/sub/api/v1/GetExecutionsBeforeDate", s.handler(s.getUser(false, s.GetExecutionsBeforeDate)))
