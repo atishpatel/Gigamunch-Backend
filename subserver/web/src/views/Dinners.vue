@@ -13,7 +13,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import ExecutionsList from '../components/ExecutionsList.vue';
 import { GetExecutionsAfterDate } from '../ts/service';
-import { IsError } from '../ts/errors';
+import { IsError, ErrorAlert } from '../ts/errors';
 
 @Component({
   components: {
@@ -37,6 +37,7 @@ export default class Dinners extends Vue {
     today.setHours(today.getHours() - 6);
     GetExecutionsAfterDate(today).then((resp) => {
       if (IsError(resp)) {
+        ErrorAlert(resp);
         return;
       }
       this.executionAndActivityList = resp.execution_and_activity;

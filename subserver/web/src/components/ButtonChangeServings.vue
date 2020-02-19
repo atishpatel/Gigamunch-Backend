@@ -16,17 +16,17 @@
             class="field-right-padding"
             v-model="req.servings_non_veg"
             label="Meat Servings"
-            :placeholder="nonvegServings"
+            :placeholder="nonvegPlaceholder"
             outline
             round
           ></v-select>
         </v-flex>
         <v-flex>
           <v-select
-          :items="servingSizes"
+            :items="servingSizes"
             v-model="req.servings_veg"
             label="Veg Servings"
-            :placeholder="vegServings"
+            :placeholder="vegPlaceholder"
             outline
             round
           ></v-select>
@@ -70,16 +70,48 @@ export default class ButtonChangeServings extends Vue {
 
   get computedText() {
     if (this.changePermanently) {
-      this.buttonText = 'Change Default Serving Size';
+      this.buttonText = 'Edit';
       this.confirmText = 'Change';
-      this.dialogText = `Subscriber currently has ${this.sub.servings_non_vegetarian} non-veg and ${this.sub.servings_vegetarian} veg servings.`;
-      return 'Change Default Serving Size';
+      this.dialogText = `Right now, you will receive ${this.sub.servings_non_vegetarian} meat servings and ${this.sub.servings_vegetarian} vegetarian servings by default.`;
+      return 'Change defalt serving size';
     }
     this.buttonText = 'Change Servings';
     this.confirmText = 'Update';
     this.dialogText = `Right now, you will receive ${this.activity.servings_non_vegetarian} meat servings and ${this.activity.servings_vegetarian} vegetarian servings for this day.`;
 
     return 'Select servings for this day';
+  }
+
+  get vegPlaceholder(): string {
+    if (this.changePermanently) {
+      if (this.sub) {
+        return `${this.sub.servings_vegetarian}`;
+      } else {
+        return '0';
+      }
+    } else {
+      if (this.activity) {
+        return `${this.activity.servings_vegetarian}`;
+      } else {
+        return '0';
+      }
+    }
+  }
+
+  get nonvegPlaceholder(): string {
+    if (this.changePermanently) {
+      if (this.sub) {
+        return `${this.sub.servings_non_vegetarian}`;
+      } else {
+        return '0';
+      }
+    } else {
+      if (this.activity) {
+        return `${this.activity.servings_non_vegetarian}`;
+      } else {
+        return '0';
+      }
+    }
   }
 
   get vegServings(): string {
@@ -103,8 +135,17 @@ export default class ButtonChangeServings extends Vue {
     const servings_non_veg = Number(this.req.servings_non_veg);
     const servings_veg = Number(this.req.servings_veg);
     if (servings_non_veg === 0 && servings_veg === 0) {
-      alert('Try selecting more than zero servings. Or press the skip button if you would like to skip this dinner.');
-        return;
+      if (this.changePermanently) {
+        alert(
+          'Try selecting more than zero servings. Or press the cancel button at the bottom of the page if you would like to stop receiving dinners.'
+        );
+      } else {
+        alert(
+          'Try selecting more than zero servings. Or press the skip button if you would like to skip this dinner.'
+        );
+      }
+
+      return;
     }
     if (this.changePermanently) {
       if (!this.sub) {

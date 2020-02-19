@@ -11,10 +11,12 @@
           title="Payment Method"
           value="xxxx-xxxx-xxxx-4444"
         ></AccountListItem>
-        <AccountListItem
-          title="Default Serving Size"
-          value="4 meat servings, 0 vegetarian servings"
-        ></AccountListItem>
+        <AccountChangeServings
+          v-on:get-account-info="getAccountInfo"
+          :sub="accountInfo.subscriber"
+        >
+
+        </AccountChangeServings>
         <AccountListItem
           title="Default Delivery Day"
           value="Monday"
@@ -60,28 +62,31 @@
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { GetAccountInfo } from '../ts/service';
-import { IsError } from '../ts/errors';
+import { IsError, ErrorAlert } from '../ts/errors';
 import AccountListItem from '../components/AccountListItem.vue';
+import AccountChangeServings from '../components/AccountChangeServings.vue';
 
 @Component({
-  components: { AccountListItem },
+  components: {
+    AccountListItem,
+    AccountChangeServings,
+  },
 })
 export default class Dinner extends Vue {
-  protected accountInfo!: SubAPI.GetAccountInfoResp;
-  @Prop()
-  protected name!: string;
+  public accountInfo!: SubAPI.GetAccountInfoResp;
   protected loading!: boolean;
 
   public constructor() {
     super();
     this.accountInfo = {
-      address: {} as Common.Address,
+      subscriber: {} as Common.Subscriber,
       payment_info: {} as SubAPI.PaymentInfo,
     } as SubAPI.GetAccountInfoResp;
   }
 
   public created() {
     this.getAccountInfo();
+    window.scrollTo(0, 0);
   }
 
   public getAccountInfo() {
@@ -89,12 +94,10 @@ export default class Dinner extends Vue {
     GetAccountInfo().then((resp) => {
       this.loading = false;
       if (IsError(resp)) {
-        // TODO: handle errors
+        ErrorAlert(resp);
         return;
       }
       this.accountInfo = resp;
-      this.name =
-        resp.email_prefs[0].first_name + ' ' + resp.email_prefs[0].last_name;
     });
   }
 }

@@ -3,14 +3,17 @@
     <div class="top-row">
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
-      <v-btn
+      <ButtonChangeServings
+        changePermanently=true
+        v-on:dialog-success="updatedServings"
+        :sub="sub"
         text
         large
         color="#E8554E"
         flat
         class="edit-button"
         :ripple=false
-      >Edit</v-btn>
+      ></ButtonChangeServings>
     </div>
     <p class="value">{{value}}</p>
     <hr class="divider-line">
@@ -19,13 +22,36 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import ButtonChangeServings from '../components/ButtonChangeServings.vue';
 
-@Component
-export default class AccountListItem extends Vue {
+@Component({
+  components: {
+    ButtonChangeServings,
+  },
+})
+export default class AccountChangeServings extends Vue {
   @Prop()
-  public title!: string;
+  public sub!: Types.SubscriberExtended;
   @Prop()
-  public value!: string;
+  public activity!: Types.ActivityExtended;
+  @Prop()
+  protected accountInfo!: SubAPI.GetAccountInfoResp;
+
+  get title(): string {
+    return 'Default Serving Size';
+  }
+
+  get value(): string {
+    if (this.sub) {
+      return `${this.sub.servings_non_vegetarian} meat servings and ${this.sub.servings_vegetarian} vegetarian servings`;
+    } else {
+      return '';
+    }
+  }
+
+  protected updatedServings() {
+    this.$emit('get-account-info');
+  }
 }
 </script>
 

@@ -27,8 +27,8 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
-import { GetAccountInfo } from '../ts/service';
-import { IsError } from '../ts/errors';
+// import { GetAccountInfo } from '../ts/service';
+// import { IsError } from '../ts/errors';
 import AccountListItem from '../components/AccountListItem.vue';
 
 @Component({
@@ -42,29 +42,17 @@ export default class Dinner extends Vue {
 
   public constructor() {
     super();
-    this.accountInfo = {
-      address: {} as Common.Address,
-      payment_info: {} as SubAPI.PaymentInfo,
-    } as SubAPI.GetAccountInfoResp;
+    // this.accountInfo = {
+    //   address: {} as Common.Address,
+    //   payment_info: {} as SubAPI.PaymentInfo,
+    // } as SubAPI.GetAccountInfoResp;
   }
 
   public created() {
     this.getAccountInfo();
   }
 
-  public getAccountInfo() {
-    this.loading = true;
-    GetAccountInfo().then((resp) => {
-      this.loading = false;
-      if (IsError(resp)) {
-        // TODO: handle errors
-        return;
-      }
-      this.accountInfo = resp;
-      this.name =
-        resp.email_prefs[0].first_name + ' ' + resp.email_prefs[0].last_name;
-    });
-  }
+  public getAccountInfo() {}
 }
 </script>
 <style scoped lang="scss">

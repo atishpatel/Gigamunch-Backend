@@ -22,9 +22,7 @@ interface GetAccountInfoReq {
 }
 interface GetAccountInfoResp {
   error: Common.Error
-  email_prefs: Common.EmailPref[]
-  phone_prefs: Common.PhonePref[]
-  address: Common.Address
+  subscriber: Common.Subscriber
   payment_info: PaymentInfo
 }
 interface PaymentInfo {

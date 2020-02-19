@@ -70,22 +70,16 @@ func (s *server) GetAccountInfo(ctx context.Context, w http.ResponseWriter, r *h
 		if err != nil {
 			return errors.GetErrorWithCode(err).Annotate("failed to get subscriber")
 		}
-		resp.Address, err = serverhelper.PBAddress(&subscriber.Address)
+		pbSubscriber, err := serverhelper.PBSubscriber(subscriber)
 		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to PBAddress")
+			return errors.GetErrorWithCode(err).Annotate("failed to serverhelper.PBSubscriber()")
 		}
-		resp.EmailPrefs, err = serverhelper.PBEmailPrefs(subscriber.EmailPrefs)
-		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to PBEmailPrefs")
-		}
-		resp.PhonePrefs, err = serverhelper.PBPhonePrefs(subscriber.PhonePrefs)
-		if err != nil {
-			return errors.GetErrorWithCode(err).Annotate("failed to PBPhonePrefs")
-		}
+		resp.Subscriber = pbSubscriber
 		resp.PaymentInfo = &pbsub.PaymentInfo{
 			CardNumberPreview: "Visa card ending in ****1234",
 			CardType:          "Visa",
 		}
+
 	}
 	return resp
 }
