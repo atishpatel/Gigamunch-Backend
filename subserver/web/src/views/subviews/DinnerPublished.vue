@@ -169,6 +169,10 @@ export default class DinnerPublished extends Vue {
   public showingVegetarianDinner = false;
   protected disableSkip = false;
 
+  public setVegShowing(v: boolean) {
+    this.showingVegetarianDinner = v;
+  }
+
   get disableChangeServings(): boolean {
     if (this.activity) {
       if (this.activity.skip) {
@@ -198,9 +202,9 @@ export default class DinnerPublished extends Vue {
 
   get dinnerImageTitle(): string {
     if (this.showingVegetarianDinner) {
-      return this.exe.culture_cook.first_name + "'s Vegetarian Dinner";
+      return `${this.exe.culture_cook.first_name}'s Vegetarian Dinner`;
     } else {
-      return this.exe.culture_cook.first_name + "'s Dinner";
+      return `${this.exe.culture_cook.first_name}'s Dinner`;
     }
   }
 
@@ -221,8 +225,8 @@ export default class DinnerPublished extends Vue {
   }
 
   get dishes(): Common.Dish[] {
-    var vegDishes: Common.Dish[] = [];
-    var meatDishes: Common.Dish[] = [];
+    const vegDishes: Common.Dish[] = [];
+    const meatDishes: Common.Dish[] = [];
 
     if (this.exe && this.exe.dishes) {
       for (let i = 0; i < this.exe.dishes.length; i++) {
@@ -260,7 +264,7 @@ export default class DinnerPublished extends Vue {
   }
 
   get cookTitle(): string {
-    return this.exe.culture_cook.first_name + "'s Story";
+    return `${this.exe.culture_cook.first_name}'s Story`;
   }
 
   get cookStory(): string {
@@ -320,7 +324,7 @@ export default class DinnerPublished extends Vue {
 
   get patternImageSrc(): string {
     if (this.exe && this.exe.content && this.exe.content.cook_image_url) {
-      let originalSrc = this.exe.content.cover_image_url;
+      const originalSrc = this.exe.content.cover_image_url;
       if (originalSrc.includes('cook.jpg')) {
         return originalSrc.replace('cook.jpg', 'cover.jpg');
       }
@@ -365,10 +369,6 @@ export default class DinnerPublished extends Vue {
     } else {
       this.showingVegetarianDinner = true;
     }
-  }
-
-  public setVegShowing(v: boolean) {
-    this.showingVegetarianDinner = v;
   }
 }
 </script>
