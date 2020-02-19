@@ -12,6 +12,70 @@
     "application/json"
   ],
   "paths": {
+    "/sub/api/v1/ChangeActivityServings": {
+      "post": {
+        "operationId": "ChangeActivityServings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SubAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIChangeActivityServingsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/ChangeSubscriberServings": {
+      "post": {
+        "operationId": "ChangeSubscriberServings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SubAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIChangeSubscriberServingsReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
     "/sub/api/v1/GetAccountInfo": {
       "post": {
         "summary": "GetAccountInfo returns a user's account info.",
@@ -21,6 +85,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetAccountInfoResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -49,6 +119,12 @@
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -75,6 +151,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -103,6 +185,12 @@
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionsResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -129,6 +217,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/SubAPIGetExecutionsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -157,6 +251,12 @@
             "schema": {
               "$ref": "#/definitions/SubAPIGetUserSummaryResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -166,6 +266,72 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/SubAPIGetUserSummaryReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/SkipActivity": {
+      "post": {
+        "summary": "SkipActivity skips a sub for a date.",
+        "operationId": "SkipActivity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SubAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIDateReq"
+            }
+          }
+        ],
+        "tags": [
+          "Sub"
+        ]
+      }
+    },
+    "/sub/api/v1/UnskipActivity": {
+      "post": {
+        "summary": "UnskipActivity unskips a sub for a date.",
+        "operationId": "UnskipActivity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SubAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SubAPIDateReq"
             }
           }
         ],
@@ -796,6 +962,58 @@
       },
       "description": "Sticker are reheat stickers for dishes."
     },
+    "SubAPIChangeActivityServingsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "servings_non_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "SubAPIChangeSubscriberServingsReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "servings_non_veg": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "servings_veg": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "SubAPIDateReq": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        }
+      }
+    },
+    "SubAPIErrorOnlyResp": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/CommonError"
+        }
+      },
+      "title": "**********************\nCommon\n**********************"
+    },
     "SubAPIGetAccountInfoReq": {
       "type": "object"
     },
@@ -876,6 +1094,12 @@
           "items": {
             "$ref": "#/definitions/CommonExecutionAndActivity"
           }
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommonActivity"
+          }
         }
       }
     },
@@ -917,6 +1141,39 @@
         },
         "card_type": {
           "type": "string"
+        }
+      }
+    },
+    "gatewayruntimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
         }
       }
     }
