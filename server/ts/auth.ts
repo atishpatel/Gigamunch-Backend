@@ -72,9 +72,7 @@ firebase.auth().onAuthStateChanged((user: FBUser) => {
     // is signed in
     eventName = Events.SignedIn;
     user.getIdToken(false).then((idToken: string) => {
-      Login(idToken).then(() => {
-        window.location.href = '/sub/';
-      });
+      Login(idToken);
     });
     APP.User = user;
     // fire event
