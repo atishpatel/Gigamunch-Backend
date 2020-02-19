@@ -16,6 +16,7 @@ import (
 
 	pbcommon "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbcommon"
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbserver"
+	"github.com/atishpatel/Gigamunch-Backend/core/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/db"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
@@ -251,7 +252,7 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 	// end decode request
 	resp := &pb.ErrorOnlyResp{}
 	logging.Infof(ctx, "Request struct: %+v", req)
-
+	req.Email = strings.ToLower(req.Email)
 	var servingsNonVegetarian int8
 	var servingsVegetarian int8
 	switch req.Servings {
@@ -343,6 +344,14 @@ func (s *server) SubmitCheckoutv2(ctx context.Context, w http.ResponseWriter, r 
 	_, err = subC.Create(createReq)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Create")
+	}
+	authC, err := auth.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to auth.NewClient")
+	}
+	err = authC.CreateUserIfNoExist(req.Email, req.Password, req.FirstName+" "+req.LastName)
+	if err != nil {
+		return errors.Annotate(err, "failed to auth.CreateUserIfNoExist")
 	}
 	return resp
 }

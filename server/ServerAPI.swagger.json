@@ -5,10 +5,6 @@
     "title": "ServerAPI.proto",
     "version": "version not set"
   },
-  "schemes": [
-    
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],
@@ -24,6 +20,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/ServerAPITokenOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -52,6 +54,12 @@
             "schema": {
               "$ref": "#/definitions/ServerAPIErrorOnlyResp"
             }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
+            }
           }
         },
         "parameters": [
@@ -77,6 +85,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/ServerAPIErrorOnlyResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/gatewayruntimeError"
             }
           }
         },
@@ -241,6 +255,9 @@
         },
         "promo": {
           "type": "string"
+        },
+        "password": {
+          "type": "string"
         }
       },
       "title": "SubmitCheckoutReq"
@@ -276,6 +293,39 @@
         }
       },
       "title": "UpdatePaymentReq"
+    },
+    "gatewayruntimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
     }
   }
 }
