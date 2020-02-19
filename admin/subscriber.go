@@ -227,6 +227,7 @@ func (s *server) UpdateAddress(ctx context.Context, w http.ResponseWriter, r *ht
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.GetAddress")
 	}
+	subscriber.DeliveryNotes = req.DeliveryNotes
 	subscriber.Address = *address
 	err = subC.Update(subscriber)
 	if err != nil {
