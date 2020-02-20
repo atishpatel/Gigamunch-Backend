@@ -42,7 +42,7 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile
-          v-if="userSummary.has_subscribed === true"
+          v-if="userSummary.is_logged_in === true"
           href="#"
           @click="signOut"
         >
