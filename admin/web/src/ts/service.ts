@@ -109,6 +109,27 @@ export function SendCustomerSMS(emails: string[], message: string): Promise<Admi
   return callFetch(url, 'POST', req);
 }
 
+export function UpdateAddress(user_id: string, address: Common.Address, delivery_notes: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/UpdateAddress';
+  const req: AdminAPI.UpdateAddressReq = {
+    user_id,
+    address,
+    delivery_notes,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ReplaceSubscriberEmail(old_email: string, new_email: string, first_name: string, last_name: string): Promise<AdminAPI.ErrorOnlyResp> {
+  const url: string = baseURL + '/v1/ReplaceSubscriberEmail';
+  const req: AdminAPI.ReplaceSubscriberEmailReq = {
+    old_email,
+    new_email,
+    first_name,
+    last_name,
+  };
+  return callFetch(url, 'POST', req);
+}
+
 export function ActivateSubscriber(idOrEmail: string, first_bag_date: string): Promise<AdminAPI.GetHasSubscribedRespV2> {
   const url: string = baseURL + '/v1/ActivateSubscriber';
   const req: AdminAPI.ActivateSubscriberReq = {

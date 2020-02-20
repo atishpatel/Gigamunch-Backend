@@ -20,7 +20,7 @@
       >
         <template v-slot:items="props">
           <td>
-            <router-link :to="'/subscriber/' + props.item.emailsString"> {{ props.item.emailsString }} </router-link>
+            <router-link :to="'/subscriber/' + props.item.id"> {{ props.item.emailsString }} </router-link>
           </td>
           <td class="text-xs-right">{{ props.item.namesString }}</td>
           <td class="text-xs-right">{{ props.item.phonenumbersString }}</td>

@@ -61,6 +61,22 @@ func NewClient(ctx context.Context, log *logging.Client, dbC common.DB, sqlC *sq
 	}, nil
 }
 
+// CreateUserIfNoExist creates a user if it does not already exist.
+func (c *Client) CreateUserIfNoExist(email, password, name string) error {
+	_, err := c.fbAuth.GetUserByEmail(c.ctx, email)
+	if err != nil {
+		utc := &fba.UserToCreate{}
+		utc.Email(strings.ToLower(email))
+		utc.Password((password))
+		utc.DisplayName(name)
+		_, err = c.fbAuth.CreateUser(c.ctx, utc)
+		if err != nil {
+			return errInternal.WithError(err).Annotate("failed to fbauth.CreateUser")
+		}
+	}
+	return nil
+}
+
 // Verify verifies the token.
 func (c *Client) Verify(token string) (*common.User, error) {
 	if token == "" {
@@ -108,7 +124,7 @@ func (c *Client) Verify(token string) (*common.User, error) {
 		AuthID:    tkn.UID,
 		FirstName: firstName,
 		LastName:  lastName,
-		Email:     email,
+		Email:     strings.ToLower(email),
 		PhotoURL:  picture,
 		Admin:     admin,
 		// ActiveSubscriber: activeSubscriber,

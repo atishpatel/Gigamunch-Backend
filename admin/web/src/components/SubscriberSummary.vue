@@ -27,10 +27,6 @@
             :sub="sub"
             v-on:dialog-success="getSubscriberAndActivities"
           ></ButtonDeactivate>
-          <v-btn
-            outline
-            round
-          >Update Subscriber</v-btn>
         </div>
 
         <!-- Subsriber Info Table -->
@@ -43,10 +39,23 @@
           </div>
 
           <div class="info-row">
+            <div class="info-label">Name:</div>
+            <div class="info-value subscriber-email">
+              {{sub.namesString}}
+            </div>
+          </div>
+
+          <div class="info-row">
             <div class="info-label">Email:</div>
             <div class="info-value subscriber-email">
               {{sub.emailsString}}
             </div>
+            <v-spacer></v-spacer>
+            <ButtonChangeEmail
+              :sub="sub"
+              :req="changeEmailReq"
+              v-on:dialog-success="getSubscriber"
+            ></ButtonChangeEmail>
           </div>
 
           <div class="info-row">
@@ -65,11 +74,12 @@
               >{{sub.addressString}}</a> --- {{sub.address.latitude}}, {{sub.address.longitude}}
             </div>
             <v-spacer></v-spacer>
-            <v-btn
-              outline
-              round
-              @click="updateAddress"
-            >Update Address</v-btn>
+            <ButtonUpdateAddress
+              ref="updateAddress"
+              :sub="sub"
+              changePermanently="true"
+              v-on:dialog-success="getSubscriberAndActivities"
+            ></ButtonUpdateAddress>
           </div>
 
           <div class="info-row">
@@ -136,6 +146,8 @@ import ButtonActivate from './ButtonActivate.vue';
 import ButtonDeactivate from './ButtonDeactivate.vue';
 import ButtonChangeServings from './ButtonChangeServings.vue';
 import ButtonChangePlanDay from './ButtonChangePlanDay.vue';
+import ButtonUpdateAddress from './ButtonUpdateAddress.vue';
+import ButtonChangeEmail from './ButtonChangeEmail.vue';
 
 @Component({
   components: {
@@ -143,12 +155,20 @@ import ButtonChangePlanDay from './ButtonChangePlanDay.vue';
     ButtonDeactivate,
     ButtonChangeServings,
     ButtonChangePlanDay,
+    ButtonUpdateAddress,
+    ButtonChangeEmail,
   },
 })
 export default class SubscriberSummary extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
   public logs!: Common.Log[];
+
+  protected changeEmailReq = {
+    new_email: '',
+    first_name: '',
+    last_name: '',
+  };
 
   get computedServings() {
     let v = '';
@@ -161,10 +181,18 @@ export default class SubscriberSummary extends Vue {
     if (this.sub.servings_vegetarian > 0) {
       v += `${this.sub.servings_vegetarian} vegetarian 🌱`;
     }
+    if (this.sub.email_prefs) {
+      this.changeEmailReq.first_name = this.sub.email_prefs[0].first_name;
+      this.changeEmailReq.last_name = this.sub.email_prefs[0].last_name;
+    }
+    if (this.sub.address && this.$refs.updateAddress) {
+      (this.$refs.updateAddress as ButtonUpdateAddress).setAddressAndNotes(
+        this.sub.address,
+        this.sub.delivery_notes
+      );
+    }
     return v;
   }
-
-  protected updateAddress() {}
 
   protected getSubscriber() {
     this.$emit('get-subscriber');

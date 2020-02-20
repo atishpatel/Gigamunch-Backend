@@ -87,6 +87,7 @@ export default class App extends Vue {
   public drawer = false;
   public hideLoadingScreen = false;
   public userSummary = {
+    //TODO: set these back to false and uncomment the GetUserSummary()
     is_active: false,
     is_logged_in: false,
     has_subscribed: false,

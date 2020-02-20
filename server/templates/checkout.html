@@ -812,14 +812,12 @@
                 </div>
               </div>
               <div class="input-label">
-                <label for="phone_number">Phone Number (for delivery)</label>
+                <label for="password">Password</label>
                 <div class="input-container">
-                  <input type="tel"
-                         name="phone_number"
-                         id="phone_number"
-                         size="1"
-                         placeholder="615-123-1234"
-                         value="[[.PhoneNumber]]" />
+                  <input type="password"
+                         name="password"
+                         id="password"
+                         size="1" />
 
                 </div>
               </div>
@@ -846,15 +844,29 @@
 
               </div>
             </div>
-            <div>
-              <label for="delivery_note">Delivery Notes (optional)</label>
-              <div class="input-container">
-                <input type="text"
-                       name="delivery_notes"
-                       id="delivery_notes"
-                       placeholder="Gate code: # or any other delivery tips"
-                       value="[[.DeliveryNotes]]" />
+            <div class="checkout-row">
+              <div class="input-label">
+                <label for="phone_number">Phone Number (for delivery)</label>
+                <div class="input-container">
+                  <input type="tel"
+                         name="phone_number"
+                         id="phone_number"
+                         size="1"
+                         placeholder="615-123-1234"
+                         value="[[.PhoneNumber]]" />
 
+                </div>
+              </div>
+              <div class="input-label">
+                <label for="delivery_note">Delivery Notes (optional)</label>
+                <div class="input-container">
+                  <input type="text"
+                         name="delivery_notes"
+                         id="delivery_notes"
+                         placeholder="Gate code or any other notes"
+                         value="[[.DeliveryNotes]]" />
+
+                </div>
               </div>
             </div>
             <div>
@@ -1210,7 +1222,7 @@
           },
           expirationDate: {
             selector: '#expiration-date',
-            placeholder: '10/2021'
+            placeholder: '10/2023'
           }
         }
       }, function(hostedFieldsErr, hostedFieldsInstance) {
@@ -1254,6 +1266,7 @@
             var deliveryNotes = form.elements['delivery_notes'].value;
             var reference = form.elements['reference'].value;
             var phoneNumber = form.elements['phone_number'].value;
+            var password = form.elements['password'].value;
             var paymentNonce = payload.nonce;
             var campaigns;
             var referenceEmail;
@@ -1303,6 +1316,7 @@
               'campaigns': campaigns,
               'reference_email': referenceEmail,
               'promo': promo,
+              'password': password,
             };
 
             var xhr = new XMLHttpRequest();

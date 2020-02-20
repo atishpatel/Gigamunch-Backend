@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atishpatel/Gigamunch-Backend/core/maps"
 	"github.com/atishpatel/Gigamunch-Backend/core/serverhelper"
 
 	pb "github.com/atishpatel/Gigamunch-Backend/Gigamunch-Proto/pbadmin"
@@ -202,6 +203,40 @@ func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWr
 	return resp
 }
 
+// UpdateAddress activates a subscriber account.
+func (s *server) UpdateAddress(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
+	var err error
+	req := new(pb.UpdateAddressReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(req.UserID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Get")
+	}
+	address, err := maps.GetAddress(ctx, req.Address.FullAddress, req.Address.Apt)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.GetAddress")
+	}
+	subscriber.DeliveryNotes = req.DeliveryNotes
+	subscriber.Address = *address
+	err = subC.Update(subscriber)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Activate")
+	}
+	resp := &pb.ErrorOnlyResp{}
+	return resp
+}
+
 // ActivateSubscriber activates a subscriber account.
 func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client) Response {
 	var err error
@@ -312,6 +347,12 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 		return failedToDecode(err)
 	}
 	// end decode request
+	if req.OldEmail == "" {
+		return errors.Annotate(errors.BadRequestError, "old email cannot be empty")
+	}
+	if req.NewEmail == "" {
+		req.NewEmail = req.OldEmail
+	}
 	req.NewEmail = strings.ToLower(req.NewEmail)
 	subnewC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
@@ -324,6 +365,8 @@ func (s *server) ReplaceSubscriberEmail(ctx context.Context, w http.ResponseWrit
 	for i := range snew.EmailPrefs {
 		if snew.EmailPrefs[i].Email == req.OldEmail {
 			snew.EmailPrefs[i].Email = req.NewEmail
+			snew.EmailPrefs[i].FirstName = req.FirstName
+			snew.EmailPrefs[i].LastName = req.LastName
 		}
 	}
 	err = subnewC.Update(snew)

@@ -40,6 +40,21 @@
         </v-list-tile>
         <v-list-tile
           target="_blank"
+          href="/admin/executions"
+        >
+          <v-list-tile-action>
+            <v-icon>description</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content class="nav-tile-content">
+            <v-list-tile-title>
+              Culture Exections
+            </v-list-tile-title>
+            <v-spacer></v-spacer>
+            <v-icon>open_in_new</v-icon>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile
+          target="_blank"
           href="/admin/swagger/index.html"
         >
           <v-list-tile-action>

@@ -47,12 +47,12 @@ export default class SendMessage extends Vue {
   public req!: AdminAPI.SendCustomerSMSReq;
 
   protected submit() {
-    this.updateEmails;
+    this.updateEmails();
     if (this.req.emails.length <= 0) {
       alert('add emails');
       return;
     }
-    if (this.req.message == '') {
+    if (this.req.message === '') {
       alert('enter a message');
       return;
     }
@@ -74,7 +74,7 @@ export default class SendMessage extends Vue {
     to = to.replace(/    /g, ',');
     to = to.replace(/ /g, '');
     to = to.replace(/,,/g, ',');
-    let toArray = to.split(',');
+    const toArray = to.split(',');
     this.ToField = to;
     this.req.emails = toArray;
     return toArray;
