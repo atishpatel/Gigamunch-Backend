@@ -48,7 +48,7 @@ import { UpdateSubscriber } from '../ts/service';
     DialogConfirm,
   },
 })
-export default class AccountChangeName extends Vue {
+export default class AccountUpdateAddress extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
 
