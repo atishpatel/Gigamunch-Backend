@@ -6,7 +6,7 @@
       clipped
       app
     >
-      <div class="drawer-nav-header">Menu</div>
+      <div class="drawer-nav-header">Gigamunch</div>
       <v-list>
         <v-list-tile to="/">
           <v-list-tile-action>
@@ -42,8 +42,9 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile
-          to="/logout"
           v-if="userSummary.has_subscribed === true"
+          href="#"
+          @click="signOut"
         >
           <v-list-tile-action>
             <v-icon>logout</v-icon>
@@ -55,7 +56,8 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile
-          to="/checkout"
+          href="https://eatgigamunch.com/checkout"
+          target="_blank"
           v-if="userSummary.has_subscribed === false"
         >
           <v-list-tile-action>
@@ -87,6 +89,7 @@
       flat
       clipped-left
       app
+      color="white"
       class="app-toolbar"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
@@ -95,22 +98,19 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div>
-        <a
+        <v-btn
           v-if="userSummary.has_subscribed === false"
-          class="nav-link"
-          href="/checkout"
-        > Sign up </a>
+          depressed
+          color="#E8554E"
+          target="_blank"
+          class="white--text"
+          href="https://eatgigamunch.com/checkout"
+        >Sign up</v-btn>
         <a
           v-if="userSummary.is_logged_in === false"
           class="nav-link"
           href="/login"
         >Login</a>
-        <a
-          v-if="userSummary.is_logged_in === true"
-          class="nav-link"
-          href="#"
-          @click="signOut"
-        >Sign Out</a>
       </div>
     </v-toolbar>
 
@@ -167,20 +167,18 @@ v-app {
   color: #2c3e50;
 }
 
-.app-toolbar div {
-  background: white;
-}
-
 .main {
   background: white;
 }
 
 .drawer-nav-header {
-  background-color: #009688;
+  background-color: #d0782c;
   color: white;
   font-weight: bold;
   font-size: 24px;
   padding: 24px 20px;
+  font-family: 'Laila', serif;
+  font-weight: 500;
 }
 
 .nav-tile-content {
