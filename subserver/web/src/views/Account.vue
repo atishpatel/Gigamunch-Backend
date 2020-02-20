@@ -22,10 +22,10 @@
           v-on:get-account-info="getAccountInfo"
         >
         </AccountChangeDeliveryDay>
-        <AccountListItem
-          title="Delivery Address"
-          value="1835 North Washington Avenue, Cookeville, TN, 38501"
-        ></AccountListItem>
+        <AccountUpdateAddress
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+        ></AccountUpdateAddress>
         <AccountChangeDeliveryNotes
           :sub="accountInfo.subscriber"
           v-on:get-account-info="getAccountInfo"
@@ -70,6 +70,7 @@ import AccountChangeName from '../components/AccountChangeName.vue';
 import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes.vue';
 import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue';
 import AccountChangeDeliveryDay from '../components/AccountChangeDeliveryDay.vue';
+import AccountUpdateAddress from '../components/AccountUpdateAddress.vue';
 
 @Component({
   components: {
@@ -79,6 +80,7 @@ import AccountChangeDeliveryDay from '../components/AccountChangeDeliveryDay.vue
     AccountChangeDeliveryNotes,
     AccountChangePhoneNumber,
     AccountChangeDeliveryDay,
+    AccountUpdateAddress,
   },
 })
 export default class Account extends Vue {

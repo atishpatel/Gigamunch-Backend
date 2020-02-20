@@ -57,8 +57,10 @@ export default class AccountChangeName extends Vue {
   }
 
   get value(): string {
-    if (this.sub && this.sub.email_prefs) {
-      return `${this.sub.email_prefs[0].first_name} ${this.sub.email_prefs[0].last_name}`;
+    if (this.sub && this.sub.address) {
+      const addr = this.sub.address;
+      return `${addr.street}, ${addr.city}, ${addr.state}, ${addr.zip}, ${addr.country}`;
+
     } else {
       return '';
     }
