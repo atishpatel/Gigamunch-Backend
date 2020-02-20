@@ -15,7 +15,6 @@
           v-on:get-account-info="getAccountInfo"
           :sub="accountInfo.subscriber"
         >
-
         </AccountChangeServings>
         <AccountChangeDeliveryDay
           :sub="accountInfo.subscriber"
@@ -36,16 +35,12 @@
         ></AccountChangePhoneNumber>
       </div>
       <div class="cancel">
-        <v-btn
-          depressed
-          large
-          color="#E8554E"
-          class="white--text"
-        >Cancel Account</v-btn>
+        <CancelButton :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"></CancelButton>
       </div>
       <hr class="divider-line">
       <div class="footer-message">
-        <p class="footer-message-text">Feel free to talk to us at</p>
+        <p class="footer-message-text">If you have any questions, feel free to talk to us at</p>
         <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
         <p
           class="footer-message-text"
@@ -71,6 +66,7 @@ import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes
 import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue';
 import AccountChangeDeliveryDay from '../components/AccountChangeDeliveryDay.vue';
 import AccountUpdateAddress from '../components/AccountUpdateAddress.vue';
+import CancelButton from '../components/CancelButton.vue';
 
 @Component({
   components: {
@@ -81,6 +77,7 @@ import AccountUpdateAddress from '../components/AccountUpdateAddress.vue';
     AccountChangePhoneNumber,
     AccountChangeDeliveryDay,
     AccountUpdateAddress,
+    CancelButton,
   },
 })
 export default class Account extends Vue {

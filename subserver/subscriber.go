@@ -42,6 +42,32 @@ func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWr
 	return resp
 }
 
+// DeactivateSubscriber deactivates the subscriber.
+func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
+	var err error
+	req := new(pbsub.DeactivateSubscriberReq)
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(user.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Get")
+	}
+	err = subC.Deactivate(subscriber.ID, req.Reason)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Deactivate")
+	}
+	resp := &pbsub.ErrorOnlyResp{}
+	return resp
+}
+
 // UpdateSubscriber updates the subscriber.
 func (s *server) UpdateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
 	var err error
