@@ -17,10 +17,11 @@
         >
 
         </AccountChangeServings>
-        <AccountListItem
-          title="Default Delivery Day"
-          value="Monday"
-        ></AccountListItem>
+        <AccountChangeDeliveryDay
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+        >
+        </AccountChangeDeliveryDay>
         <AccountListItem
           title="Delivery Address"
           value="1835 North Washington Avenue, Cookeville, TN, 38501"
@@ -68,6 +69,7 @@ import AccountChangeServings from '../components/AccountChangeServings.vue';
 import AccountChangeName from '../components/AccountChangeName.vue';
 import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes.vue';
 import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue';
+import AccountChangeDeliveryDay from '../components/AccountChangeDeliveryDay.vue';
 
 @Component({
   components: {
@@ -76,6 +78,7 @@ import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue
     AccountChangeName,
     AccountChangeDeliveryNotes,
     AccountChangePhoneNumber,
+    AccountChangeDeliveryDay,
   },
 })
 export default class Account extends Vue {
