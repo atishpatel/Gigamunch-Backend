@@ -6,7 +6,7 @@
 
       <DialogConfirm
         ref="dialog"
-        Title="Change Name"
+        Title="Update Delivery Notes"
         ButtonText="Edit"
         ConfirmText="Update"
         v-on:dialog-success="submit"
@@ -16,16 +16,8 @@
             <v-flex>
               <v-text-field
                 class="field-right-padding"
-                v-model="req.first_name"
-                label="First Name"
-                outline
-                round
-              ></v-text-field>
-            </v-flex>
-            <v-flex>
-              <v-text-field
-                v-model="req.last_name"
-                label="Last Name"
+                v-model="req.delivery_notes"
+                label="Delivery Notes"
                 outline
                 round
               ></v-text-field>
@@ -49,25 +41,27 @@ import { UpdateSubscriber } from '../ts/service';
     DialogConfirm,
   },
 })
-export default class AccountChangeName extends Vue {
+export default class AccountChangeDeliveryNotes extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
 
   get title(): string {
-    return 'Name';
+    return 'Delivery Notes';
   }
 
   get value(): string {
-    if (this.sub && this.sub.email_prefs) {
-      return `${this.sub.email_prefs[0].first_name} ${this.sub.email_prefs[0].last_name}`;
-    } else {
-      return '';
+    if (this.sub) {
+      if (!this.sub.delivery_notes || this.sub.delivery_notes == '') {
+        return 'Not provided';
+      } else {
+        return this.sub.delivery_notes;
+      }
     }
+    return '';
   }
 
   public req = {
-    first_name: '',
-    last_name: '',
+    delivery_notes: '',
   };
 
   protected submit() {
@@ -79,23 +73,19 @@ export default class AccountChangeName extends Vue {
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.first_name == '') {
-      alert('First name is empty');
-      return;
-    }
-    if (this.req.last_name == '') {
-      alert('Last name is empty');
-      return;
-    }
     if (!this.sub) {
-      alert('account info not loaded in name section');
+      alert('account info not loaded in deliery notes section');
+      return;
+    }
+    if (!this.sub.email_prefs[0]) {
+      alert('account info not loaded email_prefs in deliery notes section');
       return;
     }
     UpdateSubscriber(
-      this.req.first_name,
-      this.req.last_name,
+      this.sub.email_prefs[0].first_name,
+      this.sub.email_prefs[0].last_name,
       this.sub.address,
-      this.sub.delivery_notes,
+      this.req.delivery_notes,
       this.sub.phonenumbersString
     ).then(handler);
   }

@@ -25,10 +25,10 @@
           title="Delivery Address"
           value="1835 North Washington Avenue, Cookeville, TN, 38501"
         ></AccountListItem>
-        <AccountListItem
-          title="Delivery Notes"
-          value="Not provided"
-        ></AccountListItem>
+        <AccountChangeDeliveryNotes
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+        ></AccountChangeDeliveryNotes>
         <AccountListItem
           title="Phone Number"
           value="(615) 545-4989"
@@ -66,12 +66,14 @@ import { IsError, ErrorAlert } from '../ts/errors';
 import AccountListItem from '../components/AccountListItem.vue';
 import AccountChangeServings from '../components/AccountChangeServings.vue';
 import AccountChangeName from '../components/AccountChangeName.vue';
+import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes.vue';
 
 @Component({
   components: {
     AccountListItem,
     AccountChangeServings,
     AccountChangeName,
+    AccountChangeDeliveryNotes,
   },
 })
 export default class Account extends Vue {
