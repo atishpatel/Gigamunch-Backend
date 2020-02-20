@@ -70,7 +70,7 @@
           </v-list-tile-content>
         </v-list-tile>
         <v-list-tile
-          to="/login"
+          href="/login"
           v-if="userSummary.is_logged_in === false"
         >
           <v-list-tile-action>
