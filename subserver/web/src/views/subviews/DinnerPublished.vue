@@ -45,34 +45,40 @@
               {{servingText}}
             </p>
           </div>
-          <div
-            v-if="!userSummary.has_subscribed"
-            class="buttons-row"
-          >
+          <div class="buttons-row">
             <v-btn
+              v-if="!userSummary.is_active && !userSummary.has_subscribed"
+              href="https://eatgigamunch.com/checkout"
+              target="_blank"
               depressed
               color="#E8554E"
               class="white--text"
+              :disabled="this.isTooLate"
             >Get this dinner</v-btn>
-          </div>
-          <div
-            v-else
-            class="buttons-row"
-          >
             <v-btn
+              v-if="!userSummary.is_active && userSummary.has_subscribed"
+              href="/account"
               depressed
               color="#E8554E"
               class="white--text"
-              :disabled="disableSkip"
+              :disabled="this.isTooLate"
+            >Get this dinner</v-btn>
+            <v-btn
+              v-if="userSummary.is_logged_in"
+              depressed
+              color="#E8554E"
+              class="white--text"
+              :disabled="disableSkip || isTooLate"
               @click="skipClicked"
             >{{skipButtonText}}</v-btn>
             <ButtonChangeServings
+              v-if="userSummary.is_logged_in"
               :activity="activity"
               v-on:dialog-success="updatedServings"
               depressed
               color="#E8554E"
               class="white--text"
-              :ButtonDisabled="disableChangeServings"
+              :ButtonDisabled="disableChangeServings || isTooLate"
             ></ButtonChangeServings>
             <v-btn
               depressed
@@ -80,6 +86,11 @@
               class="white--text"
               @click="seeVegClicked"
             >{{seeVegButtonText}}</v-btn>
+          </div>
+          <div v-if="isTooLate && userSummary.is_active">
+            <p class="too-late-text">
+              It is too late to make serving size changes or skip this dinner.
+            </p>
           </div>
           <div
             v-for="dish in dishes"
@@ -176,13 +187,23 @@ export default class DinnerPublished extends Vue {
     this.showingVegetarianDinner = v;
   }
 
+  get hasActivity(): boolean {
+    if (this.activity) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   get disableChangeServings(): boolean {
     if (this.activity) {
       if (this.activity.skip) {
         return true;
+      } else {
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   get heroImageText(): string {
@@ -275,10 +296,16 @@ export default class DinnerPublished extends Vue {
   }
 
   get servingText(): string {
-    if (!this.userSummary.has_subscribed) {
-      return `You could receive this dinner on ${GetDayMonthDayDate(
-        this.exe.date
-      )}`;
+    if (!this.userSummary.is_active) {
+      if (this.isTooLate) {
+        return `It is too late to receive this dinner on ${GetDayMonthDayDate(
+          this.exe.date
+        )}, check out other upcoming dinners.`;
+      } else {
+        return `You could receive this dinner on ${GetDayMonthDayDate(
+          this.exe.date
+        )}`;
+      }
     } else {
       if (this.activity) {
         if (this.activity.skip) {
@@ -310,7 +337,9 @@ export default class DinnerPublished extends Vue {
           }
         }
       }
-      return '';
+      return `You will not receive this dinner on ${GetDayMonthDayDate(
+        this.exe.date
+      )}`;
     }
   }
 
@@ -321,8 +350,9 @@ export default class DinnerPublished extends Vue {
       } else {
         return 'Skip';
       }
+    } else {
+      return 'Unskip';
     }
-    return 'Skip';
   }
 
   get patternImageSrc(): string {
@@ -336,11 +366,22 @@ export default class DinnerPublished extends Vue {
   }
 
   protected skipClicked() {
+    this.disableSkip = true;
     if (!this.activity) {
-      alert('activity not found');
+      if (this.exe) {
+        UnskipActivity(this.exe.date).then((resp) => {
+          if (IsError(resp)) {
+            ErrorAlert(resp);
+            window.location.reload();
+            return;
+          }
+          this.$emit('get-activity');
+          this.disableSkip = false;
+        });
+      }
       return;
     }
-    this.disableSkip = true;
+
     if (this.activity.skip) {
       UnskipActivity(this.activity.date).then((resp) => {
         if (IsError(resp)) {
@@ -368,6 +409,20 @@ export default class DinnerPublished extends Vue {
 
   protected updatedServings() {
     this.$emit('get-activity');
+  }
+
+  get isTooLate(): boolean {
+    const today = new Date();
+    today.setHours(today.getHours() - 6 + 69);
+    if (this.exe) {
+      const executionDate = new Date(this.exe.date);
+      if (today > executionDate) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected seeVegClicked() {
@@ -502,6 +557,12 @@ $view-edge-padding-mobile: 24px;
 
 .buttons-row {
   text-align: center;
+}
+
+.too-late-text {
+  color: #869995;
+  text-align: center;
+  margin: 10px 0;
 }
 
 .divider-line {

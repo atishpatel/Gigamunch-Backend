@@ -80,7 +80,7 @@ export default class AccountChangeServings extends Vue {
 }
 
 .divider-line {
-  margin: 30px 10px 0 0;
+  margin: 30px 35px 0 0;
   border: 0;
   border-bottom: 1px solid #dadfe1;
 }

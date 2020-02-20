@@ -5,7 +5,7 @@
       <v-spacer></v-spacer>
       <AccountDialogConfirm
         ref="dialog"
-        Title="Change Name"
+        Title="Change Default Delivery Day"
         ButtonText="Edit"
         ConfirmText="Update"
         v-on:dialog-success="submit"
@@ -13,21 +13,14 @@
         <template v-slot:dialog-content>
           <v-layout>
             <v-flex>
-              <v-text-field
+              <v-select
+                :items="availableDeliveryDays"
                 class="field-right-padding"
-                v-model="req.first_name"
-                label="First Name"
+                v-model="req.day"
+                label="Delivery Day"
                 outline
                 round
-              ></v-text-field>
-            </v-flex>
-            <v-flex>
-              <v-text-field
-                v-model="req.last_name"
-                label="Last Name"
-                outline
-                round
-              ></v-text-field>
+              ></v-select>
             </v-flex>
           </v-layout>
         </template>
@@ -42,31 +35,29 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import AccountDialogConfirm from '../components/AccountDialogConfirm.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
-import { UpdateSubscriber } from '../ts/service';
+import { ChangePlanDay } from '../ts/service';
 @Component({
   components: {
     AccountDialogConfirm,
   },
 })
-export default class AccountChangeName extends Vue {
+export default class AccountChangeDeliveryDay extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
 
   get title(): string {
-    return 'Name';
+    return 'Default Delivery Day';
   }
 
   get value(): string {
-    if (this.sub && this.sub.email_prefs) {
-      return `${this.sub.email_prefs[0].first_name} ${this.sub.email_prefs[0].last_name}`;
-    } else {
-      return '';
-    }
+    return this.sub.plan_weekday;
   }
 
+  //   public availableDeliveryDays = ['Monday', 'Thursday'];
+  public availableDeliveryDays = ['Monday'];
+
   public req = {
-    first_name: '',
-    last_name: '',
+    day: '',
   };
 
   protected submit() {
@@ -78,25 +69,11 @@ export default class AccountChangeName extends Vue {
       (this.$refs.dialog as AccountDialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.first_name === '') {
-      alert('First name is empty');
-      return;
-    }
-    if (this.req.last_name === '') {
-      alert('Last name is empty');
-      return;
-    }
     if (!this.sub) {
-      alert('account info not loaded in name section');
+      alert('account info not loaded in delivery day section');
       return;
     }
-    UpdateSubscriber(
-      this.req.first_name,
-      this.req.last_name,
-      this.sub.address,
-      this.sub.delivery_notes,
-      this.sub.phonenumbersString
-    ).then(handler);
+    ChangePlanDay(this.req.day).then(handler);
   }
 }
 </script>
