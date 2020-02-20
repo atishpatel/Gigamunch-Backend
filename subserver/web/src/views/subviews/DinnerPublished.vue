@@ -412,10 +412,10 @@ export default class DinnerPublished extends Vue {
   }
 
   get isTooLate(): boolean {
-    let today = new Date();
+    const today = new Date();
     today.setHours(today.getHours() - 6 + 69);
     if (this.exe) {
-      let executionDate = new Date(this.exe.date);
+      const executionDate = new Date(this.exe.date);
       if (today > executionDate) {
         return true;
       } else {

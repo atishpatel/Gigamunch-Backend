@@ -159,8 +159,15 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
+$body-font-family: 'Poppins', 'Avenir', Helvetica, Arial, sans-serif;
+$title-font: 'Laila', 'Poppins', 'Avenir', Helvetica, Arial, sans-serif;
+
 v-app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: $body-font-family !important;
+  .title {
+    // To pin point specific classes of some components
+    font-family: $title-font !important;
+  }
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
