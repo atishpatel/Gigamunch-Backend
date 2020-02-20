@@ -21,3 +21,8 @@ import VuetifyGoogleAutocomplete from '../components/vuetify-google-autocomplete
 Vue.use(VuetifyGoogleAutocomplete, {
   apiKey: 'AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y',
 });
+
+// @ts-ignore
+import vueBraintree from 'vue-braintree';
+
+Vue.use(vueBraintree);

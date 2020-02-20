@@ -5,7 +5,7 @@
       <v-spacer></v-spacer>
       <DialogConfirm
         ref="dialog"
-        Title="Update Address"
+        Title="Update Payment"
         ButtonText="Edit"
         ConfirmText="Update"
         v-on:dialog-success="submit"
@@ -13,21 +13,16 @@
         <template v-slot:dialog-content>
           <v-layout>
             <v-flex>
-              <vuetify-google-autocomplete
-              ref="elAddress"
-              id="map"
-              append-icon="search"
-              classname="form-control"
-              placeholder="Select Address"
-              v-on:placechanged="getAddressData"
-              country="us"
-              outlined
-              outline
-              aria-autocomplete="false"
-              autocomplete="false"
-          >
-                
-              </vuetify-google-autocomplete>
+      <!-- https://francoislevesque.github.io/vue-braintree/configuration.html#enable-3d-secure -->
+      <v-braintree 
+    :authorization="getAuthorization"
+    @success="onSuccess"
+    @error="onError"
+>
+<template v-slot:button="slotProps">
+    <v-btn @click="slotProps.submit" color="success">Fancy button</v-btn>
+  </template>
+</v-braintree>
             </v-flex>
           </v-layout>
         </template>
@@ -42,39 +37,50 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import DialogConfirm from '../components/DialogConfirm.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
-import { UpdateSubscriber } from '../ts/service';
+import { UpdatePayment } from '../ts/service';
 @Component({
   components: {
     DialogConfirm,
   },
 })
-export default class AccountUpdateAddress extends Vue {
+export default class AccountUpdatePayment extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
+  protected disableButton = false;
 
   get title(): string {
-    return 'Address';
+    return 'Payment Method';
   }
 
   get value(): string {
-    if (this.sub && this.sub.address) {
-      const addr = this.sub.address;
-      return `${addr.street}, ${addr.city}, ${addr.state}, ${addr.zip}, ${addr.country}`;
+    return '';
+  }
 
-    } else {
-      return '';
+  get getAuthorization(): string {
+    let authorization = 'production_tv5qygvt_wsgmypp8c46cnbpc';
+    if (window.location.hostname === 'localhost' || window.location.hostname === 'gigamunch-omninexus-dev.appspot.com') {
+      authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
     }
+    return authorization;
+  }
+
+  public onSuccess(payload: any) {
+    let nonce = payload.nonce;
+    this.submit(nonce);
+  }
+
+  public onError(error: any) {
+    let message = error.message;
+    console.error(error);
+    alert(message);
   }
 
   public req = {
-    address: {} as Common.Address,
+    nonce: '',
   };
 
-  protected getAddressData(addressData: any, placeResultData: any) {
-    this.req.address.full_address = placeResultData.formatted_address;
-  }
 
-  protected submit() {
+  protected submit(payment_method_nonce: string) {
     const handler = (resp: any) => {
       if (IsError(resp)) {
         ErrorAlert(resp);
@@ -83,21 +89,15 @@ export default class AccountUpdateAddress extends Vue {
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.address.full_address == '') {
-      alert('Address is no selected.');
+    if (payment_method_nonce == '') {
+      alert('Payment is no selected.');
       return;
     }
     if (!this.sub) {
       alert('account info not loaded in address section');
       return;
     }
-    UpdateSubscriber(
-      this.sub.email_prefs[0].first_name,
-      this.sub.email_prefs[0].last_name,
-      this.req.address,
-      this.sub.delivery_notes,
-      this.sub.phonenumbersString
-    ).then(handler);
+    UpdatePayment(payment_method_nonce).then(handler);
   }
 }
 </script>
@@ -133,4 +133,6 @@ export default class AccountUpdateAddress extends Vue {
   border: 0;
   border-bottom: 1px solid #dadfe1;
 }
+
+
 </style>
