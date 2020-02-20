@@ -68,6 +68,12 @@
           class="nav-link"
           href="/login"
         >Login</a>
+        <a
+          v-if="userSummary.is_logged_in === true"
+          class="nav-link"
+          href="#"
+          @click="signOut"
+        >Sign Out</a>
       </div>
     </v-toolbar>
 
@@ -81,6 +87,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { GetUserSummary } from './ts/service';
+import { SignOut } from './ts/auth';
 
 @Component({})
 export default class App extends Vue {
@@ -102,6 +109,12 @@ export default class App extends Vue {
       this.hideLoadingScreen = true;
       this.userSummary = resp;
       // console.log(resp);
+    });
+  }
+
+  public signOut() {
+    SignOut().then(() => {
+      window.location.href = '/sub/';
     });
   }
 }
