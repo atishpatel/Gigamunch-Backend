@@ -5,10 +5,6 @@
     "title": "SubAPI.proto",
     "version": "version not set"
   },
-  "schemes": [
-    
-    "https"
-  ],
   "consumes": [
     "application/json"
   ],

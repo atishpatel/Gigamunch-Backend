@@ -11,7 +11,11 @@
             <Image169 :src="exe.content.landscape_image_url"></Image169>
           </div>
           <div
+<<<<<<< HEAD
             class="host-image-image"
+=======
+            class="hero-image-text"
+>>>>>>> feature/sub-app-v1
             v-html="heroImageText"
           ></div>
         </div>
@@ -139,17 +143,7 @@
             >💛&nbsp;&nbsp;The Gigamunch Team</p>
           </div>
         </div>
-<<<<<<< HEAD
       </div>
-      <!-- <div class="action">
-        <div v-if="userSummary.is_logged_in === true">signed in view</div>
-        <div v-else>singed out</div>
-        <p>action</p>
-      </div> -->
-=======
-
-      </div>
->>>>>>> feature/sub-app-v1
     </div>
   </div>
 </template>

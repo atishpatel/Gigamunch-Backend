@@ -107,12 +107,26 @@ export default class ExecutionsItem extends Vue {
     border-radius: 50%;
   }
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> master
+>>>>>>> feature/sub-app-v1
 .cook-name {
   font-weight: 500;
   font-size: 17px;
   padding: 12px 0 6px 0;
   margin: 0;
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> master
+>>>>>>> feature/sub-app-v1
 .subtitle {
   padding: 0px;
   margin: 0px;
