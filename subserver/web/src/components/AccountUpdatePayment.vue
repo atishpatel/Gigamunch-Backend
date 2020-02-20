@@ -52,8 +52,11 @@ import { UpdatePayment } from '../ts/service';
 export default class AccountUpdatePayment extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
-  protected disableButton = false;
 
+  public req = {
+    nonce: '',
+  };
+  protected disableButton = false;
   get title(): string {
     return 'Payment Method';
   }
@@ -74,19 +77,15 @@ export default class AccountUpdatePayment extends Vue {
   }
 
   public onSuccess(payload: any) {
-    let nonce = payload.nonce;
+    const nonce = payload.nonce;
     this.submit(nonce);
   }
 
   public onError(error: any) {
-    let message = error.message;
+    const message = error.message;
     console.error(error);
     alert(message);
   }
-
-  public req = {
-    nonce: '',
-  };
 
   protected submit(payment_method_nonce: string) {
     const handler = (resp: any) => {
@@ -97,7 +96,7 @@ export default class AccountUpdatePayment extends Vue {
       (this.$refs.dialog as DialogConfirmPayment).Dismiss();
       this.$emit('get-account-info');
     };
-    if (payment_method_nonce == '') {
+    if (payment_method_nonce === '') {
       alert('Payment is no selected.');
       return;
     }

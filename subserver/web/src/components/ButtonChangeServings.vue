@@ -112,12 +112,20 @@ export default class ButtonChangeServings extends Vue {
     if (this.changePermanently) {
       this.buttonText = 'Edit';
       this.confirmText = 'Change';
-      this.dialogText = `Right now, you will receive ${this.sub.servings_non_vegetarian} meat servings and ${this.sub.servings_vegetarian} vegetarian servings by default.`;
+      if (this.sub) {
+        this.dialogText = `Right now, you will receive ${this.sub.servings_non_vegetarian} meat servings and ${this.sub.servings_vegetarian} vegetarian servings by default.`;
+      } else {
+        this.dialogText = '';
+      }
       return 'Change defalt serving size';
     }
     this.buttonText = 'Change Servings';
     this.confirmText = 'Update';
-    this.dialogText = `Right now, you will receive ${this.activity.servings_non_vegetarian} meat servings and ${this.activity.servings_vegetarian} vegetarian servings for this day.`;
+    if (this.activity) {
+      this.dialogText = `Right now, you will receive ${this.activity.servings_non_vegetarian} meat servings and ${this.activity.servings_vegetarian} vegetarian servings for this day.`;
+    } else {
+      this.dialogText = '';
+    }
 
     return 'Select servings for this day';
   }
@@ -155,11 +163,17 @@ export default class ButtonChangeServings extends Vue {
   }
 
   get vegServings(): string {
-    return `${this.activity.servings_vegetarian}`;
+    if (this.activity) {
+      return `${this.activity.servings_vegetarian}`;
+    }
+    return '';
   }
 
   get nonvegServings(): string {
-    return `${this.activity.servings_non_vegetarian}`;
+    if (this.activity) {
+      return `${this.activity.servings_non_vegetarian}`;
+    }
+    return '';
   }
 
   protected submit() {
