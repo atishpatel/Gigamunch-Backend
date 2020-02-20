@@ -71,7 +71,7 @@ func (s *server) UpdateSubscriber(ctx context.Context, w http.ResponseWriter, r 
 	subscriber.DeliveryNotes = req.DeliveryNotes
 	subscriber.EmailPrefs[0].FirstName = req.FirstName
 	subscriber.EmailPrefs[0].LastName = req.LastName
-	subscriber.PhonePrefs = make([]subold.PhonePref, 1)
+	subscriber.PhonePrefs = make([]subold.PhonePref, 0)
 	subscriber.AddPhoneNumber(req.PhoneNumber)
 	subscriber.Address = *address
 	err = subC.Update(subscriber)

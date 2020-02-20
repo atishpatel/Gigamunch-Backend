@@ -29,10 +29,10 @@
           :sub="accountInfo.subscriber"
           v-on:get-account-info="getAccountInfo"
         ></AccountChangeDeliveryNotes>
-        <AccountListItem
-          title="Phone Number"
-          value="(615) 545-4989"
-        ></AccountListItem>
+        <AccountChangePhoneNumber
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+        ></AccountChangePhoneNumber>
       </div>
       <div class="cancel">
         <v-btn
@@ -67,6 +67,7 @@ import AccountListItem from '../components/AccountListItem.vue';
 import AccountChangeServings from '../components/AccountChangeServings.vue';
 import AccountChangeName from '../components/AccountChangeName.vue';
 import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes.vue';
+import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue';
 
 @Component({
   components: {
@@ -74,6 +75,7 @@ import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes
     AccountChangeServings,
     AccountChangeName,
     AccountChangeDeliveryNotes,
+    AccountChangePhoneNumber,
   },
 })
 export default class Account extends Vue {
