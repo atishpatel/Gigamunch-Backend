@@ -37,10 +37,11 @@ func getExecutionContent(e *execution.Execution) (*htmlContentResponse, error) {
 	exe := &ExecutionExtended{
 		Execution: *e,
 	}
-	date, err := time.Parse(dateFormat, exe.Date)
-	if err != nil {
-		return nil, err
-	}
+	var err error
+	date, _ := time.Parse(dateFormat, exe.Date)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	exe.DisplayDate = getDisplayDate(date)
 	exe.MondayDisplayDate = getDisplayDate(date)
