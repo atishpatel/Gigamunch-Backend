@@ -100,6 +100,11 @@
               </td>
               <td>
                 <div class="edit-progress-section">
+                  <a href="execution/[[execution.id]]?mode=captain">
+                    <span>Captain</span>
+                  </a>
+                </div>
+                <div class="edit-progress-section">
                   <a href="execution/[[execution.id]]?mode=head_chef">
                     <span>Head Chef (Mike)</span>
                     <paper-progress value="[[execution.progress.head_chef]]"></paper-progress>
@@ -129,6 +134,9 @@
                   <i class="material-icons"
                   style="font-size: 42px;">code</i>
                 </a>
+                <paper-icon-button icon="app-icons:content-copy"
+                                   on-click="duplicateExecution">
+                </paper-icon-button>
               </td>
             </tr>
           </template>
@@ -205,7 +213,25 @@
           }
 
           this.executions = executions;
+          this.loading = false;
         });
+      }
+
+      duplicateExecution(e) {
+        this.loading = true;
+        const exe = e.model.execution;
+        exe.id = 0;
+        exe.date = '';
+        exe.publish = false;
+        this.service.UpdateExecution('captain', exe).then((resp) => {
+          let err = resp.error;
+          if (err && err.code !== 0) {
+            alert(err);
+            return;
+          }
+          this.getExecutions();
+        });
+        this.executions = [];
       }
     }
     window.customElements.define(ExecutionsPage.is, ExecutionsPage);

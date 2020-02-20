@@ -8,6 +8,7 @@ The following programs need to be installed:
     - https://github.com/google/protobuf/releases 
     - `go get -u github.com/golang/protobuf/protoc-gen-go`
     - `go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger`
+    - `go get -u google.golang.org/grpc`
   - install node LTS: https://nodejs.org/en/
   - `brew install yarn`
   - `yarn global add gulp-cli`

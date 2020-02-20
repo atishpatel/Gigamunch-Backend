@@ -10,6 +10,16 @@ cron:
   schedule: every day 5:00
   timezone: America/Chicago
   target: admin
+- description: "Setup Subscriber Activities in 14 days"
+  url: /admin/task/SetupActivites?hours=336
+  schedule: every day 5:00
+  timezone: America/Chicago
+  target: admin
+- description: "Setup Subscriber Activities in 21 days"
+  url: /admin/task/SetupActivites?hours=504
+  schedule: every day 5:00
+  timezone: America/Chicago
+  target: admin
 - description: "Bag reminder"
   url: /send-bag-reminder
   schedule: every day 18:00
