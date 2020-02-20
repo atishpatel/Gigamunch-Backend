@@ -53,6 +53,7 @@
               depressed
               color="#E8554E"
               class="white--text"
+              :disabled="this.isTooLate"
             >Get this dinner</v-btn>
             <v-btn
               v-if="!userSummary.is_active && userSummary.has_subscribed"
@@ -60,6 +61,7 @@
               depressed
               color="#E8554E"
               class="white--text"
+              :disabled="this.isTooLate"
             >Get this dinner</v-btn>
             <v-btn
               v-if="userSummary.is_logged_in"
@@ -85,7 +87,7 @@
               @click="seeVegClicked"
             >{{seeVegButtonText}}</v-btn>
           </div>
-          <div v-if="isTooLate">
+          <div v-if="isTooLate && userSummary.is_active">
             <p class="too-late-text">
               It is too late to make serving size changes or skip this dinner.
             </p>
@@ -295,9 +297,15 @@ export default class DinnerPublished extends Vue {
 
   get servingText(): string {
     if (!this.userSummary.is_active) {
-      return `You could receive this dinner on ${GetDayMonthDayDate(
-        this.exe.date
-      )}`;
+      if (this.isTooLate) {
+        return `It is too late to receive this dinner on ${GetDayMonthDayDate(
+          this.exe.date
+        )}, check out other upcoming dinners.`;
+      } else {
+        return `You could receive this dinner on ${GetDayMonthDayDate(
+          this.exe.date
+        )}`;
+      }
     } else {
       if (this.activity) {
         if (this.activity.skip) {
