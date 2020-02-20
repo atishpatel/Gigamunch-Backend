@@ -45,47 +45,38 @@
               {{servingText}}
             </p>
           </div>
-          <div
-            v-if="!userSummary.is_active && !userSummary.has_subscribed"
-            class="buttons-row"
-          >
+          <div class="buttons-row">
             <v-btn
-              href="/checkout"
+              v-if="!userSummary.is_active && !userSummary.has_subscribed"
+              href="https://eatgigamunch.com/checkout"
               target="_blank"
               depressed
               color="#E8554E"
               class="white--text"
             >Get this dinner</v-btn>
-          </div>
-          <div
-            v-if="!userSummary.is_active && userSummary.has_subscribed"
-            class="buttons-row"
-          >
             <v-btn
+              v-if="!userSummary.is_active && userSummary.has_subscribed"
               href="/account"
               depressed
               color="#E8554E"
               class="white--text"
             >Get this dinner</v-btn>
-          </div>
-          <div
-            v-else
-            class="buttons-row"
-          >
             <v-btn
+              v-if="userSummary.is_logged_in"
               depressed
               color="#E8554E"
               class="white--text"
-              :disabled="disableSkip"
+              :disabled="disableSkip || isTooLate"
               @click="skipClicked"
             >{{skipButtonText}}</v-btn>
             <ButtonChangeServings
+              v-if="userSummary.is_logged_in"
               :activity="activity"
               v-on:dialog-success="updatedServings"
               depressed
               color="#E8554E"
               class="white--text"
-              :ButtonDisabled="disableChangeServings"
+              :ButtonDisabled="disableChangeServings || isTooLate"
             ></ButtonChangeServings>
             <v-btn
               depressed
@@ -93,6 +84,11 @@
               class="white--text"
               @click="seeVegClicked"
             >{{seeVegButtonText}}</v-btn>
+          </div>
+          <div v-if="isTooLate">
+            <p class="too-late-text">
+              It is too late to make serving size changes or skip this dinner.
+            </p>
           </div>
           <div
             v-for="dish in dishes"
@@ -201,9 +197,11 @@ export default class DinnerPublished extends Vue {
     if (this.activity) {
       if (this.activity.skip) {
         return true;
+      } else {
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   get heroImageText(): string {
@@ -331,7 +329,9 @@ export default class DinnerPublished extends Vue {
           }
         }
       }
-      return '';
+      return `You will not receive this dinner on ${GetDayMonthDayDate(
+        this.exe.date
+      )}`;
     }
   }
 
@@ -401,6 +401,20 @@ export default class DinnerPublished extends Vue {
 
   protected updatedServings() {
     this.$emit('get-activity');
+  }
+
+  get isTooLate(): boolean {
+    let today = new Date();
+    today.setHours(today.getHours() - 6 + 69);
+    if (this.exe) {
+      let executionDate = new Date(this.exe.date);
+      if (today > executionDate) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected seeVegClicked() {
@@ -535,6 +549,12 @@ $view-edge-padding-mobile: 24px;
 
 .buttons-row {
   text-align: center;
+}
+
+.too-late-text {
+  color: #869995;
+  text-align: center;
+  margin: 10px 0;
 }
 
 .divider-line {
