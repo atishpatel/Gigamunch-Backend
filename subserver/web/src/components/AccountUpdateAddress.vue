@@ -5,7 +5,7 @@
       <v-spacer></v-spacer>
       <DialogConfirm
         ref="dialog"
-        Title="Change Name"
+        Title="Update Address"
         ButtonText="Edit"
         ConfirmText="Update"
         v-on:dialog-success="submit"
@@ -13,21 +13,21 @@
         <template v-slot:dialog-content>
           <v-layout>
             <v-flex>
-              <v-text-field
-                class="field-right-padding"
-                v-model="req.first_name"
-                label="First Name"
-                outline
-                round
-              ></v-text-field>
-            </v-flex>
-            <v-flex>
-              <v-text-field
-                v-model="req.last_name"
-                label="Last Name"
-                outline
-                round
-              ></v-text-field>
+              <vuetify-google-autocomplete
+              ref="elAddress"
+              id="map"
+              append-icon="search"
+              classname="form-control"
+              placeholder="Select Address"
+              v-on:placechanged="getAddressData"
+              country="us"
+              outlined
+              outline
+              aria-autocomplete="false"
+              autocomplete="false"
+          >
+                
+              </vuetify-google-autocomplete>
             </v-flex>
           </v-layout>
         </template>
@@ -53,7 +53,7 @@ export default class AccountChangeName extends Vue {
   public sub!: Types.SubscriberExtended;
 
   get title(): string {
-    return 'Name';
+    return 'Address';
   }
 
   get value(): string {
@@ -65,9 +65,12 @@ export default class AccountChangeName extends Vue {
   }
 
   public req = {
-    first_name: '',
-    last_name: '',
+    address: {} as Common.Address,
   };
+
+  protected getAddressData(addressData: any, placeResultData: any) {
+    this.req.address.full_address = placeResultData.formatted_address;
+  }
 
   protected submit() {
     const handler = (resp: any) => {
@@ -78,22 +81,18 @@ export default class AccountChangeName extends Vue {
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.first_name == '') {
-      alert('First name is empty');
-      return;
-    }
-    if (this.req.last_name == '') {
-      alert('Last name is empty');
+    if (this.req.address.full_address == '') {
+      alert('Address is no selected.');
       return;
     }
     if (!this.sub) {
-      alert('account info not loaded in name section');
+      alert('account info not loaded in address section');
       return;
     }
     UpdateSubscriber(
-      this.req.first_name,
-      this.req.last_name,
-      this.sub.address,
+      this.sub.email_prefs[0].first_name,
+      this.sub.email_prefs[0].last_name,
+      this.req.address,
       this.sub.delivery_notes,
       this.sub.phonenumbersString
     ).then(handler);

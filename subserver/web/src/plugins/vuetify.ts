@@ -14,3 +14,10 @@ Vue.use(Vuetify, {
     warning: '#FFC107',
   },
 });
+
+// @ts-ignore
+import VuetifyGoogleAutocomplete from '../components/vuetify-google-autocomplete/lib';
+
+Vue.use(VuetifyGoogleAutocomplete, {
+  apiKey: 'AIzaSyCDOw6QXpThS7dm3rl79wDdEvwPlLWsi0Y',
+});
