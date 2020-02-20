@@ -95,7 +95,6 @@ export default class ExecutionsItem extends Vue {
 .culture-title {
   font-weight: 500;
   font-size: 1.2em;
-  padding-left: 24px;
   margin: 40px 0 15px 0;
 }
 @media (min-width: 800px) {
@@ -110,7 +109,6 @@ export default class ExecutionsItem extends Vue {
   flex-wrap: nowrap;
   overflow-x: auto;
   transition: 0.5s ease 0s;
-  padding: 0px 24px 30px;
   -webkit-overflow-scrolling: touch;
   .card {
     flex: 0 0 auto;

@@ -1,44 +1,91 @@
 <template>
   <div>
-    <h1>Account</h1>
-    <section>
-      <div class="field">
-        <div class="field-title">Name</div>
-        <div class="field-value">
-          {{name}}
-        </div>
-        <div class="field-action">
-          Change
-        </div>
+    <div class="content-container">
+      <h1>Account</h1>
+      <div class="list">
+        <AccountChangeName :sub="accountInfo.subscriber"></AccountChangeName>
+        <AccountListItem
+          title="Payment Method"
+          value="xxxx-xxxx-xxxx-4444"
+        ></AccountListItem>
+        <AccountChangeServings
+          v-on:get-account-info="getAccountInfo"
+          :sub="accountInfo.subscriber"
+        >
+
+        </AccountChangeServings>
+        <AccountListItem
+          title="Default Delivery Day"
+          value="Monday"
+        ></AccountListItem>
+        <AccountListItem
+          title="Delivery Address"
+          value="1835 North Washington Avenue, Cookeville, TN, 38501"
+        ></AccountListItem>
+        <AccountListItem
+          title="Delivery Notes"
+          value="Not provided"
+        ></AccountListItem>
+        <AccountListItem
+          title="Phone Number"
+          value="(615) 545-4989"
+        ></AccountListItem>
       </div>
-    </section>
+      <div class="cancel">
+        <v-btn
+          depressed
+          large
+          color="#E8554E"
+          class="white--text"
+        >Cancel Account</v-btn>
+      </div>
+      <hr class="divider-line">
+      <div class="footer-message">
+        <p class="footer-message-text">Feel free to talk to us at</p>
+        <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
+        <p
+          class="footer-message-text"
+          style="margin-top: 12px;"
+        ><strong>We're here for you.</strong></p>
+        <p
+          class="footer-message-text"
+          style="margin-top: 32px;"
+        >💛&nbsp;&nbsp;The Gigamunch Team</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { GetAccountInfo } from '../ts/service';
-import { IsError } from '../ts/errors';
+import { IsError, ErrorAlert } from '../ts/errors';
+import AccountListItem from '../components/AccountListItem.vue';
+import AccountChangeServings from '../components/AccountChangeServings.vue';
+import AccountChangeName from '../components/AccountChangeName.vue';
 
 @Component({
-  components: {},
+  components: {
+    AccountListItem,
+    AccountChangeServings,
+    AccountChangeName,
+  },
 })
-export default class Dinner extends Vue {
-  protected accountInfo!: SubAPI.GetAccountInfoResp;
-  @Prop()
-  protected name!: string;
+export default class Account extends Vue {
+  public accountInfo!: SubAPI.GetAccountInfoResp;
   protected loading!: boolean;
 
   public constructor() {
     super();
     this.accountInfo = {
-      address: {} as Common.Address,
+      subscriber: {} as Common.Subscriber,
       payment_info: {} as SubAPI.PaymentInfo,
     } as SubAPI.GetAccountInfoResp;
   }
 
   public created() {
     this.getAccountInfo();
+    window.scrollTo(0, 0);
   }
 
   public getAccountInfo() {
@@ -46,23 +93,40 @@ export default class Dinner extends Vue {
     GetAccountInfo().then((resp) => {
       this.loading = false;
       if (IsError(resp)) {
-        // TODO: handle errors
+        ErrorAlert(resp);
         return;
       }
       this.accountInfo = resp;
-      this.name =
-        resp.email_prefs[0].first_name + ' ' + resp.email_prefs[0].last_name;
     });
   }
 }
 </script>
 <style scoped lang="scss">
-.field {
-  display: flex;
-  flex-direction: row;
+.content-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 12px;
+}
+.list {
+  margin: 40px 0 40px 0;
+}
+.cancel {
+  text-align: center;
+}
+.divider-line {
+  margin: 40px 40px 40px 0;
+  border: 0;
+  border-bottom: 1px solid #dadfe1;
+}
+.footer-message {
+  padding: 0 0 50px 0;
+  align-content: center;
 }
 
-.field-title {
-  font-weight: 600;
+.footer-message-text {
+  align-content: center;
+  text-align: center;
+  margin: 0;
+  font-size: 16px;
 }
 </style>

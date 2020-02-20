@@ -91,8 +91,8 @@ export default class ExecutionsItem extends Vue {
   }
 }
 .cook-face-image {
-  height: 100px;
-  width: 100px;
+  height: 85px;
+  width: 85px;
   position: relative;
   margin: 0 15px 0 0;
   img {
@@ -109,11 +109,21 @@ export default class ExecutionsItem extends Vue {
 }
 .cook-name {
   font-weight: 500;
-  padding: 16px 0;
+  font-size: 17px;
+  padding: 12px 0 6px 0;
   margin: 0;
 }
 .subtitle {
   padding: 0px;
   margin: 0px;
+  color: #869995;
+}
+@media (min-width: 600px) {
+  .cook-name {
+    font-size: 22px;
+  }
+  .subtitle {
+    font-size: 18px;
+  }
 }
 </style>

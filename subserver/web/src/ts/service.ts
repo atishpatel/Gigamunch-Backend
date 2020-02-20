@@ -35,20 +35,30 @@ export function GetExecutions(start: number, limit: number): Promise<SubAPI.GetE
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecutionsAfterDate(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
+export function GetExecutionsAfterDate(date: Date | string): Promise<SubAPI.GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutionsAfterDate';
-  const req: SubAPI.GetExecutionsReq = {
-    start,
-    limit,
+  let dateString = '';
+  if (typeof (date) === 'string') {
+    dateString = date;
+  } else if (typeof (date) === 'object') {
+    dateString = date.toISOString();
+  }
+  const req: SubAPI.GetExecutionsDateReq = {
+    date: dateString,
   };
   return callFetch(url, 'GET', req);
 }
 
-export function GetExecutionsBeforeDate(start: number, limit: number): Promise<SubAPI.GetExecutionsResp> {
+export function GetExecutionsBeforeDate(date: Date | string): Promise<SubAPI.GetExecutionsResp> {
   const url: string = baseURL + 'GetExecutionsBeforeDate';
-  const req: SubAPI.GetExecutionsReq = {
-    start,
-    limit,
+  let dateString = '';
+  if (typeof (date) === 'string') {
+    dateString = date;
+  } else if (typeof (date) === 'object') {
+    dateString = date.toISOString();
+  }
+  const req: SubAPI.GetExecutionsDateReq = {
+    date: dateString,
   };
   return callFetch(url, 'GET', req);
 }
@@ -59,6 +69,71 @@ export function GetExecution(idOrDate: string): Promise<SubAPI.GetExecutionResp>
     idOrDate,
   };
   return callFetch(url, 'GET', req);
+}
+
+export function SkipActivity(date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'SkipActivity';
+  const req: SubAPI.DateReq = {
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function UnskipActivity(date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'UnskipActivity';
+  const req: SubAPI.DateReq = {
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ChangeActivityServings(id: string, servings_non_veg: number, servings_veg: number, date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'ChangeActivityServings';
+  const req: SubAPI.ChangeActivityServingsReq = {
+    id,
+    servings_non_veg,
+    servings_veg,
+    date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ChangeSubscriberServings(id: string, servings_non_veg: number, servings_veg: number): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'ChangeSubscriberServings';
+  const req: SubAPI.ChangeSubscriberServingsReq = {
+    id,
+    servings_non_veg,
+    servings_veg,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function UpdateSubscriber(first_name: string, last_name: string, address: Common.Address, delivery_notes: string, phone_number: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'UpdateSubscriber';
+  const req: SubAPI.UpdateSubscriberReq = {
+    first_name,
+    last_name,
+    address,
+    delivery_notes,
+    phone_number,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function UpdatePayment(payment_method_nonce: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'UpdatePayment';
+  const req: SubAPI.UpdatePaymentReq = {
+    payment_method_nonce,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ChangePlanDay(new_plan_day: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'ChangePlanDay';
+  const req: SubAPI.ChangePlanDayReq = {
+    new_plan_day,
+  };
+  return callFetch(url, 'POST', req);
 }
 
 function callFetch(url: string, method: string, body: object): Promise<any> {

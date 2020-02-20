@@ -13,7 +13,7 @@ if [[ $1 == "build" ]]; then
     cd admin/app
     gulp build
     cd ../web
-    yarn build
+    yarn run build
     cd ../..
   fi
   if [[ $* == *server* ]]; then
@@ -111,14 +111,14 @@ if [[ $1 == "serve" ]]; then
     cd admin
     dev_appserver.py --datastore_path ../.datastore --port 8081 ./app.yaml& 
     cd web
-    yarn serve
+    yarn run serve
     cd ../..
   fi
   if [[ $2 == "admin-new" ]]; then
     echo "Starting admin new:"
     cd admin
     cd web
-    yarn serve
+    yarn run serve
     cd ../..
   fi
   if [[ $2 == "server" ]]; then
@@ -132,8 +132,8 @@ if [[ $1 == "serve" ]]; then
   fi
   if [[ $2 == "sub" ]]; then
     echo "Starting sub:"
-    cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
-    dev_appserver.py --datastore_path ./.datastore --port 8081 subserver/app.yaml& 
+    # cat subserver/app.template.yaml | sed "s/PROJECTID/$project/g; s/_SERVEPATH_//g; s/MODULE/sub/g; " > subserver/app.yaml
+    # dev_appserver.py --datastore_path ./.datastore --port 8081 subserver/app.yaml& 
     cd subserver/web 
     yarn run serve
     cd ../..

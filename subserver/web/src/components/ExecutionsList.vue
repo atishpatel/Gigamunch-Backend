@@ -1,11 +1,13 @@
 <template>
-  <div>
-    <h1 class="title">Upcomming Dinners</h1>
-    <div
-      v-for="executionAndActivity in executionAndActivityList"
-      v-bind:key="executionAndActivity.execution.id"
-    >
-      <ExecutionsItem :execution="executionAndActivity.execution"></ExecutionsItem>
+  <div class="view">
+    <div class="content-container">
+      <h1>Upcoming Dinners</h1>
+      <div
+        v-for="executionAndActivity in executionAndActivityList"
+        v-bind:key="executionAndActivity.execution.id"
+      >
+        <ExecutionsItem :execution="executionAndActivity.execution"></ExecutionsItem>
+      </div>
     </div>
   </div>
 </template>
@@ -28,13 +30,20 @@ export default class ExecutionsList extends Vue {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import '../scss/theme.scss';
-.title {
-  display: inline-block;
-  text-align: start;
-  margin: 0 24px;
-  padding-bottom: 16px;
-  font-size: 1.5em;
-  color: $app-theme-secondary;
-  border-bottom: 4px solid $app-theme-accent;
+$view-edge-padding-desktop: 120px;
+$view-edge-padding-mobile: 24px;
+.content-container {
+  background-color: white;
+  padding: 0 $view-edge-padding-mobile 25px $view-edge-padding-mobile;
+}
+@media (min-width: 700px) {
+  .content-container {
+    padding: 0 $view-edge-padding-desktop 25px $view-edge-padding-desktop;
+  }
+}
+
+.view {
+  max-width: 850px;
+  margin: auto;
 }
 </style>

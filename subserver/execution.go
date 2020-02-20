@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -103,7 +104,6 @@ func (s *server) GetExecutionsAfterDate(ctx context.Context, w http.ResponseWrit
 		return failedToDecode(err)
 	}
 	// end decode request
-
 	exeC, err := execution.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution.NewClient")
@@ -112,6 +112,17 @@ func (s *server) GetExecutionsAfterDate(ctx context.Context, w http.ResponseWrit
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution.GetAfterDate")
 	}
+	publishedExecutions := filterPublishedExecutions(executions)
+	sort.Slice(publishedExecutions, func(i, j int) bool {
+		if publishedExecutions[i].Date == "" {
+			return false
+		}
+		if publishedExecutions[j].Date == "" {
+			return true
+		}
+		return publishedExecutions[i].Date < publishedExecutions[j].Date
+	})
+
 	var activities []*activity.Activity
 	if user != nil {
 		activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
@@ -123,7 +134,7 @@ func (s *server) GetExecutionsAfterDate(ctx context.Context, w http.ResponseWrit
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.GetAfterDateForUser")
 		}
 	}
-	resp, err := getExecutionsResp(executions, activities)
+	resp, err := getExecutionsResp(publishedExecutions, activities)
 	if err != nil {
 		return errors.GetErrorWithCode(err)
 	}
@@ -149,6 +160,17 @@ func (s *server) GetExecutionsBeforeDate(ctx context.Context, w http.ResponseWri
 	if err != nil {
 		return errors.GetErrorWithCode(err).Annotate("failed to get execution.GetBeforeDate")
 	}
+	publishedExecutions := filterPublishedExecutions(executions)
+	sort.Slice(publishedExecutions, func(i, j int) bool {
+		if publishedExecutions[i].Date == "" {
+			return false
+		}
+		if publishedExecutions[j].Date == "" {
+			return true
+		}
+		return publishedExecutions[i].Date < publishedExecutions[j].Date
+	})
+
 	var activities []*activity.Activity
 	if user != nil {
 		activityC, err := activity.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
@@ -160,11 +182,23 @@ func (s *server) GetExecutionsBeforeDate(ctx context.Context, w http.ResponseWri
 			return errors.GetErrorWithCode(err).Annotate("failed to get activity.GetBeforeDateForUser")
 		}
 	}
-	resp, err := getExecutionsResp(executions, activities)
+	resp, err := getExecutionsResp(publishedExecutions, activities)
 	if err != nil {
 		return errors.GetErrorWithCode(err)
 	}
 	return resp
+}
+
+// filterPublishedExecutions takes in executions, returns only published executions
+func filterPublishedExecutions(executions []*execution.Execution) []*execution.Execution {
+
+	var publishedExecutions []*execution.Execution
+	for _, execution := range executions {
+		if execution.Publish {
+			publishedExecutions = append(publishedExecutions, execution)
+		}
+	}
+	return publishedExecutions
 }
 
 // GetExecution gets an execution.

@@ -55,7 +55,9 @@ firebase.auth().onAuthStateChanged(function (user) {
     else {
         eventName = Events.SignedIn;
         user.getIdToken(false).then(function (idToken) {
-            Login(idToken);
+            Login(idToken).then(function () {
+                window.location.href = '/sub/';
+            });
         });
         APP.User = user;
         var event_1 = document.createEvent('Event');

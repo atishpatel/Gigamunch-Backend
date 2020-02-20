@@ -14,7 +14,7 @@
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>
-              My Dinners
+              Upcoming Dinners
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
@@ -48,8 +48,8 @@
       class="app-toolbar"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title class="headline">
-        <span>Sub</span>
+      <v-toolbar-title>
+        <span class="logo-headline">Gigamunch</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div>
@@ -64,7 +64,7 @@
           href="/checkout"
         >Sign up</a>
         <a
-          v-if="userSummary.is_logged_in === false"
+          v-else
           class="nav-link"
           href="/login"
         >Login</a>
@@ -72,7 +72,8 @@
     </v-toolbar>
 
     <v-content class="main">
-      <router-view />
+      <router-view :userSummary="userSummary" />
+
     </v-content>
   </v-app>
 </template>
@@ -99,7 +100,7 @@ export default class App extends Vue {
     // App ready
     GetUserSummary().then((resp) => {
       this.hideLoadingScreen = true;
-      // this.userSummary = resp;
+      this.userSummary = resp;
       // console.log(resp);
     });
   }
@@ -142,5 +143,11 @@ v-app {
 
 .v-list__tile--active {
   background-color: #eceff1;
+}
+
+.logo-headline {
+  color: #d0782c;
+  font-family: 'Laila', serif;
+  font-weight: 500;
 }
 </style>
