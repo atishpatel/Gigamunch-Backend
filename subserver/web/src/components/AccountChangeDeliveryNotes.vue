@@ -51,7 +51,7 @@ export default class AccountChangeDeliveryNotes extends Vue {
 
   get value(): string {
     if (this.sub) {
-      if (!this.sub.delivery_notes || this.sub.delivery_notes == '') {
+      if (!this.sub.delivery_notes || this.sub.delivery_notes === '') {
         return 'Not provided';
       } else {
         return this.sub.delivery_notes;

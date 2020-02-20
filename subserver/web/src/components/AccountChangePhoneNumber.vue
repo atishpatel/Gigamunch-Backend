@@ -57,7 +57,7 @@ export default class AccountChangePhoneNumber extends Vue {
         !this.sub.phone_prefs ||
         !this.sub.phone_prefs[0] ||
         !this.sub.phone_prefs[0].number ||
-        this.sub.phone_prefs[0].number == ''
+        this.sub.phone_prefs[0].number === ''
       ) {
         return 'Not provided - You will miss out on delivery texts';
       } else {

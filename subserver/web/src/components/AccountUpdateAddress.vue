@@ -14,19 +14,19 @@
           <v-layout>
             <v-flex>
               <vuetify-google-autocomplete
-              ref="elAddress"
-              id="map"
-              append-icon="search"
-              classname="form-control"
-              placeholder="Select Address"
-              v-on:placechanged="getAddressData"
-              country="us"
-              outlined
-              outline
-              aria-autocomplete="false"
-              autocomplete="false"
-          >
-                
+                ref="elAddress"
+                id="map"
+                append-icon="search"
+                classname="form-control"
+                placeholder="Select Address"
+                v-on:placechanged="getAddressData"
+                country="us"
+                outlined
+                outline
+                aria-autocomplete="false"
+                autocomplete="false"
+              >
+
               </vuetify-google-autocomplete>
             </v-flex>
           </v-layout>
@@ -60,7 +60,6 @@ export default class AccountUpdateAddress extends Vue {
     if (this.sub && this.sub.address) {
       const addr = this.sub.address;
       return `${addr.street}, ${addr.city}, ${addr.state}, ${addr.zip}, ${addr.country}`;
-
     } else {
       return '';
     }
@@ -83,7 +82,7 @@ export default class AccountUpdateAddress extends Vue {
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.address.full_address == '') {
+    if (this.req.address.full_address === '') {
       alert('Address is no selected.');
       return;
     }
