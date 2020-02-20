@@ -6,11 +6,11 @@
       clipped
       app
     >
-      <div class="drawer-nav-header">Menu</div>
+      <div class="drawer-nav-header">Gigamunch</div>
       <v-list>
         <v-list-tile to="/">
           <v-list-tile-action>
-            <v-icon>inbox</v-icon>
+            <v-icon>calendar_today</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>
@@ -18,7 +18,7 @@
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile to="/history">
+        <!-- <v-list-tile to="/history">
           <v-list-tile-action>
             <v-icon>drafts</v-icon>
           </v-list-tile-action>
@@ -27,14 +27,58 @@
               Dinner History
             </v-list-tile-title>
           </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile to="/account">
+        </v-list-tile> -->
+        <v-list-tile
+          to="/account"
+          v-if="userSummary.has_subscribed === true"
+        >
           <v-list-tile-action>
-            <v-icon>drafts</v-icon>
+            <v-icon>account_circle</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>
               Account
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile
+          v-if="userSummary.has_subscribed === true"
+          href="#"
+          @click="signOut"
+        >
+          <v-list-tile-action>
+            <v-icon>logout</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Log out
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile
+          href="https://eatgigamunch.com/checkout"
+          target="_blank"
+          v-if="userSummary.has_subscribed === false"
+        >
+          <v-list-tile-action>
+            <v-icon>emoji_emotions</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Sign up
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile
+          href="/login"
+          v-if="userSummary.is_logged_in === false"
+        >
+          <v-list-tile-action>
+            <v-icon>account_circle</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Log in
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
@@ -45,6 +89,7 @@
       flat
       clipped-left
       app
+      color="white"
       class="app-toolbar"
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
@@ -53,18 +98,16 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <div>
-        <a
-          v-if="userSummary.has_subscribed === true && userSummary.is_active === false"
-          class="nav-link"
-          href="account"
-        >Sign up</a>
-        <a
+        <v-btn
           v-if="userSummary.has_subscribed === false"
-          class="nav-link"
-          href="/checkout"
-        >Sign up</a>
+          depressed
+          color="#E8554E"
+          target="_blank"
+          class="white--text"
+          href="https://eatgigamunch.com/checkout"
+        >Sign up</v-btn>
         <a
-          v-else
+          v-if="userSummary.is_logged_in === false"
           class="nav-link"
           href="/login"
         >Login</a>
@@ -81,18 +124,18 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { GetUserSummary } from './ts/service';
+import { SignOut } from './ts/auth';
 
 @Component({})
 export default class App extends Vue {
   public drawer = false;
   public hideLoadingScreen = false;
   public userSummary = {
-    //TODO: set these back to false and uncomment the GetUserSummary()
     is_active: false,
     is_logged_in: false,
     has_subscribed: false,
-    // is_admin: false,
-    // on_probation: false,
+    is_admin: false,
+    on_probation: false,
     error: {} as Common.Error,
   } as SubAPI.GetUserSummaryResp;
 
@@ -100,24 +143,35 @@ export default class App extends Vue {
     // App ready
     GetUserSummary().then((resp) => {
       this.hideLoadingScreen = true;
-      this.userSummary = resp;
+      if (resp.is_logged_in) {
+        this.userSummary = resp;
+      }
       // console.log(resp);
+    });
+  }
+
+  public signOut() {
+    SignOut().then(() => {
+      window.location.href = '/sub/';
     });
   }
 }
 </script>
 
 <style lang="scss">
+$body-font-family: 'Poppins', 'Avenir', Helvetica, Arial, sans-serif;
+$title-font: 'Laila', 'Poppins', 'Avenir', Helvetica, Arial, sans-serif;
+
 v-app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: $body-font-family !important;
+  .title {
+    // To pin point specific classes of some components
+    font-family: $title-font !important;
+  }
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-
-.app-toolbar div {
-  background: white;
 }
 
 .main {
@@ -125,11 +179,13 @@ v-app {
 }
 
 .drawer-nav-header {
-  background-color: #009688;
+  background-color: #d0782c;
   color: white;
   font-weight: bold;
   font-size: 24px;
   padding: 24px 20px;
+  font-family: 'Laila', serif;
+  font-weight: 500;
 }
 
 .nav-tile-content {

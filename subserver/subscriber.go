@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -41,6 +42,71 @@ func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWr
 	return resp
 }
 
+// ActivateSubscriber activates a subscriber account.
+func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
+	var err error
+	req := new(pbsub.ActivateSubscriberReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(user.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Get")
+	}
+
+	planDay := subscriber.PlanWeekday
+	intervalStartDate := time.Now().Add(81 * time.Hour)
+	for intervalStartDate.Weekday().String() != planDay {
+		intervalStartDate = intervalStartDate.Add(time.Hour * 24)
+	}
+	firstBagDate := intervalStartDate
+	if req.FirstBagDate != "" {
+		firstBagDate = getDatetime(req.FirstBagDate)
+	}
+
+	err = subC.Activate(subscriber.ID, firstBagDate)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Activate")
+	}
+	resp := &pbsub.ErrorOnlyResp{}
+	return resp
+}
+
+// DeactivateSubscriber deactivates the subscriber.
+func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
+	var err error
+	req := new(pbsub.DeactivateSubscriberReq)
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(user.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Get")
+	}
+	err = subC.Deactivate(subscriber.ID, req.Reason)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Deactivate")
+	}
+	resp := &pbsub.ErrorOnlyResp{}
+	return resp
+}
+
 // UpdateSubscriber updates the subscriber.
 func (s *server) UpdateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
 	var err error
@@ -59,6 +125,10 @@ func (s *server) UpdateSubscriber(ctx context.Context, w http.ResponseWriter, r 
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Get")
 	}
+	if req.Address.FullAddress == "" {
+		a := req.Address
+		req.Address.FullAddress = fmt.Sprintf("%s, %s, %s %s, %s", a.Street, a.City, a.State, a.Zip, a.Country)
+	}
 	address, err := maps.GetAddress(ctx, req.Address.FullAddress, req.Address.Apt)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.GetAddress")
@@ -66,7 +136,7 @@ func (s *server) UpdateSubscriber(ctx context.Context, w http.ResponseWriter, r 
 	subscriber.DeliveryNotes = req.DeliveryNotes
 	subscriber.EmailPrefs[0].FirstName = req.FirstName
 	subscriber.EmailPrefs[0].LastName = req.LastName
-	subscriber.PhonePrefs = make([]subold.PhonePref, 1)
+	subscriber.PhonePrefs = make([]subold.PhonePref, 0)
 	subscriber.AddPhoneNumber(req.PhoneNumber)
 	subscriber.Address = *address
 	err = subC.Update(subscriber)
