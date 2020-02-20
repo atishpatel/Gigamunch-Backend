@@ -3,7 +3,10 @@
     <div class="content-container">
       <h1>Account</h1>
       <div class="list">
-        <AccountChangeName :sub="accountInfo.subscriber"></AccountChangeName>
+        <AccountChangeName
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+        ></AccountChangeName>
         <AccountListItem
           title="Payment Method"
           value="xxxx-xxxx-xxxx-4444"

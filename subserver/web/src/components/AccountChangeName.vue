@@ -87,7 +87,7 @@ export default class AccountChangeName extends Vue {
         return;
       }
       (this.$refs.dialog as DialogConfirm).Dismiss();
-      this.$emit('dialog-success');
+      this.$emit('get-account-info');
     };
     if (this.req.first_name == '') {
       alert('First name is empty');
