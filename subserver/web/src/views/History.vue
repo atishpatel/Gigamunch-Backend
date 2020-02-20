@@ -2,13 +2,6 @@
   <div>
     <div class="content-container">
       <h1>Dinner History</h1>
-      <div class="list">
-        <AccountListItem
-          title="Name"
-          value="Chris Sipe"
-        ></AccountListItem>
-      </div>
-
       <div class="footer-message">
         <p class="footer-message-text">Feel free to talk to us at</p>
         <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
@@ -26,19 +19,12 @@
 </template>
 
 <script lang="ts">
-import { Prop, Component, Vue } from 'vue-property-decorator';
+import { Vue } from 'vue-property-decorator';
 // import { GetAccountInfo } from '../ts/service';
 // import { IsError } from '../ts/errors';
-import AccountListItem from '../components/AccountListItem.vue';
 
-@Component({
-  components: { AccountListItem },
-})
 export default class Dinner extends Vue {
   protected accountInfo!: SubAPI.GetAccountInfoResp;
-  @Prop()
-  protected name!: string;
-  protected loading!: boolean;
 
   public constructor() {
     super();
@@ -48,11 +34,11 @@ export default class Dinner extends Vue {
     // } as SubAPI.GetAccountInfoResp;
   }
 
-  public created() {
-    this.getAccountInfo();
-  }
+  // public created() {
+  //   this.getAccountInfo();
+  // }
 
-  public getAccountInfo() {}
+  // public getAccountInfo() {}
 }
 </script>
 <style scoped lang="scss">
@@ -60,9 +46,6 @@ export default class Dinner extends Vue {
   max-width: 700px;
   margin: auto;
   padding: 12px;
-}
-.list {
-  margin: 40px 0 40px 0;
 }
 .divider-line {
   margin: 40px 0 40px 0;

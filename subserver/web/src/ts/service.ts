@@ -87,6 +87,22 @@ export function UnskipActivity(date: string): Promise<SubAPI.ErrorOnlyResp> {
   return callFetch(url, 'POST', req);
 }
 
+export function DeactivateSubscriber(reason: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'DeactivateSubscriber';
+  const req: SubAPI.DeactivateSubscriberReq = {
+    reason,
+  };
+  return callFetch(url, 'POST', req);
+}
+
+export function ActivateSubscriber(first_bag_date: string): Promise<SubAPI.ErrorOnlyResp> {
+  const url: string = baseURL + 'ActivateSubscriber';
+  const req: SubAPI.ActivateSubscriberReq = {
+    first_bag_date,
+  };
+  return callFetch(url, 'POST', req);
+}
+
 export function ChangeActivityServings(id: string, servings_non_veg: number, servings_veg: number, date: string): Promise<SubAPI.ErrorOnlyResp> {
   const url: string = baseURL + 'ChangeActivityServings';
   const req: SubAPI.ChangeActivityServingsReq = {

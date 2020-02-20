@@ -3,7 +3,7 @@
     <div class="top-row">
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
-      <DialogConfirm
+      <AccountDialogConfirm
         ref="dialog"
         Title="Update Address"
         ButtonText="Edit"
@@ -14,24 +14,24 @@
           <v-layout>
             <v-flex>
               <vuetify-google-autocomplete
-              ref="elAddress"
-              id="map"
-              append-icon="search"
-              classname="form-control"
-              placeholder="Select Address"
-              v-on:placechanged="getAddressData"
-              country="us"
-              outlined
-              outline
-              aria-autocomplete="false"
-              autocomplete="false"
-          >
-                
+                ref="elAddress"
+                id="map"
+                append-icon="search"
+                classname="form-control"
+                placeholder="Select Address"
+                v-on:placechanged="getAddressData"
+                country="us"
+                outlined
+                outline
+                aria-autocomplete="false"
+                autocomplete="false"
+              >
+
               </vuetify-google-autocomplete>
             </v-flex>
           </v-layout>
         </template>
-      </DialogConfirm>
+      </AccountDialogConfirm>
     </div>
     <p class="value">{{value}}</p>
     <hr class="divider-line">
@@ -40,12 +40,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DialogConfirm from '../components/DialogConfirm.vue';
+import AccountDialogConfirm from '../components/AccountDialogConfirm.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
 import { UpdateSubscriber } from '../ts/service';
 @Component({
   components: {
-    DialogConfirm,
+    AccountDialogConfirm,
   },
 })
 export default class AccountUpdateAddress extends Vue {
@@ -60,7 +60,6 @@ export default class AccountUpdateAddress extends Vue {
     if (this.sub && this.sub.address) {
       const addr = this.sub.address;
       return `${addr.street}, ${addr.city}, ${addr.state}, ${addr.zip}, ${addr.country}`;
-
     } else {
       return '';
     }
@@ -80,10 +79,10 @@ export default class AccountUpdateAddress extends Vue {
         ErrorAlert(resp);
         return;
       }
-      (this.$refs.dialog as DialogConfirm).Dismiss();
+      (this.$refs.dialog as AccountDialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.address.full_address == '') {
+    if (this.req.address.full_address === '') {
       alert('Address is no selected.');
       return;
     }
@@ -129,7 +128,7 @@ export default class AccountUpdateAddress extends Vue {
 }
 
 .divider-line {
-  margin: 30px 10px 0 0;
+  margin: 30px 35px 0 0;
   border: 0;
   border-bottom: 1px solid #dadfe1;
 }

@@ -3,7 +3,7 @@
     <div class="top-row">
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
-      <DialogConfirm
+      <DialogConfirmPayment
         ref="dialog"
         Title="Update Payment"
         ButtonText="Edit"
@@ -13,20 +13,26 @@
         <template v-slot:dialog-content>
           <v-layout>
             <v-flex>
-      <!-- https://francoislevesque.github.io/vue-braintree/configuration.html#enable-3d-secure -->
-      <v-braintree 
-    :authorization="getAuthorization"
-    @success="onSuccess"
-    @error="onError"
->
-<template v-slot:button="slotProps">
-    <v-btn @click="slotProps.submit" color="success">Fancy button</v-btn>
-  </template>
-</v-braintree>
+              <!-- https://francoislevesque.github.io/vue-braintree/configuration.html#enable-3d-secure -->
+              <v-braintree
+                :authorization="getAuthorization"
+                @success="onSuccess"
+                @error="onError"
+              >
+                <template v-slot:button="slotProps">
+                  <v-btn
+                    @click="slotProps.submit"
+                    color="#E8554E"
+                    depressed
+                    class="white--text"
+                    style="margin: 10px 0 -60px 0;"
+                  >Update</v-btn>
+                </template>
+              </v-braintree>
             </v-flex>
           </v-layout>
         </template>
-      </DialogConfirm>
+      </DialogConfirmPayment>
     </div>
     <p class="value">{{value}}</p>
     <hr class="divider-line">
@@ -35,12 +41,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DialogConfirm from '../components/DialogConfirm.vue';
+import DialogConfirmPayment from '../components/DialogConfirmPayment.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
 import { UpdatePayment } from '../ts/service';
 @Component({
   components: {
-    DialogConfirm,
+    DialogConfirmPayment,
   },
 })
 export default class AccountUpdatePayment extends Vue {
@@ -58,7 +64,10 @@ export default class AccountUpdatePayment extends Vue {
 
   get getAuthorization(): string {
     let authorization = 'production_tv5qygvt_wsgmypp8c46cnbpc';
-    if (window.location.hostname === 'localhost' || window.location.hostname === 'gigamunch-omninexus-dev.appspot.com') {
+    if (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === 'gigamunch-omninexus-dev.appspot.com'
+    ) {
       authorization = 'sandbox_vprqjq87_4j6rdqcz74z7rt92';
     }
     return authorization;
@@ -79,14 +88,13 @@ export default class AccountUpdatePayment extends Vue {
     nonce: '',
   };
 
-
   protected submit(payment_method_nonce: string) {
     const handler = (resp: any) => {
       if (IsError(resp)) {
         ErrorAlert(resp);
         return;
       }
-      (this.$refs.dialog as DialogConfirm).Dismiss();
+      (this.$refs.dialog as DialogConfirmPayment).Dismiss();
       this.$emit('get-account-info');
     };
     if (payment_method_nonce == '') {
@@ -94,7 +102,7 @@ export default class AccountUpdatePayment extends Vue {
       return;
     }
     if (!this.sub) {
-      alert('account info not loaded in address section');
+      alert('account info not loaded in payment section');
       return;
     }
     UpdatePayment(payment_method_nonce).then(handler);
@@ -133,6 +141,4 @@ export default class AccountUpdatePayment extends Vue {
   border: 0;
   border-bottom: 1px solid #dadfe1;
 }
-
-
 </style>

@@ -4,7 +4,7 @@
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
 
-      <DialogConfirm
+      <AccountDialogConfirm
         ref="dialog"
         Title="Update Delivery Notes"
         ButtonText="Edit"
@@ -24,7 +24,7 @@
             </v-flex>
           </v-layout>
         </template>
-      </DialogConfirm>
+      </AccountDialogConfirm>
     </div>
     <p class="value">{{value}}</p>
     <hr class="divider-line">
@@ -33,12 +33,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DialogConfirm from '../components/DialogConfirm.vue';
+import AccountDialogConfirm from '../components/AccountDialogConfirm.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
 import { UpdateSubscriber } from '../ts/service';
 @Component({
   components: {
-    DialogConfirm,
+    AccountDialogConfirm,
   },
 })
 export default class AccountChangeDeliveryNotes extends Vue {
@@ -51,7 +51,7 @@ export default class AccountChangeDeliveryNotes extends Vue {
 
   get value(): string {
     if (this.sub) {
-      if (!this.sub.delivery_notes || this.sub.delivery_notes == '') {
+      if (!this.sub.delivery_notes || this.sub.delivery_notes === '') {
         return 'Not provided';
       } else {
         return this.sub.delivery_notes;
@@ -70,7 +70,7 @@ export default class AccountChangeDeliveryNotes extends Vue {
         ErrorAlert(resp);
         return;
       }
-      (this.$refs.dialog as DialogConfirm).Dismiss();
+      (this.$refs.dialog as AccountDialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
     if (!this.sub) {
@@ -119,7 +119,7 @@ export default class AccountChangeDeliveryNotes extends Vue {
 }
 
 .divider-line {
-  margin: 30px 10px 0 0;
+  margin: 30px 35px 0 0;
   border: 0;
   border-bottom: 1px solid #dadfe1;
 }
