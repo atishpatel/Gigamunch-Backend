@@ -46,10 +46,23 @@
             </p>
           </div>
           <div
-            v-if="!userSummary.has_subscribed"
+            v-if="!userSummary.is_active && !userSummary.has_subscribed"
             class="buttons-row"
           >
             <v-btn
+              href="/checkout"
+              target="_blank"
+              depressed
+              color="#E8554E"
+              class="white--text"
+            >Get this dinner</v-btn>
+          </div>
+          <div
+            v-if="!userSummary.is_active && userSummary.has_subscribed"
+            class="buttons-row"
+          >
+            <v-btn
+              href="/account"
               depressed
               color="#E8554E"
               class="white--text"
@@ -176,6 +189,14 @@ export default class DinnerPublished extends Vue {
     this.showingVegetarianDinner = v;
   }
 
+  get hasActivity(): boolean {
+    if (this.activity) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   get disableChangeServings(): boolean {
     if (this.activity) {
       if (this.activity.skip) {
@@ -275,7 +296,7 @@ export default class DinnerPublished extends Vue {
   }
 
   get servingText(): string {
-    if (!this.userSummary.has_subscribed) {
+    if (!this.userSummary.is_active) {
       return `You could receive this dinner on ${GetDayMonthDayDate(
         this.exe.date
       )}`;
@@ -321,8 +342,9 @@ export default class DinnerPublished extends Vue {
       } else {
         return 'Skip';
       }
+    } else {
+      return 'Unskip';
     }
-    return 'Skip';
   }
 
   get patternImageSrc(): string {
@@ -336,11 +358,22 @@ export default class DinnerPublished extends Vue {
   }
 
   protected skipClicked() {
+    this.disableSkip = true;
     if (!this.activity) {
-      alert('activity not found');
+      if (this.exe) {
+        UnskipActivity(this.exe.date).then((resp) => {
+          if (IsError(resp)) {
+            ErrorAlert(resp);
+            window.location.reload();
+            return;
+          }
+          this.$emit('get-activity');
+          this.disableSkip = false;
+        });
+      }
       return;
     }
-    this.disableSkip = true;
+
     if (this.activity.skip) {
       UnskipActivity(this.activity.date).then((resp) => {
         if (IsError(resp)) {
