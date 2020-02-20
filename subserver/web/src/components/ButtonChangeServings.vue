@@ -144,7 +144,6 @@ export default class ButtonChangeServings extends Vue {
           'Try selecting more than zero servings. Or press the skip button if you would like to skip this dinner.'
         );
       }
-
       return;
     }
     if (this.changePermanently) {

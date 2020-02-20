@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -58,6 +59,10 @@ func (s *server) UpdateSubscriber(ctx context.Context, w http.ResponseWriter, r 
 	subscriber, err := subC.Get(user.ID)
 	if err != nil {
 		return errors.Annotate(err, "failed to sub.Get")
+	}
+	if req.Address.FullAddress == "" {
+		a := req.Address
+		req.Address.FullAddress = fmt.Sprintf("%s, %s, %s %s, %s", a.Street, a.City, a.State, a.Zip, a.Country)
 	}
 	address, err := maps.GetAddress(ctx, req.Address.FullAddress, req.Address.Apt)
 	if err != nil {

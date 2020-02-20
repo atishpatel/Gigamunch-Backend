@@ -53,6 +53,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import DialogConfirm from '../components/DialogConfirm.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
+import { UpdateSubscriber } from '../ts/service';
 @Component({
   components: {
     DialogConfirm,
@@ -80,16 +81,33 @@ export default class AccountChangeName extends Vue {
   };
 
   protected submit() {
-    // const handler = (resp: any) => {
-    //   if (IsError(resp)) {
-    //     ErrorAlert(resp);
-    //     return;
-    //   }
-    // if this.req.first_name == ''
-    //   (this.$refs.dialog as DialogConfirm).Dismiss();
-    //   this.$emit('dialog-success');
-    // };
-    this.$emit('get-account-info');
+    const handler = (resp: any) => {
+      if (IsError(resp)) {
+        ErrorAlert(resp);
+        return;
+      }
+      (this.$refs.dialog as DialogConfirm).Dismiss();
+      this.$emit('dialog-success');
+    };
+    if (this.req.first_name == '') {
+      alert('First name is empty');
+      return;
+    }
+    if (this.req.last_name == '') {
+      alert('Last name is empty');
+      return;
+    }
+    if (!this.sub) {
+      alert('account info not loaded in name section');
+      return;
+    }
+    UpdateSubscriber(
+      this.req.first_name,
+      this.req.last_name,
+      this.sub.address,
+      this.sub.delivery_notes,
+      this.sub.phonenumbersString
+    ).then(handler);
   }
 }
 </script>
