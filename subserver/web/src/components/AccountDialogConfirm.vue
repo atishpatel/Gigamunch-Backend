@@ -31,6 +31,12 @@
           class="white--text"
           @click="dialog = false"
         >{{CancelText}}</v-btn>
+        <v-btn
+          depressed
+          color="#E8554E"
+          class="white--text"
+          @click="$emit('dialog-success')"
+        >{{ConfirmText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

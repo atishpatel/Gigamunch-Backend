@@ -3,7 +3,7 @@
     <div class="top-row">
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
-      <DialogConfirm
+      <AccountDialogConfirm
         ref="dialog"
         Title="Change Name"
         ButtonText="Edit"
@@ -31,7 +31,7 @@
             </v-flex>
           </v-layout>
         </template>
-      </DialogConfirm>
+      </AccountDialogConfirm>
     </div>
     <p class="value">{{value}}</p>
     <hr class="divider-line">
@@ -40,12 +40,12 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import DialogConfirm from '../components/DialogConfirm.vue';
+import AccountDialogConfirm from '../components/AccountDialogConfirm.vue';
 import { IsError, ErrorAlert } from '../ts/errors';
 import { UpdateSubscriber } from '../ts/service';
 @Component({
   components: {
-    DialogConfirm,
+    AccountDialogConfirm,
   },
 })
 export default class AccountChangeName extends Vue {
@@ -75,7 +75,7 @@ export default class AccountChangeName extends Vue {
         ErrorAlert(resp);
         return;
       }
-      (this.$refs.dialog as DialogConfirm).Dismiss();
+      (this.$refs.dialog as AccountDialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
     if (this.req.first_name === '') {
@@ -128,7 +128,7 @@ export default class AccountChangeName extends Vue {
 }
 
 .divider-line {
-  margin: 30px 10px 0 0;
+  margin: 30px 35px 0 0;
   border: 0;
   border-bottom: 1px solid #dadfe1;
 }

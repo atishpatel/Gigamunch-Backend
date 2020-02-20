@@ -1,5 +1,43 @@
 <template>
+  <AccountDialogConfirm
+    v-if="changePermanently"
+    ref="dialog"
+    :Title="computedText"
+    :ButtonText="buttonText"
+    :ConfirmText="confirmText"
+    v-on:dialog-success="submit"
+    :ButtonDisabled="ButtonDisabled"
+  >
+    <template v-slot:dialog-content>
+      <v-card-text>{{dialogText}}</v-card-text>
+      <v-layout>
+        <v-flex>
+          <v-select
+            :items="servingSizes"
+            class="field-right-padding"
+            v-model="req.servings_non_veg"
+            label="Meat Servings"
+            :placeholder="nonvegPlaceholder"
+            outline
+            round
+          ></v-select>
+        </v-flex>
+        <v-flex>
+          <v-select
+            :items="servingSizes"
+            v-model="req.servings_veg"
+            label="Veg Servings"
+            :placeholder="vegPlaceholder"
+            outline
+            round
+          ></v-select>
+        </v-flex>
+      </v-layout>
+    </template>
+  </AccountDialogConfirm>
+
   <DialogConfirm
+    v-else
     ref="dialog"
     :Title="computedText"
     :ButtonText="buttonText"
@@ -44,10 +82,12 @@ import {
 } from '../ts/service';
 import { IsError, ErrorAlert } from '../ts/errors';
 import DialogConfirm from './DialogConfirm.vue';
+import AccountDialogConfirm from './AccountDialogConfirm.vue';
 
 @Component({
   components: {
     DialogConfirm,
+    AccountDialogConfirm,
   },
 })
 export default class ButtonChangeServings extends Vue {
