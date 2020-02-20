@@ -11,11 +11,7 @@
             <Image169 :src="exe.content.landscape_image_url"></Image169>
           </div>
           <div
-<<<<<<< HEAD
-            class="host-image-image"
-=======
             class="hero-image-text"
->>>>>>> feature/sub-app-v1
             v-html="heroImageText"
           ></div>
         </div>
