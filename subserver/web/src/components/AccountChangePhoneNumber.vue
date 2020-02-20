@@ -3,13 +3,10 @@
     <div class="top-row">
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
-<<<<<<< HEAD
-=======
 
->>>>>>> 22e30d342573a130468f1eb53c989e67f2242bb8
       <DialogConfirm
         ref="dialog"
-        Title="Change Name"
+        Title="Update Phone Number"
         ButtonText="Edit"
         ConfirmText="Update"
         v-on:dialog-success="submit"
@@ -19,17 +16,11 @@
             <v-flex>
               <v-text-field
                 class="field-right-padding"
-                v-model="req.first_name"
-                label="First Name"
+                v-model="req.phonenumbersString"
+                label="Phone Number"
                 outline
-                round
-              ></v-text-field>
-            </v-flex>
-            <v-flex>
-              <v-text-field
-                v-model="req.last_name"
-                label="Last Name"
-                outline
+                placeholder="555-555-5555"
+                maxlength="12"
                 round
               ></v-text-field>
             </v-flex>
@@ -52,25 +43,32 @@ import { UpdateSubscriber } from '../ts/service';
     DialogConfirm,
   },
 })
-export default class AccountChangeName extends Vue {
+export default class AccountChangePhoneNumber extends Vue {
   @Prop()
   public sub!: Types.SubscriberExtended;
 
   get title(): string {
-    return 'Name';
+    return 'Phone Number';
   }
 
   get value(): string {
-    if (this.sub && this.sub.email_prefs) {
-      return `${this.sub.email_prefs[0].first_name} ${this.sub.email_prefs[0].last_name}`;
-    } else {
-      return '';
+    if (this.sub) {
+      if (
+        !this.sub.phone_prefs ||
+        !this.sub.phone_prefs[0] ||
+        !this.sub.phone_prefs[0].number ||
+        this.sub.phone_prefs[0].number == ''
+      ) {
+        return 'Not provided - You will miss out on delivery texts';
+      } else {
+        return this.sub.phone_prefs[0].number;
+      }
     }
+    return '';
   }
 
   public req = {
-    first_name: '',
-    last_name: '',
+    phonenumbersString: '',
   };
 
   protected submit() {
@@ -82,24 +80,20 @@ export default class AccountChangeName extends Vue {
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('get-account-info');
     };
-    if (this.req.first_name == '') {
-      alert('First name is empty');
-      return;
-    }
-    if (this.req.last_name == '') {
-      alert('Last name is empty');
-      return;
-    }
     if (!this.sub) {
-      alert('account info not loaded in name section');
+      alert('account info not loaded in phone number section');
+      return;
+    }
+    if (!this.sub.email_prefs[0]) {
+      alert('account info not loaded email_prefs in phone number section');
       return;
     }
     UpdateSubscriber(
-      this.req.first_name,
-      this.req.last_name,
+      this.sub.email_prefs[0].first_name,
+      this.sub.email_prefs[0].last_name,
       this.sub.address,
       this.sub.delivery_notes,
-      this.sub.phonenumbersString
+      this.req.phonenumbersString
     ).then(handler);
   }
 }
