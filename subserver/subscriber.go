@@ -42,6 +42,45 @@ func (s *server) ChangeSubscriberServings(ctx context.Context, w http.ResponseWr
 	return resp
 }
 
+// ActivateSubscriber activates a subscriber account.
+func (s *server) ActivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
+	var err error
+	req := new(pbsub.ActivateSubscriberReq)
+
+	// decode request
+	err = decodeRequest(ctx, r, req)
+	if err != nil {
+		return failedToDecode(err)
+	}
+	// end decode request
+
+	subC, err := sub.NewClient(ctx, log, s.db, s.sqlDB, s.serverInfo)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.NewClient")
+	}
+	subscriber, err := subC.Get(user.ID)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Get")
+	}
+
+	planDay := subscriber.PlanWeekday
+	intervalStartDate := time.Now().Add(81 * time.Hour)
+	for intervalStartDate.Weekday().String() != planDay {
+		intervalStartDate = intervalStartDate.Add(time.Hour * 24)
+	}
+	firstBagDate := intervalStartDate
+	if req.FirstBagDate != "" {
+		firstBagDate = getDatetime(req.FirstBagDate)
+	}
+
+	err = subC.Activate(subscriber.ID, firstBagDate)
+	if err != nil {
+		return errors.Annotate(err, "failed to sub.Activate")
+	}
+	resp := &pbsub.ErrorOnlyResp{}
+	return resp
+}
+
 // DeactivateSubscriber deactivates the subscriber.
 func (s *server) DeactivateSubscriber(ctx context.Context, w http.ResponseWriter, r *http.Request, log *logging.Client, user *common.User) Response {
 	var err error

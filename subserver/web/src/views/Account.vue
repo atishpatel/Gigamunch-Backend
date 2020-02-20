@@ -1,7 +1,18 @@
 <template>
   <div>
     <div class="content-container">
-      <h1>Account</h1>
+      <h1 v-if="userSummary.is_active === true">Account</h1>
+      <h1
+        style="color: #869995;"
+        v-if="userSummary.is_active === false"
+      >Inactive Account</h1>
+      <v-btn
+        v-if="userSummary.is_active === false"
+        depressed
+        color="#E8554E"
+        class="white--text"
+        @click="reactivateClicked"
+      >Re-activate Account</v-btn>
       <div class="list">
         <AccountChangeName
           :sub="accountInfo.subscriber"
@@ -35,10 +46,14 @@
         ></AccountChangePhoneNumber>
       </div>
       <div class="cancel">
-        <CancelButton :sub="accountInfo.subscriber"
-          v-on:get-account-info="getAccountInfo"></CancelButton>
+        <CancelButton
+          v-if="userSummary.is_active === true"
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+          v-on:get-user-summary="getUserSummary"
+        ></CancelButton>
       </div>
-      <hr class="divider-line">
+
       <div class="footer-message">
         <p class="footer-message-text">If you have any questions, feel free to talk to us at</p>
         <p class="footer-message-text"><a href="mailto:hello@eatgigamunch.com"><strong>hello@eatgigamunch.com</strong></a></p>
@@ -59,6 +74,7 @@
 import { Prop, Component, Vue } from 'vue-property-decorator';
 import { GetAccountInfo } from '../ts/service';
 import { IsError, ErrorAlert } from '../ts/errors';
+import { GetUserSummary } from '../ts/service';
 import AccountListItem from '../components/AccountListItem.vue';
 import AccountChangeServings from '../components/AccountChangeServings.vue';
 import AccountChangeName from '../components/AccountChangeName.vue';
@@ -68,7 +84,8 @@ import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue
 import AccountChangeDeliveryDay from '../components/AccountChangeDeliveryDay.vue';
 import AccountUpdateAddress from '../components/AccountUpdateAddress.vue';
 import CancelButton from '../components/CancelButton.vue';
-
+import DialogConfirm from '../components/DialogConfirm.vue';
+import { ActivateSubscriber } from '../ts/service';
 
 @Component({
   components: {
@@ -81,9 +98,13 @@ import CancelButton from '../components/CancelButton.vue';
     AccountChangeDeliveryDay,
     AccountUpdateAddress,
     CancelButton,
+    DialogConfirm,
   },
 })
 export default class Account extends Vue {
+  @Prop()
+  public userSummary!: SubAPI.GetUserSummaryResp;
+
   public accountInfo!: SubAPI.GetAccountInfoResp;
   protected loading!: boolean;
 
@@ -111,6 +132,27 @@ export default class Account extends Vue {
       this.accountInfo = resp;
     });
   }
+  public getUserSummary() {
+    GetUserSummary().then((resp) => {
+      this.userSummary = resp;
+      // console.log(resp);
+    });
+  }
+  protected reactivateClicked() {
+    const handler = (resp: any) => {
+      if (IsError(resp)) {
+        ErrorAlert(resp);
+        return;
+      }
+      this.getAccountInfo();
+      this.getUserSummary();
+    };
+    if (!this.accountInfo || !this.accountInfo.subscriber) {
+      alert('failed to load account info when reactivating');
+      return;
+    }
+    ActivateSubscriber('').then(handler);
+  }
 }
 </script>
 <style scoped lang="scss">
@@ -131,7 +173,7 @@ export default class Account extends Vue {
   border-bottom: 1px solid #dadfe1;
 }
 .footer-message {
-  padding: 0 0 50px 0;
+  padding: 69px 0 50px 0;
   align-content: center;
 }
 

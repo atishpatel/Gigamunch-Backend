@@ -63,7 +63,7 @@ func main() {
 	http.HandleFunc("/sub/api/v1/ChangeSubscriberServings", s.handler(s.getUser(true, s.ChangeSubscriberServings)))
 	http.HandleFunc("/sub/api/v1/GetAccountInfo", s.handler(s.getUser(true, s.GetAccountInfo)))
 	http.HandleFunc("/sub/api/v1/DeactivateSubscriber", s.handler(s.getUser(true, s.DeactivateSubscriber)))
-	// http.HandleFunc("/sub/api/v1/ActivateSubscriber", s.handler(s.getUser(true, s.ActivateSubscriber)))
+	http.HandleFunc("/sub/api/v1/ActivateSubscriber", s.handler(s.getUser(true, s.ActivateSubscriber)))
 
 	// Executions
 	http.HandleFunc("/sub/api/v1/GetExecutions", s.handler(s.getUser(false, s.GetExecutions)))

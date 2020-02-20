@@ -47,7 +47,7 @@ export default class AccountChangeName extends Vue {
       }
       (this.$refs.dialog as DialogConfirm).Dismiss();
       this.$emit('get-account-info');
-      this.$emit('get-user-summary');
+      this.$emit('get-ser-summary');
     };
 
     if (!this.sub) {
