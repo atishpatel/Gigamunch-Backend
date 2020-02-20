@@ -23,8 +23,8 @@ function setUser(user: firebase.User | null) {
   userLoaded = true;
 }
 
-export function SignOut() {
-  firebase.auth().signOut();
+export function SignOut(): Promise<void> {
+  return firebase.auth().signOut();
 }
 
 export function SetupFirebase() {

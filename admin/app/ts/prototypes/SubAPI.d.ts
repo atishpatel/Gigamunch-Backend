@@ -6,7 +6,6 @@ interface DateReq {
     date: string
 }
 interface GetUserSummaryReq {
-
 }
 interface GetUserSummaryResp {
   error: Common.Error
@@ -18,7 +17,6 @@ interface GetUserSummaryResp {
   is_logged_in: boolean
 }
 interface GetAccountInfoReq {
-
 }
 interface GetAccountInfoResp {
   error: Common.Error
