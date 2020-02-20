@@ -3,10 +3,6 @@
     <div class="top-row">
       <p class="title">{{title}}</p>
       <v-spacer></v-spacer>
-<<<<<<< HEAD
-=======
-
->>>>>>> 22e30d342573a130468f1eb53c989e67f2242bb8
       <DialogConfirm
         ref="dialog"
         Title="Change Name"
