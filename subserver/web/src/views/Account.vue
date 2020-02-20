@@ -7,15 +7,14 @@
           :sub="accountInfo.subscriber"
           v-on:get-account-info="getAccountInfo"
         ></AccountChangeName>
-        <AccountListItem
-          title="Payment Method"
-          value="xxxx-xxxx-xxxx-4444"
-        ></AccountListItem>
+        <AccountUpdatePayment
+          :sub="accountInfo.subscriber"
+          v-on:get-account-info="getAccountInfo"
+        ></AccountUpdatePayment>
         <AccountChangeServings
           v-on:get-account-info="getAccountInfo"
           :sub="accountInfo.subscriber"
         >
-
         </AccountChangeServings>
         <AccountChangeDeliveryDay
           :sub="accountInfo.subscriber"
@@ -68,9 +67,11 @@ import AccountListItem from '../components/AccountListItem.vue';
 import AccountChangeServings from '../components/AccountChangeServings.vue';
 import AccountChangeName from '../components/AccountChangeName.vue';
 import AccountChangeDeliveryNotes from '../components/AccountChangeDeliveryNotes.vue';
+import AccountUpdatePayment from '../components/AccountUpdatePayment.vue';
 import AccountChangePhoneNumber from '../components/AccountChangePhoneNumber.vue';
 import AccountChangeDeliveryDay from '../components/AccountChangeDeliveryDay.vue';
 import AccountUpdateAddress from '../components/AccountUpdateAddress.vue';
+
 
 @Component({
   components: {
@@ -78,6 +79,7 @@ import AccountUpdateAddress from '../components/AccountUpdateAddress.vue';
     AccountChangeServings,
     AccountChangeName,
     AccountChangeDeliveryNotes,
+    AccountUpdatePayment,
     AccountChangePhoneNumber,
     AccountChangeDeliveryDay,
     AccountUpdateAddress,
