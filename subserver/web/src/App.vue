@@ -143,7 +143,9 @@ export default class App extends Vue {
     // App ready
     GetUserSummary().then((resp) => {
       this.hideLoadingScreen = true;
-      this.userSummary = resp;
+      if (resp.is_logged_in) {
+        this.userSummary = resp;
+      }
       // console.log(resp);
     });
   }
