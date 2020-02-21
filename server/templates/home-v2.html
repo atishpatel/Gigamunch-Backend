@@ -1357,6 +1357,14 @@
   <!--[endif]-->
   <!-- END AOS -->
   [[template "campaign-logger" .]] [[template "footer" .]]
+  <script>
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister()
+      }
+    });
+
+  </script>
 </body>
 
 </html>

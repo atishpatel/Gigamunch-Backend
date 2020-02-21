@@ -29,6 +29,14 @@
   <div id="app"></div>
   <!-- built files will be auto injected -->
   <script src="https://unpkg.com/vue-braintree/dist/vue-braintree.umd.min.js"></script>
+  <script>
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        registration.unregister()
+      }
+    });
+
+  </script>
 </body>
 
 </html>
