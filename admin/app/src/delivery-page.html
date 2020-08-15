@@ -1,17 +1,10 @@
-<link rel="import"
-      href="../bower_components/polymer/polymer-element.html">
-<link rel="import"
-      href="../bower_components/polymer/lib/elements/dom-repeat.html">
-<link rel="import"
-      href="../bower_components/paper-button/paper-button.html">
-<link rel="import"
-      href="../bower_components/paper-progress/paper-progress.html">
-<link rel="import"
-      href="../bower_components/paper-checkbox/paper-checkbox.html">
-<link rel="import"
-      href="../bower_components/google-map/google-map.html">
-<link rel="import"
-      href="shared-styles.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="delivery-page">
   <template>
@@ -74,47 +67,33 @@
         .delivery-count {
           padding: 12px 0;
         }
-
       </style>
     </shared-styles>
 
     <h1 class="">[[dateString]]</h1>
     <div>
-      <select id="driverSelect"
-              disabled="[[routeChangeInProcess]]"
-              value="{{driverName::change}}"
-              required>
-          <option disabled selected value> -- select an driver -- </option>
-          <template is="dom-repeat"
-                    items="[[drivers]]"
-                    as="driver">
-            <option value="[[driver.name]]">[[driver.name]]</option>
-          </template>
-        </select>
-      <paper-button disabled="[[routeChangeInProcess]]"
-                    on-click="optimizeDriverRoute">Optimize driver route</paper-button>
-      <paper-button disabled="[[routeChangeInProcess]]"
-                    on-click="reverseRoute">Reverse route</paper-button>
-      <paper-progress hidden$="[[!routeChangeInProcess]]"
-                      value="[[routeOptimizeProgress]]"></paper-progress>
+      <select id="driverSelect" disabled="[[routeChangeInProcess]]" value="{{driverName::change}}" required>
+        <option disabled selected value> -- select an driver -- </option>
+        <template is="dom-repeat" items="[[drivers]]" as="driver">
+          <option value="[[driver.name]]">[[driver.name]]</option>
+        </template>
+      </select>
+      <paper-button disabled="[[routeChangeInProcess]]" on-click="optimizeDriverRoute">Optimize driver route
+      </paper-button>
+      <paper-button disabled="[[routeChangeInProcess]]" on-click="reverseRoute">Reverse route</paper-button>
+      <paper-progress hidden$="[[!routeChangeInProcess]]" value="[[routeOptimizeProgress]]"></paper-progress>
     </div>
 
     <div style="padding-top:12px">
       <p>---- Advance tools -----</p>
       <span>To: </span>
-      <select
-          disabled="[[routeChangeInProcess]]"
-          value="{{driverNameTo::change}}"
-          required>
+      <select disabled="[[routeChangeInProcess]]" value="{{driverNameTo::change}}" required>
         <option disabled selected value> -- select an driver -- </option>
-        <template is="dom-repeat"
-                  items="[[drivers]]"
-                  as="driver">
+        <template is="dom-repeat" items="[[drivers]]" as="driver">
           <option value="[[driver.name]]">[[driver.name]]</option>
         </template>
       </select>
-      <paper-button disabled="[[routeChangeInProcess]]"
-                    on-click="transferDeliveries">Transfer Deliveries</paper-button>
+      <paper-button disabled="[[routeChangeInProcess]]" on-click="transferDeliveries">Transfer Deliveries</paper-button>
       <p>--------------------------------</p>
     </div>
 
@@ -134,12 +113,9 @@
             <div class="table-cell">Status</div>
             <div class="table-cell">Email</div>
           </div>
-          <dom-repeat id="driversOptimizedRepeat"
-                      items="[[optimizedDrivers]]"
-                      as="driver">
+          <dom-repeat id="driversOptimizedRepeat" items="[[optimizedDrivers]]" as="driver">
             <template>
-              <dom-repeat items="[[driver.deliveries]]"
-                          as="delivery">
+              <dom-repeat items="[[driver.deliveries]]" as="delivery">
                 <template>
                   <div class="table-row">
                     <div class="table-cell">[[driver.name]]</div>
@@ -152,8 +128,7 @@
                     <div class="table-cell">[[delivery.veg_servings]]</div>
                     <div class="table-cell">[[delivery.status]]</div>
                     <div class="table-cell">
-                      <a target="_blank"
-                         href="subscriber/[[delivery.sub_email]]">[[delivery.sub_email]]</a>
+                      <a target="_blank" href="subscriber/[[delivery.sub_email]]">[[delivery.sub_email]]</a>
                     </div>
                   </div>
                 </template>
@@ -161,10 +136,8 @@
             </template>
           </dom-repeat>
         </div>
-        <paper-checkbox checked="{{showUnoptimized}}"
-                        style="margin: 20px 0px">Show Unoptimized</paper-checkbox>
-        <div class="table"
-             hidden$="{{!showUnoptimized}}">
+        <paper-checkbox checked="{{showUnoptimized}}" style="margin: 20px 0px">Show Unoptimized</paper-checkbox>
+        <div class="table" hidden$="{{!showUnoptimized}}">
           <div class="table-row table-header-row">
             <div class="table-cell">Driver</div>
             <div class="table-cell">Name</div>
@@ -177,12 +150,9 @@
             <div class="table-cell">Status</div>
             <div class="table-cell">Email</div>
           </div>
-          <dom-repeat id="driversUnoptimizedRepeat"
-                      items="[[drivers]]"
-                      as="driver">
+          <dom-repeat id="driversUnoptimizedRepeat" items="[[drivers]]" as="driver">
             <template>
-              <dom-repeat items="[[driver.deliveries]]"
-                          as="delivery">
+              <dom-repeat items="[[driver.deliveries]]" as="delivery">
                 <template>
                   <div class="table-row">
                     <div class="table-cell">[[driver.name]]</div>
@@ -195,8 +165,7 @@
                     <div class="table-cell">[[delivery.veg_servings]]</div>
                     <div class="table-cell">[[delivery.status]]</div>
                     <div class="table-cell">
-                      <a target="_blank"
-                         href="subscriber/[[sublog.sub_email]]">[[delivery.sub_email]]</a>
+                      <a target="_blank" href="subscriber/[[sublog.sub_email]]">[[delivery.sub_email]]</a>
                     </div>
                   </div>
                 </template>
@@ -213,9 +182,7 @@
               <div class="table-cell">Roud Trip</div>
               <div class="table-cell">Optimize</div>
             </div>
-            <dom-repeat id="driversSummaryRepeat"
-                        items="[[drivers]]"
-                        as="driver">
+            <dom-repeat id="driversSummaryRepeat" items="[[drivers]]" as="driver">
               <template>
                 <div class="table-row">
                   <div class="table-cell">[[driver.name]]</div>
@@ -224,9 +191,8 @@
                     <paper-checkbox checked="{{driver.round_trip}}"></paper-checkbox>
                   </div>
                   <div class="table-cell">
-                    <a target="_blank"
-                       disabled="[[driver.optimized]]"
-                       href="delivery/[[dateValue]]?optimize_driver=[[driver.name]]&round_trip=[[driver.round_trip]]">
+                    <a target="_blank" disabled="[[driver.optimized]]"
+                      href="delivery/[[dateValue]]?optimize_driver=[[driver.name]]&round_trip=[[driver.round_trip]]">
                       <paper-button disabled="[[driver.optimized]]">Optimize</paper-button>
                     </a>
                   </div>
@@ -243,13 +209,8 @@
         </div>
         <br>
         <h2>Map</h2>
-        <google-map id="map"
-                    map="{{map}}"
-                    fit-to-marker
-                    disable-street-view-control
-                    latitude="36.16"
-                    longitude="-86.78"
-                    api-key="[[apiKey]]">
+        <google-map id="map" map="{{map}}" fit-to-marker disable-street-view-control latitude="36.16" longitude="-86.78"
+          api-key="[[apiKey]]">
         </google-map>
       </div>
     </div>
@@ -316,7 +277,7 @@
       }
 
       static get observers() {
-        return [ /* observer descriptors */ ]
+        return [ /* observer descriptors */]
       }
 
       constructor() {
@@ -496,29 +457,67 @@
             tsp.startOver();
             tsp.setOnProgressCallback(this.onProgressCallback.bind(this));
             tsp.setTravelMode(google.maps.DirectionsTravelMode.DRIVING);
-            google.maps.event.addListener(tsp.getGDirectionsService(), "error", function() {
+            google.maps.event.addListener(tsp.getGDirectionsService(), "error", function () {
               this.routeChangeInProcess = false;
               alert("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
               console.error("Request failed: " + reasons[tsp.getGDirectionsService().getStatus().code]);
             });
-            // add the deliveries as waypoints
-            driver.deliveries.forEach((delivery) => {
-              tsp.addWaypointWithLabel(this._createGoogleLatlng(delivery.address.latitude, delivery.address.longitude), delivery.name, null);
-            });
+            // set start
             const startLatlng = this._createGoogleLatlng(driver.start_latlng);
             tsp.addWaypointWithLabel(startLatlng, 'Start');
             tsp.setAsStart(startLatlng);
+            // add the deliveries as waypoints
+            let furthestPoint = {
+              lat: driver.start_latlng.lat,
+              lng: driver.start_latlng.lng,
+            };
+            let furthestDistance = 0;
+            driver.deliveries.forEach((delivery) => {
+              tsp.addWaypointWithLabel(this._createGoogleLatlng(delivery.address.latitude, delivery.address.longitude), delivery.name, null);
+              const d = this.getDistanceFromLatLonInKm(driver.start_latlng.lat, driver.start_latlng.lng, delivery.address.latitude, delivery.address.longitude);
+              // console.log(furthestDistance, d, delivery.address);
+              if (d > furthestDistance) {
+                furthestDistance = d;
+                furthestPoint.lat = Number(delivery.address.latitude) + .00001;
+                furthestPoint.lng = Number(delivery.address.longitude) + .00001;
+              }
+            });
             // optimize
             if (driver.round_trip) {
+              console.log('Round trip.');
               tsp.solveRoundTrip(this.onSuccessCallback.bind(this));
             } else {
-              const endLatlng = this._createGoogleLatlng(driver.end_latlng);
+              console.log('Solving A to Z.', driver.start_latlng, furthestPoint);
+              const endLatlng = this._createGoogleLatlng(furthestPoint);
               tsp.addWaypointWithLabel(endLatlng, 'End');
               tsp.setAsStop(endLatlng);
               tsp.solveAtoZ(this.onSuccessCallback.bind(this));
             }
           }
         });
+      }
+
+      getDistanceFromLatLonInKm(lat1s, lon1s, lat2s, lon2s) {
+        const lat1 = Number(lat1s);
+        const lon1 = Number(lon1s);
+        const lat2 = Number(lat2s);
+        const lon2 = Number(lon2s);
+        var R = 6371; // Radius of the earth in km
+        var dLat = this.deg2rad(lat2 - lat1);  // this.deg2rad below
+        var dLon = this.deg2rad(lon2 - lon1);
+        var a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2)
+          ;
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        var d = R * c; // Distance in km
+        return d;
+      }
+
+      deg2rad(deg) {
+        return deg * (Math.PI / 180)
       }
 
       _createGoogleLatlng(lat, lng) {
@@ -599,10 +598,10 @@
           name: '-',
           color: '#607D8B',
           desc: 'Catch All',
-          round_trip: true,
+          round_trip: false,
           start_latlng: {
-            lat: 36.268554,
-            lng: -86.628631
+            lat: 36.127410,
+            lng: -86.710480
           },
           end_latlng: {
             lat: 36.268554,
@@ -650,14 +649,14 @@
 
           // add popup in map
           function addMarkerPopup(sublog, driver) {
-            google.maps.event.addListener(sublog.marker, 'click', function(event) {
+            google.maps.event.addListener(sublog.marker, 'click', function (event) {
               const container = '<div style="background-color:white;min-width:250px;padding:12px;">';
               const labelStr = '<b>' + sublog.name + '</b><br>';
               const driverStr = `Driver: ${driver.name}<br>`;
               const addrStr = sublog.addressStr + '<br>';
               let changeDriverList = '<hr>';
               for (let i = 0; i < drivers.length; i++) {
-                changeDriverList += `<span onclick="APP.Event.Fire(\'updateDriver\', {driverName:\'${drivers[i].name }\', deliveryEmail:\'${sublog.sub_email}\'})" style="color: #899BA3;cursor: pointer;text-decoration: underline;">Set driver to ${drivers[i].name}</span><br>`
+                changeDriverList += `<span onclick="APP.Event.Fire(\'updateDriver\', {driverName:\'${drivers[i].name}\', deliveryEmail:\'${sublog.sub_email}\'})" style="color: #899BA3;cursor: pointer;text-decoration: underline;">Set driver to ${drivers[i].name}</span><br>`
               }
               const infoWindow = new google.maps.InfoWindow({
                 content: container + labelStr + driverStr + addrStr + changeDriverList + '</div>',
@@ -776,336 +775,385 @@
 
       _getGeofences() {
         return [{
-            name: 'Tim',
-            desc: 'Brentwood',
-            color: '#673AB7',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
-            },
-            geofence: [
-              [-86.6701126, 35.9274248],
-              [-86.531951, 36.0148247],
-              [-86.5739609, 36.1155302],
-              [-86.6972351, 36.0613116],
-              [-86.7162895, 36.1351713],
-              [-86.7782168, 36.1162655],
-              [-86.8045235, 36.1177702],
-              [-86.7934058, 36.1058094],
-              [-86.7699337, 36.0944009],
-              [-86.7721653, 36.088575],
-              [-86.7947389, 35.997452],
-              [-86.7126566, 35.9871939],
-              [-86.6701126, 35.9274248],
-            ],
+          name: 'Tim',
+          desc: 'Brentwood',
+          color: '#673AB7',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
           },
-          {
-            name: 'Jaiquan',
-            desc: 'Belle Meade',
-            color: '#E91E63',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.8479522, 36.1222747],
-              [-86.9434731, 36.0585355],
-              [-86.9303513, 36.0493765],
-              [-86.9190819, 36.0451044],
-              [-86.9073976, 36.0327335],
-              [-86.8651199, 36.0563158],
-              [-86.8098449, 36.1095883],
-              [-86.820766, 36.1223472],
-              [-86.8352079, 36.1317764],
-              [-86.8479522, 36.1222747],
-            ],
+          end_latlng: {
+            lat: 36.268554,
+            lng: -86.628631
           },
-          {
-            name: 'Eric',
-            desc: 'EastNashville',
-            color: '#FFC107',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.6354371, 36.2442733],
-              [-86.6481474, 36.2874708],
-              [-86.8539815, 36.2938401],
-              [-86.8829727, 36.199958],
-              [-86.8173981, 36.1982958],
-              [-86.7878701, 36.2010579],
-              [-86.7784309, 36.1708627],
-              [-86.7713974, 36.1631032],
-              [-86.7574882, 36.1592214],
-              [-86.7521667, 36.1628248],
-              [-86.7020416, 36.1750198],
-              [-86.6972351, 36.1938628],
-              [-86.7113089, 36.240388],
-              [-86.6354371, 36.2442733],
-            ],
+          geofence: [
+            [-86.6701126, 35.9274248],
+            [-86.531951, 36.0148247],
+            [-86.5739609, 36.1155302],
+            [-86.6972351, 36.0613116],
+            [-86.7162895, 36.1351713],
+            [-86.7782168, 36.1162655],
+            [-86.8045235, 36.1177702],
+            [-86.7934058, 36.1058094],
+            [-86.7699337, 36.0944009],
+            [-86.7721653, 36.088575],
+            [-86.7947389, 35.997452],
+            [-86.7126566, 35.9871939],
+            [-86.6701126, 35.9274248],
+          ],
+        },
+        {
+          name: 'Jaiquan',
+          desc: 'Belle Meade',
+          color: '#E91E63',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
           },
-          {
-            name: 'Katina',
-            desc: 'Vanderbilt',
-            color: '#CDDC39',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.8228913, 36.1998196],
-              [-86.839714, 36.1672596],
-              [-86.8228867, 36.1368329],
-              [-86.8344756, 36.131427],
-              [-86.8095875, 36.1110444],
-              [-86.8022118, 36.1291403],
-              [-86.7957733, 36.144946],
-              [-86.7638397, 36.1581127],
-              [-86.7871778, 36.2033527],
-              [-86.8228913, 36.1998196],
-            ],
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
           },
-          {
-            name: 'Todd',
-            desc: 'Sylvan',
-            color: '#FF5722',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.8405723, 36.1670517],
-              [-86.8852101, 36.1939336],
-              [-86.8874439, 36.1529848],
-              [-87.0530892, 36.0887831],
-              [-86.9915382, 36.0252227],
-              [-86.8560218, 36.1129166],
-              [-86.8443473, 36.1258798],
-              [-86.8242618, 36.1368327],
-              [-86.8405723, 36.1670517],
-            ],
+          geofence: [
+            [-86.8479522, 36.1222747],
+            [-86.9434731, 36.0585355],
+            [-86.9303513, 36.0493765],
+            [-86.9190819, 36.0451044],
+            [-86.9073976, 36.0327335],
+            [-86.8651199, 36.0563158],
+            [-86.8098449, 36.1095883],
+            [-86.820766, 36.1223472],
+            [-86.8352079, 36.1317764],
+            [-86.8479522, 36.1222747],
+          ],
+        },
+        {
+          name: 'Eric',
+          desc: 'EastNashville',
+          color: '#FFC107',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
           },
-          {
-            name: 'Downtown',
-            desc: 'Downtown',
-            color: '#795548',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.7236709, 36.1353793],
-              [-86.7490769, 36.1538159],
-              [-86.7600631, 36.1575582],
-              [-86.7938421, 36.1484807],
-              [-86.8064975, 36.120509],
-              [-86.7782168, 36.1162655],
-              [-86.7399609, 36.1224977],
-              [-86.7236709, 36.1353793],
-            ],
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
           },
-          {
-            name: 'Abdinoor',
-            desc: 'Unknown',
-            color: '#03A9F4',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.8029066, 36.1198455],
-              [-86.9073976, 36.0327335],
-              [-86.9406536, 36.0591588],
-              [-86.9903882, 36.0311615],
-              [-86.9648712, 35.9845978],
-              [-86.8012757, 35.9968206],
-              [-86.7713279, 36.0930572],
-              [-86.7980138, 36.1095138],
-              [-86.8029066, 36.1198455],
-            ],
+          geofence: [
+            [-86.6354371, 36.2442733],
+            [-86.6481474, 36.2874708],
+            [-86.8539815, 36.2938401],
+            [-86.8829727, 36.199958],
+            [-86.8173981, 36.1982958],
+            [-86.7878701, 36.2010579],
+            [-86.7784309, 36.1708627],
+            [-86.7713974, 36.1631032],
+            [-86.7574882, 36.1592214],
+            [-86.7521667, 36.1628248],
+            [-86.7020416, 36.1750198],
+            [-86.6972351, 36.1938628],
+            [-86.7113089, 36.240388],
+            [-86.6354371, 36.2442733],
+          ],
+        },
+        {
+          name: 'Katina',
+          desc: 'Vanderbilt',
+          color: '#CDDC39',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
           },
-          // {
-          //   name: 'Katina',
-          //   desc: 'Hermitage',
-          //   color: '#4CAF50',
-          //   round_trip: true,
-          //   start_latlng: {
-          //     lat: 36.127325,
-          //     lng: -86.710504
-          //   },
-          //   end_latlng: {
-          //     lat: 36.268554,
-          //     lng: -86.628631
-          //   },
-          //   geofence: [
-          //     [-86.6934586, 36.0631905],
-          //     [-86.5997315, 36.1070282],
-          //     [-86.5447999, 36.1292152],
-          //     [-86.6011048, 36.1913054],
-          //     [-86.6889954, 36.1824384],
-          //     [-86.7185211, 36.1389201],
-          //     [-86.6934586, 36.0631905],
-          //   ],
-          // },
-          {
-            name: 'Franklin',
-            desc: 'Franklin',
-            color: '#3F51B5',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
-            },
-            geofence: [
-              [-86.7154223, 35.9914808],
-              [-86.8287278, 35.9989828],
-              [-86.9451244, 35.98412],
-              [-86.9591888, 35.9045924],
-              [-86.9475263, 35.8152954],
-              [-86.7319022, 35.8130676],
-              [-86.6584247, 35.8570476],
-              [-86.7154223, 35.9914808],
-            ],
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
           },
-          {
-            name: 'Enis',
-            desc: 'Hendersonville',
-            color: '#009688',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
-            },
-            geofence: [
-              [-86.602478, 36.2542406],
-              [-86.5756989, 36.2647604],
-              [-86.583252, 36.316785],
-            ],
+          geofence: [
+            [-86.8228913, 36.1998196],
+            [-86.839714, 36.1672596],
+            [-86.8228867, 36.1368329],
+            [-86.8344756, 36.131427],
+            [-86.8095875, 36.1110444],
+            [-86.8022118, 36.1291403],
+            [-86.7957733, 36.144946],
+            [-86.7638397, 36.1581127],
+            [-86.7871778, 36.2033527],
+            [-86.8228913, 36.1998196],
+          ],
+        },
+        {
+          name: 'Todd',
+          desc: 'Sylvan',
+          color: '#FF5722',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
           },
-          {
-            name: 'Mike',
-            desc: 'Hendersonville2',
-            color: '#03A9F4',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.268554,
-              lng: -86.628631
-            },
-            geofence: [
-              [-86.602478, 36.2542406],
-              [-86.5756989, 36.2647604],
-              [-86.583252, 36.316785],
-            ],
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
           },
-          // {
-          //   name: 'Piyush',
-          //   desc: 'Hermitage',
-          //   color: '#4CAF50',
-          //   round_trip: true,
-          //   start_latlng: {
-          //     lat: 36.127325,
-          //     lng: -86.710504
-          //   },
-          //   end_latlng: {
-          //     lat: 36.268554,
-          //     lng: -86.628631
-          //   },
-          //   geofence: [
-          //     [-86.6934586, 36.0631905],
-          //     [-86.5997315, 36.1070282],
-          //     [-86.5447999, 36.1292152],
-          //     [-86.6011048, 36.1913054],
-          //     [-86.6889954, 36.1824384],
-          //     [-86.7185211, 36.1389201],
-          //     [-86.6934586, 36.0631905],
-          //   ],
-          // },
-          {
-            name: 'Extra Driver',
-            desc: 'Unknown',
-            color: '#000000',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.7504501, 36.1231782],
-              [-86.7689896, 36.1610231],
-              [-86.7792892, 36.1694768],
-            ],
+          geofence: [
+            [-86.8405723, 36.1670517],
+            [-86.8852101, 36.1939336],
+            [-86.8874439, 36.1529848],
+            [-87.0530892, 36.0887831],
+            [-86.9915382, 36.0252227],
+            [-86.8560218, 36.1129166],
+            [-86.8443473, 36.1258798],
+            [-86.8242618, 36.1368327],
+            [-86.8405723, 36.1670517],
+          ],
+        },
+        {
+          name: 'Downtown',
+          desc: 'Downtown',
+          color: '#795548',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
           },
-          {
-            name: 'Extra Driver 2',
-            desc: 'Unknown',
-            color: '#000000',
-            round_trip: true,
-            start_latlng: {
-              lat: 36.127325,
-              lng: -86.710504
-            },
-            end_latlng: {
-              lat: 36.118228,
-              lng: -86.755293
-            },
-            geofence: [
-              [-86.7504501, 36.1231782],
-              [-86.7689896, 36.1610231],
-              [-86.7792892, 36.1694768],
-            ],
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
           },
+          geofence: [
+            [-86.7236709, 36.1353793],
+            [-86.7490769, 36.1538159],
+            [-86.7600631, 36.1575582],
+            [-86.7938421, 36.1484807],
+            [-86.8064975, 36.120509],
+            [-86.7782168, 36.1162655],
+            [-86.7399609, 36.1224977],
+            [-86.7236709, 36.1353793],
+          ],
+        },
+        {
+          name: 'Abdinoor',
+          desc: 'Unknown',
+          color: '#03A9F4',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.8029066, 36.1198455],
+            [-86.9073976, 36.0327335],
+            [-86.9406536, 36.0591588],
+            [-86.9903882, 36.0311615],
+            [-86.9648712, 35.9845978],
+            [-86.8012757, 35.9968206],
+            [-86.7713279, 36.0930572],
+            [-86.7980138, 36.1095138],
+            [-86.8029066, 36.1198455],
+          ],
+        },
+        {
+          name: 'Franklin',
+          desc: 'Franklin',
+          color: '#3F51B5',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.268554,
+            lng: -86.628631
+          },
+          geofence: [
+            [-86.7154223, 35.9914808],
+            [-86.8287278, 35.9989828],
+            [-86.9451244, 35.98412],
+            [-86.9591888, 35.9045924],
+            [-86.9475263, 35.8152954],
+            [-86.7319022, 35.8130676],
+            [-86.6584247, 35.8570476],
+            [-86.7154223, 35.9914808],
+          ],
+        },
+        {
+          name: 'Enis',
+          desc: 'Hendersonville',
+          color: '#009688',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.268554,
+            lng: -86.628631
+          },
+          geofence: [
+            [-86.602478, 36.2542406],
+            [-86.5756989, 36.2647604],
+            [-86.583252, 36.316785],
+          ],
+        },
+        {
+          name: 'Mike',
+          desc: 'Hendersonville2',
+          color: '#03A9F4',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.268554,
+            lng: -86.628631
+          },
+          geofence: [
+            [-86.602478, 36.2542406],
+            [-86.5756989, 36.2647604],
+            [-86.583252, 36.316785],
+          ],
+        },
+        {
+          name: 'Extra Driver',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
+        {
+          name: 'Extra Driver 2',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
+        {
+          name: 'Extra Driver 3',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
+        {
+          name: 'Extra Driver 4',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
+        {
+          name: 'Extra Driver 5',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
+        {
+          name: 'Extra Driver 6',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
+        {
+          name: 'Extra Driver 7',
+          desc: 'Unknown',
+          color: '#000000',
+          round_trip: false,
+          start_latlng: {
+            lat: 36.127410,
+            lng: -86.710480
+          },
+          end_latlng: {
+            lat: 36.118228,
+            lng: -86.755293
+          },
+          geofence: [
+            [-86.7504501, 36.1231782],
+            [-86.7689896, 36.1610231],
+            [-86.7792892, 36.1694768],
+          ],
+        },
         ]
       }
 
