@@ -464,27 +464,50 @@ func get(ctx context.Context, id string) (*SubscriptionSignUp, error) {
 }
 
 func getMulti(ctx context.Context, ids []string) ([]*SubscriptionSignUp, error) {
+	var err error
 	query := datastore.NewQuery(kindSubscriber).
-		Filter("EmailPrefs.Email>", "")
+		Filter("EmailPrefs.Email>", "").
+		Limit(-1)
 
 	var results []*Subscriber
-	_, err := query.GetAll(ctx, &results)
+	_, err = query.GetAll(ctx, &results)
 	if err != nil {
 		return nil, err
 	}
 	if len(results) < 1 {
 		return nil, datastore.ErrNoSuchEntity
 	}
-
 	dst := make([]*SubscriptionSignUp, len(ids))
 	for i, email := range ids {
+		found := false
 		for _, sub := range results {
 			if sub.Email() == email {
 				dst[i] = sub.GetSubscriptionSignUp()
+				found = true
 				break
 			}
 		}
+		if !found {
+			logging.Errorf(ctx, "FAIL in getMulti: failed to find email: %s", email)
+		}
 	}
+	// var wg sync.WaitGroup
+	// var errs []error
+	// for i, email := range ids {
+	// 	wg.Add(1)
+	// 	go func(j int, e string) {
+	// 		defer wg.Done()
+	// 		v, err := get(ctx, e)
+	// 		if err != nil {
+	// 			errs = append(errs, err)
+	// 		}
+	// 		dst[j] = v
+	// 	}(i, email)
+	// }
+	// wg.Wait()
+	// if len(errs) != 0 {
+	// 	err = errs[0]
+	// }
 	return dst, nil
 }
 

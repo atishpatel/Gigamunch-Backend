@@ -9,7 +9,7 @@ The following programs need to be installed:
     - `go get -u github.com/golang/protobuf/protoc-gen-go`
     - `go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger`
     - `go get -u google.golang.org/grpc`
-  - install node LTS: https://nodejs.org/en/
+  - install node 12 LTS: https://nodejs.org/en/
   - `brew install yarn`
   - `yarn global add gulp-cli`
   - `yarn global add @vue/cli`
@@ -29,6 +29,7 @@ Setting up for web development:
     - in ./admin/app
     - in ./subserver/web
   - `go get ./cookapi`
+    - if deploying, then copy paste the FIX code in main to the correct folder
   - `go get ./server`
   - `go get ./admin`
   - `go get ./subserver`

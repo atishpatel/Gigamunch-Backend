@@ -645,14 +645,15 @@ func (service *Service) GetSubLogsForDate(ctx context.Context, req *DateReq) (*G
 		}
 		resp.SubLogs = make([]SubLog, len(subLogs))
 		for i := range subLogs {
+			resp.SubLogs[i].SubscriptionLog = *subLogs[i]
+			resp.SubLogs[i].Date = subLogs[i].Date
+			resp.SubLogs[i].DeliveryTime = subLogs[i].DeliveryTime
+			resp.SubLogs[i].Servings = subLogs[i].Servings
+			logging.Infof(ctx, "email:%s", subLogs[i].SubEmail)
 			for j := range subs {
 				if subLogs[i].SubEmail == subs[j].Email {
-					resp.SubLogs[i].SubscriptionLog = *subLogs[i]
 					resp.SubLogs[i].SubscriptionSignUp = *subs[j]
-					resp.SubLogs[i].Date = subLogs[i].Date
 					resp.SubLogs[i].CustomerID = subs[j].CustomerID
-					resp.SubLogs[i].DeliveryTime = subLogs[i].DeliveryTime
-					resp.SubLogs[i].Servings = subLogs[i].Servings
 				}
 			}
 		}

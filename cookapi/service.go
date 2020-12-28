@@ -12,7 +12,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/GoogleCloudPlatform/go-endpoints/endpoints"
-	"github.com/atishpatel/Gigamunch-Backend/auth"
 	"github.com/atishpatel/Gigamunch-Backend/core/common"
 	"github.com/atishpatel/Gigamunch-Backend/core/logging"
 	"github.com/atishpatel/Gigamunch-Backend/core/mail"
@@ -55,11 +54,11 @@ func validateRequestAndGetUser(ctx context.Context, req validatableTokenReq) (*t
 	if err != nil {
 		return nil, errors.ErrorWithCode{Code: errors.CodeInvalidParameter, Message: err.Error()}.Wrap("failed to validate request")
 	}
-	user, err := auth.GetUserFromToken(ctx, req.gigatoken())
-	if err != nil && errors.GetErrorWithCode(err).Code == errors.CodeSignOut {
-		utils.Criticalf(ctx, "A signout code was issued to. err: %+v", err)
-	}
-	return user, err
+	// user, err := auth.GetUserFromToken(ctx, req.gigatoken())
+	// if err != nil && errors.GetErrorWithCode(err).Code == errors.CodeSignOut {
+	// 	utils.Criticalf(ctx, "A signout code was issued to. err: %+v", err)
+	// }
+	return nil, err
 }
 
 // Service is the REST API Endpoint exposed to Gigamunchers
